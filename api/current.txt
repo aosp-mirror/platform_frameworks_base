@@ -5740,6 +5740,7 @@ package android.app.admin {
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
+    method public java.lang.String getApplicationRestrictionsManagingPackage(android.content.ComponentName);
     method public boolean getAutoTimeRequired();
     method public boolean getBluetoothContactSharingDisabled(android.content.ComponentName);
     method public boolean getCameraDisabled(android.content.ComponentName);
@@ -5783,6 +5784,7 @@ package android.app.admin {
     method public boolean isActivePasswordSufficient();
     method public boolean isAdminActive(android.content.ComponentName);
     method public boolean isApplicationHidden(android.content.ComponentName, java.lang.String);
+    method public boolean isCallerApplicationRestrictionsManagingPackage();
     method public boolean isDeviceOwnerApp(java.lang.String);
     method public boolean isLockTaskPermitted(java.lang.String);
     method public boolean isMasterVolumeMuted(android.content.ComponentName);
@@ -5799,6 +5801,7 @@ package android.app.admin {
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
+    method public void setApplicationRestrictionsManagingPackage(android.content.ComponentName, java.lang.String);
     method public void setAutoTimeRequired(android.content.ComponentName, boolean);
     method public void setBluetoothContactSharingDisabled(android.content.ComponentName, boolean);
     method public void setCameraDisabled(android.content.ComponentName, boolean);

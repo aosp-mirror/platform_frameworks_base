@@ -944,6 +944,88 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg2").size());
     }
 
+    public void testApplicationRestrictionsManagingApp() throws Exception {
+        setAsProfileOwner(admin1);
+
+        final String appRestrictionsManagerPackage = "com.google.app.restrictions.manager";
+        final int appRestrictionsManagerAppId = 20987;
+        final int appRestrictionsManagerUid = UserHandle.getUid(
+                DpmMockContext.CALLER_USER_HANDLE, appRestrictionsManagerAppId);
+        doReturn(appRestrictionsManagerUid).when(mContext.packageManager).getPackageUid(
+                eq(appRestrictionsManagerPackage),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+        mContext.binder.callingUid = appRestrictionsManagerUid;
+
+        // appRestrictionsManager package shouldn't be able to manage restrictions as the PO hasn't
+        // delegated that permission yet.
+        assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
+        Bundle rest = new Bundle();
+        rest.putString("KEY_STRING", "Foo1");
+        try {
+            dpm.setApplicationRestrictions(null, "pkg1", rest);
+            fail("Didn't throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "caller cannot manage application restrictions", expected.getMessage());
+        }
+        try {
+            dpm.getApplicationRestrictions(null, "pkg1");
+            fail("Didn't throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "caller cannot manage application restrictions", expected.getMessage());
+        }
+
+        // Check via the profile owner that no restrictions were set.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
+
+        // Let appRestrictionsManagerPackage manage app restrictions
+        dpm.setApplicationRestrictionsManagingPackage(admin1, appRestrictionsManagerPackage);
+        assertEquals(appRestrictionsManagerPackage,
+                dpm.getApplicationRestrictionsManagingPackage(admin1));
+
+        // Now that package should be able to set and retrieve app restrictions.
+        mContext.binder.callingUid = appRestrictionsManagerUid;
+        assertTrue(dpm.isCallerApplicationRestrictionsManagingPackage());
+        dpm.setApplicationRestrictions(null, "pkg1", rest);
+        Bundle returned = dpm.getApplicationRestrictions(null, "pkg1");
+        assertEquals(1, returned.size(), 1);
+        assertEquals("Foo1", returned.get("KEY_STRING"));
+
+        // The same app running on a separate user shouldn't be able to manage app restrictions.
+        mContext.binder.callingUid = UserHandle.getUid(
+                UserHandle.USER_SYSTEM, appRestrictionsManagerAppId);
+        assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
+        try {
+            dpm.setApplicationRestrictions(null, "pkg1", rest);
+            fail("Didn't throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "caller cannot manage application restrictions", expected.getMessage());
+        }
+
+        // The DPM is still able to manage app restrictions, even if it allowed another app to do it
+        // too.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        assertEquals(returned, dpm.getApplicationRestrictions(admin1, "pkg1"));
+        dpm.setApplicationRestrictions(admin1, "pkg1", null);
+        assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
+
+        // Removing the ability for the package to manage app restrictions.
+        dpm.setApplicationRestrictionsManagingPackage(admin1, null);
+        assertNull(dpm.getApplicationRestrictionsManagingPackage(admin1));
+        mContext.binder.callingUid = appRestrictionsManagerUid;
+        assertFalse(dpm.isCallerApplicationRestrictionsManagingPackage());
+        try {
+            dpm.setApplicationRestrictions(null, "pkg1", null);
+            fail("Didn't throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "caller cannot manage application restrictions", expected.getMessage());
+        }
+    }
+
     public void testSetUserRestriction_asDo() throws Exception {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_USERS);

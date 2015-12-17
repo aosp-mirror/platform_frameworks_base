@@ -3312,8 +3312,69 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set the application restrictions for a given target
-     * application running in the profile.
+     * Called by a profile owner or device owner to grant permission to a package to manage
+     * application restrictions for the calling user via {@link #setApplicationRestrictions} and
+     * {@link #getApplicationRestrictions}.
+     * <p>
+     * This permission is persistent until it is later cleared by calling this method with a
+     * {@code null} value or uninstalling the managing package.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The package name which will be given access to application restrictions
+     * APIs. If {@code null} is given the current package will be cleared.
+     */
+    public void setApplicationRestrictionsManagingPackage(@NonNull ComponentName admin,
+            @Nullable String packageName) {
+        if (mService != null) {
+            try {
+                mService.setApplicationRestrictionsManagingPackage(admin, packageName);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner or device owner to retrieve the application restrictions managing
+     * package for the current user, or {@code null} if none is set.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The package name allowed to manage application restrictions on the current user, or
+     * {@code null} if none is set.
+     */
+    public String getApplicationRestrictionsManagingPackage(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getApplicationRestrictionsManagingPackage(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns {@code true} if the calling package has been granted permission via
+     * {@link #setApplicationRestrictionsManagingPackage} to manage application
+     * restrictions for the calling user.
+     */
+    public boolean isCallerApplicationRestrictionsManagingPackage() {
+        if (mService != null) {
+            try {
+                return mService.isCallerApplicationRestrictionsManagingPackage();
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the application restrictions for a given target application running in the calling user.
+     *
+     * <p>The caller must be a profile or device owner on that user, or the package allowed to
+     * manage application restrictions via {@link #setApplicationRestrictionsManagingPackage};
+     * otherwise a security exception will be thrown.
      *
      * <p>The provided {@link Bundle} consists of key-value pairs, where the types of values may be:
      * <ul>
@@ -3323,24 +3384,25 @@ public class DevicePolicyManager {
      * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
      * </ul>
      *
-     * <p>The application restrictions are only made visible to the target application and the
-     * profile or device owner.
-     *
      * <p>If the restrictions are not available yet, but may be applied in the near future,
-     * the admin can notify the target application of that by adding
+     * the caller can notify the target application of that by adding
      * {@link UserManager#KEY_RESTRICTIONS_PENDING} to the settings parameter.
      *
-     * <p>The calling device admin must be a profile or device owner; if it is not, a security
-     * exception will be thrown.
+     * <p>The application restrictions are only made visible to the target application via
+     * {@link UserManager#getApplicationRestrictions(String)}, in addition to the profile or
+     * device owner, and the application restrictions managing package via
+     * {@link #getApplicationRestrictions}.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     * {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to update restricted settings for.
      * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
      * set of active restrictions.
      *
+     * @see #setApplicationRestrictionsManagingPackage
      * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
-    public void setApplicationRestrictions(@NonNull ComponentName admin, String packageName,
+    public void setApplicationRestrictions(@Nullable ComponentName admin, String packageName,
             Bundle settings) {
         if (mService != null) {
             try {
@@ -3896,19 +3958,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to get the application restrictions for a given target
-     * application running in the profile.
+     * Retrieves the application restrictions for a given target application running in the calling
+     * user.
      *
-     * <p>The calling device admin must be a profile or device owner; if it is not, a security
-     * exception will be thrown.
+     * <p>The caller must be a profile or device owner on that user, or the package allowed to
+     * manage application restrictions via {@link #setApplicationRestrictionsManagingPackage};
+     * otherwise a security exception will be thrown.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     * {@code null} if called by the application restrictions managing package.
      * @param packageName The name of the package to fetch restricted settings of.
      * @return {@link Bundle} of settings corresponding to what was set last time
      * {@link DevicePolicyManager#setApplicationRestrictions} was called, or an empty {@link Bundle}
      * if no restrictions have been set.
+     *
+     * @see {@link #setApplicationRestrictionsManagingPackage}
      */
-    public Bundle getApplicationRestrictions(@NonNull ComponentName admin, String packageName) {
+    public Bundle getApplicationRestrictions(@Nullable ComponentName admin, String packageName) {
         if (mService != null) {
             try {
                 return mService.getApplicationRestrictions(admin, packageName);

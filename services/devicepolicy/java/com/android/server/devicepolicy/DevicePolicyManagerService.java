@@ -193,6 +193,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
+    private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
+            = "application-restrictions-manager";
 
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
@@ -321,6 +323,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         String mDelegatedCertInstallerPackage;
 
         boolean doNotAskCredentialsOnBoot = false;
+
+        String mApplicationRestrictionsManagingPackage;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -1035,25 +1039,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 saveSettingsLocked(policy.mUserHandle);
             }
 
-            if (policy.mDelegatedCertInstallerPackage != null &&
-                    (packageName == null
-                    || packageName.equals(policy.mDelegatedCertInstallerPackage))) {
-                try {
-                    // Check if delegated cert installer package is removed.
-                    if (mIPackageManager.getPackageInfo(
-                            policy.mDelegatedCertInstallerPackage, 0, userHandle) == null) {
-                        policy.mDelegatedCertInstallerPackage = null;
-                        saveSettingsLocked(policy.mUserHandle);
-                    }
-                } catch (RemoteException e) {
-                    // Shouldn't happen
-                }
+            // Check if delegated cert installer or app restrictions managing packages are removed.
+            if (isRemovedPackage(packageName, policy.mDelegatedCertInstallerPackage, userHandle)) {
+                policy.mDelegatedCertInstallerPackage = null;
+                saveSettingsLocked(policy.mUserHandle);
+            }
+            if (isRemovedPackage(
+                    packageName, policy.mApplicationRestrictionsManagingPackage, userHandle)) {
+                policy.mApplicationRestrictionsManagingPackage = null;
+                saveSettingsLocked(policy.mUserHandle);
             }
         }
         if (removed) {
             // The removed admin might have disabled camera, so update user restrictions.
             pushUserRestrictions(userHandle);
         }
+    }
+
+    private boolean isRemovedPackage(String changedPackage, String targetPackage, int userHandle) {
+        try {
+            return targetPackage != null
+                    && (changedPackage == null || changedPackage.equals(targetPackage))
+                    && mIPackageManager.getPackageInfo(targetPackage, 0, userHandle) == null;
+        } catch (RemoteException e) {
+            // Shouldn't happen
+        }
+
+        return false;
     }
 
     /**
@@ -1799,6 +1811,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_DELEGATED_CERT_INSTALLER,
                         policy.mDelegatedCertInstallerPackage);
             }
+            if (policy.mApplicationRestrictionsManagingPackage != null) {
+                out.attribute(null, ATTR_APPLICATION_RESTRICTIONS_MANAGER,
+                        policy.mApplicationRestrictionsManagingPackage);
+            }
 
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -1924,6 +1940,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             policy.mDelegatedCertInstallerPackage = parser.getAttributeValue(null,
                     ATTR_DELEGATED_CERT_INSTALLER);
+            policy.mApplicationRestrictionsManagingPackage = parser.getAttributeValue(null,
+                    ATTR_APPLICATION_RESTRICTIONS_MANAGER);
 
             type = parser.next();
             int outerDepth = parser.getDepth();
@@ -4819,6 +4837,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyData policy = getUserData(userId);
         policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
         policy.mDelegatedCertInstallerPackage = null;
+        policy.mApplicationRestrictionsManagingPackage = null;
         policy.mStatusBarDisabled = false;
         saveSettingsLocked(userId);
 
@@ -5191,18 +5210,68 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+    public void setApplicationRestrictionsManagingPackage(ComponentName admin, String packageName) {
+        final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            DevicePolicyData policy = getUserData(userHandle);
+            policy.mApplicationRestrictionsManagingPackage = packageName;
+            saveSettingsLocked(userHandle);
+        }
+    }
 
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                mUserManager.setApplicationRestrictions(packageName, settings, userHandle);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
+    @Override
+    public String getApplicationRestrictionsManagingPackage(ComponentName admin) {
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            DevicePolicyData policy = getUserData(userHandle);
+            return policy.mApplicationRestrictionsManagingPackage;
+        }
+    }
+
+    @Override
+    public boolean isCallerApplicationRestrictionsManagingPackage() {
+        final int callingUid = mInjector.binderGetCallingUid();
+        final int userHandle = UserHandle.getUserId(callingUid);
+        synchronized (this) {
+            final DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mApplicationRestrictionsManagingPackage == null) {
+                return false;
             }
+
+            try {
+                int uid = mContext.getPackageManager().getPackageUid(
+                        policy.mApplicationRestrictionsManagingPackage, userHandle);
+                return uid == callingUid;
+            } catch (NameNotFoundException e) {
+                return false;
+            }
+        }
+    }
+
+    private void enforceCanManageApplicationRestrictions(ComponentName who) {
+        if (who != null) {
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
+        } else if (!isCallerApplicationRestrictionsManagingPackage()) {
+            throw new SecurityException(
+                    "No admin component given, and caller cannot manage application restrictions "
+                    + "for other apps.");
+        }
+    }
+
+    @Override
+    public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
+        enforceCanManageApplicationRestrictions(who);
+
+        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            mUserManager.setApplicationRestrictions(packageName, settings, userHandle);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
@@ -5768,21 +5837,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        enforceCanManageApplicationRestrictions(who);
 
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                Bundle bundle = mUserManager.getApplicationRestrictions(packageName, userHandle);
-                // if no restrictions were saved, mUserManager.getApplicationRestrictions
-                // returns null, but DPM method should return an empty Bundle as per JavaDoc
-                return bundle != null ? bundle : Bundle.EMPTY;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
-            }
+        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+           Bundle bundle = mUserManager.getApplicationRestrictions(packageName, userHandle);
+           // if no restrictions were saved, mUserManager.getApplicationRestrictions
+           // returns null, but DPM method should return an empty Bundle as per JavaDoc
+           return bundle != null ? bundle : Bundle.EMPTY;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
