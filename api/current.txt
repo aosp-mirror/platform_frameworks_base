@@ -39298,11 +39298,11 @@ package android.view {
     method public int getAction();
     method public android.content.ClipData getClipData();
     method public android.content.ClipDescription getClipDescription();
-    method public android.view.DropPermissionHolder getDropPermissionHolder();
     method public java.lang.Object getLocalState();
     method public boolean getResult();
     method public float getX();
     method public float getY();
+    method public android.view.DropPermissions requestDropPermissions();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_DRAG_ENDED = 4; // 0x4
     field public static final int ACTION_DRAG_ENTERED = 5; // 0x5
@@ -39313,12 +39313,8 @@ package android.view {
     field public static final android.os.Parcelable.Creator<android.view.DragEvent> CREATOR;
   }
 
-  public class DropPermissionHolder implements android.os.Parcelable {
-    method public int describeContents();
-    method public void grant();
-    method public void revoke();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.view.DropPermissionHolder> CREATOR;
+  public final class DropPermissions {
+    method public void release();
   }
 
   public class FocusFinder {

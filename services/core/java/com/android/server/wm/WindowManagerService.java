@@ -153,7 +153,6 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.DropPermissionHolder;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
@@ -758,13 +757,12 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean completeDropLw(float x, float y) {
         WindowState dropTargetWin = mDragState.getDropTargetWinLw(x, y);
 
-        DropPermissionHolder dropPermissionHolder = null;
+        DropPermissionsHandler dropPermissions = null;
         if (dropTargetWin != null &&
                 (mDragState.mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
                 (mDragState.mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
-            dropPermissionHolder = new DropPermissionHolder(
+            dropPermissions = new DropPermissionsHandler(
                     mDragState.mData,
-                    mActivityManager,
                     mDragState.mUid,
                     dropTargetWin.getOwningPackage(),
                     mDragState.mFlags & DRAG_FLAGS_URI_PERMISSIONS,
@@ -772,7 +770,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.getUserId(dropTargetWin.getOwningUid()));
         }
 
-        return mDragState.notifyDropLw(dropTargetWin, dropPermissionHolder, x, y);
+        return mDragState.notifyDropLw(dropTargetWin, dropPermissions, x, y);
     }
 
     /**

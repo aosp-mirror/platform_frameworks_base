@@ -35,7 +35,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.DropPermissionHolder;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -53,6 +52,8 @@ import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerService.DragInputEventReceiver;
 import com.android.server.wm.WindowManagerService.H;
+
+import com.android.internal.view.IDropPermissions;
 
 import java.util.ArrayList;
 
@@ -428,7 +429,7 @@ class DragState {
     // Tell the drop target about the data.  Returns 'true' if we can immediately
     // dispatch the global drag-ended message, 'false' if we need to wait for a
     // result from the recipient.
-    boolean notifyDropLw(WindowState touchedWin, DropPermissionHolder dropPermissionHolder,
+    boolean notifyDropLw(WindowState touchedWin, IDropPermissions dropPermissions,
             float x, float y) {
         if (mAnimation != null) {
             return false;
@@ -449,7 +450,7 @@ class DragState {
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
         DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
-                null, null, mData, dropPermissionHolder, false);
+                null, null, mData, dropPermissions, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
 
@@ -516,7 +517,7 @@ class DragState {
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
             ClipDescription description, ClipData data,
-            DropPermissionHolder dropPermissionHolder,
+            IDropPermissions dropPermissions,
             boolean result) {
         float winX = x - win.mFrame.left;
         float winY = y - win.mFrame.top;
@@ -525,7 +526,7 @@ class DragState {
             winY *= win.mGlobalScale;
         }
         return DragEvent.obtain(action, winX, winY, localState, description, data,
-                dropPermissionHolder, result);
+                dropPermissions, result);
     }
 
     boolean stepAnimationLocked(long currentTimeMs) {
