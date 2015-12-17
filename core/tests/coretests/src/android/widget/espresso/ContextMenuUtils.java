@@ -1,0 +1,110 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
+package android.widget.espresso;
+
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.hasFocus;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.not;
+
+import com.android.internal.view.menu.ListMenuItemView;
+
+import android.support.test.espresso.NoMatchingRootException;
+import android.support.test.espresso.NoMatchingViewException;
+import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.matcher.ViewMatchers;
+import android.widget.MenuPopupWindow.MenuDropDownListView;
+
+/**
+ * Espresso utility methods for the context menu.
+ */
+public final class ContextMenuUtils {
+    private ContextMenuUtils() {}
+
+    private static ViewInteraction onContextMenu() {
+        // TODO: Have more reliable way to get context menu.
+        return onView(ViewMatchers.isAssignableFrom(MenuDropDownListView.class))
+                .inRoot(withDecorView(hasFocus()));
+    }
+
+    /**
+     * Asserts that the context menu is displayed
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    private static void assertContextMenuIsDisplayed() {
+        onContextMenu().check(matches(isDisplayed()));
+    }
+
+    /**
+     * Asserts that the context menu is not displayed
+     *
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertContextMenuIsNotDisplayed() {
+        try {
+            assertContextMenuIsDisplayed();
+        } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e) {
+            return;
+        }
+        throw new AssertionError("Context menu is displayed");
+    }
+
+    /**
+     * Asserts that the context menu contains the specified item and the item has specified enabled
+     *  state.
+     *
+     * @param itemLabel label of the item.
+     * @param enabled enabled state of the item.
+     * @throws AssertionError if the assertion fails
+     */
+    private static void asssertContextMenuContainsItemWithEnabledState(String itemLabel,
+            boolean enabled) {
+        onContextMenu().check(matches(
+                hasDescendant(allOf(
+                        isAssignableFrom(ListMenuItemView.class),
+                        enabled ? isEnabled() : not(isEnabled()),
+                        hasDescendant(withText(itemLabel))))));
+    }
+
+    /**
+     * Asserts that the context menu contains the specified item and the item is enabled.
+     *
+     * @param itemLabel label of the item.
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertContextMenuContainsItemEnabled(String itemLabel) {
+        asssertContextMenuContainsItemWithEnabledState(itemLabel, true);
+    }
+
+    /**
+     * Asserts that the context menu contains the specified item and the item is disabled.
+     *
+     * @param itemLabel label of the item.
+     * @throws AssertionError if the assertion fails
+     */
+    public static void assertContextMenuContainsItemDisabled(String itemLabel) {
+        asssertContextMenuContainsItemWithEnabledState(itemLabel, false);
+    }
+}

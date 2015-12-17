@@ -26,8 +26,11 @@ import static android.widget.espresso.TextViewActions.mouseDragOnText;
 import static android.widget.espresso.TextViewActions.mouseLongClickAndDragOnText;
 import static android.widget.espresso.TextViewActions.mouseTripleClickAndDragOnText;
 import static android.widget.espresso.TextViewActions.mouseTripleClickOnTextAtIndex;
+import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
+
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.typeTextIntoFocusedView;
@@ -37,8 +40,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 import com.android.frameworks.coretests.R;
 
+import android.support.test.espresso.Espresso;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.MotionEvent;
+import android.widget.espresso.ContextMenuUtils;
 
 /**
  * Tests mouse interaction of the TextView widget from an Activity
@@ -49,10 +55,13 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
         super(TextViewActivity.class);
     }
 
+    @Override
+    public void setUp() {
+        getActivity();
+    }
+
     @SmallTest
     public void testSelectTextByDrag() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -77,8 +86,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByDrag_reverse() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -89,9 +96,56 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
     }
 
     @SmallTest
-    public void testSelectTextByLongClick() throws Exception {
-        getActivity();
+    public void testContextMenu() throws Exception {
+        final String text = "abc def ghi.";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
 
+        ContextMenuUtils.assertContextMenuIsNotDisplayed();
+
+        onView(withId(R.id.textview)).perform(
+                mouseClickOnTextAtIndex(text.indexOf("d"), MotionEvent.BUTTON_SECONDARY));
+
+        ContextMenuUtils.assertContextMenuContainsItemDisabled(
+                getActivity().getString(com.android.internal.R.string.copy));
+        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+                getActivity().getString(com.android.internal.R.string.undo));
+
+        // Hide context menu.
+        pressBack();
+        ContextMenuUtils.assertContextMenuIsNotDisplayed();
+
+        onView(withId(R.id.textview)).perform(
+                mouseDragOnText(text.indexOf("c"), text.indexOf("h")));
+        onView(withId(R.id.textview)).perform(
+                mouseClickOnTextAtIndex(text.indexOf("d"), MotionEvent.BUTTON_SECONDARY));
+
+        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+                getActivity().getString(com.android.internal.R.string.copy));
+        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+                getActivity().getString(com.android.internal.R.string.undo));
+
+        // Hide context menu.
+        pressBack();
+
+        onView(withId(R.id.textview)).check(hasSelection("c def g"));
+
+        onView(withId(R.id.textview)).perform(
+                mouseClickOnTextAtIndex(text.indexOf("i"), MotionEvent.BUTTON_SECONDARY));
+        ContextMenuUtils.assertContextMenuContainsItemDisabled(
+                getActivity().getString(com.android.internal.R.string.copy));
+        ContextMenuUtils.assertContextMenuContainsItemEnabled(
+                getActivity().getString(com.android.internal.R.string.undo));
+
+        // Hide context menu.
+        pressBack();
+
+        onView(withId(R.id.textview)).check(hasSelection(""));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("i")));
+    }
+
+    @SmallTest
+    public void testSelectTextByLongClick() throws Exception {
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -117,8 +171,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByDoubleClick() throws Exception {
-        getActivity();
-
         final String helloWorld = "Hello world!";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(helloWorld));
@@ -144,8 +196,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByDoubleClickAndDrag() throws Exception {
-        getActivity();
-
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
@@ -157,8 +207,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByDoubleClickAndDrag_reverse() throws Exception {
-        getActivity();
-
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
@@ -170,8 +218,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByLongPressAndDrag() throws Exception {
-        getActivity();
-
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
@@ -183,8 +229,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByLongPressAndDrag_reverse() throws Exception {
-        getActivity();
-
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(click());
         onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
@@ -196,8 +240,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByTripleClick() throws Exception {
-        getActivity();
-
         final StringBuilder builder = new StringBuilder();
         builder.append("First paragraph.\n");
         builder.append("Second paragraph.");
@@ -232,8 +274,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByTripleClickAndDrag() throws Exception {
-        getActivity();
-
         final StringBuilder builder = new StringBuilder();
         builder.append("First paragraph.\n");
         builder.append("Second paragraph.");
@@ -263,8 +303,6 @@ public class TextViewActivityMouseTest extends ActivityInstrumentationTestCase2<
 
     @SmallTest
     public void testSelectTextByTripleClickAndDrag_reverse() throws Exception {
-        getActivity();
-
         final StringBuilder builder = new StringBuilder();
         builder.append("First paragraph.\n");
         builder.append("Second paragraph.");
