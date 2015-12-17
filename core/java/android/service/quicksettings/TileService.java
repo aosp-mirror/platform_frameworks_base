@@ -77,6 +77,15 @@ public class TileService extends Service {
     private Tile mTile;
     private IBinder mToken;
 
+    @Override
+    public void onDestroy() {
+        if (mListening) {
+            onStopListening();
+            mListening = false;
+        }
+        super.onDestroy();
+    }
+
     /**
      * Called when the user adds this tile to Quick Settings.
      * <p/>
@@ -197,10 +206,10 @@ public class TileService extends Service {
                     mTile = (Tile) msg.obj;
                     break;
                 case MSG_TILE_ADDED:
-                    TileService.this.onTileRemoved();
+                    TileService.this.onTileAdded();
                     break;
                 case MSG_TILE_REMOVED:
-                    TileService.this.onTileAdded();
+                    TileService.this.onTileRemoved();
                     break;
                 case MSG_STOP_LISTENING:
                     if (mListening) {
