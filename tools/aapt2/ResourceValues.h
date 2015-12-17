@@ -43,9 +43,15 @@ struct Value {
 
     /**
      * Whether this value is weak and can be overridden without
-     * warning or error. Default for base class is false.
+     * warning or error. Default is false.
      */
-    virtual bool isWeak() const;
+    bool isWeak() const {
+        return mWeak;
+    }
+
+    void setWeak(bool val) {
+        mWeak = val;
+    }
 
     /**
      * Returns the source where this value was defined.
@@ -95,6 +101,7 @@ struct Value {
 protected:
     Source mSource;
     std::u16string mComment;
+    bool mWeak = false;
 };
 
 /**
@@ -159,7 +166,7 @@ struct Reference : public BaseItem<Reference> {
  * An ID resource. Has no real value, just a place holder.
  */
 struct Id : public BaseItem<Id> {
-    bool isWeak() const override;
+    Id() { mWeak = true; }
     bool flatten(android::Res_value* out) const override;
     Id* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
@@ -185,9 +192,17 @@ struct String : public BaseItem<String> {
 
     String(const StringPool::Ref& ref);
 
+    // Whether the string is marked as translateable. This does not persist when flattened.
+    // It is only used during compilation phase.
+    void setTranslateable(bool val);
+    bool isTranslateable() const;
+
     bool flatten(android::Res_value* outValue) const override;
     String* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
+
+private:
+    bool mTranslateable;
 };
 
 struct StyledString : public BaseItem<StyledString> {
@@ -195,9 +210,17 @@ struct StyledString : public BaseItem<StyledString> {
 
     StyledString(const StringPool::StyleRef& ref);
 
+    // Whether the string is marked as translateable. This does not persist when flattened.
+    // It is only used during compilation phase.
+    void setTranslateable(bool val);
+    bool isTranslateable() const;
+
     bool flatten(android::Res_value* outValue) const override;
     StyledString* clone(StringPool* newPool) const override;
     void print(std::ostream* out) const override;
+
+private:
+    bool mTranslateable;
 };
 
 struct FileReference : public BaseItem<FileReference> {
@@ -232,7 +255,6 @@ struct Attribute : public BaseValue<Attribute> {
         uint32_t value;
     };
 
-	bool weak;
     uint32_t typeMask;
     int32_t minInt;
     int32_t maxInt;
@@ -240,7 +262,6 @@ struct Attribute : public BaseValue<Attribute> {
 
     Attribute(bool w, uint32_t t = 0u);
 
-    bool isWeak() const override;
     Attribute* clone(StringPool* newPool) const override;
     void printMask(std::ostream* out) const;
     void print(std::ostream* out) const override;
