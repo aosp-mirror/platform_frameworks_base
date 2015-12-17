@@ -947,7 +947,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         final StatusBarNotification sbn = row.getStatusBarNotification();
         PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
         row.setTag(sbn.getPackageName());
-        final View guts = row.getGuts();
+        final NotificationGuts guts = row.getGuts();
         final String pkg = sbn.getPackageName();
         String appname = pkg;
         Drawable pkgicon = null;
@@ -969,8 +969,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
 
-        bindTopicImportance(sbn, row);
-
         final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
         if (appUid >= 0) {
             final int appUidF = appUid;
@@ -983,69 +981,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             settingsButton.setVisibility(View.GONE);
         }
-    }
 
-    private void bindTopicImportance(final StatusBarNotification sbn,
-            ExpandableNotificationRow row) {
-        final INotificationManager sINM = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        final Notification.Topic topic = sbn.getNotification().getTopic() == null
-                ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
-                        com.android.internal.R.string.default_notification_topic_label))
-                : sbn.getNotification().getTopic();
-
-        ((TextView) row.findViewById(R.id.topic_details)).setText(topic.getLabel());
-        final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
-        int importance = mNotificationData.getImportance(sbn.getKey());
-        SeekBar seekBar = (SeekBar) row.findViewById(R.id.seekbar);
-        seekBar.setMax(4);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                topicSummary.setText(getProgressSummary(progress));
-                if (fromUser) {
-                    try {
-                        sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,
-                                progress);
-                    } catch (RemoteException e) {
-                        // :(
-                    }
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // no-op
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // no-op
-            }
-
-            private String getProgressSummary(int progress) {
-                switch (progress) {
-                    case NotificationListenerService.Ranking.IMPORTANCE_NONE:
-                        return mContext.getString(
-                                com.android.internal.R.string.notification_importance_blocked);
-                    case NotificationListenerService.Ranking.IMPORTANCE_LOW:
-                        return mContext.getString(
-                                com.android.internal.R.string.notification_importance_low);
-                    case NotificationListenerService.Ranking.IMPORTANCE_DEFAULT:
-                        return mContext.getString(
-                                com.android.internal.R.string.notification_importance_default);
-                    case NotificationListenerService.Ranking.IMPORTANCE_HIGH:
-                        return mContext.getString(
-                                com.android.internal.R.string.notification_importance_high);
-                    case NotificationListenerService.Ranking.IMPORTANCE_MAX:
-                        return mContext.getString(
-                                com.android.internal.R.string.notification_importance_max);
-                    default:
-                        return "";
-                }
-            }
-        });
-        seekBar.setProgress(importance);
+        guts.bindImportance(sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }
 
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {

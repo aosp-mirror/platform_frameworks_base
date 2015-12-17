@@ -251,6 +251,7 @@ public class RankingHelper implements RankingConfig {
             }
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATT_NAME, r.pkg);
+            out.attribute(null, ATT_IMPORTANCE, Integer.toString(r.importance));
 
             if (!forBackup) {
                 out.attribute(null, ATT_UID, Integer.toString(r.uid));
@@ -426,6 +427,20 @@ public class RankingHelper implements RankingConfig {
         updateConfig();
     }
 
+    /**
+     * Sets the default importance for all new topics that appear in the future, and resets
+     * the importance of all current topics.
+     */
+    @Override
+    public void setAppImportance(String pkgName, int uid, int importance) {
+        final Record r = getOrCreateRecord(pkgName, uid);
+        r.importance = importance;
+        for (Topic t :  r.topics.values()) {
+            t.importance = importance;
+        }
+        updateConfig();
+    }
+
     private Topic getOrCreateTopic(Record r, Notification.Topic topic) {
         if (topic == null) {
             topic = createDefaultTopic();
@@ -435,6 +450,7 @@ public class RankingHelper implements RankingConfig {
             return t;
         } else {
             t = new Topic(topic);
+            t.importance = r.importance;
             r.topics.put(topic.getId(), t);
             return t;
         }
@@ -477,6 +493,8 @@ public class RankingHelper implements RankingConfig {
                 pw.print(" (");
                 pw.print(r.uid == Record.UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
                 pw.print(')');
+                pw.print(" importance=");
+                pw.print(Ranking.importanceToString(r.importance));
                 pw.println();
                 for (Topic t : r.topics.values()) {
                     pw.print(prefix);
@@ -532,6 +550,7 @@ public class RankingHelper implements RankingConfig {
 
         String pkg;
         int uid = UNKNOWN_UID;
+        int importance = DEFAULT_IMPORTANCE;
         Map<String, Topic> topics = new ArrayMap<>();
    }
 

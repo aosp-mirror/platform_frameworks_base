@@ -1248,6 +1248,13 @@ public class NotificationManagerService extends SystemService {
             return mRankingHelper.getTopicImportance(pkg, uid, topic);
         }
 
+        @Override
+        public void setAppImportance(String pkg, int uid, int importance) {
+            enforceSystemOrSystemUI("Caller not system or systemui");
+            mRankingHelper.setAppImportance(pkg, uid, importance);
+            savePolicyFile();
+        }
+
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
