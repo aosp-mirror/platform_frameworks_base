@@ -136,9 +136,6 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         colorType = GraphicsJNI::getNativeBitmapColorType(env, jconfig);
-        if (kAlpha_8_SkColorType == colorType) {
-            colorType = kGray_8_SkColorType;
-        }
         requireUnpremul = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
         // The Java options of ditherMode and preferQualityOverSpeed are deprecated.  We will
@@ -189,6 +186,9 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
         env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
         env->SetObjectField(options, gOptions_mimeFieldID,
                 encodedFormatToString(env, brd->getEncodedFormat()));
+        if (env->ExceptionCheck()) {
+            return nullObjectReturn("OOM in encodedFormatToString()");
+        }
     }
 
     // If we may have reused a bitmap, we need to indicate that the pixels have changed.
