@@ -2,14 +2,13 @@ page.title=Introduction
 @jd:body
 
 <p>Developing applications for Android devices is facilitated by a group of tools that are
-  provided with the SDK. You can access these tools through an Eclipse plugin called ADT (Android
-  Development Tools) or from the command line. Developing with Eclipse is the preferred method because
+  provided with the SDK. You can access these tools through Android Studio or from the command line. Developing with Android Studio is the preferred method because
   it can directly invoke the tools that you need while developing applications.</p>
 
   <p>However, you may choose to develop with another IDE or a simple text editor and invoke the
   tools on the command line or with scripts. This is a less streamlined way to develop because you
   will sometimes have to call command line tools manually, but you will have access to the same
-  number of features that you would have in Eclipse.</p>
+  number of features that you would have in Android Studio.</p>
 
 <div class="figure" style="width:461px">
   <img src="{@docRoot}images/developing/developing_overview.png"
@@ -20,7 +19,7 @@ page.title=Introduction
   </p>
 </div>
 
-<p>The basic steps for developing applications (with or without Eclipse) are shown in figure 1. The
+<p>The basic steps for developing applications (with or without Android Studio) are shown in figure 1. The
 development steps encompass four development phases, which include:</p>
 
 <ul>
@@ -39,13 +38,14 @@ development steps encompass four development phases, which include:</p>
   </li>
   <li><strong>Debugging and Testing</strong>
     <p>During this phase you build your project into a debuggable <code>.apk</code> package that you
-    can install and run on the emulator or an Android-powered device. If you are using Eclipse,
-    builds are generated each time you project is saved. If you're using another IDE,
-    you can build your project using Ant and install it on a device using
-    <a href="{@docRoot}tools/help/adb.html">adb</a>. For more information, see
+    can install and run on the emulator or an Android-powered device. Android Studio uses
+    a build system based on <a href="http://www.gradle.org/" target="_android">Gradle</a>
+    that provides flexibility, customized build variants, dependency resolution, and much more.
+    If you're using another IDE, you can build your project using Gradle and install it on a device
+    using <a href="{@docRoot}tools/help/adb.html">adb</a>. For more information, see
     <a href="{@docRoot}tools/building/index.html">Build and run your application</a>.</p>
     <p>Next, you debug your application using a JDWP-compliant debugger along with the debugging
-    and logging tools that are provided with the Android SDK. Eclipse already comes packaged with
+    and logging tools that are provided with the Android SDK. Android Studio already comes packaged with
     a compatible debugger. For more information see,
     <a href="{@docRoot}tools/debugging/index.html">Debug your application with the
       SDK debugging and logging tools</a>.</p>
@@ -62,7 +62,7 @@ development steps encompass four development phases, which include:</p>
 
 <h2 id="EssentialTools">Essential command line tools</h2>
 
-  <p>When developing in IDEs or editors other than Eclipse, be familiar with
+  <p>When developing in IDEs or editors other than Android Studio, be familiar with
   all of the tools below, because you will have to run them from the command line.</p>
 
   <dl>
@@ -84,7 +84,7 @@ development steps encompass four development phases, which include:</p>
   source and third-party tools:</p>
 
   <dl>
-    <dt>Ant</dt>
+    <a href="http://www.gradle.org/">Gradle</a> 
 
     <dd>To compile and build your Android project into an installable .apk file.</dd>
 
@@ -99,13 +99,13 @@ development steps encompass four development phases, which include:</p>
     JDK.</dd>
   </dl>
 
-  <p>If you are using Eclipse and ADT, tools such as <code>adb</code> and <code>android</code>
-  are automatically called by Eclipse and ADT so you don't have to manually invoke these tools.
+  <p>If you are using Android Studio, tools such as <code>adb</code> and <code>android</code>
+  are automatically called by Android Studio, so you don't have to manually invoke these tools.
   You need to be familiar with <code>adb</code>, however, because certain functions are not
 accessible from
-  Eclipse, such as the <code>adb</code> shell commands. You might also need to call Keytool and
+  Android Studio, such as the <code>adb</code> shell commands. You might also need to call Keytool and
 Jarsigner to
-  sign your applications, but you can set up Eclipse to do this automatically as well.</p>
+  sign your applications, but you can set up Android Studio to do this automatically as well.</p>
 
 <p>For more information on the tools provided with the Android SDK, see the
   <a href="{@docRoot}tools/index.html">Tools</a> section of the documentation.</p>
@@ -147,4 +147,3 @@ src="{@docRoot}images/developing/intellijidea_android_ide.png"/>
     	<a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a>
 	</li>
 </ul>
-

@@ -143,7 +143,7 @@ content from the home screen.</div>
 favorites tray</strong></p>
 
 <p>New home screen <strong>folders</strong> offer a new way for users to group
-their apps and shortcuts logically, just by dragging one onto another. Also, 
+their apps and shortcuts logically, just by dragging one onto another. Also,
 in All Apps launcher, users can now simply <strong>drag an app</strong> to get
 information about it or immediately uninstall it, or disable a pre-installed app.</p>
 
@@ -210,7 +210,7 @@ engine lets you dictate continously.</div>
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Improved text input and
 spell-checking</strong></p>
-  
+
 <p>The soft keyboard in Android 4.0 makes text input even faster and more
 accurate. Error correction and word suggestion are improved through a new set of
 default dictionaries and more accurate heuristics for handling cases such as
@@ -693,7 +693,7 @@ development across the range of Android-powered devices.</p>
 <h3 id="communication-dev">Communication and sharing</h3>
 
 <p>Android 4.0 extends social and sharing features to any application on the
-device. Applications can integrate contacts, profile data, stream items, 
+device. Applications can integrate contacts, profile data, stream items,
 and calendar events from any of the user’s activities or social networks.</p>
 
 
@@ -914,8 +914,8 @@ supporting flatter view hierarchies that are faster to layout and render.
 Because hierarchies are flatter, developers can also manage alignments between
 components that are visually related to each other even when they are not
 logically related, for precise control over application UI. GridLayout is also
-specifically designed to be configured by drag-and-drop design tools such as the
-ADT Plug-in for Eclipse.</p>
+specifically designed to be configured by drag-and-drop design tools such as
+Android Studio.</p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>OpenGL ES texture
@@ -998,7 +998,7 @@ properties such as parent and child nodes, available states, supported actions,
 screen position, and more. Applications can also request changes to certain
 properties to help manage focus and selected state. For example, an
 accessibility service could use these new capabilities to add convenient
-features such as screen-search by text. </p> 
+features such as screen-search by text. </p>
 
 
 <p style="margin-top:1em;margin-bottom:.75em;"><strong>Text-to-speech
