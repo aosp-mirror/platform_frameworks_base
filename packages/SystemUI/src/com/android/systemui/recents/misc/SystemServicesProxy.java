@@ -43,6 +43,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -572,7 +573,7 @@ public class SystemServicesProxy {
      * Returns the activity icon for the ActivityInfo for a user, badging if
      * necessary.
      */
-    public Drawable getActivityIcon(ActivityInfo info, int userId) {
+    public Drawable getBadgedActivityIcon(ActivityInfo info, int userId) {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
@@ -585,9 +586,31 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns the task description icon, loading and badging it if it necessary.
+     */
+    public Drawable getBadgedTaskDescriptionIcon(ActivityManager.TaskDescription taskDescription,
+            int userId, Resources res) {
+
+        // If we are mocking, then return a mock label
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+            return new ColorDrawable(0xFF666666);
+        }
+
+        Bitmap tdIcon = taskDescription.getInMemoryIcon();
+        if (tdIcon == null) {
+            tdIcon = ActivityManager.TaskDescription.loadTaskDescriptionIcon(
+                    taskDescription.getIconFilename(), userId);
+        }
+        if (tdIcon != null) {
+            return getBadgedIcon(new BitmapDrawable(res, tdIcon), userId);
+        }
+        return null;
+    }
+
+    /**
      * Returns the given icon for a user, badging if necessary.
      */
-    public Drawable getBadgedIcon(Drawable icon, int userId) {
+    private Drawable getBadgedIcon(Drawable icon, int userId) {
         if (userId != UserHandle.myUserId()) {
             icon = mPm.getUserBadgedIcon(icon, new UserHandle(userId));
         }
@@ -597,7 +620,7 @@ public class SystemServicesProxy {
     /**
      * Returns the given label for a user, badging if necessary.
      */
-    public String getBadgedLabel(String label, int userId) {
+    private String getBadgedLabel(String label, int userId) {
         if (userId != UserHandle.myUserId()) {
             label = mPm.getUserBadgedLabel(label, new UserHandle(userId)).toString();
         }

@@ -29,7 +29,6 @@ import android.util.Log;
 import com.android.systemui.Prefs;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
@@ -46,9 +45,6 @@ import java.util.List;
  *      options specified, such that we can transition into the Recents activity seamlessly
  */
 public class RecentsTaskLoadPlan {
-
-    private static String TAG = "RecentsTaskLoadPlan";
-    private static boolean DEBUG = false;
 
     private static int MIN_NUM_TASKS = 5;
     private static int SESSION_BEGIN_TIME = 1000 /* ms/s */ * 60 /* s/min */ * 60 /* min/hr */ *
@@ -107,13 +103,6 @@ public class RecentsTaskLoadPlan {
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
-
-        if (DEBUG) {
-            Log.d(TAG, "preloadRawTasks, tasks: " + mRawTasks.size());
-            for (ActivityManager.RecentTaskInfo info : mRawTasks) {
-                Log.d(TAG, "  " + info.baseIntent + ", " + info.lastActiveTime);
-            }
-        }
     }
 
     /**
@@ -126,8 +115,6 @@ public class RecentsTaskLoadPlan {
      * - least-recent to most-recent freeform tasks
      */
     public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
-        if (DEBUG) Log.d(TAG, "preloadPlan");
-
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
@@ -149,38 +136,26 @@ public class RecentsTaskLoadPlan {
 
             // This task is only shown in the stack if it statisfies the historical time or min
             // number of tasks constraints. Freeform tasks are also always shown.
-            boolean isStackTask = true;
             boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
-            isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
-                    (t.lastActiveTime >= lastStackActiveTime &&
-                            i >= (taskCount - MIN_NUM_TASKS)));
+            boolean isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
+                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS)));
             if (isStackTask && newLastStackActiveTime < 0) {
                 newLastStackActiveTime = t.lastActiveTime;
             }
 
-            // Load the label, icon, and color
-            String activityLabel = loader.getAndUpdateActivityLabel(taskKey, t.taskDescription,
-                    ssp);
-            String contentDescription = loader.getAndUpdateContentDescription(taskKey,
-                    activityLabel, ssp, res);
-            Drawable activityIcon = isStackTask
-                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, ssp, res, false)
+            // Load the title, icon, and color
+            String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
+            String contentDescription = loader.getAndUpdateContentDescription(taskKey, title, res);
+            Drawable icon = isStackTask
+                    ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
+            Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
 
-            Bitmap icon = t.taskDescription != null
-                    ? t.taskDescription.getInMemoryIcon() : null;
-            String iconFilename = t.taskDescription != null
-                    ? t.taskDescription.getIconFilename() : null;
-
             // Add the task to the stack
-            Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, activityLabel,
-                    contentDescription, activityIcon, activityColor, (i == (taskCount - 1)),
-                    config.lockToAppEnabled, !isStackTask, icon, iconFilename, t.bounds);
-            task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, false);
-            if (DEBUG) {
-                Log.d(TAG, activityLabel + " bounds: " + t.bounds);
-            }
+            Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
+                    thumbnail, title, contentDescription, activityColor, !isStackTask,
+                    (i == (taskCount - 1)), config.lockToAppEnabled, t.bounds, t.taskDescription);
 
             allTasks.add(task);
         }
@@ -200,19 +175,13 @@ public class RecentsTaskLoadPlan {
      */
     public synchronized void executePlan(Options opts, RecentsTaskLoader loader,
             TaskResourceLoadQueue loadQueue) {
-        if (DEBUG) Log.d(TAG, "executePlan, # tasks: " + opts.numVisibleTasks +
-                ", # thumbnails: " + opts.numVisibleTaskThumbnails +
-                ", running task id: " + opts.runningTaskId);
-
         RecentsConfiguration config = Recents.getConfiguration();
-        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
 
         // Iterate through each of the tasks and load them according to the load conditions.
         ArrayList<Task> tasks = mStack.getStackTasks();
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
-            ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
             Task task = tasks.get(i);
             Task.TaskKey taskKey = task.key;
 
@@ -226,17 +195,15 @@ public class RecentsTaskLoadPlan {
             }
 
             if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
-                if (task.activityIcon == null) {
-                    if (DEBUG) Log.d(TAG, "\tLoading icon: " + taskKey);
-                    task.activityIcon = loader.getAndUpdateActivityIcon(taskKey, t.taskDescription,
-                            ssp, res, true);
+                if (task.icon == null) {
+                    task.icon = loader.getAndUpdateActivityIcon(taskKey, task.taskDescription,
+                            res, true);
                 }
             }
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null || isRunningTask) {
-                    if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
                     if (config.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, ssp, true);
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, true);
                     } else if (config.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
                         loadQueue.addTask(task);
                     }

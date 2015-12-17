@@ -31,7 +31,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -72,7 +71,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         public void onTaskDataLoaded(Task task) {
             // This callback is only made for TaskRow view holders
             ImageView iv = (ImageView) content.findViewById(R.id.icon);
-            iv.setImageDrawable(task.applicationIcon);
+            iv.setImageDrawable(task.icon);
         }
 
         @Override
@@ -128,7 +127,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         @Override
         public void onClick(View v) {
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.startActivityFromRecents(v.getContext(), task.key.id, task.activityLabel,
+            ssp.startActivityFromRecents(v.getContext(), task.key.id, task.title,
                     ActivityOptions.makeBasic());
         }
 
@@ -240,7 +239,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
                 TaskRow taskRow = (TaskRow) row;
                 taskRow.task.addCallback(holder);
                 TextView tv = (TextView) holder.content.findViewById(R.id.description);
-                tv.setText(taskRow.task.activityLabel);
+                tv.setText(taskRow.task.title);
                 holder.content.setOnClickListener(taskRow);
                 loader.loadTaskData(taskRow.task);
                 break;
@@ -313,10 +312,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
      * Dismisses history back to the stack view.
      */
     private void dismissHistory() {
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(mContext);
-        t.increment();
-        EventBus.getDefault().send(new HideHistoryEvent(true /* animate */, t));
-        t.decrement();
+        EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
         EventBus.getDefault().send(new HideHistoryButtonEvent());
     }
 }

@@ -44,7 +44,6 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
-import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
@@ -798,7 +797,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView frontMostTask = taskViews.get(taskViewCount - 1);
             event.setFromIndex(mStack.indexOfStackTask(backMostTask.getTask()));
             event.setToIndex(mStack.indexOfStackTask(frontMostTask.getTask()));
-            event.setContentDescription(frontMostTask.getTask().activityLabel);
+            event.setContentDescription(frontMostTask.getTask().title);
         }
         event.setItemCount(mStack.getStackTaskCount());
         event.setScrollY(mStackScroller.mScroller.getCurrY());
@@ -1022,8 +1021,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (launchTargetTask != null) {
                 occludesLaunchTarget = launchTargetTask.group.isTaskAboveTask(task,
                         launchTargetTask);
-                hideTask = SystemServicesProxy.isFreeformStack(launchTargetTask.key.stackId) &&
-                        SystemServicesProxy.isFreeformStack(task.key.stackId);
+                hideTask = launchTargetTask.isFreeformTask() && task.isFreeformTask();
             }
             tv.prepareEnterRecentsAnimation(task.isLaunchTarget, hideTask, occludesLaunchTarget,
                     offscreenY);
@@ -1495,7 +1493,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 (!isFreeformTask && event.dropTarget == mFreeformWorkspaceDropTarget) ||
                         (isFreeformTask && event.dropTarget == mStackDropTarget);
 
-        event.postAnimationTrigger.increment();
         if (hasChangedStacks) {
             // Move the task to the right position in the stack (ie. the front of the stack if
             // freeform or the front of the stack if fullscreen).  Note, we MUST move the tasks
@@ -1508,7 +1505,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             updateLayout(true);
 
             // Move the task to the new stack in the system after the animation completes
-            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            event.addPostAnimationCallback(new Runnable() {
                 @Override
                 public void run() {
                     SystemServicesProxy ssp = Recents.getSystemServices();
@@ -1516,8 +1513,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 }
             });
         }
-        event.taskView.animate()
-                .withEndAction(event.postAnimationTrigger.decrementAsRunnable());
+        event.getAnimationTrigger().increment();
+        event.taskView.animate().withEndAction(event.getAnimationTrigger().decrementAsRunnable());
 
         // We translated the view but we need to animate it back from the current layout-space rect
         // to its final layout-space rect
@@ -1557,7 +1554,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            if (SystemServicesProxy.isFreeformStack(task.key.stackId)) {
+            if (task.isFreeformTask()) {
                 tv.setVisibility(event.visible ? View.VISIBLE : View.INVISIBLE);
             }
         }
@@ -1578,9 +1575,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     .setUpdateListener(null)
                     .setListener(null)
                     .withLayer()
-                    .withEndAction(event.postHideStackAnimationTrigger.decrementAsRunnable())
+                    .withEndAction(event.getAnimationTrigger().decrementAsRunnable())
                     .start();
-            event.postHideStackAnimationTrigger.increment();
+            event.getAnimationTrigger().increment();
         }
     }
 
@@ -1593,7 +1590,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             final TaskView tv = taskViews.get(i);
-            event.postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            event.addPostAnimationCallback(new Runnable() {
                 @Override
                 public void run() {
                     tv.animate()
@@ -1617,7 +1614,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Announce for accessibility
         tv.announceForAccessibility(getContext().getString(
-                R.string.accessibility_recents_item_dismissed, tv.getTask().activityLabel));
+                R.string.accessibility_recents_item_dismissed, tv.getTask().title));
 
         // Remove the task from the stack
         mStack.removeTask(task);

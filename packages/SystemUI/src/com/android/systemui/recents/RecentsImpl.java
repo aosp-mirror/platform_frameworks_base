@@ -207,7 +207,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-        launchOpts.numVisibleTasks = loader.getApplicationIconCacheSize();
+        launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
         launchOpts.onlyLoadForCache = true;
         loader.loadTasks(mContext, plan, launchOpts);
@@ -452,7 +452,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
+        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.title, launchOpts);
     }
 
     /**
@@ -524,7 +524,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.activityLabel, launchOpts);
+        ssp.startActivityFromRecents(mContext, toTask.key.id, toTask.title, launchOpts);
     }
 
     public void showNextAffiliatedTask() {

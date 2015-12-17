@@ -29,9 +29,6 @@ import java.util.ArrayList;
  */
 public class ReferenceCountedTrigger {
 
-    private static final String TAG = "ReferenceCountedTrigger";
-
-    Context mContext;
     int mCount;
     ArrayList<Runnable> mFirstIncRunnables = new ArrayList<Runnable>();
     ArrayList<Runnable> mLastDecRunnables = new ArrayList<Runnable>();
@@ -51,13 +48,12 @@ public class ReferenceCountedTrigger {
         }
     };
 
-    public ReferenceCountedTrigger(Context context) {
-        this(context, null, null, null);
+    public ReferenceCountedTrigger() {
+        this(null, null, null);
     }
 
-    public ReferenceCountedTrigger(Context context, Runnable firstIncRunnable,
-                                   Runnable lastDecRunnable, Runnable errorRunanable) {
-        mContext = context;
+    public ReferenceCountedTrigger(Runnable firstIncRunnable, Runnable lastDecRunnable,
+            Runnable errorRunanable) {
         if (firstIncRunnable != null) mFirstIncRunnables.add(firstIncRunnable);
         if (lastDecRunnable != null) mLastDecRunnables.add(lastDecRunnable);
         mErrorRunnable = errorRunanable;
@@ -81,22 +77,14 @@ public class ReferenceCountedTrigger {
 
     /** Adds a runnable to the last-decrement runnables list. */
     public void addLastDecrementRunnable(Runnable r) {
-        // To ensure that the last decrement always calls, we increment and decrement after setting
-        // the last decrement runnable
-        boolean ensureLastDecrement = (mCount == 0);
-        if (ensureLastDecrement) increment();
         mLastDecRunnables.add(r);
-        if (ensureLastDecrement) decrement();
     }
 
     /** Decrements the ref count */
     public void decrement() {
         mCount--;
-        if (mCount == 0 && !mLastDecRunnables.isEmpty()) {
-            int numRunnables = mLastDecRunnables.size();
-            for (int i = 0; i < numRunnables; i++) {
-                mLastDecRunnables.get(i).run();
-            }
+        if (mCount == 0) {
+            flushLastDecrementRunnables();
         } else if (mCount < 0) {
             if (mErrorRunnable != null) {
                 mErrorRunnable.run();
@@ -104,6 +92,19 @@ public class ReferenceCountedTrigger {
                 throw new RuntimeException("Invalid ref count");
             }
         }
+    }
+
+    /**
+     * Runs and clears all the last-decrement runnables now.
+     */
+    public void flushLastDecrementRunnables() {
+        if (!mLastDecRunnables.isEmpty()) {
+            int numRunnables = mLastDecRunnables.size();
+            for (int i = 0; i < numRunnables; i++) {
+                mLastDecRunnables.get(i).run();
+            }
+        }
+        mLastDecRunnables.clear();
     }
 
     /** Convenience method to decrement this trigger as a runnable. */

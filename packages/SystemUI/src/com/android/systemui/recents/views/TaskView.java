@@ -651,7 +651,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      */
     public void setFocusedState(boolean isFocused, boolean animated, boolean requestViewFocus) {
         if (DEBUG) {
-            Log.d(TAG, "setFocusedState: " + mTask.activityLabel + " focused: " + isFocused +
+            Log.d(TAG, "setFocusedState: " + mTask.title + " focused: " + isFocused +
                     " animated: " + animated + " requestViewFocus: " + requestViewFocus +
                     " isFocused(): " + isFocused() +
                     " isAccessibilityFocused(): " + isAccessibilityFocused());
@@ -771,7 +771,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     public final void onBusEvent(DragEndEvent event) {
         if (!(event.dropTarget instanceof TaskStack.DockState)) {
-            event.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            event.addPostAnimationCallback(new Runnable() {
                 @Override
                 public void run() {
                     // Animate the drag view back from where it is, to the view location, then after

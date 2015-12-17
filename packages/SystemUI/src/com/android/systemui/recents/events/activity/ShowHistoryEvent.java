@@ -22,15 +22,8 @@ import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 /**
  * This is sent when the history view button is clicked.
  */
-public class ShowHistoryEvent extends EventBus.Event {
+public class ShowHistoryEvent extends EventBus.AnimatedEvent {
 
-    public final ReferenceCountedTrigger postHideStackAnimationTrigger;
+    // Simple event
 
-    /**
-     * @param postHideStackAnimationTrigger the trigger that gets called when all the task animations are finished when
-     *                                      transitioning to the history view
-     */
-    public ShowHistoryEvent(ReferenceCountedTrigger postHideStackAnimationTrigger) {
-        this.postHideStackAnimationTrigger = postHideStackAnimationTrigger;
-    }
 }
