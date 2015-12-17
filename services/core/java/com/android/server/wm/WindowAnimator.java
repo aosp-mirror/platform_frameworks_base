@@ -782,7 +782,7 @@ public class WindowAnimator {
         SurfaceControl.openTransaction();
         try {
             for (int i = mService.mDisplayContents.size() - 1; i >= 0; i--) {
-                DisplayContent display = mService.mDisplayContents.get(i);
+                DisplayContent display = mService.mDisplayContents.valueAt(i);
                 final WindowList windows = mService.getWindowListLocked(display.getDisplayId());
                 for (int j = windows.size() - 1; j >= 0; j--) {
                     windows.get(j).maybeRemoveReplacedWindow();
