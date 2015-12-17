@@ -170,18 +170,14 @@ public class WifiScanner {
         public int maxScansToCache;
         /**
          * if maxPeriodInMs is non zero or different than period, then this bucket is
-         * an exponential backoff bucket and the scan period will grow exponentially
-         * as per formula: actual_period(N) = period ^ (N/(step_count+1))
-         * to a maximum period of max_period.
+         * a truncated binary exponential backoff bucket and the scan period will grow
+         * exponentially as per formula: actual_period(N) = period * (2 ^ (N/stepCount))
+         * to maxPeriodInMs
          */
         public int maxPeriodInMs;
         /**
-         * for exponential back off bucket: multiplier: new_period=old_period*exponent
-         */
-        public int exponent;
-        /**
-         * for exponential back off bucket, number of scans performed at a given
-         * period and until the exponent is applied
+         * for truncated binary exponential back off bucket, number of scans to perform
+         * for a given period
          */
         public int stepCount;
 
@@ -198,7 +194,6 @@ public class WifiScanner {
             dest.writeInt(numBssidsPerScan);
             dest.writeInt(maxScansToCache);
             dest.writeInt(maxPeriodInMs);
-            dest.writeInt(exponent);
             dest.writeInt(stepCount);
 
             if (channels != null) {
@@ -226,7 +221,6 @@ public class WifiScanner {
                         settings.numBssidsPerScan = in.readInt();
                         settings.maxScansToCache = in.readInt();
                         settings.maxPeriodInMs = in.readInt();
-                        settings.exponent = in.readInt();
                         settings.stepCount = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];

@@ -21283,7 +21283,6 @@ package android.net.wifi {
     method public void writeToParcel(android.os.Parcel, int);
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
-    field public int exponent;
     field public int maxPeriodInMs;
     field public int maxScansToCache;
     field public int numBssidsPerScan;
@@ -25611,8 +25610,8 @@ package android.os {
     ctor public UserHandle(android.os.Parcel);
     method public int describeContents();
     method public int getIdentifier();
-    method public boolean isOwner();
-    method public static int myUserId();
+    method public final boolean isOwner();
+    method public static final int myUserId();
     method public static android.os.UserHandle readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     method public static void writeToParcel(android.os.UserHandle, android.os.Parcel);
