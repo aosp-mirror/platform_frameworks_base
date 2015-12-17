@@ -5170,7 +5170,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         /** All of the stacks on this display. Order matters, topmost stack is in front of all other
          * stacks, bottommost behind. Accessed directly by ActivityManager package classes */
-        final ArrayList<ActivityStack> mStacks = new ArrayList<ActivityStack>();
+        final ArrayList<ActivityStack> mStacks = new ArrayList<>();
 
         ActivityRecord mVisibleBehindActivity;
 
