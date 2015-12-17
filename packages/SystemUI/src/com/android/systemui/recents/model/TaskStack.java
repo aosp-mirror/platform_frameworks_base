@@ -232,16 +232,16 @@ public class TaskStack {
         public static final DockState NONE = new DockState(-1, 96, null, null);
         public static final DockState LEFT = new DockState(
                 DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
-                new RectF(0, 0, 0.25f, 1), new RectF(0, 0, 0.25f, 1));
+                new RectF(0, 0, 0.15f, 1), new RectF(0, 0, 0.15f, 1));
         public static final DockState TOP = new DockState(
                 DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
-                new RectF(0, 0, 1, 0.25f), new RectF(0, 0, 1, 0.25f));
+                new RectF(0, 0, 1, 0.15f), new RectF(0, 0, 1, 0.15f));
         public static final DockState RIGHT = new DockState(
                 DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
-                new RectF(0.75f, 0, 1, 1), new RectF(0.75f, 0, 1, 1));
+                new RectF(0.85f, 0, 1, 1), new RectF(0.85f, 0, 1, 1));
         public static final DockState BOTTOM = new DockState(
                 DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
-                new RectF(0, 0.75f, 1, 1), new RectF(0, 0.75f, 1, 1));
+                new RectF(0, 0.85f, 1, 1), new RectF(0, 0.85f, 1, 1));
 
         @Override
         public boolean acceptsDrop(int x, int y, int width, int height) {

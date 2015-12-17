@@ -69,7 +69,7 @@
     <!-- The lock to task button foreground color. -->
     <color name="recents_task_view_lock_to_app_button_color">#ff666666</color>
     <!-- The background color for the freeform workspace. -->
-    <color name="recents_freeform_workspace_bg_color">#66000000</color>
+    <color name="recents_freeform_workspace_bg_color">#33FFFFFF</color>
 
     <color name="keyguard_affordance">#ffffffff</color>
 

@@ -216,7 +216,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 R.drawable.recents_freeform_workspace_bg);
         mFreeformWorkspaceBackground.setCallback(this);
         if (ssp.hasFreeformWorkspaceSupport()) {
-            setBackgroundColor(getContext().getColor(R.color.recents_freeform_workspace_bg_color));
+            mFreeformWorkspaceBackground.setColor(
+                    getContext().getColor(R.color.recents_freeform_workspace_bg_color));
         }
     }
 

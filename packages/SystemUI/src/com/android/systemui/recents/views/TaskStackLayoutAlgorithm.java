@@ -118,7 +118,7 @@ public class TaskStackLayoutAlgorithm {
      */
     public static class StackState {
 
-        public static final StackState FREEFORM_ONLY = new StackState(1f, 0);
+        public static final StackState FREEFORM_ONLY = new StackState(1f, 255);
         public static final StackState STACK_ONLY = new StackState(0f, 0);
         public static final StackState SPLIT = new StackState(0.5f, 255);
 
