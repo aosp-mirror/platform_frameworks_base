@@ -1079,11 +1079,12 @@ public class Canvas {
      *                 (count >> 2).
      * @param paint    The paint used to draw the points
      */
-    public void drawLines(@Size(min=4,multiple=2) float[] pts, int offset, int count, Paint paint) {
+    public void drawLines(@Size(multiple=4) @NonNull float[] pts, int offset, int count,
+            @NonNull Paint paint) {
         native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
-    public void drawLines(@Size(min=4,multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
+    public void drawLines(@Size(multiple=4) @NonNull float[] pts, @NonNull Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
 
