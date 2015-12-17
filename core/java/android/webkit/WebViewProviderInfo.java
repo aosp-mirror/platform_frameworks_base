@@ -40,10 +40,10 @@ public class WebViewProviderInfo implements Parcelable {
         public WebViewPackageNotFoundException(Exception e) { super(e); }
     }
 
-    public WebViewProviderInfo(String packageName, String description, String signature) {
+    public WebViewProviderInfo(String packageName, String description, String[] signatures) {
         this.packageName = packageName;
         this.description = description;
-        this.signature = signature;
+        this.signatures = signatures;
     }
 
     private boolean hasValidSignature() {
@@ -53,7 +53,7 @@ public class WebViewProviderInfo implements Parcelable {
         try {
             // If no signature is declared, instead check whether the package is included in the
             // system.
-            if (signature == null)
+            if (signatures == null || signatures.length == 0)
                 return getPackageInfo().applicationInfo.isSystemApp();
 
             packageSignatures = getPackageInfo().signatures;
@@ -62,8 +62,15 @@ public class WebViewProviderInfo implements Parcelable {
         }
         if (packageSignatures.length != 1)
             return false;
-        final byte[] releaseSignature = Base64.decode(signature, Base64.DEFAULT);
-        return Arrays.equals(releaseSignature, packageSignatures[0].toByteArray());
+
+        final byte[] packageSignature = packageSignatures[0].toByteArray();
+        // Return whether the package signature matches any of the valid signatures
+        for (String signature : signatures) {
+            final byte[] validSignature = Base64.decode(signature, Base64.DEFAULT);
+            if (Arrays.equals(packageSignature, validSignature))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -109,7 +116,7 @@ public class WebViewProviderInfo implements Parcelable {
     private WebViewProviderInfo(Parcel in) {
         packageName = in.readString();
         description = in.readString();
-        signature = in.readString();
+        signatures = in.createStringArray();
         packageInfo = null;
     }
 
@@ -122,14 +129,14 @@ public class WebViewProviderInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(packageName);
         out.writeString(description);
-        out.writeString(signature);
+        out.writeStringArray(signatures);
     }
 
     // fields read from framework resource
     public String packageName;
     public String description;
 
-    private String signature;
+    private String[] signatures;
 
     private PackageInfo packageInfo;
     // flags declaring we want extra info from the package manager

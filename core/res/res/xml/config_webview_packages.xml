@@ -16,5 +16,6 @@
 
 <webviewproviders>
     <!-- The default WebView implementation -->
-    <webviewprovider description="Android WebView" packageName="com.android.webview" />
+    <webviewprovider description="Android WebView" packageName="com.android.webview">
+    </webviewprovider>
 </webviewproviders>
