@@ -654,6 +654,12 @@ public class Canvas {
     /**
      * Return, in ctm, the current transformation matrix. This does not alter
      * the matrix in the canvas, but just returns a copy of it.
+     *
+     * @deprecated {@link #isHardwareAccelerated() Hardware accelerated} canvases may have any
+     * matrix when passed to a View or Drawable, as it is implementation defined where in the
+     * hierarchy such canvases are created. It is recommended in such cases to either draw contents
+     * irrespective of the current matrix, or to track relevant transform state outside of the
+     * canvas.
      */
     @Deprecated
     public void getMatrix(@NonNull Matrix ctm) {
@@ -663,6 +669,12 @@ public class Canvas {
     /**
      * Return a new matrix with a copy of the canvas' current transformation
      * matrix.
+     *
+     * @deprecated {@link #isHardwareAccelerated() Hardware accelerated} canvases may have any
+     * matrix when passed to a View or Drawable, as it is implementation defined where in the
+     * hierarchy such canvases are created. It is recommended in such cases to either draw contents
+     * irrespective of the current matrix, or to track relevant transform state outside of the
+     * canvas.
      */
     @Deprecated
     public final @NonNull Matrix getMatrix() {
@@ -812,6 +824,7 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
+    @Deprecated
     public boolean clipRegion(@NonNull Region region, @NonNull Region.Op op) {
         return native_clipRegion(mNativeCanvasWrapper, region.ni(), op.nativeInt);
     }
@@ -829,6 +842,7 @@ public class Canvas {
      * @deprecated Unlike all other clip calls this API does not respect the
      *             current matrix. Use {@link #clipRect(Rect)} as an alternative.
      */
+    @Deprecated
     public boolean clipRegion(@NonNull Region region) {
         return clipRegion(region, Region.Op.INTERSECT);
     }
@@ -1829,16 +1843,16 @@ public class Canvas {
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
      *
-     * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
-     *
      * @param text     The text to be drawn
      * @param index    The index of the first character to draw
      * @param count    The number of characters to draw, starting from index.
      * @param pos      Array of [x,y] positions, used to position each
      *                 character
      * @param paint    The paint used for the text (e.g. color, size, style)
+     *
+     * @deprecated This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      */
     @Deprecated
     public void drawPosText(@NonNull char[] text, int index, int count,
@@ -1856,13 +1870,13 @@ public class Canvas {
      * Draw the text in the array, with each character's origin specified by
      * the pos array.
      *
-     * This method does not support glyph composition and decomposition and
-     * should therefore not be used to render complex scripts. It also doesn't
-     * handle supplementary characters (eg emoji).
-     *
      * @param text  The text to be drawn
      * @param pos   Array of [x,y] positions, used to position each character
      * @param paint The paint used for the text (e.g. color, size, style)
+     *
+     * @deprecated This method does not support glyph composition and decomposition and
+     * should therefore not be used to render complex scripts. It also doesn't
+     * handle supplementary characters (eg emoji).
      */
     @Deprecated
     public void drawPosText(@NonNull String text, @NonNull @Size(multiple=2) float[] pos,
