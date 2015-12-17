@@ -482,7 +482,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
                     "Failed to resolve stage location", e);
         }
-        final boolean quickInstall = (params.installFlags & PackageManager.INSTALL_QUICK) != 0;
 
         // Verify that stage looks sane with respect to existing application.
         // This currently only ensures packageName, versionCode, and certificate
@@ -490,10 +489,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         validateInstallLocked();
 
         Preconditions.checkNotNull(mPackageName);
-        // TODO: fix b/25118622; don't bypass signature check
-        if (!quickInstall) {
-            Preconditions.checkNotNull(mSignatures);
-        }
+        Preconditions.checkNotNull(mSignatures);
         Preconditions.checkNotNull(mResolvedBaseFile);
 
         if (!mPermissionsAccepted) {
@@ -603,7 +599,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * {@link PackageManagerService}.
      */
     private void validateInstallLocked() throws PackageManagerException {
-        final boolean quickInstall = (params.installFlags & PackageManager.INSTALL_QUICK) != 0;
         mPackageName = null;
         mVersionCode = -1;
         mSignatures = null;
@@ -627,9 +622,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             final ApkLite apk;
             try {
-                // TODO: fix b/25118622; always use PARSE_COLLECT_CERTIFICATES
-                final int parseFlags = quickInstall ? 0 : PackageParser.PARSE_COLLECT_CERTIFICATES;
-                apk = PackageParser.parseApkLite(file, parseFlags);
+                apk = PackageParser.parseApkLite(file, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);
             }
@@ -750,7 +743,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void assertApkConsistent(String tag, ApkLite apk) throws PackageManagerException {
-        final boolean quickInstall = (params.installFlags & PackageManager.INSTALL_QUICK) != 0;
         if (!mPackageName.equals(apk.packageName)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag + " package "
                     + apk.packageName + " inconsistent with " + mPackageName);
@@ -760,8 +752,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     + " version code " + apk.versionCode + " inconsistent with "
                     + mVersionCode);
         }
-        // TODO: fix b/25118622; don't bypass signature check
-        if (!quickInstall && !Signature.areExactMatch(mSignatures, apk.signatures)) {
+        if (!Signature.areExactMatch(mSignatures, apk.signatures)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     tag + " signatures are inconsistent");
         }

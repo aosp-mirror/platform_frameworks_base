@@ -457,19 +457,11 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package is
-     * to be installed quickly.
-     *
-     * @hide
-     */
-    public static final int INSTALL_QUICK = 0x00000800;
-
-    /**
-     * Flag parameter for {@link #installPackage} to indicate that this package is
      * to be installed as a lightweight "ephemeral" app.
      *
      * @hide
      */
-    public static final int INSTALL_EPHEMERAL = 0x00001000;
+    public static final int INSTALL_EPHEMERAL = 0x00000800;
 
     /**
      * Flag parameter for
