@@ -141,6 +141,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 return 1;
             }
             abandonSession = false;
+            pw.println("Success");
             return 0;
         } finally {
             if (abandonSession) {
