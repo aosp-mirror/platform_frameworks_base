@@ -60,8 +60,8 @@ public class TaskViewHeader extends FrameLayout
     // Header views
     ImageView mMoveTaskButton;
     ImageView mDismissButton;
-    ImageView mApplicationIcon;
-    TextView mActivityDescription;
+    ImageView mIconView;
+    TextView mTitleView;
     int mMoveTaskTargetStackId = INVALID_STACK_ID;
 
     // Header drawables
@@ -128,16 +128,16 @@ public class TaskViewHeader extends FrameLayout
     @Override
     protected void onFinishInflate() {
         // Initialize the icon and description views
-        mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
-        mApplicationIcon.setOnLongClickListener(this);
-        mActivityDescription = (TextView) findViewById(R.id.activity_description);
+        mIconView = (ImageView) findViewById(R.id.icon);
+        mIconView.setOnLongClickListener(this);
+        mTitleView = (TextView) findViewById(R.id.title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         mDismissButton.setOnClickListener(this);
         mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
 
         // Hide the backgrounds if they are ripple drawables
-        if (mApplicationIcon.getBackground() instanceof RippleDrawable) {
-            mApplicationIcon.setBackground(null);
+        if (mIconView.getBackground() instanceof RippleDrawable) {
+            mIconView.setBackground(null);
         }
 
         mBackgroundColorDrawable = (GradientDrawable) getContext().getDrawable(
@@ -158,8 +158,8 @@ public class TaskViewHeader extends FrameLayout
     public void onTaskViewSizeChanged(int width, int height) {
         mTaskViewRect.set(0, 0, width, height);
         boolean updateMoveTaskButton = mMoveTaskButton.getVisibility() != View.GONE;
-        int appIconWidth = mApplicationIcon.getMeasuredWidth();
-        int activityDescWidth = mActivityDescription.getMeasuredWidth();
+        int appIconWidth = mIconView.getMeasuredWidth();
+        int activityDescWidth = mTitleView.getMeasuredWidth();
         int dismissIconWidth = mDismissButton.getMeasuredWidth();
         int moveTaskIconWidth = mMoveTaskButton.getVisibility() == View.VISIBLE
                 ? mMoveTaskButton.getMeasuredWidth()
@@ -168,26 +168,26 @@ public class TaskViewHeader extends FrameLayout
         // Priority-wise, we show the activity icon first, the dismiss icon if there is room, the
         // move-task icon if there is room, and then finally, the activity label if there is room
         if (width < (appIconWidth + dismissIconWidth)) {
-            mActivityDescription.setVisibility(View.INVISIBLE);
+            mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.INVISIBLE);
             }
             mDismissButton.setVisibility(View.INVISIBLE);
         } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth)) {
-            mActivityDescription.setVisibility(View.INVISIBLE);
+            mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.INVISIBLE);
             }
             mDismissButton.setVisibility(View.VISIBLE);
         } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth +
                 activityDescWidth)) {
-            mActivityDescription.setVisibility(View.INVISIBLE);
+            mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.VISIBLE);
             }
             mDismissButton.setVisibility(View.VISIBLE);
         } else {
-            mActivityDescription.setVisibility(View.VISIBLE);
+            mTitleView.setVisibility(View.VISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.VISIBLE);
             }
@@ -233,15 +233,13 @@ public class TaskViewHeader extends FrameLayout
 
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
-        if (t.activityIcon != null) {
-            mApplicationIcon.setImageDrawable(t.activityIcon);
-        } else if (t.applicationIcon != null) {
-            mApplicationIcon.setImageDrawable(t.applicationIcon);
+        if (t.icon != null) {
+            mIconView.setImageDrawable(t.icon);
         }
-        if (!mActivityDescription.getText().toString().equals(t.activityLabel)) {
-            mActivityDescription.setText(t.activityLabel);
+        if (!mTitleView.getText().toString().equals(t.title)) {
+            mTitleView.setText(t.title);
         }
-        mActivityDescription.setContentDescription(t.contentDescription);
+        mTitleView.setContentDescription(t.contentDescription);
 
         // Try and apply the system ui tint
         int existingBgColor = (getBackground() instanceof ColorDrawable) ?
@@ -254,7 +252,7 @@ public class TaskViewHeader extends FrameLayout
                 R.color.recents_task_bar_light_text_color);
         int taskBarViewDarkTextColor = getResources().getColor(
                 R.color.recents_task_bar_dark_text_color);
-        mActivityDescription.setTextColor(t.useLightOnPrimaryColor ?
+        mTitleView.setTextColor(t.useLightOnPrimaryColor ?
                 taskBarViewLightTextColor : taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
@@ -281,15 +279,15 @@ public class TaskViewHeader extends FrameLayout
 
         // In accessibility, a single click on the focused app info button will show it
         if (ssp.isTouchExplorationEnabled()) {
-            mApplicationIcon.setOnClickListener(this);
+            mIconView.setOnClickListener(this);
         }
     }
 
     /** Unbinds the bar view from the task */
     void unbindFromTask() {
         mTask = null;
-        mApplicationIcon.setImageDrawable(null);
-        mApplicationIcon.setOnClickListener(null);
+        mIconView.setImageDrawable(null);
+        mIconView.setOnClickListener(null);
         mMoveTaskButton.setOnClickListener(null);
     }
 
@@ -357,7 +355,7 @@ public class TaskViewHeader extends FrameLayout
 
     @Override
     public void onClick(View v) {
-        if (v == mApplicationIcon) {
+        if (v == mIconView) {
             // In accessibility, a single click on the focused app info button will show it
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
         } else if (v == mDismissButton) {
@@ -379,7 +377,7 @@ public class TaskViewHeader extends FrameLayout
 
     @Override
     public boolean onLongClick(View v) {
-        if (v == mApplicationIcon) {
+        if (v == mIconView) {
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
             return true;
         }

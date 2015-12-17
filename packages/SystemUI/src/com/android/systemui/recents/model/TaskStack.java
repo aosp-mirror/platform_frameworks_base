@@ -354,7 +354,7 @@ public class TaskStack {
                 if (t.isAffiliatedTask()) {
                     // If this task is affiliated with another parent in the stack, then the historical state of this
                     // task depends on the state of the parent task
-                    Task parentTask = taskIdMap.get(t.taskAffiliationId);
+                    Task parentTask = taskIdMap.get(t.affiliationTaskId);
                     if (parentTask != null) {
                         t = parentTask;
                     }
@@ -368,7 +368,7 @@ public class TaskStack {
                 if (t.isAffiliatedTask()) {
                     // If this task is affiliated with another parent in the stack, then the historical state of this
                     // task depends on the state of the parent task
-                    Task parentTask = taskIdMap.get(t.taskAffiliationId);
+                    Task parentTask = taskIdMap.get(t.affiliationTaskId);
                     if (parentTask != null) {
                         t = parentTask;
                     }
@@ -716,7 +716,7 @@ public class TaskStack {
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;
-                int affiliation = t.taskAffiliationId > 0 ? t.taskAffiliationId :
+                int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
                         IndividualTaskIdOffset + t.key.id;
                 if (mAffinitiesGroups.containsKey(affiliation)) {
                     group = getGroupWithAffiliation(affiliation);
@@ -737,7 +737,7 @@ public class TaskStack {
                 // Ignore the groups that only have one task
                 if (taskCount <= 1) continue;
                 // Calculate the group color distribution
-                int affiliationColor = tasksMap.get(group.mTaskKeys.get(0)).taskAffiliationColor;
+                int affiliationColor = tasksMap.get(group.mTaskKeys.get(0)).affiliationColor;
                 float alphaStep = (1f - minAlpha) / taskCount;
                 float alpha = 1f;
                 for (int j = 0; j < taskCount; j++) {

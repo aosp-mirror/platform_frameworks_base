@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.model;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -92,24 +93,46 @@ public class Task {
     }
 
     public TaskKey key;
+
+    /**
+     * The group will be computed separately from the initialization of the task
+     */
     public TaskGrouping group;
-    // The taskAffiliationId is the task id of the parent task or itself if it is not affiliated with any task
-    public int taskAffiliationId;
-    public int taskAffiliationColor;
-    public boolean isLaunchTarget;
-    public Drawable applicationIcon;
-    public Drawable activityIcon;
+    /**
+     * The affiliationTaskId is the task id of the parent task or itself if it is not affiliated
+     * with any task.
+     */
+    public int affiliationTaskId;
+    public int affiliationColor;
+
+    /**
+     * The icon is the task description icon (if provided), which falls back to the activity icon,
+     * which can then fall back to the application icon.
+     */
+    public Drawable icon;
+    public Bitmap thumbnail;
+    public String title;
     public String contentDescription;
-    public String activityLabel;
     public int colorPrimary;
     public boolean useLightOnPrimaryColor;
-    public Bitmap thumbnail;
+
+    /**
+     * The bounds of the task, used only if it is a freeform task.
+     */
+    public Rect bounds;
+
+    /**
+     * The task description for this task, only used to reload task icons.
+     */
+    public ActivityManager.TaskDescription taskDescription;
+
+    /**
+     * The state isLaunchTarget will be set for the correct task upon launching Recents.
+     */
+    public boolean isLaunchTarget;
+    public boolean isHistorical;
     public boolean lockToThisTask;
     public boolean lockToTaskEnabled;
-    public boolean isHistorical;
-    public Bitmap icon;
-    public String iconFilename;
-    public Rect bounds;
 
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
@@ -117,45 +140,46 @@ public class Task {
         // Do nothing
     }
 
-    public Task(TaskKey key, int taskAffiliation, int taskAffiliationColor,
-                String activityTitle, String contentDescription, Drawable activityIcon,
-                int colorPrimary, boolean lockToThisTask, boolean lockToTaskEnabled,
-                boolean isHistorical, Bitmap icon, String iconFilename, Rect bounds) {
-        boolean isInAffiliationGroup = (taskAffiliation != key.id);
-        boolean hasAffiliationGroupColor = isInAffiliationGroup && (taskAffiliationColor != 0);
+    public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
+                Bitmap thumbnail, String title, String contentDescription, int colorPrimary,
+                boolean isHistorical, boolean lockToThisTask, boolean lockToTaskEnabled,
+                Rect bounds, ActivityManager.TaskDescription taskDescription) {
+        boolean isInAffiliationGroup = (affiliationTaskId != key.id);
+        boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
-        this.taskAffiliationId = taskAffiliation;
-        this.taskAffiliationColor = taskAffiliationColor;
-        this.activityLabel = activityTitle;
+        this.affiliationTaskId = affiliationTaskId;
+        this.affiliationColor = affiliationColor;
+        this.icon = icon;
+        this.thumbnail = thumbnail;
+        this.title = title;
         this.contentDescription = contentDescription;
-        this.activityIcon = activityIcon;
-        this.colorPrimary = hasAffiliationGroupColor ? taskAffiliationColor : colorPrimary;
+        this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
+        this.bounds = bounds;
+        this.taskDescription = taskDescription;
+        this.isHistorical = isHistorical;
         this.lockToThisTask = lockToTaskEnabled && lockToThisTask;
         this.lockToTaskEnabled = lockToTaskEnabled;
-        this.isHistorical = isHistorical;
-        this.icon = icon;
-        this.iconFilename = iconFilename;
-        this.bounds = bounds;
     }
 
     /** Copies the other task. */
     public void copyFrom(Task o) {
         this.key = o.key;
-        this.taskAffiliationId = o.taskAffiliationId;
-        this.taskAffiliationColor = o.taskAffiliationColor;
-        this.activityLabel = o.activityLabel;
+        this.group = o.group;
+        this.affiliationTaskId = o.affiliationTaskId;
+        this.affiliationColor = o.affiliationColor;
+        this.icon = o.icon;
+        this.thumbnail = o.thumbnail;
+        this.title = o.title;
         this.contentDescription = o.contentDescription;
-        this.activityIcon = o.activityIcon;
         this.colorPrimary = o.colorPrimary;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
+        this.bounds = o.bounds;
+        this.isLaunchTarget = o.isLaunchTarget;
+        this.isHistorical = o.isHistorical;
         this.lockToThisTask = o.lockToThisTask;
         this.lockToTaskEnabled = o.lockToTaskEnabled;
-        this.isHistorical = o.isHistorical;
-        this.icon = o.icon;
-        this.iconFilename = o.iconFilename;
-        this.bounds = o.bounds;
     }
 
     /**
@@ -200,7 +224,7 @@ public class Task {
 
     /** Notifies the callback listeners that this task has been loaded */
     public void notifyTaskDataLoaded(Bitmap thumbnail, Drawable applicationIcon) {
-        this.applicationIcon = applicationIcon;
+        this.icon = applicationIcon;
         this.thumbnail = thumbnail;
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
@@ -210,7 +234,7 @@ public class Task {
 
     /** Notifies the callback listeners that this task has been unloaded */
     public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
-        applicationIcon = defaultApplicationIcon;
+        icon = defaultApplicationIcon;
         thumbnail = defaultThumbnail;
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
@@ -222,7 +246,7 @@ public class Task {
      * Returns whether this task is affiliated with another task.
      */
     public boolean isAffiliatedTask() {
-        return key.id != taskAffiliationId;
+        return key.id != affiliationTaskId;
     }
 
     @Override

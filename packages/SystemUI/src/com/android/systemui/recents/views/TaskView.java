@@ -651,7 +651,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      */
     public void setFocusedState(boolean isFocused, boolean animated, boolean requestViewFocus) {
         if (DEBUG) {
-            Log.d(TAG, "setFocusedState: " + mTask.activityLabel + " focused: " + isFocused +
+            Log.d(TAG, "setFocusedState: " + mTask.title + " focused: " + isFocused +
                     " animated: " + animated + " requestViewFocus: " + requestViewFocus +
                     " isFocused(): " + isFocused() +
                     " isAccessibilityFocused(): " + isAccessibilityFocused());
