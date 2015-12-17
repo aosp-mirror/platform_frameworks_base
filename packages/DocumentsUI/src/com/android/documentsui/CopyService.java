@@ -45,6 +45,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -495,10 +496,34 @@ public class CopyService extends IntentService {
             }
         }
 
+        final String dstMimeType;
+        final String dstDisplayName;
+
+        // If the file is virtual, but can be converted to another format, then try to copy it
+        // as such format. Also, append an extension for the target mime type (if known).
+        if (srcInfo.isVirtualDocument() && srcInfo.isTypedDocument()) {
+            final String[] streamTypes = getContentResolver().getStreamTypes(
+                    srcInfo.derivedUri, "*/*");
+            if (streamTypes.length > 0) {
+                dstMimeType = streamTypes[0];
+                final String extension = MimeTypeMap.getSingleton().
+                        getExtensionFromMimeType(dstMimeType);
+                dstDisplayName = srcInfo.displayName +
+                        (extension != null ? "." + extension : srcInfo.displayName);
+            } else {
+                // TODO: Log failures. b/26192412
+                mFailedFiles.add(srcInfo);
+                return false;
+            }
+        } else {
+            dstMimeType = srcInfo.mimeType;
+            dstDisplayName = srcInfo.displayName;
+        }
+
         // Create the target document (either a file or a directory), then copy recursively the
         // contents (bytes or children).
         final Uri dstUri = DocumentsContract.createDocument(mDstClient,
-                dstDirInfo.derivedUri, srcInfo.mimeType, srcInfo.displayName);
+                dstDirInfo.derivedUri, dstMimeType, dstDisplayName);
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.
             mFailedFiles.add(srcInfo);
@@ -517,7 +542,7 @@ public class CopyService extends IntentService {
         if (Document.MIME_TYPE_DIR.equals(srcInfo.mimeType)) {
             success = copyDirectoryHelper(srcInfo, dstInfo, mode);
         } else {
-            success = copyFileHelper(srcInfo, dstInfo, mode);
+            success = copyFileHelper(srcInfo, dstInfo, dstMimeType, mode);
         }
 
         if (mode == TRANSFER_MODE_MOVE && success) {
@@ -593,11 +618,12 @@ public class CopyService extends IntentService {
      *
      * @param srcUriInfo Info of the file to copy from.
      * @param dstUriInfo Info of the *file* to copy to. Must be created beforehand.
+     * @param mimeType Mime type for the target. Can be different than source for virtual files.
      * @return True on success, false on error.
      * @throws RemoteException
      */
-    private boolean copyFileHelper(DocumentInfo srcInfo, DocumentInfo dstInfo, int mode)
-            throws RemoteException {
+    private boolean copyFileHelper(DocumentInfo srcInfo, DocumentInfo dstInfo, String mimeType,
+            int mode) throws RemoteException {
         // Copy an individual file.
         CancellationSignal canceller = new CancellationSignal();
         ParcelFileDescriptor srcFile = null;
@@ -610,19 +636,11 @@ public class CopyService extends IntentService {
             // If the file is virtual, but can be converted to another format, then try to copy it
             // as such format.
             if (srcInfo.isVirtualDocument() && srcInfo.isTypedDocument()) {
-                final String[] streamTypes = mSrcClient.getStreamTypes(
-                        srcInfo.derivedUri, "*/*");
-                if (streamTypes.length > 0) {
-                    // Pick the first streamable format.
-                    final AssetFileDescriptor srcFileAsAsset =
-                            mSrcClient.openTypedAssetFileDescriptor(
-                                    srcInfo.derivedUri, streamTypes[0], null, canceller);
-                    srcFile = srcFileAsAsset.getParcelFileDescriptor();
-                    src = new AssetFileDescriptor.AutoCloseInputStream(srcFileAsAsset);
-                } else {
-                    // TODO: Log failures. b/26192412
-                    mFailedFiles.add(srcInfo);
-                }
+                final AssetFileDescriptor srcFileAsAsset =
+                        mSrcClient.openTypedAssetFileDescriptor(
+                                srcInfo.derivedUri, mimeType, null, canceller);
+                srcFile = srcFileAsAsset.getParcelFileDescriptor();
+                src = new AssetFileDescriptor.AutoCloseInputStream(srcFileAsAsset);
             } else {
                 srcFile = mSrcClient.openFile(srcInfo.derivedUri, "r", canceller);
                 src = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
