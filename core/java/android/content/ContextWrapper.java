@@ -82,8 +82,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public Resources getResources()
-    {
+    public Resources getResources() {
         return mBase.getResources();
     }
 

@@ -326,10 +326,30 @@ public abstract class Context {
      */
     public static final int BIND_NOT_VISIBLE = 0x40000000;
 
-    /** Return an AssetManager instance for your application's package. */
+    /**
+     * Returns an AssetManager instance for the application's package.
+     * <p>
+     * <strong>Note:</strong> Implementations of this method should return
+     * an AssetManager instance that is consistent with the Resources instance
+     * returned by {@link #getResources()}. For example, they should share the
+     * same {@link Configuration} object.
+     *
+     * @return an AssetManager instance for the application's package
+     * @see #getResources()
+     */
     public abstract AssetManager getAssets();
 
-    /** Return a Resources instance for your application's package. */
+    /**
+     * Returns a Resources instance for the application's package.
+     * <p>
+     * <strong>Note:</strong> Implementations of this method should return
+     * a Resources instance that is consistent with the AssetManager instance
+     * returned by {@link #getAssets()}. For example, they should share the
+     * same {@link Configuration} object.
+     *
+     * @return a Resources instance for the application's package
+     * @see #getAssets()
+     */
     public abstract Resources getResources();
 
     /** Return PackageManager instance to find global package information. */

@@ -104,11 +104,15 @@ public class ContextThemeWrapper extends ContextWrapper {
     @Override
     public AssetManager getAssets() {
         // Ensure we're returning assets with the correct configuration.
-        return getResources().getAssets();
+        return getResourcesInternal().getAssets();
     }
 
     @Override
     public Resources getResources() {
+        return getResourcesInternal();
+    }
+
+    private Resources getResourcesInternal() {
         if (mResources == null) {
             if (mOverrideConfiguration == null) {
                 mResources = super.getResources();
@@ -117,7 +121,6 @@ public class ContextThemeWrapper extends ContextWrapper {
                 mResources = resContext.getResources();
             }
         }
-
         return mResources;
     }
 
