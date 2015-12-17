@@ -134,6 +134,25 @@ public final class WebViewFactory {
     private static String TAG_SIGNATURE = "signature";
 
     /**
+     * Reads all signatures at the current depth (within the current provider) from the XML parser.
+     */
+    private static String[] readSignatures(XmlResourceParser parser) throws IOException,
+            XmlPullParserException {
+        List<String> signatures = new ArrayList<String>();
+        int outerDepth = parser.getDepth();
+        while(XmlUtils.nextElementWithin(parser, outerDepth)) {
+            if (parser.getName().equals(TAG_SIGNATURE)) {
+                // Parse the value within the signature tag
+                String signature = parser.nextText();
+                signatures.add(signature);
+            } else {
+                Log.e(LOGTAG, "Found an element in a webview provider that is not a signature");
+            }
+        }
+        return signatures.toArray(new String[signatures.size()]);
+    }
+
+    /**
      * Returns all packages declared in the framework resources as potential WebView providers.
      * @hide
      * */
@@ -161,9 +180,9 @@ public final class WebViewFactory {
                         throw new MissingWebViewPackageException(
                                 "WebView provider in framework resources missing description");
                     }
-                    String signature = parser.getAttributeValue(null, TAG_SIGNATURE);
                     webViewProviders.add(
-                            new WebViewProviderInfo(packageName, description, signature));
+                            new WebViewProviderInfo(packageName, description,
+                                readSignatures(parser)));
                 }
                 else {
                     Log.e(LOGTAG, "Found an element that is not a webview provider");
