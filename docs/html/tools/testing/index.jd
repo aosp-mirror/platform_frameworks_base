@@ -3,7 +3,7 @@ page.title=Testing
 
 <p> The Android framework includes an integrated testing framework that helps you test all aspects
 of your application and the SDK tools include tools for setting up and running test applications.
-Whether you are working in Eclipse with ADT or working from the command line, the SDK tools help you
+Whether you are working in Android Studio or working from the command line, the SDK tools help you
 set up and run your tests within an emulator or the device you are targeting. </p>
 
 <p>If you aren't yet familiar with the Android testing framework, start by reading <a

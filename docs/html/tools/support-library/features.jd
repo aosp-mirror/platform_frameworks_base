@@ -38,7 +38,7 @@ page.title=Support Library Features
         Support Library Revisions</a></li>
       <li><a href="{@docRoot}tools/support-library/setup.html">
         Support Library Setup</a></li>
-        <li><a href="{@docRoot}tools/testing-support-library/index.html">
+      <li><a href="{@docRoot}tools/testing-support-library/index.html">
         Testing Support Library</a></li>
     </ol>
 
@@ -55,7 +55,7 @@ page.title=Support Library Features
   appcompat</a> libraries, because they support a wide range of
   Android versions and provide APIs for recommended user interface patterns.</p>
 
-<p>To use any of the following libraries, you must download the library files to your
+<p>In order to use any of the following libraries, you must download the library files to your
   Android SDK installation. Follow the directions for downloading the Support Libraries in
   <a href="{@docRoot}tools/support-library/setup.html#download">Support Library Setup</a> to
   complete this step. You must take additional steps to include a specific Support Library in
@@ -204,8 +204,7 @@ com.android.support:multidex:1.0.0
 </p>
 
 <p class="note"><strong>Note:</strong>
-  This library depends on the v4 Support Library. If you are using Ant or Eclipse, make sure
-  you include the v4 Support Library as part of this library's classpath.
+  This library depends on the v4 Support Library.
 </p>
 
 <p>Here are a few of the key classes included in the v7 appcompat library:</p>
@@ -308,12 +307,10 @@ with a dependency on the v7 appcompat library, so you'll need to include both
 libraries in your build path when setting up your project. For more information
 on how to set up your project, follow the instructions in <a
 href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries
-with resources</a>. If you are developing in Eclipse/ADT, make sure to include
-both the <code>android-support-v7-mediarouter.jar</code> and
-<code>android-support-v7-appcompat.jar</code> files.</p>
+with resources</a>.</p>
 
-<p>If you are using Android Studio, all you need to do is specify the Gradle build
-script dependency identifier <code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
+<p>The Gradle builder script dependency identifier is as follows:
+<code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
 where "&lt;revision&gt;" is the minimum revision at which the library is available. For example:</p>
 
 <pre>
@@ -352,8 +349,8 @@ com.android.support:palette-v7:23.1.0
 
 <p>The recyclerview library adds the {@link android.support.v7.widget.RecyclerView}
 class. This class provides support for the
-<a href="{@docRoot}training/material/lists-cards.html">RecyclerView</a> widget, a view
-for efficiently displaying large data sets by providing a
+<a href="{@docRoot}training/material/lists-cards.html">RecyclerView</a>
+widget, a view for efficiently displaying large data sets by providing a
 limited window of data items.</p>
 
 <p>After you download the Android Support Libraries, this library is located in the
@@ -423,7 +420,7 @@ com.android.support:preference-v7:23.1.0
 
 <p class="note">
   <strong>Note:</strong> Use of RenderScript with the support library is supported with Android
-  Studio and Gradle-based builds, as well as the Eclipse plugin and Ant build tools. The
+  Studio and Gradle-based builds. The
   renderscript library is located in the <code>build-tools/$VERSION/renderscript/</code> folder.
 </p>
 
