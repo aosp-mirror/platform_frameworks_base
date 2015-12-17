@@ -389,6 +389,13 @@ public final class PowerManager {
     public static final String REBOOT_RECOVERY = "recovery";
 
     /**
+     * The value to pass as the 'reason' argument to reboot() when device owner requests a reboot on
+     * the device.
+     * @hide
+     */
+    public static final String REBOOT_REQUESTED_BY_DEVICE_OWNER = "deviceowner";
+
+    /**
      * The value to pass as the 'reason' argument to android_reboot().
      * @hide
      */

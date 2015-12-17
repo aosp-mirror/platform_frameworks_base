@@ -5790,6 +5790,7 @@ package android.app.admin {
     method public boolean isProvisioningAllowed(java.lang.String);
     method public boolean isUninstallBlocked(android.content.ComponentName, java.lang.String);
     method public void lockNow();
+    method public void reboot(android.content.ComponentName);
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean removeCrossProfileWidgetProvider(android.content.ComponentName, java.lang.String);
     method public boolean removeKeyPair(android.content.ComponentName, java.lang.String);
