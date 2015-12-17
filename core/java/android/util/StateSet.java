@@ -260,6 +260,12 @@ public class StateSet {
             case R.attr.state_enabled:
                 sb.append("E ");
                 break;
+            case R.attr.state_checked:
+                sb.append("C ");
+                break;
+            case R.attr.state_activated:
+                sb.append("A ");
+                break;
             }
         }
 
