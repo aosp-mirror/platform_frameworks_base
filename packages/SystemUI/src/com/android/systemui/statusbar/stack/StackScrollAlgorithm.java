@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +67,8 @@ public class StackScrollAlgorithm {
     private int mBottomStackSlowDownLength;
     private int mTopStackSlowDownLength;
     private int mCollapseSecondCardPadding;
-    private boolean mIsSmallScreen;
-    private int mMaxNotificationHeight;
     private boolean mScaleDimmed;
-    private HeadsUpManager mHeadsUpManager;
+    private ExpandableView mFirstChild;
     private int mFirstChildMinHeight;
     private boolean mDimmed;
 
@@ -115,8 +112,6 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.notifications_top_padding);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
-        mMaxNotificationHeight = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_max_height);
         mTopStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.top_stack_peek_amount);
         mBottomStackPeekSize = context.getResources()
@@ -154,6 +149,7 @@ public class StackScrollAlgorithm {
         algorithmState.scrolledPixelsTop = 0;
         algorithmState.itemsInBottomStack = 0.0f;
         algorithmState.partialInBottom = 0.0f;
+        mFirstChildMinHeight = mFirstChild == null ? 0 : mFirstChild.getMinHeight();
         float bottomOverScroll = ambientState.getOverScrollAmount(false /* onTop */);
 
         int scrollY = ambientState.getScrollY();
@@ -937,11 +933,8 @@ public class StackScrollAlgorithm {
         this.mIsExpanded = isExpanded;
     }
 
-    public void notifyChildrenSizesChanged(final NotificationStackScrollLayout hostView) {
-        int firstItemMinHeight = hostView.getFirstItemMinHeight();
-        if (firstItemMinHeight != mFirstChildMinHeight) {
-            mFirstChildMinHeight = firstItemMinHeight;
-        }
+    public void notifyChildrenChanged(final NotificationStackScrollLayout hostView) {
+        mFirstChild = hostView.getFirstChildNotGone();
         if (mIsExpansionChanging) {
             hostView.post(new Runnable() {
                 @Override
@@ -961,10 +954,6 @@ public class StackScrollAlgorithm {
         if (view.equals(mFirstChildWhileExpanding)) {
             updateFirstChildMaxSizeToMaxHeight();
         }
-    }
-
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
-        mHeadsUpManager = headsUpManager;
     }
 
     class StackScrollAlgorithmState {

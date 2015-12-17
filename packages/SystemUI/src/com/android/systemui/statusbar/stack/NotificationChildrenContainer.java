@@ -463,6 +463,10 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     public int getMinHeight() {
+        return getIntrinsicHeight(NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
+    }
+
+    public int getMinExpandHeight() {
         return getIntrinsicHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
     }
 

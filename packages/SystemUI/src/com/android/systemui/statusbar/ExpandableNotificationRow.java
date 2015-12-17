@@ -29,7 +29,6 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.LinearInterpolator;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -965,6 +964,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMinHeight() {
+        if (mIsSummaryWithChildren && !isGroupExpanded() && !mShowingPublic) {
+            return mChildrenContainer.getMinHeight();
+        }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMinHeight();
     }
@@ -972,7 +974,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public int getMinExpandHeight() {
         if (mIsSummaryWithChildren && !mOnKeyguard) {
-            return mChildrenContainer.getMinHeight();
+            return mChildrenContainer.getMinExpandHeight();
         }
         return getMinHeight();
     }

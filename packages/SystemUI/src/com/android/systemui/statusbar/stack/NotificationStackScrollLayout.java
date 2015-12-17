@@ -367,7 +367,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mRequestViewResizeAnimationOnLayout = false;
         }
         requestChildrenUpdate();
-        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
     }
 
     private void requestAnimationOnViewResize() {
@@ -1339,7 +1338,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * @return the first child which has visibility unequal to GONE
      */
-    private ExpandableView getFirstChildNotGone() {
+    public ExpandableView getFirstChildNotGone() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -1640,7 +1639,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void onViewRemovedInternal(View child) {
-        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
+        mStackScrollAlgorithm.notifyChildrenChanged(this);
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
@@ -1794,7 +1793,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void onViewAddedInternal(View child) {
         updateHideSensitiveForChild(child);
-        mStackScrollAlgorithm.notifyChildrenSizesChanged(this);
+        mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
@@ -2837,7 +2836,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mAmbientState.setHeadsUpManager(headsUpManager);
-        mStackScrollAlgorithm.setHeadsUpManager(headsUpManager);
     }
 
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
