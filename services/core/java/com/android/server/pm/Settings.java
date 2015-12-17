@@ -65,7 +65,9 @@ import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
 import com.android.server.pm.PermissionsState.PermissionState;
 
+import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collection;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2789,9 +2791,9 @@ final class Settings {
             }
 
             if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Reading default preferred " + f);
-            FileInputStream str = null;
+            InputStream str = null;
             try {
-                str = new FileInputStream(f);
+                str = new BufferedInputStream(new FileInputStream(f));
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(str, null);
 
