@@ -2717,15 +2717,12 @@ package android.accounts {
     method public android.os.Bundle addAccountFromCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle confirmCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle editProperties(android.accounts.AccountAuthenticatorResponse, java.lang.String);
-    method public android.os.Bundle finishSession(android.accounts.AccountAuthenticatorResponse, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public android.os.Bundle getAccountCredentialsForCloning(android.accounts.AccountAuthenticatorResponse, android.accounts.Account) throws android.accounts.NetworkErrorException;
     method public android.os.Bundle getAccountRemovalAllowed(android.accounts.AccountAuthenticatorResponse, android.accounts.Account) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle getAuthToken(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract java.lang.String getAuthTokenLabel(java.lang.String);
     method public final android.os.IBinder getIBinder();
     method public abstract android.os.Bundle hasFeatures(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String[]) throws android.accounts.NetworkErrorException;
-    method public android.os.Bundle startAddAccountSession(android.accounts.AccountAuthenticatorResponse, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle) throws android.accounts.NetworkErrorException;
-    method public android.os.Bundle startUpdateCredentialsSession(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
     method public abstract android.os.Bundle updateCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
     field public static final java.lang.String KEY_CUSTOM_TOKEN_EXPIRY = "android.accounts.expiry";
   }
@@ -2763,7 +2760,6 @@ package android.accounts {
     method public void clearPassword(android.accounts.Account);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> confirmCredentials(android.accounts.Account, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> editProperties(java.lang.String, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
-    method public android.accounts.AccountManagerFuture<android.os.Bundle> finishSession(android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public static android.accounts.AccountManager get(android.content.Context);
     method public android.accounts.Account[] getAccounts();
     method public android.accounts.Account[] getAccountsByType(java.lang.String);
@@ -2791,8 +2787,6 @@ package android.accounts {
     method public void setAuthToken(android.accounts.Account, java.lang.String, java.lang.String);
     method public void setPassword(android.accounts.Account, java.lang.String);
     method public void setUserData(android.accounts.Account, java.lang.String, java.lang.String);
-    method public android.accounts.AccountManagerFuture<android.os.Bundle> startAddAccountSession(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
-    method public android.accounts.AccountManagerFuture<android.os.Bundle> startUpdateCredentialsSession(android.accounts.Account, java.lang.String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> updateCredentials(android.accounts.Account, java.lang.String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     field public static final java.lang.String ACTION_AUTHENTICATOR_INTENT = "android.accounts.AccountAuthenticator";
     field public static final java.lang.String AUTHENTICATOR_ATTRIBUTES_NAME = "account-authenticator";
@@ -2809,8 +2803,6 @@ package android.accounts {
     field public static final java.lang.String KEY_ACCOUNT_AUTHENTICATOR_RESPONSE = "accountAuthenticatorResponse";
     field public static final java.lang.String KEY_ACCOUNT_MANAGER_RESPONSE = "accountManagerResponse";
     field public static final java.lang.String KEY_ACCOUNT_NAME = "authAccount";
-    field public static final java.lang.String KEY_ACCOUNT_SESSION_BUNDLE = "accountSessionBundle";
-    field public static final java.lang.String KEY_ACCOUNT_STATUS_TOKEN = "accountStatusToken";
     field public static final java.lang.String KEY_ACCOUNT_TYPE = "accountType";
     field public static final java.lang.String KEY_ANDROID_PACKAGE_NAME = "androidPackageName";
     field public static final java.lang.String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
