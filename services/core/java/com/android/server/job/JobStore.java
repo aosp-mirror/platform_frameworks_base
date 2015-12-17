@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -348,9 +349,27 @@ public class JobStore {
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
                 throws IOException, XmlPullParserException {
             out.startTag(null, XML_TAG_EXTRAS);
-            extras.saveToXml(out);
+            PersistableBundle extrasCopy = deepCopyBundle(extras, 10);
+            extrasCopy.saveToXml(out);
             out.endTag(null, XML_TAG_EXTRAS);
         }
+
+        private PersistableBundle deepCopyBundle(PersistableBundle bundle, int maxDepth) {
+            if (maxDepth <= 0) {
+                return null;
+            }
+            PersistableBundle copy = (PersistableBundle) bundle.clone();
+            Set<String> keySet = bundle.keySet();
+            for (String key: keySet) {
+                PersistableBundle b = copy.getPersistableBundle(key);
+                if (b != null) {
+                    PersistableBundle bCopy = deepCopyBundle(b, maxDepth-1);
+                    copy.putPersistableBundle(key, bCopy);
+                }
+            }
+            return copy;
+        }
+
         /**
          * Write out a tag with data identifying this job's constraints. If the constraint isn't here
          * it doesn't apply.
