@@ -323,6 +323,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStackSupervisor.ActivityContainer.FORCE_NEW_TASK_FLAGS;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -509,6 +510,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
+
+    ActivityStarter mActivityStarter;
 
     /** Task stack change listeners. */
     private RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
@@ -1786,7 +1789,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    mStackSupervisor.doPendingActivityLaunchesLocked(true);
+                    mActivityStarter.doPendingActivityLaunchesLocked(true);
                 }
             } break;
             case KILL_APPLICATION_MSG: {
@@ -2290,6 +2293,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
         mStackSupervisor.setWindowManager(wm);
+        mActivityStarter.setWindowManager(wm);
     }
 
     public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
@@ -2477,6 +2481,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mRecentTasks = new RecentTasks(this);
         mStackSupervisor = new ActivityStackSupervisor(this, mRecentTasks);
+        mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mTaskPersister = new TaskPersister(systemDir, mStackSupervisor, mRecentTasks);
 
         mProcessCpuThread = new Thread("CpuTracker") {
@@ -3601,7 +3606,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     aInfo.applicationInfo.uid, true);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mStackSupervisor.startHomeActivity(intent, aInfo, reason);
+                mActivityStarter.startHomeActivityLocked(intent, aInfo, reason);
             }
         }
 
@@ -3679,7 +3684,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
-                    mStackSupervisor.startActivityLocked(null, intent, null /*ephemeralIntent*/,
+                    mActivityStarter.startActivityLocked(null, intent, null /*ephemeralIntent*/,
                             null, ri.activityInfo, null /*rInfo*/, null, null, null, null, 0, 0, 0,
                             null, 0, 0, 0, null, false, false, null, null, null);
                 }
@@ -4006,6 +4011,25 @@ public final class ActivityManagerService extends ActivityManagerNative
                 UserHandle.getCallingUserId());
     }
 
+    final int startActivity(Intent intent, ActivityStackSupervisor.ActivityContainer container) {
+        enforceNotIsolatedCaller("ActivityContainer.startActivity");
+        final int userId = mUserController.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), mStackSupervisor.mCurrentUser, false,
+                ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
+
+        // TODO: Switch to user app stacks here.
+        String mimeType = intent.getType();
+        final Uri data = intent.getData();
+        if (mimeType == null && data != null && "content".equals(data.getScheme())) {
+            mimeType = getProviderMimeType(data, userId);
+        }
+        container.checkEmbeddedAllowedInner(userId, intent, mimeType);
+
+        intent.addFlags(FORCE_NEW_TASK_FLAGS);
+        return mActivityStarter.startActivityMayWait(null, -1, null, intent, mimeType, null, null, null,
+                null, 0, 0, null, null, null, null, false, userId, container, null);
+    }
+
     @Override
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
@@ -4014,7 +4038,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
-        return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
+        return mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
                 profilerInfo, null, null, bOptions, false, userId, null, null);
     }
@@ -4077,7 +4101,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // TODO: Switch to user app stacks here.
         try {
-            int ret = mStackSupervisor.startActivityMayWait(null, targetUid, targetPackage, intent,
+            int ret = mActivityStarter.startActivityMayWait(null, targetUid, targetPackage, intent,
                     resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
                     null, null, bOptions, ignoreTargetSecurity, userId, null, null);
             return ret;
@@ -4106,7 +4130,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 userId, false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
-        mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
+        mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
                 null, null, resultTo, resultWho, requestCode, startFlags, profilerInfo, res, null,
                 bOptions, false, userId, null, null);
         return res;
@@ -4120,7 +4144,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
-        int ret = mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,
+        int ret = mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
                 null, null, config, bOptions, false, userId, null, null);
         return ret;
@@ -4178,7 +4202,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
-        return mStackSupervisor.startActivityMayWait(null, callingUid, callingPackage, intent,
+        return mActivityStarter.startActivityMayWait(null, callingUid, callingPackage, intent,
                 resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
                 null, bOptions, false, userId, null, null);
     }
@@ -4289,7 +4313,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            int res = mStackSupervisor.startActivityLocked(r.app.thread, intent,
+            int res = mActivityStarter.startActivityLocked(r.app.thread, intent,
                     null /*ephemeralIntent*/, r.resolvedType, aInfo, null /*rInfo*/, null,
                     null, resultTo != null ? resultTo.appToken : null, resultWho, requestCode, -1,
                     r.launchedFromUid, r.launchedFromPackage, -1, r.launchedFromUid, 0, options,
@@ -4374,7 +4398,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 userId, false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
 
         // TODO: Switch to user app stacks here.
-        int ret = mStackSupervisor.startActivityMayWait(null, uid, callingPackage, intent,
+        int ret = mActivityStarter.startActivityMayWait(null, uid, callingPackage, intent,
                 resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
                 null, null, null, bOptions, false, userId, container, inTask);
         return ret;
@@ -4388,7 +4412,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
-        int ret = mStackSupervisor.startActivities(caller, -1, callingPackage, intents,
+        int ret = mActivityStarter.startActivities(caller, -1, callingPackage, intents,
                 resolvedTypes, resultTo, bOptions, userId);
         return ret;
     }
@@ -4400,7 +4424,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
         // TODO: Switch to user app stacks here.
-        int ret = mStackSupervisor.startActivities(null, uid, callingPackage, intents, resolvedTypes,
+        int ret = mActivityStarter.startActivities(null, uid, callingPackage, intents, resolvedTypes,
                 resultTo, bOptions, userId);
         return ret;
     }
@@ -20837,7 +20861,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException("Bad app thread " + appThread);
                 }
             }
-            return mStackSupervisor.startActivityMayWait(appThread, -1, callingPackage, intent,
+            return mActivityStarter.startActivityMayWait(appThread, -1, callingPackage, intent,
                     resolvedType, null, null, null, null, 0, 0, null, null,
                     null, bOptions, false, callingUser, null, tr);
         }
