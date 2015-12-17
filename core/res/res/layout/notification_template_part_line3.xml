@@ -31,6 +31,7 @@
         android:singleLine="true"
         android:ellipsize="marquee"
         android:fadingEdge="horizontal"
+        android:layout_marginTop="1dp"
         />
     <ImageView android:id="@+id/profile_badge_line3"
         android:layout_width="@dimen/notification_badge_size"

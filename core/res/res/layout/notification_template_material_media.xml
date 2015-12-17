@@ -29,7 +29,7 @@
     <LinearLayout
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_min_content_height"
+        android:layout_height="wrap_content"
         android:background="#00000000"
         android:orientation="horizontal"
         android:layout_marginStart="@dimen/notification_content_margin_start"
@@ -43,6 +43,7 @@
             android:layout_gravity="fill_vertical"
             android:layout_weight="1"
             android:minHeight="@dimen/notification_min_content_height"
+            android:paddingBottom="@dimen/notification_content_margin_bottom"
             android:orientation="vertical"
             >
             <include layout="@layout/notification_template_part_line1"/>

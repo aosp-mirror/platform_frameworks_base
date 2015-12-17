@@ -123,13 +123,6 @@
             android:visibility="gone"
             android:layout_weight="1"
             />
-        <FrameLayout
-            android:id="@+id/inbox_end_pad"
-            android:layout_width="match_parent"
-            android:layout_height="13dp"
-            android:visibility="gone"
-            android:layout_weight="0"
-        />
         <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
     <include layout="@layout/notification_template_right_icon" />

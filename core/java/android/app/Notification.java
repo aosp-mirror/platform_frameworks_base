@@ -3001,6 +3001,7 @@ public class Notification implements Parcelable
             resetNotificationHeader(contentView);
             resetContentMargins(contentView);
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
+            contentView.setViewVisibility(R.id.title, View.GONE);
             contentView.setTextViewText(R.id.title, null);
             contentView.setTextViewText(R.id.text, null);
             contentView.setViewVisibility(R.id.line3, View.GONE);
@@ -3047,6 +3048,7 @@ public class Notification implements Parcelable
             bindNotificationHeader(contentView);
             bindLargeIcon(contentView);
             if (ex.getCharSequence(EXTRA_TITLE) != null) {
+                contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title,
                         processLegacyText(ex.getCharSequence(EXTRA_TITLE)));
             }
@@ -3065,8 +3067,24 @@ public class Notification implements Parcelable
             }
             // Note getStandardView may hide line 3 again.
             contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
+            setContentMinHeight(contentView, showProgress || mN.mLargeIcon != null);
 
             return contentView;
+        }
+
+        /**
+         * @param remoteView the remote view to update the minheight in
+         * @param hasMinHeight does it have a mimHeight
+         * @hide
+         */
+        void setContentMinHeight(RemoteViews remoteView, boolean hasMinHeight) {
+            int minHeight = 0;
+            if (hasMinHeight) {
+                // we need to set the minHeight of the notification
+                minHeight = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_min_content_height);
+            }
+            remoteView.setInt(R.id.notification_main_column, "setMinimumHeight", minHeight);
         }
 
         private boolean handleProgressBar(boolean hasProgress, RemoteViews contentView, Bundle ex) {
@@ -3832,12 +3850,7 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(mSummaryText));
                 contentView.setViewVisibility(R.id.line3, View.VISIBLE);
             }
-            int imageMinHeight = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_big_picture_content_min_height_with_picture);
-            // We need to make space for the right image, so we're enforcing a minheight if there
-            // is a picture.
-            int minHeight = (mBuilder.mN.mLargeIcon == null) ? 0 : imageMinHeight;
-            contentView.setInt(R.id.notification_main_column, "setMinimumHeight", minHeight);
+            mBuilder.setContentMinHeight(contentView, mBuilder.mN.mLargeIcon != null);
 
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;

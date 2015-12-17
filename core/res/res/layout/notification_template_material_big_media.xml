@@ -33,6 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/notification_content_margin_top"
         android:layout_marginStart="@dimen/notification_content_margin_start"
+        android:layout_marginBottom="@dimen/notification_content_margin_bottom"
         android:layout_marginEnd="24dp"
         android:layout_toStartOf="@id/right_icon"
         android:minHeight="@dimen/notification_min_content_height"

@@ -52,7 +52,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private final int mMaxHeadsUpHeight;
     private final int mNotificationMinHeight;
     private final int mNotificationMaxHeight;
-    private int mRowMinHeight;
 
     /** Does this row contain layouts that can adapt to row expansion */
     private boolean mExpandable;
@@ -225,10 +224,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
                 : mMaxHeadsUpHeight;
-        mRowMinHeight = minHeight;
         mMaxViewHeight = mNotificationMaxHeight;
-        mPrivateLayout.setHeights(mRowMinHeight, headsUpheight, mNotificationMaxHeight);
-        mPublicLayout.setHeights(mRowMinHeight, headsUpheight, mNotificationMaxHeight);
+        mPrivateLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
+        mPublicLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -488,7 +486,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public void reset() {
         super.reset();
-        mRowMinHeight = 0;
         final boolean wasExpanded = isExpanded();
         mMaxViewHeight = 0;
         mExpandable = false;
@@ -712,7 +709,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (expand && mExpandable) {
             setActualHeight(mMaxExpandHeight);
         } else {
-            setActualHeight(mRowMinHeight);
+            setActualHeight(getMinHeight());
         }
     }
 

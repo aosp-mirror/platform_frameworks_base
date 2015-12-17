@@ -25,12 +25,12 @@
     <LinearLayout
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginEnd="@dimen/notification_content_margin_end"
         android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:minHeight="@dimen/notification_min_content_height"
+        android:layout_marginBottom="@dimen/notification_content_margin_bottom"
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
@@ -42,7 +42,7 @@
         android:layout_gravity="bottom"
         android:layout_marginStart="@dimen/notification_content_margin_start"
         android:layout_marginBottom="11dp"
-        android:layout_marginEnd="@dimen/notification_content_margin_end">
+        android:layout_marginEnd="@dimen/notification_content_margin_end" >
         <include layout="@layout/notification_template_progress" />
     </FrameLayout>
     <include layout="@layout/notification_template_right_icon" />

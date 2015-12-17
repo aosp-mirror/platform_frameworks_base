@@ -2378,7 +2378,7 @@
   <java-symbol type="drawable" name="ic_expand_bundle" />
   <java-symbol type="drawable" name="ic_collapse_bundle" />
   <java-symbol type="dimen" name="notification_header_height" />
-  <java-symbol type="dimen" name="notification_big_picture_content_min_height_with_picture" />
+  <java-symbol type="dimen" name="notification_min_content_height" />
   <java-symbol type="dimen" name="notification_header_shrink_min_width" />
   <java-symbol type="dimen" name="notification_content_margin_start" />
   <java-symbol type="dimen" name="notification_content_margin_end" />

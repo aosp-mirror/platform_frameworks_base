@@ -142,6 +142,9 @@
     <!-- height of the content margin to accomodate for the header -->
     <dimen name="notification_content_margin_top">30dp</dimen>
 
+    <!-- height of the content margin on the bottom -->
+    <dimen name="notification_content_margin_bottom">13dp</dimen>
+
     <!-- height of notification header view if present -->
     <dimen name="notification_header_height">32dp</dimen>
 
@@ -153,14 +156,11 @@
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_height">64dp</dimen>
 
-    <!--  Min height of the notification content. -->
-    <dimen name="notification_min_content_height">54dp</dimen>
-
     <!-- The minimum width of the app name in the header if it shrinks -->
     <dimen name="notification_header_shrink_min_width">72dp</dimen>
 
-    <!-- The minimum height of the content if there is a picture present with big picture -->
-    <dimen name="notification_big_picture_content_min_height_with_picture">41dp</dimen>
+    <!-- The minimum height of the content if there are at least two lines or a picture-->
+    <dimen name="notification_min_content_height">41dp</dimen>
 
     <!-- Preferred width of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
