@@ -98,8 +98,6 @@ public:
 
     void setEmpty();
     void setClip(float left, float top, float right, float bottom);
-    void clipRectWithTransform(float left, float top, float right, float bottom,
-            const mat4* transform, SkRegion::Op op);
     void clipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
     void clipRegion(const SkRegion& region, SkRegion::Op op);
@@ -133,12 +131,8 @@ public:
 private:
     void enterRectangleMode();
     void rectangleModeClipRectWithTransform(const Rect& r, const mat4* transform, SkRegion::Op op);
-    void rectangleModeClipRectWithTransform(float left, float top, float right,
-            float bottom, const mat4* transform, SkRegion::Op op);
 
     void enterRectangleListMode();
-    void rectangleListModeClipRectWithTransform(float left, float top,
-            float right, float bottom, const mat4* transform, SkRegion::Op op);
     void rectangleListModeClipRectWithTransform(const Rect& r,
             const mat4* transform, SkRegion::Op op);
 
@@ -147,8 +141,6 @@ private:
     void enterRegionMode();
     void regionModeClipRectWithTransform(const Rect& r, const mat4* transform,
             SkRegion::Op op);
-    void regionModeClipRectWithTransform(float left, float top, float right,
-            float bottom, const mat4* transform, SkRegion::Op op);
 
     void ensureClipRegion();
     void onClipRegionUpdated();

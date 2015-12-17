@@ -192,7 +192,7 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    mSnapshot->clip(left, top, right, bottom, op);
+    mSnapshot->clip(Rect(left, top, right, bottom), op);
     mDirtyClip = true;
     return !mSnapshot->clipIsEmpty();
 }

@@ -98,7 +98,7 @@ public:
 
     static std::unique_ptr<Snapshot> makeSnapshot(const Matrix4& transform, const Rect& clip) {
         std::unique_ptr<Snapshot> snapshot(new Snapshot());
-        snapshot->clip(clip.left, clip.top, clip.right, clip.bottom, SkRegion::kReplace_Op);
+        snapshot->clip(clip, SkRegion::kReplace_Op); // store clip first, so it isn't transformed
         *(snapshot->transform) = transform;
         return snapshot;
     }

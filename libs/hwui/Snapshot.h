@@ -124,7 +124,7 @@ public:
      * the specified operation. The specified rectangle is transformed
      * by this snapshot's trasnformation.
      */
-    void clip(float left, float top, float right, float bottom, SkRegion::Op op);
+    void clip(const Rect& localClip, SkRegion::Op op);
 
     /**
      * Modifies the current clip with the new clip rectangle and

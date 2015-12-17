@@ -201,12 +201,6 @@ void ClipArea::setClip(float left, float top, float right, float bottom) {
     mClipRegion.setEmpty();
 }
 
-void ClipArea::clipRectWithTransform(float left, float top, float right,
-        float bottom, const mat4* transform, SkRegion::Op op) {
-    Rect r(left, top, right, bottom);
-    clipRectWithTransform(r, transform, op);
-}
-
 void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
         SkRegion::Op op) {
     switch (mMode) {
@@ -274,13 +268,6 @@ void ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
     rectangleListModeClipRectWithTransform(r, transform, op);
 }
 
-void ClipArea::rectangleModeClipRectWithTransform(float left, float top,
-        float right, float bottom, const mat4* transform, SkRegion::Op op) {
-    Rect r(left, top, right, bottom);
-    rectangleModeClipRectWithTransform(r, transform, op);
-    mClipRect = mRectangleList.calculateBounds();
-}
-
 /*
  * RectangleList mode implementation
  */
@@ -301,12 +288,6 @@ void ClipArea::rectangleListModeClipRectWithTransform(const Rect& r,
         enterRegionMode();
         regionModeClipRectWithTransform(r, transform, op);
     }
-}
-
-void ClipArea::rectangleListModeClipRectWithTransform(float left, float top,
-        float right, float bottom, const mat4* transform, SkRegion::Op op) {
-    Rect r(left, top, right, bottom);
-    rectangleListModeClipRectWithTransform(r, transform, op);
 }
 
 /*
@@ -334,11 +315,6 @@ void ClipArea::regionModeClipRectWithTransform(const Rect& r,
     regionFromPath(transformedRect, transformedRectRegion);
     mClipRegion.op(transformedRectRegion, op);
     onClipRegionUpdated();
-}
-
-void ClipArea::regionModeClipRectWithTransform(float left, float top,
-        float right, float bottom, const mat4* transform, SkRegion::Op op) {
-    regionModeClipRectWithTransform(Rect(left, top, right, bottom), transform, op);
 }
 
 void ClipArea::onClipRegionUpdated() {
