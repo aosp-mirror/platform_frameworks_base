@@ -231,6 +231,10 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView;
     }
 
+    public View[] getAllViews() {
+        return mRotatedViews;
+    }
+
     public KeyButtonView getRecentsButton() {
         return (KeyButtonView) getCurrentView().findViewById(R.id.recent_apps);
     }
@@ -341,7 +345,6 @@ public class NavigationBarView extends LinearLayout {
         // Update menu button in case the IME state has changed.
         setMenuVisibility(mShowMenu, true);
 
-
         setDisabledFlags(mDisabledFlags, true);
     }
 
@@ -395,12 +398,6 @@ public class NavigationBarView extends LinearLayout {
             return ActivityManagerNative.getDefault().isInLockTaskMode();
         } catch (RemoteException e) {
             return false;
-        }
-    }
-
-    private void setVisibleOrGone(View view, boolean visible) {
-        if (view != null) {
-            view.setVisibility(visible ? VISIBLE : GONE);
         }
     }
 

@@ -495,7 +495,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
 
-    private int mDrawCount;
     private Runnable mLaunchTransitionEndRunnable;
     private boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
@@ -670,8 +669,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
-        Resources res = context.getResources();
-
         updateDisplaySize(); // populates mDisplayMetrics
         updateResources();
 
@@ -835,23 +832,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mZenModeController = mVolumeComponent.getZenController();
         }
         mCastController = new CastControllerImpl(mContext);
-        final SignalClusterView signalCluster =
-                (SignalClusterView) mStatusBarView.findViewById(R.id.signal_cluster);
-        final SignalClusterView signalClusterKeyguard =
-                (SignalClusterView) mKeyguardStatusBar.findViewById(R.id.signal_cluster);
-        final SignalClusterView signalClusterQs =
-                (SignalClusterView) mHeader.findViewById(R.id.signal_cluster);
-        mNetworkController.addSignalCallback(signalCluster);
-        mNetworkController.addSignalCallback(signalClusterKeyguard);
-        signalCluster.setSecurityController(mSecurityController);
-        signalCluster.setNetworkController(mNetworkController);
-        signalClusterKeyguard.setSecurityController(mSecurityController);
-        signalClusterKeyguard.setNetworkController(mNetworkController);
-        if (signalClusterQs != null) {
-            mNetworkController.addSignalCallback(signalClusterQs);
-            signalClusterQs.setSecurityController(mSecurityController);
-            signalClusterQs.setNetworkController(mNetworkController);
-        }
+
+        initSignalCluster(mStatusBarView);
+        initSignalCluster(mKeyguardStatusBar);
+        initSignalCluster(mHeader);
+
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
             mNetworkController.addEmergencyListener(mHeader);
@@ -975,6 +960,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 checkUserAutohide(v, event);
                 return false;
             }});
+    }
+
+    private void initSignalCluster(View containerView) {
+        SignalClusterView signalCluster =
+                (SignalClusterView) containerView.findViewById(R.id.signal_cluster);
+        if (signalCluster != null) {
+            mNetworkController.addSignalCallback(signalCluster);
+            signalCluster.setSecurityController(mSecurityController);
+            signalCluster.setNetworkController(mNetworkController);
+        }
     }
 
     /** Returns true if the app shelf should be shown in the nav bar. */
