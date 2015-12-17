@@ -116,6 +116,12 @@ class DatabaseHelper extends SQLiteOpenHelper {
             // cleaned up automatically when the user is deleted.
             File databaseFile = new File(
                     Environment.getUserSystemDirectory(userHandle), DATABASE_NAME);
+            // If databaseFile doesn't exist, database can be kept in memory. It's safe because the
+            // database will be migrated and disposed of immediately after onCreate finishes
+            if (!databaseFile.exists()) {
+                Log.i(TAG, "No previous database file exists - running in in-memory mode");
+                return null;
+            }
             return databaseFile.getPath();
         }
     }
@@ -130,8 +136,16 @@ class DatabaseHelper extends SQLiteOpenHelper {
         return mValidTables.contains(name);
     }
 
+    private boolean isInMemory() {
+        return getDatabaseName() == null;
+    }
+
     public void dropDatabase() {
         close();
+        // No need to remove files if db is in memory
+        if (isInMemory()) {
+            return;
+        }
         File databaseFile = mContext.getDatabasePath(getDatabaseName());
         if (databaseFile.exists()) {
             databaseFile.delete();
@@ -145,6 +159,10 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     public void backupDatabase() {
         close();
+        // No need to backup files if db is in memory
+        if (isInMemory()) {
+            return;
+        }
         File databaseFile = mContext.getDatabasePath(getDatabaseName());
         if (!databaseFile.exists()) {
             return;
