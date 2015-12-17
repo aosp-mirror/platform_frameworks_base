@@ -54,7 +54,8 @@ public class ModelTest extends AndroidTestCase {
         Document.COLUMN_DOCUMENT_ID,
         Document.COLUMN_FLAGS,
         Document.COLUMN_DISPLAY_NAME,
-        Document.COLUMN_SIZE
+        Document.COLUMN_SIZE,
+        Document.COLUMN_MIME_TYPE
     };
     private static Cursor cursor;
 
@@ -197,27 +198,74 @@ public class ModelTest extends AndroidTestCase {
 
     // Tests sorting by item size.
     public void testSort_sizes() {
-        BitSet seen = new BitSet(ITEM_COUNT);
-        List<Integer> sizes = new ArrayList<>();
-
         DirectoryResult r = new DirectoryResult();
         r.cursor = cursor;
         r.sortOrder = State.SORT_ORDER_SIZE;
         model.update(r);
 
+        BitSet seen = new BitSet(ITEM_COUNT);
+        int previousSize = Integer.MAX_VALUE;
         for (String id: model.getModelIds()) {
             Cursor c = model.getItem(id);
             seen.set(c.getPosition());
-            sizes.add(DocumentInfo.getCursorInt(c, Document.COLUMN_SIZE));
+            // Check sort order - descending numerical
+            int size = DocumentInfo.getCursorInt(c, Document.COLUMN_SIZE);
+            assertTrue(previousSize >= size);
+            previousSize = size;
         }
-
+        // Check that all items were accounted for.
         assertEquals(ITEM_COUNT, seen.cardinality());
-        for (int i = 0; i < sizes.size()-1; ++i) {
-            // Note: sizes are sorted descending.
-            assertTrue(sizes.get(i) >= sizes.get(i+1));
-        }
     }
 
+    // Tests that directories and files are properly bucketed when sorting by size
+    public void testSort_sizesWithBucketing() {
+        MatrixCursor c = new MatrixCursor(COLUMNS);
+
+        for (int i = 0; i < ITEM_COUNT; ++i) {
+            MatrixCursor.RowBuilder row = c.newRow();
+            row.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY);
+            row.add(Document.COLUMN_DOCUMENT_ID, Integer.toString(i));
+            row.add(Document.COLUMN_SIZE, i);
+            // Interleave directories and text files.
+            String mimeType =(i % 2 == 0) ? Document.MIME_TYPE_DIR : "text/*";
+            row.add(Document.COLUMN_MIME_TYPE, mimeType);
+        }
+
+        DirectoryResult r = new DirectoryResult();
+        r.cursor = c;
+        r.sortOrder = State.SORT_ORDER_SIZE;
+        model.update(r);
+
+        boolean seenAllDirs = false;
+        int previousSize = Integer.MAX_VALUE;
+        BitSet seen = new BitSet(ITEM_COUNT);
+        // Iterate over items in sort order. Once we've encountered a document (i.e. not a
+        // directory), all subsequent items must also be documents. That is, all directories are
+        // bucketed at the front of the list, sorted by size, followed by documents, sorted by size.
+        for (String id: model.getModelIds()) {
+            Cursor cOut = model.getItem(id);
+            seen.set(cOut.getPosition());
+
+            String mimeType = DocumentInfo.getCursorString(cOut, Document.COLUMN_MIME_TYPE);
+            if (seenAllDirs) {
+                assertFalse(Document.MIME_TYPE_DIR.equals(mimeType));
+            } else {
+                if (!Document.MIME_TYPE_DIR.equals(mimeType)) {
+                    seenAllDirs = true;
+                    // Reset the previous size seen, because documents are bucketed separately by
+                    // the sort.
+                    previousSize = Integer.MAX_VALUE;
+                }
+            }
+            // Check sort order - descending numerical
+            int size = DocumentInfo.getCursorInt(c, Document.COLUMN_SIZE);
+            assertTrue(previousSize >= size);
+            previousSize = size;
+        }
+
+        // Check that all items were accounted for.
+        assertEquals(ITEM_COUNT, seen.cardinality());
+    }
 
     // Tests that Model.delete works correctly.
     public void testDelete() throws Exception {

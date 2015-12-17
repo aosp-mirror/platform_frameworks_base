@@ -152,17 +152,11 @@ public class Model implements SiblingProvider {
     private void updateModelData() {
         int[] positions = new int[mCursorCount];
         mIds.clear();
-        String[] strings = null;
-        long[] longs = null;
+        String[] stringValues = new String[mCursorCount];
+        long[] longValues = null;
 
-        switch (mSortOrder) {
-            case SORT_ORDER_DISPLAY_NAME:
-                strings = new String[mCursorCount];
-                break;
-            case SORT_ORDER_LAST_MODIFIED:
-            case SORT_ORDER_SIZE:
-                longs = new long[mCursorCount];
-                break;
+        if (mSortOrder == SORT_ORDER_LAST_MODIFIED || mSortOrder == SORT_ORDER_SIZE) {
+            longValues = new long[mCursorCount];
         }
 
         mCursor.moveToPosition(-1);
@@ -177,27 +171,29 @@ public class Model implements SiblingProvider {
                     final String displayName = getCursorString(
                             mCursor, Document.COLUMN_DISPLAY_NAME);
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-                        strings[pos] = DocumentInfo.DIR_PREFIX + displayName;
+                        stringValues[pos] = DocumentInfo.DIR_PREFIX + displayName;
                     } else {
-                        strings[pos] = displayName;
+                        stringValues[pos] = displayName;
                     }
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    longs[pos] = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+                    longValues[pos] = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+                    stringValues[pos] = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     break;
                 case SORT_ORDER_SIZE:
-                    longs[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
+                    longValues[pos] = getCursorLong(mCursor, Document.COLUMN_SIZE);
+                    stringValues[pos] = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     break;
             }
         }
 
         switch (mSortOrder) {
             case SORT_ORDER_DISPLAY_NAME:
-                binarySort(positions, strings, mIds);
+                binarySort(stringValues, positions, mIds);
                 break;
             case SORT_ORDER_LAST_MODIFIED:
             case SORT_ORDER_SIZE:
-                binarySort(positions, longs, mIds);
+                binarySort(longValues, stringValues, positions, mIds);
                 break;
         }
 
@@ -209,13 +205,19 @@ public class Model implements SiblingProvider {
     }
 
     /**
-     * Borrowed from TimSort.binarySort(), but modified to sort three-column data set.
+     * Sorts model data. Takes three columns of index-corresponded data. The first column is the
+     * sort key. Rows are sorted in ascending alphabetical order on the sort key. This code is based
+     * on TimSort.binarySort().
+     *
+     * @param sortKey Data is sorted in ascending alphabetical order.
+     * @param positions Cursor positions to be sorted.
+     * @param ids Model IDs to be sorted.
      */
-    private static void binarySort(int[] positions, String[] strings, List<String> ids) {
+    private static void binarySort(String[] sortKey, int[] positions, List<String> ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
-            final String pivotValue = strings[start];
+            final String pivotValue = sortKey[start];
             final String pivotId = ids.get(start);
 
             int left = 0;
@@ -225,7 +227,7 @@ public class Model implements SiblingProvider {
                 int mid = (left + right) >>> 1;
 
                 final String lhs = pivotValue;
-                final String rhs = strings[mid];
+                final String rhs = sortKey[mid];
                 final int compare = DocumentInfo.compareToIgnoreCaseNullable(lhs, rhs);
 
                 if (compare < 0) {
@@ -239,48 +241,68 @@ public class Model implements SiblingProvider {
             switch (n) {
                 case 2:
                     positions[left + 2] = positions[left + 1];
-                    strings[left + 2] = strings[left + 1];
+                    sortKey[left + 2] = sortKey[left + 1];
                     ids.set(left + 2, ids.get(left + 1));
                 case 1:
                     positions[left + 1] = positions[left];
-                    strings[left + 1] = strings[left];
+                    sortKey[left + 1] = sortKey[left];
                     ids.set(left + 1, ids.get(left));
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
-                    System.arraycopy(strings, left, strings, left + 1, n);
+                    System.arraycopy(sortKey, left, sortKey, left + 1, n);
                     for (int i = n; i >= 1; --i) {
                         ids.set(left + i, ids.get(left + i - 1));
                     }
             }
 
             positions[left] = pivotPosition;
-            strings[left] = pivotValue;
+            sortKey[left] = pivotValue;
             ids.set(left, pivotId);
         }
     }
 
     /**
-     * Borrowed from TimSort.binarySort(), but modified to sort three-column data set.
+     * Sorts model data. Takes four columns of index-corresponded data. The first column is the sort
+     * key, and the second is an array of mime types. The rows are first bucketed by mime type
+     * (directories vs documents) and then each bucket is sorted independently in descending
+     * numerical order on the sort key. This code is based on TimSort.binarySort().
+     *
+     * @param sortKey Data is sorted in descending numerical order.
+     * @param mimeTypes Corresponding mime types. Directories will be sorted ahead of documents.
+     * @param positions Cursor positions to be sorted.
+     * @param ids Model IDs to be sorted.
      */
-   private static void binarySort(int[] positions, long[] longs, List<String> ids) {
+    private static void binarySort(
+            long[] sortKey, String[] mimeTypes, int[] positions, List<String> ids) {
         final int count = positions.length;
         for (int start = 1; start < count; start++) {
             final int pivotPosition = positions[start];
-            final long pivotValue = longs[start];
+            final long pivotValue = sortKey[start];
+            final String pivotMime = mimeTypes[start];
             final String pivotId = ids.get(start);
 
             int left = 0;
             int right = start;
 
             while (left < right) {
-                int mid = (left + right) >>> 1;
+                int mid = ((left + right) >>> 1);
 
-                final long lhs = pivotValue;
-                final long rhs = longs[mid];
-                // Sort in descending numerical order. This matches legacy behaviour, which yields
-                // largest or most recent items on top.
-                final int compare = -Long.compare(lhs, rhs);
+                // First bucket by mime type.  Directories always go in front.
+                int compare = 0;
+                final boolean lhsIsDir = Document.MIME_TYPE_DIR.equals(pivotMime);
+                final boolean rhsIsDir = Document.MIME_TYPE_DIR.equals(mimeTypes[mid]);
+                if (lhsIsDir && !rhsIsDir) {
+                    compare = -1;
+                } else if (!lhsIsDir && rhsIsDir) {
+                    compare = 1;
+                } else {
+                    final long lhs = pivotValue;
+                    final long rhs = sortKey[mid];
+                    // Sort in descending numerical order. This matches legacy behaviour, which yields
+                    // largest or most recent items on top.
+                    compare = -Long.compare(lhs, rhs);
+                }
 
                 if (compare < 0) {
                     right = mid;
@@ -293,23 +315,27 @@ public class Model implements SiblingProvider {
             switch (n) {
                 case 2:
                     positions[left + 2] = positions[left + 1];
-                    longs[left + 2] = longs[left + 1];
+                    sortKey[left + 2] = sortKey[left + 1];
+                    mimeTypes[left + 2] = mimeTypes[left + 1];
                     ids.set(left + 2, ids.get(left + 1));
                 case 1:
                     positions[left + 1] = positions[left];
-                    longs[left + 1] = longs[left];
+                    sortKey[left + 1] = sortKey[left];
+                    mimeTypes[left + 1] = mimeTypes[left];
                     ids.set(left + 1, ids.get(left));
                     break;
                 default:
                     System.arraycopy(positions, left, positions, left + 1, n);
-                    System.arraycopy(longs, left, longs, left + 1, n);
+                    System.arraycopy(sortKey, left, sortKey, left + 1, n);
+                    System.arraycopy(mimeTypes, left, mimeTypes, left + 1, n);
                     for (int i = n; i >= 1; --i) {
                         ids.set(left + i, ids.get(left + i - 1));
                     }
             }
 
             positions[left] = pivotPosition;
-            longs[left] = pivotValue;
+            sortKey[left] = pivotValue;
+            mimeTypes[left] = pivotMime;
             ids.set(left, pivotId);
         }
     }

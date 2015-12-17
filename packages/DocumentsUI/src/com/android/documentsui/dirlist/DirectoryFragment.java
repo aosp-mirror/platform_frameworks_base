@@ -592,7 +592,8 @@ public class DirectoryFragment extends Fragment {
             case MODE_GRID:
                 thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
                 if (mGridLayout == null) {
-                    mGridLayout = new GridLayoutManager(getContext(), mColumnCount );
+                    mGridLayout = new GridLayoutManager(getContext(), mColumnCount);
+                    mGridLayout.setSpanSizeLookup(mAdapter.createSpanSizeLookup());
                 }
                 layout = mGridLayout;
                 break;
@@ -1000,39 +1001,81 @@ public class DirectoryFragment extends Fragment {
             extends RecyclerView.Adapter<DocumentHolder>
             implements Model.UpdateListener {
 
-        static private final String TAG = "DocumentsAdapter";
+        private static final String TAG = "DocumentsAdapter";
+        private static final int ITEM_TYPE_LAYOUT_DIVIDER = 0;
+        private static final int ITEM_TYPE_DOCUMENT = 1;
+        private static final int ITEM_TYPE_DIRECTORY = 2;
+
         private final Context mContext;
+
         /**
          * An ordered list of model IDs. This is the data structure that determines what shows up in
          * the UI, and where.
          */
         private List<String> mModelIds = new ArrayList<>();
 
+        // The list is divided into two segments - directories, and everything else. Record the
+        // position where the transition happens.
+        private int mDividerPosition;
+
         public DocumentsAdapter(Context context) {
             mContext = context;
         }
 
+        public GridLayoutManager.SpanSizeLookup createSpanSizeLookup() {
+            return new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    // Make layout whitespace span the grid. This has the effect of breaking
+                    // grid rows whenever layout whitespace is encountered.
+                    if (getItemViewType(position) == ITEM_TYPE_LAYOUT_DIVIDER) {
+                        return mColumnCount;
+                    } else {
+                        return 1;
+                    }
+                }
+            };
+        }
+
         @Override
         public DocumentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            final State state = getDisplayState();
-            final LayoutInflater inflater = LayoutInflater.from(getContext());
             View item = null;
-            switch (state.derivedMode) {
-                case MODE_GRID:
-                    item = inflater.inflate(R.layout.item_doc_grid, parent, false);
+
+            switch (viewType) {
+                case ITEM_TYPE_DIRECTORY:
+                case ITEM_TYPE_DOCUMENT:
+                    item = createItemView(parent);
                     break;
-                case MODE_LIST:
-                    item = inflater.inflate(R.layout.item_doc_list, parent, false);
+                case ITEM_TYPE_LAYOUT_DIVIDER:
+                    item = createLayoutWhitespace();
                     break;
-                case MODE_UNKNOWN:
-                default:
-                    throw new IllegalStateException("Unsupported layout mode.");
             }
 
             DocumentHolder holder = new DocumentHolder(item);
             holder.addClickListener(mItemClickListener);
             holder.addOnKeyListener(mSelectionManager);
             return holder;
+        }
+
+        private View createItemView(ViewGroup parent) {
+            final State state = getDisplayState();
+            final LayoutInflater inflater = LayoutInflater.from(getContext());
+
+            switch (state.derivedMode) {
+                case MODE_GRID:
+                    return  inflater.inflate(R.layout.item_doc_grid, parent, false);
+                case MODE_LIST:
+                    return inflater.inflate(R.layout.item_doc_list, parent, false);
+                case MODE_UNKNOWN:
+                default:
+                    throw new IllegalStateException("Unsupported layout mode.");
+            }
+        }
+
+        private View createLayoutWhitespace() {
+            View whitespace = new View(getContext());
+            whitespace.setVisibility(View.GONE);
+            return whitespace;
         }
 
         /**
@@ -1042,6 +1085,11 @@ public class DirectoryFragment extends Fragment {
          */
         @Override
         public void onBindViewHolder(DocumentHolder holder, int position, List<Object> payload) {
+            if (holder.getItemViewType() == ITEM_TYPE_LAYOUT_DIVIDER) {
+                // Whitespace items are hidden elements with no data to bind.
+                return;
+            }
+
             final View itemView = holder.itemView;
 
             if (payload.contains(MultiSelectManager.SELECTION_CHANGED_MARKER)) {
@@ -1055,6 +1103,11 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DocumentHolder holder, int position) {
+            if (holder.getItemViewType() == ITEM_TYPE_LAYOUT_DIVIDER) {
+                // Whitespace items are hidden elements with no data to bind.
+                return;
+            }
+
             final Context context = getContext();
             final State state = getDisplayState();
             final RootsCache roots = DocumentsApplication.getRootsCache(context);
@@ -1225,6 +1278,23 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onModelUpdate(Model model) {
             mModelIds = Lists.newArrayList(model.getModelIds());
+            mDividerPosition = 0;
+
+            // Walk down the list of IDs till we encounter something that's not a directory, and
+            // insert a whitespace element - this introduces a visual break in the grid between
+            // folders and documents.
+            // TODO: This code makes assumptions about the model, namely, that it performs a
+            // bucketed sort where directories will always be ordered before other files.  CBB.
+            for (int i = 0; i < mModelIds.size(); ++i) {
+                final String mimeType = getCursorString(
+                        model.getItem(mModelIds.get(i)), Document.COLUMN_MIME_TYPE);
+                if (!Document.MIME_TYPE_DIR.equals(mimeType)) {
+                    mDividerPosition = i;
+                    break;
+                }
+            }
+
+            mModelIds.add(mDividerPosition, null);
         }
 
         @Override
@@ -1288,6 +1358,34 @@ public class DirectoryFragment extends Fragment {
          */
         public List<String> getModelIds() {
             return mModelIds;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position < mDividerPosition) {
+                return ITEM_TYPE_DIRECTORY;
+            } else if (position == mDividerPosition) {
+                return ITEM_TYPE_LAYOUT_DIVIDER;
+            } else {
+                return ITEM_TYPE_DOCUMENT;
+            }
+        }
+
+        /**
+         * Triggers item-change notifications by stable ID. Passing an unrecognized ID will result
+         * in a warning in logcat, but no other error.
+         *
+         * @param id
+         * @param selectionChangedMarker
+         */
+        public void notifyItemChanged(String id, String selectionChangedMarker) {
+            int position = mModelIds.indexOf(id);
+
+            if (position >= 0) {
+                notifyItemChanged(position, selectionChangedMarker);
+            } else {
+                Log.w(TAG, "Item change notification received for unknown item: " + id);
+            }
         }
     }
 
