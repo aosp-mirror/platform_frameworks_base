@@ -336,7 +336,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onPackageBroadcastReceived(Intent intent, int userId) {
-        if (!isUserRunningAndUnlocked(userId)) return;
+        if (!mUserManager.isUserUnlocked(userId)) return;
 
         final String action = intent.getAction();
         boolean added = false;
@@ -417,7 +417,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Refresh the masked state for all profiles under the given user.
      */
     private void refreshProfileWidgetsMaskedState(int userId) {
-        if (!isUserRunningAndUnlocked(userId)) return;
+        if (!mUserManager.isUserUnlocked(userId)) return;
         List<UserInfo> profiles = mUserManager.getEnabledProfiles(userId);
         if (profiles != null) {
             for (int i = 0; i < profiles.size(); i++) {
@@ -431,7 +431,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * Mask/unmask widgets in the given profile, depending on the quiet state of the profile.
      */
     private void refreshWidgetMaskedState(int profileId) {
-        if (!isUserRunningAndUnlocked(profileId)) return;
+        if (!mUserManager.isUserUnlocked(profileId)) return;
         final long identity = Binder.clearCallingIdentity();
         try {
             UserInfo user  = mUserManager.getUserInfo(profileId);
@@ -481,7 +481,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void ensureGroupStateLoadedLocked(int userId) {
-        if (!isUserRunningAndUnlocked(userId)) {
+        if (!mUserManager.isUserUnlocked(userId)) {
             throw new IllegalStateException(
                     "User " + userId + " must be unlocked for widgets to be available");
         }
@@ -2510,15 +2510,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void onWidgetsClearedLocked() {
         mWidgetPackages.clear();
-    }
-
-    private boolean isUserRunningAndUnlocked(int userId) {
-        if (userId == UserHandle.USER_NULL) {
-            return false;
-        } else {
-            return mContext.getSystemService(ActivityManager.class)
-                    .isUserRunningAndUnlocked(userId);
-        }
     }
 
     @Override
