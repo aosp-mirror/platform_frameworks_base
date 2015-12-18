@@ -28,6 +28,7 @@ import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
+import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.MOVING;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 
@@ -569,10 +570,10 @@ final class ActivityStack {
     }
 
     /**
-     * Returns the top activity in any existing task matching the given
-     * Intent.  Returns null if no such task is found.
+     * Returns the top activity in any existing task matching the given Intent in the input result.
+     * Returns null if no such task is found.
      */
-    ActivityRecord findTaskLocked(ActivityRecord target) {
+    void findTaskLocked(ActivityRecord target, FindTaskResult result) {
         Intent intent = target.intent;
         ActivityInfo info = target.info;
         ComponentName cls = intent.getComponent();
@@ -627,10 +628,15 @@ final class ActivityStack {
                     + taskIntent.getComponent().flattenToShortString()
                     + "/aff=" + r.task.rootAffinity + " to new cls="
                     + intent.getComponent().flattenToShortString() + "/aff=" + info.taskAffinity);
-            if (!isDocument && !taskIsDocument && task.rootAffinity != null) {
+            if (!isDocument && !taskIsDocument
+                    && result.r == null && task.canMatchRootAffinity()) {
                 if (task.rootAffinity.equals(target.taskAffinity)) {
-                    if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity!");
-                    return r;
+                    if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Found matching affinity candidate!");
+                    // It is possible for multiple tasks to have the same root affinity especially
+                    // if they are in separate stacks. We save off this candidate, but keep looking
+                    // to see if there is a better candidate.
+                    result.r = r;
+                    result.matchedByRootAffinity = true;
                 }
             } else if (taskIntent != null && taskIntent.getComponent() != null &&
                     taskIntent.getComponent().compareTo(cls) == 0 &&
@@ -639,7 +645,9 @@ final class ActivityStack {
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,
                         "For Intent " + intent + " bringing to top: " + r.intent);
-                return r;
+                result.r = r;
+                result.matchedByRootAffinity = false;
+                break;
             } else if (affinityIntent != null && affinityIntent.getComponent() != null &&
                     affinityIntent.getComponent().compareTo(cls) == 0 &&
                     Objects.equals(documentData, taskDocumentData)) {
@@ -647,11 +655,11 @@ final class ActivityStack {
                 //dump();
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS,
                         "For Intent " + intent + " bringing to top: " + r.intent);
-                return r;
+                result.r = r;
+                result.matchedByRootAffinity = false;
+                break;
             } else if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Not a match: " + task);
         }
-
-        return null;
     }
 
     /**

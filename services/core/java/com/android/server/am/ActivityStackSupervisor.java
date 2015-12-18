@@ -418,6 +418,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private final ActivityMetricsLogger mActivityMetricsLogger;
 
+    static class FindTaskResult {
+        ActivityRecord r;
+        boolean matchedByRootAffinity;
+    }
+    private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -3641,7 +3647,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (bounds != null) {
-            resizeStackLocked(PINNED_STACK_ID, bounds, !PRESERVE_WINDOWS, true);
+            resizeStackLocked(stackId, bounds, !PRESERVE_WINDOWS, true);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
@@ -3670,6 +3676,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ActivityRecord findTaskLocked(ActivityRecord r) {
+        mTmpFindTaskResult.r = null;
+        mTmpFindTaskResult.matchedByRootAffinity = false;
         if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Looking for task of " + r);
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
@@ -3684,14 +3692,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             "Skipping stack: (new task not allowed) " + stack);
                     continue;
                 }
-                final ActivityRecord ar = stack.findTaskLocked(r);
-                if (ar != null) {
-                    return ar;
+                stack.findTaskLocked(r, mTmpFindTaskResult);
+                // It is possible to have task in multiple stacks with the same root affinity.
+                // If the match we found was based on root affinity we keep on looking to see if
+                // there is a better match in another stack. We eventually return the match based
+                // on root affinity if we don't find a better match.
+                if (mTmpFindTaskResult.r != null && !mTmpFindTaskResult.matchedByRootAffinity) {
+                    return mTmpFindTaskResult.r;
                 }
             }
         }
-        if (DEBUG_TASKS) Slog.d(TAG_TASKS, "No task found");
-        return null;
+        if (DEBUG_TASKS && mTmpFindTaskResult.r == null) Slog.d(TAG_TASKS, "No task found");
+        return mTmpFindTaskResult.r;
     }
 
     ActivityRecord findActivityLocked(Intent intent, ActivityInfo info) {
