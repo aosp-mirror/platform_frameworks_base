@@ -2370,7 +2370,7 @@
     <!-- Set initial MaxRetry value for operators -->
     <integer name="config_mdc_initial_max_retry">1</integer>
 
-    <!-- The OEM specified sensor type for the gesture to launch the camear app. -->
+    <!-- The OEM specified sensor type for the gesture to launch the camera app. -->
     <integer name="config_cameraLaunchGestureSensorType">-1</integer>
     <!-- The OEM specified sensor string type for the gesture to launch camera app, this value
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
