@@ -240,9 +240,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private void liftBackground() {
         if (isHorizontalDivision()) {
-            mBackground.animate().scaleY(1.5f);
+            mBackground.animate().scaleY(1.4f);
         } else {
-            mBackground.animate().scaleX(1.5f);
+            mBackground.animate().scaleX(1.4f);
         }
         mBackground.animate()
                 .setInterpolator(mTouchResponseInterpolator)

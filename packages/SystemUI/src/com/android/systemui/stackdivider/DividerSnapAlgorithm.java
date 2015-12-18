@@ -98,10 +98,10 @@ public class DividerSnapAlgorithm {
 
         // TODO: Better calculation
         targets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START));
-        targets.add(new SnapTarget((int) (0.38f * dividerMax) - mDividerSize / 2,
+        targets.add(new SnapTarget((int) (0.3415f * dividerMax) - mDividerSize / 2,
                 SnapTarget.FLAG_NONE));
         targets.add(new SnapTarget(dividerMax / 2 - mDividerSize / 2, SnapTarget.FLAG_NONE));
-        targets.add(new SnapTarget((int) (0.62f * dividerMax) - mDividerSize / 2,
+        targets.add(new SnapTarget((int) (0.6585f * dividerMax) - mDividerSize / 2,
                 SnapTarget.FLAG_NONE));
         targets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END));
         return targets;

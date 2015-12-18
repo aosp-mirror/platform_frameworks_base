@@ -20,7 +20,7 @@
     </style>
 
     <style name="DockedDividerBackground">
-        <item name="android:layout_width">12dp</item>
+        <item name="android:layout_width">10dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center_horizontal</item>
     </style>
@@ -28,7 +28,7 @@
     <style name="DockedDividerHandle">
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_height">96dp</item>
     </style>
 
 </resources>

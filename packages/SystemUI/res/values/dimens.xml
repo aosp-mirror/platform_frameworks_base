@@ -583,9 +583,9 @@
     <dimen name="qs_header_neg_padding">-8dp</dimen>
 
     <!-- How high we lift the divider when touching -->
-    <dimen name="docked_stack_divider_lift_elevation">6dp</dimen>
+    <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
 
-    <dimen name="docked_divider_handle_width">24dp</dimen>
+    <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
 
 </resources>

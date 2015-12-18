@@ -47,7 +47,7 @@
 
     <!-- How much the content in the divider is inset from the window bounds when resting. Used to
          calculate the bounds of the stacks-->
-    <dimen name="docked_stack_divider_insets">18dp</dimen>
+    <dimen name="docked_stack_divider_insets">19dp</dimen>
 
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
