@@ -197,6 +197,10 @@ public final class ViewRootImpl implements ViewParent,
     // so the window should no longer be active.
     boolean mStopped = false;
 
+    // Set to true if the owner of this window is in ambient mode,
+    // which means it won't receive input events.
+    boolean mIsAmbientMode = false;
+
     // Set to true to stop input during an Activity Transition.
     boolean mPausedForTransition = false;
 
@@ -1030,6 +1034,10 @@ public final class ViewRootImpl implements ViewParent,
         if (!mWillDrawSoon && (intersected || mIsAnimating)) {
             scheduleTraversals();
         }
+    }
+
+    public void setIsAmbientMode(boolean ambient) {
+        mIsAmbientMode = ambient;
     }
 
     void setWindowStopped(boolean stopped) {
@@ -3685,7 +3693,7 @@ public final class ViewRootImpl implements ViewParent,
                 return true;
             } else if ((!mAttachInfo.mHasWindowFocus
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) || mStopped
-                    || (mPausedForTransition && !isBack(q.mEvent))) {
+                    || mIsAmbientMode || (mPausedForTransition && !isBack(q.mEvent))) {
                 // This is a focus event and the window doesn't currently have input focus or
                 // has stopped. This could be an event that came back from the previous stage
                 // but the window has lost focus or stopped in the meantime.
@@ -5511,6 +5519,8 @@ public final class ViewRootImpl implements ViewParent,
                 writer.println(mProcessInputEventsScheduled);
         writer.print(innerPrefix); writer.print("mTraversalScheduled=");
                 writer.print(mTraversalScheduled);
+        writer.print(innerPrefix); writer.print("mIsAmbientMode=");
+                writer.print(mIsAmbientMode);
         if (mTraversalScheduled) {
             writer.print(" (barrier="); writer.print(mTraversalBarrier); writer.println(")");
         } else {
