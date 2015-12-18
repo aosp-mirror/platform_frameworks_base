@@ -33,6 +33,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -90,8 +91,13 @@ public final class NetworkScorerAppManager {
      * @return the list of scorers, or the empty list if there are no valid scorers.
      */
     public static Collection<NetworkScorerAppData> getAllValidScorers(Context context) {
-        List<NetworkScorerAppData> scorers = new ArrayList<>();
+        // Network scorer apps can only run as the primary user so exit early if we're not the
+        // primary user.
+        if (UserHandle.getCallingUserId() != 0 /*USER_SYSTEM*/) {
+            return Collections.emptyList();
+        }
 
+        List<NetworkScorerAppData> scorers = new ArrayList<>();
         PackageManager pm = context.getPackageManager();
         // Only apps installed under the primary user of the device can be scorers.
         List<ResolveInfo> receivers =
@@ -104,8 +110,9 @@ public final class NetworkScorerAppManager {
                 continue;
             }
             if (!permission.BROADCAST_NETWORK_PRIVILEGED.equals(receiverInfo.permission)) {
-                // Receiver doesn't require the BROADCAST_NETWORK_PRIVILEGED permission, which means
-                // anyone could trigger network scoring and flood the framework with score requests.
+                // Receiver doesn't require the BROADCAST_NETWORK_PRIVILEGED permission, which
+                // means anyone could trigger network scoring and flood the framework with score
+                // requests.
                 continue;
             }
             if (pm.checkPermission(permission.SCORE_NETWORKS, receiverInfo.packageName) !=
@@ -127,8 +134,8 @@ public final class NetworkScorerAppManager {
                 }
             }
 
-            // NOTE: loadLabel will attempt to load the receiver's label and fall back to the app
-            // label if none is present.
+            // NOTE: loadLabel will attempt to load the receiver's label and fall back to the
+            // app label if none is present.
             scorers.add(new NetworkScorerAppData(receiverInfo.packageName,
                     receiverInfo.applicationInfo.uid, receiverInfo.loadLabel(pm),
                     configurationActivityClassName));
