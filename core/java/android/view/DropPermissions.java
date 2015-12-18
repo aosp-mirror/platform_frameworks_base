@@ -16,11 +16,27 @@
 
 package android.view;
 
+import android.os.IBinder;
 import android.os.RemoteException;
 import com.android.internal.view.IDropPermissions;
 import dalvik.system.CloseGuard;
 
 
+/**
+ * {@link DropPermissions} controls the access permissions for the content URIs associated with a
+ * {@link DragEvent}.
+ * <p>
+ * Permission are granted when this object is created by {@link
+ * android.app.Activity#requestDropPermissions(DragEvent) Activity.requestDropPermissions}.
+ * Which permissions are granted is defined by the set of flags passed to {@link
+ * View#startDragAndDrop(android.content.ClipData, View.DragShadowBuilder, Object, int)
+ * View.startDragAndDrop} by the app that started the drag operation.
+ * <p>
+ * The life cycle of the permissions is bound to the activity used to call {@link
+ * android.app.Activity#requestDropPermissions(DragEvent) requestDropPermissions}. The
+ * permissions are revoked when this activity is destroyed, or when {@link #release()} is called,
+ * whichever occurs first.
+ */
 public final class DropPermissions {
 
     private final IDropPermissions mDropPermissions;
@@ -28,21 +44,43 @@ public final class DropPermissions {
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
     /**
-     * Create a new DropPermissions object to be passed to the client with a DragEvent.
-     *
+     * Create a new {@link DropPermissions} object to control the access permissions for content
+     * URIs associated with {@link DragEvent}.
+     * @param dragEvent Drag event
+     * @return {@link DropPermissions} object or null if there are no content URIs associated with
+     * the {@link DragEvent}.
      * @hide
      */
-    DropPermissions(IDropPermissions dropPermissions) {
-        mDropPermissions = dropPermissions;
-        try {
-            mDropPermissions.take();
-        } catch (RemoteException e) {
+    public static DropPermissions obtain(DragEvent dragEvent) {
+        if (dragEvent.getDropPermissions() == null) {
+            return null;
         }
-        mCloseGuard.open("release");
+        return new DropPermissions(dragEvent.getDropPermissions());
+    }
+
+    /** @hide */
+    private DropPermissions(IDropPermissions dropPermissions) {
+        mDropPermissions = dropPermissions;
     }
 
     /**
-     * Revoke permissions taken by {@link DragEvent#requestDropPermissions()}.
+     * Take the permissions and bind their lifetime to the activity.
+     * @param activityToken Binder pointing to an Activity instance to bind the lifetime to.
+     * @return True if permissions are successfully taken.
+     * @hide
+     */
+    public boolean take(IBinder activityToken) {
+        try {
+            mDropPermissions.take(activityToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+        mCloseGuard.open("release");
+        return true;
+    }
+
+    /**
+     * Revoke permissions explicitly.
      */
     public void release() {
         try {

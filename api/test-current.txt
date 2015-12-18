@@ -3504,6 +3504,7 @@ package android.app {
     method public boolean releaseInstance();
     method public final deprecated void removeDialog(int);
     method public void reportFullyDrawn();
+    method public android.view.DropPermissions requestDropPermissions(android.view.DragEvent);
     method public final void requestPermissions(java.lang.String[], int);
     method public boolean requestVisibleBehind(boolean);
     method public final boolean requestWindowFeature(int);
@@ -39607,7 +39608,6 @@ package android.view {
     method public boolean getResult();
     method public float getX();
     method public float getY();
-    method public android.view.DropPermissions requestDropPermissions();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_DRAG_ENDED = 4; // 0x4
     field public static final int ACTION_DRAG_ENTERED = 5; // 0x5

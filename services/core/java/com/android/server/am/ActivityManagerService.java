@@ -8230,6 +8230,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public IBinder getUriPermissionOwnerForActivity(IBinder activityToken) {
+        enforceNotIsolatedCaller("getUriPermissionOwnerForActivity");
+        synchronized(this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+            if (r == null) {
+                throw new IllegalArgumentException("Activity does not exist; token="
+                        + activityToken);
+            }
+            return r.getUriPermissionsLocked().getExternalTokenLocked();
+        }
+    }
     /**
      * @param uri This uri must NOT contain an embedded userId.
      * @param sourceUserId The userId in which the uri is to be resolved.

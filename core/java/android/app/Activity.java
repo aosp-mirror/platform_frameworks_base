@@ -31,6 +31,8 @@ import android.transition.Scene;
 import android.transition.TransitionManager;
 import android.util.ArrayMap;
 import android.util.SuperNotCalledException;
+import android.view.DragEvent;
+import android.view.DropPermissions;
 import android.view.Window.WindowControllerCallback;
 import android.widget.Toolbar;
 
@@ -6334,6 +6336,21 @@ public class Activity extends ContextThemeWrapper
      */
     public void startPostponedEnterTransition() {
         mActivityTransitionState.startPostponedEnterTransition();
+    }
+
+    /**
+     * Create {@link DropPermissions} object bound to this activity and controlling the access
+     * permissions for content URIs associated with the {@link DragEvent}.
+     * @param event Drag event
+     * @return The DropPermissions object used to control access to the content URIs. Null if
+     * no content URIs are associated with the event or if permissions could not be granted.
+     */
+    public DropPermissions requestDropPermissions(DragEvent event) {
+        DropPermissions dropPermissions = DropPermissions.obtain(event);
+        if (dropPermissions != null && dropPermissions.take(getActivityToken())) {
+            return dropPermissions;
+        }
+        return null;
     }
 
     // ------------------ Internal API ------------------

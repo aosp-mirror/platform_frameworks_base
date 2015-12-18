@@ -363,6 +363,7 @@ public interface IActivityManager extends IInterface {
     public String getProviderMimeType(Uri uri, int userId) throws RemoteException;
 
     public IBinder newUriPermissionOwner(String name) throws RemoteException;
+    public IBinder getUriPermissionOwnerForActivity(IBinder activityToken) throws RemoteException;
     public void grantUriPermissionFromOwner(IBinder owner, int fromUid, String targetPkg,
             Uri uri, int mode, int sourceUserId, int targetUserId) throws RemoteException;
     public void revokeUriPermissionFromOwner(IBinder owner, Uri uri,
@@ -920,4 +921,5 @@ public interface IActivityManager extends IInterface {
     int KILL_PACKAGE_DEPENDENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 354;
     int ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
     int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 356;
+    int GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 357;
 }

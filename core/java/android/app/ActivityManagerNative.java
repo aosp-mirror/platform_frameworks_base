@@ -1845,6 +1845,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder activityToken = data.readStrongBinder();
+            IBinder perm = getUriPermissionOwnerForActivity(activityToken);
+            reply.writeNoException();
+            reply.writeStrongBinder(perm);
+            return true;
+        }
+
         case GRANT_URI_PERMISSION_FROM_OWNER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder owner = data.readStrongBinder();
@@ -5114,6 +5123,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(name);
         mRemote.transact(NEW_URI_PERMISSION_OWNER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        IBinder res = reply.readStrongBinder();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+
+    public IBinder getUriPermissionOwnerForActivity(IBinder activityToken) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(activityToken);
+        mRemote.transact(GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         IBinder res = reply.readStrongBinder();
         data.recycle();

@@ -16,11 +16,13 @@
 
 package com.android.internal.view;
 
+import android.os.IBinder;
+
 /**
  * Interface to allow a drop receiver to request permissions for URIs passed along with ClipData
  * contained in DragEvent.
  */
 interface IDropPermissions {
-    void take();
+    void take(IBinder activityToken);
     void release();
 }

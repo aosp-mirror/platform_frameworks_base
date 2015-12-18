@@ -37,7 +37,7 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
 
     private final ArrayList<Uri> mUris = new ArrayList<Uri>();
 
-    private IBinder mPermissionOwner = null;
+    private IBinder mActivityToken = null;
 
     DropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
             int sourceUserId, int targetUserId) {
@@ -51,18 +51,21 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
     }
 
     @Override
-    public void take() throws RemoteException {
-        if (mPermissionOwner != null) {
+    public void take(IBinder activityToken) throws RemoteException {
+        if (mActivityToken != null) {
             return;
         }
+        mActivityToken = activityToken;
 
-        mPermissionOwner = ActivityManagerNative.getDefault().newUriPermissionOwner("drop");
+        // Will throw if Activity is not found.
+        IBinder permissionOwner = ActivityManagerNative.getDefault().
+                getUriPermissionOwnerForActivity(mActivityToken);
 
         long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
                 ActivityManagerNative.getDefault().grantUriPermissionFromOwner(
-                        mPermissionOwner, mSourceUid, mTargetPackage, mUris.get(i), mMode,
+                        permissionOwner, mSourceUid, mTargetPackage, mUris.get(i), mMode,
                         mSourceUserId, mTargetUserId);
             }
         } finally {
@@ -72,15 +75,24 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
 
     @Override
     public void release() throws RemoteException {
-        if (mPermissionOwner == null) {
+        if (mActivityToken == null) {
             return;
+        }
+
+        IBinder permissionOwner = null;
+        try {
+            permissionOwner = ActivityManagerNative.getDefault().
+                    getUriPermissionOwnerForActivity(mActivityToken);
+        } catch (Exception e) {
+            // Activity is destroyed, permissions already revoked.
+            return;
+        } finally {
+            mActivityToken = null;
         }
 
         for (int i = 0; i < mUris.size(); ++i) {
             ActivityManagerNative.getDefault().revokeUriPermissionFromOwner(
-                    mPermissionOwner, mUris.get(i), mMode, mSourceUserId);
+                    permissionOwner, mUris.get(i), mMode, mSourceUserId);
         }
-
-        mPermissionOwner = null;
     }
 }

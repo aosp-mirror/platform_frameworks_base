@@ -364,20 +364,9 @@ public class DragEvent implements Parcelable {
         return mClipDescription;
     }
 
-    /**
-     * Requests the permissions for the content URIs contained in {@link android.content.ClipData}
-     * object associated with this event. Which permissions will be granted is defined by the set of
-     * flags passed to {@link View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)}.
-     * Returns the {@link DropPermissions} object that can be used by the receiving app to release
-     * the permissions for the content URIs when they are no longer needed.
-     * This method only returns valid data if the event action is {@link #ACTION_DROP}.
-     * @return The DropPermissions object used to control access to the content URIs.
-     */
-    public DropPermissions requestDropPermissions() {
-        if (mDropPermissions == null) {
-            return null;
-        }
-        return new DropPermissions(mDropPermissions);
+    /** @hide */
+    public IDropPermissions getDropPermissions() {
+        return mDropPermissions;
     }
 
     /**
