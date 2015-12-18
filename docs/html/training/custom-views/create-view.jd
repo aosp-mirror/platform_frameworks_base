@@ -61,8 +61,7 @@ well-designed class, though, a custom view should:
     existing view
     subclasses, such as {@link android.widget.Button}.</p>
 
-<p>To allow the <a href="{@docRoot}guide/developing/tools/adt.html">Android Developer Tools
-</a> to interact with your view, at a minimum you must provide a constructor that takes a
+<p>To allow Android Studio to interact with your view, at a minimum you must provide a constructor that takes a
 {@link android.content.Context} and an {@link android.util.AttributeSet} object as parameters.
 This constructor allows the layout editor to create and edit an instance of your view.</p>
 
@@ -146,15 +145,9 @@ enable this behavior in your custom view, you must:
         <p>In order to avoid having to repeat the long namespace URI, the sample uses an {@code
             xmlns} directive. This
             directive assigns the alias {@code custom} to the namespace {@code
-            http://schemas.android.com/apk/res-auto}. You can choose any alias
+            http://schemas.android.com/apk/res/com.example.customviews}. You can choose any alias
             you want for your
             namespace.</p>
-
-<p class="note"><strong>Note:</strong> If you are not using Gradle to build
-your project, your {@code xlmns} URI cannot include {@code res-auto}.
-Instead, the URI must contain the fully qualified name of your project. In
-this example, the non-Gradle URI would be:
-{@code http://schemas.android.com/apk/res/com.example.customviews}.</p> 
 
         <p>Notice the name of the XML tag that adds the custom view to the layout. It is the fully
             qualified name of the

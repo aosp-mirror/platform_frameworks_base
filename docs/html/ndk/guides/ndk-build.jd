@@ -8,7 +8,6 @@ page.title=ndk-build
       <ol>
         <li><a href="#int">Internals</a></li>
          <li><a href="#ifc">Invoking from the Command Line</a></li>
-         <li><a href="#ife">Invoking from Eclipse</a></li>
          <li><a href="#6432">64-Bit and 32-Bit Toolchains</a></li>
          <li><a href="#req">Requirements</a></li>
           </ol>
@@ -85,29 +84,6 @@ $ ndk-build clean
   don't want to {@code cd} to it in your terminal.</dd>
 </dl>
 
-<h2 id="ife">Invoking from Eclipse</h2>
-<p>To build from Eclipse, make sure that you have configured it as described in
-<a href="{@docRoot}ndk/guides/setup.html#configure">Setup</a>. If you
-wish to build using the default <code>ndk-build</code> command, with no
-options, you can just build your project just as you would any Android project.
-To get Eclipse to add any of the options described above, follow these steps:</p>
-<ol type="1">
-<li>In the <em>Project Explorer</em> pane, right-click your project name.</li>
-<li>Select <strong>Properties</strong>.</li>
-<li>Click <strong>C/C++ Build</strong>.</li>
-<li>Under the <em>Builder Settings</em> tab, uncheck <strong>Use default build command</strong>.</li>
-<li>In the <em>Build command</em> field, enter the entire build string as if you were typing it on
-the command line.</li>
-<li>Click <strong>OK</strong>.</li>
-</ol>
-Figure 1 shows an example of an entered string.<br>
-<br>
-<img src="./images/NDK_build_string.png"
-    srcset="./images/NDK_build_string@2x.png 2x"
-    alt="enter the build string next to 'Build command'"
-    height="152" width="501">
-<p style="clear:both"><b>Figure 1.</b> Specifying a debug build from within
-Eclipse</p>
 <p><a class="anchor" id="dvr"></a> </p>
 <h3>Debuggable versus Release builds</h3>
 <p>Use the <code>NDK_DEBUG</code> option and, in certain cases,

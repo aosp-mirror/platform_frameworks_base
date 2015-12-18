@@ -66,8 +66,8 @@ parent.link=index.html
 <h2>See Also</h2>
       <ol>
         <li>
-          <a href="{@docRoot}tools/testing/testing_eclipse.html">
-          Testing from Eclipse with ADT</a>
+          <a href="{@docRoot}training/testing/unit-testing/local-unit-tests.html">
+          Building Local Unit Tests</a>
         </li>
         <li>
           <a href="{@docRoot}tools/testing/testing_otheride.html">
@@ -215,9 +215,9 @@ parent.link=index.html
 </ul>
 <h2 id="NextSteps">Next Steps</h2>
 <p>
-    To learn how to set up and run tests in Eclipse, please refer to 
-<a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse with ADT</a>.
-    If you're not working in Eclipse, refer to 
+    To learn how to set up and run tests in Android Studio, please refer to 
+<a href="{@docRoot}training/testing/unit-testing/local-unit-tests.html">Building Local Unit Tests</a>.
+    If you're not working in Android Studio, refer to 
 <a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.
 </p>
 <p>

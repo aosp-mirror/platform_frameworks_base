@@ -17,7 +17,7 @@ parent.link=index.html
     "{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
   </ul>
 
-<p>If you are using Android Studio or Eclipse, the <code>android</code> tool's features are
+<p>If you are using Android Studio, the <code>android</code> tool's features are
 integrated into the IDE, so you should not need to use this tool directly. </p>
 
   <p class="note"><strong>Note:</strong> The documentation of options below is not exhaustive

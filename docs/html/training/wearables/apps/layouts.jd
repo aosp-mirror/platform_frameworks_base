@@ -199,12 +199,6 @@ dependencies {
 <a href="{@docRoot}reference/android/support/wearable/view/package-summary.html">Wear API
 reference documentation</a> for the classes above.</p>
 
-<h3 id="UiLibEclipse">Download the Wearable UI library for Eclipse ADT</h3>
-
-<p>If you are using the ADT plugin for Eclipse, download the
-<a href="{@docRoot}shareables/training/wearable-support-lib.zip">Wearable UI library</a> to
-include the Wearable UI library as a dependency in your project.</p>
-
-<p class="note"><strong>Note:</strong> We recommend
-<a href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear app
-development.</p>
+<p class="note"><strong>Note:</strong> We recommend using <a
+href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development, as
+it provides project setup, library inclusion, and packaging conveniences.</p>

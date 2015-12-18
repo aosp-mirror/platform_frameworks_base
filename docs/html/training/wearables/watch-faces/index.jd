@@ -45,9 +45,9 @@ app. This class also covers design considerations and implementation tips to ens
 designs integrate with system UI elements and are power-efficient.</p>
 
 <p class="note"><strong>Note:</strong> We recommend using <a
-href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development as
-it provides project setup, library inclusion, and packaging conveniences that aren't available
-in the Eclipse Android Developer Tools. This training assumes you are using Android Studio.</p>
+href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development, as
+it provides project setup, library inclusion, and packaging conveniences. This training assumes
+you are using Android Studio.</p>
 
 
 <h2>Lessons</h2>

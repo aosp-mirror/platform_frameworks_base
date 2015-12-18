@@ -48,7 +48,7 @@ own views that are robust and reusable.</p>
 <dl>
 <dt><b><a href="create-view.html">Creating a View Class</a></b></dt>
 <dd>Create a class that acts like a built-in view, with custom
-    attributes and support from the <a href="http://developer.android.com/sdk/eclipse-adt.html">ADT</a> layout editor.
+    attributes and support from the <a href="http://developer.android.com/sdk/installing/studio-layout.html">Android Studio</a> layout editor.
 </dd>
 
 <dt><b><a href="custom-drawing.html">Custom Drawing</a></b></dt>

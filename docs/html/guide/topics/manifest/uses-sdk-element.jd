@@ -543,10 +543,7 @@ download other platform versions as necessary. </p>
 <p>To access the updater, use the <code>android</code> command-line tool,
 located in the &lt;sdk&gt;/tools directory. You can launch the SDK updater by
 executing <code>android sdk</code>. You can
-also simply double-click the android.bat (Windows) or android (OS X/Linux) file.
-In ADT, you can also access the updater by selecting
-<strong>Window</strong>&nbsp;>&nbsp;<strong>Android SDK
-Manager</strong>.</p>
+also simply double-click the android.bat (Windows) or android (OS X/Linux) file.</p>
 
 <p>To run your application against different platform versions in the emulator,
 create an AVD for each platform version that you want to test. For more
