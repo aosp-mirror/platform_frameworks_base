@@ -587,6 +587,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.FORMAT_PLS_PLAYLIST,
             MtpConstants.FORMAT_XML_DOCUMENT,
             MtpConstants.FORMAT_FLAC,
+            MtpConstants.FORMAT_DNG,
         };
     }
 
@@ -696,6 +697,7 @@ public class MtpDatabase implements AutoCloseable {
             case MtpConstants.FORMAT_GIF:
             case MtpConstants.FORMAT_PNG:
             case MtpConstants.FORMAT_BMP:
+            case MtpConstants.FORMAT_DNG:
                 return IMAGE_PROPERTIES;
             default:
                 return FILE_PROPERTIES;

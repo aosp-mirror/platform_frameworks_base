@@ -22500,6 +22500,7 @@ package android.mtp {
     field public static final int FORMAT_AUDIBLE = 47364; // 0xb904
     field public static final int FORMAT_AVI = 12298; // 0x300a
     field public static final int FORMAT_BMP = 14340; // 0x3804
+    field public static final int FORMAT_DNG = 14353; // 0x3811
     field public static final int FORMAT_DPOF = 12294; // 0x3006
     field public static final int FORMAT_EXECUTABLE = 12291; // 0x3003
     field public static final int FORMAT_EXIF_JPEG = 14337; // 0x3801
