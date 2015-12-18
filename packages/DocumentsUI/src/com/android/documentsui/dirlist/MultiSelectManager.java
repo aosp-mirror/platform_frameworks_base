@@ -462,7 +462,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(id, selected);
         }
-        mEnvironment.notifyItemChanged(id, SELECTION_CHANGED_MARKER);
+        mEnvironment.notifyItemChanged(id);
     }
 
     /**
@@ -803,7 +803,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         String getModelIdFromAdapterPosition(int position);
         int getItemCount();
         List<String> getModelIds();
-        void notifyItemChanged(String id, String selectionChangedMarker);
+        void notifyItemChanged(String id);
         void registerDataObserver(RecyclerView.AdapterDataObserver observer);
     }
 
@@ -959,21 +959,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public void notifyItemChanged(String id, String selectionChangedMarker) {
-            // TODO: This could be optimized if we turned on RecyclerView stable IDs.
-            int count = mAdapter.getItemCount();
-            for (int i = 0; i < count; ++i) {
-                RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(i);
-                // If the view isn't bound, this code never runs because the viewholder won't be
-                // found. That's fine, though, because the only time a view needs to be updated is
-                // when it's bound.
-                if (vh instanceof DirectoryFragment.DocumentHolder) {
-                    if (((DirectoryFragment.DocumentHolder) vh).modelId.equals(id)) {
-                        mAdapter.notifyItemChanged(i, SELECTION_CHANGED_MARKER);
-                    }
-                }
-            }
-
+        public void notifyItemChanged(String id) {
+            mAdapter.notifyItemChanged(id, SELECTION_CHANGED_MARKER);
         }
 
         @Override

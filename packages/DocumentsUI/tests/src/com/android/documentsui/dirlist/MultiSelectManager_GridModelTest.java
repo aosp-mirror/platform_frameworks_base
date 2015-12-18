@@ -339,7 +339,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         }
 
         @Override
-        public void notifyItemChanged(String id, String selectionChangedMarker) {
+        public void notifyItemChanged(String id) {
             throw new UnsupportedOperationException();
         }
 

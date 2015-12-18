@@ -25,7 +25,6 @@ import android.view.View;
 import com.android.documentsui.dirlist.MultiSelectManager.SelectionEnvironment;
 
 import java.util.List;
-import java.util.Set;
 
 public class TestSelectionEnvironment implements SelectionEnvironment {
 
@@ -132,7 +131,7 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     }
 
     @Override
-    public void notifyItemChanged(String id, String selectionChangedMarker) {
+    public void notifyItemChanged(String id) {
     }
 
     @Override
