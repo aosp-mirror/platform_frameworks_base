@@ -493,30 +493,6 @@ public class StubProvider extends DocumentsProvider {
     }
 
     @VisibleForTesting
-    public File createFile(String rootId, String path, String mimeType, byte[] content)
-            throws FileNotFoundException, IOException {
-        Log.d(TAG, "Creating test file " + rootId + ":" + path);
-        StubDocument root = mRoots.get(rootId).document;
-        if (root == null) {
-            throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
-        }
-        final File file = new File(root.file, path.substring(1));
-        if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {
-            if (!file.mkdirs()) {
-                throw new FileNotFoundException("Couldn't create directory " + file.getPath());
-            }
-        } else {
-            if (!file.createNewFile()) {
-                throw new FileNotFoundException("Couldn't create file " + file.getPath());
-            }
-            try (final FileOutputStream fout = new FileOutputStream(file)) {
-                fout.write(content);
-            }
-        }
-        return file;
-    }
-
-    @VisibleForTesting
     public Uri createRegularFile(String rootId, String path, String mimeType, byte[] content)
             throws FileNotFoundException, IOException {
         final File file = createFile(rootId, path, mimeType, content);
@@ -558,6 +534,29 @@ public class StubProvider extends DocumentsProvider {
             return null;
         }
         return found.file;
+    }
+
+    private File createFile(String rootId, String path, String mimeType, byte[] content)
+            throws FileNotFoundException, IOException {
+        Log.d(TAG, "Creating test file " + rootId + ":" + path);
+        StubDocument root = mRoots.get(rootId).document;
+        if (root == null) {
+            throw new FileNotFoundException("No roots with the ID " + rootId + " were found");
+        }
+        final File file = new File(root.file, path.substring(1));
+        if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {
+            if (!file.mkdirs()) {
+                throw new FileNotFoundException("Couldn't create directory " + file.getPath());
+            }
+        } else {
+            if (!file.createNewFile()) {
+                throw new FileNotFoundException("Couldn't create file " + file.getPath());
+            }
+            try (final FileOutputStream fout = new FileOutputStream(file)) {
+                fout.write(content);
+            }
+        }
+        return file;
     }
 
     final static class RootInfo {
