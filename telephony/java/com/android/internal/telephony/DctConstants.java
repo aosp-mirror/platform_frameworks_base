@@ -44,7 +44,9 @@ public class DctConstants {
         CONNECTED,
         DISCONNECTING,
         FAILED,
-        RETRYING
+        RETRYING        // After moving retry manager to ApnContext, we'll never enter this state!
+                        // Todo: Remove this state and other places that use this state and then
+                        // rename SCANNING to RETRYING.
     }
 
     public enum Activity {
