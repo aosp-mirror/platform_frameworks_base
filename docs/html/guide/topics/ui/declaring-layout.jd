@@ -54,9 +54,6 @@ application can create View and ViewGroup objects (and manipulate their properti
 <div class="sidebox-wrapper">
 <div class="sidebox">
   <ul>
-  <li>The <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
-  Plugin for Eclipse</a> offers a layout preview of your XML &mdash;
-  with the XML file opened, select the <strong>Layout</strong> tab.</li>
   <li>You should also try the
   <a href="{@docRoot}tools/debugging/debugging-ui.html#hierarchyViewer">Hierarchy Viewer</a> tool,
   for debugging layouts &mdash; it reveals layout property values,

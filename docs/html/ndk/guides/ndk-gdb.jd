@@ -32,10 +32,7 @@ API level that you declare in your {@code AndroidManifest.xml} file does not mat
 <li>Develop your app in a Unix shell. On Windows, use <a href="https://www.cygwin.com/">Cygwin</a>
 or the experimental {@code ndk-gdb-py} <a href="https://www.python.org/">Python</a>
 implementation.</li>
-<li>Use GNU Make 3.81 or higher.</li>
-<li>If you are building your app from
-<a href="{@docRoot}sdk/installing/installing-adt.html">Eclipse</a>, build it
-using version 0.9.7 or higher of the ADT plug-in.</li>
+<li>Use GNU Make 3.81 or higher.</li></ul>
 
 <h2 id="use">Usage</h2>
   To invoke the {@code ndk-gdb} script, change into the application directory or any directory under

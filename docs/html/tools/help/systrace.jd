@@ -30,32 +30,11 @@ of these methods.</p>
 
 <h2 id="gui">User Interface</h2>
 
-<p>The Systrace tool can be run from the
-<a href="{@docRoot}tools/help/adt.html">Android Developer Tools</a> (ADT) in Eclipse,
-<a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>,
+<p>The Systrace tool can be run from
+<a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>
 or the Android <a href="{@docRoot}tools/help/monitor.html">Device Monitor</a>.
 
 <p>To run the Systrace capture user interface:</p>
-
-<div class="toggle-content closed">
-<p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
-  <img src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-  />Using Eclipse</a></p>
-
-  <div class="toggle-content-toggleme">
-  <ol>
-    <li>In Eclipse, open an Android application project.</li>
-    <li>Switch to the DDMS perspective, by selecting <strong>Window &gt; Perspectives &gt;
-      DDMS</strong>.</li>
-    <li>In the <strong>Devices</strong> tab, select the device on which to run a trace. If no
-      devices are listed, make sure your device is connected via USB cable and that debugging is
-      enabled on the device.</li>
-    <li>Click the Systrace icon <img src="{@docRoot}images/systrace/systrace-button.png"
-      style="margin:0"/> at the top of the <strong>Devices</strong> panel to configure tracing.</li>
-    <li>Set the tracing options and click <strong>OK</strong> to start the trace.</li>
-  </ol>
-  </div>
-</div>
 
 <div class="toggle-content closed">
 <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">

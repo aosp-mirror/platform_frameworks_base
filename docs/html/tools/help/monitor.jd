@@ -47,6 +47,4 @@ encapsulates the following tools:</p>
 <p>Start an Android emulator or connect an Android device via USB cable, and connect Device
 Monitor to the device by selecting it in the <strong>Devices</strong> window.</p>
 
-<p class="note"><strong>Note:</strong> Only one debugger can be connected to your device at a time.
-If you're using ADT, you may need to close the debugging tool before launching the Device Monitor
-in order for the device to be fully debuggable.</p>
+<p class="note"><strong>Note:</strong> Only one debugger can be connected to your device at a time.</p>

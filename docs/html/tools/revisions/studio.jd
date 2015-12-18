@@ -254,7 +254,7 @@ Android Studio, as denoted by revision number. </p>
       <li>Integrated the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
         into Android Studio to simplify package and tools access and provide update notifications.
         <p class="note"><strong>Note:</strong> The standalone SDK Manager is still available from
-        the command line, but is recommended for use with only Eclipse ADT and standalone SDK
+        the command line, but is recommended for use only with standalone SDK
         installations. </p> </li>
       <li>Added the <code>finger</code> command in the emulator console to simulate
         <a href="{@docRoot}tools/studio/studio-features.html#finger-print">fingerprint</a>

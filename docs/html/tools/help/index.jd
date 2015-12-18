@@ -133,7 +133,7 @@ files after they have been signed.</dd>
 WYSIWYG editor. It also previews stretched versions of the image, and highlights the area in which
 content is allowed.</dd>
 
-<dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
+  <dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
     <dd>Helps you add material icons and import Scalable Vector Graphic (SVG) files into your
     Android Studio project as a drawable resource.</dd>
 
@@ -160,8 +160,8 @@ device.</p>
 
 <p>The other platform tools, such as <a href="{@docRoot}guide/components/aidl.html">aidl</a>,
 <code>aapt</code>, <code>dexdump</code>, and <code>dx</code>, are typically called by the Android
-build tools or Android Development Tools (ADT), so you rarely need to invoke these tools directly.
-As a general rule, you should rely on the build tools or the ADT plugin to call them as needed.</p>
+build tools, so you rarely need to invoke these tools directly.
+As a general rule, you should rely on the build tools to call them as needed.</p>
 
 <p class="note"><strong>Note:</strong> The Android SDK provides additional shell tools that can
 be accessed through <code>adb</code>, such as <a href="{@docRoot}tools/help/bmgr.html">bmgr</a> and
