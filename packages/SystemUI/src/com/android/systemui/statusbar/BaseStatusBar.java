@@ -1549,8 +1549,14 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             for (int i = 0; i < numActions; i++) {
                 Notification.Action action = actions.get(i);
+                if (action == null) {
+                    continue;
+                }
                 RemoteInput[] remoteInputs = action.getRemoteInputs();
-                for (RemoteInput ri : action.getRemoteInputs()) {
+                if (remoteInputs == null) {
+                    continue;
+                }
+                for (RemoteInput ri : remoteInputs) {
                     if (ri.getAllowFreeFormInput()) {
                         viableAction = action;
                         break;
