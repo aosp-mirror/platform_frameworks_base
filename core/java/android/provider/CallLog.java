@@ -421,6 +421,13 @@ public class CallLog {
         public static final String ADD_FOR_ALL_USERS = "add_for_all_users";
 
         /**
+         * The date the row is last inserted, updated, or marked as deleted, in milliseconds
+         * since the epoch. Read only.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String LAST_MODIFIED = "last_modified";
+
+        /**
          * If a successful call is made that is longer than this duration, update the phone number
          * in the ContactsProvider with the normalized version of the number, based on the user's
          * current country code.
