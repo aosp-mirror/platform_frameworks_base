@@ -91,8 +91,7 @@ public:
 
     MergingOpBatch(batchid_t batchId, BakedOpState* op)
             : BatchBase(batchId, op, true)
-            , mClipSideFlags(op->computedState.clipSideFlags)
-            , mClipRect(op->computedState.clipRect) {
+            , mClipSideFlags(op->computedState.clipSideFlags) {
     }
 
     /*
@@ -194,22 +193,17 @@ public:
         mBounds.unionWith(op->computedState.clippedBounds);
         mOps.push_back(op);
 
-        const int newClipSideFlags = op->computedState.clipSideFlags;
-        mClipSideFlags |= newClipSideFlags;
-
-        const Rect& opClip = op->computedState.clipRect;
-        if (newClipSideFlags & OpClipSideFlags::Left) mClipRect.left = opClip.left;
-        if (newClipSideFlags & OpClipSideFlags::Top) mClipRect.top = opClip.top;
-        if (newClipSideFlags & OpClipSideFlags::Right) mClipRect.right = opClip.right;
-        if (newClipSideFlags & OpClipSideFlags::Bottom) mClipRect.bottom = opClip.bottom;
+        // Because a new op must have passed canMergeWith(), we know it's passed the clipping compat
+        // check, and doesn't extend past a side of the clip that's in use by the merged batch.
+        // Therefore it's safe to simply always merge flags, and use the bounds as the clip rect.
+        mClipSideFlags |= op->computedState.clipSideFlags;
     }
 
     int getClipSideFlags() const { return mClipSideFlags; }
-    const Rect& getClipRect() const { return mClipRect; }
+    const Rect& getClipRect() const { return mBounds; }
 
 private:
     int mClipSideFlags;
-    Rect mClipRect;
 };
 
 OpReorderer::LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
