@@ -222,6 +222,46 @@ TEST(OpReorderer, simpleBatching) {
             << "Expect number of ops = 2 * loop count";
 }
 
+TEST(OpReorderer, clippedMerging) {
+    class ClippedMergingTestRenderer : public TestRendererBase {
+    public:
+        void onMergedBitmapOps(const MergedBakedOpList& opList) override {
+            EXPECT_EQ(0, mIndex);
+            mIndex += opList.count;
+            EXPECT_EQ(4u, opList.count);
+            EXPECT_EQ(Rect(10, 10, 90, 90), opList.clip);
+            EXPECT_EQ(OpClipSideFlags::Left | OpClipSideFlags::Top | OpClipSideFlags::Right,
+                    opList.clipSideFlags);
+        }
+    };
+    auto node = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& props, TestCanvas& canvas) {
+        SkBitmap bitmap = TestUtils::createSkBitmap(20, 20);
+
+        // left side clipped (to inset left half)
+        canvas.clipRect(10, 0, 50, 100, SkRegion::kReplace_Op);
+        canvas.drawBitmap(bitmap, 0, 40, nullptr);
+
+        // top side clipped (to inset top half)
+        canvas.clipRect(0, 10, 100, 50, SkRegion::kReplace_Op);
+        canvas.drawBitmap(bitmap, 40, 0, nullptr);
+
+        // right side clipped (to inset right half)
+        canvas.clipRect(50, 0, 90, 100, SkRegion::kReplace_Op);
+        canvas.drawBitmap(bitmap, 80, 40, nullptr);
+
+        // bottom not clipped, just abutting (inset bottom half)
+        canvas.clipRect(0, 50, 100, 90, SkRegion::kReplace_Op);
+        canvas.drawBitmap(bitmap, 40, 70, nullptr);
+    });
+
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+            createSyncedNodeList(node), sLightCenter);
+    ClippedMergingTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
 TEST(OpReorderer, textMerging) {
     class TextMergingTestRenderer : public TestRendererBase {
     public:
