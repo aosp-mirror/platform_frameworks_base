@@ -16,8 +16,9 @@
 
 package android.security.net.config;
 
-import java.util.Set;
+import android.util.ArraySet;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 import com.android.org.conscrypt.TrustedCertificateIndex;
 
@@ -33,10 +34,12 @@ public class TestCertificateSource implements CertificateSource {
         }
     }
 
+    @Override
     public Set<X509Certificate> getCertificates() {
             return mCertificates;
     }
 
+    @Override
     public X509Certificate findBySubjectAndPublicKey(X509Certificate cert) {
         java.security.cert.TrustAnchor anchor = mIndex.findBySubjectAndPublicKey(cert);
         if (anchor == null) {
@@ -45,11 +48,21 @@ public class TestCertificateSource implements CertificateSource {
         return anchor.getTrustedCert();
     }
 
+    @Override
     public X509Certificate findByIssuerAndSignature(X509Certificate cert) {
         java.security.cert.TrustAnchor anchor = mIndex.findByIssuerAndSignature(cert);
         if (anchor == null) {
             return null;
         }
         return anchor.getTrustedCert();
+    }
+
+    @Override
+    public Set<X509Certificate> findAllByIssuerAndSignature(X509Certificate cert) {
+        Set<X509Certificate> certs = new ArraySet<X509Certificate>();
+        for (java.security.cert.TrustAnchor anchor : mIndex.findAllByIssuerAndSignature(cert)) {
+            certs.add(anchor.getTrustedCert());
+        }
+        return certs;
     }
 }

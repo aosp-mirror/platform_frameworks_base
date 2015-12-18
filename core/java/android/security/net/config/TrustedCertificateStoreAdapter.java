@@ -42,6 +42,11 @@ public class TrustedCertificateStoreAdapter extends TrustedCertificateStore {
     }
 
     @Override
+    public Set<X509Certificate> findAllIssuers(X509Certificate cert) {
+        return mConfig.findAllCertificatesByIssuerAndSignature(cert);
+    }
+
+    @Override
     public X509Certificate getTrustAnchor(X509Certificate cert) {
         TrustAnchor anchor = mConfig.findTrustAnchorBySubjectAndPublicKey(cert);
         if (anchor == null) {

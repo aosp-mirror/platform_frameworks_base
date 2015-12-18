@@ -17,8 +17,8 @@
 package android.security.net.config;
 
 import android.util.ArraySet;
-import java.util.Set;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 
 /** @hide */
 public final class CertificatesEntryRef {
@@ -59,5 +59,9 @@ public final class CertificatesEntryRef {
         }
 
         return new TrustAnchor(foundCert, mOverridesPins);
+    }
+
+    public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
+        return mSource.findAllByIssuerAndSignature(cert);
     }
 }
