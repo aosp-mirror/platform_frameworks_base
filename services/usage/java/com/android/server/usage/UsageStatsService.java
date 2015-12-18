@@ -218,7 +218,7 @@ public class UsageStatsService extends SystemService implements
             synchronized (this) {
                 mScreenOnTime = readScreenOnTimeLocked();
             }
-            mDisplayManager.registerDisplayListener(mDisplayListener, null);
+            mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
             synchronized (this) {
                 updateDisplayLocked();
             }
