@@ -3917,8 +3917,7 @@ public class Notification implements Parcelable
     public static class BigTextStyle extends Style {
 
         private static final int MAX_LINES = 13;
-        private static final int LINES_CONSUMED_BY_ACTIONS = 3;
-        private static final int LINES_CONSUMED_BY_SUMMARY = 2;
+        private static final int LINES_CONSUMED_BY_ACTIONS = 4;
 
         private CharSequence mBigText;
 
@@ -3988,8 +3987,10 @@ public class Notification implements Parcelable
 
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, oldBuilderContentText);
 
-            contentView.setTextViewText(R.id.big_text, mBuilder.processLegacyText(mBigText));
-            contentView.setViewVisibility(R.id.big_text, View.VISIBLE);
+            CharSequence bigTextText = mBuilder.processLegacyText(mBigText);
+            contentView.setTextViewText(R.id.big_text, bigTextText);
+            contentView.setViewVisibility(R.id.big_text,
+                    TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
             contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
 
             mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
@@ -4002,13 +4003,8 @@ public class Notification implements Parcelable
         private int calculateMaxLines() {
             int lineCount = MAX_LINES;
             boolean hasActions = mBuilder.mActions.size() > 0;
-            boolean hasSummary = (mSummaryTextSet ? mSummaryText
-                    : mBuilder.getAllExtras().getCharSequence(EXTRA_SUB_TEXT)) != null;
             if (hasActions) {
                 lineCount -= LINES_CONSUMED_BY_ACTIONS;
-            }
-            if (hasSummary) {
-                lineCount -= LINES_CONSUMED_BY_SUMMARY;
             }
             return lineCount;
         }
