@@ -355,7 +355,7 @@ public class Main {
         renderAndVerify(params, "expand_horz_layout.png");
     }
 
-    /** Test expand_layout.xml */
+    /** Test indeterminate_progressbar.xml */
     @Test
     public void testVectorAnimation() throws ClassNotFoundException {
         // Create the layout pull parser.
@@ -377,6 +377,26 @@ public class Main {
                 layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
                 RenderingMode.V_SCROLL, 22);
         renderAndVerify(params, "animated_vector_1.png", TimeUnit.SECONDS.toNanos(3));
+    }
+
+    /**
+     * Test a vector drawable that uses trimStart and trimEnd. It also tests all the primitives
+     * for vector drawables (lines, moves and cubic and quadratic curves).
+     */
+    @Test
+    public void testVectorDrawable() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "vector_drawable.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "vector_drawable.png", TimeUnit.SECONDS.toNanos(2));
     }
 
     /**

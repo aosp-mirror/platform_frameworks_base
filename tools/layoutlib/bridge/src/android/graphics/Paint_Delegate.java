@@ -152,11 +152,7 @@ public class Paint_Delegate {
      * returns the value of stroke miter needed by the java api.
      */
     public float getJavaStrokeMiter() {
-        float miter = mStrokeMiter * mStrokeWidth;
-        if (miter < 1.f) {
-            miter = 1.f;
-        }
-        return miter;
+        return mStrokeMiter;
     }
 
     public int getJavaCap() {
