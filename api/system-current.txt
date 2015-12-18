@@ -21203,6 +21203,7 @@ package android.net.wifi {
     field public static final int REASON_UNSPECIFIED = -1; // 0xffffffff
     field public static final deprecated int REPORT_EVENT_AFTER_BUFFER_FULL = 0; // 0x0
     field public static final int REPORT_EVENT_AFTER_EACH_SCAN = 1; // 0x1
+    field public static final int REPORT_EVENT_CONTEXT_HUB = 8; // 0x8
     field public static final int REPORT_EVENT_FULL_SCAN_RESULT = 2; // 0x2
     field public static final int REPORT_EVENT_NO_BATCH = 4; // 0x4
     field public static final int WIFI_BAND_24_GHZ = 1; // 0x1
