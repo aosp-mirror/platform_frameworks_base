@@ -246,7 +246,6 @@ final class UserController {
                 mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
 
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
-                unlockedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 unlockedIntent.addFlags(
                         Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
                 mService.broadcastIntentLocked(null, null, unlockedIntent, null, null, 0, null,
