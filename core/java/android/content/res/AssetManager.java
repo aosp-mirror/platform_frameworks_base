@@ -698,6 +698,18 @@ public final class AssetManager implements AutoCloseable {
      */
     public native final String[] getLocales();
 
+    /**
+     * Same as getLocales(), except that locales that are only provided by the system (i.e. those
+     * present in framework-res.apk or its overlays) will not be listed.
+     *
+     * For example, if the "system" assets support English, French, and German, and the additional
+     * assets support Cherokee and French, getLocales() would return
+     * [Cherokee, English, French, German], while getNonSystemLocales() would return
+     * [Cherokee, French].
+     * {@hide}
+     */
+    public native final String[] getNonSystemLocales();
+
     /** {@hide} */
     public native final Configuration[] getSizeConfigurations();
 

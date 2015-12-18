@@ -3080,13 +3080,16 @@ struct ResTable::Package
 // table that defined the package); the ones after are skins on top of it.
 struct ResTable::PackageGroup
 {
-    PackageGroup(ResTable* _owner, const String16& _name, uint32_t _id, bool appAsLib)
+    PackageGroup(
+            ResTable* _owner, const String16& _name, uint32_t _id,
+            bool appAsLib, bool _isSystemAsset)
         : owner(_owner)
         , name(_name)
         , id(_id)
         , largestTypeId(0)
         , bags(NULL)
         , dynamicRefTable(static_cast<uint8_t>(_id), appAsLib)
+        , isSystemAsset(_isSystemAsset)
     { }
 
     ~PackageGroup() {
@@ -3178,6 +3181,10 @@ struct ResTable::PackageGroup
     // by having these tables in a per-package scope rather than
     // per-package-group.
     DynamicRefTable                 dynamicRefTable;
+
+    // If the package group comes from a system asset. Used in
+    // determining non-system locales.
+    const bool                      isSystemAsset;
 };
 
 struct ResTable::bag_set
@@ -3572,8 +3579,9 @@ status_t ResTable::add(Asset* asset, const int32_t cookie, bool copyData) {
             copyData);
 }
 
-status_t ResTable::add(Asset* asset, Asset* idmapAsset, const int32_t cookie, bool copyData,
-        bool appAsLib) {
+status_t ResTable::add(
+        Asset* asset, Asset* idmapAsset, const int32_t cookie, bool copyData,
+        bool appAsLib, bool isSystemAsset) {
     const void* data = asset->getBuffer(true);
     if (data == NULL) {
         ALOGW("Unable to get buffer of resource asset file");
@@ -3592,20 +3600,21 @@ status_t ResTable::add(Asset* asset, Asset* idmapAsset, const int32_t cookie, bo
     }
 
     return addInternal(data, static_cast<size_t>(asset->getLength()),
-            idmapData, idmapSize, appAsLib, cookie, copyData);
+            idmapData, idmapSize, appAsLib, cookie, copyData, isSystemAsset);
 }
 
-status_t ResTable::add(ResTable* src)
+status_t ResTable::add(ResTable* src, bool isSystemAsset)
 {
     mError = src->mError;
 
-    for (size_t i=0; i<src->mHeaders.size(); i++) {
+    for (size_t i=0; i < src->mHeaders.size(); i++) {
         mHeaders.add(src->mHeaders[i]);
     }
 
-    for (size_t i=0; i<src->mPackageGroups.size(); i++) {
+    for (size_t i=0; i < src->mPackageGroups.size(); i++) {
         PackageGroup* srcPg = src->mPackageGroups[i];
-        PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id, false);
+        PackageGroup* pg = new PackageGroup(this, srcPg->name, srcPg->id,
+                false /* appAsLib */, isSystemAsset || srcPg->isSystemAsset);
         for (size_t j=0; j<srcPg->packages.size(); j++) {
             pg->packages.add(srcPg->packages[j]);
         }
@@ -3646,7 +3655,7 @@ status_t ResTable::addEmpty(const int32_t cookie) {
 }
 
 status_t ResTable::addInternal(const void* data, size_t dataSize, const void* idmapData, size_t idmapDataSize,
-        bool appAsLib, const int32_t cookie, bool copyData)
+        bool appAsLib, const int32_t cookie, bool copyData, bool isSystemAsset)
 {
     if (!data) {
         return NO_ERROR;
@@ -3749,7 +3758,8 @@ status_t ResTable::addInternal(const void* data, size_t dataSize, const void* id
                 return (mError=BAD_TYPE);
             }
 
-            if (parsePackage((ResTable_package*)chunk, header, appAsLib) != NO_ERROR) {
+            if (parsePackage(
+                    (ResTable_package*)chunk, header, appAsLib, isSystemAsset) != NO_ERROR) {
                 return mError;
             }
             curPackage++;
@@ -5663,12 +5673,15 @@ const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) con
 }
 
 void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap,
-        bool ignoreAndroidPackage) const {
+        bool ignoreAndroidPackage, bool includeSystemConfigs) const {
     const size_t packageCount = mPackageGroups.size();
     String16 android("android");
     for (size_t i = 0; i < packageCount; i++) {
         const PackageGroup* packageGroup = mPackageGroups[i];
         if (ignoreAndroidPackage && android == packageGroup->name) {
+            continue;
+        }
+        if (!includeSystemConfigs && packageGroup->isSystemAsset) {
             continue;
         }
         const size_t typeCount = packageGroup->types.size();
@@ -5707,11 +5720,14 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMi
     }
 }
 
-void ResTable::getLocales(Vector<String8>* locales) const
+void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) const
 {
     Vector<ResTable_config> configs;
     ALOGV("calling getConfigurations");
-    getConfigurations(&configs);
+    getConfigurations(&configs,
+            false /* ignoreMipmap */,
+            false /* ignoreAndroidPackage */,
+            includeSystemLocales /* includeSystemConfigs */);
     ALOGV("called getConfigurations size=%d", (int)configs.size());
     const size_t I = configs.size();
 
@@ -5937,7 +5953,7 @@ status_t ResTable::getEntry(
 }
 
 status_t ResTable::parsePackage(const ResTable_package* const pkg,
-                                const Header* const header, bool appAsLib)
+                                const Header* const header, bool appAsLib, bool isSystemAsset)
 {
     const uint8_t* base = (const uint8_t*)pkg;
     status_t err = validate_chunk(&pkg->header, sizeof(*pkg) - sizeof(pkg->typeIdOffset),
@@ -5985,8 +6001,8 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     if (id >= 256) {
         LOG_ALWAYS_FATAL("Package id out of range");
         return NO_ERROR;
-    } else if (id == 0 || appAsLib) {
-        // This is a library so assign an ID
+    } else if (id == 0 || appAsLib || isSystemAsset) {
+        // This is a library or a system asset, so assign an ID
         id = mNextPackageId++;
     }
 
@@ -6018,7 +6034,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
         char16_t tmpName[sizeof(pkg->name)/sizeof(pkg->name[0])];
         strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(pkg->name[0]));
-        group = new PackageGroup(this, String16(tmpName), id, appAsLib);
+        group = new PackageGroup(this, String16(tmpName), id, appAsLib, isSystemAsset);
         if (group == NULL) {
             delete package;
             return (mError=NO_MEMORY);
