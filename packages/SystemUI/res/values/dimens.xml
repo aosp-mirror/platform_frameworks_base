@@ -49,7 +49,7 @@
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">140dp</dimen>
+    <dimen name="notification_max_heads_up_height">141dp</dimen>
 
     <!-- Height of a the summary ("more card") notification on keyguard. -->
     <dimen name="notification_summary_height">44dp</dimen>

@@ -107,6 +107,8 @@ public class NotificationContentView extends FrameLayout {
     };
     private OnClickListener mExpandClickListener;
     private boolean mBeforeN;
+    private boolean mExpandable;
+
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
@@ -491,6 +493,7 @@ public class NotificationContentView extends FrameLayout {
     public void setHeadsUp(boolean headsUp) {
         mIsHeadsUp = headsUp;
         selectLayout(false /* animate */, true /* force */);
+        updateExpandButtons(mExpandable);
     }
 
     @Override
@@ -610,6 +613,13 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void updateExpandButtons(boolean expandable) {
+        mExpandable = expandable;
+        // if the expanded child has the same height as the collapsed one we hide it.
+        if (mExpandedChild != null && mExpandedChild.getHeight() != 0 &&
+                ((mIsHeadsUp && mExpandedChild.getHeight() == mHeadsUpChild.getHeight()) ||
+                (!mIsHeadsUp && mExpandedChild.getHeight() == mContractedChild.getHeight()))) {
+            expandable = false;
+        }
         if (mExpandedChild != null) {
             mExpandedWrapper.updateExpandability(expandable, mExpandClickListener);
         }
