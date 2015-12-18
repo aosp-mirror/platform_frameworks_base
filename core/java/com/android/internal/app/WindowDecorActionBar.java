@@ -18,6 +18,8 @@ package com.android.internal.app;
 
 import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
+import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Toolbar;
 
@@ -948,6 +950,12 @@ public class WindowDecorActionBar extends ActionBar implements
             return true;
         }
         return false;
+    }
+
+    /** @hide */
+    @Override
+    public boolean requestFocus() {
+        return requestFocus(mDecorToolbar.getViewGroup());
     }
 
     /**
