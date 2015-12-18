@@ -11252,14 +11252,14 @@ package android.graphics {
 
   public static class BitmapFactory.Options {
     ctor public BitmapFactory.Options();
-    method public void requestCancelDecode();
+    method public deprecated void requestCancelDecode();
     field public android.graphics.Bitmap inBitmap;
     field public int inDensity;
-    field public boolean inDither;
+    field public deprecated boolean inDither;
     field public deprecated boolean inInputShareable;
     field public boolean inJustDecodeBounds;
     field public boolean inMutable;
-    field public boolean inPreferQualityOverSpeed;
+    field public deprecated boolean inPreferQualityOverSpeed;
     field public android.graphics.Bitmap.Config inPreferredConfig;
     field public boolean inPremultiplied;
     field public deprecated boolean inPurgeable;
