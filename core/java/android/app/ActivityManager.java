@@ -1237,6 +1237,18 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_HOME_STACK_TASKS = 0x0008;
 
     /**
+     * Ignores all tasks that are on the docked stack.
+     * @hide
+     */
+    public static final int RECENT_INGORE_DOCKED_STACK_TASKS = 0x0010;
+
+    /**
+     * Ignores all tasks that are on the pinned stack.
+     * @hide
+     */
+    public static final int RECENT_INGORE_PINNED_STACK_TASKS = 0x0020;
+
+    /**
      * <p></p>Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      *

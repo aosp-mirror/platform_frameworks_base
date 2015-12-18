@@ -194,6 +194,8 @@ public class SystemServicesProxy {
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
         List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
                 ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+                ActivityManager.RECENT_INGORE_DOCKED_STACK_TASKS |
+                ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
                 ActivityManager.RECENT_INCLUDE_PROFILES |
                 ActivityManager.RECENT_WITH_EXCLUDED, userId);

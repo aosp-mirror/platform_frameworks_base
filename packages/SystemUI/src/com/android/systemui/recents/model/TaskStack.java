@@ -352,28 +352,28 @@ public class TaskStack {
             @Override
             public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
                 if (t.isAffiliatedTask()) {
-                    // If this task is affiliated with another parent in the stack, then the historical state of this
-                    // task depends on the state of the parent task
+                    // If this task is affiliated with another parent in the stack, then the
+                    // historical state of this task depends on the state of the parent task
                     Task parentTask = taskIdMap.get(t.affiliationTaskId);
                     if (parentTask != null) {
                         t = parentTask;
                     }
                 }
-                return !t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
+                return !t.isHistorical;
             }
         });
         mHistoryTaskList.setFilter(new TaskFilter() {
             @Override
             public boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index) {
                 if (t.isAffiliatedTask()) {
-                    // If this task is affiliated with another parent in the stack, then the historical state of this
-                    // task depends on the state of the parent task
+                    // If this task is affiliated with another parent in the stack, then the
+                    // historical state of this task depends on the state of the parent task
                     Task parentTask = taskIdMap.get(t.affiliationTaskId);
                     if (parentTask != null) {
                         t = parentTask;
                     }
                 }
-                return t.isHistorical && !SystemServicesProxy.isDockedStack(t.key.stackId);
+                return t.isHistorical;
             }
         });
     }

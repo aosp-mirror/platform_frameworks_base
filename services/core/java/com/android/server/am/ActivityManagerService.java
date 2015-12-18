@@ -8768,6 +8768,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                             continue;
                         }
                     }
+                    if ((flags & ActivityManager.RECENT_INGORE_DOCKED_STACK_TASKS) != 0) {
+                        if (tr.stack != null && tr.stack.isDockedStack()) {
+                            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                                    "Skipping, docked stack task: " + tr);
+                            continue;
+                        }
+                    }
+                    if ((flags & ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS) != 0) {
+                        if (tr.stack != null && tr.stack.isPinnedStack()) {
+                            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                                    "Skipping, pinned stack task: " + tr);
+                            continue;
+                        }
+                    }
                     if (tr.autoRemoveRecents && tr.getTopActivity() == null) {
                         // Don't include auto remove tasks that are finished or finishing.
                         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,

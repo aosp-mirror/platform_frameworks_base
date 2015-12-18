@@ -520,6 +520,14 @@ final class ActivityStack {
         return mStackId == HOME_STACK_ID;
     }
 
+    final boolean isDockedStack() {
+        return mStackId == DOCKED_STACK_ID;
+    }
+
+    final boolean isPinnedStack() {
+        return mStackId == PINNED_STACK_ID;
+    }
+
     final boolean isOnHomeDisplay() {
         return isAttached() &&
                 mActivityContainer.mActivityDisplay.mDisplayId == Display.DEFAULT_DISPLAY;
