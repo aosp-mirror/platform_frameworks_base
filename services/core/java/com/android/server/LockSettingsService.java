@@ -695,7 +695,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockUser(userId, token);
 
             UserInfo info = UserManager.get(mContext).getUserInfo(userId);
-            if (LockPatternUtils.isSeparateWorkChallengeEnabled() && info.isManagedProfile()) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
                 TrustManager trustManager =
                         (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
                 trustManager.setDeviceLockedForUser(userId, false);

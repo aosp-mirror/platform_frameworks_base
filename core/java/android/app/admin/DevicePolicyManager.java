@@ -941,6 +941,22 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns true if the Profile Challenge is available to use for the given profile user.
+     *
+     * @hide
+     */
+    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.isSeparateProfileChallengeAllowed(userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Constant for {@link #setPasswordQuality}: the policy has no requirements
      * for the password.  Note that quality constants are ordered so that higher
      * values are more restrictive.

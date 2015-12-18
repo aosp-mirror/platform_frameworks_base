@@ -256,4 +256,6 @@ interface IDevicePolicyManager {
 
     String getShortSupportMessageForUser(in ComponentName admin, int userHandle);
     String getLongSupportMessageForUser(in ComponentName admin, int userHandle);
+
+    boolean isSeparateProfileChallengeAllowed(int userHandle);
 }

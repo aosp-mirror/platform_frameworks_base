@@ -71,6 +71,7 @@ class LockSettingsStorage {
     private final Object mFileWriteLock = new Object();
 
     private int mStoredCredentialType;
+    private LockPatternUtils mLockPatternUtils;
 
     class CredentialHash {
         static final int TYPE_NONE = -1;
@@ -100,6 +101,7 @@ class LockSettingsStorage {
     public LockSettingsStorage(Context context, Callback callback) {
         mContext = context;
         mOpenHelper = new DatabaseHelper(context, callback);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     public void writeKeyValue(String key, String value, int userId) {
@@ -388,7 +390,7 @@ class LockSettingsStorage {
 
     private int getUserParentOrSelfId(int userId) {
         // Device supports per user encryption, so lock is applied to the given user.
-        if (LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+        if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
             return userId;
         }
         // Device uses Block Based Encryption, and the parent user's lock is used for the whole

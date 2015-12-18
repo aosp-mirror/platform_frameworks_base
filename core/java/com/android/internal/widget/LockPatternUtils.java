@@ -24,6 +24,7 @@ import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,6 +35,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -135,6 +137,8 @@ public class LockPatternUtils {
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
 
+    private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
+
     // Maximum allowed number of repeated or ordered characters in a sequence before we'll
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
@@ -143,6 +147,7 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
+    private UserManager mUserManager;
 
 
     public static final class RequestThrottledException extends Exception {
@@ -171,6 +176,13 @@ public class LockPatternUtils {
             }
         }
         return mDevicePolicyManager;
+    }
+
+    private UserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = UserManager.get(mContext);
+        }
+        return mUserManager;
     }
 
     private TrustManager getTrustManager() {
@@ -866,6 +878,39 @@ public class LockPatternUtils {
     }
 
     /**
+     * Enables/disables the Separate Profile Challenge for this {@param userHandle}. This is a no-op
+     * for user handles that do not belong to a managed profile.
+     */
+    public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled) {
+        UserInfo info = getUserManager().getUserInfo(userHandle);
+        if (info.isManagedProfile()) {
+            setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userHandle);
+        }
+    }
+
+    /**
+     * Retrieves whether the Separate Profile Challenge is enabled for this {@param userHandle}.
+     */
+    public boolean isSeparateProfileChallengeEnabled(int userHandle) {
+        UserInfo info = getUserManager().getUserInfo(userHandle);
+        if (!info.isManagedProfile()) {
+            return false;
+        }
+        return getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userHandle);
+    }
+
+    /**
+     * Retrieves whether the current DPM allows use of the Profile Challenge.
+     */
+    public boolean isSeparateProfileChallengeAllowed(int userHandle) {
+        UserInfo info = getUserManager().getUserInfo(userHandle);
+        if (!info.isManagedProfile()) {
+            return false;
+        }
+        return getDevicePolicyManager().isSeparateProfileChallengeAllowed(userHandle);
+    }
+
+    /**
      * Deserialize a pattern.
      * @param string The pattern serialized with {@link #patternToString}
      * @return The pattern.
@@ -1286,10 +1331,6 @@ public class LockPatternUtils {
         if (Looper.getMainLooper().isCurrentThread()) {
             throw new IllegalStateException("should not be called from the main thread.");
         }
-    }
-
-    public static boolean isSeparateWorkChallengeEnabled() {
-        return StorageManager.isFileBasedEncryptionEnabled();
     }
 
     public void registerStrongAuthTracker(final StrongAuthTracker strongAuthTracker) {

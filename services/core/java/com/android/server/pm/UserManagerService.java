@@ -276,6 +276,8 @@ public class UserManagerService extends IUserManager.Stub {
     private final ArrayList<UserRestrictionsListener> mUserRestrictionsListeners =
             new ArrayList<>();
 
+    private final LockPatternUtils mLockPatternUtils;
+
     private static UserManagerService sInstance;
 
     public static UserManagerService getInstance() {
@@ -320,6 +322,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         mLocalService = new LocalService();
         LocalServices.addService(UserManagerInternal.class, mLocalService);
+        mLockPatternUtils = new LockPatternUtils(mContext);
     }
 
     void systemReady() {
@@ -456,7 +459,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public int getCredentialOwnerProfile(int userHandle) {
         checkManageUsersPermission("get the credential owner");
-        if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+        if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
             synchronized (mUsersLock) {
                 UserInfo profileParent = getProfileParentLU(userHandle);
                 if (profileParent != null) {

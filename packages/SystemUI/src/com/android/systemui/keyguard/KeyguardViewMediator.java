@@ -744,8 +744,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         long timeout;
 
-        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
-        if ((!user.isManagedProfile() && LockPatternUtils.isSeparateWorkChallengeEnabled())
+        if ((mLockPatternUtils.isSeparateProfileChallengeEnabled(userId))
                 || policyTimeout <= 0) {
             timeout = lockAfterTimeout;
         } else {
@@ -785,9 +784,9 @@ public class KeyguardViewMediator extends SystemUI {
     private void doKeyguardLaterLockedForChildProfiles() {
         UserManager um = UserManager.get(mContext);
         List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
-        if (LockPatternUtils.isSeparateWorkChallengeEnabled() && profiles.size() > 1) {
+        if (profiles.size() > 1) {
             for (UserInfo info : profiles) {
-                if (info.id != UserHandle.myUserId() && info.isManagedProfile()) {
+                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
                     long userTimeout = getLockTimeout(info.id);
                     long userWhen = SystemClock.elapsedRealtime() + userTimeout;
                     Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);

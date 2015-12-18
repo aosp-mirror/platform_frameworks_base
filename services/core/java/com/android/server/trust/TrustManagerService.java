@@ -290,14 +290,9 @@ public class TrustManagerService extends SystemService {
     }
 
     public void setDeviceLockedForUser(int userId, boolean locked) {
-        if (LockPatternUtils.isSeparateWorkChallengeEnabled()) {
-            UserInfo info = mUserManager.getUserInfo(userId);
-            if (info.isManagedProfile()) {
-                synchronized (mDeviceLockedForUser) {
-                    mDeviceLockedForUser.put(userId, locked);
-                }
-            } else {
-                Log.wtf(TAG, "Requested to change lock state for non-profile user " + userId);
+        if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+            synchronized (mDeviceLockedForUser) {
+                mDeviceLockedForUser.put(userId, locked);
             }
         }
     }
@@ -669,7 +664,7 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceLocked(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
-            if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+            if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
                 userId = resolveProfileParent(userId);
             }
 
@@ -680,13 +675,13 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceSecure(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
-            if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+            if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
                 userId = resolveProfileParent(userId);
             }
 
             long token = Binder.clearCallingIdentity();
             try {
-                return new LockPatternUtils(mContext).isSecure(userId);
+                return mLockPatternUtils.isSecure(userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

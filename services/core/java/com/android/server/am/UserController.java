@@ -143,6 +143,8 @@ final class UserController {
 
     private volatile UserManagerService mUserManager;
 
+    private final LockPatternUtils mLockPatternUtils;
+
     UserController(ActivityManagerService service) {
         mService = service;
         mHandler = mService.mHandler;
@@ -150,6 +152,7 @@ final class UserController {
         final UserState uss = new UserState(UserHandle.SYSTEM);
         mStartedUsers.put(UserHandle.USER_SYSTEM, uss);
         mUserLru.add(UserHandle.USER_SYSTEM);
+        mLockPatternUtils = new LockPatternUtils(mService.mContext);
         updateStartedUserArrayLocked();
     }
 
@@ -1294,13 +1297,12 @@ final class UserController {
      * intercept activity launches for work apps when the Work Challenge is present.
      */
     boolean shouldConfirmCredentials(int userId) {
-        final UserInfo user = getUserInfo(userId);
-        if (!user.isManagedProfile() || !LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+        if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
             return false;
         }
         final KeyguardManager km = (KeyguardManager) mService.mContext
                 .getSystemService(KEYGUARD_SERVICE);
-        return km.isDeviceLocked(user.id);
+        return km.isDeviceLocked(userId);
     }
 
     void dump(PrintWriter pw, boolean dumpAll) {
