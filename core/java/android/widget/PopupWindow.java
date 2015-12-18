@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 
 import com.android.internal.R;
@@ -1313,7 +1314,8 @@ public class PopupWindow {
             p.width = mLastWidth = mWidth;
         }
 
-        p.privateFlags = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
+        p.privateFlags = PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH
+                | PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 
         // Used for debugging.
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
