@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.IdRes;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -101,24 +103,51 @@ public class NotificationGuts extends LinearLayout {
                 ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
                 com.android.internal.R.string.default_notification_topic_label))
                 : sbn.getNotification().getTopic();
+        boolean doesAppUseTopics = false;
+        try {
+            doesAppUseTopics = sINM.doesAppUseTopics(sbn.getPackageName(), sbn.getUid());
+        } catch (RemoteException e) {}
+        final boolean appUsesTopics = doesAppUseTopics;
 
         final RadioButton applyToTopic = (RadioButton) row.findViewById(R.id.apply_to_topic);
-        if (sbn.getNotification().getTopic() != null) {
-            applyToTopic.setVisibility(View.VISIBLE);
-            applyToTopic.setChecked(true);
-            applyToTopic.setText(mContext.getString(R.string.apply_to_topic, topic.getLabel()));
-            row.findViewById(R.id.apply_to_app).setVisibility(View.VISIBLE);
-        }
-
+        applyToTopic.setChecked(true);
+        final View applyToApp = row.findViewById(R.id.apply_to_app);
         final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
         final TextView topicTitle = ((TextView) row.findViewById(R.id.title));
-        SeekBar seekBar = (SeekBar) row.findViewById(R.id.seekbar);
+        final SeekBar seekBar = (SeekBar) row.findViewById(R.id.seekbar);
+        final RadioGroup applyTo = (RadioGroup) row.findViewById(R.id.apply_to);
+        applyTo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                try {
+                    switch (checkedId) {
+                        case R.id.apply_to_topic:
+                            sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,
+                                    seekBar.getProgress());
+                            break;
+                        default:
+                            sINM.setAppImportance(sbn.getPackageName(), sbn.getUid(),
+                                    seekBar.getProgress());
+                    }
+                } catch (RemoteException e) {
+                    // :(
+                }
+            }
+        });
+
         seekBar.setMax(4);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 updateTitleAndSummary(progress);
                 if (fromUser) {
+                    if (appUsesTopics) {
+                        applyToTopic.setVisibility(View.VISIBLE);
+
+                        applyToTopic.setText(
+                                mContext.getString(R.string.apply_to_topic, topic.getLabel()));
+                        applyToApp.setVisibility(View.VISIBLE);
+                    }
                     try {
                         if (applyToTopic.isChecked()) {
                             sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,

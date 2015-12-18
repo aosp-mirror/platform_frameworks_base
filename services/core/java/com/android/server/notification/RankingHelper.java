@@ -170,6 +170,7 @@ public class RankingHelper implements RankingConfig {
                         } else {
                             r = getOrCreateRecord(name, uid);
                         }
+                        r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
 
                         // Migrate package level settings to the default topic.
                         // Might be overwritten by parseTopics.
@@ -439,6 +440,18 @@ public class RankingHelper implements RankingConfig {
             t.importance = importance;
         }
         updateConfig();
+    }
+
+    @Override
+    public boolean doesAppUseTopics(String pkgName, int uid) {
+        final Record r = getOrCreateRecord(pkgName, uid);
+        int numTopics = r.topics.size();
+        if (numTopics == 0
+                || (numTopics == 1 && r.topics.containsKey(Notification.TOPIC_DEFAULT))) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     private Topic getOrCreateTopic(Record r, Notification.Topic topic) {

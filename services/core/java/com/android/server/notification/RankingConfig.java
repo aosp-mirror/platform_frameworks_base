@@ -37,4 +37,6 @@ public interface RankingConfig {
     int getTopicImportance(String packageName, int uid, Notification.Topic topic);
 
     void setAppImportance(String packageName, int uid, int importance);
+
+    boolean doesAppUseTopics(String packageName, int uid);
 }
