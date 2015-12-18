@@ -276,6 +276,12 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_RESUME_WHILE_PAUSING = 0x4000;
     /**
+     * Bit in {@link #flags} indicating that this activity should be run with VR mode enabled.
+     *
+     * {@see android.app.Activity#setVrMode(boolean)}.
+     */
+    public static final int FLAG_ENABLE_VR_MODE = 0x8000;
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.

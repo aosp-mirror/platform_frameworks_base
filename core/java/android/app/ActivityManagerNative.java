@@ -2766,6 +2766,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case SET_VR_MODE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final IBinder token = data.readStrongBinder();
+            final boolean enable = data.readInt() == 1;
+            setVrMode(token, enable);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -5894,6 +5902,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return res;
+    }
+
+    public void setVrMode(IBinder token, boolean enabled) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(enabled ? 1 : 0);
+        mRemote.transact(SET_VR_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     @Override

@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -53,6 +54,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -93,6 +95,8 @@ abstract public class ManagedServices {
     // List of packages in restored setting across all mUserProfiles, for quick
     // filtering upon package updates.
     private ArraySet<String> mRestoredPackages = new ArraySet<>();
+    // State of current service categories
+    private ArrayMap<String, Boolean> mCategoryEnabled = new ArrayMap<>();
 
 
     // Kept to de-dupe user change events (experienced after boot, when we receive a settings and a
@@ -262,6 +266,46 @@ abstract public class ManagedServices {
         }
     }
 
+    public void setCategoryState(String category, boolean enabled) {
+        synchronized (mMutex) {
+            final Boolean previous = mCategoryEnabled.put(category, enabled);
+            if (!(previous == null || previous != enabled)) {
+                return;
+            }
+
+            // State changed
+            if (DEBUG) {
+                Slog.d(TAG, ((enabled) ? "Enabling " : "Disabling ") + "category " + category);
+            }
+
+            final int[] userIds = mUserProfiles.getCurrentProfileIds();
+            for (int userId : userIds) {
+                final Set<ComponentName> componentNames = queryPackageForServices(null,
+                        userId, category);
+
+                // Disallow services not enabled in Settings
+                final ArraySet<ComponentName> userComponents =
+                        loadComponentNamesFromSetting(mConfig.secureSettingName, userId);
+                if (userComponents == null) {
+                    componentNames.clear();
+                } else {
+                    componentNames.retainAll(userComponents);
+                }
+
+                if (DEBUG) {
+                    Slog.d(TAG, "Components for category " + category + ": " + componentNames);
+                }
+                for (ComponentName c : componentNames) {
+                    if (enabled) {
+                        registerServiceLocked(c, userId);
+                    } else {
+                        unregisterServiceLocked(c, userId);
+                    }
+                }
+            }
+
+        }
+    }
 
     private void rebuildRestoredPackages() {
         mRestoredPackages.clear();
@@ -283,9 +327,9 @@ abstract public class ManagedServices {
             int userId) {
         final ContentResolver cr = mContext.getContentResolver();
         String settingValue = Settings.Secure.getStringForUser(
-                cr,
-                settingName,
-                userId);
+            cr,
+            settingName,
+            userId);
         if (TextUtils.isEmpty(settingValue))
             return null;
         String[] restored = settingValue.split(ENABLED_SERVICES_SEPARATOR);
@@ -314,10 +358,10 @@ abstract public class ManagedServices {
                 TextUtils.join(ENABLED_SERVICES_SEPARATOR, componentNames);
         final ContentResolver cr = mContext.getContentResolver();
         Settings.Secure.putStringForUser(
-                cr,
-                settingName,
-                value,
-                userId);
+            cr,
+            settingName,
+            value,
+            userId);
     }
 
     /**
@@ -333,11 +377,19 @@ abstract public class ManagedServices {
     }
 
     protected Set<ComponentName> queryPackageForServices(String packageName, int userId) {
+        return queryPackageForServices(packageName, userId, null);
+    }
+
+    protected Set<ComponentName> queryPackageForServices(String packageName, int userId,
+            String category) {
         Set<ComponentName> installed = new ArraySet<>();
         final PackageManager pm = mContext.getPackageManager();
         Intent queryIntent = new Intent(mConfig.serviceInterface);
         if (!TextUtils.isEmpty(packageName)) {
             queryIntent.setPackage(packageName);
+        }
+        if (category != null) {
+            queryIntent.addCategory(category);
         }
         List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
                 queryIntent,
@@ -353,9 +405,9 @@ abstract public class ManagedServices {
                 ComponentName component = new ComponentName(info.packageName, info.name);
                 if (!mConfig.bindPermission.equals(info.permission)) {
                     Slog.w(TAG, "Skipping " + getCaption() + " service "
-                            + info.packageName + "/" + info.name
-                            + ": it does not require the permission "
-                            + mConfig.bindPermission);
+                        + info.packageName + "/" + info.name
+                        + ": it does not require the permission "
+                        + mConfig.bindPermission);
                     continue;
                 }
                 installed.add(component);
@@ -449,6 +501,16 @@ abstract public class ManagedServices {
                 }
 
                 final ArrayList<ComponentName> add = new ArrayList<>(userComponents);
+
+                // Remove components from disabled categories so that those services aren't run.
+                for (Entry<String, Boolean> e : mCategoryEnabled.entrySet()) {
+                    if (!e.getValue()) {
+                        Set<ComponentName> c = queryPackageForServices(null, userIds[i],
+                            e.getKey());
+                        add.removeAll(c);
+                    }
+                }
+
                 toAdd.put(userIds[i], add);
 
                 newEnabled.addAll(userComponents);
@@ -488,93 +550,97 @@ abstract public class ManagedServices {
      * Version of registerService that takes the name of a service component to bind to.
      */
     private void registerService(final ComponentName name, final int userid) {
+        synchronized (mMutex) {
+            registerServiceLocked(name, userid);
+        }
+    }
+
+    private void registerServiceLocked(final ComponentName name, final int userid) {
         if (DEBUG) Slog.v(TAG, "registerService: " + name + " u=" + userid);
 
-        synchronized (mMutex) {
-            final String servicesBindingTag = name.toString() + "/" + userid;
-            if (mServicesBinding.contains(servicesBindingTag)) {
-                // stop registering this thing already! we're working on it
-                return;
-            }
-            mServicesBinding.add(servicesBindingTag);
+        final String servicesBindingTag = name.toString() + "/" + userid;
+        if (mServicesBinding.contains(servicesBindingTag)) {
+            // stop registering this thing already! we're working on it
+            return;
+        }
+        mServicesBinding.add(servicesBindingTag);
 
-            final int N = mServices.size();
-            for (int i = N - 1; i >= 0; i--) {
-                final ManagedServiceInfo info = mServices.get(i);
-                if (name.equals(info.component)
-                        && info.userid == userid) {
-                    // cut old connections
-                    if (DEBUG) Slog.v(TAG, "    disconnecting old " + getCaption() + ": "
-                            + info.service);
-                    removeServiceLocked(i);
-                    if (info.connection != null) {
-                        mContext.unbindService(info.connection);
-                    }
+        final int N = mServices.size();
+        for (int i = N - 1; i >= 0; i--) {
+            final ManagedServiceInfo info = mServices.get(i);
+            if (name.equals(info.component)
+                && info.userid == userid) {
+                // cut old connections
+                if (DEBUG) Slog.v(TAG, "    disconnecting old " + getCaption() + ": "
+                    + info.service);
+                removeServiceLocked(i);
+                if (info.connection != null) {
+                    mContext.unbindService(info.connection);
                 }
             }
+        }
 
-            Intent intent = new Intent(mConfig.serviceInterface);
-            intent.setComponent(name);
+        Intent intent = new Intent(mConfig.serviceInterface);
+        intent.setComponent(name);
 
-            intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
+        intent.putExtra(Intent.EXTRA_CLIENT_LABEL, mConfig.clientLabel);
 
-            final PendingIntent pendingIntent = PendingIntent.getActivity(
-                    mContext, 0, new Intent(mConfig.settingsAction), 0);
-            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
+        final PendingIntent pendingIntent = PendingIntent.getActivity(
+            mContext, 0, new Intent(mConfig.settingsAction), 0);
+        intent.putExtra(Intent.EXTRA_CLIENT_INTENT, pendingIntent);
 
-            ApplicationInfo appInfo = null;
-            try {
-                appInfo = mContext.getPackageManager().getApplicationInfo(
-                        name.getPackageName(), 0);
-            } catch (NameNotFoundException e) {
-                // Ignore if the package doesn't exist we won't be able to bind to the service.
-            }
-            final int targetSdkVersion =
-                    appInfo != null ? appInfo.targetSdkVersion : Build.VERSION_CODES.BASE;
+        ApplicationInfo appInfo = null;
+        try {
+            appInfo = mContext.getPackageManager().getApplicationInfo(
+                name.getPackageName(), 0);
+        } catch (NameNotFoundException e) {
+            // Ignore if the package doesn't exist we won't be able to bind to the service.
+        }
+        final int targetSdkVersion =
+            appInfo != null ? appInfo.targetSdkVersion : Build.VERSION_CODES.BASE;
 
-            try {
-                if (DEBUG) Slog.v(TAG, "binding: " + intent);
-                ServiceConnection serviceConnection = new ServiceConnection() {
-                    IInterface mService;
+        try {
+            if (DEBUG) Slog.v(TAG, "binding: " + intent);
+            ServiceConnection serviceConnection = new ServiceConnection() {
+                IInterface mService;
 
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder binder) {
-                        boolean added = false;
-                        ManagedServiceInfo info = null;
-                        synchronized (mMutex) {
-                            mServicesBinding.remove(servicesBindingTag);
-                            try {
-                                mService = asInterface(binder);
-                                info = newServiceInfo(mService, name,
-                                        userid, false /*isSystem*/, this, targetSdkVersion);
-                                binder.linkToDeath(info, 0);
-                                added = mServices.add(info);
-                            } catch (RemoteException e) {
-                                // already dead
-                            }
-                        }
-                        if (added) {
-                            onServiceAdded(info);
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder binder) {
+                    boolean added = false;
+                    ManagedServiceInfo info = null;
+                    synchronized (mMutex) {
+                        mServicesBinding.remove(servicesBindingTag);
+                        try {
+                            mService = asInterface(binder);
+                            info = newServiceInfo(mService, name,
+                                userid, false /*isSystem*/, this, targetSdkVersion);
+                            binder.linkToDeath(info, 0);
+                            added = mServices.add(info);
+                        } catch (RemoteException e) {
+                            // already dead
                         }
                     }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        Slog.v(TAG, getCaption() + " connection lost: " + name);
+                    if (added) {
+                        onServiceAdded(info);
                     }
-                };
-                if (!mContext.bindServiceAsUser(intent,
-                        serviceConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                        new UserHandle(userid))) {
-                    mServicesBinding.remove(servicesBindingTag);
-                    Slog.w(TAG, "Unable to bind " + getCaption() + " service: " + intent);
-                    return;
                 }
-            } catch (SecurityException ex) {
-                Slog.e(TAG, "Unable to bind " + getCaption() + " service: " + intent, ex);
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    Slog.v(TAG, getCaption() + " connection lost: " + name);
+                }
+            };
+            if (!mContext.bindServiceAsUser(intent,
+                serviceConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                new UserHandle(userid))) {
+                mServicesBinding.remove(servicesBindingTag);
+                Slog.w(TAG, "Unable to bind " + getCaption() + " service: " + intent);
                 return;
             }
+        } catch (SecurityException ex) {
+            Slog.e(TAG, "Unable to bind " + getCaption() + " service: " + intent, ex);
+            return;
         }
     }
 
@@ -583,20 +649,24 @@ abstract public class ManagedServices {
      */
     private void unregisterService(ComponentName name, int userid) {
         synchronized (mMutex) {
-            final int N = mServices.size();
-            for (int i = N - 1; i >= 0; i--) {
-                final ManagedServiceInfo info = mServices.get(i);
-                if (name.equals(info.component)
-                        && info.userid == userid) {
-                    removeServiceLocked(i);
-                    if (info.connection != null) {
-                        try {
-                            mContext.unbindService(info.connection);
-                        } catch (IllegalArgumentException ex) {
-                            // something happened to the service: we think we have a connection
-                            // but it's bogus.
-                            Slog.e(TAG, getCaption() + " " + name + " could not be unbound: " + ex);
-                        }
+            unregisterServiceLocked(name, userid);
+        }
+    }
+
+    private void unregisterServiceLocked(ComponentName name, int userid) {
+        final int N = mServices.size();
+        for (int i = N - 1; i >= 0; i--) {
+            final ManagedServiceInfo info = mServices.get(i);
+            if (name.equals(info.component)
+                && info.userid == userid) {
+                removeServiceLocked(i);
+                if (info.connection != null) {
+                    try {
+                        mContext.unbindService(info.connection);
+                    } catch (IllegalArgumentException ex) {
+                        // something happened to the service: we think we have a connection
+                        // but it's bogus.
+                        Slog.e(TAG, getCaption() + " " + name + " could not be unbound: " + ex);
                     }
                 }
             }

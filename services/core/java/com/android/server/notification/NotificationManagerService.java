@@ -124,6 +124,9 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.vr.VrManagerInternal;
+import com.android.server.vr.VrStateListener;
+
 import libcore.io.IoUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -206,6 +209,8 @@ public class NotificationManagerService extends SystemService {
     AudioManagerInternal mAudioManagerInternal;
     StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
+    private VrManagerInternal mVrManagerInternal;
+    private final NotificationVrListener mVrListener = new NotificationVrListener();
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -816,6 +821,14 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private final class NotificationVrListener extends VrStateListener {
+        @Override
+        public void onVrStateChanged(final boolean enabled) {
+            mListeners.setCategoryState(NotificationListenerService.CATEGORY_VR_NOTIFICATIONS,
+                enabled);
+        }
+    }
+
     private SettingsObserver mSettingsObserver;
     private ZenModeHelper mZenModeHelper;
 
@@ -1004,6 +1017,8 @@ public class NotificationManagerService extends SystemService {
             // Grab our optional AudioService
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
+            mVrManagerInternal = getLocalService(VrManagerInternal.class);
+            mVrManagerInternal.registerListener(mVrListener);
             mZenModeHelper.onSystemReady();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to

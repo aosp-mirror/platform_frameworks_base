@@ -181,6 +181,7 @@ final class ActivityRecord {
     boolean forceNewConfig; // force re-create with new config next time
     int launchCount;        // count of launches since last state
     long lastLaunchTime;    // time of last lauch of this activity
+    boolean isVrActivity;   // is the activity running in VR mode?
     ArrayList<ActivityContainer> mChildContainers = new ArrayList<ActivityContainer>();
 
     String stringName;      // for caching of toString().
@@ -317,6 +318,7 @@ final class ActivityRecord {
                 pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         pw.print(prefix); pw.print("mActivityType=");
                 pw.println(activityTypeToString(mActivityType));
+        pw.print(prefix); pw.print("vrMode="); pw.println(isVrActivity);
         if (displayStartTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("displayStartTime=");
                     if (displayStartTime == 0) pw.print("0");
@@ -650,6 +652,7 @@ final class ActivityRecord {
             }
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
+            isVrActivity = (aInfo.flags & ActivityInfo.FLAG_ENABLE_VR_MODE) != 0;
         } else {
             realActivity = null;
             taskAffinity = null;
@@ -661,6 +664,7 @@ final class ActivityRecord {
             noDisplay = false;
             mActivityType = APPLICATION_ACTIVITY_TYPE;
             immersive = false;
+            isVrActivity = false;
         }
     }
 

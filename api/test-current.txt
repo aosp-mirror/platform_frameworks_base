@@ -3538,6 +3538,7 @@ package android.app {
     method public deprecated void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
+    method public void setVrMode(boolean);
     method public boolean shouldShowRequestPermissionRationale(java.lang.String);
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public boolean showAssist(android.os.Bundle);
@@ -8993,6 +8994,7 @@ package android.content.pm {
     field public static final int FLAG_ALWAYS_RETAIN_TASK_STATE = 8; // 0x8
     field public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 8192; // 0x2000
     field public static final int FLAG_CLEAR_TASK_ON_LAUNCH = 4; // 0x4
+    field public static final int FLAG_ENABLE_VR_MODE = 32768; // 0x8000
     field public static final int FLAG_EXCLUDE_FROM_RECENTS = 32; // 0x20
     field public static final int FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS = 256; // 0x100
     field public static final int FLAG_FINISH_ON_TASK_LAUNCH = 2; // 0x2
@@ -9556,6 +9558,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final java.lang.String FEATURE_USB_HOST = "android.hardware.usb.host";
     field public static final java.lang.String FEATURE_VERIFIED_BOOT = "android.software.verified_boot";
+    field public static final java.lang.String FEATURE_VR_MODE = "android.software.vr.mode";
     field public static final java.lang.String FEATURE_WATCH = "android.hardware.type.watch";
     field public static final java.lang.String FEATURE_WEBVIEW = "android.software.webview";
     field public static final java.lang.String FEATURE_WIFI = "android.hardware.wifi";
@@ -33260,6 +33263,7 @@ package android.service.notification {
     method public final void requestInterruptionFilter(int);
     method public final void requestListenerHints(int);
     method public final void setNotificationsShown(java.lang.String[]);
+    field public static final java.lang.String CATEGORY_VR_NOTIFICATIONS = "android.intent.category.vr.notifications";
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
