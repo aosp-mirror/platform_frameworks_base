@@ -1394,6 +1394,12 @@ final class TaskRecord {
         return mLastNonFullscreenBounds;
     }
 
+    boolean canMatchRootAffinity() {
+        // We don't allow root affinity matching on the pinned stack as no other task should
+        // be launching in it based on affinity.
+        return rootAffinity != null && (stack == null || stack.mStackId != PINNED_STACK_ID);
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("userId="); pw.print(userId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
