@@ -603,9 +603,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean nonFullscreenTask = task != null && !task.isFullscreen();
+        final boolean fullscreenTask = task == null || task.isFullscreen();
         final boolean freeformWorkspace = task != null && task.inFreeformWorkspace();
-        if (nonFullscreenTask) {
+
+        if (fullscreenTask || isChildWindow()) {
+            // We use the parent frame as the containing frame for fullscreen and child windows
+            mContainingFrame.set(pf);
+            mDisplayFrame.set(df);
+        } else {
             task.getBounds(mContainingFrame);
             final WindowState imeWin = mService.mInputMethodWindow;
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
@@ -623,9 +628,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 }
             }
             mDisplayFrame.set(mContainingFrame);
-        } else {
-            mContainingFrame.set(pf);
-            mDisplayFrame.set(df);
         }
 
         final int pw = mContainingFrame.width();
@@ -2276,7 +2278,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
 
         if (nonFullscreenTask) {
-            // Make sure window fits in containing frame since it is in a non-fullscreen stack as
+            // Make sure window fits in containing frame since it is in a non-fullscreen task as
             // required by {@link Gravity#apply} call.
             w = Math.min(w, pw);
             h = Math.min(h, ph);
