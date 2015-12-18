@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.util.ArrayList;
 
@@ -500,6 +501,10 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     @Override
     protected void onTransitionsComplete() {
         moveSharedElementsFromOverlay();
+        final ViewGroup decorView = getDecor();
+        if (decorView != null) {
+            decorView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
     }
 
     private void sharedElementTransitionStarted() {
