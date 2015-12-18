@@ -147,7 +147,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             mProvider.openDevice(0);
             mResolver.waitForNotification(ROOTS_URI, 1);
             final Cursor cursor = mProvider.queryRoots(null);
-            assertEquals(1, cursor.getCount());
+            assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             assertEquals("3", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
@@ -176,7 +176,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryRoots_error() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(
-                new MtpDeviceRecord(0, "Device", false /* unopened */, new MtpRoot[0]));
+                new MtpDeviceRecord(0, "Device A", false /* unopened */, new MtpRoot[0]));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
                 "Device",
@@ -197,7 +197,16 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             mResolver.waitForNotification(ROOTS_URI, 1);
 
             final Cursor cursor = mProvider.queryRoots(null);
-            assertEquals(1, cursor.getCount());
+            assertEquals(2, cursor.getCount());
+
+            cursor.moveToNext();
+            assertEquals("1", cursor.getString(0));
+            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
+            assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
+            assertEquals("Device A", cursor.getString(3));
+            assertEquals("1", cursor.getString(4));
+            assertEquals(0, cursor.getInt(5));
+
             cursor.moveToNext();
             assertEquals("3", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));

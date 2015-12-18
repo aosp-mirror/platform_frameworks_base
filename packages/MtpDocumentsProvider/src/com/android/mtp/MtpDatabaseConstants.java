@@ -126,14 +126,14 @@ class MtpDatabaseConstants {
             Document.COLUMN_LAST_MODIFIED + " INTEGER," +
             Document.COLUMN_ICON + " INTEGER," +
             Document.COLUMN_FLAGS + " INTEGER NOT NULL," +
-            Document.COLUMN_SIZE + " INTEGER NOT NULL);";
+            Document.COLUMN_SIZE + " INTEGER);";
 
     static final String QUERY_CREATE_ROOT_EXTRA =
             "CREATE TABLE " + TABLE_ROOT_EXTRA + " (" +
             Root.COLUMN_ROOT_ID + " INTEGER PRIMARY KEY," +
             Root.COLUMN_FLAGS + " INTEGER NOT NULL," +
-            Root.COLUMN_AVAILABLE_BYTES + " INTEGER NOT NULL," +
-            Root.COLUMN_CAPACITY_BYTES + " INTEGER NOT NULL," +
+            Root.COLUMN_AVAILABLE_BYTES + " INTEGER," +
+            Root.COLUMN_CAPACITY_BYTES + " INTEGER," +
             Root.COLUMN_MIME_TYPES + " TEXT NOT NULL);";
 
     /**
@@ -145,18 +145,26 @@ class MtpDatabaseConstants {
         COLUMN_MAP_ROOTS = new HashMap<>();
         COLUMN_MAP_ROOTS.put(Root.COLUMN_ROOT_ID, TABLE_ROOT_EXTRA + "." + Root.COLUMN_ROOT_ID);
         COLUMN_MAP_ROOTS.put(Root.COLUMN_FLAGS, TABLE_ROOT_EXTRA + "." + Root.COLUMN_FLAGS);
-        COLUMN_MAP_ROOTS.put(Root.COLUMN_ICON, TABLE_DOCUMENTS + "." + Document.COLUMN_ICON);
         COLUMN_MAP_ROOTS.put(
-                Root.COLUMN_TITLE, TABLE_DOCUMENTS + "." + Document.COLUMN_DISPLAY_NAME);
-        COLUMN_MAP_ROOTS.put(Root.COLUMN_SUMMARY, TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY);
+                Root.COLUMN_ICON,
+                TABLE_DOCUMENTS + "." + Document.COLUMN_ICON + " AS " + Root.COLUMN_ICON);
         COLUMN_MAP_ROOTS.put(
-                Root.COLUMN_DOCUMENT_ID, TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID);
+                Root.COLUMN_TITLE,
+                TABLE_DOCUMENTS + "." + Document.COLUMN_DISPLAY_NAME + " AS " + Root.COLUMN_TITLE);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_SUMMARY,
+                TABLE_DOCUMENTS + "." + Document.COLUMN_SUMMARY + " AS " + Root.COLUMN_SUMMARY);
+        COLUMN_MAP_ROOTS.put(
+                Root.COLUMN_DOCUMENT_ID,
+                TABLE_DOCUMENTS + "." + Document.COLUMN_DOCUMENT_ID +
+                " AS " + Root.COLUMN_DOCUMENT_ID);
         COLUMN_MAP_ROOTS.put(
                 Root.COLUMN_AVAILABLE_BYTES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_AVAILABLE_BYTES);
         COLUMN_MAP_ROOTS.put(
                 Root.COLUMN_CAPACITY_BYTES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_CAPACITY_BYTES);
         COLUMN_MAP_ROOTS.put(
                 Root.COLUMN_MIME_TYPES, TABLE_ROOT_EXTRA + "." + Root.COLUMN_MIME_TYPES);
+        COLUMN_MAP_ROOTS.put(COLUMN_DEVICE_ID, COLUMN_DEVICE_ID);
     }
 
     private static String createJoinFromClosure(

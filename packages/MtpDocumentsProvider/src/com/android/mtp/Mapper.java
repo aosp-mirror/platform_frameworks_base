@@ -66,10 +66,13 @@ class Mapper {
         database.beginTransaction();
         try {
             final ContentValues[] valuesList = new ContentValues[1];
+            final ContentValues[] extraValuesList = new ContentValues[1];
             valuesList[0] = new ContentValues();
-            MtpDatabase.getDeviceDocumentValues(valuesList[0], device);
+            extraValuesList[0] = new ContentValues();
+            MtpDatabase.getDeviceDocumentValues(valuesList[0], extraValuesList[0], device);
             final boolean changed = putDocuments(
                     valuesList,
+                    extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
                     EMPTY_ARGS,
                     /* heuristic */ false,
@@ -88,7 +91,7 @@ class Mapper {
      * @param roots List of root information.
      * @return If roots are added or removed from the database.
      */
-    synchronized boolean putRootDocuments(
+    synchronized boolean putStorageDocuments(
             String parentDocumentId, Resources resources, MtpRoot[] roots) {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
@@ -109,36 +112,21 @@ class Mapper {
                     throw new Error("Unexpected map mode.");
             }
             final ContentValues[] valuesList = new ContentValues[roots.length];
+            final ContentValues[] extraValuesList = new ContentValues[roots.length];
             for (int i = 0; i < roots.length; i++) {
                 valuesList[i] = new ContentValues();
+                extraValuesList[i] = new ContentValues();
                 MtpDatabase.getStorageDocumentValues(
-                        valuesList[i], resources, parentDocumentId, roots[i]);
+                        valuesList[i], extraValuesList[i], resources, parentDocumentId, roots[i]);
             }
             final boolean changed = putDocuments(
                     valuesList,
+                    extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + "=?",
                     strings(parentDocumentId),
                     heuristic,
                     mapColumn);
-            final ContentValues values = new ContentValues();
-            int i = 0;
-            for (final MtpRoot root : roots) {
-                // Use the same value for the root ID and the corresponding document ID.
-                final String documentId = valuesList[i++].getAsString(Document.COLUMN_DOCUMENT_ID);
-                // If it fails to insert/update documents, the document ID will be set with -1.
-                // In this case we don't insert/update root extra information neither.
-                if (documentId == null) {
-                    continue;
-                }
-                values.put(Root.COLUMN_ROOT_ID, documentId);
-                values.put(
-                        Root.COLUMN_FLAGS,
-                        Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
-                values.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
-                values.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
-                values.put(Root.COLUMN_MIME_TYPES, "");
-                database.replace(TABLE_ROOT_EXTRA, null, values);
-            }
+
             database.setTransactionSuccessful();
             return changed;
         } finally {
@@ -176,6 +164,7 @@ class Mapper {
         }
         putDocuments(
                 valuesList,
+                null,
                 COLUMN_PARENT_DOCUMENT_ID + "=?",
                 strings(parentId),
                 heuristic,
@@ -257,6 +246,7 @@ class Mapper {
      * rows. If the methods adds rows to database, it updates valueList with correct document ID.
      *
      * @param valuesList Values for documents to be stored in the database.
+     * @param rootExtraValuesList Values for root extra to be stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param args Argument for selection SQL.
      * @param heuristic Whether the mapping mode is heuristic.
@@ -264,6 +254,7 @@ class Mapper {
      */
     private boolean putDocuments(
             ContentValues[] valuesList,
+            @Nullable ContentValues[] rootExtraValuesList,
             String selection,
             String[] args,
             boolean heuristic,
@@ -272,7 +263,14 @@ class Mapper {
         boolean added = false;
         database.beginTransaction();
         try {
-            for (final ContentValues values : valuesList) {
+            for (int i = 0; i < valuesList.length; i++) {
+                final ContentValues values = valuesList[i];
+                final ContentValues rootExtraValues;
+                if (rootExtraValuesList != null) {
+                    rootExtraValues = rootExtraValuesList[i];
+                } else {
+                    rootExtraValues = null;
+                }
                 final Cursor candidateCursor = database.query(
                         TABLE_DOCUMENTS,
                         strings(Document.COLUMN_DOCUMENT_ID),
@@ -290,25 +288,26 @@ class Mapper {
                     final long rowId;
                     if (candidateCursor.getCount() == 0) {
                         rowId = database.insert(TABLE_DOCUMENTS, null, values);
-                        if (rowId == -1) {
-                            throw new SQLiteException("Failed to put a document into database.");
-                        }
                         added = true;
                     } else if (!heuristic) {
                         candidateCursor.moveToNext();
-                        final String documentId = candidateCursor.getString(0);
-                        rowId = database.update(
+                        rowId = candidateCursor.getLong(0);
+                        database.update(
                                 TABLE_DOCUMENTS,
                                 values,
                                 SELECTION_DOCUMENT_ID,
-                                strings(documentId));
+                                strings(rowId));
                     } else {
                         values.put(COLUMN_ROW_STATE, ROW_STATE_PENDING);
-                        rowId = database.insert(TABLE_DOCUMENTS, null, values);
+                        rowId = database.insertOrThrow(TABLE_DOCUMENTS, null, values);
                     }
                     // Document ID is a primary integer key of the table. So the returned row
                     // IDs should be same with the document ID.
                     values.put(Document.COLUMN_DOCUMENT_ID, rowId);
+                    if (rootExtraValues != null) {
+                        rootExtraValues.put(Root.COLUMN_ROOT_ID, rowId);
+                        database.replace(TABLE_ROOT_EXTRA, null, rootExtraValues);
+                    }
                 } finally {
                     candidateCursor.close();
                 }
