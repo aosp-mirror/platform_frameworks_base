@@ -4168,6 +4168,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_GRANT_PREFIX_URI_PERMISSION = 0x00000080;
 
     /**
+     * Internal flag used to indicate that a system component has done their
+     * homework and verified their encryption-aware behavior.
+     *
+     * @hide
+     */
+    public static final int FLAG_DEBUG_ENCRYPTION_TRIAGED = 0x00000100;
+
+    /**
      * If set, the new activity is not kept in the history stack.  As soon as
      * the user navigates away from it, the activity is finished.  This may also
      * be set with the {@link android.R.styleable#AndroidManifestActivity_noHistory

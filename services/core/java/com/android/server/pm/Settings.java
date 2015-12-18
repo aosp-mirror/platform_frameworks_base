@@ -3837,13 +3837,11 @@ final class Settings {
     }
 
     private boolean isVisibleLPr(ComponentInfo componentInfo, int flags) {
-        if ((flags & PackageManager.GET_ENCRYPTION_UNAWARE_COMPONENTS) != 0) {
-            return true;
-        }
-        if ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0) {
-            return componentInfo.encryptionAware;
-        }
-        return true;
+        final boolean matchUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE_ONLY) != 0)
+                && !componentInfo.encryptionAware;
+        final boolean matchAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0)
+                && componentInfo.encryptionAware;
+        return matchUnaware || matchAware;
     }
 
     String getInstallerPackageNameLPr(String packageName) {

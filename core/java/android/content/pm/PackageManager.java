@@ -47,10 +47,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
-import android.provider.Settings;
 import android.util.AndroidException;
 
-import android.util.Log;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
@@ -236,21 +234,33 @@ public abstract class PackageManager {
     public static final int MATCH_ALL = 0x00020000;
 
     /**
-     * {@link PackageInfo} flag: include components which aren't encryption
-     * aware in the returned info, regardless of the current user state.
+     * {@link PackageInfo} flag: include only components which are encryption
+     * unaware in the returned info, regardless of the current user state.
      */
-    public static final int GET_ENCRYPTION_UNAWARE_COMPONENTS = 0x00040000;
+    public static final int MATCH_ENCRYPTION_UNAWARE_ONLY = 0x00040000;
 
     /**
-     * {@link PackageInfo} flag: return components that are marked as
-     * {@link ComponentInfo#encryptionAware}, unless
-     * {@link #GET_ENCRYPTION_UNAWARE_COMPONENTS} is also specified.
-     * <p>
-     * This flag is for internal use only.
+     * {@link PackageInfo} flag: include only components which are encryption
+     * aware in the returned info, regardless of the current user state.
+     */
+    public static final int MATCH_ENCRYPTION_AWARE_ONLY = 0x00080000;
+
+    /**
+     * {@link PackageInfo} flag: include both encryption aware and unaware
+     * components in the returned info, regardless of the current user state.
+     */
+    public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = MATCH_ENCRYPTION_AWARE_ONLY
+            | MATCH_ENCRYPTION_UNAWARE_ONLY;
+
+    /**
+     * {@link PackageInfo} flag: use the default encryption matching behavior
+     * based on user state. Internal flag used to indicate that a system
+     * component has done their homework and verified their encryption-aware
+     * behavior.
      *
      * @hide
      */
-    public static final int MATCH_ENCRYPTION_AWARE_ONLY = 0x00080000;
+    public static final int MATCH_ENCRYPTION_DEFAULT = 0x00100000;
 
     /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:

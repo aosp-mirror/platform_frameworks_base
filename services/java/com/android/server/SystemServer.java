@@ -1322,6 +1322,7 @@ public final class SystemServer {
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.android.systemui",
                     "com.android.systemui.SystemUIService"));
+        intent.addFlags(Intent.FLAG_DEBUG_ENCRYPTION_TRIAGED);
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.SYSTEM);
     }
