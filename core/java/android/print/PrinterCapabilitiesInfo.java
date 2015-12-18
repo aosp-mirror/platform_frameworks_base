@@ -16,8 +16,11 @@
 
 package android.print;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.print.PrintAttributes.ColorMode;
+import android.print.PrintAttributes.DuplexMode;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
@@ -121,7 +124,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The media sizes.
      */
-    public List<MediaSize> getMediaSizes() {
+    public @NonNull List<MediaSize> getMediaSizes() {
         return Collections.unmodifiableList(mMediaSizes);
     }
 
@@ -130,7 +133,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The resolutions.
      */
-    public List<Resolution> getResolutions() {
+    public @NonNull List<Resolution> getResolutions() {
         return Collections.unmodifiableList(mResolutions);
     }
 
@@ -140,7 +143,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The minimal margins.
      */
-    public Margins getMinMargins() {
+    public @NonNull Margins getMinMargins() {
         return mMinMargins;
     }
 
@@ -152,7 +155,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      * @see PrintAttributes#COLOR_MODE_COLOR
      * @see PrintAttributes#COLOR_MODE_MONOCHROME
      */
-    public int getColorModes() {
+    public @ColorMode int getColorModes() {
         return mColorModes;
     }
 
@@ -165,7 +168,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
      * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
      */
-    public int getDuplexModes() {
+    public @DuplexMode int getDuplexModes() {
         return mDuplexModes;
     }
 
@@ -174,7 +177,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      *
      * @return The default attributes.
      */
-    public PrintAttributes getDefaults() {
+    public @NonNull PrintAttributes getDefaults() {
         PrintAttributes.Builder builder = new PrintAttributes.Builder();
 
         builder.setMinMargins(mMinMargins);
@@ -425,7 +428,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @throws IllegalArgumentException If the printer id is <code>null</code>.
          */
-        public Builder(PrinterId printerId) {
+        public Builder(@NonNull PrinterId printerId) {
             if (printerId == null) {
                 throw new IllegalArgumentException("printerId cannot be null.");
             }
@@ -446,7 +449,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.MediaSize
          */
-        public Builder addMediaSize(MediaSize mediaSize, boolean isDefault) {
+        public @NonNull Builder addMediaSize(@NonNull MediaSize mediaSize, boolean isDefault) {
             if (mPrototype.mMediaSizes == null) {
                 mPrototype.mMediaSizes = new ArrayList<MediaSize>();
             }
@@ -474,7 +477,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.Resolution
          */
-        public Builder addResolution(Resolution resolution, boolean isDefault) {
+        public @NonNull Builder addResolution(@NonNull Resolution resolution, boolean isDefault) {
             if (mPrototype.mResolutions == null) {
                 mPrototype.mResolutions = new ArrayList<Resolution>();
             }
@@ -502,7 +505,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @see PrintAttributes.Margins
          */
-        public Builder setMinMargins(Margins margins) {
+        public @NonNull Builder setMinMargins(@NonNull Margins margins) {
             if (margins == null) {
                 throw new IllegalArgumentException("margins cannot be null");
             }
@@ -532,7 +535,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * @see PrintAttributes#COLOR_MODE_COLOR
          * @see PrintAttributes#COLOR_MODE_MONOCHROME
          */
-        public Builder setColorModes(int colorModes, int defaultColorMode) {
+        public @NonNull Builder setColorModes(@ColorMode int colorModes,
+                @ColorMode int defaultColorMode) {
             int currentModes = colorModes;
             while (currentModes > 0) {
                 final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
@@ -562,7 +566,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
          * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
          */
-        public Builder setDuplexModes(int duplexModes, int defaultDuplexMode) {
+        public @NonNull Builder setDuplexModes(@DuplexMode int duplexModes,
+                @DuplexMode int defaultDuplexMode) {
             int currentModes = duplexModes;
             while (currentModes > 0) {
                 final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
@@ -589,7 +594,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          *
          * @throws IllegalStateException If a required attribute was not specified.
          */
-        public PrinterCapabilitiesInfo build() {
+        public @NonNull PrinterCapabilitiesInfo build() {
             if (mPrototype.mMediaSizes == null || mPrototype.mMediaSizes.isEmpty()) {
                 throw new IllegalStateException("No media size specified.");
             }

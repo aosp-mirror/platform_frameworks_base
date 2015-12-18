@@ -16,6 +16,8 @@
 
 package android.print;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
@@ -181,6 +183,8 @@ public final class PrintManager {
      *
      * @param context The current context in which to operate.
      * @param service The backing system service.
+     * @param userId The user id in which to operate.
+     * @param appId The application id in which to operate.
      * @hide
      */
     public PrintManager(Context context, IPrintManager service, int userId, int appId) {
@@ -291,6 +295,7 @@ public final class PrintManager {
     /**
      * Gets a print job given its id.
      *
+     * @param printJobId The id of the print job.
      * @return The print job list.
      * @see PrintJob
      * @hide
@@ -340,7 +345,7 @@ public final class PrintManager {
      * @return The print job list.
      * @see PrintJob
      */
-    public List<PrintJob> getPrintJobs() {
+    public @NonNull List<PrintJob> getPrintJobs() {
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
             return Collections.emptyList();
@@ -435,8 +440,9 @@ public final class PrintManager {
      *
      * @see PrintJob
      */
-    public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
-            PrintAttributes attributes) {
+    public @NonNull PrintJob print(@NonNull String printJobName,
+            @NonNull PrintDocumentAdapter documentAdapter,
+            @Nullable PrintAttributes attributes) {
         if (mService == null) {
             Log.w(LOG_TAG, "Feature android.software.print not available");
             return null;

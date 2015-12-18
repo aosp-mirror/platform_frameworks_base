@@ -344,7 +344,7 @@ public final class PrintJob {
      * @return True if the tag was set, false otherwise.
      */
     @MainThread
-    public boolean setTag(String tag) {
+    public boolean setTag(@NonNull String tag) {
         PrintService.throwIfNotCalledOnMainThread();
         if (isInImmutableState()) {
             return false;
@@ -364,7 +364,8 @@ public final class PrintJob {
      *
      * @see #setTag(String)
      */
-    public String getTag() {
+    @MainThread
+    public @Nullable String getTag() {
         PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getTag();
     }

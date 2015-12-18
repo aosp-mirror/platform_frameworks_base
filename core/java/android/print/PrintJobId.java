@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -91,14 +92,14 @@ public final class PrintJobId implements Parcelable {
      *
      * @hide
      */
-    public String flattenToString() {
+    public @NonNull String flattenToString() {
         return mValue;
     }
 
     /**
      * Unflattens a print job id from a string.
      *
-     * @string The string.
+     * @param string The string.
      * @return The unflattened id, or null if the string is malformed.
      *
      * @hide

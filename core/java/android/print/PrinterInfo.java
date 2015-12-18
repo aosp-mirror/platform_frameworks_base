@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.annotation.IntDef;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +33,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This class represents the description of a printer. Instances of
  * this class are created by print services to report to the system
@@ -42,6 +46,13 @@ import android.text.TextUtils;
  */
 public final class PrinterInfo implements Parcelable {
 
+    /** @hide */
+    @IntDef({
+            STATUS_IDLE, STATUS_BUSY, STATUS_UNAVAILABLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Status {
+    }
     /** Printer status: the printer is idle and ready to print. */
     public static final int STATUS_IDLE = 1;
 
@@ -112,7 +123,7 @@ public final class PrinterInfo implements Parcelable {
      *
      * @return The printer id.
      */
-    public PrinterId getId() {
+    public @NonNull PrinterId getId() {
         return mId;
     }
 
@@ -169,7 +180,7 @@ public final class PrinterInfo implements Parcelable {
      *
      * @return The printer name.
      */
-    public String getName() {
+    public @Nullable String getName() {
         return mName;
     }
 
@@ -182,7 +193,7 @@ public final class PrinterInfo implements Parcelable {
      * @see #STATUS_IDLE
      * @see #STATUS_UNAVAILABLE
      */
-    public int getStatus() {
+    public @Status int getStatus() {
         return mStatus;
     }
 
@@ -191,7 +202,7 @@ public final class PrinterInfo implements Parcelable {
      *
      * @return The description.
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return mDescription;
     }
 
@@ -212,7 +223,7 @@ public final class PrinterInfo implements Parcelable {
      *
      * @return The capabilities.
      */
-    public PrinterCapabilitiesInfo getCapabilities() {
+    public @Nullable PrinterCapabilitiesInfo getCapabilities() {
         return mCapabilities;
     }
 
@@ -363,7 +374,7 @@ public final class PrinterInfo implements Parcelable {
          * @throws IllegalArgumentException If the printer id is null, or the
          * printer name is empty or the status is not a valid one.
          */
-        public Builder(PrinterId printerId, String name, int status) {
+        public Builder(@NonNull PrinterId printerId, @NonNull String name, @Status int status) {
             if (printerId == null) {
                 throw new IllegalArgumentException("printerId cannot be null.");
             }
@@ -384,7 +395,7 @@ public final class PrinterInfo implements Parcelable {
          *
          * @param other Other info from which to start building.
          */
-        public Builder(PrinterInfo other) {
+        public Builder(@NonNull PrinterInfo other) {
             mPrototype = new PrinterInfo();
             mPrototype.copyFrom(other);
         }
@@ -399,7 +410,7 @@ public final class PrinterInfo implements Parcelable {
          * @see PrinterInfo#STATUS_BUSY
          * @see PrinterInfo#STATUS_UNAVAILABLE
          */
-        public Builder setStatus(int status) {
+        public @Nullable Builder setStatus(@Status int status) {
             mPrototype.mStatus = status;
             return this;
         }
@@ -441,7 +452,7 @@ public final class PrinterInfo implements Parcelable {
          * @param name The name.
          * @return This builder.
          */
-        public Builder setName(String name) {
+        public @NonNull Builder setName(@NonNull String name) {
             mPrototype.mName = name;
             return this;
         }
@@ -453,7 +464,7 @@ public final class PrinterInfo implements Parcelable {
          * @param description The description.
          * @return This builder.
          */
-        public Builder setDescription(String description) {
+        public @NonNull Builder setDescription(@NonNull String description) {
             mPrototype.mDescription = description;
             return this;
         }
@@ -476,7 +487,7 @@ public final class PrinterInfo implements Parcelable {
          * @param capabilities The capabilities.
          * @return This builder.
          */
-        public Builder setCapabilities(PrinterCapabilitiesInfo capabilities) {
+        public @NonNull Builder setCapabilities(@NonNull PrinterCapabilitiesInfo capabilities) {
             mPrototype.mCapabilities = capabilities;
             return this;
         }
@@ -486,7 +497,7 @@ public final class PrinterInfo implements Parcelable {
          *
          * @return A new {@link PrinterInfo}.
          */
-        public PrinterInfo build() {
+        public @NonNull PrinterInfo build() {
             return mPrototype;
         }
 

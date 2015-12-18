@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -191,30 +192,29 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
-     * attribute, this extra is used to pass in the currently constructed {@link
-     * PrintJobInfo} to your activity allowing you to modify it. After you are
-     * done, you must return the modified {@link PrintJobInfo} via the same extra.
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity} attribute,
+     * this extra is used to pass in the currently constructed {@link PrintJobInfo} to your activity
+     * allowing you to modify it. After you are done, you must return the modified
+     * {@link PrintJobInfo} via the same extra.
      * <p>
-     * You cannot modify the passed in {@link PrintJobInfo} directly, rather you
-     * should build another one using the {@link PrintJobInfo.Builder} class. You
-     * can specify any standard properties and add advanced, printer specific,
-     * ones via {@link PrintJobInfo.Builder#putAdvancedOption(String, String)
-     * PrintJobInfo.Builder.putAdvancedOption(String, String)} and {@link
-     * PrintJobInfo.Builder#putAdvancedOption(String, int)
-     * PrintJobInfo.Builder.putAdvancedOption(String, int)}. The advanced options
-     * are not interpreted by the system, they will not be visible to applications,
-     * and can only be accessed by your print service via {@link
-     * PrintJob#getAdvancedStringOption(String) PrintJob.getAdvancedStringOption(String)}
-     * and {@link PrintJob#getAdvancedIntOption(String) PrintJob.getAdvancedIntOption(String)}.
+     * You cannot modify the passed in {@link PrintJobInfo} directly, rather you should build
+     * another one using the {@link android.print.PrintJobInfo.Builder PrintJobInfo.Builder} class.
+     * You can specify any standard properties and add advanced, printer specific, ones via
+     * {@link android.print.PrintJobInfo.Builder#putAdvancedOption(String, String)
+     * PrintJobInfo.Builder.putAdvancedOption(String, String)} and
+     * {@link android.print.PrintJobInfo.Builder#putAdvancedOption(String, int)
+     * PrintJobInfo.Builder.putAdvancedOption(String, int)}. The advanced options are not
+     * interpreted by the system, they will not be visible to applications, and can only be accessed
+     * by your print service via {@link PrintJob#getAdvancedStringOption(String)
+     * PrintJob.getAdvancedStringOption(String)} and {@link PrintJob#getAdvancedIntOption(String)
+     * PrintJob.getAdvancedIntOption(String)}.
      * </p>
      * <p>
-     * If the advanced print options activity offers changes to the standard print
-     * options, you can get the current {@link android.print.PrinterInfo} using the
-     * {@link #EXTRA_PRINTER_INFO} extra which will allow you to present the user
-     * with UI options supported by the current printer. For example, if the current
-     * printer does not support a given media size, you should not offer it in the
-     * advanced print options UI.
+     * If the advanced print options activity offers changes to the standard print options, you can
+     * get the current {@link android.print.PrinterInfo PrinterInfo} using the
+     * {@link #EXTRA_PRINTER_INFO} extra which will allow you to present the user with UI options
+     * supported by the current printer. For example, if the current printer does not support a
+     * given media size, you should not offer it in the advanced print options UI.
      * </p>
      *
      * @see #EXTRA_PRINTER_INFO
@@ -275,9 +275,10 @@ public abstract class PrintService extends Service {
     /**
      * Callback asking you to create a new {@link PrinterDiscoverySession}.
      *
+     * @return The created session.
      * @see PrinterDiscoverySession
      */
-    protected abstract PrinterDiscoverySession onCreatePrinterDiscoverySession();
+    protected abstract @Nullable PrinterDiscoverySession onCreatePrinterDiscoverySession();
 
     /**
      * Called when cancellation of a print job is requested. The service
@@ -368,6 +369,7 @@ public abstract class PrintService extends Service {
                 mHandler.sendEmptyMessage(ServiceHandler.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
             }
 
+            @Override
             public void startPrinterDiscovery(List<PrinterId> priorityList) {
                 mHandler.obtainMessage(ServiceHandler.MSG_START_PRINTER_DISCOVERY,
                         priorityList).sendToTarget();

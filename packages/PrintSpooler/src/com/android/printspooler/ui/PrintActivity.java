@@ -461,6 +461,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
     }
 
+    @Override
     public void onUpdateCanceled() {
         if (DEBUG) {
             Log.i(LOG_TAG, "onUpdateCanceled()");
@@ -1737,8 +1738,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void updatePageRangeOptions(int pageCount) {
+        @SuppressWarnings("unchecked")
         ArrayAdapter<SpinnerItem<Integer>> rangeOptionsSpinnerAdapter =
-                (ArrayAdapter) mRangeOptionsSpinner.getAdapter();
+                (ArrayAdapter<SpinnerItem<Integer>>) mRangeOptionsSpinner.getAdapter();
         rangeOptionsSpinnerAdapter.clear();
 
         final int[] rangeOptionsValues = getResources().getIntArray(
@@ -1927,6 +1929,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             this.label = label;
         }
 
+        @Override
         public String toString() {
             return label.toString();
         }
@@ -2186,7 +2189,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 0 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf);
+                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf, null);
                 } else if (position == 1) {
                     title = getString(R.string.all_printers);
                 }
@@ -2194,7 +2197,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (position == 1 && getPdfPrinter() != null) {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
                     title = printerHolder.printer.getName();
-                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf);
+                    icon = getResources().getDrawable(R.drawable.ic_menu_savetopdf, null);
                 } else if (position == getCount() - 1) {
                     title = getString(R.string.all_printers);
                 } else {

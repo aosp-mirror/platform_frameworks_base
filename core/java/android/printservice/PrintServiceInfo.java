@@ -98,8 +98,7 @@ public final class PrintServiceInfo implements Parcelable {
      *
      * @param resolveInfo The service resolve info.
      * @param context Context for accessing resources.
-     * @throws XmlPullParserException If a XML parsing error occurs.
-     * @throws IOException If a I/O error occurs.
+     * @return The created instance.
      */
     public static PrintServiceInfo create(ResolveInfo resolveInfo, Context context) {
         String settingsActivityName = null;
@@ -220,10 +219,12 @@ public final class PrintServiceInfo implements Parcelable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel parcel, int flagz) {
         parcel.writeString(mId);
         parcel.writeParcelable(mResolveInfo, 0);
@@ -275,10 +276,12 @@ public final class PrintServiceInfo implements Parcelable {
 
     public static final Parcelable.Creator<PrintServiceInfo> CREATOR =
             new Parcelable.Creator<PrintServiceInfo>() {
+        @Override
         public PrintServiceInfo createFromParcel(Parcel parcel) {
             return new PrintServiceInfo(parcel);
         }
 
+        @Override
         public PrintServiceInfo[] newArray(int size) {
             return new PrintServiceInfo[size];
         }

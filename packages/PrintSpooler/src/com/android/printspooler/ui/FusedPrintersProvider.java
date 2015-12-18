@@ -668,7 +668,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             }
 
             private void expect(XmlPullParser parser, int type, String tag)
-                    throws IOException, XmlPullParserException {
+                    throws XmlPullParserException {
                 if (!accept(parser, type, tag)) {
                     throw new XmlPullParserException("Exepected event: " + type
                             + " and tag: " + tag + " but got event: " + parser.getEventType()
@@ -685,7 +685,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             }
 
             private boolean accept(XmlPullParser parser, int type, String tag)
-                    throws IOException, XmlPullParserException {
+                    throws XmlPullParserException {
                 if (parser.getEventType() != type) {
                     return false;
                 }
@@ -702,7 +702,8 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
         private final class WriteTask extends AsyncTask<List<PrinterInfo>, Void, Void> {
             @Override
-            protected Void doInBackground(List<PrinterInfo>... printers) {
+            protected Void doInBackground(
+                    @SuppressWarnings("unchecked") List<PrinterInfo>... printers) {
                 doWritePrinterHistory(printers[0]);
                 return null;
             }
