@@ -1222,7 +1222,7 @@ final class UserController {
     }
 
     private boolean isCurrentUserLocked(int userId) {
-        return mCurrentUserId == userId || mTargetUserId == userId;
+        return userId == getCurrentOrTargetUserIdLocked();
     }
 
     int setTargetUserIdLocked(int targetUserId) {
