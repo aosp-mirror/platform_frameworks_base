@@ -75,7 +75,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
@@ -3363,7 +3362,7 @@ final class ActivityStack {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
-                    int res = mStackSupervisor.startActivityLocked(srec.app.thread, destIntent,
+                    int res = mService.mActivityStarter.startActivityLocked(srec.app.thread, destIntent,
                             null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null, null,
                             parent.appToken, null, 0, -1, parent.launchedFromUid,
                             parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
