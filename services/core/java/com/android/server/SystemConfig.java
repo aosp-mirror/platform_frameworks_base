@@ -48,6 +48,13 @@ public class SystemConfig {
 
     static SystemConfig sInstance;
 
+    // permission flag, determines which types of configuration are allowed to be read
+    private static final int ALLOW_FEATURES = 0x01;
+    private static final int ALLOW_LIBS = 0x02;
+    private static final int ALLOW_PERMISSIONS = 0x04;
+    private static final int ALLOW_APP_CONFIGS = 0x08;
+    private static final int ALLOW_ALL = ~0;
+
     // Group-ids that are given to all packages as read from etc/permissions/*.xml.
     int[] mGlobalGids;
 
@@ -161,21 +168,27 @@ public class SystemConfig {
     SystemConfig() {
         // Read configuration from system
         readPermissions(Environment.buildPath(
-                Environment.getRootDirectory(), "etc", "sysconfig"), false);
+                Environment.getRootDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         // Read configuration from the old permissions dir
         readPermissions(Environment.buildPath(
-                Environment.getRootDirectory(), "etc", "permissions"), false);
-        // Only read features from OEM config
+                Environment.getRootDirectory(), "etc", "permissions"), ALLOW_ALL);
+        // Allow ODM to customize system configs around libs, features and apps
+        int odmPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_APP_CONFIGS;
         readPermissions(Environment.buildPath(
-                Environment.getOemDirectory(), "etc", "sysconfig"), true);
+                Environment.getOdmDirectory(), "etc", "sysconfig"), odmPermissionFlag);
         readPermissions(Environment.buildPath(
-                Environment.getOemDirectory(), "etc", "permissions"), true);
+                Environment.getOdmDirectory(), "etc", "permissions"), odmPermissionFlag);
+        // Only allow OEM to customize features
+        readPermissions(Environment.buildPath(
+                Environment.getOemDirectory(), "etc", "sysconfig"), ALLOW_FEATURES);
+        readPermissions(Environment.buildPath(
+                Environment.getOemDirectory(), "etc", "permissions"), ALLOW_FEATURES);
     }
 
-    void readPermissions(File libraryDir, boolean onlyFeatures) {
+    void readPermissions(File libraryDir, int permissionFlag) {
         // Read permissions from given directory.
         if (!libraryDir.exists() || !libraryDir.isDirectory()) {
-            if (!onlyFeatures) {
+            if (permissionFlag == ALLOW_ALL) {
                 Slog.w(TAG, "No directory " + libraryDir + ", skipping");
             }
             return;
@@ -203,16 +216,16 @@ public class SystemConfig {
                 continue;
             }
 
-            readPermissionsFromXml(f, onlyFeatures);
+            readPermissionsFromXml(f, permissionFlag);
         }
 
         // Read platform permissions last so it will take precedence
         if (platformFile != null) {
-            readPermissionsFromXml(platformFile, onlyFeatures);
+            readPermissionsFromXml(platformFile, permissionFlag);
         }
     }
 
-    private void readPermissionsFromXml(File permFile, boolean onlyFeatures) {
+    private void readPermissionsFromXml(File permFile, int permissionFlag) {
         FileReader permReader = null;
         try {
             permReader = new FileReader(permFile);
@@ -242,6 +255,11 @@ public class SystemConfig {
                         + ": found " + parser.getName() + ", expected 'permissions' or 'config'");
             }
 
+            boolean allowAll = permissionFlag == ALLOW_ALL;
+            boolean allowLibs = (permissionFlag & ALLOW_LIBS) != 0;
+            boolean allowFeatures = (permissionFlag & ALLOW_FEATURES) != 0;
+            boolean allowPermissions = (permissionFlag & ALLOW_PERMISSIONS) != 0;
+            boolean allowAppConfigs = (permissionFlag & ALLOW_APP_CONFIGS) != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -249,7 +267,7 @@ public class SystemConfig {
                 }
 
                 String name = parser.getName();
-                if ("group".equals(name) && !onlyFeatures) {
+                if ("group".equals(name) && allowAll) {
                     String gidStr = parser.getAttributeValue(null, "gid");
                     if (gidStr != null) {
                         int gid = android.os.Process.getGidForName(gidStr);
@@ -261,7 +279,7 @@ public class SystemConfig {
 
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-                } else if ("permission".equals(name) && !onlyFeatures) {
+                } else if ("permission".equals(name) && allowPermissions) {
                     String perm = parser.getAttributeValue(null, "name");
                     if (perm == null) {
                         Slog.w(TAG, "<permission> without name in " + permFile + " at "
@@ -272,7 +290,7 @@ public class SystemConfig {
                     perm = perm.intern();
                     readPermission(parser, perm);
 
-                } else if ("assign-permission".equals(name) && !onlyFeatures) {
+                } else if ("assign-permission".equals(name) && allowPermissions) {
                     String perm = parser.getAttributeValue(null, "name");
                     if (perm == null) {
                         Slog.w(TAG, "<assign-permission> without name in " + permFile + " at "
@@ -304,7 +322,7 @@ public class SystemConfig {
                     perms.add(perm);
                     XmlUtils.skipCurrentTag(parser);
 
-                } else if ("library".equals(name) && !onlyFeatures) {
+                } else if ("library".equals(name) && allowLibs) {
                     String lname = parser.getAttributeValue(null, "name");
                     String lfile = parser.getAttributeValue(null, "file");
                     if (lname == null) {
@@ -320,7 +338,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("feature".equals(name)) {
+                } else if ("feature".equals(name) && allowFeatures) {
                     String fname = parser.getAttributeValue(null, "name");
                     boolean allowed;
                     if (!lowRam) {
@@ -341,7 +359,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("unavailable-feature".equals(name)) {
+                } else if ("unavailable-feature".equals(name) && allowFeatures) {
                     String fname = parser.getAttributeValue(null, "name");
                     if (fname == null) {
                         Slog.w(TAG, "<unavailable-feature> without name in " + permFile + " at "
@@ -352,7 +370,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("allow-in-power-save-except-idle".equals(name) && !onlyFeatures) {
+                } else if ("allow-in-power-save-except-idle".equals(name) && allowAll) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<allow-in-power-save-except-idle> without package in "
@@ -363,7 +381,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("allow-in-power-save".equals(name) && !onlyFeatures) {
+                } else if ("allow-in-power-save".equals(name) && allowAll) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<allow-in-power-save> without package in " + permFile + " at "
@@ -374,7 +392,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("fixed-ime-app".equals(name) && !onlyFeatures) {
+                } else if ("fixed-ime-app".equals(name) && allowAll) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<fixed-ime-app> without package in " + permFile + " at "
@@ -385,7 +403,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("app-link".equals(name)) {
+                } else if ("app-link".equals(name) && allowAppConfigs) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<app-link> without package in " + permFile + " at "
@@ -394,7 +412,7 @@ public class SystemConfig {
                         mLinkedApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
-                } else if ("system-user-whitelisted-app".equals(name)) {
+                } else if ("system-user-whitelisted-app".equals(name) && allowAppConfigs) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<system-user-whitelisted-app> without package in " + permFile
@@ -403,7 +421,7 @@ public class SystemConfig {
                         mSystemUserWhitelistedApps.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
-                } else if ("system-user-blacklisted-app".equals(name)) {
+                } else if ("system-user-blacklisted-app".equals(name) && allowAppConfigs) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<system-user-blacklisted-app without package in " + permFile
