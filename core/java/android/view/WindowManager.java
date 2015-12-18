@@ -1183,6 +1183,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH = 0x00008000;
 
         /**
+         * Flag to indicate that this child window should always be laid-out in the parent
+         * frame regardless of the current windowing mode configuration.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME = 0x00010000;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
