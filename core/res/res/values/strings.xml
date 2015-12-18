@@ -3966,25 +3966,6 @@
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration, location services, and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 
-
-    <!-- [CHAR LIMIT=100] Notification importance slider title -->
-    <string name="notification_importance_title">Importance</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
-    <string name="notification_importance_blocked">Blocked: Never show these notifications</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: low importance level description -->
-    <string name="notification_importance_low">Low: Silently show at the bottom of the notification list</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: normal importance level description -->
-    <string name="notification_importance_default">Normal: Silently show these notifications</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
-    <string name="notification_importance_high">High: Show at the top of the notifications list and make sound</string>
-
-    <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
-    <string name="notification_importance_max">Urgent: Peek onto the screen and make sound</string>
-
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes_summary">
         <item quantity="one">For one minute (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>

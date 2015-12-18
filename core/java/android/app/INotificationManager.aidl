@@ -55,6 +55,7 @@ interface INotificationManager
     void setTopicImportance(String pkg, int uid, in Notification.Topic topic, int importance);
     int getTopicImportance(String pkg, int uid, in Notification.Topic topic);
     void setAppImportance(String pkg, int uid, int importance);
+    boolean doesAppUseTopics(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

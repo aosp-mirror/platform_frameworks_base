@@ -2091,12 +2091,6 @@
   <java-symbol type="array" name="config_system_condition_providers" />
   <java-symbol type="string" name="muted_by" />
   <java-symbol type="string" name="zen_mode_alarm" />
-  <java-symbol type="string" name="notification_importance_blocked" />
-  <java-symbol type="string" name="notification_importance_low" />
-  <java-symbol type="string" name="notification_importance_default" />
-  <java-symbol type="string" name="notification_importance_high" />
-  <java-symbol type="string" name="notification_importance_max" />
-  <java-symbol type="string" name="notification_importance_title" />
 
   <java-symbol type="string" name="select_day" />
   <java-symbol type="string" name="select_year" />

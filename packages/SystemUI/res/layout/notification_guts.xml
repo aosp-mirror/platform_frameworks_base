@@ -139,7 +139,9 @@
 
         </FrameLayout>
 
-        <RadioGroup android:layout_width="wrap_content"
+        <RadioGroup
+                    android:id="@+id/apply_to"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingTop="8dp">
             <RadioButton android:id="@+id/apply_to_topic"
