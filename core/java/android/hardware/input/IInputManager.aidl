@@ -73,4 +73,6 @@ interface IInputManager {
 
     void setPointerIconShape(int shapeId);
     void setCustomPointerIcon(in PointerIcon icon);
+
+    void setPointerIconDetached(boolean detached);
 }

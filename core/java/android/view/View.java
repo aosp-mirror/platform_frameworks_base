@@ -14716,6 +14716,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         destroyDrawingCache();
 
         cleanupDraw();
+        releasePointerCapture();
         mCurrentAnimation = null;
     }
 
@@ -21210,6 +21211,56 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mPointerIcon = pointerIcon;
+    }
+
+    /**
+     * Request capturing further mouse events.
+     *
+     * When the view captures, the mouse pointer icon will disappear and will not change its
+     * position. Further mouse events will come to the capturing view, and the mouse movements
+     * will can be detected through {@link MotionEvent#AXIS_RELATIVE_X} and
+     * {@link MotionEvent#AXIS_RELATIVE_Y}. Non-mouse events (touchscreens, or stylus) will not
+     * be affected.
+     *
+     * The capture will be released through {@link #releasePointerCapture()}, or will be lost
+     * automatically when the view or containing window disappear.
+     *
+     * @return true when succeeds.
+     * @see #releasePointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public void setPointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.setPointerCapture(this);
+        }
+    }
+
+
+    /**
+     * Release the current capture of mouse events.
+     *
+     * If the view does not have the capture, it will do nothing.
+     * @see #setPointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public void releasePointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl != null) {
+            viewRootImpl.releasePointerCapture(this);
+        }
+    }
+
+    /**
+     * Checks the capture status of mouse events.
+     *
+     * @return true if the view has the capture.
+     * @see #setPointerCapture()
+     * @see #hasPointerCapture()
+     */
+    public boolean hasPointerCapture() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        return (viewRootImpl != null) && viewRootImpl.hasPointerCapture(this);
     }
 
     //
