@@ -52,8 +52,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private static final float SCRIM_IN_FRONT_ALPHA = 0.75f;
     private static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
-    private static final int TAG_HUN_START_ALPHA = R.id.hun_scrim_alpha_start;
-    private static final int TAG_HUN_END_ALPHA = R.id.hun_scrim_alpha_end;
+    private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
+    private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
 
     private final ScrimView mScrimBehind;
     private final ScrimView mScrimInFront;
@@ -164,6 +164,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         scheduleUpdate();
     }
 
+    public void animateNextChange() {
+        mAnimateChange = true;
+    }
+
     public void setDozing(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;
@@ -271,21 +275,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void setScrimColor(View scrim, float alpha) {
-        ValueAnimator runningAnim = (ValueAnimator) scrim.getTag(TAG_KEY_ANIM);
-        Float target = (Float) scrim.getTag(TAG_KEY_ANIM_TARGET);
-        if (runningAnim != null && target != null) {
-            if (alpha != target) {
-                runningAnim.cancel();
-            } else {
-                return;
-            }
-        }
-        if (mAnimateChange) {
-            startScrimAnimation(scrim, alpha);
-        } else {
-            setCurrentScrimAlpha(scrim, alpha);
-            updateScrimColor(scrim);
-        }
+        updateScrim(mAnimateChange, scrim, alpha, getCurrentScrimAlpha(scrim));
     }
 
     private float getDozeAlpha(View scrim) {
@@ -428,41 +418,44 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void updateHeadsUpScrim(boolean animate) {
-        float alpha = calculateHeadsUpAlpha();
-        ValueAnimator previousAnimator = StackStateAnimator.getChildTag(mHeadsUpScrim,
+        updateScrim(animate, mHeadsUpScrim, calculateHeadsUpAlpha(), mCurrentHeadsUpAlpha);
+    }
+
+    private void updateScrim(boolean animate, View scrim, float alpha, float currentAlpha) {
+        ValueAnimator previousAnimator = StackStateAnimator.getChildTag(scrim,
                 TAG_KEY_ANIM);
         float animEndValue = -1;
         if (previousAnimator != null) {
-            if (animate || alpha == mCurrentHeadsUpAlpha) {
+            if (animate || alpha == currentAlpha) {
                 previousAnimator.cancel();
             } else {
-                animEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim, TAG_HUN_END_ALPHA);
+                animEndValue = StackStateAnimator.getChildTag(scrim, TAG_END_ALPHA);
             }
         }
-        if (alpha != mCurrentHeadsUpAlpha && alpha != animEndValue) {
+        if (alpha != currentAlpha && alpha != animEndValue) {
             if (animate) {
-                startScrimAnimation(mHeadsUpScrim, alpha);
-                mHeadsUpScrim.setTag(TAG_HUN_START_ALPHA, mCurrentHeadsUpAlpha);
-                mHeadsUpScrim.setTag(TAG_HUN_END_ALPHA, alpha);
+                startScrimAnimation(scrim, alpha);
+                scrim.setTag(TAG_START_ALPHA, currentAlpha);
+                scrim.setTag(TAG_END_ALPHA, alpha);
             } else {
                 if (previousAnimator != null) {
-                    float previousStartValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
-                            TAG_HUN_START_ALPHA);
-                    float previousEndValue = StackStateAnimator.getChildTag(mHeadsUpScrim,
-                           TAG_HUN_END_ALPHA);
+                    float previousStartValue = StackStateAnimator.getChildTag(scrim,
+                            TAG_START_ALPHA);
+                    float previousEndValue = StackStateAnimator.getChildTag(scrim,
+                            TAG_END_ALPHA);
                     // we need to increase all animation keyframes of the previous animator by the
                     // relative change to the end value
                     PropertyValuesHolder[] values = previousAnimator.getValues();
                     float relativeDiff = alpha - previousEndValue;
                     float newStartValue = previousStartValue + relativeDiff;
                     values[0].setFloatValues(newStartValue, alpha);
-                    mHeadsUpScrim.setTag(TAG_HUN_START_ALPHA, newStartValue);
-                    mHeadsUpScrim.setTag(TAG_HUN_END_ALPHA, alpha);
+                    scrim.setTag(TAG_START_ALPHA, newStartValue);
+                    scrim.setTag(TAG_END_ALPHA, alpha);
                     previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
                 } else {
                     // update the alpha directly
-                    setCurrentScrimAlpha(mHeadsUpScrim, alpha);
-                    updateScrimColor(mHeadsUpScrim);
+                    setCurrentScrimAlpha(scrim, alpha);
+                    updateScrimColor(scrim);
                 }
             }
         }
