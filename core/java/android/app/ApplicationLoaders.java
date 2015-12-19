@@ -27,7 +27,7 @@ class ApplicationLoaders
         return gApplicationLoaders;
     }
 
-    public ClassLoader getClassLoader(String zip, String librarySearchPath,
+    public ClassLoader getClassLoader(String zip, boolean isBundled, String librarySearchPath,
                                       String libraryPermittedPath, ClassLoader parent)
     {
         /*
@@ -56,7 +56,8 @@ class ApplicationLoaders
     
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
                 PathClassLoader pathClassloader =
-                    new PathClassLoader(zip, librarySearchPath, libraryPermittedPath, parent);
+                    new PathClassLoader(zip, isBundled, librarySearchPath,
+                                        libraryPermittedPath, parent);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 mLoaders.put(zip, pathClassloader);
