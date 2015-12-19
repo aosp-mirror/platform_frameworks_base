@@ -16,6 +16,7 @@
 
 package com.android.shell;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static com.android.shell.BugreportPrefs.STATE_SHOW;
 import static com.android.shell.BugreportPrefs.getWarningState;
 
@@ -29,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -48,6 +50,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -59,8 +62,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.SystemProperties;
+import android.os.Vibrator;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -115,6 +118,8 @@ public class BugreportProgressService extends Service {
     static final String INTENT_BUGREPORT_SHARE = "android.intent.action.BUGREPORT_SHARE";
     static final String INTENT_BUGREPORT_INFO_LAUNCH =
             "android.intent.action.BUGREPORT_INFO_LAUNCH";
+    static final String INTENT_BUGREPORT_SCREENSHOT =
+            "android.intent.action.BUGREPORT_SCREENSHOT";
 
     static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
@@ -127,6 +132,16 @@ public class BugreportProgressService extends Service {
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_POLL = 2;
+    private static final int MSG_DELAYED_SCREENSHOT = 3;
+    private static final int MSG_SCREENSHOT_REQUEST = 4;
+    private static final int MSG_SCREENSHOT_RESPONSE = 5;
+
+    /**
+     * Delay before a screenshot is taken.
+     * <p>
+     * Should be at least 3 seconds, otherwise its toast might show up in the screenshot.
+     */
+    static final int SCREENSHOT_DELAY_SECONDS = 3;
 
     /** Polling frequency, in milliseconds. */
     static final long POLLING_FREQUENCY = 2 * DateUtils.SECOND_IN_MILLIS;
@@ -141,35 +156,59 @@ public class BugreportProgressService extends Service {
     private static final String NAME_SUFFIX = ".name";
 
     /** System property (and value) used to stop dumpstate. */
+    // TODO: should call ActiveManager API instead
     private static final String CTL_STOP = "ctl.stop";
     private static final String BUGREPORT_SERVICE = "bugreportplus";
+
+    /**
+     * Directory on Shell's data storage where screenshots will be stored.
+     * <p>
+     * Must be a path supported by its FileProvider.
+     */
+    private static final String SCREENSHOT_DIR = "bugreports";
 
     /** Managed dumpstate processes (keyed by pid) */
     private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();
 
-    private Looper mServiceLooper;
-    private ServiceHandler mServiceHandler;
+    private Context mContext;
+    private ServiceHandler mMainHandler;
+    private ScreenshotHandler mScreenshotHandler;
 
     private final BugreportInfoDialog mInfoDialog = new BugreportInfoDialog();
 
+    private File mScreenshotsDir;
+
+    /**
+     * Flag indicating whether a screenshot is being taken.
+     * <p>
+     * This is the only state that is shared between the 2 handlers and hence must have synchronized
+     * access.
+     */
+    private boolean mTakingScreenshot;
+
     @Override
     public void onCreate() {
-        HandlerThread thread = new HandlerThread("BugreportProgressServiceThread",
-                Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
+        mContext = getApplicationContext();
+        mMainHandler = new ServiceHandler("BugreportProgressServiceMainThread");
+        mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
 
-        mServiceLooper = thread.getLooper();
-        mServiceHandler = new ServiceHandler(mServiceLooper);
+        mScreenshotsDir = new File(new ContextWrapper(mContext).getFilesDir(), SCREENSHOT_DIR);
+        if (!mScreenshotsDir.exists()) {
+            Log.i(TAG, "Creating directory " + mScreenshotsDir + " to store temporary screenshots");
+            if (!mScreenshotsDir.mkdir()) {
+                Log.w(TAG, "Could not create directory " + mScreenshotsDir);
+            }
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             // Handle it in a separate thread.
-            Message msg = mServiceHandler.obtainMessage();
+            final Message msg = mMainHandler.obtainMessage();
             msg.what = MSG_SERVICE_COMMAND;
             msg.obj = intent;
-            mServiceHandler.sendMessage(msg);
+            mMainHandler.sendMessage(msg);
         }
 
         // If service is killed it cannot be recreated because it would not know which
@@ -184,35 +223,47 @@ public class BugreportProgressService extends Service {
 
     @Override
     public void onDestroy() {
-        mServiceLooper.quit();
+        mMainHandler.getLooper().quit();
+        mScreenshotHandler.getLooper().quit();
         super.onDestroy();
     }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        synchronized (mProcesses) {
-            final int size = mProcesses.size();
-            if (size == 0) {
-                writer.printf("No monitored processes");
-                return;
-            }
-            writer.printf("Monitored dumpstate processes\n");
-            writer.printf("-----------------------------\n");
-            for (int i = 0; i < size; i++) {
-              writer.printf("%s\n", mProcesses.valueAt(i));
-            }
+        final int size = mProcesses.size();
+        if (size == 0) {
+            writer.printf("No monitored processes");
+            return;
+        }
+        writer.printf("Monitored dumpstate processes\n");
+        writer.printf("-----------------------------\n");
+        for (int i = 0; i < size; i++) {
+            writer.printf("%s\n", mProcesses.valueAt(i));
         }
     }
 
+    /**
+     * Main thread used to handle all requests but taking screenshots.
+     */
     private final class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
-            super(looper);
+        public ServiceHandler(String name) {
+            super(newLooper(name));
         }
 
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_POLL) {
                 poll();
+                return;
+            }
+
+            if (msg.what == MSG_DELAYED_SCREENSHOT) {
+                takeScreenshot(msg.arg1, msg.arg2);
+                return;
+            }
+
+            if (msg.what == MSG_SCREENSHOT_RESPONSE) {
+                handleScreenshotResponse(msg);
                 return;
             }
 
@@ -262,6 +313,9 @@ public class BugreportProgressService extends Service {
                 case INTENT_BUGREPORT_INFO_LAUNCH:
                     launchBugreportInfoDialog(pid);
                     break;
+                case INTENT_BUGREPORT_SCREENSHOT:
+                    takeScreenshot(pid, true);
+                    break;
                 case INTENT_BUGREPORT_SHARE:
                     shareBugreport(pid);
                     break;
@@ -286,6 +340,32 @@ public class BugreportProgressService extends Service {
     }
 
     /**
+     * Separate thread used only to take screenshots so it doesn't block the main thread.
+     */
+    private final class ScreenshotHandler extends Handler {
+        public ScreenshotHandler(String name) {
+            super(newLooper(name));
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what != MSG_SCREENSHOT_REQUEST) {
+                Log.e(TAG, "Invalid message type: " + msg.what);
+                return;
+            }
+            handleScreenshotRequest(msg);
+        }
+    }
+
+    private BugreportInfo getInfo(int pid) {
+        final BugreportInfo info = mProcesses.get(pid);
+        if (info == null) {
+            Log.w(TAG, "Not monitoring process with PID " + pid);
+        }
+        return info;
+    }
+
+    /**
      * Creates the {@link BugreportInfo} for a process and issue a system notification to
      * indicate its progress.
      *
@@ -304,14 +384,14 @@ public class BugreportProgressService extends Service {
             return false;
         }
 
-        final BugreportInfo info = new BugreportInfo(getApplicationContext(), pid, name, max);
-        synchronized (mProcesses) {
-            if (mProcesses.indexOfKey(pid) >= 0) {
-                Log.w(TAG, "PID " + pid + " already watched");
-            } else {
-                mProcesses.put(info.pid, info);
-            }
+        final BugreportInfo info = new BugreportInfo(mContext, pid, name, max);
+        if (mProcesses.indexOfKey(pid) >= 0) {
+            Log.w(TAG, "PID " + pid + " already watched");
+        } else {
+            mProcesses.put(info.pid, info);
         }
+        // Take initial screenshot.
+        takeScreenshot(pid, false);
         updateProgress(info);
         return true;
     }
@@ -325,26 +405,35 @@ public class BugreportProgressService extends Service {
             return;
         }
 
-        final Context context = getApplicationContext();
         final NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
         final String percentText = nf.format((double) info.progress / info.max);
-        final Action cancelAction = new Action.Builder(null, context.getString(
-                com.android.internal.R.string.cancel), newCancelIntent(context, info)).build();
-        final Intent infoIntent = new Intent(context, BugreportProgressService.class);
+        final Action cancelAction = new Action.Builder(null, mContext.getString(
+                com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
+        final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
         infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
         infoIntent.putExtra(EXTRA_PID, info.pid);
         final Action infoAction = new Action.Builder(null,
-                context.getString(R.string.bugreport_info_action),
-                PendingIntent.getService(context, info.pid, infoIntent,
+                mContext.getString(R.string.bugreport_info_action),
+                PendingIntent.getService(mContext, info.pid, infoIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT)).build();
+        final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
+        screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
+        screenshotIntent.putExtra(EXTRA_PID, info.pid);
+        PendingIntent screenshotPendingIntent = mTakingScreenshot ? null : PendingIntent
+                .getService(mContext, info.pid, screenshotIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+        final Action screenshotAction = new Action.Builder(null,
+                mContext.getString(R.string.bugreport_screenshot_action),
+                screenshotPendingIntent).build();
 
-        final String title = context.getString(R.string.bugreport_in_progress_title);
+        final String title = mContext.getString(R.string.bugreport_in_progress_title);
+
         final String name =
-                info.name != null ? info.name : context.getString(R.string.bugreport_unnamed);
+                info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
 
-        final Notification notification = new Notification.Builder(context)
+        final Notification notification = new Notification.Builder(mContext)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setContentTitle(title)
                 .setTicker(title)
@@ -353,13 +442,14 @@ public class BugreportProgressService extends Service {
                 .setProgress(info.max, info.progress, false)
                 .setOngoing(true)
                 .setLocalOnly(true)
-                .setColor(context.getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
                 .addAction(infoAction)
+                .addAction(screenshotAction)
                 .addAction(cancelAction)
                 .build();
 
-        NotificationManager.from(context).notify(TAG, info.pid, notification);
+        NotificationManager.from(mContext).notify(TAG, info.pid, notification);
     }
 
     /**
@@ -377,16 +467,14 @@ public class BugreportProgressService extends Service {
      * Finalizes the progress on a given bugreport and cancel its notification.
      */
     private void stopProgress(int pid) {
-        synchronized (mProcesses) {
-            if (mProcesses.indexOfKey(pid) < 0) {
-                Log.w(TAG, "PID not watched: " + pid);
-            } else {
-                mProcesses.remove(pid);
-            }
-            stopSelfWhenDone();
+        if (mProcesses.indexOfKey(pid) < 0) {
+            Log.w(TAG, "PID not watched: " + pid);
+        } else {
+            mProcesses.remove(pid);
         }
+        stopSelfWhenDone();
         Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
-        NotificationManager.from(getApplicationContext()).cancel(TAG, pid);
+        NotificationManager.from(mContext).cancel(TAG, pid);
     }
 
     /**
@@ -394,12 +482,11 @@ public class BugreportProgressService extends Service {
      */
     private void cancel(int pid) {
         Log.v(TAG, "cancel: pid=" + pid);
-        synchronized (mProcesses) {
-            BugreportInfo info = mProcesses.get(pid);
-            if (info != null && !info.finished) {
-                Log.i(TAG, "Cancelling bugreport service (pid=" + pid + ") on user's request");
-                setSystemProperty(CTL_STOP, BUGREPORT_SERVICE);
-            }
+        final BugreportInfo info = getInfo(pid);
+        if (info != null && !info.finished) {
+            Log.i(TAG, "Cancelling bugreport service (pid=" + pid + ") on user's request");
+            setSystemProperty(CTL_STOP, BUGREPORT_SERVICE);
+            deleteScreenshots(info);
         }
         stopProgress(pid);
     }
@@ -410,54 +497,52 @@ public class BugreportProgressService extends Service {
      * @return whether it should keep polling.
      */
     private boolean pollProgress() {
-        synchronized (mProcesses) {
-            final int total = mProcesses.size();
-            if (total == 0) {
-                Log.d(TAG, "No process to poll progress.");
-            }
-            int activeProcesses = 0;
-            for (int i = 0; i < total; i++) {
-                final int pid = mProcesses.keyAt(i);
-                final BugreportInfo info = mProcesses.valueAt(i);
-                if (info.finished) {
-                    if (DEBUG) Log.v(TAG, "Skipping finished process " + pid);
-                    continue;
-                }
-                activeProcesses++;
-                final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
-                final int progress = SystemProperties.getInt(progressKey, 0);
-                if (progress == 0) {
-                    Log.v(TAG, "System property " + progressKey + " is not set yet");
-                }
-                final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
-                final boolean maxChanged = max > 0 && max != info.max;
-                final boolean progressChanged = progress > 0 && progress != info.progress;
-
-                if (progressChanged || maxChanged) {
-                    if (progressChanged) {
-                        if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
-                                + info.progress + " to " + progress);
-                        info.progress = progress;
-                    }
-                    if (maxChanged) {
-                        Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
-                                + " to " + max);
-                        info.max = max;
-                    }
-                    info.lastUpdate = System.currentTimeMillis();
-                    updateProgress(info);
-                } else {
-                    long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
-                    if (inactiveTime >= INACTIVITY_TIMEOUT) {
-                        Log.w(TAG, "No progress update for process " + pid + " since "
-                                + info.getFormattedLastUpdate());
-                        stopProgress(info.pid);
-                    }
-                }
-            }
-            if (DEBUG) Log.v(TAG, "pollProgress() total=" + total + ", actives=" + activeProcesses);
-            return activeProcesses > 0;
+        final int total = mProcesses.size();
+        if (total == 0) {
+            Log.d(TAG, "No process to poll progress.");
         }
+        int activeProcesses = 0;
+        for (int i = 0; i < total; i++) {
+            final int pid = mProcesses.keyAt(i);
+            final BugreportInfo info = mProcesses.valueAt(i);
+            if (info.finished) {
+                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid);
+                continue;
+            }
+            activeProcesses++;
+            final String progressKey = DUMPSTATE_PREFIX + pid + PROGRESS_SUFFIX;
+            final int progress = SystemProperties.getInt(progressKey, 0);
+            if (progress == 0) {
+                Log.v(TAG, "System property " + progressKey + " is not set yet");
+            }
+            final int max = SystemProperties.getInt(DUMPSTATE_PREFIX + pid + MAX_SUFFIX, 0);
+            final boolean maxChanged = max > 0 && max != info.max;
+            final boolean progressChanged = progress > 0 && progress != info.progress;
+
+            if (progressChanged || maxChanged) {
+                if (progressChanged) {
+                    if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
+                            + info.progress + " to " + progress);
+                    info.progress = progress;
+                }
+                if (maxChanged) {
+                    Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
+                            + " to " + max);
+                    info.max = max;
+                }
+                info.lastUpdate = System.currentTimeMillis();
+                updateProgress(info);
+            } else {
+                long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
+                if (inactiveTime >= INACTIVITY_TIMEOUT) {
+                    Log.w(TAG, "No progress update for process " + pid + " since "
+                            + info.getFormattedLastUpdate());
+                    stopProgress(info.pid);
+                }
+            }
+        }
+        if (DEBUG) Log.v(TAG, "pollProgress() total=" + total + ", actives=" + activeProcesses);
+        return activeProcesses > 0;
     }
 
     /**
@@ -467,35 +552,141 @@ public class BugreportProgressService extends Service {
     private void launchBugreportInfoDialog(int pid) {
         // Copy values so it doesn't lock mProcesses while UI is being updated
         final String name, title, description;
-        synchronized (mProcesses) {
-            final BugreportInfo info = mProcesses.get(pid);
-            if (info == null) {
-                Log.w(TAG, "No bugreport info for PID " + pid);
-                return;
-            }
-            name = info.name;
-            title = info.title;
-            description = info.description;
+        final BugreportInfo info = getInfo(pid);
+        if (info == null) {
+            return;
+        }
+        name = info.name;
+        title = info.title;
+        description = info.description;
+
+        collapseNotificationBar();
+        mInfoDialog.initialize(mContext, pid, name, title, description);
+    }
+
+    /**
+     * Starting point for taking a screenshot.
+     * <p>
+     * If {@code delayed} is set, it first display a toast message and waits
+     * {@link #SCREENSHOT_DELAY_SECONDS} seconds before taking it, otherwise it takes the screenshot
+     * right away.
+     * <p>
+     * Typical usage is delaying when taken from the notification action, and taking it right away
+     * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
+     */
+    private void takeScreenshot(int pid, boolean delayed) {
+        setTakingScreenshot(true);
+        if (delayed) {
+            collapseNotificationBar();
+            final String msg = mContext.getResources()
+                    .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
+                            SCREENSHOT_DELAY_SECONDS, SCREENSHOT_DELAY_SECONDS);
+            Log.i(TAG, msg);
+            // Show a toast just once, otherwise it might be captured in the screenshot.
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+
+            takeScreenshot(pid, SCREENSHOT_DELAY_SECONDS);
+        } else {
+            takeScreenshot(pid, 0);
+        }
+    }
+
+    /**
+     * Takes a screenshot after {@code delay} seconds.
+     */
+    private void takeScreenshot(int pid, int delay) {
+        if (delay > 0) {
+            Log.d(TAG, "Taking screenshot for " + pid + " in " + delay + " seconds");
+            final Message msg = mMainHandler.obtainMessage();
+            msg.what = MSG_DELAYED_SCREENSHOT;
+            msg.arg1 = pid;
+            msg.arg2 = delay - 1;
+            mMainHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
+            return;
         }
 
-        // Closes the notification bar first.
-        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        // It's time to take the screenshot: let the proper thread handle it
+        final BugreportInfo info = getInfo(pid);
+        if (info == null) {
+            return;
+        }
+        final String screenshotPath =
+                new File(mScreenshotsDir, info.getPathNextScreenshot()).getAbsolutePath();
 
-        mInfoDialog.initialize(getApplicationContext(), pid, name, title, description);
+        final Message requestMsg = new Message();
+        requestMsg.what = MSG_SCREENSHOT_REQUEST;
+        requestMsg.arg1 = pid;
+        requestMsg.obj = screenshotPath;
+        mScreenshotHandler.sendMessage(requestMsg);
+    }
+
+    /**
+     * Sets the internal {@code mTakingScreenshot} state and updates all notifications so their
+     * SCREENSHOT button is enabled or disabled accordingly.
+     */
+    private void setTakingScreenshot(boolean flag) {
+        synchronized (BugreportProgressService.this) {
+            mTakingScreenshot = flag;
+            for (int i = 0; i < mProcesses.size(); i++) {
+                updateProgress(mProcesses.valueAt(i));
+            }
+        }
+    }
+
+    private void handleScreenshotRequest(Message requestMsg) {
+        String screenshotFile = (String) requestMsg.obj;
+        boolean taken = takeScreenshot(mContext, screenshotFile);
+        setTakingScreenshot(false);
+
+        final Message resultMsg = new Message();
+        resultMsg.what = MSG_SCREENSHOT_RESPONSE;
+        resultMsg.arg1 = requestMsg.arg1;
+        resultMsg.arg2 = taken ? 1 : 0;
+        resultMsg.obj = screenshotFile;
+        mMainHandler.sendMessage(resultMsg);
+    }
+
+    private void handleScreenshotResponse(Message resultMsg) {
+        final boolean taken = resultMsg.arg2 != 0;
+        final BugreportInfo info = getInfo(resultMsg.arg1);
+        if (info == null) {
+            return;
+        }
+        final File screenshotFile = new File((String) resultMsg.obj);
+
+        final int msgId;
+        if (taken) {
+            info.addScreenshot(screenshotFile);
+            msgId = R.string.bugreport_screenshot_taken;
+        } else {
+            // TODO: try again using Framework APIs instead of relying on screencap.
+            msgId = R.string.bugreport_screenshot_failed;
+        }
+        final String msg = mContext.getString(msgId);
+        Log.d(TAG, msg);
+        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Deletes all screenshots taken for a given bugreport.
+     */
+    private void deleteScreenshots(BugreportInfo info) {
+        for (File file : info.screenshotFiles) {
+            Log.i(TAG, "Deleting screenshot file " + file);
+            file.delete();
+        }
     }
 
     /**
      * Finishes the service when it's not monitoring any more processes.
      */
     private void stopSelfWhenDone() {
-        synchronized (mProcesses) {
-            if (mProcesses.size() > 0) {
-                if (DEBUG) Log.v(TAG, "Staying alive, waiting for pids " + mProcesses);
-                return;
-            }
-            Log.v(TAG, "No more pids to handle, shutting down");
-            stopSelf();
+        if (mProcesses.size() > 0) {
+            if (DEBUG) Log.v(TAG, "Staying alive, waiting for pids " + mProcesses);
+            return;
         }
+        Log.v(TAG, "No more pids to handle, shutting down");
+        stopSelf();
     }
 
     /**
@@ -503,24 +694,24 @@ public class BugreportProgressService extends Service {
      */
     private void onBugreportFinished(int pid, Intent intent) {
         mInfoDialog.onBugreportFinished(pid);
-        final Context context = getApplicationContext();
-        BugreportInfo info;
-        synchronized (mProcesses) {
-            info = mProcesses.get(pid);
-            if (info == null) {
-                // Happens when BUGREPORT_FINISHED was received without a BUGREPORT_STARTED
-                Log.v(TAG, "Creating info for untracked pid " + pid);
-                info = new BugreportInfo(context, pid);
-                mProcesses.put(pid, info);
-            }
-            info.bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
-            info.screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
-            info.finished = true;
+        BugreportInfo info = getInfo(pid);
+        if (info == null) {
+            // Happens when BUGREPORT_FINISHED was received without a BUGREPORT_STARTED first.
+            Log.v(TAG, "Creating info for untracked pid " + pid);
+            info = new BugreportInfo(mContext, pid);
+            mProcesses.put(pid, info);
         }
+        info.renameScreenshots(mScreenshotsDir);
+        info.bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
+        final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
+        if (screenshot != null) {
+            info.addScreenshot(screenshot);
+        }
+        info.finished = true;
 
-        final Configuration conf = context.getResources().getConfiguration();
+        final Configuration conf = mContext.getResources().getConfiguration();
         if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
-            triggerLocalNotification(context, info);
+            triggerLocalNotification(mContext, info);
         }
     }
 
@@ -530,11 +721,11 @@ public class BugreportProgressService extends Service {
      * (usually by triggering it on another connected device); we don't need to display the
      * notification in this case.
      */
-    private static void triggerLocalNotification(final Context context, final BugreportInfo info) {
+    private void triggerLocalNotification(final Context context, final BugreportInfo info) {
         if (!info.bugreportFile.exists() || !info.bugreportFile.canRead()) {
             Log.e(TAG, "Could not read bugreport file " + info.bugreportFile);
-            Toast.makeText(context, context.getString(R.string.bugreport_unreadable_text),
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
+            stopProgress(info.pid);
             return;
         }
 
@@ -561,7 +752,6 @@ public class BugreportProgressService extends Service {
         // Files are kept on private storage, so turn into Uris that we can
         // grant temporary permissions for.
         final Uri bugreportUri = getUri(context, info.bugreportFile);
-        final Uri screenshotUri = getUri(context, info.screenshotFile);
 
         final Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         final String mimeType = "application/vnd.android.bugreport";
@@ -575,7 +765,7 @@ public class BugreportProgressService extends Service {
         // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.
         // So, to avoid an exception on Intent.migrateExtraStreamToClipData(), we need to manually
         // create the ClipData object with the attachments URIs.
-        StringBuilder messageBody = new StringBuilder("Build info: ")
+        final StringBuilder messageBody = new StringBuilder("Build info: ")
             .append(SystemProperties.get("ro.build.description"))
             .append("\nSerial number: ")
             .append(SystemProperties.get("ro.serialno"));
@@ -586,7 +776,8 @@ public class BugreportProgressService extends Service {
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
                 new ClipData.Item(null, null, null, bugreportUri));
         final ArrayList<Uri> attachments = Lists.newArrayList(bugreportUri);
-        if (screenshotUri != null) {
+        for (File screenshot : info.screenshotFiles) {
+            final Uri screenshotUri = getUri(context, screenshot);
             clipData.addItem(new ClipData.Item(null, null, null, screenshotUri));
             attachments.add(screenshotUri);
         }
@@ -606,29 +797,25 @@ public class BugreportProgressService extends Service {
      * intent, but issuing a warning dialog the first time.
      */
     private void shareBugreport(int pid) {
-        final Context context = getApplicationContext();
-        final BugreportInfo info;
-        synchronized (mProcesses) {
-            info = mProcesses.get(pid);
-            if (info == null) {
-                // Should not happen, so log if it does...
-                Log.e(TAG, "INTERNAL ERROR: no info for PID " + pid + ": " + mProcesses);
-                return;
-            }
+        final BugreportInfo info = getInfo(pid);
+        if (info == null) {
+            // Should not happen, so log if it does...
+            Log.e(TAG, "INTERNAL ERROR: no info for PID " + pid + ": " + mProcesses);
+            return;
         }
-        final Intent sendIntent = buildSendIntent(context, info);
+        final Intent sendIntent = buildSendIntent(mContext, info);
         final Intent notifIntent;
 
         // Send through warning dialog by default
-        if (getWarningState(context, STATE_SHOW) == STATE_SHOW) {
-            notifIntent = buildWarningIntent(context, sendIntent);
+        if (getWarningState(mContext, STATE_SHOW) == STATE_SHOW) {
+            notifIntent = buildWarningIntent(mContext, sendIntent);
         } else {
             notifIntent = sendIntent;
         }
         notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Send the share intent...
-        context.startActivity(notifIntent);
+        mContext.startActivity(notifIntent);
 
         // ... and stop watching this process.
         stopProgress(pid);
@@ -781,19 +968,50 @@ public class BugreportProgressService extends Service {
      * Updates the user-provided details of a bugreport.
      */
     private void updateBugreportInfo(int pid, String name, String title, String description) {
-        synchronized (mProcesses) {
-            final BugreportInfo info = mProcesses.get(pid);
-            if (info == null) {
-                Log.w(TAG, "No bugreport info for PID " + pid);
-                return;
-            }
-            info.title = title;
-            info.description = description;
-            if (name != null && !info.name.equals(name)) {
-                info.name = name;
-                updateProgress(info);
-            }
+        final BugreportInfo info = getInfo(pid);
+        if (info == null) {
+            return;
         }
+        info.title = title;
+        info.description = description;
+        if (name != null && !info.name.equals(name)) {
+            info.name = name;
+            updateProgress(info);
+        }
+    }
+
+    private void collapseNotificationBar() {
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+    }
+
+    private static Looper newLooper(String name) {
+        final HandlerThread thread = new HandlerThread(name, THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        return thread.getLooper();
+    }
+
+    /**
+     * Takes a screenshot and save it to the given location.
+     */
+    private static boolean takeScreenshot(Context context, String screenshotFile) {
+        ((Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE))
+                .vibrate(150);
+        final ProcessBuilder screencap = new ProcessBuilder()
+                .command("/system/bin/screencap", "-p", screenshotFile);
+        Log.d(TAG, "Taking screenshot using " + screencap.command());
+        try {
+            final int exitValue = screencap.start().waitFor();
+            if (exitValue == 0) {
+                return true;
+            }
+            Log.e(TAG, "screencap (" + screencap.command() + ") failed: " + exitValue);
+        } catch (IOException e) {
+            Log.e(TAG, "screencap (" + screencap.command() + ") failed", e);
+        } catch (InterruptedException e) {
+            Log.w(TAG, "Thread interrupted while screencap still running");
+            Thread.currentThread().interrupt();
+        }
+        return false;
     }
 
     /**
@@ -843,7 +1061,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
-        private synchronized void initialize(Context context, int pid, String name, String title,
+        private void initialize(Context context, int pid, String name, String title,
                 String description) {
             // First initializes singleton.
             if (mDialog == null) {
@@ -937,7 +1155,7 @@ public class BugreportProgressService extends Service {
          * Sanitizes the user-provided value for the {@code name} field, automatically replacing
          * invalid characters if necessary.
          */
-        private synchronized void sanitizeName() {
+        private void sanitizeName() {
             String name = mInfoName.getText().toString();
             if (name.equals(mTempName)) {
                 if (DEBUG) Log.v(TAG, "name didn't change, no need to sanitize: " + name);
@@ -973,7 +1191,7 @@ public class BugreportProgressService extends Service {
          * <p>Once the bugreport is finished dumpstate has already generated the final files, so
          * changing the name would have no effect.
          */
-        private synchronized void onBugreportFinished(int pid) {
+        private void onBugreportFinished(int pid) {
             if (mInfoName != null) {
                 mInfoName.setEnabled(false);
                 mInfoName.setText(mSavedName);
@@ -1034,14 +1252,19 @@ public class BugreportProgressService extends Service {
         File bugreportFile;
 
         /**
-         * Path of the screenshot file.
+         * Path of the screenshot files.
          */
-        File screenshotFile;
+        List<File> screenshotFiles = new ArrayList<>(1);
 
         /**
          * Whether dumpstate sent an intent informing it has finished.
          */
         boolean finished;
+
+        /**
+         * Internal counter used to name screenshot files.
+         */
+        int screenshotCounter;
 
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
@@ -1062,6 +1285,45 @@ public class BugreportProgressService extends Service {
             this.finished = true;
         }
 
+        /**
+         * Gets the name for next screenshot file.
+         */
+        String getPathNextScreenshot() {
+            screenshotCounter ++;
+            return "screenshot-" + pid + "-" + screenshotCounter + ".png";
+        }
+
+        /**
+         * Saves the location of a taken screenshot so it can be sent out at the end.
+         */
+        void addScreenshot(File screenshot) {
+            screenshotFiles.add(screenshot);
+        }
+
+        /**
+         * Rename all screenshots files so that they contain the user-generated name instead of pid.
+         */
+        void renameScreenshots(File screenshotDir) {
+            if (TextUtils.isEmpty(name)) {
+                return;
+            }
+            final List<File> renamedFiles = new ArrayList<>(screenshotFiles.size());
+            for (File oldFile : screenshotFiles) {
+                final String oldName = oldFile.getName();
+                final String newName = oldName.replace(Integer.toString(pid), name);
+                final File newFile;
+                if (!newName.equals(oldName)) {
+                    final File renamedFile = new File(screenshotDir, newName);
+                    newFile = oldFile.renameTo(renamedFile) ? renamedFile : oldFile;
+                } else {
+                    Log.w(TAG, "Name didn't change: " + oldName); // Shouldn't happen.
+                    newFile = oldFile;
+                }
+                renamedFiles.add(newFile);
+            }
+            screenshotFiles = renamedFiles;
+        }
+
         String getFormattedLastUpdate() {
             return DateUtils.formatDateTime(context, lastUpdate,
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
@@ -1072,7 +1334,7 @@ public class BugreportProgressService extends Service {
             final float percent = ((float) progress * 100 / max);
             return "pid: " + pid + ", name: " + name + ", finished: " + finished
                     + "\n\ttitle: " + title + "\n\tdescription: " + description
-                    + "\n\tfile: " + bugreportFile + "\n\tscreenshot: " + screenshotFile
+                    + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
                     + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate();
         }

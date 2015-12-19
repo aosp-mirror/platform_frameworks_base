@@ -1100,6 +1100,7 @@
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
 
+  <java-symbol type="plurals" name="bugreport_countdown" />
   <java-symbol type="plurals" name="duration_hours" />
   <java-symbol type="plurals" name="duration_minutes" />
   <java-symbol type="plurals" name="duration_seconds" />

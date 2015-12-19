@@ -25,6 +25,7 @@ import static com.android.shell.BugreportProgressService.EXTRA_PID;
 import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_STARTED;
+import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -35,7 +36,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -56,6 +60,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
@@ -151,7 +156,25 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
+                null, 1);
+
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_takeExtraScreenshot() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+
+        waitForScreenshotButtonEnabled(true);
+        takeScreenshot();
+        assertScreenshotButtonEnabled(false);
+        waitForScreenshotButtonEnabled(true);
+
+        Bundle extras =
+                sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
+                null, 2);
 
         assertServiceNotRunning();
     }
@@ -194,7 +217,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
                 mScreenshotPath);
-        assertActionSendMultiple(extras, TITLE, mDescription, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NEW_NAME, TITLE,
+                mDescription, 1);
 
         assertServiceNotRunning();
     }
@@ -225,8 +249,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent();
-        assertActionSendMultiple(extras, TITLE, mDescription, BUGREPORT_CONTENT,
-                SCREENSHOT_CONTENT);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, TITLE,
+                mDescription, 1);
 
         assertServiceNotRunning();
     }
@@ -288,7 +312,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     private void assertProgressNotification(String name, String percent) {
-        // TODO: it current looks for 3 distinct objects, without taking advantage of their
+        // TODO: it currently looks for 3 distinct objects, without taking advantage of their
         // relationship.
         openProgressNotification();
         Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
@@ -311,7 +335,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     /**
      * Sends a "bugreport started" intent with the default values.
      */
-    private void sendBugreportStarted(int max) {
+    private void sendBugreportStarted(int max) throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
         intent.putExtra(EXTRA_PID, PID);
         intent.putExtra(EXTRA_NAME, NAME);
@@ -377,15 +401,29 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     /**
-     * Asserts the proper ACTION_SEND_MULTIPLE intent was sent.
+     * Asserts the proper {@link Intent#ACTION_SEND_MULTIPLE} intent was sent.
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
-        assertActionSendMultiple(extras, ZIP_FILE, null, bugreportContent, screenshotContent);
+        assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, null, ZIP_FILE,
+                null, 0);
     }
 
-    private void assertActionSendMultiple(Bundle extras, String subject, String description,
-            String bugreportContent, String screenshotContent) throws IOException {
+    /**
+     * Asserts the proper {@link Intent#ACTION_SEND_MULTIPLE} intent was sent.
+     *
+     * @param extras extras received in the intent
+     * @param bugreportContent expected content in the bugreport file
+     * @param screenshotContent expected content in the screenshot file (sent by dumpstate), if any
+     * @param pid emulated dumpstate pid
+     * @param name bugreport name as provided by the user
+     * @param title bugreport name as provided by the user (or received by dumpstate)
+     * @param description bugreport description as provided by the user
+     * @param numberScreenshots expected number of screenshots taken by Shell.
+     */
+    private void assertActionSendMultiple(Bundle extras, String bugreportContent,
+            String screenshotContent, int pid, String name, String title, String description,
+            int numberScreenshots) throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
         assertContainsRegex("missing build info",
                 SystemProperties.get("ro.build.description"), body);
@@ -395,31 +433,61 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             assertContainsRegex("missing description", description, body);
         }
 
-        assertEquals("wrong subject", subject, extras.getString(Intent.EXTRA_SUBJECT));
+        assertEquals("wrong subject", title, extras.getString(Intent.EXTRA_SUBJECT));
 
         List<Uri> attachments = extras.getParcelableArrayList(Intent.EXTRA_STREAM);
-        int expectedSize = screenshotContent != null ? 2 : 1;
+        int expectedNumberScreenshots = numberScreenshots;
+        if (screenshotContent != null) {
+            expectedNumberScreenshots ++; // Add screenshot received by dumpstate
+        }
+        int expectedSize = expectedNumberScreenshots + 1; // All screenshots plus the bugreport file
         assertEquals("wrong number of attachments", expectedSize, attachments.size());
 
         // Need to interact through all attachments, since order is not guaranteed.
-        Uri zipUri = null, screenshotUri = null;
+        Uri zipUri = null;
+        List<Uri> screenshotUris = new ArrayList<>(expectedNumberScreenshots);
         for (Uri attachment : attachments) {
             if (attachment.getPath().endsWith(".zip")) {
                 zipUri = attachment;
             }
             if (attachment.getPath().endsWith(".png")) {
-                screenshotUri = attachment;
+                screenshotUris.add(attachment);
             }
         }
         assertNotNull("did not get .zip attachment", zipUri);
         assertZipContent(zipUri, BUGREPORT_FILE, BUGREPORT_CONTENT);
 
-        if (screenshotContent != null) {
-            assertNotNull("did not get .png attachment", screenshotUri);
-            assertContent(screenshotUri, SCREENSHOT_CONTENT);
-        } else {
-            assertNull("should not have .png attachment", screenshotUri);
+        // URI of the screenshot taken by dumpstate.
+        Uri externalScreenshotUri = null;
+        SortedSet<String> internalScreenshotNames = new TreeSet<>();
+        for (Uri screenshotUri : screenshotUris) {
+            String screenshotName = screenshotUri.getLastPathSegment();
+            if (screenshotName.endsWith(SCREENSHOT_FILE)) {
+                externalScreenshotUri = screenshotUri;
+            } else {
+                internalScreenshotNames.add(screenshotName);
+            }
         }
+        // Check external screenshot
+        if (screenshotContent != null) {
+            assertNotNull("did not get .png attachment for external screenshot",
+                    externalScreenshotUri);
+            assertContent(externalScreenshotUri, SCREENSHOT_CONTENT);
+        } else {
+            assertNull("should not have .png attachment for external screenshot",
+                    externalScreenshotUri);
+        }
+        // Check internal screenshots.
+        SortedSet<String> expectedNames = new TreeSet<>();
+        for (int i = 1 ; i <= numberScreenshots; i++) {
+            String prefix = name != null ? name : Integer.toString(pid);
+            String expectedName = "screenshot-" + prefix + "-" + i + ".png";
+            expectedNames.add(expectedName);
+        }
+        // Ideally we should use MoreAsserts, but the error message in case of failure is not
+        // really useful.
+        assertEquals("wrong names for internal screenshots",
+                expectedNames, internalScreenshotNames);
     }
 
     private void assertContent(Uri uri, String expectedContent) throws IOException {
@@ -503,6 +571,47 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         String path = new File(dir, file).getAbsolutePath();
         Log.v(TAG, "Path for '" + file + "': " + path);
         return path;
+    }
+
+    /**
+     * Gets the notification button used to take a screenshot.
+     */
+    private UiObject getScreenshotButton() {
+        openProgressNotification();
+        return mUiBot.getVisibleObject(
+                mContext.getString(R.string.bugreport_screenshot_action).toUpperCase());
+    }
+
+    /**
+     * Takes a screenshot using the system notification.
+     */
+    private void takeScreenshot() throws Exception {
+        UiObject screenshotButton = getScreenshotButton();
+        mUiBot.click(screenshotButton, "screenshot_button");
+    }
+
+    private UiObject waitForScreenshotButtonEnabled(boolean expectedEnabled) throws Exception {
+        UiObject screenshotButton = getScreenshotButton();
+        int maxAttempts = SCREENSHOT_DELAY_SECONDS + 2;
+        int i = 0;
+        do {
+            boolean enabled = screenshotButton.isEnabled();
+            if (enabled == expectedEnabled) {
+                return screenshotButton;
+            }
+            i++;
+            Log.v(TAG, "Sleeping for 1 second while waiting for screenshot.enable to be "
+                    + expectedEnabled + " (attempt " + i + ")");
+            Thread.sleep(DateUtils.SECOND_IN_MILLIS);
+        } while (i <= maxAttempts);
+        fail("screenshot.enable didn't change to " + expectedEnabled + " in " + maxAttempts + "s");
+        return screenshotButton;
+    }
+
+    private void assertScreenshotButtonEnabled(boolean expectedEnabled) throws Exception {
+        UiObject screenshotButton = getScreenshotButton();
+        assertEquals("wrong state for screenshot button ", expectedEnabled,
+                screenshotButton.isEnabled());
     }
 
     /**
