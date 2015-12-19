@@ -194,6 +194,7 @@ class="en">Tools Help</span></a></div>
        </li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/vector-asset-studio.html">Vector Asset Studio</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/image-asset-studio.html">Image Asset Studio</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/zipalign.html">zipalign</a></li>
 
     </ul>
