@@ -8,6 +8,7 @@ page.title=Device Monitor
       <ol>
         <li><a href="{@docRoot}tools/debugging/debugging-memory.html"
           >Investigating Your RAM Usage</a></li>
+          <li><a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a></li>
       </ol>
     </div>
   </div>
