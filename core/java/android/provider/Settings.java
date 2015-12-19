@@ -2592,6 +2592,15 @@ public final class Settings {
         private static final Validator MICROPHONE_MUTE_VALIDATOR = sBooleanValidator;
 
         /**
+         * Master mono (int 1 = mono, 0 = normal).
+         *
+         * @hide
+         */
+        public static final String MASTER_MONO = "master_mono";
+
+        private static final Validator MASTER_MONO_VALIDATOR = sBooleanValidator;
+
+        /**
          * Whether the notifications should use the ring volume (value of 1) or
          * a separate notification volume (value of 0). In most cases, users
          * will have this enabled so the notification and ringer volumes will be
@@ -3357,6 +3366,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLUME_MASTER);
             PRIVATE_SETTINGS.add(VOLUME_MASTER_MUTE);
             PRIVATE_SETTINGS.add(MICROPHONE_MUTE);
+            PRIVATE_SETTINGS.add(MASTER_MONO);
             PRIVATE_SETTINGS.add(NOTIFICATIONS_USE_RING_VOLUME);
             PRIVATE_SETTINGS.add(VIBRATE_IN_SILENT);
             PRIVATE_SETTINGS.add(MEDIA_BUTTON_RECEIVER);
@@ -3435,6 +3445,7 @@ public final class Settings {
             VALIDATORS.put(VIBRATE_INPUT_DEVICES, VIBRATE_INPUT_DEVICES_VALIDATOR);
             VALIDATORS.put(VOLUME_MASTER_MUTE, VOLUME_MASTER_MUTE_VALIDATOR);
             VALIDATORS.put(MICROPHONE_MUTE, MICROPHONE_MUTE_VALIDATOR);
+            VALIDATORS.put(MASTER_MONO, MASTER_MONO_VALIDATOR);
             VALIDATORS.put(NOTIFICATIONS_USE_RING_VOLUME, NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR);
             VALIDATORS.put(VIBRATE_IN_SILENT, VIBRATE_IN_SILENT_VALIDATOR);
             VALIDATORS.put(MEDIA_BUTTON_RECEIVER, MEDIA_BUTTON_RECEIVER_VALIDATOR);

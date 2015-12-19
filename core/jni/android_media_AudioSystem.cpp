@@ -498,6 +498,22 @@ android_media_AudioSystem_getMasterMute(JNIEnv *env, jobject thiz)
 }
 
 static jint
+android_media_AudioSystem_setMasterMono(JNIEnv *env, jobject thiz, jboolean mono)
+{
+    return (jint) check_AudioSystem_Command(AudioSystem::setMasterMono(mono));
+}
+
+static jboolean
+android_media_AudioSystem_getMasterMono(JNIEnv *env, jobject thiz)
+{
+    bool mono;
+    if (AudioSystem::getMasterMono(&mono) != NO_ERROR) {
+        mono = false;
+    }
+    return mono;
+}
+
+static jint
 android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
 {
     return (jint) AudioSystem::getDevicesForStream(static_cast <audio_stream_type_t>(stream));
@@ -1637,6 +1653,8 @@ static const JNINativeMethod gMethods[] = {
     {"getMasterVolume",     "()F",      (void *)android_media_AudioSystem_getMasterVolume},
     {"setMasterMute",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMute},
     {"getMasterMute",       "()Z",      (void *)android_media_AudioSystem_getMasterMute},
+    {"setMasterMono",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMono},
+    {"getMasterMono",       "()Z",      (void *)android_media_AudioSystem_getMasterMono},
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
     {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},

@@ -52,6 +52,10 @@ interface IAudioService {
 
     void setMasterMute(boolean mute, int flags, String callingPackage, int userId);
 
+    boolean isMasterMono();
+
+    void setMasterMono(boolean mute, String callingPackage, int userId);
+
     int getStreamVolume(int streamType);
 
     int getStreamMinVolume(int streamType);
