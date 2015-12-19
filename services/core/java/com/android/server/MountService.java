@@ -807,8 +807,8 @@ class MountService extends IMountService.Stub
                 // System user does not have media provider, so skip.
                 if (user.isSystemOnly()) continue;
 
-                final ProviderInfo provider =
-                        mPms.resolveContentProvider(MediaStore.AUTHORITY, 0, user.id);
+                final ProviderInfo provider = mPms.resolveContentProvider(MediaStore.AUTHORITY,
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.id);
                 if (provider != null) {
                     final IActivityManager am = ActivityManagerNative.getDefault();
                     try {

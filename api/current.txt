@@ -9567,7 +9567,6 @@ package android.content.pm {
     field public static final int GET_CONFIGURATIONS = 16384; // 0x4000
     field public static final int GET_DISABLED_COMPONENTS = 512; // 0x200
     field public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 32768; // 0x8000
-    field public static final int GET_ENCRYPTION_UNAWARE_COMPONENTS = 262144; // 0x40000
     field public static final int GET_GIDS = 256; // 0x100
     field public static final int GET_INSTRUMENTATION = 16; // 0x10
     field public static final int GET_INTENT_FILTERS = 32; // 0x20
@@ -9583,6 +9582,9 @@ package android.content.pm {
     field public static final int GET_URI_PERMISSION_PATTERNS = 2048; // 0x800
     field public static final int MATCH_ALL = 131072; // 0x20000
     field public static final int MATCH_DEFAULT_ONLY = 65536; // 0x10000
+    field public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = 786432; // 0xc0000
+    field public static final int MATCH_ENCRYPTION_AWARE_ONLY = 524288; // 0x80000
+    field public static final int MATCH_ENCRYPTION_UNAWARE_ONLY = 262144; // 0x40000
     field public static final long MAXIMUM_VERIFICATION_TIMEOUT = 3600000L; // 0x36ee80L
     field public static final int PERMISSION_DENIED = -1; // 0xffffffff
     field public static final int PERMISSION_GRANTED = 0; // 0x0
