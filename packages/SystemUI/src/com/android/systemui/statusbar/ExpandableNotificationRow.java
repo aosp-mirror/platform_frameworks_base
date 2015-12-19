@@ -36,6 +36,7 @@ import android.widget.RemoteViews;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.stack.StackScrollState;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -59,6 +60,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mHasUserChangedExpansion;
     /** If {@link #mHasUserChangedExpansion}, has the user expanded this row */
     private boolean mUserExpanded;
+
+    /**
+     * Has this notification been expanded while it was pinned
+     */
+    private boolean mExpandedWhenPinned;
     /** Is the user touching this row */
     private boolean mUserLocked;
     /** Are we showing the "public" version */
@@ -103,6 +109,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private boolean mIsSystemChildExpanded;
     private boolean mIsPinned;
     private FalsingManager mFalsingManager;
+    private HeadsUpManager mHeadsUpManager;
     private NotificationHeaderUtil mHeaderUtil = new NotificationHeaderUtil(this);
 
     private boolean mJustClicked;
@@ -115,14 +122,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         public void onClick(View v) {
             if (!mShowingPublic && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
                 mGroupManager.toggleGroupExpansion(mStatusBarNotification);
-                mOnExpandClickListener.onExpandClicked(ExpandableNotificationRow.this,
+                mOnExpandClickListener.onExpandClicked(mEntry,
                         mGroupManager.isGroupExpanded(mStatusBarNotification));
             } else {
-                boolean nowExpanded = !isExpanded();
-                setUserExpanded(nowExpanded);
+                boolean nowExpanded;
+                if (isPinned()) {
+                    nowExpanded = !mExpandedWhenPinned;
+                    mExpandedWhenPinned = nowExpanded;
+                } else {
+                    nowExpanded = !isExpanded();
+                    setUserExpanded(nowExpanded);
+                }
                 notifyHeightChanged(true);
-                mOnExpandClickListener.onExpandClicked(ExpandableNotificationRow.this,
-                        nowExpanded);
+                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
             }
         }
     };
@@ -386,6 +398,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     public void setPinned(boolean pinned) {
         mIsPinned = pinned;
+        if (pinned) {
+            setIconAnimationRunning(true);
+            mExpandedWhenPinned = false;
+        } else if (mExpandedWhenPinned) {
+            setUserExpanded(true);
+        }
         setChronometerRunning(mLastChronometerRunning);
     }
 
@@ -393,11 +411,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mIsPinned;
     }
 
-    public int getHeadsUpHeight() {
+    /**
+     * @param atLeastMinHeight should the value returned be at least the minimum height.
+     *                         Used to avoid cyclic calls
+     * @return the height of the heads up notification when pinned
+     */
+    public int getPinnedHeadsUpHeight(boolean atLeastMinHeight) {
         if (mIsSummaryWithChildren) {
             return mChildrenContainer.getIntrinsicHeight();
         }
-        return mHeadsUpHeight;
+        if(mExpandedWhenPinned) {
+            return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
+        } else if (atLeastMinHeight) {
+            return Math.max(getMinHeight(), mHeadsUpHeight);
+        } else {
+            return mHeadsUpHeight;
+        }
     }
 
     /**
@@ -459,6 +488,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setOnExpandClickListener(OnExpandClickListener onExpandClickListener) {
         mOnExpandClickListener = onExpandClickListener;
+    }
+
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+        mHeadsUpManager = headsUpManager;
     }
 
     public interface ExpansionLogger {
@@ -718,7 +751,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (isUserLocked()) {
             return getActualHeight();
         }
-        boolean inExpansionState = isExpanded();
         if (mGuts != null && mGuts.areGutsExposed()) {
             return mGuts.getHeight();
         } else if ((isChildInGroup() && !isGroupExpanded())) {
@@ -728,12 +760,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
         } else if (mIsHeadsUp) {
-            if (inExpansionState) {
+            if (isPinned()) {
+                return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
+            } else if (isExpanded()) {
                 return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
             } else {
                 return Math.max(getMinHeight(), mHeadsUpHeight);
             }
-        } else if (inExpansionState) {
+        } else if (isExpanded()) {
             return getMaxExpandHeight();
         } else {
             return getMinHeight();
@@ -961,8 +995,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMinHeight() {
-        if (mIsSummaryWithChildren && !isGroupExpanded() && !mShowingPublic) {
+        if (mIsHeadsUp && mHeadsUpManager.isTrackingHeadsUp()) {
+                return getPinnedHeadsUpHeight(false /* atLeastMinHeight */);
+        } else if (mIsSummaryWithChildren && !isGroupExpanded() && !mShowingPublic) {
             return mChildrenContainer.getMinHeight();
+        } else if (mIsHeadsUp) {
+            return mHeadsUpHeight;
         }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMinHeight();
@@ -1067,6 +1105,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public interface OnExpandClickListener {
-        void onExpandClicked(View clickedView, boolean nowExpanded);
+        void onExpandClicked(NotificationData.Entry clickedEntry, boolean nowExpanded);
     }
 }

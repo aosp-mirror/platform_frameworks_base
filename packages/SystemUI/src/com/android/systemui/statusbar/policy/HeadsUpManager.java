@@ -387,7 +387,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
                     row.getLocationOnScreen(mTmpTwoArray);
                     minX = mTmpTwoArray[0];
                     maxX = mTmpTwoArray[0] + row.getWidth();
-                    maxY = row.getHeadsUpHeight();
+                    maxY = row.getIntrinsicHeight();
                     break;
                 }
             }
@@ -448,6 +448,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         for (String key : mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
             setEntryPinned(entry, false /* isPinned */);
+            // maybe it got un sticky
+            entry.updateEntry(false /* updatePostTime */);
         }
     }
 
@@ -470,6 +472,10 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         mTrackingHeadsUp = trackingHeadsUp;
     }
 
+    public boolean isTrackingHeadsUp() {
+        return mTrackingHeadsUp;
+    }
+
     public void setIsExpanded(boolean isExpanded) {
         if (isExpanded != mIsExpanded) {
             mIsExpanded = isExpanded;
@@ -482,9 +488,16 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         }
     }
 
-    public int getTopHeadsUpHeight() {
+    /**
+     * @return the height of the top heads up notification when pinned. This is different from the
+     *         intrinsic height, which also includes whether the notification is system expanded and
+     *         is mainly used when dragging down from a heads up notification.
+     */
+    public int getTopHeadsUpPinnedHeight() {
         HeadsUpEntry topEntry = getTopEntry();
-        return topEntry != null ? topEntry.entry.row.getHeadsUpHeight() : 0;
+        return topEntry != null && topEntry.entry != null
+                ? topEntry.entry.row.getPinnedHeadsUpHeight(true /* atLeastMinHeight */)
+                : 0;
     }
 
     /**
@@ -558,6 +571,22 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
     }
 
     /**
+     * Set an entry to be expanded and therefore stick in the heads up area if it's pinned
+     * until it's collapsed again.
+     */
+    public void setExpanded(NotificationData.Entry entry, boolean expanded) {
+        HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(entry.key);
+        if (headsUpEntry != null && headsUpEntry.expanded != expanded) {
+            headsUpEntry.expanded = expanded;
+            if (expanded) {
+                headsUpEntry.removeAutoRemovalCallbacks();
+            } else {
+                headsUpEntry.updateEntry(false /* updatePostTime */);
+            }
+        }
+    }
+
+    /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
      */
@@ -567,6 +596,7 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         public long earliestRemovaltime;
         private Runnable mRemoveHeadsUpRunnable;
         public boolean remoteInputActive;
+        public boolean expanded;
 
         public void setEntry(final NotificationData.Entry entry) {
             this.entry = entry;
@@ -601,12 +631,17 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             if (mEntriesToRemoveAfterExpand.contains(entry)) {
                 mEntriesToRemoveAfterExpand.remove(entry);
             }
-            if (!hasFullScreenIntent(entry) && !mRemoteInputActive) {
+            if (!isSticky()) {
                 long finishTime = postTime + mHeadsUpNotificationDecay;
                 long removeDelay = Math.max(finishTime - currentTime, mMinimumDisplayTime);
                 mHandler.postDelayed(mRemoveHeadsUpRunnable, removeDelay);
             }
             mSortedEntries.add(HeadsUpEntry.this);
+        }
+
+        private boolean isSticky() {
+            return (entry.row.isPinned() && expanded)
+                    || remoteInputActive || hasFullScreenIntent(entry);
         }
 
         @Override
@@ -641,6 +676,8 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             removeAutoRemovalCallbacks();
             entry = null;
             mRemoveHeadsUpRunnable = null;
+            expanded = false;
+            remoteInputActive = false;
         }
     }
 

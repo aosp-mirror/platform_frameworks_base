@@ -155,13 +155,7 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return mLayoutHeight - mTopPadding - getTopHeadsUpPushIn();
-    }
-
-    private int getTopHeadsUpPushIn() {
-        ExpandableNotificationRow topHeadsUpEntry = getTopHeadsUpEntry();
-        return topHeadsUpEntry != null ? topHeadsUpEntry.getHeadsUpHeight()
-                - topHeadsUpEntry.getMinHeight(): 0;
+        return mLayoutHeight - mTopPadding;
     }
 
     public boolean isShadeExpanded() {
@@ -178,11 +172,6 @@ public class AmbientState {
 
     public float getMaxHeadsUpTranslation() {
         return mMaxHeadsUpTranslation;
-    }
-
-    public ExpandableNotificationRow getTopHeadsUpEntry() {
-        HeadsUpManager.HeadsUpEntry topEntry = mHeadsUpManager.getTopEntry();
-        return topEntry == null ? null : topEntry.entry.row;
     }
 
     public void setDismissAllInProgress(boolean dismissAllInProgress) {

@@ -495,27 +495,28 @@ public class NotificationStackScrollLayout extends ViewGroup
         int stackHeight;
         float paddingOffset;
         boolean trackingHeadsUp = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp();
-        int normalUnfoldPositionStart = trackingHeadsUp ? mHeadsUpManager.getTopHeadsUpHeight()
+        int normalUnfoldPositionStart = trackingHeadsUp
+                ? mHeadsUpManager.getTopHeadsUpPinnedHeight()
                 : minStackHeight;
         if (newStackHeight - mTopPadding - mTopPaddingOverflow >= normalUnfoldPositionStart
                 || getNotGoneChildCount() == 0) {
             paddingOffset = mTopPaddingOverflow;
             stackHeight = newStackHeight;
         } else {
-
-            // We did not reach the position yet where we actually start growing,
-            // so we translate the stack upwards.
-            int translationY = (newStackHeight - minStackHeight);
-            // A slight parallax effect is introduced in order for the stack to catch up with
-            // the top card.
-            float partiallyThere = (newStackHeight - mTopPadding - mTopPaddingOverflow)
-                    / minStackHeight;
-            partiallyThere = Math.max(0, partiallyThere);
+            int translationY;
             if (!trackingHeadsUp) {
+                // We did not reach the position yet where we actually start growing,
+                // so we translate the stack upwards.
+                translationY = (newStackHeight - minStackHeight);
+                // A slight parallax effect is introduced in order for the stack to catch up with
+                // the top card.
+                float partiallyThere = (newStackHeight - mTopPadding - mTopPaddingOverflow)
+                        / minStackHeight;
+                partiallyThere = Math.max(0, partiallyThere);
                 translationY += (1 - partiallyThere) * (mBottomStackPeekSize +
                         mCollapseSecondCardPadding);
             } else {
-                translationY = (int) (height - mHeadsUpManager.getTopHeadsUpHeight());
+                translationY = (int) (height - normalUnfoldPositionStart);
             }
             paddingOffset = translationY - mTopPadding;
             stackHeight = (int) (height - (translationY - mTopPadding));
@@ -1506,7 +1507,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public int getMinStackHeight() {
         final ExpandableView firstChild = getFirstChildNotGone();
-        final int firstChildMinHeight = firstChild != null ? (int) firstChild.getMinHeight()
+        final int firstChildMinHeight = firstChild != null ? firstChild.getMinHeight()
                 : mCollapsedSize;
         return firstChildMinHeight + mBottomStackPeekSize + mCollapseSecondCardPadding;
     }

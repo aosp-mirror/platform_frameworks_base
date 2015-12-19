@@ -4035,9 +4035,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void onExpandClicked(View clickedView, boolean nowExpanded) {
+    public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
+        mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         if (mState == StatusBarState.KEYGUARD && nowExpanded) {
-            goToLockedShade(clickedView);
+            goToLockedShade(clickedEntry.row);
         }
     }
 

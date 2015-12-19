@@ -1276,7 +1276,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
-    public void onExpandClicked(View clickedView, boolean nowExpanded) {
+    public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
     }
 
     protected class H extends Handler {
@@ -1359,6 +1359,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent, false);
             row.setExpansionLogger(this, entry.notification.getKey());
             row.setGroupManager(mGroupManager);
+            row.setHeadsUpManager(mHeadsUpManager);
             row.setRemoteInputController(mRemoteInputController);
             row.setOnExpandClickListener(this);
         }

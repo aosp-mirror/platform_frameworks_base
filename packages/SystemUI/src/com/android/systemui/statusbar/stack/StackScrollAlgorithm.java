@@ -410,10 +410,6 @@ public class StackScrollAlgorithm {
         // How far in is the element currently transitioning into the bottom stack.
         float yPositionInScrollView = 0.0f;
 
-        // If we have a heads-up higher than the collapsed height we need to add the difference to
-        // the padding of all other elements, i.e push in the top stack slightly.
-        ExpandableNotificationRow topHeadsUpEntry = ambientState.getTopHeadsUpEntry();
-
         int childCount = algorithmState.visibleChildren.size();
         int numberOfElementsCompletelyIn = algorithmState.partialInTop == 1.0f
                 ? algorithmState.lastTopStackIndex
@@ -422,7 +418,7 @@ public class StackScrollAlgorithm {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackViewState childViewState = resultState.getViewStateForView(child);
             childViewState.location = StackViewState.LOCATION_UNKNOWN;
-            int childHeight = getMaxAllowedChildHeight(child, ambientState);
+            int childHeight = getMaxAllowedChildHeight(child);
             int minHeight = child.getMinHeight();
             float yPositionInScrollViewAfterElement = yPositionInScrollView
                     + childHeight
@@ -504,11 +500,6 @@ public class StackScrollAlgorithm {
             currentYPosition = childViewState.yTranslation + childHeight + mPaddingBetweenElements;
             yPositionInScrollView = yPositionInScrollViewAfterElement;
 
-            if (ambientState.isShadeExpanded() && topHeadsUpEntry != null
-                    && child != topHeadsUpEntry) {
-                childViewState.yTranslation += topHeadsUpEntry.getHeadsUpHeight() -
-                        mFirstChildMinHeight;
-            }
             childViewState.yTranslation += ambientState.getTopPadding()
                     + ambientState.getStackTranslation();
         }
@@ -533,10 +524,6 @@ public class StackScrollAlgorithm {
             StackViewState childState = resultState.getViewStateForView(row);
             boolean isTopEntry = topHeadsUpEntry == row;
             if (mIsExpanded) {
-                if (isTopEntry) {
-                    childState.height += row.getHeadsUpHeight() - mFirstChildMinHeight;
-                }
-                childState.height = Math.max(childState.height, row.getHeadsUpHeight());
                 // Ensure that the heads up is always visible even when scrolled off from the bottom
                 float bottomPosition = ambientState.getMaxHeadsUpTranslation() - childState.height;
                 childState.yTranslation = Math.min(childState.yTranslation,
@@ -545,12 +532,12 @@ public class StackScrollAlgorithm {
             if (row.isPinned()) {
                 childState.yTranslation = Math.max(childState.yTranslation,
                         mNotificationsTopPadding);
-                childState.height = Math.max(row.getHeadsUpHeight(), childState.height);
+                childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 if (!isTopEntry) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
                     StackViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
-                    childState.height = row.getHeadsUpHeight();
+                    childState.height = row.getIntrinsicHeight();
                     childState.yTranslation = topState.yTranslation + topState.height
                             - childState.height;
                 }
@@ -608,16 +595,8 @@ public class StackScrollAlgorithm {
                 mFirstChildMinHeight - childHeight);
     }
 
-    private int getMaxAllowedChildHeight(View child, AmbientState ambientState) {
-        if (child instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            if (ambientState == null && row.isHeadsUp()
-                    || ambientState != null && ambientState.getTopHeadsUpEntry() == child) {
-                int extraSize = row.getIntrinsicHeight() - row.getHeadsUpHeight();
-                return mFirstChildMinHeight + extraSize;
-            }
-            return row.getIntrinsicHeight();
-        } else if (child instanceof ExpandableView) {
+    private int getMaxAllowedChildHeight(View child) {
+        if (child instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) child;
             return expandableView.getIntrinsicHeight();
         }
@@ -744,7 +723,7 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackViewState childViewState = resultState.getViewStateForView(child);
-            int childHeight = getMaxAllowedChildHeight(child, ambientState);
+            int childHeight = getMaxAllowedChildHeight(child);
             float yPositionInScrollViewAfterElement = yPositionInScrollView
                     + childHeight
                     + mPaddingBetweenElements;
@@ -865,13 +844,6 @@ public class StackScrollAlgorithm {
                 // current height or the end value of the animation.
                 mFirstChildMaxHeight = StackStateAnimator.getFinalActualHeight(
                         mFirstChildWhileExpanding);
-                if (mFirstChildWhileExpanding instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row =
-                            (ExpandableNotificationRow) mFirstChildWhileExpanding;
-                    if (row.isHeadsUp()) {
-                        mFirstChildMaxHeight += mFirstChildMinHeight - row.getHeadsUpHeight();
-                    }
-                }
             } else {
                 updateFirstChildMaxSizeToMaxHeight();
             }
@@ -893,7 +865,7 @@ public class StackScrollAlgorithm {
                                 int oldBottom) {
                             if (mFirstChildWhileExpanding != null) {
                                 mFirstChildMaxHeight = getMaxAllowedChildHeight(
-                                        mFirstChildWhileExpanding, null);
+                                        mFirstChildWhileExpanding);
                             } else {
                                 mFirstChildMaxHeight = 0;
                             }
@@ -901,7 +873,7 @@ public class StackScrollAlgorithm {
                         }
                     });
         } else {
-            mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding, null);
+            mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
         }
     }
 
