@@ -574,6 +574,9 @@ public final class MediaBrowser {
         Log.d(TAG, "  mMediaSessionToken=" + mMediaSessionToken);
     }
 
+    /**
+     * A class with information on a single media item for use in browsing media.
+     */
     public static class MediaItem implements Parcelable {
         private final int mFlags;
         private final MediaDescription mDescription;
