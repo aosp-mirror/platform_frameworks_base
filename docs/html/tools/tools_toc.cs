@@ -168,6 +168,27 @@ class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/help/android-monitor.html">Android Monitor</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/help/am-logcat.html"><span
+            class="en">logcat Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-memory.html"><span
+            class="en">Memory Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-cpu.html"><span
+            class="en">CPU Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-gpu.html"><span
+            class="en">GPU Monitor</span></a>
+          </li>
+          <li><a href="<?cs var:toroot ?>tools/help/am-network.html"><span
+            class="en">Network Monitor</span></a>
+          </li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
       <li><a href="<?cs var:toroot ?>tools/help/monitor.html">Device Monitor</a></li>

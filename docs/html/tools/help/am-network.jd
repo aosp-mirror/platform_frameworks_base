@@ -1,0 +1,130 @@
+page.title=Network Monitor
+parent.title=Android Monitor
+parent.link=android-monitor.html
+page.tags=monitor
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#running">Displaying a Running App in the Network Monitor</a></li>
+</ol>
+
+ <h2>See also</h2>
+  <ol>
+    <li>
+        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
+      </li>
+    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
+      </li>
+
+      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
+      </li>
+
+      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
+      </li>
+
+      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
+      </li>
+  </ol>
+
+<h2>Video</h2>
+  <ol>
+    <li><a href="https://www.youtube.com/watch?v=fEEulSk1kNY"
+      class="external-link">Battery Drain and Networking</a></li>
+  </ol>
+
+<h2>
+  Dependencies and Prerequisites
+</h2>
+
+<ul>
+  <li>
+    <a href="{@docRoot}tools/building/building-studio.html#RunningOnDeviceStudio">Connect a
+    hardware device</a> to your development computer.
+  </li>
+
+  <li>Make sure your development computer detects your hardware device, which often happens
+  automatically when you connect it to a USB port.
+  </li>
+
+  <li>
+    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
+    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
+    <strong>Developer Options</strong> on the device.
+  </li>
+
+  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
+  <code>build.gradle</code> file (it’s initially set by default).
+  </li>
+
+  <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
+  <strong>Enable ADB Integration</strong>.
+  </li>
+
+  <li>
+    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
+  </li>
+</ul>
+
+</div>
+</div>
+
+<p>
+  The Network Monitor makes it possible to track when your application is making network requests.
+  Using this tool, you can monitor how and when your app transfers data, and optimize the underlying
+  code appropriately.
+</p>
+
+<p>
+  By monitoring the frequency of data transfers, and the amount of data transferred during each
+  connection, you can identify areas of your app that can be made more efficient and use less
+  battery power.
+  Generally, you should look for short spikes that can be delayed, or that could cause a later
+  transfer to be preempted.
+</p>
+
+
+<h2 id="running">
+  Displaying a Running App in the Network Monitor
+</h2>
+
+<p>
+  Follow these steps:
+</p>
+
+<ol>
+  <li>Connect a hardware device.
+  </li>
+
+  <li>
+    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+  </li>
+
+  <li>Click the <strong>Network</strong> tab.
+  </li>
+
+  <li>Open an app project and <a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on the hardware device.
+  </li>
+
+  <li>To start the Network Monitor, click Pause <img src="{@docRoot}images/tools/am-ipause.png"
+    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to
+  deselect it.
+  </li>
+<p>
+  Any network traffic begins to appear in the Network Monitor:
+</p>
+  <img src="{@docRoot}images/tools/am-networkmon.png" style="vertical-align:sub;margin:0;width:450px" />
+<p>
+  The Network Monitor adds up the amount of time it takes for the device to transmit and receive
+  kilobytes of data.
+  The y-axis is in kilobytes per second. The x-axis starts with seconds, and then minutes and
+  seconds, and so on.
+</p>
+  <li>To stop the Network Monitor, click Pause <img src="{@docRoot}images/tools/am-ipause.png"
+    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> again to
+  select it.
+  </li>
+</ol>
