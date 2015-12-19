@@ -3592,9 +3592,15 @@ class MountService extends IMountService.Stub
         }
 
         pw.println();
-        pw.println("mConnection:");
+        pw.println("mConnector:");
         pw.increaseIndent();
         mConnector.dump(fd, pw, args);
+        pw.decreaseIndent();
+
+        pw.println();
+        pw.println("mCryptConnector:");
+        pw.increaseIndent();
+        mCryptConnector.dump(fd, pw, args);
         pw.decreaseIndent();
 
         pw.println();
