@@ -3790,17 +3790,16 @@ final class Settings {
         return cmp != null ? Arrays.toString(cmp.toArray()) : "[]";
     }
 
-    boolean isEnabledAndVisibleLPr(ComponentInfo componentInfo, int flags, int userId) {
+    boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
         return isEnabledLPr(componentInfo, flags, userId)
-                && isVisibleLPr(componentInfo, flags);
+                && isMatchLPr(componentInfo, flags);
     }
 
     private boolean isEnabledLPr(ComponentInfo componentInfo, int flags, int userId) {
         if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
             return true;
         }
-        final String pkgName = componentInfo.packageName;
-        final PackageSetting packageSettings = mPackages.get(pkgName);
+        final PackageSetting packageSettings = mPackages.get(componentInfo.packageName);
         if (PackageManagerService.DEBUG_SETTINGS) {
             Log.v(PackageManagerService.TAG, "isEnabledLock - packageName = "
                     + componentInfo.packageName + " componentName = " + componentInfo.name);
@@ -3836,12 +3835,19 @@ final class Settings {
         return componentInfo.enabled;
     }
 
-    private boolean isVisibleLPr(ComponentInfo componentInfo, int flags) {
-        final boolean matchUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE_ONLY) != 0)
+    private boolean isMatchLPr(ComponentInfo componentInfo, int flags) {
+        if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+            final PackageSetting ps = mPackages.get(componentInfo.packageName);
+            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                return false;
+            }
+        }
+
+        final boolean matchesUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE_ONLY) != 0)
                 && !componentInfo.encryptionAware;
-        final boolean matchAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0)
+        final boolean matchesAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0)
                 && componentInfo.encryptionAware;
-        return matchUnaware || matchAware;
+        return matchesUnaware || matchesAware;
     }
 
     String getInstallerPackageNameLPr(String packageName) {

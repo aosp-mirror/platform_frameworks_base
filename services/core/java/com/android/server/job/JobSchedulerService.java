@@ -16,20 +16,14 @@
 
 package com.android.server.job;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.app.job.IJobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -53,6 +47,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.AppIdleController;
@@ -62,6 +57,15 @@ import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.TimeController;
+
+import libcore.util.EmptyArray;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Responsible for taking jobs representing work to be performed by a client app, and determining
@@ -126,7 +130,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     final ArrayList<JobStatus> mPendingJobs = new ArrayList<>();
 
-    final ArrayList<Integer> mStartedUsers = new ArrayList<>();
+    int[] mStartedUsers = EmptyArray.INT;
 
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
@@ -201,14 +205,20 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStartUser(int userHandle) {
-        mStartedUsers.add(userHandle);
+        mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
+        // Let's kick any outstanding jobs for this user.
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    }
+
+    @Override
+    public void onUnlockUser(int userHandle) {
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
     public void onStopUser(int userHandle) {
-        mStartedUsers.remove(Integer.valueOf(userHandle));
+        mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
     }
 
     /**
@@ -744,7 +754,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         private void maybeQueueReadyJobsForExecutionLockedH() {
             int chargingCount = 0;
-            int idleCount =  0;
+            int idleCount = 0;
             int backoffCount = 0;
             int connectivityCount = 0;
             List<JobStatus> runnableJobs = null;
@@ -812,18 +822,31 @@ public class JobSchedulerService extends com.android.server.SystemService
          *      - It's not pending.
          *      - It's not already running on a JSC.
          *      - The user that requested the job is running.
+         *      - The component is enabled and runnable.
          */
         private boolean isReadyToBeExecutedLocked(JobStatus job) {
             final boolean jobReady = job.isReady();
             final boolean jobPending = mPendingJobs.contains(job);
             final boolean jobActive = isCurrentlyActiveLocked(job);
-            final boolean userRunning = mStartedUsers.contains(job.getUserId());
+
+            final int userId = job.getUserId();
+            final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
+            final boolean componentPresent;
+            try {
+                componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                        job.getServiceComponent(), PackageManager.MATCH_ENCRYPTION_DEFAULT,
+                        userId) != null);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
                         + " ready=" + jobReady + " pending=" + jobPending
-                        + " active=" + jobActive + " userRunning=" + userRunning);
+                        + " active=" + jobActive + " userStarted=" + userStarted
+                        + " componentPresent=" + componentPresent);
             }
-            return userRunning && jobReady && !jobPending && !jobActive;
+            return userStarted && componentPresent && jobReady && !jobPending && !jobActive;
         }
 
         /**
@@ -901,7 +924,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             final IPackageManager pm = AppGlobals.getPackageManager();
             final ComponentName service = job.getService();
             try {
-                ServiceInfo si = pm.getServiceInfo(service, 0, UserHandle.getUserId(uid));
+                ServiceInfo si = pm.getServiceInfo(service, PackageManager.MATCH_ENCRYPTION_DEFAULT,
+                        UserHandle.getUserId(uid));
                 if (si == null) {
                     throw new IllegalArgumentException("No such service " + service);
                 }
@@ -1014,16 +1038,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Binder.restoreCallingIdentity(identityToken);
             }
         }
-    };
+    }
 
     void dumpInternal(PrintWriter pw) {
         final long now = SystemClock.elapsedRealtime();
         synchronized (mJobs) {
-            pw.print("Started users: ");
-            for (int i=0; i<mStartedUsers.size(); i++) {
-                pw.print("u" + mStartedUsers.get(i) + " ");
-            }
-            pw.println();
+            pw.println("Started users: " + Arrays.toString(mStartedUsers));
             pw.println("Registered jobs:");
             if (mJobs.size() > 0) {
                 ArraySet<JobStatus> jobs = mJobs.getJobs();

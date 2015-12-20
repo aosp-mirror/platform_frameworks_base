@@ -126,6 +126,7 @@ public class KeyguardServiceDelegate {
 
         final ComponentName keyguardComponent = ComponentName.unflattenFromString(
                 resources.getString(com.android.internal.R.string.config_keyguardComponent));
+        intent.addFlags(Intent.FLAG_DEBUG_ENCRYPTION_TRIAGED);
         intent.setComponent(keyguardComponent);
 
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,

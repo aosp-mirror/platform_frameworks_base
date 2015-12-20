@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -146,6 +147,11 @@ public class ComponentInfo extends PackageItemInfo {
      */
     public final int getBannerResource() {
         return banner != 0 ? banner : applicationInfo.banner;
+    }
+
+    /** {@hide} */
+    public ComponentName getComponentName() {
+        return new ComponentName(packageName, name);
     }
 
     protected void dumpFront(Printer pw, String prefix) {

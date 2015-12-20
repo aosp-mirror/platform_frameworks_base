@@ -3227,7 +3227,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
             if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
-            if (a != null && mSettings.isEnabledAndVisibleLPr(a.info, flags, userId)) {
+            if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
@@ -3272,7 +3272,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getReceiverInfo " + component + ": " + a);
-            if (a != null && mSettings.isEnabledAndVisibleLPr(a.info, flags, userId)) {
+            if (a != null && mSettings.isEnabledAndMatchLPr(a.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateActivityInfo(a, flags, ps.readUserState(userId),
@@ -3291,7 +3291,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Service s = mServices.mServices.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getServiceInfo " + component + ": " + s);
-            if (s != null && mSettings.isEnabledAndVisibleLPr(s.info, flags, userId)) {
+            if (s != null && mSettings.isEnabledAndMatchLPr(s.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateServiceInfo(s, flags, ps.readUserState(userId),
@@ -3310,7 +3310,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             PackageParser.Provider p = mProviders.mProviders.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getProviderInfo " + component + ": " + p);
-            if (p != null && mSettings.isEnabledAndVisibleLPr(p.info, flags, userId)) {
+            if (p != null && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)) {
                 PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
                 if (ps == null) return null;
                 return PackageParser.generateProviderInfo(p, flags, ps.readUserState(userId),
@@ -5751,7 +5751,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
             String[] permissions, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, null);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5779,7 +5778,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, null);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5930,7 +5928,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ? mSettings.mPackages.get(provider.owner.packageName)
                     : null;
             return ps != null
-                    && mSettings.isEnabledAndVisibleLPr(provider.info, flags, userId)
+                    && mSettings.isEnabledAndMatchLPr(provider.info, flags, userId)
                     && (!mSafeMode || (provider.info.applicationInfo.flags
                             &ApplicationInfo.FLAG_SYSTEM) != 0)
                     ? PackageParser.generateProviderInfo(provider, flags,
@@ -5987,7 +5985,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && (processName == null
                                 || (p.info.processName.equals(processName)
                                         && UserHandle.isSameApp(p.info.applicationInfo.uid, uid)))
-                        && mSettings.isEnabledAndVisibleLPr(p.info, flags, userId)
+                        && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)
                         && (!mSafeMode
                                 || (p.info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
                     if (finalList == null) {
@@ -9253,7 +9251,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         protected ResolveInfo newResult(PackageParser.ActivityIntentInfo info,
                 int match, int userId) {
             if (!sUserManager.exists(userId)) return null;
-            if (!mSettings.isEnabledAndVisibleLPr(info.activity.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndMatchLPr(info.activity.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Activity activity = info.activity;
@@ -9477,7 +9475,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 int match, int userId) {
             if (!sUserManager.exists(userId)) return null;
             final PackageParser.ServiceIntentInfo info = (PackageParser.ServiceIntentInfo)filter;
-            if (!mSettings.isEnabledAndVisibleLPr(info.service.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndMatchLPr(info.service.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Service service = info.service;
@@ -9700,7 +9698,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!sUserManager.exists(userId))
                 return null;
             final PackageParser.ProviderIntentInfo info = filter;
-            if (!mSettings.isEnabledAndVisibleLPr(info.provider.info, mFlags, userId)) {
+            if (!mSettings.isEnabledAndMatchLPr(info.provider.info, mFlags, userId)) {
                 return null;
             }
             final PackageParser.Provider provider = info.provider;
