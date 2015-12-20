@@ -253,6 +253,14 @@ public abstract class PackageManager {
             | MATCH_ENCRYPTION_UNAWARE_ONLY;
 
     /**
+     * {@link PackageInfo} flag: include only components from applications that
+     * are marked with {@link ApplicationInfo#FLAG_SYSTEM}.
+     *
+     * @hide
+     */
+    public static final int MATCH_SYSTEM_ONLY = 0x00100000;
+
+    /**
      * {@link PackageInfo} flag: use the default encryption matching behavior
      * based on user state. Internal flag used to indicate that a system
      * component has done their homework and verified their encryption-aware
@@ -260,7 +268,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int MATCH_ENCRYPTION_DEFAULT = 0x00100000;
+    public static final int MATCH_ENCRYPTION_DEFAULT = 0x10000000;
 
     /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:

@@ -125,28 +125,28 @@ public class ArrayUtils {
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static <T> boolean isEmpty(T[] array) {
+    public static <T> boolean isEmpty(@Nullable T[] array) {
         return array == null || array.length == 0;
     }
 
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(int[] array) {
+    public static boolean isEmpty(@Nullable int[] array) {
         return array == null || array.length == 0;
     }
 
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(long[] array) {
+    public static boolean isEmpty(@Nullable long[] array) {
         return array == null || array.length == 0;
     }
 
     /**
      * Checks if given array is null or has zero elements.
      */
-    public static boolean isEmpty(byte[] array) {
+    public static boolean isEmpty(@Nullable byte[] array) {
         return array == null || array.length == 0;
     }
 
@@ -156,7 +156,7 @@ public class ArrayUtils {
      * @param value the value to check for
      * @return true if the value is present in the array
      */
-    public static <T> boolean contains(T[] array, T value) {
+    public static <T> boolean contains(@Nullable T[] array, T value) {
         return indexOf(array, value) != -1;
     }
 
@@ -164,7 +164,7 @@ public class ArrayUtils {
      * Return first index of {@code value} in {@code array}, or {@code -1} if
      * not found.
      */
-    public static <T> int indexOf(T[] array, T value) {
+    public static <T> int indexOf(@Nullable T[] array, T value) {
         if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
             if (Objects.equals(array[i], value)) return i;
@@ -175,7 +175,7 @@ public class ArrayUtils {
     /**
      * Test if all {@code check} items are contained in {@code array}.
      */
-    public static <T> boolean containsAll(T[] array, T[] check) {
+    public static <T> boolean containsAll(@Nullable T[] array, T[] check) {
         if (check == null) return true;
         for (T checkItem : check) {
             if (!contains(array, checkItem)) {
@@ -185,7 +185,7 @@ public class ArrayUtils {
         return true;
     }
 
-    public static boolean contains(int[] array, int value) {
+    public static boolean contains(@Nullable int[] array, int value) {
         if (array == null) return false;
         for (int element : array) {
             if (element == value) {
@@ -195,7 +195,7 @@ public class ArrayUtils {
         return false;
     }
 
-    public static boolean contains(long[] array, long value) {
+    public static boolean contains(@Nullable long[] array, long value) {
         if (array == null) return false;
         for (long element : array) {
             if (element == value) {
@@ -205,10 +205,12 @@ public class ArrayUtils {
         return false;
     }
 
-    public static long total(long[] array) {
+    public static long total(@Nullable long[] array) {
         long total = 0;
-        for (long value : array) {
-            total += value;
+        if (array != null) {
+            for (long value : array) {
+                total += value;
+            }
         }
         return total;
     }
@@ -366,11 +368,11 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static long[] cloneOrNull(long[] array) {
+    public static @Nullable long[] cloneOrNull(@Nullable long[] array) {
         return (array != null) ? array.clone() : null;
     }
 
-    public static <T> ArraySet<T> add(ArraySet<T> cur, T val) {
+    public static @NonNull <T> ArraySet<T> add(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             cur = new ArraySet<>();
         }
@@ -378,7 +380,7 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static <T> ArraySet<T> remove(ArraySet<T> cur, T val) {
+    public static @Nullable <T> ArraySet<T> remove(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             return null;
         }
@@ -390,11 +392,11 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(ArraySet<T> cur, T val) {
+    public static <T> boolean contains(@Nullable ArraySet<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
     }
 
-    public static <T> ArrayList<T> add(ArrayList<T> cur, T val) {
+    public static @NonNull <T> ArrayList<T> add(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             cur = new ArrayList<>();
         }
@@ -402,7 +404,7 @@ public class ArrayUtils {
         return cur;
     }
 
-    public static <T> ArrayList<T> remove(ArrayList<T> cur, T val) {
+    public static @Nullable <T> ArrayList<T> remove(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
             return null;
         }
@@ -414,7 +416,7 @@ public class ArrayUtils {
         }
     }
 
-    public static <T> boolean contains(ArrayList<T> cur, T val) {
+    public static <T> boolean contains(@Nullable ArrayList<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
     }
 

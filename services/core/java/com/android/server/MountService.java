@@ -24,6 +24,7 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -89,9 +90,6 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.Xml;
 
-import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.os.SomeArgs;
@@ -105,6 +103,9 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.pm.PackageManagerService;
+
+import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

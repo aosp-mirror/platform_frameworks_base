@@ -978,7 +978,7 @@ public class InputManagerService extends IInputManager.Stub
         final PackageManager pm = mContext.getPackageManager();
         Intent intent = new Intent(InputManager.ACTION_QUERY_KEYBOARD_LAYOUTS);
         for (ResolveInfo resolveInfo : pm.queryBroadcastReceivers(intent,
-                PackageManager.GET_META_DATA)) {
+                PackageManager.GET_META_DATA | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE)) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             final int priority = resolveInfo.priority;
             visitKeyboardLayoutsInPackage(pm, activityInfo, null, priority, visitor);
@@ -993,7 +993,8 @@ public class InputManagerService extends IInputManager.Stub
             try {
                 ActivityInfo receiver = pm.getReceiverInfo(
                         new ComponentName(d.packageName, d.receiverName),
-                        PackageManager.GET_META_DATA);
+                        PackageManager.GET_META_DATA
+                                | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
                 visitKeyboardLayoutsInPackage(pm, receiver, d.keyboardLayoutName, 0, visitor);
             } catch (NameNotFoundException ex) {
             }
