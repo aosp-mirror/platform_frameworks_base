@@ -59440,8 +59440,8 @@ package java.util.regex {
     method public java.lang.StringBuffer appendTail(java.lang.StringBuffer);
     method public int end();
     method public int end(int);
-    method public boolean find(int);
     method public boolean find();
+    method public boolean find(int);
     method public java.lang.String group();
     method public java.lang.String group(int);
     method public int groupCount();
@@ -59469,8 +59469,8 @@ package java.util.regex {
   }
 
   public final class Pattern implements java.io.Serializable {
-    method public static java.util.regex.Pattern compile(java.lang.String, int) throws java.util.regex.PatternSyntaxException;
     method public static java.util.regex.Pattern compile(java.lang.String);
+    method public static java.util.regex.Pattern compile(java.lang.String, int) throws java.util.regex.PatternSyntaxException;
     method public int flags();
     method public java.util.regex.Matcher matcher(java.lang.CharSequence);
     method public static boolean matches(java.lang.String, java.lang.CharSequence);
@@ -59485,6 +59485,7 @@ package java.util.regex {
     field public static final int LITERAL = 16; // 0x10
     field public static final int MULTILINE = 8; // 0x8
     field public static final int UNICODE_CASE = 64; // 0x40
+    field public static final int UNICODE_CHARACTER_CLASS = 256; // 0x100
     field public static final int UNIX_LINES = 1; // 0x1
   }
 
