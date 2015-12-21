@@ -26,4 +26,9 @@
     <string name="bugreport_storage_title" msgid="5332488144740527109">"รายงานข้อบกพร่อง"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ไม่สามารถอ่านไฟล์รายงานข้อบกพร่อง"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ไม่มีชื่อ"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"รายละเอียด"</string>
+    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"รายละเอียดรายงานข้อบกพร่อง"</string>
+    <string name="bugreport_info_name" msgid="5089191832271852826">"ชื่อย่อ"</string>
+    <string name="bugreport_info_title" msgid="127167853370557175">"สรุป 1 บรรทัด"</string>
+    <string name="bugreport_info_description" msgid="4117088998733546784">"คำอธิบายโดยละเอียด"</string>
 </resources>

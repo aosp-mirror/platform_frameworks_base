@@ -26,4 +26,9 @@
     <string name="bugreport_storage_title" msgid="5332488144740527109">"錯誤報告"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"無法讀取錯誤報告檔案"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"未命名"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"詳細資料"</string>
+    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"錯誤報告詳細資料"</string>
+    <string name="bugreport_info_name" msgid="5089191832271852826">"簡稱"</string>
+    <string name="bugreport_info_title" msgid="127167853370557175">"簡短摘要"</string>
+    <string name="bugreport_info_description" msgid="4117088998733546784">"詳細說明"</string>
 </resources>

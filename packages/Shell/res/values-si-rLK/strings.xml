@@ -26,4 +26,9 @@
     <string name="bugreport_storage_title" msgid="5332488144740527109">"දෝෂ වාර්තා"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"දෝෂ වාර්තා ගොනුව කියවීමට නොහැකි විය"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"නම් නොකළ"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"විස්තර"</string>
+    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"දෝෂ වාර්තා විස්තර"</string>
+    <string name="bugreport_info_name" msgid="5089191832271852826">"කෙටි නම"</string>
+    <string name="bugreport_info_title" msgid="127167853370557175">"පේළි-1 සාරාංශය"</string>
+    <string name="bugreport_info_description" msgid="4117088998733546784">"සවිස්තර විස්තරය"</string>
 </resources>
