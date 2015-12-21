@@ -350,7 +350,7 @@ public final class KeyChain {
 
     /**
      * Returns the {@code PrivateKey} for the requested alias, or null
-     * if no there is no result.
+     * if there is no result.
      *
      * <p> This method may block while waiting for a connection to another process, and must never
      * be called from the main thread.
@@ -371,7 +371,7 @@ public final class KeyChain {
             final IKeyChainService keyChainService = keyChainConnection.getService();
             final String keyId = keyChainService.requestPrivateKey(alias);
             if (keyId == null) {
-                throw new KeyChainException("keystore had a problem");
+                return null;
             }
             return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
                     KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
