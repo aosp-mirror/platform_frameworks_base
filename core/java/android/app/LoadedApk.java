@@ -359,12 +359,21 @@ public final class LoadedApk {
                     }
                 }
 
+                String libraryPermittedPath = mAppDir + File.pathSeparator + mDataDir;
+                boolean isBundledApp = false;
+
                 if (mApplicationInfo.isSystemApp()) {
+                    isBundledApp = true;
                     // Add path to system libraries to libPaths;
                     // Access to system libs should be limited
                     // to bundled applications; this is why updated
                     // system apps are not included.
                     libPaths.add(System.getProperty("java.library.path"));
+
+                    // This is necessary to grant bundled apps access to
+                    // libraries located in subdirectories of /system/lib
+                    libraryPermittedPath += File.pathSeparator +
+                                            System.getProperty("java.library.path");
                 }
 
                 final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
@@ -382,10 +391,8 @@ public final class LoadedApk {
                 // as this is early and necessary.
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
 
-                String libraryPermittedPath = mAppDir + File.pathSeparator + mDataDir;
-
-                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, librarySearchPath,
-                        libraryPermittedPath, mBaseClassLoader);
+                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, isBundledApp,
+                        librarySearchPath, libraryPermittedPath, mBaseClassLoader);
 
                 StrictMode.setThreadPolicy(oldPolicy);
             } else {
