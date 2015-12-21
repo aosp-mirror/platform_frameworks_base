@@ -24,7 +24,10 @@
        pt-br-lang="Material Design"
        ru-lang="Material Design"
        zh-cn-lang="材料设计"
-       zh-tw-lang="材料設計">
+       zh-tw-lang="材料設計"
+       in-lang="Desain Bahan"
+       vi-lang="Material Design"
+       >
     Material for Android</a></div>
   </li>
 

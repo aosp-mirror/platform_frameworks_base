@@ -21,7 +21,10 @@ page.title=Определение настраиваемой анимации
 </div>
 
 
-<p>Благодаря анимации в Material Design пользователи получают реакцию на выполняемые действия. Кроме того, анимация обеспечивает визуальную связанность при взаимодействии с приложением. Тема Material Design содержит ряд анимаций по умолчанию для кнопок и переходов, а в Android 5.0 (уровень API 21) и более поздних версиях можно настраивать эти анимации и создавать новые:</p>
+<p>Благодаря анимациям в Material Design пользователи получают отклик на выполняемые
+действия. Кроме того, анимации обеспечивают зрительную связь при взаимодействии с приложением. Тема Material Design содержит ряд анимаций
+по умолчанию для кнопок и переходов, а в Android 5.0 (уровень API 21) и более поздних версиях можно настраивать эти анимации
+и создавать новые:</p>
 
 <ul>
 <li>реакция на касание;</li>
@@ -34,30 +37,44 @@ page.title=Определение настраиваемой анимации
 
 <h2 id="Touch">Настройка реакции на касание</h2>
 
-<p>Реакция на касание в Material Design обеспечивает моментальное визуальное подтверждение взаимодействия пользователя с элементами интерфейса в точке касания. В анимации по умолчанию для реакции на нажатие кнопок используется новый класс {@link android.graphics.drawable.RippleDrawable}, обеспечивающий переход между разными состояниями с созданием эффекта ряби.</p>
+<p>Реакция на касание в Material Design обеспечивает моментальное визуальное подтверждение взаимодействия пользователя с элементами интерфейса в точке касания.
+ В стандартной анимации
+для реакции на нажатие кнопок используется новый класс {@link android.graphics.drawable.RippleDrawable}, обеспечивающий переход между разными состояниями с созданием эффекта ряби.
+</p>
 
-<p>В большинстве случаев эту возможность следует применять в XML-файле представления, указав фон представления следующим образом:</p>
+<p>В большинстве случаев эту возможность следует применять в XML-файле представления, указав фон представления следующим образом:
+</p>
 
 <ul>
 <li><code>?android:attr/selectableItemBackground</code> для ограниченной области ряби;</li>
-<li><code>?android:attr/selectableItemBackgroundBorderless</code> для ряби, распространяемой за границы представления.</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> для ряби, распространяемой за границы представления.
+ При отрисовке она будет ограничиваться ближайшим родительским элементом представления со значением фона, отличным от null.
+</li>
 </ul>
 
-<p class="note"><strong>Примечание.</strong> <code>selectableItemBackgroundBorderless</code> – это новый атрибут, представленный в уровне API 21.</p>
+<p class="note"><strong>Примечание.</strong> <code>selectableItemBackgroundBorderless</code> — это новый атрибут, представленный в уровне API 21.
+</p>
 
 
-<p>Также можно определить {@link android.graphics.drawable.RippleDrawable} в качестве XML-ресурса с помощью элемента <code>ripple</code>.</p>
+<p>Также можно определить {@link android.graphics.drawable.RippleDrawable}
+ в качестве XML-ресурса с помощью элемента <code>ripple</code>.</p>
 
-<p>Можно назначить цвет для объектов {@link android.graphics.drawable.RippleDrawable}. Чтобы изменить цвет реакции на касание, который используется по умолчанию, воспользуйтесь атрибутом темы <code>android:colorControlHighlight</code>.</p>
+<p>Можно назначить цвет для объектов {@link android.graphics.drawable.RippleDrawable}. Чтобы
+изменить стандартный цвет отклика на касание, воспользуйтесь атрибутом темы <code>android:colorControlHighlight</code>
+.</p>
 
-<p>Дополнительные сведения представлены в справке по API для класса {@link android.graphics.drawable.RippleDrawable}.</p>
+<p>Дополнительные сведения представлены в справке по API для класса {@link
+android.graphics.drawable.RippleDrawable}.</p>
 
 
 <h2 id="Reveal">Применение эффекта появления</h2>
 
-<p>Анимация эффекта появления обеспечивает визуальную связанность в действиях пользователя, когда отображается или скрывается группа элементов интерфейса. С помощью метода {@link android.view.ViewAnimationUtils#createCircularReveal ViewAnimationUtils.createCircularReveal()} можно анимировать ограничивающий круг для скрытия или отображения представления.</p>
+<p>Анимация эффекта появления обеспечивает зрительную связь с действиями пользователя, когда отображается или скрывается группа элементов интерфейса.
+ С помощью метода {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} можно анимировать ограничивающий круг, чтобы отобразить или скрыть с экрана представление.
+</p>
 
-<p>Отображение ранее скрытого представления с помощью этого эффекта:</p>
+<p>Как отобразить ранее скрытое представление с помощью этого эффекта:</p>
 
 <pre>
 // previously invisible view
@@ -79,7 +96,7 @@ myView.setVisibility(View.VISIBLE);
 anim.start();
 </pre>
 
-<p>Скрытие ранее отображавшегося представления с помощью этого эффекта:</p>
+<p>Как скрыть ранее отображавшееся представление с помощью этого эффекта:</p>
 
 <pre>
 // previously visible view
@@ -122,50 +139,65 @@ anim.start();
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Рисунок 1.</strong> Переход с общими элементами.</p>
-    <em>Чтобы заново воспроизвести ролик, коснитесь экрана мобильного устройства</em>
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Рисунок 1.</strong> Переход с общими элементами.
+</p>
+    <em>Для воспроизведения фильма нажмите экран устройства</em>
   </div>
 </div>
 
-<p>Переходы в приложениях Material Design обеспечивают визуальные связи между различными состояниями путем движения элементов и преобразований между общими элементами. Можно выбрать настраиваемые анимации для начальных и конечных переходов, а также для переходов общих элементов между операциями.</p>
+<p>Переходы в приложениях Material Design обеспечивают зрительные связи между различными состояниями путем движения элементов и преобразований между общими элементами.
+ Можно выбрать настраиваемые анимации для начальных и конечных переходов, а также для переходов общих элементов между операциями.
+</p>
 
 <ul>
-<li><strong>Начальный</strong> переход определяет порядок появления представлений в операции на экране. Например, в начальном переходе <em>взрыв</em> представления появляются на экране извне и перемещаются по направлению к центру экрана.</li>
+<li><strong>Начальный</strong> переход определяет порядок появления на экране представлений в операции.
+ Например, в начальном переходе <em>explode</em> представления появляются на экране извне и перемещаются к центру экрана.
+</li>
 
-<li><strong>Конечный</strong> переход определяет порядок исчезновения представлений с экрана в операции. Например, в конечном переходе <em>взрыв</em> представления исчезают с экрана в направлении из центра к краям.</li>
+<li><strong>Конечный</strong> переход определяет порядок исчезновения с экрана представлений в операции. Например, в конечном переходе <em>explode</em> представления исчезают
+с экрана в направлении из центра к краям.
+</li>
 
-<li>Переход <strong>общих элементов</strong> определяет порядок перехода представлений, которые используются в обеих операциях, между этими операциями. Например, если в двух операциях используется одно и то же изображение, но в разных позициях и с разными размерами, в случае применения перехода общего элемента <em>changeImageTransform</em> выполняется плавное перемещение и масштабирование изображения между этими операциями.</li>
+<li>Переход <strong>общих элементов</strong> определяет порядок перехода между операциями представлений, используемых в обеих операциях.
+ Например, если в двух
+операциях используется одно и то же изображение, но в разных позициях и с разными размерами, в случае применения перехода общего элемента <em>changeImageTransform</em> выполняется плавное перемещение и масштабирование изображения между этими операциями.
+</li>
 </ul>
 
 <p>В Android 5.0 (уровень API 21) поддерживаются следующие начальные и конечные переходы:</p>
 
 <ul>
-<li><em>взрыв</em> – перемещение представлений в центр экрана или из центра;</li>
-<li><em>скольжение</em> – перемещение представлений к одному из краев представления или от него;</li>
-<li><em>наплыв</em> – отображение или скрытие представления на экране путем изменения его прозрачности.</li>
+<li><em>explode</em> — перемещение представлений в центр экрана или из центра;</li>
+<li><em>slide</em> — перемещение представлений к одному из краев экрана или от него;</li>
+<li><em>fade</em> — отображение или скрытие представления на экране путем изменения его прозрачности.</li>
 </ul>
 
-<p>Любой переход, являющийся расширением класса {@link android.transition.Visibility}, поддерживается как начальный или конечный переход. Дополнительные сведения представлены в справке по API для класса {@link android.transition.Transition}.</p>
+<p>Любой переход, являющийся наследованием класса {@link android.transition.Visibility}, поддерживается как начальный или конечный переход.
+ Дополнительные сведения представлены в справке по API для класса 
+{@link android.transition.Transition}.</p>
 
 <p>В Android 5.0 (уровень API 21) также поддерживаются следующие переходы общих элементов:</p>
 
 <ul>
-<li><em>changeBounds</em> – анимация изменений границ макетов целевых представлений.</li>
-<li><em>changeClipBounds</em> – анимация изменений границ обрезки целевых представлений.</li>
-<li><em>changeTransform</em> – анимация изменений параметров масштабирования и поворота целевых представлений.</li>
-<li><em>changeImageTransform</em> – анимация изменений размеров и параметров масштабирования целевых изображений.</li>
+<li><em>changeBounds</em> — анимация изменений границ макетов целевых представлений;</li>
+<li><em>changeClipBounds</em> — анимация изменений границ обрезки целевых представлений;</li>
+<li><em>changeTransform</em> — анимация изменений параметров масштабирования и поворота целевых представлений;</li>
+<li><em>changeImageTransform</em> — анимация изменений размеров и параметров масштабирования целевых изображений.</li>
 </ul>
 
-<p>Если активировать переходы в приложении, то между начальной и конечной операциями активируется переход «Угасание», используемый по умолчанию.</p>
+<p>Если активировать переходы в приложении, то между начальной и конечной операциями активируется стандартный переход методом плавной замены.
+</p>
 
 <img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
 <p class="img-caption">
   <strong>Рисунок 2.</strong> Переход с одним общим элементом.
 </p>
 
-<h3>Настраиваемые переходы</h3>
+<h3>Определение настраиваемых переходов</h3>
 
-<p>Сначала необходимо активировать переходы содержимого окна с помощью атрибута <code>android:windowContentTransitions</code> при определении стиля, наследуемого из темы Material Design. В определении стиля можно указать начальный и конечный переходы, а также переходы общих элементов:</p>
+<p>Сначала необходимо активировать переходы содержимого окна с помощью атрибута <code>android:windowContentTransitions</code>
+при определении стиля, наследуемого из темы Material Design. В определении стиля можно указать начальный и конечный переходы, а также переходы общих элементов:
+</p>
 
 <pre>
 &lt;style name="BaseAppTheme" parent="android:Theme.Material">
@@ -194,9 +226,12 @@ anim.start();
 &lt;/transitionSet>
 </pre>
 
-<p>Элемент <code>changeImageTransform</code> соответствует классу {@link android.transition.ChangeImageTransform}. Дополнительные сведения представлены в справке по API для {@link android.transition.Transition}.</p>
+<p>Элемент <code>changeImageTransform</code> соответствует классу
+{@link android.transition.ChangeImageTransform}. Дополнительные сведения представлены в справке по API для {@link android.transition.Transition}.
+</p>
 
-<p>Чтобы активировать в своем коде переходы содержимого окна, вызовите метод {@link android.view.Window#requestFeature Window.requestFeature()}:</p>
+<p>Чтобы активировать в своем коде переходы содержимого окна, вызовите метод 
+{@link android.view.Window#requestFeature Window.requestFeature()}:</p>
 
 <pre>
 // inside your activity (if you did not enable transitions in your theme)
@@ -206,31 +241,45 @@ getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
 getWindow().setExitTransition(new Explode());
 </pre>
 
-<p>Чтобы задать переходы в своем коде, вызовите следующие методы с использованием объекта {@link android.transition.Transition}:</p>
+<p>Чтобы задать переходы в своем коде, вызовите следующие методы с использованием объекта {@link
+android.transition.Transition}:</p>
 
 <ul>
-  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
-  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
-  <li>{@link android.view.Window#setSharedElementEnterTransition Window.setSharedElementEnterTransition()}</li>
-  <li>{@link android.view.Window#setSharedElementExitTransition Window.setSharedElementExitTransition()}</li>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()};</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()};</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()};</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}.</li>
 </ul>
 
-<p>Методы {@link android.view.Window#setExitTransition setExitTransition()} и {@link android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} задают конечный переход для вызывающей операции. Методы {@link android.view.Window#setEnterTransition setEnterTransition()} и {@link android.view.Window#setSharedElementEnterTransition setSharedElementEnterTransition()} задают начальный переход для вызываемой операции.</p>
+<p>Методы {@link android.view.Window#setExitTransition setExitTransition()} и {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} задают конечный переход для вызывающей операции.
+ Методы {@link android.view.Window#setEnterTransition
+setEnterTransition()} и {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} задают начальный переход для вызываемой операции.</p>
 
-<p>Чтобы в полной мере использовать переход, необходимо активировать переходы содержимого окна как в вызывающей, так и в вызываемой операции. В противном случае вызывающая операция запустит конечный переход, однако будет выполнен переход окна (например, масштабирование или затемнение).</p>
+<p>Чтобы в полной мере реализовать возможности перехода, необходимо активировать переходы содержимого окна как в вызывающей, так и в вызываемой операции.
+ В противном случае вызывающая операция запустит конечный переход, однако будет выполнен переход окна (например, масштабирование или затемнение).
+</p>
 
-<p>Чтобы запустить начальный переход как можно раньше, используйте в вызываемой операции метод {@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}. Это позволит сделать начальные переходы более эффектными.</p>
+<p>Чтобы запустить начальный переход как можно раньше, используйте в вызываемой операции метод 
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+. Это позволит сделать начальные переходы более эффектными.</p>
 
 <h3>Запуск операции с помощью переходов</h3>
 
-<p>Если в приложении активированы переходы и для операции задан конечный переход, переход активируется при запуске другой операции следующим образом:</p>
+<p>Если в приложении разрешены переходы и для операции задан конечный переход, переход активируется при запуске другой операции следующим образом:
+</p>
 
 <pre>
 startActivity(intent,
               ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
 </pre>
 
-<p>Если для второй операции задан начальный переход, переход также активируется при запуске операции. Чтобы отключить переходы при запуске другой операции, укажите набор параметров <code>null</code>.</p>
+<p>Если для второй операции задан начальный переход, он также активируется при запуске операции.
+ Чтобы отключить переходы при запуске другой операции, укажите
+значение <code>null</code> для набора параметров.</p>
 
 <h3>Запуск операции с помощью общего элемента</h3>
 
@@ -240,8 +289,10 @@ startActivity(intent,
 <li>Активируйте в своей теме переходы содержимого окна.</li>
 <li>В определении стиля укажите переходы общих элементов.</li>
 <li>Определите свой переход как XML-ресурс.</li>
-<li>Присвойте общим элементам общее имя в обоих макетах, используя для этого атрибут <code>android:transitionName</code>.</li>
-<li>Воспользуйтесь методом {@link android.app.ActivityOptions#makeSceneTransitionAnimation ActivityOptions.makeSceneTransitionAnimation()}.</li>
+<li>Присвойте одинаковое имя общим элементам в обоих макетах, используя для этого атрибут 
+<code>android:transitionName</code>.</li>
+<li>Воспользуйтесь методом {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()}.</li>
 </ol>
 
 <pre>
@@ -266,13 +317,20 @@ imgContainerView.setOnClickListener(new View.OnClickListener() {
 });
 </pre>
 
-<p>Для общих динамических представлений, сгенерированных в коде, используйте метод{@link android.view.View#setTransitionName View.setTransitionName()} для задания общего имени элемента в обеих операциях.</p>
+<p>Для общих динамических представлений, создаваемых в коде, используйте метод
+{@link android.view.View#setTransitionName View.setTransitionName()} для определения одинакового имени элемента в обеих операциях.
+</p>
 
-<p>Чтобы обратить анимацию перехода по завершении второй операции, вместо {@link android.app.Activity#finish Activity.finish()} вызовите метод {@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}.</p>
+<p>Чтобы выполнить анимацию обратного перехода по завершении второй операции, вызовите метод 
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+ вместо{@link android.app.Activity#finish Activity.finish()}.</p>
 
 <h3>Запуск операции с несколькими общими элементами</h3>
 
-<p>Чтобы создать анимацию перехода на экране между двумя операциями с несколькими общими элементами, определите общие элементы в обоих макетах с помощью атрибута <code>android:transitionName</code> (или воспользуйтесь методом {@link android.view.View#setTransitionName View.setTransitionName()} в обеих операциях), а затем создайте объект {@link android.app.ActivityOptions}, как указано ниже.</p>
+<p>Чтобы создать анимацию перехода на экране между двумя операциями с несколькими общими
+элементами, определите общие элементы в обоих макетах с помощью атрибута <code>android:transitionName</code>
+ (или воспользуйтесь методом {@link android.view.View#setTransitionName View.setTransitionName()} в обеих
+операциях), а затем создайте объект {@link android.app.ActivityOptions}, как указано ниже.</p>
 
 <pre>
 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
@@ -283,9 +341,14 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
 
 <h2 id="CurvedMotion">Использование перемещения по кривой</h2>
 
-<p>При анимации в Material Design используются кривые для интерполяции по времени и схемы перемещения в пространстве. В Android 5.0 (уровень API 21) и более поздних версиях имеется возможность определить для анимаций настраиваемые кривые синхронизации и схемы перемещения по кривой.</p>
+<p>При анимации в Material Design используются кривые для интерполяции по времени и создания схем перемещения в пространстве.
+ В Android 5.0 (уровень API 21) и более поздних версиях имеется возможность определить для анимаций настраиваемые кривые синхронизации и схемы перемещения по кривой.
+</p>
 
-<p>Класс {@link android.view.animation.PathInterpolator} – это новый интерполятор на основе кривой Безье или объекта {@link android.graphics.Path}. Данный интерполятор определяет перемещение по кривой в квадрате 1 x 1 с привязкой в точках (0,0) и (1,1), а также с контрольными точками, задаваемыми с помощью аргументов конструктора. Также можно определить интерполятор траектории в качестве XML-ресурса:</p>
+<p>Класс {@link android.view.animation.PathInterpolator} — это новый интерполятор на
+основе кривой Безье или объекта {@link android.graphics.Path}. Данный интерполятор определяет перемещение по кривой в квадрате 1 x 1 с привязкой в точках (0,0) и (1,1), а также с контрольными точками, задаваемыми с помощью аргументов конструктора.
+
+ Также можно определить интерполятор траектории в качестве XML-ресурса:</p>
 
 <pre>
 &lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
@@ -295,17 +358,21 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
     android:controlY2="1"/>
 </pre>
 
-<p>В системе имеются XML-ресурсы для трех основных кривых в спецификации Material Design:</p>
+<p>В системе имеются XML-ресурсы для трех основных кривых в спецификации Material Design:
+</p>
 
 <ul>
-  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
-  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
-  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code>;</li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code>;</li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code>.</li>
 </ul>
 
-<p>Можно передать объект {@link android.view.animation.PathInterpolator} в метод {@link android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
+<p>Можно передать объект {@link android.view.animation.PathInterpolator} в метод {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
 
-<p>Класс {@link android.animation.ObjectAnimator} имеет новые конструкторы, с помощью которых можно анимировать координаты вдоль траектории перемещения, используя для этого сразу два или более свойств. Например, следующий аниматор использует объект {@link android.graphics.Path} для анимации свойств представления по осям X и Y:</p>
+<p>Класс {@link android.animation.ObjectAnimator} имеет новые конструкторы, с помощью которых можно анимировать координаты вдоль траектории перемещения, используя для этого не менее двух свойств.
+ Например, следующий аниматор
+использует объект {@link android.graphics.Path} для анимации свойств представления по осям X и Y:</p>
 
 <pre>
 ObjectAnimator mAnimator;
@@ -317,7 +384,9 @@ mAnimator.start();
 
 <h2 id="ViewState">Анимация изменений состояния представления</h2>
 
-<p>С помощью класса {@link android.animation.StateListAnimator} можно определить аниматоры, которые запускаются при изменении состояния представления. В примере ниже показан порядок определения {@link android.animation.StateListAnimator} в качестве XML-ресурса:</p>
+<p>С помощью класса {@link android.animation.StateListAnimator} можно определить аниматоры, которые запускаются при изменении состояния представления.
+ В следующем примере показан порядок определения {@link
+android.animation.StateListAnimator} в качестве XML-ресурса:</p>
 
 <pre>
 &lt;!-- animate the translationZ property of a view when pressed -->
@@ -345,11 +414,21 @@ mAnimator.start();
 &lt;/selector>
 </pre>
 
-<p>Чтобы присоединить к представлению настраиваемые анимации состояния представления, определите аниматор, используя элемент <code>selector</code> в файле XML-ресурса (как в этом примере), а затем назначьте его своему представлению с помощью атрибута <code>android:stateListAnimator</code>. Чтобы в своем коде назначить представлению аниматор списка состояний, используйте метод {@link android.animation.AnimatorInflater#loadStateListAnimator AnimationInflater.loadStateListAnimator()}, а затем назначьте аниматор своему представлению с помощью метода {@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
+<p>Чтобы присоединить к представлению настраиваемые анимации состояния представления, определите аниматор, используя элемент 
+<code>selector</code> в файле XML-ресурса (как в этом примере), а затем назначьте его своему представлению
+с помощью атрибута <code>android:stateListAnimator</code>. Чтобы в своем коде назначить представлению аниматор
+ списка состояний, используйте метод {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()}, а затем назначьте аниматор своему представлению с помощью метода 
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
 
-<p>Когда ваша тема является расширением темы Material Design, по умолчанию у кнопок имеется возможность анимации по оси Z. Чтобы отключить такое поведение для кнопок, задайте для атрибута <code>android:stateListAnimator</code> значение <code>@null</code>.</p>
+<p>Если ваша тема является расширением темы Material Design, по умолчанию у кнопок имеется возможность анимации по оси Z. Чтобы отключить
+такое поведение кнопок, задайте для атрибута <code>android:stateListAnimator</code> значение 
+<code>@null</code>.</p>
 
-<p>С помощью класса {@link android.graphics.drawable.AnimatedStateListDrawable} можно создавать элементы, которые служат для отображения анимации между изменениями состояния связанного представления. В Android 5.0 в некоторых системных виджетах такая анимация используется по умолчанию. В примере ниже показан порядок определения {@link android.graphics.drawable.AnimatedStateListDrawable} в качестве XML-ресурса:</p>
+<p>С помощью класса {@link android.graphics.drawable.AnimatedStateListDrawable} можно создавать элементы, которые служат для отображения анимации между изменениями состояния связанного представления.
+ В Android 5.0 в некоторых системных виджетах такая анимация используется по умолчанию.
+ В следующем примере показан порядок
+определения {@link android.graphics.drawable.AnimatedStateListDrawable} в качестве XML-ресурса:</p>
 
 <pre>
 &lt;!-- res/drawable/myanimstatedrawable.xml -->
@@ -379,19 +458,28 @@ mAnimator.start();
 
 <h2 id="AnimVector">Анимация векторных элементов</h2>
 
-<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Векторные элементы</a> можно масштабировать без ущерба четкости. Класс {@link android.graphics.drawable.AnimatedVectorDrawable} позволяет анимировать свойства векторного элемента.</p>
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Векторные элементы</a> можно масштабировать без ущерба четкости.
+ Класс {@link android.graphics.drawable.AnimatedVectorDrawable}
+позволяет анимировать свойства векторного элемента.</p>
 
 <p>Анимированные векторные элементы обычно определяются в трех XML-файлах:</p>
 
 <ul>
-<li>векторный элемент с элементом <code>&lt;vector&gt;</code> в <code>res/drawable/</code>;</li>
-<li>анимированный векторный элемент с элементом <code>&lt;animated-vector&gt;</code> в <code>res/drawable/</code>;</li>
-<li>один или несколько аниматоров объектов с элементом <code>&lt;objectAnimator&gt;</code> в <code>res/anim/</code>.</li>
+<li>векторный элемент с элементом <code>&lt;vector&gt;</code> в
+<code>res/drawable/</code>;</li>
+<li>анимированный векторный элемент с элементом <code>&lt;animated-vector&gt;</code> в
+<code>res/drawable/</code>;</li>
+<li>один или несколько аниматоров для объектов с элементом <code>&lt;objectAnimator&gt;</code> в
+<code>res/anim/</code>.</li>
 </ul>
 
-<p>С помощью анимированных векторных элементов можно анимировать атрибуты элементов <code>&lt;group&gt;</code> и <code>&lt;path&gt;</code>. Элемент<code>&lt;group&gt;</code> определяет набор траекторий или подгрупп, а элемент <code>&lt;path&gt;</code> – траектории для создания.</p>
+<p>С помощью анимированных векторных элементов можно анимировать атрибуты элементов <code>&lt;group&gt;</code> и
+<code>&lt;path&gt;</code>. Элемент<code>&lt;group&gt;</code> определяет набор траекторий
+или подгрупп, а элемент <code>&lt;path&gt;</code> — траектории для прорисовки.</p>
 
-<p>При определении векторного элемента, который требуется анимировать, используйте атрибут <code>android:name</code> для назначения уникальных имен группам или траекториям, чтобы на них можно было сослаться в определениях аниматора. Пример:</p>
+<p>При определении векторного элемента, который требуется анимировать, используйте атрибут <code>android:name</code>
+для назначения уникальных имен группам или траекториям, чтобы на них можно было сослаться в определениях аниматора.
+ Например:</p>
 
 <pre>
 &lt;!-- res/drawable/vectordrawable.xml -->
@@ -413,7 +501,8 @@ mAnimator.start();
 &lt;/vector>
 </pre>
 
-<p>Определение анимированного векторного элемента ссылается на группы и траектории в векторном элементе, используя их имена:</p>
+<p>Определение анимированного векторного элемента ссылается на группы и траектории в векторном элементе, используя их имена:
+</p>
 
 <pre>
 &lt;!-- res/drawable/animvectordrawable.xml -->
@@ -428,7 +517,9 @@ mAnimator.start();
 &lt;/animated-vector>
 </pre>
 
-<p>Определения анимации представляют объекты {@link android.animation.ObjectAnimator} или {@link android.animation.AnimatorSet}. Первый аниматор в этом примере поворачивает целевую группу на 360 градусов:</p>
+<p>Определения анимации представляются объектами {@link android.animation.ObjectAnimator} или {@link
+android.animation.AnimatorSet}. Первый аниматор в этом примере поворачивает целевую группу на 360 градусов:
+</p>
 
 <pre>
 &lt;!-- res/anim/rotation.xml -->
@@ -439,7 +530,9 @@ mAnimator.start();
     android:valueTo="360" />
 </pre>
 
-<p>Второй аниматор в этом примере преобразует траекторию векторного элемента из одной формы в другую. Для преобразования траектории должны быть совместимы: они должны содержать одинаковое количество команд, а также одинаковое количество параметров для каждой команды.</p>
+<p>Второй аниматор в этом примере преобразует траекторию векторного элемента из одной формы в другую.
+ Для преобразования обе траектории должны быть совместимы: они должны содержать одинаковое количество команд, а также одинаковое количество параметров для каждой команды.
+</p>
 
 <pre>
 &lt;!-- res/anim/path_morph.xml -->
@@ -453,4 +546,5 @@ mAnimator.start();
 &lt;/set>
 </pre>
 
-<p>Дополнительные сведения представлены в справке по API для {@link android.graphics.drawable.AnimatedVectorDrawable}.</p> 
+<p>Дополнительные сведения представлены в справке по API для {@link
+android.graphics.drawable.AnimatedVectorDrawable}.</p>

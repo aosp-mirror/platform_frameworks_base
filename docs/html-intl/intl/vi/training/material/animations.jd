@@ -1,0 +1,550 @@
+page.title=Định nghĩa Hoạt hình Tùy chỉnh
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#Touch">Tùy chỉnh Phản hồi Chạm</a></li>
+  <li><a href="#Reveal">Sử dụng Hiệu ứng Lộ ra</a></li>
+  <li><a href="#Transitions">Tùy chỉnh Chuyển tiếp Hoạt động</a></li>
+  <li><a href="#ViewState">Tạo Hiệu ứng Hoạt hình Thay đổi Trạng thái Xem</a></li>
+  <li><a href="#AnimVector">Tạo Hiệu ứng Hoạt hình Nội dung vẽ được Véc-tơ</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+
+<p>Hoạt hình theo phong cách material design phản hồi hành động của người dùng và cung cấp 
+tính liên tục trực quan khi người dùng tương tác với ứng dụng của bạn. Giao diện material cung cấp một số hoạt hình
+mặc định cho các nút và chuyển tiếp hoạt động, và Android 5.0 (API mức 21) và cao hơn cho phép bạn tùy chỉnh
+những hoạt hình này và tạo các hoạt hình mới:</p>
+
+<ul>
+<li>Phản hồi chạm</li>
+<li>Lộ ra Vòng tròn</li>
+<li>Chuyển tiếp hoạt động</li>
+<li>Chuyển động cong</li>
+<li>Thay đổi trạng thái xem</li>
+</ul>
+
+
+<h2 id="Touch">Tùy chỉnh Phản hồi Chạm</h2>
+
+<p>Phản hồi chạm trong Material Design đưa ra một xác nhận trực quan tức thời tại
+điểm tiếp xúc khi người dùng tương tác với các phần tử UI. Hoạt hình phản hồi chạm mặc định
+cho nút sẽ sử dụng lớp {@link android.graphics.drawable.RippleDrawable} mới để chuyển tiếp
+giữa các trạng thái khác nhau bằng hiệu ứng gợn sóng.</p>
+
+<p>Trong hầu hết trường hợp, bạn nên áp dụng tính năng này trong tệp XML dạng xem của mình bằng cách chỉ định nền
+dạng xem là:</p>
+
+<ul>
+<li><code>?android:attr/selectableItemBackground</code> cho gợn sóng có giới hạn.</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> cho gợn sóng lan ra ngoài
+dạng xem. Hiệu ứng sẽ được vẽ lên và được giới hạn bởi dạng xem mẹ gần nhất có nền
+không rỗng.</li>
+</ul>
+
+<p class="note"><strong>Lưu ý:</strong> <code>selectableItemBackgroundBorderless</code> là một thuộc tính
+mới được giới thiệu trong API mức 21.</p>
+
+
+<p>Hoặc, bạn có thể định nghĩa {@link android.graphics.drawable.RippleDrawable}
+làm tài nguyên XML bằng cách sử dụng phần tử <code>ripple</code>.</p>
+
+<p>Bạn có thể gán một màu cho các đối tượng {@link android.graphics.drawable.RippleDrawable}. Để thay đổi
+màu phản hồi chạm mặc định, hãy sử dụng thuộc tính <code>android:colorControlHighlight</code>
+của chủ đề.</p>
+
+<p>Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho lớp {@link
+android.graphics.drawable.RippleDrawable}.</p>
+
+
+<h2 id="Reveal">Sử dụng Hiệu ứng Lộ ra</h2>
+
+<p>Hoạt hình lộ ra đảm bảo tính liên tục trực quan cho người dùng khi bạn hiện hoặc ẩn một nhóm phần tử
+UI. Phương thức {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} cho phép bạn tạo hiệu ứng hoạt hình một vòng tròn cắt hình
+để lộ ra hoặc ẩn một dạng xem.</p>
+
+<p>Để lộ ra một dạng xem ẩn trước đó bằng hiệu ứng này:</p>
+
+<pre>
+// previously invisible view
+View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the final radius for the clipping circle
+int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+
+// create the animator for this view (the start radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+
+// make the view visible and start the animation
+myView.setVisibility(View.VISIBLE);
+anim.start();
+</pre>
+
+<p>Để ẩn một dạng xem hiển thị trước đó bằng hiệu ứng này:</p>
+
+<pre>
+// previously visible view
+final View myView = findViewById(R.id.my_view);
+
+// get the center for the clipping circle
+int cx = (myView.getLeft() + myView.getRight()) / 2;
+int cy = (myView.getTop() + myView.getBottom()) / 2;
+
+// get the initial radius for the clipping circle
+int initialRadius = myView.getWidth();
+
+// create the animation (the final radius is zero)
+Animator anim =
+    ViewAnimationUtils.createCircularReveal(myView, cx, cy, initialRadius, 0);
+
+// make the view invisible when the animation is done
+anim.addListener(new AnimatorListenerAdapter() {
+    &#64;Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+        myView.setVisibility(View.INVISIBLE);
+    }
+});
+
+// start the animation
+anim.start();
+</pre>
+
+
+<h2 id="Transitions">Tùy chỉnh Chuyển tiếp Hoạt động</h2>
+
+<!-- shared transition video -->
+<div style="width:290px;margin-left:35px;float:right">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.mp4">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.webm">
+    <source src="{@docRoot}design/material/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Hình 1</strong> - Chuyển tiếp
+    với những phần tử chung.</p>
+    <em>Để phát lại phim, nhấp vào màn hình thiết bị</em>
+  </div>
+</div>
+
+<p>Chuyển tiếp hoạt động trong các ứng dụng theo phong cách material design cung cấp kết nối trực quan giữa các trạng thái khác nhau
+thông qua chuyển động và chuyển đổi giữa những phần tử hay dùng. Bạn có thể quy định hoạt hình tùy chỉnh cho
+các chuyển tiếp ra vào và chuyển tiếp phần tử chung giữa các hoạt động.</p>
+
+<ul>
+<li>Chuyển tiếp <strong>vào</strong> xác định các dạng xem trong một hoạt động sẽ vào cảnh đó như thế nào.
+Ví dụ, trong chuyển tiếp vào dạng <em>nổ tung</em>, dạng xem sẽ vào cảnh từ bên ngoài
+và bay về phía chính giữa màn hình.</li>
+
+<li>Chuyển tiếp <strong>ra</strong> xác định các dạng xem trong một hoạt động sẽ ra khỏi cảnh như thế nào. Ví
+ dụ, trong chuyển tiếp ra kiểu <em>nổ tung</em>, dạng xem sẽ ra khỏi cảnh từ
+trung tâm.</li>
+
+<li>Chuyển tiếp <strong>phần tử chung</strong> xác định các dạng xem chung giữa hai hoạt động
+sẽ chuyển tiếp như thế nào giữa những hoạt động này. Ví dụ, nếu hai hoạt động có cùng
+hình ảnh ở các vị trí và kích cỡ khác nhau, chuyển tiếp phần tử chung <em>changeImageTransform</em> 
+sẽ thể hiện và co giãn hình ảnh một cách mượt mà giữa những hoạt động này.</li>
+</ul>
+
+<p>Android 5.0 (API mức 21) hỗ trợ những chuyển tiếp ra vào sau:</p>
+
+<ul>
+<li><em>nổ tung</em> - Di chuyển các dạng xem vào hoặc ra khỏi chính giữa cảnh.</li>
+<li><em>trượt</em> - Di chuyển các dạng xem vào hoặc ra từ một trong các mép của cảnh.</li>
+<li><em>mờ dần</em> - Thêm hoặc gỡ bỏ dạng xem khỏi cảnh bằng cách thay đổi độ mờ đục của nó.</li>
+</ul>
+
+<p>Bất cứ chuyển tiếp nào mở rộng lớp {@link android.transition.Visibility} đều được hỗ trợ
+như một chuyển tiếp vào hoặc ra. Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho lớp
+{@link android.transition.Transition}.</p>
+
+<p>Android 5.0 (API mức 21) cũng hỗ trợ những chuyển tiếp phần tử chung này:</p>
+
+<ul>
+<li><em>changeBounds</em> - Tạo hiệu ứng hoạt hình các thay đổi trong giới hạn bố trí của dạng xem mục tiêu.</li>
+<li><em>changeClipBounds</em> - Tạo hiệu ứng hoạt hình các thay đổi trong giới hạn cắt hình của dạng xem mục tiêu.</li>
+<li><em>changeTransform</em> - Tạo hiệu ứng hoạt hình các thay đổi về co giãn và xoay dạng xem mục tiêu.</li>
+<li><em>changeImageTransform</em> - Tạo hiệu ứng hoạt hình các thay đổi về kích cỡ và co giãn của ảnh mục tiêu.</li>
+</ul>
+
+<p>Khi bạn cho phép chuyển tiếp hoạt động trong ứng dụng của mình, chuyển tiếp mờ dần chéo cross-fading
+mặc định sẽ được kích hoạt giữa các hoạt động ra vào.</p>
+
+<img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
+<p class="img-caption">
+  <strong>Hình 2</strong> - Chuyển tiếp cảnh với một phần tử chung.
+</p>
+
+<h3>Quy định chuyển tiếp tùy chỉnh</h3>
+
+<p>Trước tiên, cho phép chuyển tiếp nội dung cửa sổ bằng thuộc tính <code>android:windowContentTransitions</code>
+khi bạn định nghĩa một kiểu kế thừa từ chủ đề material. Bạn cũng có thể quy định chuyển tiếp
+ra, vào và phần tử chung trong định nghĩa kiểu của mình:</p>
+
+<pre>
+&lt;style name="BaseAppTheme" parent="android:Theme.Material">
+  &lt;!-- enable window content transitions -->
+  &lt;item name="android:windowContentTransitions">true&lt;/item>
+
+  &lt;!-- specify enter and exit transitions -->
+  &lt;item name="android:windowEnterTransition">@transition/explode&lt;/item>
+  &lt;item name="android:windowExitTransition">@transition/explode&lt;/item>
+
+  &lt;!-- specify shared element transitions -->
+  &lt;item name="android:windowSharedElementEnterTransition">
+    &#64;transition/change_image_transform&lt;/item>
+  &lt;item name="android:windowSharedElementExitTransition">
+    &#64;transition/change_image_transform&lt;/item>
+&lt;/style>
+</pre>
+
+<p>Chuyển tiếp <code>change_image_transform</code> trong ví dụ này được định nghĩa như sau:</p>
+
+<pre>
+&lt;!-- res/transition/change_image_transform.xml -->
+&lt;!-- (see also Shared Transitions below) -->
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;changeImageTransform/>
+&lt;/transitionSet>
+</pre>
+
+<p>Phần tử <code>changeImageTransform</code> tương ứng với lớp
+{@link android.transition.ChangeImageTransform}. Để biết thêm thông tin, hãy xem tài liệu tham khảo API
+cho {@link android.transition.Transition}.</p>
+
+<p>Thay vào đó, để cho phép chuyển tiếp nội dung cửa sổ trong mã của bạn, hãy gọi phương thức
+{@link android.view.Window#requestFeature Window.requestFeature()}:</p>
+
+<pre>
+// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</pre>
+
+<p>Để quy định chuyển tiếp trong mã của bạn, hãy gọi những phương thức này bằng đối tượng {@link
+android.transition.Transition}:</p>
+
+<ul>
+  <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
+  <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
+</ul>
+
+<p>Phương thức {@link android.view.Window#setExitTransition setExitTransition()} và {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} định nghĩa
+chuyển tiếp ra cho hoạt động gọi. Phương thức {@link android.view.Window#setEnterTransition
+setEnterTransition()} và {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} định nghĩa chuyển tiếp vào cho hoạt động được gọi.</p>
+
+<p>Để có đầy đủ hiệu ứng của một chuyển tiếp, bạn phải cho phép chuyển tiếp nội dung cửa sổ trên cả hoạt động
+gọi và được gọi. Nếu không, hoạt động gọi sẽ bắt đầu chuyển tiếp ra,
+nhưng khi đó bạn sẽ thấy chuyển tiếp cửa sổ (như co giãn và mờ dần).</p>
+
+<p>Để bắt đầu một chuyển tiếp vào ngay khi có thể, hãy sử dụng phương thức
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+trên hoạt động được gọi. Nó cho phép bạn có chuyển tiếp vào ấn tượng hơn.</p>
+
+<h3>Bắt đầu một hoạt động bằng chuyển tiếp</h3>
+
+<p>Nếu bạn cho phép chuyển tiếp và đặt chuyển tiếp ra cho một hoạt động, chuyển tiếp sẽ được
+kích hoạt khi bạn khởi chạy một hoạt động khác như sau:</p>
+
+<pre>
+startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</pre>
+
+<p>Nếu bạn đặt một chuyển tiếp vào cho hoạt động thứ hai, chuyển tiếp này cũng được kích hoạt khi hoạt động
+bắt đầu. Để vô hiệu hoá chuyển tiếp khi bạn bắt đầu một hoạt động khác, hãy cung cấp
+một nhóm tùy chọn <code>null</code>.</p>
+
+<h3>Bắt đầu một hoạt động bằng một phần tử chung</h3>
+
+<p>Để tạo một hoạt hình chuyển tiếp màn hình giữa hai hoạt động có một phần tử chung:</p>
+
+<ol>
+<li>Cho phép chuyển tiếp nội dung cửa sổ trong chủ đề của bạn.</li>
+<li>Quy định một chuyển tiếp phần tử chung trong kiểu của bạn.</li>
+<li>Định nghĩa chuyển tiếp của bạn dưới dạng một tài nguyên XML.</li>
+<li>Gán một tên chung cho các phần tử chung ở cả hai bố trí bằng thuộc tính
+    <code>android:transitionName</code>.</li>
+<li>Sử dụng phương thức {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()}.</li>
+</ol>
+
+<pre>
+// get the element that receives the click event
+final View imgContainerView = findViewById(R.id.img_container);
+
+// get the common element for the transition in this activity
+final View androidRobotView = findViewById(R.id.image_small);
+
+// define a click listener
+imgContainerView.setOnClickListener(new View.OnClickListener() {
+    &#64;Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this, Activity2.class);
+        // create the transition animation - the images in the layouts
+        // of both activities are defined with android:transitionName="robot"
+        ActivityOptions options = ActivityOptions
+            .makeSceneTransitionAnimation(this, androidRobotView, "robot");
+        // start the new activity
+        startActivity(intent, options.toBundle());
+    }
+});
+</pre>
+
+<p>Đối với các dạng xem động dùng chung mà bạn khởi tạo trong mã của mình, hãy sử dụng phương thức
+{@link android.view.View#setTransitionName View.setTransitionName()} để quy định một
+tên phần tử chung trong cả hai hoạt động.</p>
+
+<p>Để đảo ngược hoạt hình chuyển tiếp cảnh khi bạn kết thúc hoạt động thứ hai, hãy gọi phương thức
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+thay vì {@link android.app.Activity#finish Activity.finish()}.</p>
+
+<h3>Bắt đầu một hoạt động bằng nhiều phần tử chung</h3>
+
+<p>Để tạo một hoạt hình chuyển tiếp cảnh giữa hai hoạt động có nhiều hơn một phần tử
+chung, hãy định nghĩa các phần tử chung trong cả hai bố trí bằng thuộc tính <code>android:transitionName</code>
+ (hoặc sử dụng phương thức {@link android.view.View#setTransitionName View.setTransitionName()} 
+trong cả hai hoạt động), và tạo một đối tượng {@link android.app.ActivityOptions} như sau:</p>
+
+<pre>
+ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
+        Pair.create(view1, "agreedName1"),
+        Pair.create(view2, "agreedName2"));
+</pre>
+
+
+<h2 id="CurvedMotion">Sử dụng Chuyển động Cong</h2>
+
+<p>Hoạt hình theo phong cách material design phụ thuộc vào đường cong làm mẫu hình nội suy thời gian
+và chuyển động không gian. Với Android 5.0 (API mức 21) trở lên, bạn có thể định nghĩa đường cong định thời tùy chỉnh và
+mẫu hình chuyển động cong cho hoạt hình.</p>
+
+<p>Lớp {@link android.view.animation.PathInterpolator} là một hàm nội suy mới dựa trên đường cong
+Bézier hoặc đối tượng {@link android.graphics.Path}. Hàm nội suy này quy định một đường cong chuyển động
+trong một hình vuông 1x1, với các điểm neo tại (0,0) và (1,1) cùng các điểm kiểm soát được quy định bằng cách sử dụng
+các tham đối của hàm dựng. Bạn cũng có thể định nghĩa một hàm nội suy đường dẫn dưới dạng tài nguyên XML:</p>
+
+<pre>
+&lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1"/>
+</pre>
+
+<p>Hệ thống cung cấp tài nguyên XML cho ba đường cong cơ bản trong đặc tả
+material design:</p>
+
+<ul>
+  <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
+  <li><code>&#64;interpolator/fast_out_slow_in.xml</code></li>
+  <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
+</ul>
+
+<p>Bạn có thể chuyển một đối tượng {@link android.view.animation.PathInterpolator} tới phương thức {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
+
+<p>Lớp {@link android.animation.ObjectAnimator} có các hàm dựng mới cho phép bạn tạo hiệu ứng hoạt hình
+cho các tọa độ dọc theo một đường dẫn bằng hai hoặc nhiều thuộc tính đồng thời. Ví dụ, trình tạo hoạt hình sau
+sử dụng một đối tượng {@link android.graphics.Path} để tạo hiệu ứng hoạt hình cho thuộc tính X và Y của một dạng xem:</p>
+
+<pre>
+ObjectAnimator mAnimator;
+mAnimator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+...
+mAnimator.start();
+</pre>
+
+
+<h2 id="ViewState">Tạo Hiệu ứng Hoạt hình Thay đổi Trạng thái Xem</h2>
+
+<p>Lớp {@link android.animation.StateListAnimator} cho phép bạn định nghĩa trình tạo hoạt hình để chạy khi
+trạng thái của dạng xem thay đổi. Ví dụ sau cho biết cách định nghĩa một {@link
+android.animation.StateListAnimator}  dưới dạng tài nguyên XML:</p>
+
+<pre>
+&lt;!-- animate the translationZ property of a view when pressed -->
+&lt;selector xmlns:android="http://schemas.android.com/apk/res/android">
+  &lt;item android:state_pressed="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="@android:integer/config_shortAnimTime"
+        android:valueTo="2dp"
+        android:valueType="floatType"/>
+        &lt;!-- you could have other objectAnimator elements
+             here for "x" and "y", or other properties -->
+    &lt;/set>
+  &lt;/item>
+  &lt;item android:state_enabled="true"
+    android:state_pressed="false"
+    android:state_focused="true">
+    &lt;set>
+      &lt;objectAnimator android:propertyName="translationZ"
+        android:duration="100"
+        android:valueTo="0"
+        android:valueType="floatType"/>
+    &lt;/set>
+  &lt;/item>
+&lt;/selector>
+</pre>
+
+<p>Để gắn kèm hoạt hình trạng thái dạng xem tùy chỉnh vào một dạng xem, hãy định nghĩa một trình tạo hoạt hình bằng cách sử dụng phần tử
+<code>selector</code> trong một tệp tài nguyên XML như trong ví dụ này, và gán nó cho dạng xem
+của bạn bằng thuộc tính <code>android:stateListAnimator</code>. Để gán một trình tạo hoạt hình danh sách trạng thái
+cho một dạng xem trong mã của bạn, hãy sử dụng phương thức {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} và gán trình tạo hoạt hình cho dạng xem của bạn bằng phương thức
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
+
+<p>Khi chủ đề của bạn mở rộng ra chủ đề material, các nút sẽ có hoạt hình Z theo mặc định. Để tránh hành vi
+này trong nút của bạn, hãy đặt thuộc tính <code>android:stateListAnimator</code> thành
+<code>@null</code>.</p>
+
+<p>Lớp {@link android.graphics.drawable.AnimatedStateListDrawable} cho phép bạn tạo các nội dung vẽ được
+để hiển thị hoạt hình giữa các thay đổi trạng thái của dạng xem được liên kết. Một số widget hệ thống trong
+Android 5.0 sử dụng những hoạt hình này theo mặc định. Ví dụ sau cho biết cách
+cách định nghĩa {@link android.graphics.drawable.AnimatedStateListDrawable} dưới dạng tài nguyên XML:</p>
+
+<pre>
+&lt;!-- res/drawable/myanimstatedrawable.xml -->
+&lt;animated-selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    &lt;!-- provide a different drawable for each state-->
+    &lt;item android:id="@+id/pressed" android:drawable="@drawable/drawableP"
+        android:state_pressed="true"/>
+    &lt;item android:id="@+id/focused" android:drawable="@drawable/drawableF"
+        android:state_focused="true"/>
+    &lt;item android:id="@id/default"
+        android:drawable="@drawable/drawableD"/>
+
+    &lt;!-- specify a transition -->
+    &lt;transition android:fromId="@+id/default" android:toId="@+id/pressed">
+        &lt;animation-list>
+            &lt;item android:duration="15" android:drawable="@drawable/dt1"/>
+            &lt;item android:duration="15" android:drawable="@drawable/dt2"/>
+            ...
+        &lt;/animation-list>
+    &lt;/transition>
+    ...
+&lt;/animated-selector>
+</pre>
+
+
+<h2 id="AnimVector">Tạo Hiệu ứng Hoạt hình Nội dung vẽ được Véc-tơ</h2>
+
+<p><a href="{@docRoot}training/material/drawables.html#VectorDrawables">Nội dung vẽ được Véc-tơ</a> sẽ co giãn được
+mà không làm mất độ sắc nét. Lớp {@link android.graphics.drawable.AnimatedVectorDrawable}
+cho phép bạn tạo hiệu ứng hoạt hình các thuộc tính của nội dung vẽ được véc-tơ.</p>
+
+<p>Thường thì bạn định nghĩa nội dung vẽ được véc-tơ hoạt hình theo ba tệp XML:</p>
+
+<ul>
+<li>Nội dung vẽ được véc-tơ với phần tử <code>&lt;vector&gt;</code> trong
+<code>res/drawable/</code></li>
+<li>Nội dung vẽ được véc-tơ hoạt hình với phần tử <code>&lt;animated-vector&gt;</code> trong
+<code>res/drawable/</code></li>
+<li>Một hoặc nhiều trình tạo hoạt hình đối tượng với phần tử <code>&lt;objectAnimator&gt;</code> trong
+<code>res/anim/</code></li>
+</ul>
+
+<p>Nội dung vẽ được véc-tơ hoạt hình có thể tạo hiệu ứng hoạt hình các thuộc tính của phần tử <code>&lt;group&gt;</code> và
+<code>&lt;path&gt;</code>. Phần tử <code>&lt;group&gt;</code> định nghĩa một bộ
+đường dẫn hoặc nhóm phụ và phần tử <code>&lt;path&gt;</code> định nghĩa các đường dẫn sẽ được vẽ.</p>
+
+<p>Khi định nghĩa một nội dung vẽ được véc-tơ mà bạn muốn tạo hiệu ứng hoạt hình, hãy sử dụng thuộc tính <code>android:name</code>
+để gán một tên duy nhất cho các nhóm và đường dẫn, sao cho bạn có thể tham chiếu tới chúng từ các định nghĩa
+trình tạo hoạt hình của mình. Ví dụ:</p>
+
+<pre>
+&lt;!-- res/drawable/vectordrawable.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600">
+    &lt;group
+        <strong>android:name="rotationGroup"</strong>
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" >
+        &lt;path
+            <strong>android:name="v"</strong>
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" />
+    &lt;/group>
+&lt;/vector>
+</pre>
+
+<p>Định nghĩa nội dung vẽ được véc-tơ hoạt hình sẽ tham chiếu tới các nhóm và đường dẫn trong nội dung vẽ được véc-tơ theo
+tên của chúng:</p>
+
+<pre>
+&lt;!-- res/drawable/animvectordrawable.xml -->
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:drawable="@drawable/vectordrawable" >
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" />
+    &lt;target
+        android:name="v"
+        android:animation="@anim/path_morph" />
+&lt;/animated-vector>
+</pre>
+
+<p>Định nghĩa hoạt hình biểu diễn các đối tượng {@link android.animation.ObjectAnimator} hoặc {@link
+android.animation.AnimatorSet}. Trình tạo hoạt hình đầu tiên trong ví dụ này sẽ xoay nhóm
+đối tượng 360 độ:</p>
+
+<pre>
+&lt;!-- res/anim/rotation.xml -->
+&lt;objectAnimator
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" />
+</pre>
+
+<p>Trình tạo hoạt hình thứ hai trong ví dụ này sẽ đổi dạng đường dẫn của nội dung vẽ được véc-tơ từ hình này sang
+hình khác. Cả hai đường dẫn đều phải tương thích với việc đổi dạng: chúng phải có cùng số lệnh
+và cùng số lượng tham số cho từng lệnh.</p>
+
+<pre>
+&lt;!-- res/anim/path_morph.xml -->
+&lt;set xmlns:android="http://schemas.android.com/apk/res/android">
+    &lt;objectAnimator
+        android:duration="3000"
+        android:propertyName="pathData"
+        android:valueFrom="M300,70 l 0,-70 70,70 0,0   -70,70z"
+        android:valueTo="M300,70 l 0,-70 70,0  0,140 -70,0 z"
+        android:valueType="pathType" />
+&lt;/set>
+</pre>
+
+<p>Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho {@link
+android.graphics.drawable.AnimatedVectorDrawable}.</p>

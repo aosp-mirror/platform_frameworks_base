@@ -1609,6 +1609,15 @@ results."
           <a href="<?cs var:toroot ?>training/material/index.html"
              description=
              "How to implement material design on Android."
+            zh-cn-lang="面向开发者的材料设计"
+            zh-tw-lang="開發人員材料設計"
+            ja-lang="マテリアル デザインでのアプリ作成"
+            es-lang="Crear aplicaciones con Material Design"
+            pt-br-lang="Material Design para desenvolvedores"
+            ko-lang="개발자를 위한 머티리얼 디자인"
+            ru-lang="Создание приложений с помощью Material Design"
+            in-lang="Desain Bahan untuk Pengembang"
+            vi-lang="Material Design cho Nhà phát triển"
             >Creating Apps with Material Design</a>
         </div>
         <ul>
@@ -1620,6 +1629,8 @@ results."
             pt-br-lang="Como iniciar"
             ko-lang="시작하기"
             ru-lang="Начало работы"
+            in-lang="Memulai"
+            vi-lang="Bắt đầu"
             >
             Getting Started
           </a>
@@ -1632,6 +1643,8 @@ results."
             pt-br-lang="Como usar o tema do Material"
             ko-lang="머티어리얼 테마 사용"
             ru-lang="Использование темы Material Design"
+            in-lang="Menggunakan Tema Bahan"
+            vi-lang="Sử dụng Chủ đề Material"
             >
             Using the Material Theme
           </a>
@@ -1644,6 +1657,8 @@ results."
             pt-br-lang="Como criar listas e cartões"
             ko-lang="목록 및 카드 생성"
             ru-lang="Создание списков и подсказок"
+            in-lang="Membuat Daftar dan Kartu"
+            vi-lang="Tạo Danh sách và Thẻ"
             >
             Creating Lists and Cards
           </a>
@@ -1656,6 +1671,8 @@ results."
             pt-br-lang="Como definir sombras e recortar visualizações"
             ko-lang="그림자 정의 및 뷰 클리핑"
             ru-lang="Определение теней и обрезка представлений"
+            in-lang="Mendefinisikan Bayangan dan Memangkas Tampilan"
+            vi-lang="Định nghĩa Đổ bóng và Dạng xem Cắt hình"
             >
             Defining Shadows and Clipping Views
           </a>
@@ -1668,6 +1685,8 @@ results."
             pt-br-lang="Como trabalhar com desenháveis"
             ko-lang="Drawable 사용"
             ru-lang="Работа с элементами дизайна"
+            in-lang="Bekerja dengan Drawable"
+            vi-lang="Làm việc với Nội dung vẽ được"
             >
             Working with Drawables
           </a>
@@ -1680,6 +1699,8 @@ results."
             pt-br-lang="Como definir animações personalizadas"
             ko-lang="사용자지정 애니메이션 정의"
             ru-lang="Определение настраиваемой анимации"
+            in-lang="Mendefinisikan Animasi Custom"
+            vi-lang="Định nghĩa Hoạt hình Tùy chỉnh"
             >
             Defining Custom Animations
           </a>
@@ -1692,6 +1713,8 @@ results."
             pt-br-lang="Como manter a compatibilidade"
             ko-lang="호환성 유지"
             ru-lang="Обеспечение совместимости"
+            in-lang="Mempertahankan Kompatibilitas"
+            vi-lang="Duy trì Tính tương thích"
             >
             Maintaining Compatibility
           </a>

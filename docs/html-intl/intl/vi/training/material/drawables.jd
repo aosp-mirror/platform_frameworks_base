@@ -1,0 +1,126 @@
+page.title=Làm việc với Nội dung vẽ được
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>Bài học này hướng dẫn bạn cách</h2>
+<ol>
+  <li><a href="#DrawableTint">Nhuộm màu Tài nguyên Vẽ được</a></li>
+  <li><a href="#ColorExtract">Trích xuất Màu Nổi bật từ một Hình ảnh</a></li>
+  <li><a href="#VectorDrawables">Tạo Nội dung vẽ được Véc-tơ</a></li>
+</ol>
+<h2>Bạn cũng nên đọc</h2>
+<ul>
+  <li><a href="http://www.google.com/design/spec">Đặc tả phong cách Material Design</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design trên Android</a></li>
+</ul>
+</div>
+</div>
+
+<p>Những khả năng sau của nội dung vẽ được giúp bạn triển khai phong cách material design trong các ứng dụng của mình:</p>
+
+<ul>
+<li>Nhuộm màu nội dung vẽ được</li>
+<li>Trích xuất màu nổi bật</li>
+<li>Nội dung vẽ được véc-tơ</li>
+</ul>
+
+<p>Bài học này cho bạn biết cách sử dụng những tính năng này trong ứng dụng của mình.</p>
+
+
+<h2 id="DrawableTint">Nhuộm màu Tài nguyên Vẽ được</h2>
+
+<p>Với Android 5.0 (API mức 21) và cao hơn, bạn có thể nhuộm màu ảnh bitmap và ảnh chín miếng được định nghĩa làm
+mặt nạ alpha. Bạn có thể nhuộm chúng bằng tài nguyên màu hoặc những thuộc tính chủ đề nhằm phân giải thành các tài nguyên
+màu (ví dụ, <code>?android:attr/colorPrimary</code>). Thông thường, bạn chỉ tạo những tài sản này
+một lần và tô màu tự động cho chúng để khớp với chủ đề của mình.</p>
+
+<p>Bạn có thể áp dụng một màu nhuộm cho đối tượng {@link android.graphics.drawable.BitmapDrawable} hoặc {@link
+android.graphics.drawable.NinePatchDrawable} bằng phương thức {@code setTint()}. Bạn cũng có thể
+đặt màu nhuộm và chế độ trong bố trí của mình bằng các thuộc tính <code>android:tint</code> và
+<code>android:tintMode</code>.</p>
+
+
+<h2 id="ColorExtract">Trích xuất Màu Nổi bật từ một Hình ảnh</h2>
+
+<p>Thư viện Hỗ trợ Android r21 và cao hơn bao gồm lớp {@link
+android.support.v7.graphics.Palette}, cho phép bạn trích xuất màu nổi bật từ một hình ảnh.
+Lớp này trích xuất những màu nổi bật sau:</p>
+
+<ul>
+<li>Rực rỡ</li>
+<li>Tối rực rỡ</li>
+<li>Sáng rực rỡ</li>
+<li>Lặng</li>
+<li>Tối lặng</li>
+<li>Sáng lặng</li>
+</ul>
+
+<p>Để trích xuất những màu này, hãy chuyển một đối tượng {@link android.graphics.Bitmap} cho phương thức tĩnh 
+{@link android.support.v7.graphics.Palette#generate Palette.generate()} trong
+luồng chạy ngầm nơi bạn tải hình ảnh của mình. Nếu bạn không thể sử dụng luồng đó, hãy gọi phương thức
+{@link android.support.v7.graphics.Palette#generateAsync Palette.generateAsync()} và
+cung cấp một trình nghe.</p>
+
+<p>Bạn có thể truy xuất màu nổi bật từ hình ảnh bằng cách sử dụng các phương thức getter trong lớp
+<code>Palette</code> chẳng hạn như <code>Palette.getVibrantColor</code>.</p>
+
+<p>Để sử dụng lớp {@link android.support.v7.graphics.Palette} trong dự án của mình, hãy thêm
+<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Phần phụ thuộc Gradle</a> sau vào
+mô-đun ứng dụng của bạn:</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:palette-v7:21.0.0'
+}
+</pre>
+
+<p>Để biết thêm thông tin, hãy xem tài liệu tham khảo API cho lớp
+{@link android.support.v7.graphics.Palette}.</p>
+
+
+<h2 id="VectorDrawables">Tạo Nội dung vẽ được Véc-tơ</h2>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=wlFVIIstKmA" style="margin-top:18px">
+<div>
+    <h3>Video</h3>
+    <p>Đồ họa Véc-tơ Android</p>
+</div>
+</a>
+
+<p>Trong Android 5.0 (API mức 21) và cao hơn, bạn có thể định nghĩa nội dung vẽ được véc-tơ co giãn mà không làm mất
+độ sắc nét. Bạn chỉ cần một tệp tài sản cho một hình ảnh véc-tơ, đối lập với tệp tài sản cho
+từng mật độ màn hình trong trường hợp hình ảnh bitmap. Để tạo một hình ảnh véc-tơ, bạn định nghĩa chi tiết
+của hình ảnh trong phần tử XML <code>&lt;vector&gt;</code>.</p>
+
+<p>Ví dụ sau định nghĩa hình ảnh véc-tơ có hình một trái tim:</p>
+
+<pre>
+&lt;!-- res/drawable/heart.xml -->
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    &lt;!-- intrinsic size of the drawable -->
+    android:height="256dp"
+    android:width="256dp"
+    &lt;!-- size of the virtual canvas -->
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+  &lt;!-- draw a path -->
+  &lt;path android:fillColor="#8fff"
+      android:pathData="M20.5,9.5
+                        c-1.955,0,-3.83,1.268,-4.5,3
+                        c-0.67,-1.732,-2.547,-3,-4.5,-3
+                        C8.957,9.5,7,11.432,7,14
+                        c0,3.53,3.793,6.257,9,11.5
+                        c5.207,-5.242,9,-7.97,9,-11.5
+                        C25,11.432,23.043,9.5,20.5,9.5z" />
+&lt;/vector>
+</pre>
+
+<p>Hình ảnh véc-tơ được biểu diễn trong Android dưới dạng đối tượng {@link android.graphics.drawable.VectorDrawable}
+. Để biết thêm thông tin về cú pháp <code>pathData</code>, hãy xem tham chiếu <a href="http://www.w3.org/TR/SVG11/paths.html#PathData">Đường dẫn SVG</a>. Để biết thêm thông tin
+về việc tạo hiệu ứng hoạt hình các thuộc tính của nội dung vẽ được véc-tơ, hãy xem
+<a href="{@docRoot}training/material/animations.html#AnimVector">Tạo Hiệu ứng Hoạt hình Nội dung vẽ được Véc-tơ</a>.</p>
