@@ -23,7 +23,6 @@ import static com.android.documentsui.State.MODE_LIST;
 import static com.android.documentsui.State.MODE_UNKNOWN;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
-import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
@@ -36,22 +35,18 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ClipData;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -65,16 +60,12 @@ import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
-import android.text.format.Formatter;
-import android.text.format.Time;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -93,22 +84,17 @@ import com.android.documentsui.DocumentClipper;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
-import com.android.documentsui.IconUtils;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.MimePredicate;
-import com.android.documentsui.ProviderExecutor;
-import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentLoader;
 import com.android.documentsui.RecentsProvider;
 import com.android.documentsui.RecentsProvider.StateColumns;
-import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
-import com.android.documentsui.ThumbnailCache;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -153,6 +139,8 @@ public class DirectoryFragment extends Fragment {
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
     private ItemClickListener mItemClickListener = new ItemClickListener();
 
+    private IconHelper mIconHelper;
+
     private View mEmptyView;
     private RecyclerView mRecView;
 
@@ -162,9 +150,6 @@ public class DirectoryFragment extends Fragment {
     private int mLastMode = MODE_UNKNOWN;
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
     private boolean mLastShowSize;
-    private boolean mHideGridTitles;
-    private boolean mSvelteRecents;
-    private Point mThumbSize;
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<DirectoryResult> mCallbacks;
     private FragmentTuner mTuner;
@@ -176,9 +161,6 @@ public class DirectoryFragment extends Fragment {
 
     private MessageBar mMessageBar;
     private View mProgressBar;
-
-    private int mSelectedItemColor;
-    private int mDefaultItemColor;
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -307,11 +289,8 @@ public class DirectoryFragment extends Fragment {
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
 
-        mAdapter = new DocumentsAdapter(context);
+        mAdapter = new DocumentsAdapter();
         mRecView.setAdapter(mAdapter);
-
-        mDefaultItemColor = context.getResources().getColor(R.color.item_doc_background);
-        mSelectedItemColor = context.getResources().getColor(R.color.item_doc_background_selected);
 
         GestureDetector.SimpleOnGestureListener listener =
                 new GestureDetector.SimpleOnGestureListener() {
@@ -364,17 +343,22 @@ public class DirectoryFragment extends Fragment {
         mTuner = FragmentTuner.pick(state);
         mClipper = new DocumentClipper(context);
 
+        mIconHelper = new IconHelper(context, state.derivedMode);
+
+        boolean hideGridTitles;
         if (mType == TYPE_RECENT_OPEN) {
             // Hide titles when showing recents for picking images/videos
-            mHideGridTitles = MimePredicate.mimeMatches(
+            hideGridTitles = MimePredicate.mimeMatches(
                     MimePredicate.VISUAL_MIMES, state.acceptMimes);
         } else {
-            mHideGridTitles = (doc != null) && doc.isGridTitlesHidden();
+            hideGridTitles = (doc != null) && doc.isGridTitlesHidden();
         }
+        GridDocumentHolder.setHideTitles(hideGridTitles);
 
         final ActivityManager am = (ActivityManager) context.getSystemService(
                 Context.ACTIVITY_SERVICE);
-        mSvelteRecents = am.isLowRamDevice() && (mType == TYPE_RECENT_OPEN);
+        boolean svelte = am.isLowRamDevice() && (mType == TYPE_RECENT_OPEN);
+        mIconHelper.setThumbnailsEnabled(!svelte);
 
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
@@ -585,12 +569,9 @@ public class DirectoryFragment extends Fragment {
      * classes as needed.
      */
     private void updateLayout(int mode) {
-        final int thumbSize;
-
         final LayoutManager layout;
         switch (mode) {
             case MODE_GRID:
-                thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
                 if (mGridLayout == null) {
                     mGridLayout = new GridLayoutManager(getContext(), mColumnCount);
                     mGridLayout.setSpanSizeLookup(mAdapter.createSpanSizeLookup());
@@ -598,7 +579,6 @@ public class DirectoryFragment extends Fragment {
                 layout = mGridLayout;
                 break;
             case MODE_LIST:
-                thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
                 if (mListLayout == null) {
                     mListLayout = new LinearLayoutManager(getContext());
                 }
@@ -614,7 +594,7 @@ public class DirectoryFragment extends Fragment {
         // imperatively calling this function.
         mSelectionManager.handleLayoutChanged();
         // setting layout manager automatically invalidates existing ViewHolders.
-        mThumbSize = new Point(thumbSize, thumbSize);
+        mIconHelper.setMode(mode);
     }
 
     private int calculateColumnCount() {
@@ -775,14 +755,10 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static void cancelThumbnailTask(View view) {
+    private void cancelThumbnailTask(View view) {
         final ImageView iconThumb = (ImageView) view.findViewById(R.id.icon_thumb);
         if (iconThumb != null) {
-            final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
-            if (oldTask != null) {
-                oldTask.preempt();
-                iconThumb.setTag(null);
-            }
+            mIconHelper.stopLoading(iconThumb);
         }
     }
 
@@ -921,59 +897,6 @@ public class DirectoryFragment extends Fragment {
         return ((BaseActivity) getActivity()).getDisplayState();
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    final class DocumentHolder
-            extends RecyclerView.ViewHolder
-            implements View.OnKeyListener
-    {
-        public String modelId;
-        private ClickListener mClickListener;
-        private View.OnKeyListener mKeyListener;
-
-        public DocumentHolder(View view) {
-            super(view);
-            view.setOnKeyListener(this);
-        }
-
-        public void setSelected(boolean selected) {
-            itemView.setActivated(selected);
-            itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
-        }
-
-        @Override
-        public boolean onKey(View v, int keyCode, KeyEvent event) {
-            // Intercept enter key-up events, and treat them as clicks.  Forward other events.
-            if (event.getAction() == KeyEvent.ACTION_UP &&
-                    keyCode == KeyEvent.KEYCODE_ENTER) {
-                if (mClickListener != null) {
-                    mClickListener.onClick(this);
-                }
-                return true;
-            } else if (mKeyListener != null) {
-                return mKeyListener.onKey(v, keyCode, event);
-            }
-            return false;
-        }
-
-        public void addClickListener(ClickListener listener) {
-            // Just handle one for now; switch to a list if necessary.
-            checkState(mClickListener == null);
-            mClickListener = listener;
-        }
-
-        public void addOnKeyListener(View.OnKeyListener listener) {
-            // Just handle one for now; switch to a list if necessary.
-            checkState(mKeyListener == null);
-            mKeyListener = listener;
-        }
-    }
-
-    interface ClickListener {
-        public void onClick(DocumentHolder doc);
-    }
-
     void showEmptyView() {
         mEmptyView.setVisibility(View.VISIBLE);
         mRecView.setVisibility(View.GONE);
@@ -1002,11 +925,9 @@ public class DirectoryFragment extends Fragment {
             implements Model.UpdateListener {
 
         private static final String TAG = "DocumentsAdapter";
-        private static final int ITEM_TYPE_LAYOUT_DIVIDER = 0;
-        private static final int ITEM_TYPE_DOCUMENT = 1;
-        private static final int ITEM_TYPE_DIRECTORY = 2;
-
-        private final Context mContext;
+        public static final int ITEM_TYPE_LAYOUT_DIVIDER = 0;
+        public static final int ITEM_TYPE_DOCUMENT = 1;
+        public static final int ITEM_TYPE_DIRECTORY = 2;
 
         /**
          * An ordered list of model IDs. This is the data structure that determines what shows up in
@@ -1017,10 +938,6 @@ public class DirectoryFragment extends Fragment {
         // The list is divided into two segments - directories, and everything else. Record the
         // position where the transition happens.
         private int mDividerPosition;
-
-        public DocumentsAdapter(Context context) {
-            mContext = context;
-        }
 
         public GridLayoutManager.SpanSizeLookup createSpanSizeLookup() {
             return new GridLayoutManager.SpanSizeLookup() {
@@ -1039,43 +956,27 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public DocumentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View item = null;
+            if (viewType == ITEM_TYPE_LAYOUT_DIVIDER) {
+                return new EmptyDocumentHolder(getContext());
+            };
 
-            switch (viewType) {
-                case ITEM_TYPE_DIRECTORY:
-                case ITEM_TYPE_DOCUMENT:
-                    item = createItemView(parent);
-                    break;
-                case ITEM_TYPE_LAYOUT_DIVIDER:
-                    item = createLayoutWhitespace();
-                    break;
-            }
-
-            DocumentHolder holder = new DocumentHolder(item);
-            holder.addClickListener(mItemClickListener);
-            holder.addOnKeyListener(mSelectionManager);
-            return holder;
-        }
-
-        private View createItemView(ViewGroup parent) {
+            DocumentHolder holder = null;
             final State state = getDisplayState();
-            final LayoutInflater inflater = LayoutInflater.from(getContext());
-
             switch (state.derivedMode) {
                 case MODE_GRID:
-                    return  inflater.inflate(R.layout.item_doc_grid, parent, false);
+                    holder = new GridDocumentHolder(getContext(), parent, mIconHelper, viewType);
+                    break;
                 case MODE_LIST:
-                    return inflater.inflate(R.layout.item_doc_list, parent, false);
+                    holder = new ListDocumentHolder(getContext(), parent, mIconHelper);
+                    break;
                 case MODE_UNKNOWN:
                 default:
                     throw new IllegalStateException("Unsupported layout mode.");
             }
-        }
 
-        private View createLayoutWhitespace() {
-            View whitespace = new View(getContext());
-            whitespace.setVisibility(View.GONE);
-            return whitespace;
+            holder.addClickListener(mItemClickListener);
+            holder.addOnKeyListener(mSelectionManager);
+            return holder;
         }
 
         /**
@@ -1108,165 +1009,17 @@ public class DirectoryFragment extends Fragment {
                 return;
             }
 
-            final Context context = getContext();
-            final State state = getDisplayState();
-            final RootsCache roots = DocumentsApplication.getRootsCache(context);
-            final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
-                    context, mThumbSize);
+            String modelId = mModelIds.get(position);
+            Cursor cursor = mModel.getItem(modelId);
+            holder.bind(cursor, modelId, getDisplayState());
 
-            holder.modelId = mModelIds.get(position);
-            final Cursor cursor = mModel.getItem(holder.modelId);
-            checkNotNull(cursor, "Cursor cannot be null.");
-
-            final String docAuthority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
-            final String docRootId = getCursorString(cursor, RootCursorWrapper.COLUMN_ROOT_ID);
-            final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
             final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final String docDisplayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            final long docLastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
-            final int docIcon = getCursorInt(cursor, Document.COLUMN_ICON);
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-            final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            final View itemView = holder.itemView;
-
-            holder.setSelected(isSelected(holder.modelId));
-
-            final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
-            final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
-            final TextView title = (TextView) itemView.findViewById(android.R.id.title);
-            final ImageView icon1 = (ImageView) itemView.findViewById(android.R.id.icon1);
-            final TextView summary = (TextView) itemView.findViewById(android.R.id.summary);
-            final TextView date = (TextView) itemView.findViewById(R.id.date);
-            final TextView size = (TextView) itemView.findViewById(R.id.size);
-
-            final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) iconThumb.getTag();
-            if (oldTask != null) {
-                oldTask.preempt();
-                iconThumb.setTag(null);
-            }
-
-            iconMime.animate().cancel();
-            iconThumb.animate().cancel();
-
-            final boolean supportsThumbnail = (docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
-            final boolean allowThumbnail = (state.derivedMode == MODE_GRID)
-                    || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, docMimeType);
-            final boolean showThumbnail = supportsThumbnail && allowThumbnail && !mSvelteRecents;
-
-            final boolean enabled = mTuner.isDocumentEnabled(docMimeType, docFlags);
-            final float iconAlpha = (state.derivedMode == MODE_LIST && !enabled) ? 0.5f : 1f;
-
-            boolean cacheHit = false;
-            if (showThumbnail) {
-                final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
-                final Bitmap cachedResult = thumbs.get(uri);
-                if (cachedResult != null) {
-                    iconThumb.setImageBitmap(cachedResult);
-                    cacheHit = true;
-                } else {
-                    iconThumb.setImageDrawable(null);
-                    // TODO: Hang this off DocumentHolder?
-                    final ThumbnailAsyncTask task = new ThumbnailAsyncTask(
-                            uri, iconMime, iconThumb, mThumbSize, iconAlpha);
-                    iconThumb.setTag(task);
-                    ProviderExecutor.forAuthority(docAuthority).execute(task);
-                }
-            }
-
-            // Always throw MIME icon into place, even when a thumbnail is being
-            // loaded in background.
-            if (cacheHit) {
-                iconMime.setAlpha(0f);
-                iconMime.setImageDrawable(null);
-                iconThumb.setAlpha(1f);
-            } else {
-                iconMime.setAlpha(1f);
-                iconThumb.setAlpha(0f);
-                iconThumb.setImageDrawable(null);
-                iconMime.setImageDrawable(
-                        getDocumentIcon(mContext, docAuthority, docId, docMimeType, docIcon, state));
-            }
-
-            if ((state.derivedMode == MODE_GRID) && mHideGridTitles) {
-                title.setVisibility(View.GONE);
-            } else {
-                title.setText(docDisplayName);
-                title.setVisibility(View.VISIBLE);
-            }
-
-            Drawable iconDrawable = null;
-            if (mType == TYPE_RECENT_OPEN) {
-                // We've already had to enumerate roots before any results can
-                // be shown, so this will never block.
-                final RootInfo root = roots.getRootBlocking(docAuthority, docRootId);
-                iconDrawable = root.loadIcon(mContext);
-
-                if (summary != null) {
-                    final boolean alwaysShowSummary = getResources()
-                            .getBoolean(R.bool.always_show_summary);
-                    if (alwaysShowSummary) {
-                        summary.setText(root.getDirectoryString());
-                        summary.setVisibility(View.VISIBLE);
-                    } else {
-                        if (iconDrawable != null && roots.isIconUniqueBlocking(root)) {
-                            // No summary needed if icon speaks for itself
-                            summary.setVisibility(View.INVISIBLE);
-                        } else {
-                            summary.setText(root.getDirectoryString());
-                            summary.setVisibility(View.VISIBLE);
-                            summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
-                        }
-                    }
-                }
-            } else {
-                // Directories showing thumbnails in grid mode get a little icon
-                // hint to remind user they're a directory.
-                if (Document.MIME_TYPE_DIR.equals(docMimeType) && state.derivedMode == MODE_GRID
-                        && showThumbnail) {
-                    iconDrawable = IconUtils.applyTintAttr(mContext, R.drawable.ic_doc_folder,
-                            android.R.attr.textColorPrimaryInverse);
-                }
-
-                if (summary != null) {
-                    if (docSummary != null) {
-                        summary.setText(docSummary);
-                        summary.setVisibility(View.VISIBLE);
-                    } else {
-                        summary.setVisibility(View.INVISIBLE);
-                    }
-                }
-            }
-
-            if (iconDrawable != null) {
-                icon1.setVisibility(View.VISIBLE);
-                icon1.setImageDrawable(iconDrawable);
-            } else {
-                icon1.setVisibility(View.GONE);
-            }
-
-            if (docLastModified == -1) {
-                date.setText(null);
-            } else {
-                date.setText(formatTime(mContext, docLastModified));
-            }
-
-            if (!state.showSize || Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
-                size.setVisibility(View.GONE);
-            } else {
-                size.setVisibility(View.VISIBLE);
-                size.setText(Formatter.formatFileSize(mContext, docSize));
-            }
-
-            setEnabledRecursive(itemView, enabled);
-
-            iconMime.setAlpha(iconAlpha);
-            iconThumb.setAlpha(iconAlpha);
-            icon1.setAlpha(iconAlpha);
-
+            holder.setSelected(isSelected(modelId));
+            holder.setEnabled(mTuner.isDocumentEnabled(docMimeType, docFlags));
             if (DEBUG_ENABLE_DND) {
-                setupDragAndDropOnDocumentView(itemView, cursor);
+                setupDragAndDropOnDocumentView(holder.itemView, cursor);
             }
         }
 
@@ -1389,27 +1142,6 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static String formatTime(Context context, long when) {
-        // TODO: DateUtils should make this easier
-        Time then = new Time();
-        then.set(when);
-        Time now = new Time();
-        now.setToNow();
-
-        int flags = DateUtils.FORMAT_NO_NOON | DateUtils.FORMAT_NO_MIDNIGHT
-                | DateUtils.FORMAT_ABBREV_ALL;
-
-        if (then.year != now.year) {
-            flags |= DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE;
-        } else if (then.yearDay != now.yearDay) {
-            flags |= DateUtils.FORMAT_SHOW_DATE;
-        } else {
-            flags |= DateUtils.FORMAT_SHOW_TIME;
-        }
-
-        return DateUtils.formatDateTime(context, when, flags);
-    }
-
     private String findCommonMimeType(List<String> mimeTypes) {
         String[] commonType = mimeTypes.get(0).split("/");
         if (commonType.length != 2) {
@@ -1432,19 +1164,6 @@ public class DirectoryFragment extends Fragment {
         }
 
         return commonType[0] + "/" + commonType[1];
-    }
-
-    private void setEnabledRecursive(View v, boolean enabled) {
-        if (v == null) return;
-        if (v.isEnabled() == enabled) return;
-        v.setEnabled(enabled);
-
-        if (v instanceof ViewGroup) {
-            final ViewGroup vg = (ViewGroup) v;
-            for (int i = vg.getChildCount() - 1; i >= 0; i--) {
-                setEnabledRecursive(vg.getChildAt(i), enabled);
-            }
-        }
     }
 
     private void copyFromClipboard() {
@@ -1721,87 +1440,10 @@ public class DirectoryFragment extends Fragment {
     private Drawable getDragShadowIcon(List<DocumentInfo> docs) {
         if (docs.size() == 1) {
             final DocumentInfo doc = docs.get(0);
-            return getDocumentIcon(getActivity(), doc.authority, doc.documentId,
-                    doc.mimeType, doc.icon, getDisplayState());
+            return mIconHelper.getDocumentIcon(getActivity(), doc.authority, doc.documentId,
+                    doc.mimeType, doc.icon);
         }
         return getActivity().getDrawable(R.drawable.ic_doc_generic);
-    }
-
-    public static Drawable getDocumentIcon(Context context, String docAuthority, String docId,
-            String docMimeType, int docIcon, State state) {
-        if (docIcon != 0) {
-            return IconUtils.loadPackageIcon(context, docAuthority, docIcon);
-        } else {
-            return IconUtils.loadMimeIcon(context, docMimeType, docAuthority, docId,
-                    state.derivedMode);
-        }
-    }
-
-    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap>
-            implements Preemptable {
-        private final Uri mUri;
-        private final ImageView mIconMime;
-        private final ImageView mIconThumb;
-        private final Point mThumbSize;
-        private final float mTargetAlpha;
-        private final CancellationSignal mSignal;
-
-        public ThumbnailAsyncTask(Uri uri, ImageView iconMime, ImageView iconThumb, Point thumbSize,
-                float targetAlpha) {
-            mUri = uri;
-            mIconMime = iconMime;
-            mIconThumb = iconThumb;
-            mThumbSize = thumbSize;
-            mTargetAlpha = targetAlpha;
-            mSignal = new CancellationSignal();
-        }
-
-        @Override
-        public void preempt() {
-            cancel(false);
-            mSignal.cancel();
-        }
-
-        @Override
-        protected Bitmap doInBackground(Uri... params) {
-            if (isCancelled()) return null;
-
-            final Context context = mIconThumb.getContext();
-            final ContentResolver resolver = context.getContentResolver();
-
-            ContentProviderClient client = null;
-            Bitmap result = null;
-            try {
-                client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                        resolver, mUri.getAuthority());
-                result = DocumentsContract.getDocumentThumbnail(client, mUri, mThumbSize, mSignal);
-                if (result != null) {
-                    final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
-                            context, mThumbSize);
-                    thumbs.put(mUri, result);
-                }
-            } catch (Exception e) {
-                if (!(e instanceof OperationCanceledException)) {
-                    Log.w(TAG, "Failed to load thumbnail for " + mUri + ": " + e);
-                }
-            } finally {
-                ContentProviderClient.releaseQuietly(client);
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (mIconThumb.getTag() == this && result != null) {
-                mIconThumb.setTag(null);
-                mIconThumb.setImageBitmap(result);
-
-                mIconMime.setAlpha(mTargetAlpha);
-                mIconMime.animate().alpha(0f).start();
-                mIconThumb.setAlpha(0f);
-                mIconThumb.animate().alpha(mTargetAlpha).start();
-            }
-        }
     }
 
     private class DrawableShadowBuilder extends View.DragShadowBuilder {
@@ -1854,7 +1496,7 @@ public class DirectoryFragment extends Fragment {
         return mSelectionManager.getSelection().contains(modelId);
     }
 
-    private class ItemClickListener implements ClickListener {
+    private class ItemClickListener implements DocumentHolder.ClickListener {
         @Override
         public void onClick(DocumentHolder doc) {
             if (mSelectionManager.hasSelection()) {
