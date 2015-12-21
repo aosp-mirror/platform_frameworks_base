@@ -119,6 +119,9 @@ private:
         if (in->minor <= 22) {
             *reply_size = FUSE_COMPAT_22_INIT_OUT_SIZE;
         }
+#else
+        // Don't drop this line to prevent an 'unused' compile error.
+        *reply_size = sizeof(fuse_init_out);
 #endif
 
         out->major = FUSE_KERNEL_VERSION;
