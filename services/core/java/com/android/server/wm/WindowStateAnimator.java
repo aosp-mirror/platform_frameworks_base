@@ -705,14 +705,12 @@ class WindowStateAnimator {
         }
 
         // Something is wrong and SurfaceFlinger will not like this, try to revert to sane values.
+        // This doesn't necessarily mean that there is an error in the system. The sizes might be
+        // incorrect, because it is before the first layout or draw.
         if (mTmpSize.width() < 1) {
-            if (!mWin.mLayoutNeeded) Slog.w(TAG,
-                    "Width of " + w + " is not positive " + mTmpSize.width());
             mTmpSize.right = mTmpSize.left + 1;
         }
         if (mTmpSize.height() < 1) {
-            if (!mWin.mLayoutNeeded) Slog.w(TAG,
-                    "Height of " + w + " is not positive " + mTmpSize.height());
             mTmpSize.bottom = mTmpSize.top + 1;
         }
 
