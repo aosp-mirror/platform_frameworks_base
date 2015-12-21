@@ -19,16 +19,22 @@ package android.inputmethodservice;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
+import android.annotation.MainThread;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
@@ -68,6 +74,8 @@ import android.widget.LinearLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -634,6 +642,97 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
+     * A {@link ContentObserver} to monitor {@link Settings.Secure#SHOW_IME_WITH_HARD_KEYBOARD}.
+     *
+     * <p>Note that {@link Settings.Secure#SHOW_IME_WITH_HARD_KEYBOARD} is not a public API.
+     * Basically this functionality still needs to be considered as implementation details.</p>
+     */
+    @MainThread
+    private static final class SettingsObserver extends ContentObserver {
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+                ShowImeWithHardKeyboardType.UNKNOWN,
+                ShowImeWithHardKeyboardType.FALSE,
+                ShowImeWithHardKeyboardType.TRUE,
+        })
+        private @interface ShowImeWithHardKeyboardType {
+            int UNKNOWN = 0;
+            int FALSE = 1;
+            int TRUE = 2;
+        }
+        @ShowImeWithHardKeyboardType
+        private int mShowImeWithHardKeyboard = ShowImeWithHardKeyboardType.UNKNOWN;
+
+        private final InputMethodService mService;
+
+        private SettingsObserver(InputMethodService service) {
+            super(new Handler(service.getMainLooper()));
+            mService = service;
+        }
+
+        /**
+         * A factory method that internally enforces two-phase initialization to make sure that the
+         * object reference will not be escaped until the object is properly constructed.
+         *
+         * <p>NOTE: Currently {@link SettingsObserver} is accessed only from main thread.  Hence
+         * this enforcement of two-phase initialization may be unnecessary at the moment.</p>
+         *
+         * @param service {@link InputMethodService} that needs to receive the callback.
+         * @return {@link SettingsObserver} that is already registered to
+         * {@link android.content.ContentResolver}. The caller must call
+         * {@link SettingsObserver#unregister()}.
+         */
+        public static SettingsObserver createAndRegister(InputMethodService service) {
+            final SettingsObserver observer = new SettingsObserver(service);
+            // The observer is properly constructed. Let's start accepting the event.
+            service.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD),
+                    false, observer);
+            return observer;
+        }
+
+        void unregister() {
+            mService.getContentResolver().unregisterContentObserver(this);
+        }
+
+        private boolean shouldShowImeWithHardKeyboard() {
+            // Lazily initialize as needed.
+            if (mShowImeWithHardKeyboard == ShowImeWithHardKeyboardType.UNKNOWN) {
+                mShowImeWithHardKeyboard = Settings.Secure.getInt(mService.getContentResolver(),
+                        Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0 ?
+                        ShowImeWithHardKeyboardType.TRUE : ShowImeWithHardKeyboardType.FALSE;
+            }
+            switch (mShowImeWithHardKeyboard) {
+                case ShowImeWithHardKeyboardType.TRUE:
+                    return true;
+                case ShowImeWithHardKeyboardType.FALSE:
+                    return false;
+                default:
+                    Log.e(TAG, "Unexpected mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard);
+                    return false;
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final Uri showImeWithHardKeyboardUri =
+                    Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
+            if (showImeWithHardKeyboardUri.equals(uri)) {
+                mShowImeWithHardKeyboard = Settings.Secure.getInt(mService.getContentResolver(),
+                        Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0) != 0 ?
+                        ShowImeWithHardKeyboardType.TRUE : ShowImeWithHardKeyboardType.FALSE;
+                mService.updateInputViewShown();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "SettingsObserver{mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard  + "}";
+        }
+    }
+    private SettingsObserver mSettingsObserver;
+
+    /**
      * You can call this to customize the theme used by your IME's window.
      * This theme should typically be one that derives from
      * {@link android.R.style#Theme_InputMethod}, which is the default theme
@@ -682,6 +781,7 @@ public class InputMethodService extends AbstractInputMethodService {
         super.setTheme(mTheme);
         super.onCreate();
         mImm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+        mSettingsObserver = SettingsObserver.createAndRegister(this);
         // If the previous IME has occupied non-empty inset in the screen, we need to decide whether
         // we continue to use the same size of the inset or update it
         mShouldClearInsetOfPreviousIme = (mImm.getInputMethodWindowVisibleHeight() > 0);
@@ -763,6 +863,10 @@ public class InputMethodService extends AbstractInputMethodService {
             // when the current IME is being switched to another one.
             mWindow.getWindow().setWindowAnimations(0);
             mWindow.dismiss();
+        }
+        if (mSettingsObserver != null) {
+            mSettingsObserver.unregister();
+            mSettingsObserver = null;
         }
     }
 
@@ -1140,21 +1244,28 @@ public class InputMethodService extends AbstractInputMethodService {
     public boolean isInputViewShown() {
         return mIsInputViewShown && mWindowVisible;
     }
-    
+
     /**
-     * Override this to control when the soft input area should be shown to
-     * the user.  The default implementation only shows the input view when
-     * there is no hard keyboard or the keyboard is hidden.  If you change what
-     * this returns, you will need to call {@link #updateInputViewShown()}
-     * yourself whenever the returned value may have changed to have it
-     * re-evaluated and applied.
+     * Override this to control when the soft input area should be shown to the user.  The default
+     * implementation returns {@code false} when there is no hard keyboard or the keyboard is hidden
+     * unless the user shows an intention to use software keyboard.  If you change what this
+     * returns, you will need to call {@link #updateInputViewShown()} yourself whenever the returned
+     * value may have changed to have it re-evaluated and applied.
+     *
+     * <p>When you override this method, it is recommended to call
+     * {@code super.onEvaluateInputViewShown()} and return {@code true} when {@code true} is
+     * returned.</p>
      */
+    @CallSuper
     public boolean onEvaluateInputViewShown() {
+        if (mSettingsObserver.shouldShowImeWithHardKeyboard()) {
+            return true;
+        }
         Configuration config = getResources().getConfiguration();
         return config.keyboard == Configuration.KEYBOARD_NOKEYS
                 || config.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES;
     }
-    
+
     /**
      * Controls the visibility of the candidates display area.  By default
      * it is hidden.
@@ -2483,5 +2594,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 + " touchableInsets=" + mTmpInsets.touchableInsets
                 + " touchableRegion=" + mTmpInsets.touchableRegion);
         p.println(" mShouldClearInsetOfPreviousIme=" + mShouldClearInsetOfPreviousIme);
+        p.println(" mSettingsObserver=" + mSettingsObserver);
     }
 }
