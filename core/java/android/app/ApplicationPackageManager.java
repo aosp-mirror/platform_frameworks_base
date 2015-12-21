@@ -42,7 +42,6 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
-import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -1421,7 +1420,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
         final VerificationParams verificationParams = new VerificationParams(null, null,
-                null, VerificationParams.NO_UID, null);
+                null, VerificationParams.NO_UID);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
                 installerPackageName, verificationParams, null, mContext.getUserId());
     }
@@ -1429,9 +1428,9 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
+            ContainerEncryptionParams encryptionParams) {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
-                null, VerificationParams.NO_UID, manifestDigest);
+                null, VerificationParams.NO_UID);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
                 installerPackageName, verificationParams, encryptionParams, mContext.getUserId());
     }
@@ -1455,7 +1454,7 @@ public class ApplicationPackageManager extends PackageManager {
     public void installPackageAsUser(Uri packageURI, PackageInstallObserver observer, int flags,
                String installerPackageName, int userId) {
         final VerificationParams verificationParams = new VerificationParams(null, null,
-                null, VerificationParams.NO_UID, null);
+                null, VerificationParams.NO_UID);
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null,
                 userId);
     }
@@ -1463,10 +1462,10 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest,
+            Uri verificationURI,
             ContainerEncryptionParams encryptionParams) {
         final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
-                null, VerificationParams.NO_UID, manifestDigest);
+                null, VerificationParams.NO_UID);
         installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
                 encryptionParams, mContext.getUserId());
     }

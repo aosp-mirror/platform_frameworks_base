@@ -122,7 +122,6 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
-import android.content.pm.ManifestDigest;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
@@ -6205,7 +6204,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try {
             pp.collectCertificates(pkg, parseFlags);
-            pp.collectManifestDigest(pkg);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         }
@@ -10037,7 +10035,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         final VerificationParams verifParams = new VerificationParams(
                 null, sessionParams.originatingUri, sessionParams.referrerUri,
-                sessionParams.originatingUid, null);
+                sessionParams.originatingUid);
         verifParams.setInstallerUid(installerUid);
 
         final OriginInfo origin;
@@ -11019,13 +11017,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + " file=" + origin.file + " cid=" + origin.cid + "}";
         }
 
-        public ManifestDigest getManifestDigest() {
-            if (verificationParams == null) {
-                return null;
-            }
-            return verificationParams.getManifestDigest();
-        }
-
         private int installLocationPolicy(PackageInfoLite pkgLite) {
             String packageName = pkgLite.packageName;
             int installLocation = pkgLite.installLocation;
@@ -11444,7 +11435,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int installFlags;
         final String installerPackageName;
         final String volumeUuid;
-        final ManifestDigest manifestDigest;
         final UserHandle user;
         final String abiOverride;
         final String[] installGrantPermissions;
@@ -11459,7 +11449,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         InstallArgs(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
-                ManifestDigest manifestDigest, UserHandle user, String[] instructionSets,
+                UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
                 String traceMethod, int traceCookie) {
             this.origin = origin;
@@ -11468,7 +11458,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.observer = observer;
             this.installerPackageName = installerPackageName;
             this.volumeUuid = volumeUuid;
-            this.manifestDigest = manifestDigest;
             this.user = user;
             this.instructionSets = instructionSets;
             this.abiOverride = abiOverride;
@@ -11570,7 +11559,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install */
         FileInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
+                    params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie);
@@ -11581,7 +11570,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
-            super(OriginInfo.fromNothing(), null, null, 0, null, null, null, null, instructionSets,
+            super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
                     null, null, null, 0);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
@@ -11808,7 +11797,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install */
         AsecInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
+                    params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie);
@@ -11818,7 +11807,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         AsecInstallArgs(String fullCodePath, String[] instructionSets,
                         boolean isExternal, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isExternal ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
+                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSets, null, null, null, 0);
             // Hackily pretend we're still looking at a full code path
             if (!fullCodePath.endsWith(RES_FILE_NAME)) {
@@ -11835,7 +11824,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         AsecInstallArgs(String cid, String[] instructionSets, boolean isForwardLocked) {
             super(OriginInfo.fromNothing(), null, null, (isAsecExternal(cid) ? INSTALL_EXTERNAL : 0)
-                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null, null,
+                    | (isForwardLocked ? INSTALL_FORWARD_LOCK : 0), null, null, null,
                     instructionSets, null, null, null, 0);
             this.cid = cid;
             setMountPath(PackageHelper.getSdDir(cid));
@@ -12102,7 +12091,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         /** New install */
         MoveInstallArgs(InstallParams params) {
             super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid, params.getManifestDigest(),
+                    params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
                     params.traceMethod, params.traceCookie);
@@ -12874,35 +12863,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-
-        /* If the installer passed in a manifest digest, compare it now. */
-        if (args.manifestDigest != null) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectManifestDigest");
-            try {
-                pp.collectManifestDigest(pkg);
-            } catch (PackageParserException e) {
-                res.setError("Failed collect during installPackageLI", e);
-                return;
-            } finally {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
-
-            if (DEBUG_INSTALL) {
-                final String parsedManifest = pkg.manifestDigest == null ? "null"
-                        : pkg.manifestDigest.toString();
-                Slog.d(TAG, "Comparing manifests: " + args.manifestDigest.toString() + " vs. "
-                        + parsedManifest);
-            }
-
-            if (!args.manifestDigest.equals(pkg.manifestDigest)) {
-                res.setError(INSTALL_FAILED_PACKAGE_CHANGED, "Manifest digest changed");
-                return;
-            }
-        } else if (DEBUG_INSTALL) {
-            final String parsedManifest = pkg.manifestDigest == null
-                    ? "null" : pkg.manifestDigest.toString();
-            Slog.d(TAG, "manifestDigest was not present, but parser got: " + parsedManifest);
         }
 
         // Get rid of all references to package scan path via parser.

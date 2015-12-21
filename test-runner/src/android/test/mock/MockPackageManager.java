@@ -34,7 +34,6 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
-import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -820,7 +819,7 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
             int flags, String installerPackageName, Uri verificationURI,
-            ManifestDigest manifestDigest, ContainerEncryptionParams encryptionParams) {
+            ContainerEncryptionParams encryptionParams) {
         throw new UnsupportedOperationException();
     }
 
@@ -957,7 +956,7 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void installPackageWithVerification(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest,
+            Uri verificationURI,
             ContainerEncryptionParams encryptionParams) {
         throw new UnsupportedOperationException();
     }

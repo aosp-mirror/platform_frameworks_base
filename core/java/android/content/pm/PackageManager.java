@@ -3768,7 +3768,6 @@ public abstract class PackageManager {
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
                 parser.collectCertificates(pkg, 0);
-                parser.collectManifestDigest(pkg);
             }
             PackageUserState state = new PackageUserState();
             return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);
@@ -3828,14 +3827,12 @@ public abstract class PackageManager {
      * @param verificationURI The location of the supplementary verification
      *            file. This can be a 'file:' or a 'content:' URI. May be
      *            {@code null}.
-     * @param manifestDigest an object that holds the digest of the package
-     *            which can be used to verify ownership. May be {@code null}.
      * @param encryptionParams if the package to be installed is encrypted,
      *            these parameters describing the encryption and authentication
      *            used. May be {@code null}.
      * @hide
      * @deprecated Use {@link #installPackageWithVerification(Uri,
-     *             PackageInstallObserver, int, String, Uri, ManifestDigest,
+     *             PackageInstallObserver, int, String, Uri,
      *             ContainerEncryptionParams)} instead. This method will
      *             continue to be supported but the older observer interface
      *             will not get additional failure details.
@@ -3843,7 +3840,7 @@ public abstract class PackageManager {
     // @SystemApi
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest,
+            Uri verificationURI,
             ContainerEncryptionParams encryptionParams);
 
     /**
@@ -3952,8 +3949,6 @@ public abstract class PackageManager {
      * @param verificationURI The location of the supplementary verification
      *            file. This can be a 'file:' or a 'content:' URI. May be
      *            {@code null}.
-     * @param manifestDigest an object that holds the digest of the package
-     *            which can be used to verify ownership. May be {@code null}.
      * @param encryptionParams if the package to be installed is encrypted,
      *            these parameters describing the encryption and authentication
      *            used. May be {@code null}.
@@ -3961,7 +3956,7 @@ public abstract class PackageManager {
      */
     public abstract void installPackageWithVerification(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI, ManifestDigest manifestDigest,
+            Uri verificationURI,
             ContainerEncryptionParams encryptionParams);
 
     /**
