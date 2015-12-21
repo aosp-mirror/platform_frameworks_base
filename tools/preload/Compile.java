@@ -33,7 +33,7 @@ public class Compile {
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
             System.err.println("Usage: Compile [log file] [output file]");
-            System.exit(0);
+            System.exit(1);
         }
 
         Root root = new Root();
