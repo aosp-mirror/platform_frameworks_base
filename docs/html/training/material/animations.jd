@@ -85,7 +85,7 @@ int cx = myView.getWidth() / 2;
 int cy = myView.getHeight() / 2;
 
 // get the final radius for the clipping circle
-int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+float finalRadius = (float) Math.hypot(cx, cy);
 
 // create the animator for this view (the start radius is zero)
 Animator anim =
@@ -107,7 +107,7 @@ int cx = myView.getWidth() / 2;
 int cy = myView.getHeight() / 2;
 
 // get the initial radius for the clipping circle
-int initialRadius = myView.getWidth();
+float initialRadius = (float) Math.hypot(cx, cy);
 
 // create the animation (the final radius is zero)
 Animator anim =
