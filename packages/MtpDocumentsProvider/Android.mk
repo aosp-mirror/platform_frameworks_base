@@ -6,6 +6,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_PACKAGE_NAME := MtpDocumentsProvider
 LOCAL_CERTIFICATE := media
 LOCAL_PRIVILEGED_MODULE := true
+LOCAL_JNI_SHARED_LIBRARIES := libappfuse_jni
 
 include $(BUILD_PACKAGE)
-include $(LOCAL_PATH)/tests/Android.mk
+include $(call all-makefiles-under, $(LOCAL_PATH))
