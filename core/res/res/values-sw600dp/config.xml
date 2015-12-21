@@ -40,5 +40,6 @@
     <!-- Use a larger scaling span for larger screen devices. -->
     <dimen name="config_minScalingSpan">32mm</dimen>
 
+    <integer name="config_dockedStackDividerSnapMode">1</integer>
 </resources>
 

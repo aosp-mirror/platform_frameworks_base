@@ -1492,6 +1492,8 @@
   <java-symbol type="bool" name="target_honeycomb_needs_options_menu" />
   <java-symbol type="dimen" name="docked_stack_divider_thickness" />
   <java-symbol type="dimen" name="docked_stack_divider_insets" />
+  <java-symbol type="integer" name="config_dockedStackDividerSnapMode" />
+  <java-symbol type="fraction" name="docked_stack_divider_fixed_ratio" />
   <java-symbol type="dimen" name="navigation_bar_height" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />

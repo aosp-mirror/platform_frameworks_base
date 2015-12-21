@@ -762,10 +762,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 frame.right - mVisibleFrame.right,
                 frame.bottom - mVisibleFrame.bottom);
 
-        mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
-                Math.max(mStableFrame.top - frame.top, 0),
-                Math.max(frame.right - mStableFrame.right, 0),
-                Math.max(frame.bottom - mStableFrame.bottom, 0));
+        if (mAttrs.type == TYPE_DOCK_DIVIDER) {
+
+            // For the docked divider, we calculate the stable insets like a full-screen window
+            // so it can use it to calculate the snap positions.
+            mStableInsets.set(Math.max(mStableFrame.left - mDisplayFrame.left, 0),
+                    Math.max(mStableFrame.top - mDisplayFrame.top, 0),
+                    Math.max(mDisplayFrame.right - mStableFrame.right, 0),
+                    Math.max(mDisplayFrame.bottom - mStableFrame.bottom, 0));
+        } else {
+            mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
+                    Math.max(mStableFrame.top - frame.top, 0),
+                    Math.max(frame.right - mStableFrame.right, 0),
+                    Math.max(frame.bottom - mStableFrame.bottom, 0));
+        }
 
         if (!mInsetFrame.isEmpty()) {
             mContentFrame.set(mFrame);

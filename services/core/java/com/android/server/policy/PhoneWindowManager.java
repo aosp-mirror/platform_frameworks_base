@@ -4243,6 +4243,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (attrs.type == TYPE_STATUS_BAR
                             || attrs.type == TYPE_TOAST
+                            || attrs.type == TYPE_DOCK_DIVIDER
                             || attrs.type == TYPE_VOICE_INTERACTION_STARTING
                             || (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                             && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW))) {

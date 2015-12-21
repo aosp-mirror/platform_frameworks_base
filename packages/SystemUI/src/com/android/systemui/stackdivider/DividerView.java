@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -90,6 +91,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private VelocityTracker mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
     private DividerSnapAlgorithm mSnapAlgorithm;
+    private final Rect mStableInsets = new Rect();
 
     public DividerView(Context context) {
         super(context);
@@ -132,6 +134,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mStableInsets.set(insets.getStableInsetLeft(), insets.getStableInsetTop(),
+                insets.getStableInsetRight(), insets.getStableInsetBottom());
+        return super.onApplyWindowInsets(insets);
+    }
+
     public void setWindowManager(DividerWindowManager windowManager) {
         mWindowManager = windowManager;
     }
@@ -142,8 +151,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public boolean startDragging() {
         mDockSide = mWindowManagerProxy.getDockSide();
-        mSnapAlgorithm = new DividerSnapAlgorithm(getContext(), mFlingAnimationUtils,
-                mDividerSize, isHorizontalDivision());
+        mSnapAlgorithm = new DividerSnapAlgorithm(getContext(), mFlingAnimationUtils, mDisplayWidth,
+                mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
         if (mDockSide != WindowManager.DOCKED_INVALID) {
             mWindowManagerProxy.setResizing(true);
             mWindowManager.setSlippery(false);

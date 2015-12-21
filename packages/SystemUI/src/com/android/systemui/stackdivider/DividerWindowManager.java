@@ -50,6 +50,9 @@ public class DividerWindowManager {
                         | FLAG_WATCH_OUTSIDE_TOUCH | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         mLp.setTitle(WINDOW_TITLE);
+        view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mWindowManager.addView(view, mLp);
         mView = view;
     }

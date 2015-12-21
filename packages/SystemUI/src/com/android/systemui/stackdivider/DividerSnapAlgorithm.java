@@ -17,14 +17,11 @@
 package com.android.systemui.stackdivider;
 
 import android.content.Context;
-import android.util.DisplayMetrics;
-import android.view.DisplayInfo;
+import android.graphics.Rect;
 
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.ArrayList;
-
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 /**
  * Calculates the snap targets and the snap position given a position and a velocity. All positions
@@ -32,10 +29,30 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
  */
 public class DividerSnapAlgorithm {
 
+    /**
+     * 3 snap targets: left/top has 16:9 ratio (for videos), 1:1, and right/bottom has 16:9 ratio
+     */
+    private static final int SNAP_MODE_16_9 = 0;
+
+    /**
+     * 3 snap targets: fixed ratio, 1:1, (1 - fixed ratio)
+     */
+    private static final int SNAP_FIXED_RATIO = 1;
+
+    /**
+     * 1 snap target: 1:1
+     */
+    private static final int SNAP_ONLY_1_1 = 2;
+
     private final Context mContext;
     private final FlingAnimationUtils mFlingAnimationUtils;
+    private final int mDisplayWidth;
+    private final int mDisplayHeight;
     private final int mDividerSize;
-    private final ArrayList<SnapTarget> mTargets;
+    private final ArrayList<SnapTarget> mTargets = new ArrayList<>();
+    private final Rect mInsets = new Rect();
+    private final int mSnapMode;
+    private final float mFixedRatio;
 
     /** The first target which is still splitting the screen */
     private final SnapTarget mFirstSplitTarget;
@@ -47,11 +64,19 @@ public class DividerSnapAlgorithm {
     private final SnapTarget mDismissEndTarget;
 
     public DividerSnapAlgorithm(Context ctx, FlingAnimationUtils flingAnimationUtils,
-            int dividerSize, boolean isHorizontalDivision) {
+            int displayWidth, int displayHeight, int dividerSize, boolean isHorizontalDivision,
+            Rect insets) {
         mContext = ctx;
         mFlingAnimationUtils = flingAnimationUtils;
         mDividerSize = dividerSize;
-        mTargets = calculateTargets(isHorizontalDivision);
+        mDisplayWidth = displayWidth;
+        mDisplayHeight = displayHeight;
+        mInsets.set(insets);
+        mSnapMode = ctx.getResources().getInteger(
+                com.android.internal.R.integer.config_dockedStackDividerSnapMode);
+        mFixedRatio = ctx.getResources().getFraction(
+                com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
+        calculateTargets(isHorizontalDivision);
         mFirstSplitTarget = mTargets.get(1);
         mLastSplitTarget = mTargets.get(mTargets.size() - 2);
         mDismissStartTarget = mTargets.get(0);
@@ -89,22 +114,61 @@ public class DividerSnapAlgorithm {
         return mTargets.get(minIndex);
     }
 
-    private ArrayList<SnapTarget> calculateTargets(boolean isHorizontalDivision) {
-        ArrayList<SnapTarget> targets = new ArrayList<>();
-        DisplayMetrics info = mContext.getResources().getDisplayMetrics();
+    private void calculateTargets(boolean isHorizontalDivision) {
+        mTargets.clear();
         int dividerMax = isHorizontalDivision
-                ? info.heightPixels
-                : info.widthPixels;
+                ? mDisplayHeight
+                : mDisplayWidth;
+        mTargets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START));
+        switch (mSnapMode) {
+            case SNAP_MODE_16_9:
+                addRatio16_9Targets(isHorizontalDivision);
+                break;
+            case SNAP_FIXED_RATIO:
+                addFixedDivisionTargets(isHorizontalDivision);
+                break;
+            case SNAP_ONLY_1_1:
+                addMiddleTarget(isHorizontalDivision);
+                break;
+        }
+        mTargets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END));
+    }
 
-        // TODO: Better calculation
-        targets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START));
-        targets.add(new SnapTarget((int) (0.3415f * dividerMax) - mDividerSize / 2,
+    private void addFixedDivisionTargets(boolean isHorizontalDivision) {
+        int start = isHorizontalDivision ? mInsets.top : mInsets.left;
+        int end = isHorizontalDivision
+                ? mDisplayHeight - mInsets.bottom
+                : mDisplayWidth - mInsets.right;
+        mTargets.add(new SnapTarget((int) (start + mFixedRatio * (end - start)) - mDividerSize / 2,
                 SnapTarget.FLAG_NONE));
-        targets.add(new SnapTarget(dividerMax / 2 - mDividerSize / 2, SnapTarget.FLAG_NONE));
-        targets.add(new SnapTarget((int) (0.6585f * dividerMax) - mDividerSize / 2,
+        addMiddleTarget(isHorizontalDivision);
+        mTargets.add(new SnapTarget((int) (start + (1 - mFixedRatio) * (end - start))
+                - mDividerSize / 2, SnapTarget.FLAG_NONE));
+    }
+
+    private void addRatio16_9Targets(boolean isHorizontalDivision) {
+        int start = isHorizontalDivision ? mInsets.top : mInsets.left;
+        int end = isHorizontalDivision
+                ? mDisplayHeight - mInsets.bottom
+                : mDisplayWidth - mInsets.right;
+        int startOther = isHorizontalDivision ? mInsets.left : mInsets.top;
+        int endOther = isHorizontalDivision
+                ? mDisplayWidth - mInsets.right
+                : mDisplayHeight - mInsets.bottom;
+        float size = 9.0f / 16.0f * (endOther - startOther);
+        int sizeInt = (int) Math.floor(size);
+        mTargets.add(new SnapTarget(start + sizeInt, SnapTarget.FLAG_NONE));
+        addMiddleTarget(isHorizontalDivision);
+        mTargets.add(new SnapTarget(end - sizeInt - mDividerSize, SnapTarget.FLAG_NONE));
+    }
+
+    private void addMiddleTarget(boolean isHorizontalDivision) {
+        int start = isHorizontalDivision ? mInsets.top : mInsets.left;
+        int end = isHorizontalDivision
+                ? mDisplayHeight - mInsets.bottom
+                : mDisplayWidth - mInsets.right;
+        mTargets.add(new SnapTarget(start + (end - start) / 2 - mDividerSize / 2,
                 SnapTarget.FLAG_NONE));
-        targets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END));
-        return targets;
     }
 
     /**
