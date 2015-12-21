@@ -102,6 +102,11 @@
         android:title="@string/demo_mode"
         android:fragment="com.android.systemui.tuner.DemoModeFragment" />
 
+    <Preference
+        android:key="color_transform"
+        android:title="@string/color_transform"
+        android:fragment="com.android.systemui.tuner.ColorMatrixFragment" />
+
     <!-- Warning, this goes last. -->
     <Preference
         android:summary="@string/tuner_persistent_warning"

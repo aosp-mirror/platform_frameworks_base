@@ -1228,4 +1228,40 @@
     <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
     <string name="notification_importance_max">Peek onto the screen and make sound</string>
 
+    <!-- Label for no color transform [CHAR LIMIT=30] -->
+    <string name="color_matrix_none">Normal colors</string>
+
+    <!-- Label for night color transform [CHAR LIMIT=30] -->
+    <string name="color_matrix_night">Night colors</string>
+
+    <!-- Label for custom color transform [CHAR LIMIT=30] -->
+    <string name="color_matrix_custom">Custom colors</string>
+
+    <!-- Label for unknown color transform [CHAR LIMIT=30] -->
+    <string name="color_matrix_unknown">Unknown colors</string>
+
+    <!-- Title for color transform [CHAR LIMIT=30] -->
+    <string name="color_transform">Color modification</string>
+
+    <!-- Title for setting to show Quick Settings tile [CHAR LIMIT=60] -->
+    <string name="color_matrix_show_qs">Show Quick Settings tile</string>
+
+    <!-- Title for switch to enable custom color transform [CHAR LIMIT=60] -->
+    <string name="color_enable_custom">Enable custom transform</string>
+
+    <!-- Button to apply settings [CHAR LIMIT=30] -->
+    <string name="color_apply">Apply</string>
+
+    <!-- Title of warning dialog about bad color settings. [CHAR LIMIT=30] -->
+    <string name="color_revert_title">Confirm settings</string>
+
+    <!-- Message warning user about custom color settings [CHAR LIMIT=NONE] -->
+    <string name="color_revert_message">Some color settings can make this
+        device unusable. Click OK to confirm these color settings,
+        otherwise these settings will reset after 10 seconds.</string>
+
+    <string name="color_modification_r" translatable="false">R</string>
+    <string name="color_modification_g" translatable="false">G</string>
+    <string name="color_modification_b" translatable="false">B</string>
+
 </resources>
