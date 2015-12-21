@@ -33,8 +33,6 @@
 #include "protos/hwui.pb.h"
 #include "protos/ProtoHelpers.h"
 
-#include <SkCanvas.h>
-
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -105,8 +103,7 @@ void RenderNode::output(uint32_t level) {
             (isRenderable() ? "" : ", empty"),
             (properties().getProjectBackwards() ? ", projected" : ""),
             (mLayer != nullptr ? ", on HW Layer" : ""));
-    ALOGD("%*s%s %d", level * 2, "", "Save",
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    ALOGD("%*s%s %d", level * 2, "", "Save", SaveFlags::MatrixClip);
 
     properties().debugOutputProperties(level);
 
@@ -574,7 +571,7 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
                     layerBounds.left, layerBounds.top,
                     layerBounds.right, layerBounds.bottom,
                     (int) (properties().getAlpha() * 255),
-                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+                    SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
         }
 
@@ -875,7 +872,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
 
     // Apply the base transform of the parent of the 3d children. This isolates
     // 3d children of the current chunk from transformations made in previous chunks.
-    int rootRestoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+    int rootRestoreTo = renderer.save(SaveFlags::Matrix);
     renderer.setGlobalMatrix(initialTransform);
 
     /**
@@ -919,7 +916,7 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
 
         // only the actual child DL draw needs to be in save/restore,
         // since it modifies the renderer's matrix
-        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+        int restoreTo = renderer.save(SaveFlags::Matrix);
 
         DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
 
@@ -941,7 +938,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     int restoreTo = renderer.getSaveCount();
 
     LinearAllocator& alloc = handler.allocator();
-    handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+    handler(new (alloc) SaveOp(SaveFlags::MatrixClip),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
     // Transform renderer to match background we're projecting onto
@@ -966,7 +963,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
         renderNodeOp_t* childOp = mProjectedNodes[i];
 
         // matrix save, concat, and restore can be done safely without allocating operations
-        int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
+        int restoreTo = renderer.save(SaveFlags::Matrix);
         renderer.concatMatrix(childOp->transformFromCompositingAncestor);
         childOp->skipInOrderDraw = false; // this is horrible, I'm so sorry everyone
         handler(childOp, renderer.getSaveCount() - 1, properties().getClipToBounds());
@@ -1027,11 +1024,11 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 
     LinearAllocator& alloc = handler.allocator();
     int restoreTo = renderer.getSaveCount();
-    handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
+    handler(new (alloc) SaveOp(SaveFlags::MatrixClip),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
     DISPLAY_LIST_LOGD("%*sSave %d %d", (handler.level() + 1) * 2, "",
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
+            SaveFlags::MatrixClip, restoreTo);
 
     if (useViewProperties) {
         setViewProperties<T>(renderer, handler);

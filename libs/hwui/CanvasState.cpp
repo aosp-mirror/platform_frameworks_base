@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include <SkCanvas.h>
-
+#include "Canvas.h"
 #include "CanvasState.h"
 #include "utils/MathUtils.h"
 
@@ -54,8 +53,7 @@ void CanvasState::initializeRecordingSaveStack(int viewportWidth, int viewportHe
     }
 
     freeAllSnapshots();
-    mSnapshot = allocSnapshot(&mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    mSnapshot = allocSnapshot(&mFirstSnapshot, SaveFlags::MatrixClip);
     mSnapshot->setRelativeLightCenter(Vector3());
     mSaveCount = 1;
 }
@@ -72,8 +70,7 @@ void CanvasState::initializeSaveStack(
     }
 
     freeAllSnapshots();
-    mSnapshot = allocSnapshot(&mFirstSnapshot,
-            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    mSnapshot = allocSnapshot(&mFirstSnapshot, SaveFlags::MatrixClip);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
     mSnapshot->fbo = mCanvas.getTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);

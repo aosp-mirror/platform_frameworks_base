@@ -102,7 +102,7 @@ SkCanvas* DisplayListCanvas::asSkCanvas() {
     return mSkiaCanvasProxy.get();
 }
 
-int DisplayListCanvas::save(SkCanvas::SaveFlags flags) {
+int DisplayListCanvas::save(SaveFlags::Flags flags) {
     addStateOp(new (alloc()) SaveOp((int) flags));
     return mState.save((int) flags);
 }
@@ -125,9 +125,9 @@ void DisplayListCanvas::restoreToCount(int saveCount) {
 }
 
 int DisplayListCanvas::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* paint, SkCanvas::SaveFlags flags) {
+        const SkPaint* paint, SaveFlags::Flags flags) {
     // force matrix/clip isolation for layer
-    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+    flags |= SaveFlags::MatrixClip;
 
     paint = refPaint(paint);
     addStateOp(new (alloc()) SaveLayerOp(left, top, right, bottom, paint, (int) flags));
@@ -232,7 +232,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint)
 
 void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top,
         const SkPaint* paint) {
-    save(SkCanvas::kMatrix_SaveFlag);
+    save(SaveFlags::Matrix);
     translate(left, top);
     drawBitmap(&bitmap, paint);
     restore();
@@ -253,7 +253,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matri
         drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                    dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
     } else {
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         concat(matrix);
         drawBitmap(&bitmap, paint);
         restore();
@@ -269,7 +269,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
             && (srcBottom - srcTop == dstBottom - dstTop)
             && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         translate(dstLeft, dstTop);
         drawBitmap(&bitmap, paint);
         restore();
@@ -283,7 +283,7 @@ void DisplayListCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float 
                 // Apply the scale transform on the canvas, so that the shader
                 // effectively calculates positions relative to src rect space
 
-                save(SkCanvas::kMatrix_SaveFlag);
+                save(SaveFlags::Matrix);
                 translate(dstLeft, dstTop);
                 scale(scaleX, scaleY);
 

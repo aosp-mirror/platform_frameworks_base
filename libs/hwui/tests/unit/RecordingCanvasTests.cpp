@@ -35,7 +35,7 @@ static void playbackOps(const DisplayList& displayList,
 
 TEST(RecordingCanvas, emptyPlayback) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.restore();
     });
     playbackOps(*dl, [](const RecordedOp& op) { ADD_FAILURE(); });
@@ -43,7 +43,7 @@ TEST(RecordingCanvas, emptyPlayback) {
 
 TEST(RecordingCanvas, clipRect) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
         canvas.drawRect(0, 0, 50, 50, SkPaint());
         canvas.drawRect(50, 50, 100, 100, SkPaint());
@@ -176,16 +176,16 @@ TEST(RecordingCanvas, backgroundAndImage) {
         SkPaint paint;
         paint.setColor(SK_ColorBLUE);
 
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         {
             // a background!
-            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             canvas.drawRect(0, 0, 100, 200, paint);
             canvas.restore();
         }
         {
             // an image!
-            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             canvas.translate(25, 25);
             canvas.scale(2, 2);
             canvas.drawBitmap(bitmap, 0, 0, nullptr);
@@ -224,7 +224,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
 
 TEST(RecordingCanvas, saveLayer_simple) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 20, 190, 180, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
     });
@@ -258,7 +258,7 @@ TEST(RecordingCanvas, saveLayer_simple) {
 
 TEST(RecordingCanvas, saveLayer_missingRestore) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(0, 0, 200, 200, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 200, 200, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         // Note: restore omitted, shouldn't result in unmatched save
     });
@@ -273,7 +273,7 @@ TEST(RecordingCanvas, saveLayer_missingRestore) {
 
 TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
     });
@@ -305,9 +305,9 @@ TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
 
 TEST(RecordingCanvas, saveLayer_addClipFlag) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(10, 20, 190, 180, SkRegion::kIntersect_Op);
-        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
         canvas.restore();
@@ -327,7 +327,7 @@ TEST(RecordingCanvas, saveLayer_viewportCrop) {
         // shouldn't matter, since saveLayer will clip to its bounds
         canvas.clipRect(-1000, -1000, 1000, 1000, SkRegion::kReplace_Op);
 
-        canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
@@ -348,12 +348,12 @@ TEST(RecordingCanvas, saveLayer_viewportCrop) {
 
 TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.translate(100, 100);
         canvas.rotate(45);
         canvas.translate(-50, -50);
 
-        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 100, 100, SkPaint());
         canvas.restore();
 
@@ -374,13 +374,13 @@ TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
 
 TEST(RecordingCanvas, saveLayer_rotateClipped) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.translate(100, 100);
         canvas.rotate(45);
         canvas.translate(-200, -200);
 
         // area of saveLayer will be clipped to parent viewport, so we ask for 400x400...
-        canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 400, 400, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
 

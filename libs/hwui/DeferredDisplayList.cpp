@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <SkCanvas.h>
-
 #include <utils/Trace.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -419,7 +417,7 @@ void DeferredDisplayList::addClip(OpenGLRenderer& renderer, ClipOp* op) {
  * beginning of the frame. This would avoid targetting and removing an FBO in the middle of a frame.
  *
  * saveLayer operations should be pulled to the beginning of the frame if the canvas doesn't have a
- * complex clip, and if the flags (kClip_SaveFlag & kClipToLayer_SaveFlag) are set.
+ * complex clip, and if the flags (SaveFlags::Clip & SaveFlags::ClipToLayer) are set.
  */
 void DeferredDisplayList::addSaveLayer(OpenGLRenderer& renderer,
         SaveLayerOp* op, int newSaveCount) {
@@ -438,7 +436,7 @@ void DeferredDisplayList::addSave(OpenGLRenderer& renderer, SaveOp* op, int newS
     int saveFlags = op->getFlags();
     DEFER_LOGD("%p adding saveOp %p, flags %x, new count %d", this, op, saveFlags, newSaveCount);
 
-    if (recordingComplexClip() && (saveFlags & SkCanvas::kClip_SaveFlag)) {
+    if (recordingComplexClip() && (saveFlags & SaveFlags::Clip)) {
         // store and replay the save operation, as it may be needed to correctly playback the clip
         DEFER_LOGD("    adding save barrier with new save count %d", newSaveCount);
         storeStateOpBarrier(renderer, op);
@@ -621,7 +619,7 @@ void DeferredDisplayList::storeRestoreToCountBarrier(OpenGLRenderer& renderer, S
             this, newSaveCount, mBatches.size());
 
     // store displayState for the restore operation, as it may be associated with a saveLayer that
-    // doesn't have kClip_SaveFlag set
+    // doesn't have SaveFlags::Clip set
     DeferredDisplayState* state = createState();
     renderer.storeDisplayState(*state, getStateOpDeferFlags());
     mBatches.push_back(new RestoreToCountBatch(op, state, newSaveCount));
@@ -654,7 +652,7 @@ void DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     renderer.eventMark("Flush");
 
     // save and restore so that reordering doesn't affect final state
-    renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    renderer.save(SaveFlags::MatrixClip);
 
     if (CC_LIKELY(avoidOverdraw())) {
         for (unsigned int i = 1; i < mBatches.size(); i++) {

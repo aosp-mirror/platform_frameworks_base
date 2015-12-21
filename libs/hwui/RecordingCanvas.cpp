@@ -92,7 +92,7 @@ void RecordingCanvas::onSnapshotRestored(const Snapshot& removed, const Snapshot
 // android/graphics/Canvas state operations
 // ----------------------------------------------------------------------------
 // Save (layer)
-int RecordingCanvas::save(SkCanvas::SaveFlags flags) {
+int RecordingCanvas::save(SaveFlags::Flags flags) {
     return mState.save((int) flags);
 }
 
@@ -105,10 +105,10 @@ void RecordingCanvas::restoreToCount(int saveCount) {
 }
 
 int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
-        const SkPaint* paint, SkCanvas::SaveFlags flags) {
+        const SkPaint* paint, SaveFlags::Flags flags) {
     // force matrix/clip isolation for layer
-    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
-    bool clippedLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
+    flags |= SaveFlags::MatrixClip;
+    bool clippedLayer = flags & SaveFlags::ClipToLayer;
 
     const Snapshot& previous = *mState.currentSnapshot();
 
@@ -128,7 +128,7 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
         // unlikely case where an unclipped savelayer is recorded with a clip it can use,
         // as none of its unaffected/unclipped area is visible
         clippedLayer = true;
-        flags |= SkCanvas::kClipToLayer_SaveFlag;
+        flags |= SaveFlags::ClipToLayer;
     }
 
     visibleBounds.doIntersect(previous.getRenderTargetClip());
@@ -424,7 +424,7 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
 
 // Bitmap-based
 void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) {
-    save(SkCanvas::kMatrix_SaveFlag);
+    save(SaveFlags::Matrix);
     translate(left, top);
     drawBitmap(&bitmap, paint);
     restore();
@@ -445,7 +445,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
         drawBitmap(bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,
                    dst.fLeft, dst.fTop, dst.fRight, dst.fBottom, paint);
     } else {
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         concat(matrix);
         drawBitmap(&bitmap, paint);
         restore();
@@ -461,7 +461,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
             && (srcBottom - srcTop == dstBottom - dstTop)
             && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        save(SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::Matrix);
         translate(dstLeft, dstTop);
         drawBitmap(&bitmap, paint);
         restore();

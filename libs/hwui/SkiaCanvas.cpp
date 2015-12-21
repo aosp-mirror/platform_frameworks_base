@@ -24,6 +24,7 @@
 #include <SkGraphics.h>
 #include <SkShader.h>
 #include <SkTArray.h>
+#include <SkTLazy.h>
 #include <SkTemplates.h>
 
 #include <memory>
@@ -63,14 +64,14 @@ public:
     virtual bool isHighContrastText() override { return mHighContrastText; }
 
     virtual int getSaveCount() const override;
-    virtual int save(SkCanvas::SaveFlags flags) override;
+    virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-                const SkPaint* paint, SkCanvas::SaveFlags flags) override;
+                const SkPaint* paint, SaveFlags::Flags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SkCanvas::SaveFlags flags) override;
+            int alpha, SaveFlags::Flags flags) override;
 
     virtual void getMatrix(SkMatrix* outMatrix) const override;
     virtual void setMatrix(const SkMatrix& matrix) override;
@@ -138,13 +139,13 @@ public:
 
 private:
     struct SaveRec {
-        int                 saveCount;
-        SkCanvas::SaveFlags saveFlags;
+        int              saveCount;
+        SaveFlags::Flags saveFlags;
     };
 
     bool mHighContrastText = false;
 
-    void recordPartialSave(SkCanvas::SaveFlags flags);
+    void recordPartialSave(SaveFlags::Flags flags);
     void saveClipsForFrame(SkTArray<SkClipStack::Element>& clips, int frameSaveCount);
     void applyClips(const SkTArray<SkClipStack::Element>& clips);
 
@@ -231,7 +232,7 @@ int SkiaCanvas::getSaveCount() const {
     return mCanvas->getSaveCount();
 }
 
-int SkiaCanvas::save(SkCanvas::SaveFlags flags) {
+int SkiaCanvas::save(SaveFlags::Flags flags) {
     int count = mCanvas->save();
     recordPartialSave(flags);
     return count;
@@ -254,8 +255,8 @@ void SkiaCanvas::restore() {
         return;
     }
 
-    bool preserveMatrix = !(rec->saveFlags & SkCanvas::kMatrix_SaveFlag);
-    bool preserveClip   = !(rec->saveFlags & SkCanvas::kClip_SaveFlag);
+    bool preserveMatrix = !(rec->saveFlags & SaveFlags::Matrix);
+    bool preserveClip   = !(rec->saveFlags & SaveFlags::Clip);
 
     SkMatrix savedMatrix;
     if (preserveMatrix) {
@@ -291,34 +292,53 @@ void SkiaCanvas::restoreToCount(int restoreCount) {
     }
 }
 
+static inline SkCanvas::SaveLayerFlags layerFlags(SaveFlags::Flags flags) {
+    SkCanvas::SaveLayerFlags layerFlags = 0;
+
+    if (!(flags & SaveFlags::HasAlphaLayer)) {
+        layerFlags |= SkCanvas::kIsOpaque_SaveLayerFlag;
+    }
+
+    if (!(flags & SaveFlags::ClipToLayer)) {
+        layerFlags |= SkCanvas::kDontClipToLayer_Legacy_SaveLayerFlag;
+    }
+
+    return layerFlags;
+}
+
 int SkiaCanvas::saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, SkCanvas::SaveFlags flags) {
-    SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
-    int count = mCanvas->saveLayer(&bounds, paint, flags | SkCanvas::kMatrixClip_SaveFlag);
+            const SkPaint* paint, SaveFlags::Flags flags) {
+    const SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
+    const SkCanvas::SaveLayerRec rec(&bounds, paint, layerFlags(flags));
+
+    int count = mCanvas->saveLayer(rec);
     recordPartialSave(flags);
     return count;
 }
 
 int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
-        int alpha, SkCanvas::SaveFlags flags) {
-    SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
-    int count = mCanvas->saveLayerAlpha(&bounds, alpha, flags | SkCanvas::kMatrixClip_SaveFlag);
-    recordPartialSave(flags);
-    return count;
+        int alpha, SaveFlags::Flags flags) {
+    SkTLazy<SkPaint> alphaPaint;
+    if (static_cast<unsigned>(alpha) < 0xFF) {
+        alphaPaint.init()->setAlpha(alpha);
+    }
+
+    return this->saveLayer(left, top, right, bottom, alphaPaint.getMaybeNull(),
+                           flags);
 }
 
 // ----------------------------------------------------------------------------
 // functions to emulate legacy SaveFlags (i.e. independent matrix/clip flags)
 // ----------------------------------------------------------------------------
 
-void SkiaCanvas::recordPartialSave(SkCanvas::SaveFlags flags) {
+void SkiaCanvas::recordPartialSave(SaveFlags::Flags flags) {
     // A partial save is a save operation which doesn't capture the full canvas state.
-    // (either kMatrix_SaveFlags or kClip_SaveFlag is missing).
+    // (either SaveFlags::Matrix or SaveFlags::Clip is missing).
 
     // Mask-out non canvas state bits.
-    flags = static_cast<SkCanvas::SaveFlags>(flags & SkCanvas::kMatrixClip_SaveFlag);
+    flags &= SaveFlags::MatrixClip;
 
-    if (SkCanvas::kMatrixClip_SaveFlag == flags) {
+    if (flags == SaveFlags::MatrixClip) {
         // not a partial save.
         return;
     }

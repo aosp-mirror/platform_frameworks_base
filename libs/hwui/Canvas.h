@@ -27,6 +27,22 @@
 
 namespace android {
 
+namespace SaveFlags {
+
+// These must match the corresponding Canvas API constants.
+enum {
+    Matrix        = 0x01,
+    Clip          = 0x02,
+    HasAlphaLayer = 0x04,
+    ClipToLayer   = 0x10,
+
+    // Helper constant
+    MatrixClip    = Matrix | Clip,
+};
+typedef uint32_t Flags;
+
+} // namespace SaveFlags
+
 class ANDROID_API Canvas {
 public:
     virtual ~Canvas() {};
@@ -70,16 +86,17 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------
+
     // Save (layer)
     virtual int getSaveCount() const = 0;
-    virtual int save(SkCanvas::SaveFlags flags) = 0;
+    virtual int save(SaveFlags::Flags flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-                const SkPaint* paint, SkCanvas::SaveFlags flags) = 0;
+                const SkPaint* paint, SaveFlags::Flags flags) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SkCanvas::SaveFlags flags) = 0;
+            int alpha, SaveFlags::Flags flags) = 0;
 
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const = 0;

@@ -34,18 +34,18 @@ public:
         card = TestUtils::createNode(0, 0, 400, 800,
                 [](RenderProperties& props, TestCanvas& canvas) {
             // nested clipped saveLayers
-            canvas.saveLayerAlpha(0, 0, 400, 400, 200, SkCanvas::kClipToLayer_SaveFlag);
+            canvas.saveLayerAlpha(0, 0, 400, 400, 200, SaveFlags::ClipToLayer);
             canvas.drawColor(Color::Green_700, SkXfermode::kSrcOver_Mode);
             canvas.clipRect(50, 50, 350, 350, SkRegion::kIntersect_Op);
-            canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::kClipToLayer_SaveFlag);
+            canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::ClipToLayer);
             canvas.drawColor(Color::Blue_500, SkXfermode::kSrcOver_Mode);
             canvas.restore();
             canvas.restore();
 
             // single unclipped saveLayer
-            canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             canvas.translate(0, 400);
-            canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::SaveFlags(0)); // unclipped
+            canvas.saveLayerAlpha(100, 100, 300, 300, 128, SaveFlags::Flags(0)); // unclipped
             SkPaint paint;
             paint.setAntiAlias(true);
             paint.setColor(Color::Green_700);
