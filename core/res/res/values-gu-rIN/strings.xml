@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"હવે લૉક કરો"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"સામગ્રીઓ છુપાવેલ છે"</string>
     <string name="safeMode" msgid="2788228061547930246">"સુરક્ષિત મોડ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"વ્યક્તિગત"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"કાપો"</string>
     <string name="copy" msgid="2681946229533511987">"કૉપિ કરો"</string>
     <string name="paste" msgid="5629880836805036433">"પેસ્ટ કરો"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"સાદી ટેક્સ્ટ તરીકે પેસ્ટ કરો"</string>
     <string name="replace" msgid="5781686059063148930">"બદલો…"</string>
     <string name="delete" msgid="6098684844021697789">"કાઢી નાખો"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL ની કૉપિ કરો"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"ટેક્સ્ટ પસંદ કરો"</string>
+    <string name="undo" msgid="7905788502491742328">"પૂર્વવત્ કરો"</string>
+    <string name="redo" msgid="7759464876566803888">"ફરી કરો"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"ટેક્સ્ટ પસંદગી"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"શબ્દકોશમાં ઉમેરો"</string>
     <string name="deleteText" msgid="6979668428458199034">"કાઢી નાખો"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"વૉલપેપર બદલો"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"સૂચના સાંભળનાર"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"શરત પ્રદાતા"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"સૂચના સહાયક"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN સક્રિય કર્યું"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> દ્વારા VPN સક્રિય થયું"</string>
     <string name="vpn_text" msgid="3011306607126450322">"નેટવર્કને સંચાલિત કરવા માટે ટચ કરો."</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ થયેલ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખેલ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"બૅટરી આવરદા વધુ સારી કરવામાં સહાય માટે, બૅટરી સેવર તમારા ઉપકરણના પ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને મોટાભાગના પૃષ્ઠભૂમિ ડેટાને સીમિત કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય એપ્લિકેશનો જે સમન્વયન પર આધાર રાખે છે તે તમે તેમને ખોલશો નહીં ત્યાં સુધી અપડેટ થઈ શકતી નથી.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જાય છે."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"મહત્વ"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"અવરોધિત: આ સૂચનાઓ ક્યારેય બતાવશો નહીં"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"નિમ્ન: સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"સામાન્ય: આ સૂચનાઓ ચુપચાપ બતાવો"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"ઉચ્ચ: સૂચનાઓની સૂચિની ટોચ પર બતાવો અને અવાજ કરો"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"તાત્કાલિક : સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજ કરો"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>
       <item quantity="other">%1$d મિનિટ માટે (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> સુધી)</item>

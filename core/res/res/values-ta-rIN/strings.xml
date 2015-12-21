@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"இப்போது பூட்டு"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"மறைந்துள்ள உள்ளடக்கம்"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"தனிப்பட்ட"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"வெட்டு"</string>
     <string name="copy" msgid="2681946229533511987">"நகலெடு"</string>
     <string name="paste" msgid="5629880836805036433">"ஒட்டு"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"எளிய உரையாக ஒட்டு"</string>
     <string name="replace" msgid="5781686059063148930">"மாற்று..."</string>
     <string name="delete" msgid="6098684844021697789">"நீக்கு"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL ஐ நகலெடு"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"உரையைத் தேர்வுசெய்க"</string>
+    <string name="undo" msgid="7905788502491742328">"செயல்தவிர்"</string>
+    <string name="redo" msgid="7759464876566803888">"மீண்டும்செய்"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"உரை தேர்ந்தெடுத்தல்"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"அகராதியில் சேர்"</string>
     <string name="deleteText" msgid="6979668428458199034">"நீக்கு"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"வால்பேப்பரை மாற்று"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"அறிவிப்புகளைக் கண்காணிக்கும் சேவை"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"நிபந்தனை வழங்குநர்"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"அறிவிப்பு உதவி"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN செயல்படுத்தப்பட்டது"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> ஆல் VPN செயல்படுத்தப்பட்டது"</string>
     <string name="vpn_text" msgid="3011306607126450322">"நெட்வொர்க்கை நிர்வகிக்கத் தொடவும்."</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"நிர்வாகி நீக்கிவிட்டார்"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகள் திறக்கும்வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"முக்கியத்துவம்"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"தடுக்கப்பட்டது: இந்த அறிவிப்புகளை ஒருபோதும் காட்டாது"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"குறைவு: ஒலியின்றி அறிவிப்புப் பட்டியலின் கீழே காட்டும்"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"இயல்பு: ஒலியின்றி இந்த அறிவிப்புகளைக் காட்டும்"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"அதிகம்: அறிவிப்புகள் பட்டியலின் மேல் பகுதியில் ஒலியுடன் காட்டும்"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"அவசரம்: ஒலியுடன் திரையில் தோன்றும்"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
       <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>

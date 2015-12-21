@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"এখনই লক করুন"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"৯৯৯+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>টি)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"লুকানো বিষয়বস্তু"</string>
     <string name="safeMode" msgid="2788228061547930246">"নিরাপদ মোড"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android সিস্টেম"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ব্যক্তিগত"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"কাটুন"</string>
     <string name="copy" msgid="2681946229533511987">"অনুলিপি"</string>
     <string name="paste" msgid="5629880836805036433">"আটকান"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"প্লেইন টেক্সট হিসাবে আটকান"</string>
     <string name="replace" msgid="5781686059063148930">"প্রতিস্থাপন করুন..."</string>
     <string name="delete" msgid="6098684844021697789">"মুছুন"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL অনুলিপি করুন"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"পাঠ্য নির্বাচন করুন"</string>
+    <string name="undo" msgid="7905788502491742328">"পূর্বাবস্থায় ফিরুন"</string>
+    <string name="redo" msgid="7759464876566803888">"পুনরায় করুন"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"পাঠ্য নির্বাচন"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"অভিধানে যুক্ত করুন"</string>
     <string name="deleteText" msgid="6979668428458199034">"মুছুন"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ওয়ালপেপার পরিবর্তন করুন"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"বিজ্ঞপ্তির শ্রোতা"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"শর্ত প্রদানকারী"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"বিজ্ঞপ্তি সহায়ক"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN সক্রিয়"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> এর দ্বারা VPN সক্রিয় করা হয়েছে"</string>
     <string name="vpn_text" msgid="3011306607126450322">"নেটওয়ার্ক পরিচালনা করতে স্পর্শ করুন৷"</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"আপনার প্রশাসক দ্বারা আপডেট করা হয়েছে"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"আপনার প্রশাসক দ্বারা মুছে ফেলা হয়েছে"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ব্যাটরির লাইফ উন্নত করতে সহায়তা করতে, ব্যাটারি সাশ্রয়কারী আপনার ডিভাইসের কার্যসম্পাদনা হ্রাস করে এবং কম্পন, অবস্থান পরিষেবাসমূহ এবং অধিকাংশ ব্যাকগ্রাউন্ড ডেটা সীমিত করে৷ ইমেল, বার্তাপ্রেরণ এবং অন্যান্য অ্যাপ্লিকেশানগুলিকে যেগুলি সিঙ্কের উপর নির্ভর করে সেগুলিকে আপনি না খোলা পর্যন্ত নাও আপডেট হতে পারে৷\n\nআপনার ডিভাইসটিকে যখন চার্জ করা হয় তখন ব্যাটারি সাশ্রয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়৷"</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"গুরুত্ব"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"অবরুদ্ধ: এই বিজ্ঞপ্তিগুলি কখনই দেখানো হবে না"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"নিম্ন: বিজ্ঞপ্তি তালিকার নীচের অংশে নিঃশব্দে প্রদর্শন করা হয়"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"সাধারন: এই বিজ্ঞপ্তিগুলি নিঃশব্দে প্রদর্শন করা হয়"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"উচ্চ: বিজ্ঞপ্তি তালিকার শীর্ষে দেখানো হয় এবং শব্দ করে"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"জরুরী: স্ক্রীনের উপরে প্রদর্শিত হয় এবং শব্দ করে"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> পর্যন্ত)</item>
       <item quantity="other">%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> পর্যন্ত)</item>

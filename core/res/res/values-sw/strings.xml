@@ -225,6 +225,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"Funga sasa"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Maudhui yamefichwa"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Binafsi"</string>
@@ -860,10 +861,13 @@
     <string name="cut" msgid="3092569408438626261">"Kata"</string>
     <string name="copy" msgid="2681946229533511987">"Nakala"</string>
     <string name="paste" msgid="5629880836805036433">"Bandika"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"Bandika kama maandishi dhahiri"</string>
     <string name="replace" msgid="5781686059063148930">"Badilisha..."</string>
     <string name="delete" msgid="6098684844021697789">"Futa"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Nakili URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Chagua maandishi"</string>
+    <string name="undo" msgid="7905788502491742328">"Tendua"</string>
+    <string name="redo" msgid="7759464876566803888">"Rejesha"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Uchaguzi wa maandishi?"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Ongeza kwenye kamusi"</string>
     <string name="deleteText" msgid="6979668428458199034">"Futa"</string>
@@ -1109,6 +1113,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Badilisha mandhari"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Kisikilizi cha arifa"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Mtoa masharti"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Mratibu wa arifa"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN imewezeshwa"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN imeamilishwa na <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Gusa ili kudhibiti mtandao."</string>
@@ -1442,12 +1447,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Kimesasiswa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kilifutwa na msimamizi wako"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Kusaidia kuboresha muda wa matumizi ya betri, inayookoa betri hupunguza utendaji wa kifaa chako na kupunguza mtetemo, huduma za utambuzi wa mahali, na data nyingi ya chini chini. Barua pepe, ujumbe na programu nyingine zinazotege,ea usawazishaji huenda zisisasishwe usipozifungua.\n\nInayookoa betri hujizima kiotomatiki kifaa chako kinapokuwa kinachaji."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"Umuhimu"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Imezuiwa: Usionyeshe arifa hizi kamwe"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"Chini: Onyesha katika sehemu ya chini ya orodha ya arifa bila kutoa sauti"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"Kawaida: Onyesha arifa hizi bila sauti"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"Juu: Onyesha katika sehemu ya juu ya orodha ya arifa na itoe sauti"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"Muhimu: Weka onyesho la kuchungulia kwenye skrini na itoe sauti"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
