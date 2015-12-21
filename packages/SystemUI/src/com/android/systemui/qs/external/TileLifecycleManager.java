@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.support.annotation.VisibleForTesting;
@@ -74,12 +75,17 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private boolean mBound;
     @VisibleForTesting
     boolean mReceiverRegistered;
+    private IQSService mService;
 
     public TileLifecycleManager(Handler handler, Context context, Intent intent, UserHandle user) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
         mUser = user;
+    }
+
+    public ComponentName getComponent() {
+        return mIntent.getComponent();
     }
 
     public boolean hasPendingClick() {
@@ -108,6 +114,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             if (DEBUG) Log.d(TAG, "Unbinding service " + mIntent);
             // Give it another chance next time it needs to be bound, out of kindness.
             mBindTryCount = 0;
+            mWrapper = null;
             mContext.unbindService(this);
         }
     }
@@ -122,6 +129,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             service.linkToDeath(this, 0);
         } catch (RemoteException e) {
         }
+        setQSService(mService);
+        setQSTile(mTile);
         handlePendingMessages();
     }
 
@@ -145,7 +154,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
         if (mListening) {
             if (DEBUG) Log.d(TAG, "Handling pending onStartListening");
-            setQSTile(mTile);
             onStartListening();
         }
         if (queue.contains(MSG_ON_CLICK)) {
@@ -269,6 +277,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private void queueMessage(int message) {
         synchronized (mQueuedMessages) {
             mQueuedMessages.add(message);
+        }
+    }
+
+    @Override
+    public void setQSService(IQSService service) {
+        mService = service;
+        if (mWrapper == null || !mWrapper.setQSService(service)) {
+            handleDeath();
         }
     }
 

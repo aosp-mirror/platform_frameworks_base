@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
+import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -38,6 +39,9 @@ public class TileServiceManager {
 
     private static final String TAG = "TileServiceManager";
 
+    @VisibleForTesting
+    static final String PREFS_FILE = "CustomTileModes";
+
     private final TileServices mServices;
     private final TileLifecycleManager mStateManager;
     private final Handler mHandler;
@@ -47,6 +51,7 @@ public class TileServiceManager {
     private int mPriority;
     private boolean mJustBound;
     private long mLastUpdate;
+    private int mType;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component) {
         this(tileServices, handler, new TileLifecycleManager(handler,
@@ -60,6 +65,25 @@ public class TileServiceManager {
         mServices = tileServices;
         mHandler = handler;
         mStateManager = tileLifecycleManager;
+        mType = tileServices.getContext().getSharedPreferences(PREFS_FILE, 0)
+                .getInt(tileLifecycleManager.getComponent().flattenToString(),
+                        TileService.TILE_MODE_UNSET);
+        mStateManager.setQSService(tileServices);
+        if (mType == TileService.TILE_MODE_UNSET) {
+            bindService();
+            mStateManager.onTileAdded();
+        }
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+    public void setType(int type) {
+        mServices.getContext().getSharedPreferences(PREFS_FILE, 0).edit()
+                .putInt(mStateManager.getComponent().flattenToString(), type).commit();
+        mType = type;
+        mServices.recalculateBindAllowance();
     }
 
     public IQSTileService getTileService() {
@@ -70,17 +94,22 @@ public class TileServiceManager {
         if (mBindRequested == bindRequested) return;
         mBindRequested = bindRequested;
         if (mBindAllowed && mBindRequested && !mBound) {
+            mHandler.removeCallbacks(mUnbind);
             bindService();
         } else {
             mServices.recalculateBindAllowance();
         }
         if (mBound && !mBindRequested) {
-            // TODO: Schedule unbind.
+            mHandler.postDelayed(mUnbind, UNBIND_DELAY);
         }
     }
 
     public void setLastUpdate(long lastUpdate) {
         mLastUpdate = lastUpdate;
+        if (mBound && mType == TileService.TILE_MODE_ACTIVE) {
+            mStateManager.onStopListening();
+            setBindRequested(false);
+        }
         mServices.recalculateBindAllowance();
     }
 
@@ -147,6 +176,15 @@ public class TileServiceManager {
     public int getBindPriority() {
         return mPriority;
     }
+
+    private final Runnable mUnbind = new Runnable() {
+        @Override
+        public void run() {
+            if (mBound && !mBindRequested) {
+                unbindService();
+            }
+        }
+    };
 
     @VisibleForTesting
     final Runnable mJustBoundOver = new Runnable() {

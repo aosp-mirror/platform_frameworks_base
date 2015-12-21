@@ -15,8 +15,11 @@
  */
 package android.service.quicksettings;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,7 +45,7 @@ import android.view.WindowManager;
  * <li>When a tile should be up to date and listing will be indicated by
  * {@link #onStartListening()} and {@link #onStopListening()}.</li>
  *
- * <li>When the user removes a tile from Quick Settings {@link #onStopListening()}
+ * <li>When the user removes a tile from Quick Settings {@link #onTileRemoved()}
  * will be called.</li>
  * </ul>
  * <p>TileService will be detected by tiles that match the {@value #ACTION_QS_TILE}
@@ -71,11 +74,48 @@ public class TileService extends Service {
      */
     public static final String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
 
+    /**
+     * The tile mode hasn't been set yet.
+     * @hide
+     */
+    public static final int TILE_MODE_UNSET = 0;
+
+    /**
+     * Constant to be returned by {@link #onTileAdded}.
+     * <p>
+     * Passive mode is the default mode for tiles.  The System will tell the tile
+     * when it is most important to update by putting it in the listening state.
+     */
+    public static final int TILE_MODE_PASSIVE = 1;
+
+    /**
+     * Constant to be returned by {@link #onTileAdded}.
+     * <p>
+     * Active mode is for tiles which already listen and keep track of their state in their
+     * own process.  These tiles may request to send an update to the System while their process
+     * is alive using {@link #requestListeningState}.  The System will only bind these tiles
+     * on its own when a click needs to occur.
+     */
+    public static final int TILE_MODE_ACTIVE = 2;
+
+    /**
+     * Used to notify SysUI that Listening has be requested.
+     * @hide
+     */
+    public static final String ACTION_REQUEST_LISTENING
+            = "android.service.quicksettings.action.REQUEST_LISTENING";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
+
     private final H mHandler = new H(Looper.getMainLooper());
 
     private boolean mListening = false;
     private Tile mTile;
     private IBinder mToken;
+    private IQSService mService;
 
     @Override
     public void onDestroy() {
@@ -92,8 +132,12 @@ public class TileService extends Service {
      * Note that this is not guaranteed to be called between {@link #onCreate()}
      * and {@link #onStartListening()}, it will only be called when the tile is added
      * and not on subsequent binds.
+     *
+     * @see #TILE_MODE_PASSIVE
+     * @see #TILE_MODE_ACTIVE
      */
-    public void onTileAdded() {
+    public int onTileAdded() {
+        return TILE_MODE_PASSIVE;
     }
 
     /**
@@ -138,7 +182,10 @@ public class TileService extends Service {
         dialog.getWindow().getAttributes().token = mToken;
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_QS_DIALOG);
         dialog.show();
-        getQsTile().onShowDialog();
+        try {
+            mService.onShowDialog(mTile);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -155,6 +202,11 @@ public class TileService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return new IQSTileService.Stub() {
+            @Override
+            public void setQSService(IQSService service) throws RemoteException {
+                mHandler.obtainMessage(H.MSG_SET_SERVICE, service).sendToTarget();
+            }
+
             @Override
             public void setQSTile(Tile tile) throws RemoteException {
                 mHandler.obtainMessage(H.MSG_SET_TILE, tile).sendToTarget();
@@ -194,6 +246,7 @@ public class TileService extends Service {
         private static final int MSG_TILE_ADDED = 4;
         private static final int MSG_TILE_REMOVED = 5;
         private static final int MSG_TILE_CLICKED = 6;
+        private static final int MSG_SET_SERVICE = 7;
 
         public H(Looper looper) {
             super(looper);
@@ -202,11 +255,28 @@ public class TileService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_SET_SERVICE:
+                    mService = (IQSService) msg.obj;
+                    if (mTile != null) {
+                        mTile.setService(mService);
+                    }
+                    break;
                 case MSG_SET_TILE:
                     mTile = (Tile) msg.obj;
+                    if (mService != null && mTile != null) {
+                        mTile.setService(mService);
+                    }
                     break;
                 case MSG_TILE_ADDED:
-                    TileService.this.onTileAdded();
+                    int mode = TileService.this.onTileAdded();
+                    if (mService == null) {
+                        return;
+                    }
+                    try {
+                        mService.setTileMode(new ComponentName(TileService.this,
+                                TileService.this.getClass()), mode);
+                    } catch (RemoteException e) {
+                    }
                     break;
                 case MSG_TILE_REMOVED:
                     TileService.this.onTileRemoved();
@@ -229,5 +299,17 @@ public class TileService extends Service {
                     break;
             }
         }
+    }
+
+    /**
+     * Requests that a tile be put in the listening state so it can send an update.
+     *
+     * This method is only applicable to tiles that return {@link #TILE_MODE_ACTIVE} from
+     * {@link #onTileAdded()}, and will do nothing otherwise.
+     */
+    public static final void requestListeningState(Context context, ComponentName component) {
+        Intent intent = new Intent(ACTION_REQUEST_LISTENING);
+        intent.putExtra(EXTRA_COMPONENT, component);
+        context.sendBroadcast(intent, Manifest.permission.BIND_QUICK_SETTINGS_TILE);
     }
 }

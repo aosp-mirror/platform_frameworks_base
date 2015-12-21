@@ -15,15 +15,21 @@
  */
 package com.android.systemui.qs.external;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.Tile;
+import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
+import android.util.Log;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 import java.util.ArrayList;
@@ -48,6 +54,8 @@ public class TileServices extends IQSService.Stub {
     public TileServices(QSTileHost host, Looper looper) {
         mHost = host;
         mContext = mHost.getContext();
+        mContext.registerReceiver(mRequestListeningReceiver,
+                new IntentFilter(TileService.ACTION_REQUEST_LISTENING));
         mHandler = new Handler(looper);
     }
 
@@ -121,12 +129,44 @@ public class TileServices extends IQSService.Stub {
         }
     }
 
+    private void requestListening(ComponentName component) {
+        synchronized (mServices) {
+            CustomTile customTile = getTileForComponent(component);
+            if (customTile == null) {
+                Log.d("TileServices", "Couldn't find tile for " + component);
+                return;
+            }
+            TileServiceManager service = mServices.get(customTile);
+            if (service.getType() != TileService.TILE_MODE_ACTIVE) {
+                return;
+            }
+            service.setBindRequested(true);
+            try {
+                service.getTileService().onStartListening();
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    @Override
+    public void setTileMode(ComponentName component, int mode) {
+        verifyCaller(component.getPackageName());
+        CustomTile customTile = getTileForComponent(component);
+        if (customTile != null) {
+            synchronized (mServices) {
+                mServices.get(customTile).setType(mode);
+            }
+        }
+    }
+
     @Override
     public void updateQsTile(Tile tile) {
         verifyCaller(tile.getComponentName().getPackageName());
         CustomTile customTile = getTileForComponent(tile.getComponentName());
         if (customTile != null) {
-            mServices.get(customTile).setLastUpdate(System.currentTimeMillis());
+            synchronized (mServices) {
+                mServices.get(customTile).setLastUpdate(System.currentTimeMillis());
+            }
             customTile.updateState(tile);
             customTile.refreshState();
         }
@@ -143,8 +183,20 @@ public class TileServices extends IQSService.Stub {
     }
 
     private CustomTile getTileForComponent(ComponentName component) {
-        return mTiles.get(component);
+        synchronized (mServices) {
+            return mTiles.get(component);
+        }
     }
+
+    private final BroadcastReceiver mRequestListeningReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (TileService.ACTION_REQUEST_LISTENING.equals(intent.getAction())) {
+                requestListening(
+                        (ComponentName) intent.getParcelableExtra(TileService.EXTRA_COMPONENT));
+            }
+        }
+    };
 
     private static final Comparator<TileServiceManager> SERVICE_SORT =
             new Comparator<TileServiceManager>() {

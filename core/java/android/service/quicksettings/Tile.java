@@ -37,10 +37,11 @@ public final class Tile implements Parcelable {
     private static final String TAG = "Tile";
 
     private ComponentName mComponentName;
-    private IQSService mService;
     private Icon mIcon;
     private CharSequence mLabel;
     private CharSequence mContentDescription;
+
+    private IQSService mService;
 
     /**
      * @hide
@@ -52,8 +53,14 @@ public final class Tile implements Parcelable {
     /**
      * @hide
      */
-    public Tile(ComponentName componentName, IQSService service) {
+    public Tile(ComponentName componentName) {
         mComponentName = componentName;
+    }
+
+    /**
+     * @hide
+     */
+    public void setService(IQSService service) {
         mService = service;
     }
 
@@ -62,6 +69,13 @@ public final class Tile implements Parcelable {
      */
     public ComponentName getComponentName() {
         return mComponentName;
+    }
+
+    /**
+     * @hide
+     */
+    public IQSService getQsService() {
+        return mService;
     }
 
     /**
@@ -137,21 +151,8 @@ public final class Tile implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     * Notifies the IQSService that this tile is showing a dialog.
-     */
-    void onShowDialog() {
-        try {
-            mService.onShowDialog(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't onShowDialog");
-        }
-    }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStrongInterface(mService);
         if (mComponentName != null) {
             dest.writeByte((byte) 1);
             mComponentName.writeToParcel(dest, flags);
@@ -169,7 +170,6 @@ public final class Tile implements Parcelable {
     }
 
     private void readFromParcel(Parcel source) {
-        mService = IQSService.Stub.asInterface(source.readStrongBinder());
         if (source.readByte() != 0) {
             mComponentName = ComponentName.CREATOR.createFromParcel(source);
         } else {

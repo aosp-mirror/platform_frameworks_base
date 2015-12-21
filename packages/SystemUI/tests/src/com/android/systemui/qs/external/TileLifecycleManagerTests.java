@@ -15,6 +15,7 @@
  */
 package com.android.systemui.qs.external;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,9 +24,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.quicksettings.TileService;
+import android.service.quicksettings.IQSService;
+import android.service.quicksettings.IQSTileService;
+import android.service.quicksettings.Tile;
 import android.test.AndroidTestCase;
 import android.util.ArraySet;
 import android.util.Log;
@@ -238,8 +243,48 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         }
     };
 
-    public static class FakeTileService extends TileService {
+    public static class FakeTileService extends Service {
         public static final String ACTION_KILL = "com.android.systemui.test.KILL";
+
+        @Override
+        public IBinder onBind(Intent intent) {
+            return new IQSTileService.Stub() {
+
+                @Override
+                public void setQSService(IQSService service) {
+
+                }
+
+                @Override
+                public void setQSTile(Tile tile) throws RemoteException {
+                }
+
+                @Override
+                public void onTileAdded() throws RemoteException {
+                    sendCallback("onTileAdded");
+                }
+
+                @Override
+                public void onTileRemoved() throws RemoteException {
+                    sendCallback("onTileRemoved");
+                }
+
+                @Override
+                public void onStartListening() throws RemoteException {
+                    sendCallback("onStartListening");
+                }
+
+                @Override
+                public void onStopListening() throws RemoteException {
+                    sendCallback("onStopListening");
+                }
+
+                @Override
+                public void onClick(IBinder iBinder) throws RemoteException {
+                    sendCallback("onClick");
+                }
+            };
+        }
 
         @Override
         public void onCreate() {
@@ -253,31 +298,6 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
             super.onDestroy();
             unregisterReceiver(mReceiver);
             sendCallback("onDestroy");
-        }
-
-        @Override
-        public void onTileAdded() {
-            sendCallback("onTileAdded");
-        }
-
-        @Override
-        public void onTileRemoved() {
-            sendCallback("onTileRemoved");
-        }
-
-        @Override
-        public void onStartListening() {
-            sendCallback("onStartListening");
-        }
-
-        @Override
-        public void onStopListening() {
-            sendCallback("onStopListening");
-        }
-
-        @Override
-        public void onClick() {
-            sendCallback("onClick");
         }
 
         private void sendCallback(String callback) {
