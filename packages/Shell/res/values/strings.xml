@@ -45,6 +45,14 @@
     <!-- Title of the notification action that opens the dialog for the user-defined bug report details. -->
     <string name="bugreport_info_action">Details</string>
 
+    <!-- Title of the notification action that takes aditional screenshots. -->
+    <string name="bugreport_screenshot_action">Screenshot</string>
+
+    <!-- Toast message sent when the a screenshot for the bug report was taken successfully. -->
+    <string name="bugreport_screenshot_taken">Screenshot taken succesfully.</string>
+    <!-- Toast message sent when the a screenshot for the bug report was not taken due to an error. -->
+    <string name="bugreport_screenshot_failed">Screenshot could not be taken.</string>
+
     <!--  Title of the dialog asking for user-defined bug report details like name, title, and description. -->
     <string name="bugreport_info_dialog_title">Bug report details</string>
 
