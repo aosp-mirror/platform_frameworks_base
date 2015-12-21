@@ -302,8 +302,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Meklēt"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nevarēja palaist lietotni <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Vairāk"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"Vēl <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontāls dalījums"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikāls dalījums"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pielāgots dalījums"</string>
@@ -366,7 +365,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ieslēgts akumulatora enerģijas taupīšanas režīms"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Samazina veiktspēju un fona datus"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Izslēgt akumulatora jaudas taupīšanu"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Saturs paslēpts"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sāks uzņemt visu, kas tiks rādīts jūsu ekrānā."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Vairs nerādīt"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Dzēst visu"</string>
@@ -451,4 +449,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vai ieslēgt Bluetooth savienojumu?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Lai pievienotu tastatūru planšetdatoram, vispirms ir jāieslēdz Bluetooth savienojums."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Ieslēgt"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Lietot paziņojumiem “<xliff:g id="TOPIC_NAME">%1$s</xliff:g>”"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Lietot visiem šīs lietotnes paziņojumiem"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Bloķēts"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Nav svarīgs"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Parasts"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Ļoti svarīgs"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Steidzams"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Nekad nerādīt šos paziņojumus"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Rādīt paziņojumu saraksta apakšdaļā bez skaņas signāla"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Rādīt šos paziņojumus bez skaņas signāla"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Rādīt paziņojumu saraksta augšdaļā un ar skaņas signālu"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Rādīt ekrānā ar skaņas signālu"</string>
 </resources>

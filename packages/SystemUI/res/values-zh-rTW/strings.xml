@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"無法啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"更多"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"還有 <xliff:g id="NUMBER">%d</xliff:g> 項"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"節約耗電量模式已啟用"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"關閉節約耗電量模式"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要開啟藍牙功能嗎？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"如要將鍵盤連線到平板電腦，您必須先開啟藍牙。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"開啟"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"套用到「<xliff:g id="TOPIC_NAME">%1$s</xliff:g>」通知"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"套用到這個應用程式的所有通知"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"封鎖"</string>
+    <string name="low_importance" msgid="4109929986107147930">"低重要性"</string>
+    <string name="default_importance" msgid="8192107689995742653">"一般重要性"</string>
+    <string name="high_importance" msgid="1527066195614050263">"高重要性"</string>
+    <string name="max_importance" msgid="5089005872719563894">"緊急重要性"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"一律不顯示這些通知"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"顯示在通知清單底部且不發出任何音效"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"顯示這些通知且不發出任何音效"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"顯示在通知清單頂端並發出音效"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"短暫顯示在螢幕上並發出音效"</string>
 </resources>

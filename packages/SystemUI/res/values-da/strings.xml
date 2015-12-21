@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"søg"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> kunne ikke startes."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Mere"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> mere"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Opdel vandret"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Opdel lodret"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Opdel brugerdefineret"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Batterisparefunktion er slået til"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reducerer ydeevne og baggrundsdata"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Deaktiver batterisparefunktion"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Indholdet er skjult"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> vil begynde at optage alt, hvad der vises på din skærm."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Vis ikke igen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Ryd alt"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Slå til"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Anvend for underretninger vedrørende <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Anvend for alle underretninger fra denne app"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Blokeret"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Lille vigtighed"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Normal vigtighed"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Stor vigtighed"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Presserende vigtighed"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Vis aldrig disse underretninger"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Vis lydløst nederst på listen over underretninger"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Vis disse underretninger lydløst"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Vis øverst på listen over underretninger, og giv lyd"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Vis på skærmen, og giv lyd"</string>
 </resources>

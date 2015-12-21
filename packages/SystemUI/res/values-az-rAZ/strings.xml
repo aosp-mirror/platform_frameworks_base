@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"axtarış"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> başlana bilmir."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Daha çox"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> Daha çox"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Üfüqi Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Şaquli Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Fərdi Böl"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Enerji qənaəti aktivdir"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Performansı azaldır və arxa fon datasını məhdudlaşdırır"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Enerjiyə qənaət rejimini deaktiv edin"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Məzmun gizlidir"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranınızda olan hər şeyin şəklini çəkəcək."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daha göstərmə"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hamısını silin"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth aktivləşsin?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Tabletinizlə klaviaturaya bağlanmaq üçün ilk olaraq Bluetooth\'u aktivləşdirməlisiniz."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivləşdirin"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> bildirişlərinə müraciət edin"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Bu tətbiqdən olan bütün bildirişlərə müraciət edin"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Bloklanmış"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Az əhəmiyyətli"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Normal əhəmiyyətli"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Çox əhəmiyyətli"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Təcili əhəmiyyətli"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Bu bildirişləri heç vaxt göstərməyin"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Bildirişlər siyahısının aşağısında səssiz göstərin"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Bu bildişləri səssiz göstərin"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Bildirişlər siyahısında yuxarıda göstərin və səsli edin"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Ekranda nəzər salın və səsli edin"</string>
 </resources>
