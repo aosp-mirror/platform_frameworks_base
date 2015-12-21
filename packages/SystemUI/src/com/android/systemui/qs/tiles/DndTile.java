@@ -107,8 +107,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                     Toast.LENGTH_LONG).show();
             return;
         }
-        mDisable.setAllowAnimation(true);
-        mDisableTotalSilence.setAllowAnimation(true);
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);

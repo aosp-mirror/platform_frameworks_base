@@ -58,8 +58,6 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     public void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         setEnabled(!mState.value);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     private void setEnabled(boolean enabled) {

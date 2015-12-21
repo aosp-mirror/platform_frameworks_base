@@ -19,8 +19,6 @@ package com.android.systemui.qs;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -29,9 +27,20 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.systemui.qs.QSTile.State;
-import com.android.systemui.statusbar.policy.*;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.Listenable;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -389,11 +398,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         @Override
         public Drawable getDrawable(Context context) {
-            Drawable d = context.getDrawable(mResId);
-            if (d instanceof Animatable) {
-                ((Animatable) d).start();
-            }
-            return d;
+            return context.getDrawable(mResId);
         }
 
         @Override
@@ -408,41 +413,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected class AnimationIcon extends ResourceIcon {
-        private boolean mAllowAnimation;
-
         public AnimationIcon(int resId) {
             super(resId);
-        }
-
-        public void setAllowAnimation(boolean allowAnimation) {
-            mAllowAnimation = allowAnimation;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
-            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) context.getDrawable(mResId)
-                    .getConstantState().newDrawable();
-            d.start();
-            if (mAllowAnimation) {
-                mAllowAnimation = false;
-            } else {
-                d.stop(); // skip directly to end state
-            }
-            return d;
-        }
-    }
-
-    protected enum UserBoolean {
-        USER_TRUE(true, true),
-        USER_FALSE(true, false),
-        BACKGROUND_TRUE(false, true),
-        BACKGROUND_FALSE(false, false);
-        public final boolean value;
-        public final boolean userInitiated;
-        private UserBoolean(boolean userInitiated, boolean value) {
-            this.value = value;
-            this.userInitiated = userInitiated;
+            return context.getDrawable(mResId).getConstantState().newDrawable();
         }
     }
 

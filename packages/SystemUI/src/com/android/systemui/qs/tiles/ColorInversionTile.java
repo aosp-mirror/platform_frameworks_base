@@ -71,8 +71,6 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     protected void handleClick() {
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mSetting.setValue(mState.value ? 0 : 1);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     @Override

@@ -64,7 +64,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         }
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         boolean newState = !mState.value;
-        refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
+        refreshState(newState);
         mFlashlightController.setFlashlight(newState);
     }
 
@@ -73,8 +73,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         // TODO: Flashlight available handling...
 //        state.visible = mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
-        if (arg instanceof UserBoolean) {
-            boolean value = ((UserBoolean) arg).value;
+        if (arg instanceof Boolean) {
+            boolean value = (Boolean) arg;
             if (value == state.value) {
                 return;
             }
@@ -83,7 +83,6 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
             state.value = mFlashlightController.isEnabled();
         }
         final AnimationIcon icon = state.value ? mEnable : mDisable;
-        icon.setAllowAnimation(arg instanceof UserBoolean && ((UserBoolean) arg).userInitiated);
         state.icon = icon;
         int onOrOffId = state.value
                 ? R.string.accessibility_quick_settings_flashlight_on
@@ -107,12 +106,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public void onFlashlightChanged(boolean enabled) {
-        refreshState(enabled ? UserBoolean.BACKGROUND_TRUE : UserBoolean.BACKGROUND_FALSE);
+        refreshState(enabled);
     }
 
     @Override
     public void onFlashlightError() {
-        refreshState(UserBoolean.BACKGROUND_FALSE);
+        refreshState(false);
     }
 
     @Override
