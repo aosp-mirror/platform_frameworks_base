@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"пребарај"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> не може да се вклучи."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Повеќе"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"Уште <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Раздели хоризонтално"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Раздели вертикално"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Раздели прилагодено"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Штедачот на батерија е вклучен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Ја намалува изведбата и податоците во заднина"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Исклучете го штедачот на батерија"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Содржините се скриени"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе започне да презема сѐ што се прикажува на вашиот екран."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не покажувај повторно"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Исчисти сè"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Да се вклучи Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"За да ја поврзете тастатурата со таблетот, најпрво треба да вклучите Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Вклучи"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Важи за известувањата за <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Важи за сите известувања од оваа апликација"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Блокирано"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Мала важност"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Нормална важност"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Голема важност"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Итна важност"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Никогаш не ги прикажувај известувањава"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Тивко прикажувај ги на дното на списокот со известувања"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Тивко прикажувај ги известувањава"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Прикажувај ги на врвот на списокот со известувања и дај звучен сигнал"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Појави се на екранот и дај звучен сигнал"</string>
 </resources>

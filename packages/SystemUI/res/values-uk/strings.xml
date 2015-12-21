@@ -366,7 +366,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Режим заощадження заряду акумулятора ввімкнено"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Знижується продуктивність і обмежуються фонові дані"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Вимкнути режим заощадження заряду акумулятора"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Вміст сховано"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримає доступ до всіх даних, які відображаються на вашому екрані."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
@@ -451,4 +450,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Увімкнути Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Щоб під’єднати клавіатуру до планшета, спершу потрібно ввімкнути Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Увімкнути"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Застосувати до сповіщень на тему \"<xliff:g id="TOPIC_NAME">%1$s</xliff:g>\""</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Застосувати до всіх сповіщень із цього додатка"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Заблоковано"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Низький пріоритет"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Стандартний пріоритет"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Високий пріоритет"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Терміново"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Ніколи не показувати ці сповіщення"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Показувати сповіщення внизу списку без звукового сигналу"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Показувати ці сповіщення без звукового сигналу"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Показувати сповіщення вгорі списку зі звуковим сигналом"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Показувати сповіщення на екрані зі звуковим сигналом"</string>
 </resources>

@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ekki var hægt að ræsa <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Meira"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> í viðbót"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Lóðrétt skipting"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Sérsniðin skipting"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Kveikt er á rafhlöðusparnaði"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Dregur úr afköstum og bakgrunnsgögnum"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Slökkva á rafhlöðusparnaði"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Innihald falið"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> mun fanga allt sem birtist á skjánum."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ekki sýna þetta aftur"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hreinsa allt"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Kveikja á Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Til að geta tengt lyklaborðið við spjaldtölvuna þarftu fyrst að kveikja á Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Kveikja"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Láta gilda um tilkynningar varðandi <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Láta gilda um allar tilkynningar frá þessu forriti"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Útilokuð"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Ekki svo mikilvægt"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Venjulegt mikilvægi"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Mjög mikilvægt"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Afar áríðandi"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Aldrei sýna þessar tilkynningar"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Sýna neðst á tilkynningalistanum án hljóðs"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Sýna þessar tilkynningar án hljóðs"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Sýna efst á tilkynningalistanum og spila hljóð"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Birta á skjánum og spila hljóð"</string>
 </resources>

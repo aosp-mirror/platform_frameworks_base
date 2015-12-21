@@ -303,8 +303,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"paieška"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nepavyko paleisti <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Daugiau"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"Dar <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontalus skaidymas"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikalus skaidymas"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tinkintas skaidymas"</string>
@@ -367,7 +366,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akumuliatoriaus tausojimo priemonė įjungta"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Išjungti Akumuliatoriaus tausojimo priemonę"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Turinys paslėptas"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"„<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ pradės fiksuoti viską, kas rodoma jūsų ekrane."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daugiau neberodyti"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Viską išvalyti"</string>
@@ -452,4 +450,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Įjungti „Bluetooth“?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Kad galėtumėte prijungti klaviatūrą prie planšetinio kompiuterio, pirmiausia turite įjungti „Bluetooth“."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Įjungti"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Taikyti „<xliff:g id="TOPIC_NAME">%1$s</xliff:g>“ pranešimams"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Taikyti visiems pranešimams iš šios programos"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Užblokuota"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Maža svarba"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Įprasta svarba"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Didelė svarba"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Skubi svarba"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Niekada nerodyti šių pranešimų"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Tyliai rodyti pranešimų sąrašo apačioje"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Tyliai rodyti šiuos pranešimus"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Rodyti pranešimų sąrašo viršuje ir skambėti"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Rodyti ekrane ir skambėti"</string>
 </resources>

@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"සෙවීම"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ආරම්භ කළ නොහැක."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"තවත්"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"තව <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"තිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"සිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"අභිමත ලෙස වෙන් කරන්න"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"බැටරිය සුරකින්නා සක්‍රීයයි"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ක්‍රියාකාරිත්වය සහ පසුබිම් දත්ත අඩු කරන්න"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"බැටරි සුරැකීම අක්‍රිය කරන්න"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"සැඟවුණු සම්බන්ධතා"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"ඔබගේ තීරයේ දර්ශනය වන සෑම දෙයම <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ලබාගැනීම ආරම්භ කරන ලදි."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"නැවත නොපෙන්වන්න"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"සියල්ල හිස් කරන්න"</string>
@@ -450,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"බ්ලූටූත් ක්‍රියාත්මක කරන්නද?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ඔබේ යතුරු පුවරුව ඔබේ ටැබ්ලට් පරිගණකයට සම්බන්ධ කිරීමට, ඔබ පළමුව බ්ලූටූත් ක්‍රියාත්මක කළ යුතුය."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> දැනුම්දීම් වෙත යොදන්න"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"මෙම යෙදුම වෙතින් වන සියලු දැනුම්දීම් සඳහා යොදන්න"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"අවහිර කරන ලදි"</string>
+    <string name="low_importance" msgid="4109929986107147930">"අඩු වැදගත්කම"</string>
+    <string name="default_importance" msgid="8192107689995742653">"සාමාන්‍ය වැදගත්කම"</string>
+    <string name="high_importance" msgid="1527066195614050263">"වැඩි වැදගත්කම"</string>
+    <string name="max_importance" msgid="5089005872719563894">"හදිසි වැදගත්කම"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"මෙම දැනුම්දීම් කිසිදා නොපෙන්වන්න"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"දැනුම්දීම් ලැයිස්තුවෙහි පහළින්ම නිශ්ශබ්දව පෙන්වන්න"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"නිශ්ශබ්දව මෙම දැනුම්දීම් පෙන්වන්න"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"දැනුම්දීම් ලැයිස්තුවෙහි ඉහළින්ම පෙන්වන්න සහ ශබ්ද කරන්න"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"තිරයට පැමිණ ශබ්ද කරන්න"</string>
 </resources>

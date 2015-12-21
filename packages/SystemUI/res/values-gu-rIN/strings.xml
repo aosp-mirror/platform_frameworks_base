@@ -364,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"બેટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"પ્રદર્શન અને પૃષ્ઠભૂમિ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"બૅટરી સેવર બંધ કરો"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"સામગ્રીઓ છુપાવેલ છે"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> તમારી સ્ક્રીન પર જે પ્રદર્શિત થાય છે તે દરેક વસ્તુને કેપ્ચર કરવાનું પ્રારંભ કરશે."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
@@ -449,4 +448,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ચાલુ કરવુ છે?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"તમારા ટેબ્લેટ સાથે કીબોર્ડ કનેક્ટ કરવા માટે, તમારે પહેલાં Bluetooth ચાલુ કરવાની જરૂર પડશે."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ચાલુ કરો"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> સૂચનાઓ પર લાગુ કરો"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"આ ઍપ્લિકેશનની તમામ સૂચનાઓ પર લાગુ કરો"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"અવરોધિત"</string>
+    <string name="low_importance" msgid="4109929986107147930">"નિમ્ન મહત્વની"</string>
+    <string name="default_importance" msgid="8192107689995742653">"સામાન્ય મહત્વની"</string>
+    <string name="high_importance" msgid="1527066195614050263">"ઉચ્ચ મહત્વની"</string>
+    <string name="max_importance" msgid="5089005872719563894">"તાત્કાલિક મહત્વની"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"આ સૂચનાઓ ક્યારેય બતાવશો નહીં"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"આ સૂચનાઓ ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"સૂચનાઓની સૂચિની ટોચ પર બતાવો અને અવાજ કરો"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજ કરો"</string>
 </resources>

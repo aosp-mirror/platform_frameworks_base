@@ -301,8 +301,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"更多"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"还有 <xliff:g id="NUMBER">%d</xliff:g> 项"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -365,7 +364,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"节电助手已开启"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低性能并限制后台流量"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"关闭节电助手"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>将开始截取您的屏幕上显示的所有内容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不再显示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
@@ -450,4 +448,28 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"开启"</string>
+    <!-- no translation found for apply_to_topic (3641403489318659666) -->
+    <skip />
+    <!-- no translation found for apply_to_app (363016783939815960) -->
+    <skip />
+    <!-- no translation found for blocked_importance (5198578988978234161) -->
+    <skip />
+    <!-- no translation found for low_importance (4109929986107147930) -->
+    <skip />
+    <!-- no translation found for default_importance (8192107689995742653) -->
+    <skip />
+    <!-- no translation found for high_importance (1527066195614050263) -->
+    <skip />
+    <!-- no translation found for max_importance (5089005872719563894) -->
+    <skip />
+    <!-- no translation found for notification_importance_blocked (2397192642657872872) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (4383563267370859725) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (4926529615920610817) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (3222680136612408223) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (5236987171904756134) -->
+    <skip />
 </resources>

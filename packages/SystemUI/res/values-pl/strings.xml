@@ -303,8 +303,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"szukaj"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nie udało się uruchomić aplikacji <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Więcej"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"i jeszcze <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podziel poziomo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podziel pionowo"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podziel niestandardowo"</string>
@@ -367,7 +366,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Oszczędzanie baterii jest włączone"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Zmniejsza wydajność i ogranicza dane w tle"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Wyłącz oszczędzanie baterii"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Treści ukryte"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> będzie zapisywać wszystko, co wyświetli się na ekranie."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nie pokazuj ponownie"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Usuń wszystkie"</string>
@@ -452,4 +450,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Włączyć Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Aby połączyć klawiaturę z tabletem, musisz najpierw włączyć Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Włącz"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Zastosuj do powiadomień typu <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Zastosuj do wszystkich powiadomień z tej aplikacji"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Zablokowane"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Mało ważne"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Mniej ważne"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Bardzo ważne"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Pilne"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Nigdy nie pokazuj tych powiadomień"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Pokazuj na dole listy powiadomień bez sygnału dźwiękowego"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Pokazuj te powiadomienia bez sygnału dźwiękowego"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Pokazuj na górze listy powiadomień i sygnalizuj dźwiękiem"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Wyświetlaj na ekranie i odtwarzaj dźwięk"</string>
 </resources>

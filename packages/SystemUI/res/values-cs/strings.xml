@@ -303,8 +303,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"vyhledat"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikaci <xliff:g id="APP">%s</xliff:g> nelze spustit."</string>
     <string name="recents_show_history_button_label" msgid="7062088196449747245">"Další"</string>
-    <!-- no translation found for recents_history_label_format (6337155608055062429) -->
-    <skip />
+    <string name="recents_history_label_format" msgid="6337155608055062429">"ještě <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Vodorovné rozdělení"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikální rozdělení"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Vlastní rozdělení"</string>
@@ -367,7 +366,6 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Režim Úspora baterie je zapnutý."</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Omezuje výkon a data na pozadí"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Vypnout úsporu baterie"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Skrytý obsah"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> začne zaznamenávat vše, co je zobrazeno na obrazovce."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tuto zprávu příště nezobrazovat"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Smazat vše"</string>
@@ -452,4 +450,16 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Zapnout Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Chcete-li klávesnici připojit k tabletu, nejdříve musíte zapnout Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Zapnout"</string>
+    <string name="apply_to_topic" msgid="3641403489318659666">"Použít u oznámení z aplikace <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"Použít u všech oznámení z této aplikace"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Blokováno"</string>
+    <string name="low_importance" msgid="4109929986107147930">"Nízká důležitost"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Normální důležitost"</string>
+    <string name="high_importance" msgid="1527066195614050263">"Vysoká důležitost"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Urgentní důležitost"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"Tato oznámení nikdy nezobrazovat"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Tato oznámení zobrazovat na konci seznamu bez zvukového upozornění"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"Tato oznámení zobrazovat bez zvukového upozornění"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"Tato oznámení zobrazovat na začátku seznamu a upozornit na ně zvukem"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"Tato oznámení zobrazovat přímo na obrazovce a upozornit na ně zvukem"</string>
 </resources>
