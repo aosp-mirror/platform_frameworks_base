@@ -181,6 +181,11 @@ public class WindowLayersController {
         // immediately receive the same treatment, e.g. to be above the dock divider.
         layer = assignAndIncreaseLayerIfNeeded(mReplacingWindow, layer);
         layer = assignAndIncreaseLayerIfNeeded(mPinnedWindow, layer);
+        final WindowState inputMethodTarget = mService.mInputMethodTarget;
+        // There might be no applications windows yet, so we need to make sure we uplift the input
+        // method above the target.
+        layer = Math.max(layer,
+                inputMethodTarget != null ? inputMethodTarget.mWinAnimator.mAnimLayer + 1 : 0);
         layer = assignAndIncreaseLayerIfNeeded(mImeWindow, layer);
     }
 
