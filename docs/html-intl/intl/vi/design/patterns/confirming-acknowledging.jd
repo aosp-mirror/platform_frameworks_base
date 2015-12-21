@@ -1,0 +1,70 @@
+page.title=Xác nhận &amp; Báo nhận
+page.tags=dialog,toast,notification
+@jd:body
+
+<p>Trong một số tình huống, khi người dùng gọi ra một hành động trong ứng dụng của bạn, bạn nên <em>xác nhận</em> hoặc <em>báo nhận</em> hành động đó thông qua văn bản.</p>
+
+<div class="cols">
+  <div class="col-6">
+    <img src="{@docRoot}design/media/confirm_ack_confirming.png">
+    <p><strong>Xác nhận</strong> là việc yêu cầu người dùng xác minh rằng họ thực sự muốn tiếp tục hành động mà họ vừa gọi ra. Trong một số trường hợp, xác nhận được đưa ra cùng với một cảnh báo hoặc thông tin trọng yếu liên quan tới hành động mà họ cần cân nhắc.</p>
+  </div>
+  <div class="col-6">
+    <img src="{@docRoot}design/media/confirm_ack_acknowledge.png">
+    <p><strong>Báo nhận</strong> là việc hiển thị văn bản để người dùng biết rằng hành động họ vừa gọi ra đã được hoàn tất. Điều này loại bỏ sự không chắc chắn về các thao tác không biểu thị mà hệ thống đang thực hiện. Trong một số trường hợp, báo nhận được đưa ra cùng với một tùy chọn hoàn tác hành động đó.</p>
+  </div>
+</div>
+
+<p>Giao tiếp với người dùng theo những cách này có thể giúp gỡ bỏ sự không chắc chắn về những thứ đã hoặc sẽ xảy ra. Xác nhận hoặc báo nhận cũng có thể ngăn người dùng mắc sai lầm mà họ có thể hối tiếc.</p>
+
+<h2>Khi nào thì xác nhận hoặc báo nhận hành động của người dùng</h2>
+<p>Không phải hành động nào cũng chắc chắn có xác nhận hay báo nhận. Hãy sử dụng lưu đồ sau làm hướng dẫn đưa ra quyết định thiết kế của bạn.</p>
+<img src="{@docRoot}design/media/confirm_ack_flowchart.png">
+
+<h2>Xác nhận</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Ví dụ: Google Play Books</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_books.png">
+    <p>Trong ví dụ này, người dùng đã yêu cầu xóa một cuốn sách khỏi thư viện Google Play của mình. Một <a href="{@docRoot}design/building-blocks/dialogs.html#alerts">cảnh báo</a> hiện ra để xác nhận hành động này bởi quan trọng là phải hiểu rằng cuốn sách sẽ không còn khả dụng trên bất cứ thiết bị nào nữa.</p>
+    <p>Khi tạo một hộp thoại xác nhận, hãy đặt tiêu đề có ý nghĩa bằng cách thể hiện hành động được yêu cầu đó.</p>
+  </div>
+  <div class="col-7">
+    <h4>Ví dụ: Android Beam</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_beam.png">
+    <p>Không nhất thiết phải đưa ra xác nhận trong cảnh báo có hai nút. Sau khi khởi chạy Android Beam, người dùng được nhắc chạm vào nội dung muốn chia sẻ (trong ví dụ này là một ảnh chụp). Nếu quyết định không tiếp tục, họ chỉ cần đưa điện thoại của mình ra xa.</p>
+  </div>
+</div>
+
+<h2>Báo nhận</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Ví dụ: Bỏ đi bản thảo Gmail đã lưu</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_draftsave.png">
+    <p>Trong ví dụ này, nếu người dùng điều hướng quay lại hoặc lên trên từ màn hình soạn thảo Gmail thì có thể sẽ xảy ra việc ngoài ý muốn: bản thảo hiện tại được tự động lưu. Báo nhận dưới hình thức cửa sổ sẽ khiến bản thảo đó biểu hiện ra ngoài. Cửa sổ này sẽ mờ dần sau vài giây.</p>
+    <p>Ở đây việc hoàn tác sẽ không thích hợp bởi việc lưu là do ứng dụng khởi chạy chứ không phải người dùng. Sẽ dễ dàng và nhanh chóng tiếp tục soạn thư bằng cách điều hướng tới danh sách bản thảo.</p>
+
+  </div>
+  <div class="col-6">
+    <h4>Ví dụ: Đã xóa hội thoại Gmail</h4>
+    <img src="{@docRoot}design/media/confirm_ack_draft_deleted.png">
+    <p>Sau khi người dùng xóa một hội thoại khỏi danh sách trong Gmail, báo nhận sẽ xuất hiện cùng tùy chọn hoàn tác. Báo nhận vẫn còn đó tới khi người dùng thực hiện một hành động không liên quan, ví dụ như cuộn danh sách.</p>
+  </div>
+</div>
+
+<h2>Không xác nhận hoặc báo nhận</h2>
+<div class="cols">
+  <div class="col-6">
+    <h4>Ví dụ: hành động +1</h4>
+    <img style="padding: 33px 0 30px;" src="{@docRoot}design/media/confirm_ack_ex_plus1.png">
+    <p><strong>Xác nhận là không cần thiết</strong>. Nếu người dùng vô tình +1 thì cũng không sao. Họ chỉ cần chạm lại vào nút này để hoàn tác hành động đó.</p>
+    <p><strong>Báo nhận là không cần thiết</strong>. Người dùng sẽ thấy nút +1 bật lại và chuyển màu đỏ. Đó là một dấu hiệu rất rõ ràng.</p>
+  </div>
+  <div class="col-7">
+    <h4>Ví dụ: Xóa một ứng dụng khỏi Màn hình Trang chủ</h4>
+    <img src="{@docRoot}design/media/confirm_ack_ex_removeapp.png">
+    <p><strong>Xác nhận là không cần thiết</strong>. Đây là một hành động có chủ ý: người dùng phải kéo và thả một mục lên một mụ̣c tiêu tương đối lớn và tách biệt. Vì thế, rất khó có khả năng xảy ra trường hợp vô ý. Nhưng nếu người dùng hối hận về quyết định, họ chỉ mất vài giây để đưa trở lại như cũ.</p>
+    <p><strong>Báo nhận là không cần thiết</strong>. Người dùng sẽ biết ứng dụng đã biến mất khỏi Màn hình Trang chủ bởi họ khiến nó biến mất bằng cách kéo nó đi.</p>
+
+  </div>
+</div>

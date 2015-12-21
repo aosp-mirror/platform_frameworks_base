@@ -1,0 +1,213 @@
+page.title=Điều hướng bằng Quay lại và Lên trên
+page.tags="navigation","activity","task","up navigation","back navigation"
+page.image=/design/media/navigation_between_siblings_gmail.png
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/implementing-navigation/index.html">
+  <div>
+    <h3>Tài liệu cho Nhà phát triển</h3>
+    <p>Triển khai Điều hướng Hiệu quả</p>
+  </div>
+</a>
+
+<p itemprop="description">Điều hướng nhất quán là một thành phần thiết yếu trong trải nghiệm người dùng nói chung. Một vài điều nhỏ bé lại khiến
+người dùng khó chịu hơn so với điều hướng cơ bản chính là hành xử không nhất quán và không như kỳ vọng. Android 3.0
+đã giới thiệu những thay đổi đáng kể về hành vi điều hướng toàn cục. Tuân thủ kỹ lưỡng các hướng dẫn
+về Quay lại và Lên trên sẽ giúp việc điều hướng trên ứng dụng của bạn trở nên dễ đoán và đáng tin cậy cho người dùng của bạn.</p>
+<p>Phiên bản Android 2.3 và mới hơn dựa vào nút <em>Quay lại</em> của hệ thống để hỗ trợ điều hướng trong một
+ứng dụng. Với việc giới thiệu thanh hành động trong Android 3.0, một cơ chế điều hướng thứ hai đã xuất hiện:
+nút <em>Lên trên</em>, bao gồm biểu tượng ứng dụng và dấu nháy lùi trái.</p>
+
+<img src="{@docRoot}design/media/navigation_with_back_and_up.png">
+
+<h2 id="up-vs-back">Lên trên so với Quay lại</h2>
+
+<p>Nút Lên trên được sử dụng để điều hướng bên trong một ứng dụng dựa trên mối quan hệ thứ bậc
+giữa các màn hình. Ví dụ, nếu màn hình A hiển thị một danh sách các mục và việc chọn một mục sẽ dẫn đến
+màn hình B (trình bày chi tiết hơn về mục đó), khi đó B sẽ đưa ra nút Lên trên để
+quay lại màn hình A.</p>
+<p>Nếu một màn hình đang ở trên cùng trong một ứng dụng (cụ thể là trang chủ của ứng dụng), thì nó sẽ xuất hiện nút
+Lên trên.</p>
+
+<p>Nút Quay lại của hệ thống được sử dụng để điều hướng ngược theo thứ tự thời gian, qua lịch sử các màn hình
+mà người dùng mới thao tác qua. Nó thường được dựa trên mối quan hệ thời gian
+giữa các màn hình thay vì thứ bậc của ứng dụng.</p>
+
+<p>Khi màn hình xem trước đó cũng đồng thời là màn hình mẹ theo thứ bậc của màn hình hiện tại, nhấn nút
+Quay lại sẽ có cùng kết quả như khi nhấn nút Lên trên&mdash;điều này thường hay
+xảy ra. Tuy nhiên, không như nút Lên trên đảm bảo người dùng vẫn còn trong ứng dụng của bạn,
+nút Quay lại có thể trả người dùng về màn hình Trang chủ hoặc thậm chí sang một ứng dụng khác.</p>
+
+<img src="{@docRoot}design/media/navigation_up_vs_back_gmail.png">
+
+<p>Nút Quay lại cũng hỗ trợ một vài hành vi không trực tiếp gắn với điều hướng giữa các màn hình:
+</p>
+<ul>
+<li>Bỏ qua cửa sổ nổi (hộp thoại, cửa sổ bật lên)</li>
+<li>Bỏ qua thanh hành động ngữ cảnh và bỏ tô sáng khỏi mục đã chọn</li>
+<li>Ẩn bàn phím trên màn hình (IME)</li>
+</ul>
+<h2 id="within-app">Điều hướng trong Ứng dụng của Bạn</h2>
+
+<h4>Điều hướng tới màn hình với nhiều điểm bắt đầu</h4>
+<p>Đôi khi một màn hình không chỉ có một vị trí cố định trong thứ bậc của ứng dụng và bạn có thể truy cập nó
+từ nhiều điểm bắt đầu&mdash;ví dụ như màn hình cài đặt có thể được truy cập từ bất cứ màn hình
+nào khác trong ứng dụng của bạn. Trong trường hợp này, nút Lên trên sẽ chọn quay lại màn hình đã chuyển đến, có tác dụng
+giống như Quay lại.</p>
+<h4>Thay đổi dạng xem bên trong một màn hình</h4>
+<p>Thay đổi tùy chọn dạng xem cho một màn hình không làm thay đổi hành vi Lên trên hay Quay lại: màn hình vẫn
+ở cùng một chỗ trong thứ bậc của ứng dụng và không tạo thêm lịch sử điều hướng mới nào.</p>
+<p>Ví dụ về thay đổi dạng xem gồm:</p>
+<ul>
+<li>Chuyển dạng xem bằng tab và/hoặc trượt nhanh trái phải</li>
+<li>Chuyển dạng xem bằng danh sách thả xuống (còn gọi là tab thu gọn)</li>
+<li>Lọc một danh sách</li>
+<li>Sắp xếp một danh sách</li>
+<li>Thay đổi đặc tính hiển thị (như thu phóng)</li>
+</ul>
+<h4>Điều hướng giữa các màn hình anh em</h4>
+<p>Khi ứng dụng của bạn hỗ trợ điều hướng từ một danh mục tới một dạng xem chi tiết của một trong những mục đó, thường
+nó ưu tiên hỗ trợ điều hướng theo hướng từ mục đó tới một mục khác ở phía trước hoặc
+phía sau nó trong danh sách. Ví dụ, trong Gmail, bạn có thể dễ dàng trượt nhanh sang trái hoặc phải từ một hội thoại
+để xem hội thoại mới hơn hoặc cũ hơn trong cùng Hộp thư đến. Như khi thay đổi dạng xem trong một màn hình,
+điều hướng đó không làm thay đổi hành vi Lên trên hoặc Quay lại.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_gmail.png">
+
+<p>Tuy nhiên, có một trường hợp ngoại lệ đáng chú ý đó là khi duyệt giữa các dạng xem chi tiết có liên quan, không
+ràng buộc với nhau bởi danh sách chuyển đến&mdash;ví dụ như khi duyệt trong Play Store giữa các ứng dụng từ
+cùng một nhà phát triển hoặc giữa các album bởi cùng một nghệ sĩ. Trong các trường hợp này, truy cập vào từng liên kết không tạo ra
+lịch sử, khiến nút Quay lại đi qua từng màn hình được xem trước đó. Thao tác Lên trên sẽ tiếp tục
+bỏ qua những màn hình liên quan này và điều hướng tới màn hình bộ chứa được xem gần đây nhất.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market1.png">
+
+<p>Bạn có khả năng thiết kế để hành vi Lên trên thông minh hơn dựa trên hiểu biết của mình về dạng xem
+chi tiết. Suy rộng từ ví dụ về Play Store bên trên, tưởng tượng người dùng đã điều hướng từ
+Cuốn sách xem gần nhất tới chi tiết chuyển thể Phim. Trong trường hợp đó, thao tác Lên trên có thể trả về một bộ chứa
+(Phim) mà trước đó người dùng chưa điều hướng qua.</p>
+
+<img src="{@docRoot}design/media/navigation_between_siblings_market2.png">
+
+<h2 id="into-your-app">Điều hướng tới Ứng dụng của Bạn thông qua Widget và Thông báo trên Màn hình Trang chủ</h2>
+
+<p>Bạn có thể sử dụng widget hoặc thông báo trên màn hình Trang chủ để giúp người dùng của mình điều hướng trực tiếp tới màn hình
+nằm sâu trong thứ bậc ứng dụng của bạn. Ví dụ, widget Hộp thư đến của Gmail và thông báo thư mới có thể
+vừa bỏ qua màn hình Hộp thư đến, vừa đưa người dùng trực tiếp tới dạng xem hội thoại.</p>
+
+<p>Trong cả hai trường hợp này, hãy điều khiển nút Lên trên như sau:</p>
+
+<ul>
+<li><em>Nếu màn hình đích thường được truy cập từ một màn hình cụ thể trong ứng dụng
+của bạn</em>, thao tác Lên trên sẽ điều hướng tới màn hình đó.</li>
+<li><em>Nếu không</em>, thao tác Lên trên sẽ điều hướng tới màn hình trên cùng ("Trang chủ") của ứng dụng của bạn.</li>
+</ul>
+
+<p>Trong trường hợp nút Quay lại, bạn nên thiết kế để việc điều hướng dễ đoán hơn bằng cách chèn vào ngăn xếp
+của tác vụ toàn bộ đường dẫn điều hướng lên trên tới màn hình trên cùng của ứng dụng. Làm vậy sẽ cho phép những người dùng nào
+quên cách họ vào ứng dụng của bạn sẽ điều hướng tới màn hình trên cùng của ứng dụng trước khi
+thoát.</p>
+
+<p>Ví dụ, widget màn hình Trang chủ của Gmail có một nút để đi trực tiếp vào màn hình
+soạn email của nó. Lên hoặc Quay lại từ màn hình soạn thư sẽ đưa người dùng tới Hộp thư đến, và từ đó
+nút Quay lại tiếp tục đưa về Trang chủ.</p>
+
+<img src="{@docRoot}design/media/navigation_from_outside_back.png">
+
+<h4>Thông báo gián tiếp</h4>
+
+<p>Khi ứng dụng của bạn cần trình bày thông tin về nhiều sự kiện đồng thời, nó có thể sử dụng
+thông báo duy nhất để chuyển hướng người dùng tới một màn hình xen kẽ. Màn hình này tổng hợp những sự kiện
+này và cung cấp đường dẫn cho người dùng đi sâu vào ứng dụng. Thông báo kiểu này được gọi
+là <em>thông báo gián tiếp</em>.</p>
+
+<p>Không như thông báo tiêu chuẩn (trực tiếp), nhấn Quay lại từ màn hình xen kẽ của một thông báo gián tiếp
+sẽ trả người dùng về điểm mà từ đó thông báo đó được kích hoạt&mdash;không có
+màn hình bổ sung nào được chèn vào ngăn xếp. Sau khi người dùng tiến vào ứng dụng từ màn hình xen kẽ
+, thao tác Lên trên và Quay lại có tác dụng như với thông báo tiêu chuẩn, như được mô tả ở trên:
+điều hướng bên trong ứng dụng thay vì quay lại màn hình xen kẽ.</p>
+
+<p>Ví dụ, giả sử một người dùng trong Gmail nhận được một thông báo gián tiếp từ Lịch. Chạm
+vào thông báo này để mở ra màn hình xen kẽ, trong đó hiển thị nhắc nhở cho một vài sự kiện
+khác nhau. Chạm vào Quay lại từ màn hình xen kẽ sẽ trả người dùng về Gmail. Chạm vào một sự kiện
+cụ thể sẽ đưa người dùng ra khỏi màn hình xen kẽ và vào ứng dụng Lịch để hiển thị chi tiết về
+sự kiện. Từ chi tiết sự kiện, Lên trên và Quay lại sẽ điều hướng tới dạng xem trên cùng của Lịch.</p>
+
+<img src="{@docRoot}design/media/navigation_indirect_notification.png">
+
+<h4>Thông báo bật lên</h4>
+
+<p><em>Thông báo bật lên</em> sẽ bỏ qua ngăn thông báo thay vì xuất hiện trực tiếp phía
+trước người dùng. Chúng hiếm khi được sử dụng và <strong>nên được để dành cho những dịp khi cần
+phản ứng kịp thời và việc gián đoạn ngữ cảnh của người dùng là cần thiết</strong>. Ví dụ,
+Talk sử dụng kiểu này để cảnh báo người dùng về lời mời từ một người bạn để tham gia trò chuyện video, bởi
+lời mời này sẽ tự động hết hạn sau một vài giây.</p>
+
+<p>Xét về hành vi điều hướng, thông báo bật lên bám sát chặt chẽ hành vi của màn hình xen kẽ
+trong thông báo gián tiếp. Quay lại sẽ bỏ qua thông báo bật lên. Nếu người dùng điều hướng
+từ màn hình bật lên vào ứng dụng thông báo, hành vi Lên trên và Quay lại sẽ bám sát quy tắc áp dụng với thông báo tiêu chuẩn,
+điều hướng bên trong ứng dụng.</p>
+
+<img src="{@docRoot}design/media/navigation_popup_notification.png">
+
+<h2 id="between-apps">Điều hướng giữa các Ứng dụng</h2>
+
+<p>Một trong những thế mạnh cơ bản của hệ thống Android đó là khả năng các ứng dụng kích hoạt
+lẫn nhau, giúp người dùng có thể điều hướng trực tiếp từ ứng dụng này sang ứng dụng khác. Ví dụ, một ứng dụng
+cần chụp ảnh có thể kích hoạt ứng dụng Camera, ứng dụng này sẽ trả
+ảnh về ứng dụng chuyển đến. Điều này đặc biệt có ích đối với cả nhà phát triển, những người có thể dễ dàng tận dụng
+đoạn mã từ các ứng dụng khác, lẫn người dùng, những người thích có một trải nghiệm nhất quán đối với những hành động
+được thực hiện thường xuyên.</p>
+
+<p>Để hiểu rõ điều hướng giữa các ứng dụng, quan trọng là phải hiểu được hành vi bộ khung Android
+được đề cập dưới đây.</p>
+
+<h4>Hoạt động, tác vụ và ý định</h4>
+
+<p>Trong Android, <strong>hoạt động</strong> là một thành phần ứng dụng định nghĩa một màn hình
+thông tin và tất cả hành động liên kết mà người dùng có thể thực hiện. Ứng dụng của bạn là tập hợp
+của nhiều hoạt động, bao gồm cả hoạt động do bạn tạo và hoạt động mà bạn sử dụng lại từ các ứng dụng khác.</p>
+
+<p><strong>Tác vụ</strong> là trình tự các hoạt động mà một người dùng tuân theo để hoàn thành một mục tiêu. 
+Tác vụ đơn có thể sử dụng các hoạt động từ chỉ một ứng dụng, hoặc có thể dựa trên hoạt động từ nhiều
+ứng dụng khác nhau.</p>
+
+<p><strong>Ý định</strong> là một cơ chế để một ứng dụng báo hiệu rằng nó muốn sự trợ giúp
+của một ứng dụng khác khi thực hiện một hành động. Các hoạt động của một ứng dụng có thể biểu thị những ý định
+mà chúng có thể phản hồi. Đối với những ý định thường gặp như "Chia sẻ", người dùng có thể cài đặt nhiều ứng dụng
+có khả năng thực hiện yêu cầu đó.</p>
+
+<h4>Ví dụ: điều hướng giữa các ứng dụng để hỗ trợ chia sẻ</h4>
+
+<p>Để hiểu những hoạt động, tác vụ và ý định này vận hành với nhau như thế nào, hãy xem cách một ứng dụng cho phép người dùng
+chia sẻ nội dung bằng cách dùng một ứng dụng khác. Ví dụ, khởi chạy ứng dụng Play Store từ Trang chủ sẽ bắt đầu
+Tác vụ A mới (xem hình bên dưới). Sau khi điều hướng qua Play Store và chạm vào một cuốn sách được quảng cáo
+để xem chi tiết của sách, người dùng vẫn ở trong cùng một tác vụ, mở rộng nó bằng cách thêm vào các hoạt động. Kích hoạt
+hành động Chia sẻ sẽ nhắc người dùng bằng một hộp thoại liệt kê từng hoạt động một (từ các ứng dụng khác nhau)
+mà đã đăng ký xử lý ý định Chia sẻ đó.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_inward.png">
+
+<p>Khi người dùng chọn chia sẻ qua Gmail, hoạt động soạn email của Gmail sẽ được thêm làm hoạt động tiếp tục
+Tác vụ A&mdash;không có tác vụ mới nào được tạo thêm. Nếu Gmail có tác vụ riêng đang chạy nền, nó sẽ
+không bị ảnh hưởng.</p>
+
+<p>Từ hoạt động soạn email, gửi thư hoặc chạm vào nút Quay lại sẽ trả người dùng về
+hoạ̣t động chi tiết về cuốn sách. Những lần chạm sau đó vào Quay lại sẽ tiếp tục điều hướng quay lại qua
+Store và cuối cùng về lại Trang chủ.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_back.png">
+
+<p>Tuy nhiên, nếu chạm vào Lên trên từ hoạt động soạn email, người dùng biểu thị mong muốn vẫn ở nguyên trong
+Gmail. Hoạt động danh sách hội thoại của Gmail xuất hiện và Tác vụ B mới sẽ được tạo cho nó. Các tác vụ mới
+sẽ luôn được liên kết gốc với Trang chủ, vì thế chạm vào Quay lại từ danh sách hội thoại sẽ quay lại đó.</p>
+
+<img src="{@docRoot}design/media/navigation_between_apps_up.png">
+
+<p>Tác vụ A duy trì chạy nền và người dùng có thể quay lại nó sau (ví dụ, thông qua
+màn hình Gần đây). Nếu Gmail đã có tác vụ riêng đang chạy nền, nó sẽ được thay thế
+bằng Tác vụ B&mdash;ngữ cảnh trước đó sẽ bị bỏ đi phục vụ cho mục đích mới của người dùng.</p>
+
+<p>Khi ứng dụng của bạn đăng ký điều khiển ý định bằng một hoạt động nằm sâu trong thứ bậc của ứng dụng,
+hãy tham khảo phần <a href="#into-your-app">Điều hướng tới Ứng dụng của Bạn thông qua Widget và Thông báo trên
+Màn hình Trang chủ</a> để xem hướng dẫn về cách quy định điều hướng Lên trên.</p>

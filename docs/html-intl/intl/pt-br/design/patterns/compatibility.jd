@@ -1,0 +1,70 @@
+page.title=Compatibilidade com versões anteriores
+page.tags="support"
+page.metaDescription=Observações sobre como o Android 4.x adapta IUs projetadas para versões de SO e hardware mais antigos.
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>Documentos do desenvolvedor</h3>
+    <p>Suporte a diferentes dispositivos</p>
+  </div>
+</a>
+
+<p>Mudanças significativas no Android 3.0 incluem:</p>
+<ul>
+<li>Obsolescência de teclas de navegação do hardware (Voltar, Menu, Pesquisar, Página inicial) em favor do tratamento da navegação
+  com controles virtuais (Voltar, Página inicial, Recentes).</li>
+<li>Padrão robusto para o uso de menus em barras de ações.</li>
+</ul>
+<p>O Android 4.0 leva essas mudanças para tablets à plataforma de telefone.</p>
+
+<h2 id="older-hardware">Adaptação do Android 4.0 a hardware e aplicativos mais antigos</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Telefones com controles de navegação virtuais</h4>
+<p>Aplicativos Android escritos para o Android 3.0 e posteriores exibem ações na barra de ações. Ações que não cabem
+na barra de ações ou não são importantes o suficiente para serem exibidas no nível superior aparecem nas
+ações adicionais.</p>
+<p>Os usuários acessam as ações adicionais tocando na barra de ações.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Telefones com teclas de navegação físicas</h4>
+<p>Telefones Android com teclas de navegação de hardware tradicionais não exigem a barra de navegação virtual na
+parte inferior da tela. Em vez disso, as ações adicionais estão disponíveis na tecla de hardware de menu. A janela pop-up
+de ações resultante tem o mesmo estilo que no exemplo anterior, mas é exibida na parte inferior da tela.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>Aplicativos legados em telefones com controles de navegação virtuais</h4>
+<p>Ao executar um aplicativo que foi desenvolvido para Android 2.3 ou anterior em um telefone com controles de 
+navegação virtuais, um controle de ações adicionais é exibido no lado direito da barra de navegação virtual. É possível
+tocar no controle para exibir as ações do aplicativo no estilo tradicional de menu do Android.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>
