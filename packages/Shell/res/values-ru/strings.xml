@@ -26,4 +26,9 @@
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Отчеты об ошибках"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Не удалось открыть отчет об ошибке"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"без названия"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>
+    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Детали отчета об ошибке"</string>
+    <string name="bugreport_info_name" msgid="5089191832271852826">"Краткое название"</string>
+    <string name="bugreport_info_title" msgid="127167853370557175">"Краткое описание ошибки"</string>
+    <string name="bugreport_info_description" msgid="4117088998733546784">"Подробное описание"</string>
 </resources>
