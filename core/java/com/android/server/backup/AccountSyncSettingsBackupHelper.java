@@ -203,9 +203,8 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
             }
         } catch (EOFException eof) {
             // Initial state may be empty.
-        } finally {
-            dataInput.close();
         }
+        // We explicitly don't close 'dataInput' because we must not close the backing fd.
         return oldMd5Checksum;
     }
 
@@ -219,7 +218,10 @@ public class AccountSyncSettingsBackupHelper implements BackupHelper {
 
         dataOutput.writeInt(STATE_VERSION);
         dataOutput.write(md5Checksum);
-        dataOutput.close();
+
+        // We explicitly don't close 'dataOutput' because we must not close the backing fd.
+        // The FileOutputStream will not close it implicitly.
+
     }
 
     private byte[] generateMd5Checksum(byte[] data) throws NoSuchAlgorithmException {
