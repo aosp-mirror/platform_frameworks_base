@@ -20,6 +20,7 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -56,6 +57,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -83,7 +85,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
-import android.view.IDockDividerVisibilityListener;
+import android.view.IDockedStackListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -4653,6 +4655,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_STACK) Slog.d(TAG_WM, "attachStack: stackId=" + stackId);
                         stack = new TaskStack(this, stackId);
                         mStackIdToStack.put(stackId, stack);
+                        if (stackId == DOCKED_STACK_ID) {
+                            getDefaultDisplayContentLocked().mDividerControllerLocked
+                                    .notifyDockedStackExistsChanged(true);
+                        }
                     }
                     stack.attachDisplayContent(displayContent);
                     displayContent.attachStack(stack, onTop);
@@ -4678,6 +4684,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void detachStackLocked(DisplayContent displayContent, TaskStack stack) {
         displayContent.detachStack(stack);
         stack.detachDisplay();
+        if (stack.mStackId == DOCKED_STACK_ID) {
+            getDefaultDisplayContentLocked().mDividerControllerLocked
+                    .notifyDockedStackExistsChanged(false);
+        }
     }
 
     public void detachStack(int stackId) {
@@ -10169,7 +10179,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             appWindowToken = findAppWindowToken(token);
             if (appWindowToken == null || !appWindowToken.isVisible()) {
-                Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token " + token);
+                Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
+                        + token);
                 return;
             }
             appWindowToken.setReplacingWindows(animate);
@@ -10216,26 +10227,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+    public void registerDockedStackListener(IDockedStackListener listener) {
         if (!checkCallingPermission(android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
-                "registerDockDividerVisibilityListener()")) {
+                "registerDockedStackListener()")) {
             return;
         }
         // TODO(multi-display): The listener is registered on the default display only.
-        final DockedStackDividerController controller =
-                getDefaultDisplayContentLocked().getDockedDividerController();
-        controller.registerDockDividerVisibilityListener(listener);
-        try {
-            listener.asBinder().linkToDeath(new IBinder.DeathRecipient() {
-                @Override
-                public void binderDied() {
-                    getDefaultDisplayContentLocked().getDockedDividerController()
-                            .registerDockDividerVisibilityListener(null);
-                }
-            }, 0);
-        } catch (RemoteException e) {
-            controller.registerDockDividerVisibilityListener(null);
-        }
+        getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
+                listener);
     }
 
     private final class LocalService extends WindowManagerInternal {

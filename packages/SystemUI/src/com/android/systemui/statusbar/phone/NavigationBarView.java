@@ -36,11 +36,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IDockedStackListener.Stub;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -227,8 +229,8 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView;
     }
 
-    public View getRecentsButton() {
-        return mCurrentView.findViewById(R.id.recent_apps);
+    public KeyButtonView getRecentsButton() {
+        return (KeyButtonView) mCurrentView.findViewById(R.id.recent_apps);
     }
 
     public View getMenuButton() {
@@ -455,6 +457,27 @@ public class NavigationBarView extends LinearLayout {
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         updateRTLOrder();
+
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(new Stub() {
+                @Override
+                public void onDividerVisibilityChanged(boolean visible) throws RemoteException {
+                }
+
+                @Override
+                public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
+                    updateRecentsIcon(exists);
+                }
+            });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed registering docked stack exists listener", e);
+        }
+    }
+
+    private void updateRecentsIcon(boolean dockedStackExists) {
+        getRecentsButton().setImageResource(dockedStackExists
+                ? R.drawable.ic_sysbar_docked
+                : R.drawable.ic_sysbar_recent);
     }
 
     public boolean isVertical() {

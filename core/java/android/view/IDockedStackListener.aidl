@@ -22,6 +22,15 @@ package android.view;
   *
   * @hide
   */
-oneway interface IDockDividerVisibilityListener {
-    void onDockDividerVisibilityChanged(boolean visible);
+oneway interface IDockedStackListener {
+
+    /**
+     * Will fire when an app is shown in side by side mode and a divider should be shown.
+     */
+    void onDividerVisibilityChanged(boolean visible);
+
+    /**
+     * Called when the docked stack gets created or removed.
+     */
+    void onDockedStackExistsChanged(boolean exists);
 }

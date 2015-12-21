@@ -18,9 +18,10 @@ package com.android.server.wm;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.IDockDividerVisibilityListener;
+import android.view.IDockedStackListener;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -44,9 +45,9 @@ public class DockedStackDividerController {
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
     private final Rect mLastRect = new Rect();
-    private IDockDividerVisibilityListener mListener;
     private boolean mLastVisibility = false;
-    private boolean mForceVisibilityReevaluation;
+    private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
+            = new RemoteCallbackList<>();
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -83,13 +84,11 @@ public class DockedStackDividerController {
             return;
         }
         mLastVisibility = visible;
-        if (mListener != null) {
-            try {
-                mListener.onDockDividerVisibilityChanged(visible);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "visibility call failed: " + e);
-            }
-        }
+        notifyDockedDividerVisibilityChanged(visible);
+    }
+
+    boolean wasVisible() {
+        return mLastVisibility;
     }
 
     void positionDockedStackedDivider(Rect frame) {
@@ -127,11 +126,36 @@ public class DockedStackDividerController {
         mLastRect.set(frame);
     }
 
-    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
-        if (mListener != null && listener != null) {
-            throw new IllegalStateException("Dock divider visibility listener already set!");
+    void notifyDockedDividerVisibilityChanged(boolean visible) {
+        final int size = mDockedStackListeners.beginBroadcast();
+        for (int i = 0; i < size; ++i) {
+            final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
+            try {
+                listener.onDividerVisibilityChanged(visible);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering divider visibility changed event.", e);
+            }
         }
-        mListener = listener;
-        reevaluateVisibility(true);
+        mDockedStackListeners.finishBroadcast();
+    }
+
+    void notifyDockedStackExistsChanged(boolean exists) {
+        final int size = mDockedStackListeners.beginBroadcast();
+        for (int i = 0; i < size; ++i) {
+            final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
+            try {
+                listener.onDockedStackExistsChanged(exists);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering docked stack exists changed event.", e);
+            }
+        }
+        mDockedStackListeners.finishBroadcast();
+    }
+
+    void registerDockedStackListener(IDockedStackListener listener) {
+        mDockedStackListeners.register(listener);
+        notifyDockedDividerVisibilityChanged(wasVisible());
+        notifyDockedStackExistsChanged(
+                mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID) != null);
     }
 }

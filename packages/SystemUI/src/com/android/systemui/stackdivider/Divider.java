@@ -17,7 +17,8 @@
 package com.android.systemui.stackdivider;
 
 import android.content.res.Configuration;
-import android.view.IDockDividerVisibilityListener;
+import android.os.RemoteException;
+import android.view.IDockedStackListener;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -49,7 +50,7 @@ public class Divider extends SystemUI {
         putComponent(Divider.class, this);
         mDockDividerVisibilityListener = new DockDividerVisibilityListener();
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ssp.registerDockDividerVisibilityListener(mDockDividerVisibilityListener);
+        ssp.registerDockedStackListener(mDockDividerVisibilityListener);
     }
 
     @Override
@@ -94,10 +95,15 @@ public class Divider extends SystemUI {
         });
     }
 
-    class DockDividerVisibilityListener extends IDockDividerVisibilityListener.Stub {
+    class DockDividerVisibilityListener extends IDockedStackListener.Stub {
+
         @Override
-        public void onDockDividerVisibilityChanged(boolean visible) {
+        public void onDividerVisibilityChanged(boolean visible) throws RemoteException {
             updateVisibility(visible);
+        }
+
+        @Override
+        public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
         }
     }
 }

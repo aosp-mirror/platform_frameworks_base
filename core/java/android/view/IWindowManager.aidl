@@ -29,7 +29,7 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.view.IApplicationToken;
 import android.view.IAppTransitionAnimationSpecsFuture;
-import android.view.IDockDividerVisibilityListener;
+import android.view.IDockedStackListener;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
 import android.view.IWindowSession;
@@ -357,7 +357,8 @@ interface IWindowManager
     void setDockedStackResizing(boolean resizing);
 
     /**
-     * Registers a listener that will be called when the dock divider changes its visibility.
+     * Registers a listener that will be called when the dock divider changes its visibility or when
+     * the docked stack gets added/removed.
      */
-    void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener);
+    void registerDockedStackListener(IDockedStackListener listener);
 }
