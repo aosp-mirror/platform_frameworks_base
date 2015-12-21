@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear agora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Conteúdo oculto"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Pessoal"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"Recortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Colar"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"Colar como texto simples"</string>
     <string name="replace" msgid="5781686059063148930">"Substituir..."</string>
     <string name="delete" msgid="6098684844021697789">"Excluir"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Selecionar texto"</string>
+    <string name="undo" msgid="7905788502491742328">"Desfazer"</string>
+    <string name="redo" msgid="7759464876566803888">"Refazer"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Seleção de texto"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Adicionar ao dicionário"</string>
     <string name="deleteText" msgid="6979668428458199034">"Excluir"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar plano de fundo"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Ouvinte de notificações"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Provedor de condições"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Assistente de notificação"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ativada"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"A VPN está ativada por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Toque para gerenciar a rede."</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Excluído pelo seu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a duração da bateria, o economizador de bateria reduz o desempenho e os limites de vibração do dispositivo, os serviços de localização e a maioria dos dados de segundo plano. E-mail, mensagens e outros aplicativos que dependem de sincronização não podem ser atualizados, a não ser que você os abra.\n\nO economizador de bateria é desligado automaticamente quando o dispositivo está sendo carregado."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"Importância"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Bloqueada: nunca mostrar essas notificações"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"Baixa: mostrar na parte inferior da lista de notificações de forma silenciosa"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: mostrar essas notificações de forma silenciosa"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"Alta: mostrar na parte superior da lista de notificações e emitir som"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"Urgente: mostrar parcialmente na tela e emitir som"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

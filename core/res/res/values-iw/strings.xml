@@ -225,6 +225,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"נעל עכשיו"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"התוכן מוסתר"</string>
     <string name="safeMode" msgid="2788228061547930246">"מצב בטוח"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏מערכת Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"אישי"</string>
@@ -868,10 +869,13 @@
     <string name="cut" msgid="3092569408438626261">"חתוך"</string>
     <string name="copy" msgid="2681946229533511987">"העתק"</string>
     <string name="paste" msgid="5629880836805036433">"הדבק"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"הדבק כטקסט פשוט"</string>
     <string name="replace" msgid="5781686059063148930">"החלף..."</string>
     <string name="delete" msgid="6098684844021697789">"מחק"</string>
     <string name="copyUrl" msgid="2538211579596067402">"העתק כתובת אתר"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"בחר טקסט"</string>
+    <string name="undo" msgid="7905788502491742328">"בטל"</string>
+    <string name="redo" msgid="7759464876566803888">"בצע מחדש"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"בחירת טקסט"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"הוסף למילון"</string>
     <string name="deleteText" msgid="6979668428458199034">"מחק"</string>
@@ -1121,6 +1125,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"שנה טפט"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"מאזין להתראות"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"ספק תנאי"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"אסיסטנט ההודעות"</string>
     <string name="vpn_title" msgid="19615213552042827">"‏VPN מופעל"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"‏VPN מופעל על ידי <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"גע כדי לנהל את הרשת."</string>
@@ -1458,12 +1463,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"נמחקה על ידי מנהל המערכת שלך"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"חשיבות"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"חסימה: לעולם אל תציג הודעות אלה"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"נמוכה: הצג בתחתית רשימת ההודעות בלי להשמיע צליל"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"רגילה: הצג הודעות אלה בלי להשמיע צליל"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"גבוהה: הצג בראש רשימת ההודעות והשמע צליל"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"דחופה: הצג לרגע על המסך והשמע צליל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1547,6 +1546,6 @@
       <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"שונות"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"אתה מגדיר את חשיבותן של הודעות אלה."</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"אתה מגדיר את החשיבות של ההודעות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
 </resources>

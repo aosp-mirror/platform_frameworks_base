@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"Lås nu"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Indholdet er skjult"</string>
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personlig"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"Klip"</string>
     <string name="copy" msgid="2681946229533511987">"Kopier"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"Indsæt som almindelig tekst"</string>
     <string name="replace" msgid="5781686059063148930">"Erstat..."</string>
     <string name="delete" msgid="6098684844021697789">"Slet"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopier webadresse"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Markér tekst"</string>
+    <string name="undo" msgid="7905788502491742328">"Fortryd"</string>
+    <string name="redo" msgid="7759464876566803888">"Annuller fortryd"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Føj til ordbog"</string>
     <string name="deleteText" msgid="6979668428458199034">"Slet"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Skift baggrund"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Underretningslytter"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Tjeneste til formidling af betingelser"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Underretningsassistent"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN er aktiveret."</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN aktiveres af <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Tryk for at administrere netværket."</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Opdateret af administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet af din administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen slukker automatisk, når enheden oplader."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"Vigtighed"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Blokeret: Vis aldrig disse underretninger"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"Lav: Vis lydløst nederst på listen over underretninger"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"Normal: Vis disse underretninger lydløst"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"Høj: Vis øverst på listen over underretninger, og giv lyd"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"Presserende: Vis på skærmen, og giv lyd"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="one">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>

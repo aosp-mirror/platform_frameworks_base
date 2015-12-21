@@ -223,6 +223,7 @@
     <string name="global_action_lockdown" msgid="8751542514724332873">"Khóa ngay"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Nội dung bị ẩn"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Cá nhân"</string>
@@ -858,10 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"Cắt"</string>
     <string name="copy" msgid="2681946229533511987">"Sao chép"</string>
     <string name="paste" msgid="5629880836805036433">"Dán"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"Dán dưới dạng văn bản thuần túy"</string>
     <string name="replace" msgid="5781686059063148930">"Thay thế..."</string>
     <string name="delete" msgid="6098684844021697789">"Xóa"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Sao chép URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Chọn văn bản"</string>
+    <string name="undo" msgid="7905788502491742328">"Hoàn tác"</string>
+    <string name="redo" msgid="7759464876566803888">"Làm lại"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Lựa chọn văn bản"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Thêm vào từ điển"</string>
     <string name="deleteText" msgid="6979668428458199034">"Xóa"</string>
@@ -1107,6 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Thay đổi hình nền"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Trình xử lý thông báo"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Trình cung cấp điều kiện"</string>
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"Trợ lý thông báo"</string>
     <string name="vpn_title" msgid="19615213552042827">"Đã kích hoạt VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN được <xliff:g id="APP">%s</xliff:g> kích hoạt"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Chạm để quản lý mạng."</string>
@@ -1440,12 +1445,6 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Được cập nhật bởi quản trị viên của bạn"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
-    <string name="notification_importance_title" msgid="7493989722610008700">"Mức độ quan trọng"</string>
-    <string name="notification_importance_blocked" msgid="7118826900767047125">"Đã chặn: Không bao giờ hiển thị các thông báo này"</string>
-    <string name="notification_importance_low" msgid="6447640449918427187">"Thấp: Hiển thị im lặng ở cuối danh sách thông báo"</string>
-    <string name="notification_importance_default" msgid="7991157697609575271">"Bình thường: Hiển thị im lặng các thông báo này"</string>
-    <string name="notification_importance_high" msgid="3152238637737215654">"Cao: Hiển thị ở đầu danh sách thông báo và phát ra âm thanh"</string>
-    <string name="notification_importance_max" msgid="1153693080467904474">"Khẩn cấp: Hiển thị trên màn hình và phát ra âm thanh"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">Trong %1$d phút (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="one">Trong một phút (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
