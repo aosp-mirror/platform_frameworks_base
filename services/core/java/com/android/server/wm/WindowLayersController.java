@@ -159,6 +159,9 @@ public class WindowLayersController {
             mDockDivider = w;
         } else {
             final TaskStack stack = w.getStack();
+            if (stack == null) {
+                return;
+            }
             if (stack.mStackId == StackId.PINNED_STACK_ID) {
                 mPinnedWindow = w;
             } else if (stack.mStackId == StackId.DOCKED_STACK_ID) {
