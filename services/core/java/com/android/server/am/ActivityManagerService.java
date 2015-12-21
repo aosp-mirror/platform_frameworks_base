@@ -15797,18 +15797,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.println(totalPss - cachedPss);
                 }
             }
+            long lostRAM = memInfo.getTotalSizeKb()
+                    - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                    - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
             if (!isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(totalPss - cachedPss
                         + memInfo.getKernelUsedSizeKb())); pw.print(" (");
                 pw.print(stringifyKBSize(totalPss - cachedPss)); pw.print(" used pss + ");
                 pw.print(stringifyKBSize(memInfo.getKernelUsedSizeKb())); pw.print(" kernel)\n");
-                pw.print(" Lost RAM: "); pw.println(stringifyKBSize(memInfo.getTotalSizeKb()
-                        - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                        - memInfo.getKernelUsedSizeKb()));
+                pw.print(" Lost RAM: "); pw.println(stringifyKBSize(lostRAM));
             } else {
-                pw.print("lostram,"); pw.println(memInfo.getTotalSizeKb()
-                        - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                        - memInfo.getKernelUsedSizeKb());
+                pw.print("lostram,"); pw.println(lostRAM);
             }
             if (!brief) {
                 if (memInfo.getZramTotalSizeKb() != 0) {
@@ -16106,7 +16105,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
-                - memInfo.getKernelUsedSizeKb()));
+                - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()));
         memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
         Slog.i(TAG, shortNativeBuilder.toString());
