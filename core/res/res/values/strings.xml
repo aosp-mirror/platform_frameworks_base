@@ -518,13 +518,6 @@
     <!-- Format for build summary info [CHAR LIMIT=NONE] -->
     <string name="bugreport_status" translatable="false">%s (%s)</string>
 
-    <!--  Toast message informing user in how many seconds a bugreport screenshot will be taken -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
-    <plurals name="bugreport_countdown">
-        <item quantity="one">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> second.</item>
-        <item quantity="other">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
-
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
