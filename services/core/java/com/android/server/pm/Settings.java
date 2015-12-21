@@ -3846,9 +3846,9 @@ final class Settings {
             }
         }
 
-        final boolean matchesUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE_ONLY) != 0)
+        final boolean matchesUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE) != 0)
                 && !componentInfo.encryptionAware;
-        final boolean matchesAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE_ONLY) != 0)
+        final boolean matchesAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE) != 0)
                 && componentInfo.encryptionAware;
         return matchesUnaware || matchesAware;
     }

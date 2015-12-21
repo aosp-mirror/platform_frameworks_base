@@ -4169,11 +4169,18 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Internal flag used to indicate that a system component has done their
-     * homework and verified their encryption-aware behavior.
+     * homework and verified that they correctly handle packages and components
+     * that come and go over time. In particular:
+     * <ul>
+     * <li>Apps installed on external storage, which will appear to be
+     * uninstalled while the the device is ejected.
+     * <li>Apps with encryption unaware components, which will appear to not
+     * exist while the device is locked.
+     * </ul>
      *
      * @hide
      */
-    public static final int FLAG_DEBUG_ENCRYPTION_TRIAGED = 0x00000100;
+    public static final int FLAG_DEBUG_TRIAGED_MISSING = 0x00000100;
 
     /**
      * If set, the new activity is not kept in the history stack.  As soon as

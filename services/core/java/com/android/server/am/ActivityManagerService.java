@@ -3590,7 +3590,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     Intent getHomeIntent() {
         Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
         intent.setComponent(mTopComponent);
-        intent.addFlags(Intent.FLAG_DEBUG_ENCRYPTION_TRIAGED);
+        intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
         if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             intent.addCategory(Intent.CATEGORY_HOME);
         }
@@ -9802,7 +9802,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ParceledListSlice<ProviderInfo> slice = AppGlobals.getPackageManager()
                     .queryContentProviders(app.processName, app.uid,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS
-                                    | PackageManager.MATCH_ENCRYPTION_DEFAULT);
+                                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
             providers = slice != null ? slice.getList() : null;
         } catch (RemoteException ex) {
         }
@@ -17010,7 +17010,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
             int callingUid, int[] users) {
         // TODO: come back and remove this assumption to triage all broadcasts
-        int pmFlags = STOCK_PM_FLAGS | PackageManager.MATCH_ENCRYPTION_DEFAULT;
+        int pmFlags = STOCK_PM_FLAGS | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
         List<ResolveInfo> receivers = null;
         try {
