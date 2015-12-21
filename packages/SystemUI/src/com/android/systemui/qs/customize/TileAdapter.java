@@ -41,7 +41,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.Icon;
-import com.android.systemui.qs.tiles.CustomTile;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.tuner.QSPagingSwitch;
 

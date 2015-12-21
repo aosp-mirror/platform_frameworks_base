@@ -1901,7 +1901,7 @@
 
     <!-- Allows an application to bind to third party quick settings tiles.
          <p>Should only be requested by the System, should be required by
-         QSTileService declarations.-->
+         TileService declarations.-->
     <permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE"
         android:protectionLevel="signature" />
 

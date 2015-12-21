@@ -153,8 +153,11 @@ public class TunerService extends SystemUI {
     private static TunerService sInstance;
 
     public static TunerService get(Context context) {
-        SystemUIApplication sysUi = (SystemUIApplication) context.getApplicationContext();
-        TunerService service = sysUi.getComponent(TunerService.class);
+        TunerService service = null;
+        if (context.getApplicationContext() instanceof SystemUIApplication) {
+            SystemUIApplication sysUi = (SystemUIApplication) context.getApplicationContext();
+            service = sysUi.getComponent(TunerService.class);
+        }
         if (service == null) {
             // Can't get it as a component, must in the tuner, lets just create one for now.
             return getStaticService(context);
