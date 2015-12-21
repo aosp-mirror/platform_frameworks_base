@@ -1594,10 +1594,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
-        // TODO(b/26050571): This can be only reenabled, if there are measure to prevent the alert
-        // windows from being fullscreen. Please consult the bug before enabling.
-        mForceWindowDrawsStatusBarBackground = false; // mContext.getResources().getBoolean(
-                //R.bool.config_forceWindowDrawsStatusBarBackground);
+        mForceWindowDrawsStatusBarBackground = mContext.getResources().getBoolean(
+                R.bool.config_forceWindowDrawsStatusBarBackground);
 
         mGlobalKeyManager = new GlobalKeyManager(mContext);
 
@@ -2065,7 +2063,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             }
             if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                    || mForceWindowDrawsStatusBarBackground) {
+                    || (mForceWindowDrawsStatusBarBackground
+                            && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT)) {
                 attrs.subtreeSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
             }
         }
