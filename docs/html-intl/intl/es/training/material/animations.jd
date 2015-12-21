@@ -1,10 +1,10 @@
-page.title=Definir animaciones personalizadas 
+page.title=Definir animaciones personalizadas
 
 @jd:body
 
 <div id="tb-wrapper">
 <div id="tb">
-<h2>Esta lección te enseña a</h2>
+<h2>Esta lección te enseña a realizar lo siguiente:</h2>
 <ol>
   <li><a href="#Touch">Personalizar la respuesta táctil</a></li>
   <li><a href="#Reveal">Usar el efecto Revelar</a></li>
@@ -15,13 +15,16 @@ page.title=Definir animaciones personalizadas
 <h2>También deberías leer</h2>
 <ul>
   <li><a href="http://www.google.com/design/spec">Especificación de Material Design</a></li>
-  <li><a href="{@docRoot}design/material/index.html">Diseño material en Android</a></li>
+  <li><a href="{@docRoot}design/material/index.html">Material Design en Android</a></li>
 </ul>
 </div>
 </div>
 
 
-<p>Las animaciones en Material Design proporcionan a los usuarios comentarios sobre sus acciones y continuidad visual a medida que los usuarios interactúan con su aplicación. El tema material proporciona algunas animaciones predeterminadas para botones y transiciones de actividades; Android 5.0 (nivel de API 21) y superior te permite personalizar estas animaciones y crear unas nuevas:</p>
+<p>Las animaciones en Material Design proporcionan a los usuarios comentarios sobre sus acciones y continuidad visual
+a medida que los usuarios interactúan con su aplicación. El tema material proporciona algunas animaciones predeterminadas
+para botones y transiciones de actividades; Android 5.0 (API nivel 21) y superior te permite personalizar estas
+animaciones y crear unas nuevas:</p>
 
 <ul>
 <li>Respuesta táctil</li>
@@ -34,28 +37,42 @@ page.title=Definir animaciones personalizadas
 
 <h2 id="Touch">Personalizar la respuesta táctil</h2>
 
-<p>La respuesta táctil en Material Design proporciona una confirmación visual instantánea en el punto de contacto cuando los usuarios interactúan con los elementos de la IU (interfaz de usuario, en inglés: UI, User Interface). Las animaciones predeterminadas de la respuesta táctil para botones usan la nueva clase {@link android.graphics.drawable.RippleDrawable}, que realiza una transición entre diferentes estados con un efecto de ondas.</p>
+<p>La respuesta táctil en Material Design proporciona una confirmación visual instantánea en el punto
+de contacto cuando los usuarios interactúan con los elementos de la IU. Las animaciones predeterminadas de la respuesta táctil para
+botones usan la nueva clase {@link android.graphics.drawable.RippleDrawable}, que realiza una transición
+entre diferentes estados con un efecto de ondas.</p>
 
-<p>En la mayoría de los casos, debes aplicar esta funcionalidad en tu vista XML al especificar el fondo de la vista como:</p>
+<p>En la mayoría de los casos, debes aplicar esta funcionalidad en la vista XML especificando el fondo
+de la vista como:</p>
 
 <ul>
-<li><code>?android:attr/selectableItemBackground</code> para un efecto de ondas con límites</li>
-<li><code>?android:attr/selectableItemBackgroundBorderless</code> para un efecto de ondas que se extiende más allá de la vista</li>
+<li><code>?android:attr/selectableItemBackground</code> para un efecto de ondas con límites.</li>
+<li><code>?android:attr/selectableItemBackgroundBorderless</code> para un efecto de ondas que se extiende más allá de
+la vista. Se lo dibujará en la vista primaria más cercana de la vista (que lo limitará) con un fondo de valor no
+nulo.</li>
 </ul>
 
-<p class="note"><strong>Nota:</strong> <code>selectableItemBackgroundBorderless</code> es un nuevo atributo introducido en el nivel de API 21.</p>
+<p class="note"><strong>Nota:</strong> <code>selectableItemBackgroundBorderless</code> es un nuevo
+atributo introducido en la API de nivel 21.</p>
 
 
-<p>Alternativamente, puedes definir un {@link android.graphics.drawable.RippleDrawable} como un recurso XML que usa el elemento <code>ripple</code>.</p>
+<p>Alternativamente, puedes definir un {@link android.graphics.drawable.RippleDrawable}
+como un recurso XML que usa el elemento <code>ripple</code>.</p>
 
-<p>Puedes asignar un color a los objetos {@link android.graphics.drawable.RippleDrawable}. Para cambiar el color predeterminado de la respuesta táctil, usa el atributo <code>android:colorControlHighlight</code> del tema.</p>
+<p>Puedes asignar un color a los objetos {@link android.graphics.drawable.RippleDrawable}. Para cambiar
+el color predeterminado de la respuesta táctil, usa el atributo <code>android:colorControlHighlight</code>
+del tema.</p>
 
-<p>Para más información, consulta la referencia de la API para la clase {@link android.graphics.drawable.RippleDrawable}.</p>
+<p>Para más información, consulta la referencia de la API para la clase {@link
+android.graphics.drawable.RippleDrawable}.</p>
 
 
 <h2 id="Reveal">Usar el efecto revelar</h2>
 
-<p>Las animaciones del efecto revelar proporcionan a los usuarios una continuidad visual cuando muestras u ocultas un grupo de elementos de la IU. El método {@link android.view.ViewAnimationUtils#createCircularReveal ViewAnimationUtils.createCircularReveal()} te permite animar un círculo de recorte para revelar u ocultar una vista.</p>
+<p>Las animaciones del efecto revelar proporcionan a los usuarios una continuidad visual cuando muestras u ocultas un grupo de elementos
+de la IU. El método {@link android.view.ViewAnimationUtils#createCircularReveal
+ViewAnimationUtils.createCircularReveal()} te permite animar un círculo de recorte para
+revelar u ocultar una vista.</p>
 
 <p>Para revelar una vista previamente invisible usando este efecto:</p>
 
@@ -122,22 +139,32 @@ anim.start();
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Figura 1</strong>: una transición con elementos compartidos.</p>
+    <p class="img-caption" style="margin-top:3px;margin-bottom:10px"><strong>Figura 1</strong>: una
+transición con elementos compartidos.</p>
     <em>Para volver a reproducir la película, haz clic en la pantalla del dispositivo.</em>
   </div>
 </div>
 
-<p>Las transiciones de actividades en las aplicaciones de Material Design proporcionan conexiones visuales entre diferentes estados mediante el movimiento y las transformaciones entre elementos comunes. Puedes especificar las animaciones personalizadas para entrar y salir de las transiciones y para las transiciones de elementos compartidos entre actividades.</p>
+<p>Las transiciones de actividades en las aplicaciones de Material Design proporcionan conexiones visuales entre diferentes estados
+mediante el movimiento y las transformaciones entre elementos comunes. Puedes especificar las animaciones personalizadas para
+entrar y salir de las transiciones y para las transiciones de elementos compartidos entre actividades.</p>
 
 <ul>
-<li>Una transición de <strong>entrada</strong> determina cómo entran en escena las vistas en una actividad. Por ejemplo, en la transición de entrada <em>expandir</em>, las vistas entran en escena desde el exterior y vuelan hacia el centro de la pantalla.</li>
+<li>Una transición de <strong>entrada</strong> determina cómo entran en escena las vistas en una actividad.
+Por ejemplo, en la transición de entrada <em>expandir</em>, las vistas entran en escena desde el exterior
+y vuelan hacia el centro de la pantalla.</li>
 
-<li>Una transición de <strong>salida</strong> determina cómo salen de escena las vistas en una actividad. Por ejemplo, en la transición de entrada <em>expandir</em>, las vistas salen de escena lejos del centro.</li>
+<li>Una transición de <strong>salida</strong> determina cómo salen de escena las vistas en una actividad. Por
+ejemplo, en la transición de salida <em>expandir</em>, las vistas salen de escena lejos del
+centro.</li>
 
-<li>Una transición <strong>elementos compartidos</strong> determina cómo las vistas que están compartidas entre dos actividades realizan una transición entre las mismas. Por ejemplo, si dos actividades tienen la misma imagen en diferentes posiciones y tamaños, la transición de elementos compartidos <em>changeImageTransform</em> traduce y escala la imagen suavemente entre estas actividades.</li>
+<li>Una transición de <strong>elementos compartidos</strong> determina cómo las vistas que están compartidas entre
+dos actividades realizan la transición entre estas. Por ejemplo, si dos actividades tienen la misma
+imagen en diferentes posiciones y tamaños, la transición de elementos compartidos <em>changeImageTransform</em>
+traduce y escala la imagen suavemente entre estas actividades.</li>
 </ul>
 
-<p>Android 5.0 (nivel de API 21) admite estas transiciones de entrada y salida:</p>
+<p>Android 5.0 (API nivel 21) admite estas transiciones de entrada y salida:</p>
 
 <ul>
 <li><em>expandir</em>: desplaza vistas hacia adentro o hacia afuera del centro de la escena.</li>
@@ -145,9 +172,11 @@ anim.start();
 <li><em>difuminar</em>: agrega o quita una vista de la escena al cambiar su opacidad.</li>
 </ul>
 
-<p>Toda transición que extiende la clase {@link android.transition.Visibility} está admitida como una transición de entrada o salida. Para más información, consulta la referencia de la API para la clase {@link android.transition.Transition}.</p>
+<p>Toda transición que extiende la clase {@link android.transition.Visibility} se admite
+como una transición de entrada o salida. Para más información, consulta la referencia de la API para la clase
+{@link android.transition.Transition}.</p>
 
-<p>Android 5.0 (nivel de API 21) también admite estas transiciones de elementos compartidos:</p>
+<p>Android 5.0 (API nivel 21) también admite estas transiciones de elementos compartidos:</p>
 
 <ul>
 <li><em>changeBounds</em>: anima los cambios en los límites de las vistas de destino.</li>
@@ -156,7 +185,8 @@ anim.start();
 <li><em>changeImageTransform</em>: anima los cambios de tamaño y escala de imágenes de destino.</li>
 </ul>
 
-<p>Cuando habilitas las transiciones de actividades en tu aplicación, la transición entre difuminados predeterminada se activa entre las actividades que ingresan y salen.</p>
+<p>Cuando habilitas las transiciones de actividades en tu aplicación, la transición entre difuminados predeterminada se
+activa entre las actividades que ingresan y salen.</p>
 
 <img src="{@docRoot}training/material/images/SceneTransition.png" alt="" width="600" height="405" style="margin-top:20px" />
 <p class="img-caption">
@@ -165,7 +195,9 @@ anim.start();
 
 <h3>Especificar transiciones personalizadas</h3>
 
-<p>Primero, habilita las transiciones de contenido de la ventana con el atributo <code>android:windowContentTransitions</code> cuando definas un estilo que herede del tema material. También puedes especificar transiciones de entrada, salida y elementos compartidos en tu definición de estilo:</p>
+<p>Primero, habilita las transiciones de contenido de la ventana con el atributo <code>android:windowContentTransitions</code>
+cuando definas un estilo que herede del tema material. También puedes especificar
+transiciones de entrada, salida y elementos compartidos en tu definición de estilo:</p>
 
 <pre>
 &lt;style name="BaseAppTheme" parent="android:Theme.Material">
@@ -194,9 +226,12 @@ anim.start();
 &lt;/transitionSet>
 </pre>
 
-<p>El elemento <code>changeImageTransform</code> corresponde a la clase {@link android.transition.ChangeImageTransform}. Para más información, consulta la referencia de la API para {@link android.transition.Transition}.</p>
+<p>El elemento <code>changeImageTransform</code> corresponde a la clase
+{@link android.transition.ChangeImageTransform}. Para más información, consulta la referencia de la
+API para {@link android.transition.Transition}.</p>
 
-<p>Para habilitar las transiciones del contenido de las ventanas en tu código haz una llamada al método {@link android.view.Window#requestFeature Window.requestFeature()}:</p>
+<p>Para habilitar las transiciones del contenido de las ventanas en tu código, llama al método
+{@link android.view.Window#requestFeature Window.requestFeature()}:</p>
 
 <pre>
 // inside your activity (if you did not enable transitions in your theme)
@@ -206,31 +241,45 @@ getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
 getWindow().setExitTransition(new Explode());
 </pre>
 
-<p>Para especificar transiciones en tu código, llama estos métodos con un objeto {@link android.transition.Transition}:</p>
+<p>Para especificar transiciones en tu código, llama a estos métodos con un objeto {@link
+android.transition.Transition}:</p>
 
 <ul>
   <li>{@link android.view.Window#setEnterTransition Window.setEnterTransition()}</li>
   <li>{@link android.view.Window#setExitTransition Window.setExitTransition()}</li>
-  <li>{@link android.view.Window#setSharedElementEnterTransition Window.setSharedElementEnterTransition()}</li>
-  <li>{@link android.view.Window#setSharedElementExitTransition Window.setSharedElementExitTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementEnterTransition
+      Window.setSharedElementEnterTransition()}</li>
+  <li>{@link android.view.Window#setSharedElementExitTransition
+      Window.setSharedElementExitTransition()}</li>
 </ul>
 
-<p>Los métodos {@link android.view.Window#setExitTransition setExitTransition()} y {@link android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} definen la transición de salida para la actividad de llamada. Los métodos {@link android.view.Window#setEnterTransition setEnterTransition()} y {@link android.view.Window#setSharedElementEnterTransition setSharedElementEnterTransition()} definen la transición de entrada para la actividad requerida.</p>
+<p>Los métodos {@link android.view.Window#setExitTransition setExitTransition()} y {@link
+android.view.Window#setSharedElementExitTransition setSharedElementExitTransition()} definen
+la transición de salida para la actividad que realiza la llamada. Los métodos {@link android.view.Window#setEnterTransition
+setEnterTransition()} y {@link android.view.Window#setSharedElementEnterTransition
+setSharedElementEnterTransition()} definen la transición de entrada para la actividad invocada.</p>
 
-<p>Para obtener el efecto completo de una transición, debes habilitar las transiciones de contenido de las ventanas en las actividades de llamada o requeridas. De lo contrario, la actividad de llamada comenzará la transición de salida, pero luego observarás una ventana de transición (como escalar o difuminar).</p>
+<p>Para obtener el efecto completo de una transición, debes habilitar las transiciones de contenido de las ventanas tanto para las
+actividades que realizan la llamada como para aquellas que son invocadas. De lo contrario, la actividad que realiza la llamada comenzará la transición de salida,
+pero luego observarás una ventana de transición (como escalar o difuminar).</p>
 
-<p>Para comenzar una transición de entrada lo antes posible, usa el método {@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()} en la actividad requerida. Esto te permite tener transiciones de entrada más intensas.</p>
+<p>Para comenzar una transición de entrada lo antes posible, usa el método
+{@link android.view.Window#setAllowEnterTransitionOverlap Window.setAllowEnterTransitionOverlap()}
+en la actividad invocada. Esto te permite tener transiciones de entrada más intensas.</p>
 
 <h3>Iniciar una actividad mediante el uso de transiciones</h3>
 
-<p>Si permites transiciones y estableces una transición de salida para una actividad, la transición se activa cuando inicias otra actividad como alguna de las siguientes:</p>
+<p>Si permites transiciones y estableces una transición de salida para una actividad, la transición se activa
+cuando inicias otra actividad, como alguna de las siguientes:</p>
 
 <pre>
 startActivity(intent,
               ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
 </pre>
 
-<p>Si estableciste una transición de entrada para la segunda actividad, la transición también se activa cuando se inicia la actividad. Para deshabilitar las transiciones cuando inicias otra actividad, proporciona una agrupación de opciones <code>null</code>.</p>
+<p>Si estableciste una transición de entrada para la segunda actividad, la transición también se activa
+cuando se inicia la actividad. Para deshabilitar las transiciones cuando inicias otra actividad, proporciona
+una agrupación de opciones <code>null</code>.</p>
 
 <h3>Iniciar una actividad con un elemento compartido</h3>
 
@@ -240,8 +289,10 @@ startActivity(intent,
 <li>Habilita las transiciones de contenido de ventanas en tu tema.</li>
 <li>Especifica una transición de elementos compartidos en tu estilo.</li>
 <li>Define tu transición como un recurso XML.</li>
-<li>Asigna un nombre en común para los elementos compartidos en ambos diseños con el atributo <code>android:transitionName</code>.</li>
-<li>Usa el método {@link android.app.ActivityOptions#makeSceneTransitionAnimation ActivityOptions.makeSceneTransitionAnimation()}.</li>
+<li>Asigna un nombre en común para los elementos compartidos en ambos diseños con el atributo
+<code>android:transitionName</code>.</li>
+<li>Usa el método {@link android.app.ActivityOptions#makeSceneTransitionAnimation
+ActivityOptions.makeSceneTransitionAnimation()}.</li>
 </ol>
 
 <pre>
@@ -266,13 +317,20 @@ imgContainerView.setOnClickListener(new View.OnClickListener() {
 });
 </pre>
 
-<p>Para las vistas dinámicas compartidas que generas en tu código, usa el método {@link android.view.View#setTransitionName View.setTransitionName()} para especificar un nombre del elemento en común en ambas actividades.</p>
+<p>Para las vistas dinámicas compartidas que generas en tu código, usa el método
+{@link android.view.View#setTransitionName View.setTransitionName()} para especificar un nombre de
+elemento en común en ambas actividades.</p>
 
-<p>Para invertir la animación de transición de escenas cuando terminas la segunda actividad, llama al método {@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()} en lugar del {@link android.app.Activity#finish Activity.finish()}.</p>
+<p>Para invertir la animación de transición de escenas cuando terminas la segunda actividad, llama al método
+{@link android.app.Activity#finishAfterTransition Activity.finishAfterTransition()}
+en lugar del {@link android.app.Activity#finish Activity.finish()}.</p>
 
 <h3>Iniciar una actividad con múltiples elementos compartidos</h3>
 
-<p>Para realizar una animación de transición de escenas entre dos actividades que tienen más de un elemento compartido, define los elementos compartidos en ambos diseños con el atributo <code>android:transitionName</code> (o usa el método {@link android.view.View#setTransitionName View.setTransitionName()} en ambas actividades) y crea un objeto {@link android.app.ActivityOptions} como se indica a continuación:</p>
+<p>Para realizar una animación de transición de escenas entre dos actividades que tienen más de un elemento
+compartido, define los elementos compartidos en ambos diseños con el atributo <code>android:transitionName</code>
+(o usa el método {@link android.view.View#setTransitionName View.setTransitionName()}
+en ambas actividades) y crea un objeto {@link android.app.ActivityOptions} como se indica a continuación:</p>
 
 <pre>
 ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
@@ -283,9 +341,14 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
 
 <h2 id="CurvedMotion">Usar movimiento curvo</h2>
 
-<p>Las animaciones en Material Design se basan en curvas para la interpolación de tiempo y los modelos de movimiento espacial. Con Android 5.0 (nivel de API 21) y superior, puedes definir las curvas de sincronización personalizadas y los modelos de movimientos curvos para las animaciones.</p>
+<p>Las animaciones en Material Design se basan en curvas para la interpolación de tiempo y los modelos de movimiento
+espacial. Con Android 5.0 (API nivel 21) y superior, puedes definir las curvas de sincronización personalizadas y
+los modelos de movimientos curvos para las animaciones.</p>
 
-<p>La clase {@link android.view.animation.PathInterpolator} es un nuevo interpolador que se basa en una curva Bézier o un objeto {@link android.graphics.Path}. Este interpolador especifica una curva de movimiento en un cuadrado de 1x1, con puntos de anclaje a (0,0) y (1,1), y puntos de control según lo especificado en los argumentos del constructor. También puedes definir un interpolador para la ruta de acceso como un recurso XML:</p>
+<p>La clase {@link android.view.animation.PathInterpolator} es un nuevo interpolador que se basa en una curva
+Bézier o un objeto {@link android.graphics.Path}. Este interpolador especifica una curva de movimiento
+en un cuadrado de 1x1, con puntos de anclaje a (0,0) y (1,1), y puntos de control según lo especificado en los argumentos del
+constructor. También puedes definir un interpolador para la ruta de acceso como un recurso XML:</p>
 
 <pre>
 &lt;pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
@@ -295,7 +358,8 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
     android:controlY2="1"/>
 </pre>
 
-<p>El sistema proporciona recursos XML para las tres curvas básicas en la especificación de Material Design:</p>
+<p>El sistema proporciona recursos XML para las tres curvas básicas en la especificación
+de Material Design:</p>
 
 <ul>
   <li><code>&#64;interpolator/fast_out_linear_in.xml</code></li>
@@ -303,9 +367,12 @@ ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this,
   <li><code>&#64;interpolator/linear_out_slow_in.xml</code></li>
 </ul>
 
-<p>Puedes pasar un objeto {@link android.view.animation.PathInterpolator} al método {@link android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
+<p>Puedes pasar un objeto {@link android.view.animation.PathInterpolator} al método {@link
+android.animation.Animator#setInterpolator Animator.setInterpolator()}.</p>
 
-<p>La clase {@link android.animation.ObjectAnimator} tiene nuevos constructores que te permiten animar coordenadas junto a una ruta de acceso, usando dos o más propiedades a la vez. Por ejemplo, el siguiente animador usa un objeto{@link android.graphics.Path} para animar las propiedades X e Y de una vista:</p>
+<p>La clase {@link android.animation.ObjectAnimator} tiene nuevos constructores que te permiten animar
+coordenadas junto a una ruta de acceso, usando dos o más propiedades a la vez. Por ejemplo, el siguiente animador
+usa un objeto{@link android.graphics.Path} para animar las propiedades X e Y de una vista:</p>
 
 <pre>
 ObjectAnimator mAnimator;
@@ -317,7 +384,9 @@ mAnimator.start();
 
 <h2 id="ViewState">Animar cambios de estados de las vistas</h2>
 
-<p>La clase {@link android.animation.StateListAnimator} te permite definir los animadores que se ejecutan cuando cambia el estado de una vista. En el siguiente ejemplo, se muestra cómo definir un {@link android.animation.StateListAnimator} como un recurso XML:</p>
+<p>La clase {@link android.animation.StateListAnimator} te permite definir los animadores que se ejecutan cuando
+cambia el estado de una vista. En el siguiente ejemplo, se muestra cómo definir un {@link
+android.animation.StateListAnimator} como un recurso XML:</p>
 
 <pre>
 &lt;!-- animate the translationZ property of a view when pressed -->
@@ -345,11 +414,21 @@ mAnimator.start();
 &lt;/selector>
 </pre>
 
-<p>Para adjuntar animaciones personalizadas de los estados de visualizaciones, define un animador usando el elemento <code>selector</code> en un archivo de recurso XML como en este ejemplo y asígnalo a tu vista con el atributo <code>android:stateListAnimator</code>. Para asignar un animador de lista de estados a una vista en tu código, usa el método {@link android.animation.AnimatorInflater#loadStateListAnimator AnimationInflater.loadStateListAnimator()} y asigna el animador a tu vista con el método {@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
+<p>Para adjuntar animaciones personalizadas de los estados de visualizaciones, define un animador usando el elemento
+<code>selector</code> en un archivo de recurso XML como en este ejemplo y asígnalo a tu
+vista con el atributo <code>android:stateListAnimator</code>. Para asignar un animador de lista de estados
+a una vista en tu código, usa el método {@link android.animation.AnimatorInflater#loadStateListAnimator
+AnimationInflater.loadStateListAnimator()} y asigna el animador a tu vista con el método
+{@link android.view.View#setStateListAnimator View.setStateListAnimator()}.</p>
 
-<p>Cuando tu tema extiende al tema material, los botones tendrán una animación Z de manera predeterminada. Para evitar este comportamiento en tus botones, establece el atributo <code>android:stateListAnimator</code> para <code>@null</code>.</p>
+<p>Cuando tu tema extiende al tema material, los botones tendrán una animación Z de manera predeterminada. Para evitar este
+comportamiento en los botones, establece el atributo <code>android:stateListAnimator</code> en
+<code>@null</code>.</p>
 
-<p>La clase {@link android.graphics.drawable.AnimatedStateListDrawable} te permite crear elementos de diseño que muestren animaciones entre los cambios de estados de la vista asociada. Algunos de los widgets del sistema en Android 5.0 usan estas animaciones de manera predeterminada. En el siguiente ejemplo, se muestra cómo definir un {@link android.graphics.drawable.AnimatedStateListDrawable} como un recurso XML:</p>
+<p>La clase {@link android.graphics.drawable.AnimatedStateListDrawable} te permite crear elementos de diseño
+que muestren animaciones entre los cambios de estados de la vista asociada. Algunos de los widgets del sistema en
+Android 5.0 usan estas animaciones de manera predeterminada. En el siguiente ejemplo, se muestra cómo
+definir un {@link android.graphics.drawable.AnimatedStateListDrawable} como un recurso XML:</p>
 
 <pre>
 &lt;!-- res/drawable/myanimstatedrawable.xml -->
@@ -379,19 +458,28 @@ mAnimator.start();
 
 <h2 id="AnimVector">Animar interfaces dibujables en vector</h2>
 
-<p>Las <a href="{@docRoot}training/material/drawables.html#VectorDrawables">interfaces dibujables en vector</a> son escalables sin perder definición. La clase {@link android.graphics.drawable.AnimatedVectorDrawable} te permite animar las propiedades de un elemento de diseño en vector.</p>
+<p>Las <a href="{@docRoot}training/material/drawables.html#VectorDrawables">interfaces dibujables en vector</a> son
+escalables sin perder definición. La clase {@link android.graphics.drawable.AnimatedVectorDrawable}
+te permite animar las propiedades de un elemento de diseño en vector.</p>
 
 <p>Generalmente, las interfaces animadas dibujables en vector se definen en tres archivos XML:</p>
 
 <ul>
-<li>Una interfaz dibujable en vector con el elemento <code>&lt;vector&gt;</code> en <code>res/drawable/</code></li>
-<li>Una interfaz dibujable animada en vector con el elemento <code>&lt;animated-vector&gt;</code> en <code>res/drawable/</code></li>
-<li>Uno o más animadores de objeto con el elemento <code>&lt;objectAnimator&gt;</code> en <code>res/anim/</code></li>
+<li>Una interfaz dibujable en vector con el elemento <code>&lt;vector&gt;</code> en
+<code>res/drawable/</code></li>
+<li>Una interfaz dibujable animada en vector con el elemento <code>&lt;animated-vector&gt;</code> en
+<code>res/drawable/</code></li>
+<li>Uno o más animadores de objeto con el elemento <code>&lt;objectAnimator&gt;</code> en
+<code>res/anim/</code></li>
 </ul>
 
-<p>Las interfaces animadas dibujables en vector pueden animar los atributos de los elementos <code>&lt;group&gt;</code> y <code>&lt;path&gt;</code>. Los elementos <code>&lt;group&gt;</code> definen un conjunto de rutas de acceso o subgrupos y el elemento <code>&lt;path&gt;</code> define rutas de acceso para dibujar.</p>
+<p>Las interfaces animadas dibujables en vector pueden animar los atributos de los elementos <code>&lt;group&gt;</code> y
+<code>&lt;path&gt;</code>. Los elementos <code>&lt;group&gt;</code> definen un conjunto de
+rutas de acceso o subgrupos y el elemento <code>&lt;path&gt;</code> define rutas de acceso para dibujar.</p>
 
-<p>Cuando definas una interfaz dibujable en vector que desees animar, usa el atributo <code>android:name</code> para asignar un nombre único a grupos o rutas de acceso, de manera que puedas hacer referencia a ellos desde tus definiciones del animador. Por ejemplo:</p>
+<p>Cuando definas una interfaz dibujable en vector que desees animar, usa el atributo <code>android:name</code>
+para asignar un nombre único a grupos o rutas de acceso, de manera que puedas hacer referencia a ellos desde tus definiciones del
+animador. Por ejemplo:</p>
 
 <pre>
 &lt;!-- res/drawable/vectordrawable.xml -->
@@ -413,7 +501,8 @@ mAnimator.start();
 &lt;/vector>
 </pre>
 
-<p>La definición de la interfaz animada dibujable en vector hace referencia a grupos y rutas de acceso en el elemento de diseño en vector por sus nombres:</p>
+<p>La definición de la interfaz animada dibujable en vector hace referencia a grupos y rutas de acceso en el elemento de diseño en vector
+por sus nombres:</p>
 
 <pre>
 &lt;!-- res/drawable/animvectordrawable.xml -->
@@ -428,7 +517,9 @@ mAnimator.start();
 &lt;/animated-vector>
 </pre>
 
-<p>Las definiciones de animación representan objetos {@link android.animation.ObjectAnimator} o {@link android.animation.AnimatorSet}. El primer animador en este ejemplo rota el grupo objetivo unos 360 grados:</p>
+<p>Las definiciones de animación representan objetos {@link android.animation.ObjectAnimator} o {@link
+android.animation.AnimatorSet}. El primer animador en este ejemplo rota el grupo
+objetivo unos 360 grados:</p>
 
 <pre>
 &lt;!-- res/anim/rotation.xml -->
@@ -439,7 +530,9 @@ mAnimator.start();
     android:valueTo="360" />
 </pre>
 
-<p>El segundo animador en este ejemplo transforma la ruta de acceso de la interfaz dibujable en vector de una forma a otra. Ambas rutas de acceso deben ser compatibles para transformar: deben tener el mismo número de comandos y el mismo número de parámetros para cada comando.</p>
+<p>El segundo animador en este ejemplo transforma la ruta de acceso de la interfaz dibujable en vector de una forma a
+otra. Ambas rutas de acceso deben ser compatibles para transformarse: deben tener el mismo número de comandos
+y el mismo número de parámetros para cada comando.</p>
 
 <pre>
 &lt;!-- res/anim/path_morph.xml -->
@@ -453,4 +546,5 @@ mAnimator.start();
 &lt;/set>
 </pre>
 
-<p>Para más información, consulta la referencia de API para {@link android.graphics.drawable.AnimatedVectorDrawable}.</p> 
+<p>Para más información, consulta la referencia de la API para {@link
+android.graphics.drawable.AnimatedVectorDrawable}.</p>
