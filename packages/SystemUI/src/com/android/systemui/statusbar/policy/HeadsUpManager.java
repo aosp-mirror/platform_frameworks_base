@@ -384,6 +384,13 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
             for (HeadsUpEntry entry : mSortedEntries) {
                 ExpandableNotificationRow row = entry.entry.row;
                 if (row.isPinned()) {
+                    if (row.isChildInGroup()) {
+                        final ExpandableNotificationRow groupSummary
+                                = mGroupManager.getGroupSummary(row.getStatusBarNotification());
+                        if (groupSummary != null) {
+                            row = groupSummary;
+                        }
+                    }
                     row.getLocationOnScreen(mTmpTwoArray);
                     minX = mTmpTwoArray[0];
                     maxX = mTmpTwoArray[0] + row.getWidth();
@@ -495,9 +502,18 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      */
     public int getTopHeadsUpPinnedHeight() {
         HeadsUpEntry topEntry = getTopEntry();
-        return topEntry != null && topEntry.entry != null
-                ? topEntry.entry.row.getPinnedHeadsUpHeight(true /* atLeastMinHeight */)
-                : 0;
+        if (topEntry == null || topEntry.entry == null) {
+            return 0;
+        }
+        ExpandableNotificationRow row = topEntry.entry.row;
+        if (row.isChildInGroup()) {
+            final ExpandableNotificationRow groupSummary
+                    = mGroupManager.getGroupSummary(row.getStatusBarNotification());
+            if (groupSummary != null) {
+                row = groupSummary;
+            }
+        }
+        return row.getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
     }
 
     /**

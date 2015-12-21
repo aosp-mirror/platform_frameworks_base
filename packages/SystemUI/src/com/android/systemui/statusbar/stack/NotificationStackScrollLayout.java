@@ -363,14 +363,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateContentHeight();
         clampScrollPosition();
         if (mRequestViewResizeAnimationOnLayout) {
-            requestAnimationOnViewResize();
+            requestAnimationOnViewResize(null);
             mRequestViewResizeAnimationOnLayout = false;
         }
         requestChildrenUpdate();
     }
 
-    private void requestAnimationOnViewResize() {
-        if (mIsExpanded && mAnimationsEnabled) {
+    private void requestAnimationOnViewResize(ExpandableNotificationRow row) {
+        if (mAnimationsEnabled && (mIsExpanded || row != null && row.isPinned())) {
             mNeedViewResizeAnimation = true;
             mNeedsAnimation = true;
         }
@@ -730,7 +730,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
-                            && mHeadsUpManager.getTopEntry().entry.row != row) {
+                            && mHeadsUpManager.getTopEntry().entry.row != row
+                            && mGroupManager.getGroupSummary(
+                                mHeadsUpManager.getTopEntry().entry.row.getStatusBarNotification())
+                                != row) {
                         continue;
                     }
                     return row.getViewAtPosition(touchY - childTop);
@@ -2338,7 +2341,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         clampScrollPosition();
         notifyHeightChangeListener(view);
         if (needsAnimation) {
-            requestAnimationOnViewResize();
+            ExpandableNotificationRow row = view instanceof ExpandableNotificationRow
+                    ? (ExpandableNotificationRow) view
+                    : null;
+            requestAnimationOnViewResize(row);
         }
         requestChildrenUpdate();
     }
@@ -2802,7 +2808,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
-        boolean animated = mAnimationsEnabled && mIsExpanded;
+        boolean animated = mAnimationsEnabled && (mIsExpanded || changedRow.isPinned());
         if (animated) {
             mExpandedGroupView = changedRow;
             mNeedsAnimation = true;
