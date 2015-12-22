@@ -2697,8 +2697,8 @@ public class NotificationManagerService extends SystemService {
                 visibilities[i] = r.getPackageVisibilityOverride();
                 mRankingHelper.extractSignals(r);
             }
+            mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
-                mRankingHelper.sort(mNotificationList);
                 final NotificationRecord r = mNotificationList.get(i);
                 if (!orderBefore.get(i).equals(r.getKey())
                         || visibilities[i] != r.getPackageVisibilityOverride()) {
