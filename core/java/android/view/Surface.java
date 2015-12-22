@@ -57,6 +57,7 @@ public class Surface implements Parcelable {
     private static native int nativeGetHeight(long nativeObject);
 
     private static native long nativeGetNextFrameNumber(long nativeObject);
+    private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
@@ -93,6 +94,21 @@ public class Surface implements Parcelable {
     private Matrix mCompatibleMatrix;
 
     private HwuiContext mHwuiContext;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SCALING_MODE_FREEZE, SCALING_MODE_SCALE_TO_WINDOW,
+                    SCALING_MODE_SCALE_CROP, SCALING_MODE_NO_SCALE_CROP})
+    public @interface ScalingMode {}
+    // From system/window.h
+    /** @hide */
+    static final int SCALING_MODE_FREEZE = 0;
+    /** @hide */
+    static final int SCALING_MODE_SCALE_TO_WINDOW = 1;
+    /** @hide */
+    static final int SCALING_MODE_SCALE_CROP = 2;
+    /** @hide */
+    static final int SCALING_MODE_NO_SCALE_CROP = 3;
 
     /** @hide */
     @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
@@ -496,6 +512,20 @@ public class Surface implements Parcelable {
         synchronized (mLock) {
             checkNotReleasedLocked();
             nativeAllocateBuffers(mNativeObject);
+        }
+    }
+
+    /**
+     * Set the scaling mode to be used for this surfaces buffers
+     * @hide
+     */
+    void setScalingMode(@ScalingMode int scalingMode) {
+        synchronized (mLock) {
+            checkNotReleasedLocked();
+            int err = nativeSetScalingMode(mNativeObject, scalingMode);
+            if (err != 0) {
+                throw new IllegalArgumentException("Invalid scaling mode: " + scalingMode);
+            }
         }
     }
 

@@ -578,8 +578,19 @@ public class SurfaceView extends View {
                     }
 
                     mSurface.transferFrom(mNewSurface);
-
                     if (visible && mSurface.isValid()) {
+                        // We set SCALING_MODE_NO_SCALE_CROP to allow the WindowManager
+                        // to update our Surface crop without requiring a new buffer from
+                        // us. In the default mode of SCALING_MODE_FREEZE, surface geometry
+                        // state (which includes crop) is only applied when a buffer
+                        // with appropriate geometry is available. During drag resize
+                        // it is quite frequent that a matching buffer will not be available
+                        // (because we are constantly being resized and have fallen behind).
+                        // However in such situations the WindowManager still needs to be able
+                        // to update our crop to ensure we stay within the bounds of the containing
+                        // window.
+                        mSurface.setScalingMode(Surface.SCALING_MODE_NO_SCALE_CROP);
+
                         if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
                             mSurfaceCreated = true;
                             mIsCreating = true;
