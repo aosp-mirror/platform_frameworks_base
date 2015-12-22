@@ -579,6 +579,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     public AssetFileDescriptor openDocumentThumbnail(
             String documentId, Point sizeHint, CancellationSignal signal)
             throws FileNotFoundException {
+        if (mArchiveHelper.isArchivedDocument(documentId)) {
+            return mArchiveHelper.openDocumentThumbnail(documentId, sizeHint, signal);
+        }
+
         final File file = getFileForDocId(documentId);
         return DocumentsContract.openImageThumbnail(file);
     }
