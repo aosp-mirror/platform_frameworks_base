@@ -62,6 +62,19 @@ struct FuseRequest {
     }
 };
 
+class ScopedFd {
+    int mFd;
+
+public:
+    explicit ScopedFd(int fd) : mFd(fd) {}
+    ~ScopedFd() {
+        close(mFd);
+    }
+    operator int() {
+        return mFd;
+    }
+};
+
 /**
  * The class is used to access AppFuse class in Java from fuse handlers.
  */
@@ -70,24 +83,26 @@ public:
     AppFuse(JNIEnv* /*env*/, jobject /*self*/) {
     }
 
-    void handle_fuse_request(int fd, const FuseRequest& req) {
+    bool handle_fuse_request(int fd, const FuseRequest& req) {
         ALOGV("Request op=%d", req.header().opcode);
         switch (req.header().opcode) {
             // TODO: Handle more operations that are enough to provide seekable
             // FD.
             case FUSE_INIT:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_init);
-                break;
+                return true;
             case FUSE_GETATTR:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_getattr);
-                break;
+                return true;
+            case FUSE_FORGET:
+                return false;
             default: {
                 ALOGV("NOTIMPL op=%d uniq=%" PRIx64 " nid=%" PRIx64 "\n",
                       req.header().opcode,
                       req.header().unique,
                       req.header().nodeid);
                 fuse_reply(fd, req.header().unique, -ENOSYS, NULL, 0);
-                break;
+                return true;
             }
         }
     }
@@ -198,7 +213,7 @@ private:
 
 jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
         JNIEnv* env, jobject self, jint jfd) {
-    const int fd = static_cast<int>(jfd);
+    ScopedFd fd(dup(static_cast<int>(jfd)));
     AppFuse appfuse(env, self);
 
     ALOGD("Start fuse loop.");
@@ -209,7 +224,7 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
         if (result < 0) {
             if (errno == ENODEV) {
                 ALOGE("Someone stole our marbles!\n");
-                return false;
+                return JNI_FALSE;
             }
             ALOGE("Failed to read bytes from FD: errno=%d\n", errno);
             continue;
@@ -227,7 +242,9 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
             continue;
         }
 
-        appfuse.handle_fuse_request(fd, request);
+        if (!appfuse.handle_fuse_request(fd, request)) {
+            return JNI_TRUE;
+        }
     }
 }
 
