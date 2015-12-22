@@ -144,6 +144,12 @@
         <item quantity="other"><xliff:g id="count" example="2">%1$s</xliff:g> printers found</item>
     </plurals>
 
+    <!-- Template for an extended description of a printer. [CHAR LIMIT=50] -->
+    <string name="printer_extended_description_template"><xliff:g id="print_service_label" example="Canon Print Service">%1$s</xliff:g> - <xliff:g id="printer_description" example="Printer under the stairs">%2$s</xliff:g></string>
+
+    <!-- Description of printer info icon. [CHAR LIMIT=50] -->
+    <string name="printer_info_desc">More information about this printer</string>
+
     <!-- Add printer dialog  -->
 
     <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->

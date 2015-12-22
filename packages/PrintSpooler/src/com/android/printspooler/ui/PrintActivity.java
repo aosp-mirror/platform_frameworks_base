@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -2200,15 +2199,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     title = getString(R.string.all_printers);
                 } else {
                     PrinterHolder printerHolder = (PrinterHolder) getItem(position);
-                    title = printerHolder.printer.getName();
-                    try {
-                        PackageInfo packageInfo = getPackageManager().getPackageInfo(
-                                printerHolder.printer.getId().getServiceName().getPackageName(), 0);
-                        subtitle = packageInfo.applicationInfo.loadLabel(getPackageManager());
-                        icon = packageInfo.applicationInfo.loadIcon(getPackageManager());
-                    } catch (NameNotFoundException nnfe) {
-                        /* ignore */
-                    }
+                    PrinterInfo printInfo = printerHolder.printer;
+
+                    title = printInfo.getName();
+                    icon = printInfo.loadIcon(PrintActivity.this);
+                    subtitle = printInfo.getDescription();
                 }
             }
 

@@ -27,7 +27,6 @@ import android.print.PrinterDiscoverySession.OnPrintersChangeListener;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -52,6 +51,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import libcore.io.IoUtils;
@@ -213,9 +213,9 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         mPrintersUpdatedBefore = true;
 
         // Some of the found printers may have be a printer that is in the
-        // history but with its name changed. Hence, we try to update the
-        // printer to use its current name instead of the historical one.
-        mPersistenceManager.updatePrintersHistoricalNamesIfNeeded(printers);
+        // history but with its properties changed. Hence, we try to update the
+        // printer to use its current properties instead of the historical one.
+        mPersistenceManager.updateHistoricalPrintersIfNeeded(printers);
 
         Map<PrinterId, PrinterInfo> printersMap = new LinkedHashMap<>();
         final int printerCount = printers.size();
@@ -340,7 +340,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
         private static final String ATTR_NAME = "name";
         private static final String ATTR_DESCRIPTION = "description";
-        private static final String ATTR_STATUS = "status";
 
         private final AtomicFile mStatePersistFile;
 
@@ -378,13 +377,13 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             mReadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
         }
 
-        public void updatePrintersHistoricalNamesIfNeeded(List<PrinterInfo> printers) {
+        public void updateHistoricalPrintersIfNeeded(List<PrinterInfo> printers) {
             boolean writeHistory = false;
 
             final int printerCount = printers.size();
             for (int i = 0; i < printerCount; i++) {
                 PrinterInfo printer = printers.get(i);
-                writeHistory |= renamePrinterIfNeeded(printer);
+                writeHistory |= updateHistoricalPrinterIfNeeded(printer);
             }
 
             if (writeHistory) {
@@ -392,18 +391,42 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             }
         }
 
-        public boolean renamePrinterIfNeeded(PrinterInfo printer) {
-            boolean renamed = false;
+        /**
+         * Updates the historical printer state with the given printer.
+         *
+         * @param printer the printer to update
+         *
+         * @return true iff the historical printer list needs to be updated
+         */
+        public boolean updateHistoricalPrinterIfNeeded(PrinterInfo printer) {
+            boolean writeHistory = false;
             final int printerCount = mHistoricalPrinters.size();
             for (int i = 0; i < printerCount; i++) {
                 PrinterInfo historicalPrinter = mHistoricalPrinters.get(i);
-                if (historicalPrinter.getId().equals(printer.getId())
-                        && !TextUtils.equals(historicalPrinter.getName(), printer.getName())) {
-                    mHistoricalPrinters.set(i, printer);
-                    renamed = true;
+
+                if (!historicalPrinter.getId().equals(printer.getId())) {
+                    continue;
+                }
+
+                // Overwrite the historical printer with the updated printer as some properties
+                // changed. We ignore the status as this is a volatile state.
+                if (historicalPrinter.equalsIgnoringStatus(printer)) {
+                    continue;
+                }
+
+                mHistoricalPrinters.set(i, printer);
+
+                // We only persist limited information in the printer history, hence check if
+                // we need to persist the update.
+                // @see PersistenceManager.WriteTask#doWritePrinterHistory
+                if (!historicalPrinter.getName().equals(printer.getName())) {
+                    if (Objects.equals(historicalPrinter.getDescription(),
+                            printer.getDescription())) {
+                        writeHistory = true;
+                    }
                 }
             }
-            return renamed;
+            return writeHistory;
         }
 
         public void addPrinterAndWritePrinterHistory(PrinterInfo printer) {
@@ -610,7 +633,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
                 String name = parser.getAttributeValue(null, ATTR_NAME);
                 String description = parser.getAttributeValue(null, ATTR_DESCRIPTION);
-                final int status = Integer.parseInt(parser.getAttributeValue(null, ATTR_STATUS));
 
                 parser.next();
 
@@ -625,7 +647,11 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 expect(parser, XmlPullParser.END_TAG, TAG_PRINTER_ID);
                 parser.next();
 
-                PrinterInfo.Builder builder = new PrinterInfo.Builder(printerId, name, status);
+                // If the printer is available the printer will be replaced by the one read from the
+                // discovery session, hence the only time when this object is used is when the
+                // printer is unavailable.
+                PrinterInfo.Builder builder = new PrinterInfo.Builder(printerId, name,
+                        PrinterInfo.STATUS_UNAVAILABLE);
                 builder.setDescription(description);
                 PrinterInfo printer = builder.build();
 
@@ -698,9 +724,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                         serializer.startTag(null, TAG_PRINTER);
 
                         serializer.attribute(null, ATTR_NAME, printer.getName());
-                        // Historical printers are always stored as unavailable.
-                        serializer.attribute(null, ATTR_STATUS, String.valueOf(
-                                PrinterInfo.STATUS_UNAVAILABLE));
                         String description = printer.getDescription();
                         if (description != null) {
                             serializer.attribute(null, ATTR_DESCRIPTION, description);

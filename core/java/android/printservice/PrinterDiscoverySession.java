@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.annotation.NonNull;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 import android.print.PrinterCapabilitiesInfo;
@@ -406,6 +407,20 @@ public abstract class PrinterDiscoverySession {
     public abstract void onStartPrinterStateTracking(PrinterId printerId);
 
     /**
+     * Request the custom icon for a printer. Once the icon is available use
+     * {@link CustomPrinterIconCallback#onCustomPrinterIconLoaded} to send the data to the print
+     * service.
+     *
+     * @param printerId The printer to icon belongs to.
+     * @param callback Callback for returning the icon to the print spooler.
+     *
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public void onRequestCustomPrinterIcon(@NonNull PrinterId printerId,
+            @NonNull CustomPrinterIconCallback callback) {
+    }
+
+    /**
      * Callback asking you to stop tracking the state of a printer. The passed
      * in printer id is the one for which you received a call to {@link
      * #onStartPrinterStateTracking(PrinterId)}.
@@ -505,6 +520,20 @@ public abstract class PrinterDiscoverySession {
                 && !mTrackedPrinters.contains(printerId)) {
             mTrackedPrinters.add(printerId);
             onStartPrinterStateTracking(printerId);
+        }
+    }
+
+    /**
+     * Request the custom icon for a printer.
+     *
+     * @param printerId The printer to icon belongs to.
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    void requestCustomPrinterIcon(PrinterId printerId) {
+        if (!mIsDestroyed && mObserver != null) {
+            CustomPrinterIconCallback callback = new CustomPrinterIconCallback(printerId,
+                    mObserver);
+            onRequestCustomPrinterIcon(printerId, callback);
         }
     }
 

@@ -29135,6 +29135,7 @@ package android.print {
     method public android.print.PrinterId getId();
     method public java.lang.String getName();
     method public int getStatus();
+    method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.print.PrinterInfo> CREATOR;
     field public static final int STATUS_BUSY = 2; // 0x2
@@ -29148,6 +29149,9 @@ package android.print {
     method public android.print.PrinterInfo build();
     method public android.print.PrinterInfo.Builder setCapabilities(android.print.PrinterCapabilitiesInfo);
     method public android.print.PrinterInfo.Builder setDescription(java.lang.String);
+    method public android.print.PrinterInfo.Builder setHasCustomPrinterIcon();
+    method public android.print.PrinterInfo.Builder setIconResourceId(int);
+    method public android.print.PrinterInfo.Builder setInfoIntent(android.app.PendingIntent);
     method public android.print.PrinterInfo.Builder setName(java.lang.String);
     method public android.print.PrinterInfo.Builder setStatus(int);
   }
@@ -29167,6 +29171,10 @@ package android.print.pdf {
 }
 
 package android.printservice {
+
+  public class CustomPrinterIconCallback {
+    method public boolean onCustomPrinterIconLoaded(android.graphics.drawable.Icon);
+  }
 
   public final class PrintDocument {
     method public android.os.ParcelFileDescriptor getData();
@@ -29223,6 +29231,7 @@ package android.printservice {
     method public final boolean isDestroyed();
     method public final boolean isPrinterDiscoveryStarted();
     method public abstract void onDestroy();
+    method public void onRequestCustomPrinterIcon(android.print.PrinterId, android.printservice.CustomPrinterIconCallback);
     method public abstract void onStartPrinterDiscovery(java.util.List<android.print.PrinterId>);
     method public abstract void onStartPrinterStateTracking(android.print.PrinterId);
     method public abstract void onStopPrinterDiscovery();

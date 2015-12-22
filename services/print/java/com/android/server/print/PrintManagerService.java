@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -171,6 +172,25 @@ public final class PrintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 return userState.getPrintJobInfo(printJobId, resolvedAppId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public Icon getCustomPrinterIcon(PrinterId printerId, int userId) {
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can get the printer icons.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return null;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return userState.getCustomPrinterIcon(printerId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

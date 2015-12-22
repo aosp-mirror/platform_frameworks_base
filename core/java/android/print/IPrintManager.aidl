@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
@@ -53,6 +54,19 @@ interface IPrintManager {
     void stopPrinterDiscovery(in IPrinterDiscoveryObserver observer, int userId);
     void validatePrinters(in List<PrinterId> printerIds, int userId);
     void startPrinterStateTracking(in PrinterId printerId, int userId);
+
+    /**
+     * Get the custom icon for a printer. If the icon is not cached, the icon is
+     * requested asynchronously. Once it is available the printer is updated.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @param userId the id of the user requesting the printer
+     * @return the custom icon to be used for the printer or null if the icon is
+     *         not yet available
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    Icon getCustomPrinterIcon(in PrinterId printerId, int userId);
+
     void stopPrinterStateTracking(in PrinterId printerId, int userId);
     void destroyPrinterDiscoverySession(in IPrinterDiscoveryObserver observer,
             int userId);

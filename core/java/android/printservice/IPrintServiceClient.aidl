@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.graphics.drawable.Icon;
 import android.os.ParcelFileDescriptor;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
@@ -53,4 +54,13 @@ interface IPrintServiceClient {
 
     void onPrintersAdded(in ParceledListSlice printers);
     void onPrintersRemoved(in ParceledListSlice printerIds);
+
+    /**
+     * Handle that a custom icon for a printer was loaded.
+     *
+     * @param printerId the id of the printer the icon belongs to
+     * @param icon the icon that was loaded
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    void onCustomPrinterIconLoaded(in PrinterId printerId, in Icon icon);
 }

@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -51,6 +52,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.AdapterView;
@@ -587,20 +589,31 @@ public final class SelectPrinterActivity extends Activity {
 
             convertView.setEnabled(isActionable(position));
 
-            PrinterInfo printer = (PrinterInfo) getItem(position);
+            final PrinterInfo printer = (PrinterInfo) getItem(position);
 
             CharSequence title = printer.getName();
-            CharSequence subtitle = null;
-            Drawable icon = null;
+            Drawable icon = printer.loadIcon(SelectPrinterActivity.this);
 
+            CharSequence printServiceLabel;
             try {
-                PackageManager pm = getPackageManager();
-                PackageInfo packageInfo = pm.getPackageInfo(printer.getId()
-                        .getServiceName().getPackageName(), 0);
-                subtitle = packageInfo.applicationInfo.loadLabel(pm);
-                icon = packageInfo.applicationInfo.loadIcon(pm);
-            } catch (NameNotFoundException nnfe) {
-                /* ignore */
+                PackageInfo packageInfo = getPackageManager().getPackageInfo(
+                        printer.getId().getServiceName().getPackageName(), 0);
+
+                printServiceLabel = packageInfo.applicationInfo.loadLabel(getPackageManager());
+            } catch (NameNotFoundException e) {
+                printServiceLabel = null;
+            }
+
+            CharSequence description = printer.getDescription();
+
+            CharSequence subtitle;
+            if (printServiceLabel == null) {
+                subtitle = description;
+            } else if (description == null) {
+                subtitle = printServiceLabel;
+            } else {
+                subtitle = getString(R.string.printer_extended_description_template,
+                        printServiceLabel, description);
             }
 
             TextView titleView = (TextView) convertView.findViewById(R.id.title);
@@ -615,6 +628,20 @@ public final class SelectPrinterActivity extends Activity {
                 subtitleView.setVisibility(View.GONE);
             }
 
+            ImageView moreInfoView = (ImageView) convertView.findViewById(R.id.more_info);
+            if (printer.getInfoIntent() != null) {
+                moreInfoView.setVisibility(View.VISIBLE);
+                moreInfoView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            startIntentSender(printer.getInfoIntent().getIntentSender(), null, 0, 0, 0);
+                        } catch (SendIntentException e) {
+                            Log.e(LOG_TAG, "Could not execute pending info intent: %s", e);
+                        }
+                    }
+                });
+            }
 
             ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
             if (icon != null) {

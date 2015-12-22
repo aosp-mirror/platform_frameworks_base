@@ -499,6 +499,7 @@ aidl_files := \
 	frameworks/base/graphics/java/android/graphics/PointF.aidl \
 	frameworks/base/graphics/java/android/graphics/RectF.aidl \
 	frameworks/base/graphics/java/android/graphics/Rect.aidl \
+	frameworks/base/graphics/java/android/graphics/drawable/Icon.aidl \
 	frameworks/base/core/java/android/accounts/AuthenticatorDescription.aidl \
 	frameworks/base/core/java/android/accounts/Account.aidl \
 	frameworks/base/core/java/android/app/admin/SystemUpdatePolicy.aidl \

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ParceledListSlice;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -98,6 +99,15 @@ final class RemotePrintService implements DeathRecipient {
         public void onPrintersAdded(List<PrinterInfo> printers);
         public void onPrintersRemoved(List<PrinterId> printerIds);
         public void onServiceDied(RemotePrintService service);
+
+        /**
+         * Handle that a custom icon for a printer was loaded.
+         *
+         * @param printerId the id of the printer the icon belongs to
+         * @param icon the icon that was loaded
+         * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+         */
+        public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon);
     }
 
     public RemotePrintService(Context context, ComponentName componentName, int userId,
@@ -402,6 +412,22 @@ final class RemotePrintService implements DeathRecipient {
     public void startPrinterStateTracking(PrinterId printerId) {
         mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_STATE_TRACKING,
                 printerId).sendToTarget();
+    }
+
+    /**
+     * Request the custom printer icon for a printer.
+     *
+     * @param printerId the id of the printer the icon should be loaded for
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     */
+    public void requestCustomPrinterIcon(PrinterId printerId) {
+        try {
+            if (isBound()) {
+                mPrintService.requestCustomPrinterIcon(printerId);
+            }
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error requesting icon for " + printerId, re);
+        }
     }
 
     private void handleStartPrinterStateTracking(final PrinterId printerId) {
@@ -840,6 +866,20 @@ final class RemotePrintService implements DeathRecipient {
             if (printerId == null || printerId.getServiceName() == null
                     || !printerId.getServiceName().equals(serviceName)) {
                 throw new IllegalArgumentException("Invalid printer id: " + printerId);
+            }
+        }
+
+        @Override
+        public void onCustomPrinterIconLoaded(PrinterId printerId, Icon icon)
+                throws RemoteException {
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mCallbacks.onCustomPrinterIconLoaded(printerId, icon);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
     }
