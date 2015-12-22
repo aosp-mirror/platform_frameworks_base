@@ -57,6 +57,10 @@ public class UserManager {
      * Authenticator.
      * The default value is <code>false</code>.
      *
+     * <p>From {@link android.os.Build.VERSION_CODES#N} a profile or device owner app can still
+     * use {@link android.accounts.AccountManager} APIs to add or remove accounts when account
+     * management is disallowed.
+     *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
