@@ -1416,9 +1416,9 @@ public final class PrintSpoolerService extends Service {
         }
 
         @Override
-        public void removeApprovedPrintService(ComponentName serviceToRemove) {
+        public void pruneApprovedPrintServices(List<ComponentName> servicesToKeep) {
             (new ApprovedPrintServices(PrintSpoolerService.this))
-                    .removeApprovedService(serviceToRemove);
+                    .pruneApprovedServices(servicesToKeep);
         }
 
         @Override

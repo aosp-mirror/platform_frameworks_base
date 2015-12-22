@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
@@ -56,7 +55,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * SystemService wrapper for the PrintManager implementation. Publishes
@@ -88,11 +86,6 @@ public final class PrintManagerService extends SystemService {
     }
 
     class PrintManagerImpl extends IPrintManager.Stub {
-        private static final char COMPONENT_NAME_SEPARATOR = ':';
-
-        private static final String EXTRA_PRINT_SERVICE_COMPONENT_NAME =
-                "EXTRA_PRINT_SERVICE_COMPONENT_NAME";
-
         private static final int BACKGROUND_USER_ID = -10;
 
         private final Object mLock = new Object();
@@ -487,7 +480,7 @@ public final class PrintManagerService extends SystemService {
 
         private void registerContentObservers() {
             final Uri enabledPrintServicesUri = Settings.Secure.getUriFor(
-                    Settings.Secure.ENABLED_PRINT_SERVICES);
+                    Settings.Secure.DISABLED_PRINT_SERVICES);
             ContentObserver observer = new ContentObserver(BackgroundThread.getHandler()) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri, int userId) {
@@ -511,8 +504,7 @@ public final class PrintManagerService extends SystemService {
 
         private void registerBroadcastReceivers() {
             PackageMonitor monitor = new PackageMonitor() {
-                @Override
-                public void onPackageModified(String packageName) {
+                private void updateServices(String packageName) {
                     if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     synchronized (mLock) {
                         // A background user/profile's print jobs are running but there is
@@ -520,11 +512,15 @@ public final class PrintManagerService extends SystemService {
                         // to handle it as the change may affect ongoing print jobs.
                         boolean servicesChanged = false;
                         UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-                        Iterator<ComponentName> iterator = userState.getEnabledServices().iterator();
-                        while (iterator.hasNext()) {
-                            ComponentName componentName = iterator.next();
-                            if (packageName.equals(componentName.getPackageName())) {
+
+                        List<PrintServiceInfo> installedServices = userState
+                                .getInstalledPrintServices();
+                        final int numInstalledServices = installedServices.size();
+                        for (int i = 0; i < numInstalledServices; i++) {
+                            if (installedServices.get(i).getResolveInfo().serviceInfo.packageName
+                                    .equals(packageName)) {
                                 servicesChanged = true;
+                                break;
                             }
                         }
                         if (servicesChanged) {
@@ -534,30 +530,15 @@ public final class PrintManagerService extends SystemService {
                 }
 
                 @Override
+                public void onPackageModified(String packageName) {
+                    updateServices(packageName);
+                    getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
+                }
+
+                @Override
                 public void onPackageRemoved(String packageName, int uid) {
-                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
-                    synchronized (mLock) {
-                        // A background user/profile's print jobs are running but there is
-                        // no UI shown. Hence, if the packages of such a user change we need
-                        // to handle it as the change may affect ongoing print jobs.
-                        boolean servicesRemoved = false;
-                        UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-                        Iterator<ComponentName> iterator = userState.getEnabledServices().iterator();
-                        while (iterator.hasNext()) {
-                            ComponentName componentName = iterator.next();
-                            if (packageName.equals(componentName.getPackageName())) {
-                                userState.removeApprovedPrintService(componentName);
-                                iterator.remove();
-                                servicesRemoved = true;
-                            }
-                        }
-                        if (servicesRemoved) {
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.ENABLED_PRINT_SERVICES,
-                                    userState.getEnabledServices(), getChangingUserId());
-                            userState.updateIfNeededLocked();
-                        }
-                    }
+                    updateServices(packageName);
+                    getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
                 }
 
                 @Override
@@ -570,10 +551,10 @@ public final class PrintManagerService extends SystemService {
                         // to handle it as the change may affect ongoing print jobs.
                         UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                         boolean stoppedSomePackages = false;
-                        Iterator<ComponentName> iterator = userState.getEnabledServices()
+                        Iterator<PrintServiceInfo> iterator = userState.getEnabledPrintServices()
                                 .iterator();
                         while (iterator.hasNext()) {
-                            ComponentName componentName = iterator.next();
+                            ComponentName componentName = iterator.next().getComponentName();
                             String componentPackage = componentName.getPackageName();
                             for (String stoppedPackage : stoppedPackages) {
                                 if (componentPackage.equals(stoppedPackage)) {
@@ -606,47 +587,10 @@ public final class PrintManagerService extends SystemService {
                             .queryIntentServicesAsUser(intent, PackageManager.GET_SERVICES,
                                     getChangingUserId());
 
-                    if (installedServices == null) {
-                        return;
-                    }
-
-                    // Enable all added services by default
-                    synchronized (mLock) {
+                    if (installedServices != null) {
                         UserState userState = getOrCreateUserStateLocked(getChangingUserId());
-
-                        Set<ComponentName> enabledServices = userState.getEnabledServices();
-                        boolean servicesAdded = false;
-
-                        final int installedServiceCount = installedServices.size();
-                        for (int i = 0; i < installedServiceCount; i++) {
-                            ServiceInfo serviceInfo = installedServices.get(i).serviceInfo;
-                            ComponentName component = new ComponentName(serviceInfo.packageName,
-                                    serviceInfo.name);
-
-                            enabledServices.add(component);
-                            servicesAdded = true;
-                        }
-
-                        if (servicesAdded) {
-                            persistComponentNamesToSettingLocked(
-                                    Settings.Secure.ENABLED_PRINT_SERVICES, enabledServices,
-                                    getChangingUserId());
-                            userState.updateIfNeededLocked();
-                        }
+                        userState.updateIfNeededLocked();
                     }
-                }
-
-                private void persistComponentNamesToSettingLocked(String settingName,
-                        Set<ComponentName> componentNames, int userId) {
-                    StringBuilder builder = new StringBuilder();
-                    for (ComponentName componentName : componentNames) {
-                        if (builder.length() > 0) {
-                            builder.append(COMPONENT_NAME_SEPARATOR);
-                        }
-                        builder.append(componentName.flattenToShortString());
-                    }
-                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                            settingName, builder.toString(), userId);
                 }
             };
 

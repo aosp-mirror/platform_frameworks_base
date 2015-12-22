@@ -4974,19 +4974,22 @@ public final class Settings {
 
         /**
          * List of the enabled print services.
+         *
+         * N and beyond uses {@link #DISABLED_PRINT_SERVICES}. But this might be used in an upgrade
+         * from pre-N.
+         *
          * @hide
          */
         public static final String ENABLED_PRINT_SERVICES =
             "enabled_print_services";
 
         /**
-         * List of the system print services we enabled on first boot. On
-         * first boot we enable all system, i.e. bundled print services,
-         * once, so they work out-of-the-box.
+         * List of the disabled print services.
+         *
          * @hide
          */
-        public static final String ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES =
-            "enabled_on_first_boot_system_print_services";
+        public static final String DISABLED_PRINT_SERVICES =
+            "disabled_print_services";
 
         /**
          * Setting to always use the default text-to-speech settings regardless
