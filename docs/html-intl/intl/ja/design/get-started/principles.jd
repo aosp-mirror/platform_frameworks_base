@@ -1,29 +1,29 @@
-page.title=Android デザイン指針
+page.title=Android デザインの原則
 @jd:body
 
-<p>このデザイン指針は、ユーザーがもっとも知りたいと思われることを中心に、Android User Experience Team により、またその活動を統一的なものにするために作成されたものです。Android デベロッパーとデザイナーに対しては各種端末向けのより詳細なデザイン ガイドラインがあります。
+<p>このデザインの原則は、ユーザーがもっとも知りたいと思われることを中心に、Android User Experience Team により、またその活動を統一的なものにするために作成されたものです。
 
-
+Android デベロッパーとデザイナーに対しては各種端末向けのより詳細なデザイン ガイドラインがあります。
 
 </p>
 
 <p>
-ご自身の創造性やデザインについて考える際、この指針を考慮に入れてください。
+ご自身のクリエイティビティやデザインについて考える際、この原則を考慮に入れてください。
 何を当てはめるかは目的に応じて調整してください。
 </p>
 
 <h2 id="enchant-me">ユーザーを引きつける</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="delight-me">サプライズで楽しませる</h4>
-<p>美しい画面、考え抜かれて配置されたアニメーション、タイミングの良いサウンド エフェクトは、使っていて楽しくなります。
+<p>美しい画面、思慮深く配置されたアニメーション、タイミングの良いサウンド エフェクトは、使っていて楽しくなります。
 わずかな効果でも、ユーザーを楽しませ、力を得たように感じてもらえます。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_delight.png">
 
@@ -32,15 +32,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="real-objects-more-fun">ボタンやメニューよりもリアルなオブジェクトでさらに楽しく</h4>
-<p>ユーザーがアプリでオブジェクトを直接タップしたり操作したりできるようになります。タスクを実行するために必要な認知の労力が軽減され、感覚的な満足度も上がります。
+<p>アプリでオブジェクトを直接タップしたり操作したりできます。タスクを試行錯誤しながら実行する必要はなく、アプリの満足度も上がります。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_real_objects.png">
 
@@ -49,16 +49,16 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="make-it-mine">自分らしさを加える</h4>
-<p>ユーザーは自分でカスタマイズすることを好みます。これにより、くつろいだ気分や自分の思いのままできる自由な気分を味わうことができます。デフォルトで実用的で美しいものを取りそろえ、それに加えてメイン タスクの妨げにならない、楽しいカスタマイズも任意で加えられます。
+<h4 id="make-it-mine">アプリに自分らしさをプラス</h4>
+<p>誰もがアプリで自分らしさを出したいと思っています。好きなようにアプリを操作できるからです。実用的で美しい機能があらかじめ用意されており、それに加えてメイン タスクの邪魔にならない、楽しいカスタマイズもできます。
 
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_make_it_mine.png">
 
@@ -67,31 +67,31 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="get-to-know-me">ユーザーについて知る</h4>
-<p>徐々にユーザーの好みを学習していきます。同じ選択を繰り返す手間をかけず、前に選択したものをすぐに選べるようになります。
+<h4 id="get-to-know-me">ユーザーの好みを学習</h4>
+<p>徐々にユーザーの好みを学習していきます。ユーザーに何度も同じ選択をさせるのではなく、前に選択したものをすぐに選べるようにします。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_get_to_know_me.png">
 
   </div>
 </div>
 
-<h2 id="simplify-my-life">よりシンプルに</h2>
+<h2 id="simplify-my-life">生活をシンプルに</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="keep-it-brief">常に簡潔に</h4>
-<p>シンプルな言葉を並べた短いフレーズを用います。長い文章は好まれません。</p>
+<h4 id="keep-it-brief">簡潔を心がける</h4>
+<p>シンプルで短いフレーズを用います。長い文章は好まれません。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_keep_it_brief.png">
 
@@ -100,15 +100,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="pictures-faster-than-words">画像は言葉よりもわかりやすい</h4>
-<p>画像を使ってアイデアを説明してみましょう。ユーザーの興味を引くことができ、言葉よりも効率的です。
+<p>画像を使ってアイデアを説明してみましょう。ユーザーの興味を引くことができ、言葉よりも効果的です。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_pictures.png">
 
@@ -117,15 +117,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="decide-for-me">選択は最小限に、最終決定はユーザーに</h4>
-<p>最初からユーザーにすべて尋ねるのではなく、もっとも適切と思われる項目を提示します。選択肢や決定事項が多すぎると面倒に感じます。
-推測が間違っていた場合に備え、「やり直し」も可能にします。</p>
+<p>最初からユーザーに選ばせるのではなく、適切と思われる項目を提示します。選択肢や決定事項が多すぎるとユーザーは面倒に感じます。
+間違った選択をしても、「やり直し」ができます。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_decide_for_me.png">
 
@@ -134,15 +134,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="only-show-when-i-need-it">必要なものを必要なときにだけ表示する</h4>
+<h4 id="only-show-when-i-need-it">必要なものを必要なときに</h4>
 <p>一度に表示される内容が多すぎると疲れてしまいます。タスクや情報はいくつかに小さくまとめてわかりやすくします。
 その時点で必要のないオプションは非表示にして、必要なときだけ表示します。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_information_when_need_it.png">
 
@@ -151,15 +151,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="always-know-where-i-am">全体像から現在の位置を示す</h4>
-<p>ユーザーがはっきりと自分の現在の場所を把握できるようにします。アプリのどの場所にいるかを明示し、遷移して画面の関係を認識できるようにします。
-実行しているタスクに対して応答し続けます。</p>
+<h4 id="always-know-where-i-am">現在位置を把握する</h4>
+<p>ユーザーが現在アプリのどこにいるのかがすぐに分かります。アプリ内における現在位置を明示し、遷移を使用して画面間の関係を表示します。
+実行中のタスクにフィードバックを返します。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_navigation.png">
 
@@ -168,16 +168,16 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="never-lose-my-stuff">作成したものは失くさない</h4>
-<p>ユーザーが時間をかけて作ったものは保存して、どこからでもアクセスできるようにします。設定、独自のカスタマイズ、電話、タブレット、コンピュータで作成したものを記録します。
-アップグレードも簡単になります。
+<h4 id="never-lose-my-stuff">作成物を失くさない</h4>
+<p>ユーザーが時間をかけて作ったものは保存して、どこからでもアクセスできるようにします。設定、独自のカスタマイズ、および携帯端末、タブレット、コンピュータで作成したものを保存します。
+アップグレードも簡単にできます。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_never_lose_stuff.png">
 
@@ -186,15 +186,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="looks-same-should-act-same">見た目が同じ場合は機能も同じにする</h4>
-<p>視覚的な違いを際立たせ、ユーザーが機能の違いをはっきり区別できるようにします。同じような外観、同じ入力で機能が異なるようなモードは避けます。
-</p>
+<h4 id="looks-same-should-act-same">見た目が同じなら機能も同じ</h4>
+<p>機能の違いがはっきり分かるように、特徴的なビジュアルにします。
+同じような外観、同じ入力方法なのに機能が異なるということのないようにします。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_looks_same.png">
 
@@ -203,15 +203,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="interrupt-only-if-important">割り込みは重要なときにだけ行う</h4>
-<p>優秀な個人秘書のように、重要ではない些細なことでユーザーをわずらわせることのないよう配慮します。集中したいユーザーにとって、重要で一刻を争うようなものでない限り、割り込まれると面倒で不快に感じる可能性があります。
+<h4 id="interrupt-only-if-important">割り込みは必要な場合のみ</h4>
+<p>優秀な個人秘書のように、ユーザーを些細なことでわずらわせないようにします。ユーザーは実行中の操作に専念したいと考えており、重要で一刻を争うようなものでない限り、割り込みは面倒で不快と感じます。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_important_interruption.png">
 
@@ -220,16 +220,16 @@ page.title=Android デザイン指針
 
 <h2 id="make-me-amazing">操作を楽しく</h2>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="give-me-tricks">あらゆる場所に工夫を仕込む</h4>
-<p>自分で理解すると嬉しく感じられます。Android アプリで広く使われている視覚や操作のパターンを生かし、アプリの操作をわかりやすいものにします。
-たとえばスワイプ操作は便利なナビゲーションのショートカットとして使えます。
+<h4 id="give-me-tricks">あらゆる場所に工夫を凝らす</h4>
+<p>理解できれば楽しくなります。Android アプリで広く使われている視覚や操作のパターンを生かし、アプリの操作をわかりやすいものにします。
+たとえばスワイプ操作は、ナビゲーションのショートカットとして使えるので便利です。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_tricks.png">
 
@@ -238,16 +238,16 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="its-not-my-fault">解決は簡単に</h4>
-<p>ユーザーに修正を促す場合はその方法に注意します。アプリではスマートに問題を解決できるようにします。うまくいかなかったときは解決方法を明確に示し、技術的な詳細を表示する必要はありません。自動的に修正できる問題はユーザーに通知する必要すらありません。
-
-</p>
+<h4 id="its-not-my-fault">ユーザーの責任にしない</h4>
+<p>ユーザーに修正を促す場合はその方法に注意します。ユーザーはアプリをスマートに使いこなしたいと考えています。
+うまくいかなかったときの解決方法は明確でなければなりませんが、技術的に詳細である必要はありません。
+自動的に修正できる問題については、通知も不要です。</p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_error.png">
 
@@ -256,15 +256,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="sprinkle-encouragement">操作を促すしかけを散りばめる</h4>
-<p>複雑なタスクは分割し、それぞれ簡単に達成できるようにします。1 つ 1 つにフィードバックすることで、ユーザーの満足度は高まります。
+<p>複雑なタスクは分割し、簡単に達成できるようにします。1 つ 1 つのアクションにフィードバックすることで、ユーザーの満足度は高まります。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_sprinkle_encouragement.png">
 
@@ -273,16 +273,16 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
-<h4 id="do-heavy-lifting-for-me">作業の手間はかけない</h4>
-<p>できると思っていなかったことをできるようにすることで、知識がなくても専門家のような気分を味わってもらえます。たとえば複数の写真効果を組み合わせたショートカットを使うことで、わずかな手順でプロのような写真に仕上げられます。
+<h4 id="do-heavy-lifting-for-me">手間のかかる作業は不要</h4>
+<p>できないと思っていたことができるようになれば、初心者でもエキスパートの気分が味わえます。たとえば複数の写真効果を組み合わせるショートカットを使うことで、わずかな手順でプロのような写真に仕上げられます。
 
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_heavy_lifting.png">
 
@@ -291,15 +291,15 @@ page.title=Android デザイン指針
 
 <div class="vspace size-2">&nbsp;</div>
 
-<div class="layout-content-row">
-  <div class="layout-content-col span-7">
+<div class="cols">
+  <div class="col-7">
 
 <h4 id="make-important-things-fast">重要なことはすみやかに</h4>
-<p>すべてのアクションが同じ優先度とは限りません。アプリのアクションには優先度を設定し、重要なものはたとえばカメラのシャッター ボタンや音楽プレイヤーの一時停止ボタンのように、簡単に見つけられすぐに使えるようにします。
+<p>すべてのアクションが同じ優先度とは限りません。アプリのアクションに優先度を設定し、カメラのシャッター ボタンや音楽プレイヤーの一時停止ボタンのように重要なものは、簡単に見つけてすぐに使えるようにします。
 </p>
 
   </div>
-  <div class="layout-content-col span-6">
+  <div class="col-6">
 
     <img src="{@docRoot}design/media/principles_make_important_fast.png">
 

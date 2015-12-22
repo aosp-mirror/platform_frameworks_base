@@ -1,0 +1,70 @@
+page.title=이전 버전과의 호환성
+page.tags="support"
+page.metaDescription=Android 4.x에서 어떤 방식으로 이전 버전의 하드웨어 및 OS용으로 디자인된 UI를 적용하는지에 대한 설명입니다.
+@jd:body
+
+<a class="notice-developers" href="{@docRoot}training/basics/supporting-devices/index.html">
+  <div>
+    <h3>개발자 문서</h3>
+    <p>다양한 기기 지원</p>
+  </div>
+</a>
+
+<p>Android 3.0에서 중요한 변경 사항은 다음과 같습니다.</p>
+<ul>
+<li>가상 컨트롤(Back, Home, Recents)을 통한 탐색 처리
+에 편리하도록 탐색 하드웨어 키(Back, Menu, Search, Home) 사용 중단.</li>
+<li>작업 모음에서 메뉴 사용을 위한 견고한 패턴.</li>
+</ul>
+<p>Android 4.0은 태블릿의 이러한 변경 사항들을 휴대폰 플랫폼에 적용합니다.</p>
+
+<h2 id="older-hardware">이전 하드웨어 및 앱에 Android 4.0 적용</h2>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>가상 탐색 컨트롤이 있는 휴대폰</h4>
+<p>Android 3.0 이상의 버전용으로 작성된 Android 앱은 작업 모음에 작업을 표시합니다. 작업 모음에 적합하지 않거나 최상위에 표시될 만큼 중요하지 않은 작업은 작업 오버플로우에 나타납니다.
+
+</p>
+<p>사용자는 작업 모음에서 작업 오버플로를 터치하는 방식으로 액세스합니다.</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_virtual_nav.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>실제 탐색 키가 있는 휴대폰</h4>
+<p>탐색 하드웨어 키가 있는 기존 Android 휴대폰은 화면 하단에 가상 탐색 모음을 표시하지 않습니다.
+ 대신 메뉴 하드웨어 키에서 작업 오버플로를 이용할 수 있습니다. 나타나는 작업 팝업은 이전의 예와 스타일은 같지만 화면 하단에 표시됩니다.
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_physical_buttons.png">
+
+  </div>
+</div>
+
+<div class="cols">
+  <div class="col-6">
+
+<h4>가상 탐색 컨트롤이 있는 휴대폰의 레거시 앱</h4>
+<p>Android 2.3 이하 버전용으로 작성된 앱을 가상 탐색 컨트롤이 있는 휴대폰에서 실행하면 가상 탐색 모음의 오른쪽에 작업 오버플로가 나타납니다.
+ 이 컨트롤을 터치하여 기존 Android 메뉴 스타일로 앱의 작업을 표시할 수 있습니다.
+</p>
+
+  </div>
+  <div class="col-7">
+
+    <img src="{@docRoot}design/media/compatibility_legacy_apps.png">
+
+  </div>
+</div>

@@ -1,6 +1,6 @@
 page.title=Desain Bahan untuk Android
 page.tags=Material,design
-page.type=design
+page.type=desain
 page.image=images/cards/design-material-for-android_2x.jpg
 
 @jd:body
@@ -25,11 +25,7 @@ page.image=images/cards/design-material-for-android_2x.jpg
 <a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
 <div>
     <h3>Video</h3>
-<<<<<<< HEAD
     <p>Kertas dan Tinta: Bahan Penting</p>
-=======
-    <p>Kertas dan Tinta: Bahan-Bahan Penting</p>
->>>>>>> Docs: L10N update for design documentation
 </div>
 </a>
 
@@ -37,17 +33,12 @@ page.image=images/cards/design-material-for-android_2x.jpg
 <a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
 <div>
     <h3>Video</h3>
-<<<<<<< HEAD
     <p>Desain Bahan di Aplikasi Google I/O</p>
-=======
-    <p>Desain Bahan dalam Aplikasi Google I/O</p>
->>>>>>> Docs: L10N update for design documentation
 </div>
 </a>
 
 
 
-<<<<<<< HEAD
 <p itemprop="description">Desain bahan adalah panduan komprehensif untuk desain visual, gerak, dan
 interaksi lintas platform dan perangkat. Android kini menyertakan dukungan untuk
 aplikasi desain bahan. Untuk menggunakan desain bahan di aplikasi Android, ikuti panduan yang didefinisikan
@@ -60,20 +51,6 @@ komponen dan fungsionalitas baru yang tersedia di Android 5.0 (API level 21) ke 
   <li>Tema baru</li>
   <li>Widget baru untuk tampilan yang kompleks</li>
   <li>API baru untuk animasi dan bayangan custom</li>
-=======
-<p itemprop="description">Desain bahan adalah panduan komprehensif untuk desain visual, gerakan, dan
-interaksi lintas platform dan perangkat. Android sekarang memasukkan dukungan untuk
-aplikasi desain bahan. Untuk menggunakan desain bahan dalam aplikasi Android Anda, ikuti panduan yang didefinisikan
-dalam <a href="http://www.google.com/design/spec">spesifikasi desain bahan</a> dan gunakan
-komponen dan fungsionalitas baru yang tersedia dalam Android 5.0 (API level 21) dan yang di atasnya.</p>
-
-<p>Android menyediakan elemen-elemen berikut bagi Anda untuk membuat aplikasi desain bahan:</p>
-
-<ul>
-  <li>Tema baru</li>
-  <li>Widget baru untuk tampilan kompleks</li>
-  <li>API baru untuk bayangan dan animasi custom</li>
->>>>>>> Docs: L10N update for design documentation
 </ul>
 
 <p>Untuk informasi selengkapnya tentang mengimplementasikan desain bahan pada Android, lihat
@@ -83,11 +60,7 @@ komponen dan fungsionalitas baru yang tersedia dalam Android 5.0 (API level 21) 
 <h3>Tema Bahan</h3>
 
 <p>Tema bahan menyediakan gaya baru untuk aplikasi Anda, widget sistem yang memungkinkan Anda mengatur
-<<<<<<< HEAD
 palet warnanya, dan animasi default untuk umpan balik sentuh dan transisi aktivitas.</p>
-=======
-palet warna, dan animasi default untuk umpan balik sentuh serta transisi aktivitas.</p>
->>>>>>> Docs: L10N update for design documentation
 
 <!-- two columns -->
 <div style="width:700px;margin-top:25px;margin-bottom:20px">
@@ -119,7 +92,6 @@ dan animasi:</p>
 <div style="width:700px;margin-top:25px;margin-bottom:20px">
 <div style="float:left;width:250px;margin-left:40px;margin-right:60px;">
   <img src="{@docRoot}design/material/images/list_mail.png" width="500" height="426" />
-<<<<<<< HEAD
   <p>Widget <code>RecyclerView</code> baru adalah versi <code>ListView</code>
  yang lebih mudah dimasukkan dan mendukung beragam tipe layout serta memberikan peningkatan kinerja.</p>
 </div>
@@ -127,15 +99,6 @@ dan animasi:</p>
   <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
   <p>Widget <code>CardView</code> baru memungkinkan Anda menampilkan potongan informasi penting dalam
   kartu yang memiliki tampilan dan cara kerja yang konsisten.</p>
-=======
-  <p>Widget <code>RecyclerView</code> baru adalah versi yang lebih mudah dimasukkan untuk <code>ListView</code>
-  yang mendukung tipe layout berbeda dan memberikan peningkatan kinerja.</p>
-</div>
-<div style="float:left;width:250px;margin-right:0px;">
-  <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
-  <p>Widget <code>CardView</code> baru memungkinkan Anda menampilkan bagian informasi penting di dalam
-  kartu yang memiliki tampilan dan gaya konsisten.</p>
->>>>>>> Docs: L10N update for design documentation
 </div>
 <br style="clear:left"/>
 </div>
@@ -146,21 +109,12 @@ dan Kartu</a>.</p>
 
 <h3>Bayangan Tampilan</h3>
 
-<<<<<<< HEAD
 <p>Selain properti X dan Y, tampilan di Android kini memiliki
 properti Z. Properti baru ini mewakili ketinggian tampilan, yang menentukan:</p>
 
 <ul>
 <li>Ukuran bayangan: tampilan dengan nilai Z lebih tinggi menghasilkan bayangan lebih besar.</li>
 <li>Urutan penggambaran: tampilan dengan nilai Z lebih tinggi muncul di atas tampilan lainnya.</li>
-=======
-<p>Selain properti X dan Y, tampilan dalam Android sekarang memiliki
-properti Z. Properti baru ini mewakili ketinggian pandangan, yang menentukan:</p>
-
-<ul>
-<li>Ukuran bayangan: tampilan dengan nilai Z lebih tinggi membentuk bayangan yang lebih besar.</li>
-<li>Urutan penggambaran: tampilan dengan nilai Z lebih tinggi akan muncul di atas tampilan lain.</li>
->>>>>>> Docs: L10N update for design documentation
 </ul>
 
 <div style="width:290px;margin-left:35px;float:right">
@@ -172,36 +126,23 @@ properti Z. Properti baru ini mewakili ketinggian pandangan, yang menentukan:</p
   </video>
   </div>
   <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
-<<<<<<< HEAD
     <em>Untuk memutar ulang film, klik layar perangkat</em>
-=======
-    <em>Untuk memutar ulang film, klik pada layar perangkat</em>
->>>>>>> Docs: L10N update for design documentation
   </div>
 </div>
 
 <p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/shadows-clipping.html">Mendefinisikan
-<<<<<<< HEAD
 Bayangan dan Memangkas Tampilan</a>.</p>
-=======
-Bayangan dan Memotong Tampilan</a>.</p>
->>>>>>> Docs: L10N update for design documentation
 
 
 <h3>Animasi</h3>
 
 <p>API animasi baru memungkinkan Anda membuat animasi custom untuk umpan balik sentuh dalam kontrol UI,
-<<<<<<< HEAD
 perubahan status tampilan, dan transisi aktivitas.</p>
-=======
-perubahan dalam status tampilan, dan transisi aktivitas.</p>
->>>>>>> Docs: L10N update for design documentation
 
 <p>API ini memungkinkan Anda:</p>
 
 <ul>
 <li style="margin-bottom:15px">
-<<<<<<< HEAD
 Merespons kejadian sentuh dalam tampilan Anda dengan animasi <strong>umpan balik sentuh</strong>.
 </li>
 <li style="margin-bottom:15px">
@@ -212,38 +153,17 @@ Peralihan antar aktivitas dengan animasi <strong>transisi aktivitas</strong> cus
 </li>
 <li style="margin-bottom:15px">
 Membuat animasi yang lebih alami dengan <strong>gerak melengkung</strong>.
-=======
-Merespons terjadinya sentuhan dalam tampilan Anda dengan animasi <strong>umpan balik sentuh</strong>.
-</li>
-<li style="margin-bottom:15px">
-Menyembunyikan dan menampilkan tampilan dengan animasi <strong>penampakan sirkuler</strong>.
-</li>
-<li style="margin-bottom:15px">
-Beralih antar aktivitas dengan animasi <strong>transisi aktivitas</strong> custom.
-</li>
-<li style="margin-bottom:15px">
-Membuat animasi yang lebih alami dengan <strong>gerakan melingkar</strong>.
->>>>>>> Docs: L10N update for design documentation
 </li>
 <li style="margin-bottom:15px">
 Menganimasikan perubahan dalam satu atau beberapa properti tampilan dengan animasi <strong>perubahan status tampilan</strong>.
 </li>
 <li style="margin-bottom:15px">
-<<<<<<< HEAD
 Menampilkan animasi di <strong>drawable daftar status</strong> di antara perubahan status tampilan.
 </li>
 </ul>
 
 <p>Animasi umpan balik sentuh dimasukkan ke dalam beberapa tampilan standar, misalnya tombol. API baru
 ini memungkinkan Anda menyesuaikan animasi ini dan menambahkannya ke tampilan custom Anda.</p>
-=======
-Menampilkan animasi dalam <strong>drawable daftar status</strong> di antara perubahan status tampilan.
-</li>
-</ul>
-
-<p>Animasi umpan balik sentuh dimasukkan ke dalam beberapa tampilan standar, misalnya tombol. API
-baru ini memungkinkan Anda menyesuaikan animasi ini dan menambahkannya ke tampilan custom.</p>
->>>>>>> Docs: L10N update for design documentation
 
 <p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/animations.html">Mendefinisikan Animasi
 Custom</a>.</p>
@@ -254,7 +174,6 @@ Custom</a>.</p>
 <p>Kemampuan baru untuk drawable ini membantu Anda mengimplementasikan aplikasi desain bahan:</p>
 
 <ul>
-<<<<<<< HEAD
 <li><strong>Drawable vektor</strong> bisa diubah skalanya tanpa kehilangan definisi dan cocok
 untuk ikon satu-warna dalam-aplikasi.</li>
 <li><strong>Pewarnaan drawable</strong> memungkinkan Anda mendefinisikan bitmap sebagai alpha-mask dan mewarnainya
@@ -264,15 +183,4 @@ gambar bitmap.</li>
 </ul>
 
 <p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/drawables.html">Bekerja dengan
-=======
-<li><strong>Drawable vektor</strong> dapat diskalakan tanpa kehilangan ketajaman dan cocok
-untuk ikon satu-warna dalam-aplikasi.</li>
-<li><strong>Pewarnaan drawable</strong> memungkinkan Anda mendefinisikan bitmap sebagai
-alpha-mask dan mewarnainya dengan satu warna saat runtime.</li>
-<li><strong>Ekstraksi warna</strong> memungkinkan Anda secara otomatis mengekstrak warna
-penting dari gambar bitmap.</li>
-</ul>
-
-<p>Untuk informasi selengkapnya, lihat <a href="{@docRoot}training/material/drawables.html">Menggunakan
->>>>>>> Docs: L10N update for design documentation
 Drawable</a>.</p>

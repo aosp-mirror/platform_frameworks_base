@@ -1,7 +1,7 @@
 page.title=Android 材料設計
 page.tags=Material,design
 page.type=設計
-page.image=mages/cards/design-material-for-android_2x.jpg
+page.image=images/cads/design-material-for-android_2x.jpg
 
 @jd:body
 
@@ -59,7 +59,7 @@ Android 現已納入對材料設計應用程式的支援。
 
 <h3>材料設計風格</h3>
 
-<p>材料設計風格提供您應用程式使用的新樣式、可以讓您設定色板的系統小工具，並針對輕觸回饋與操作 Activity 轉換提供預設動畫。
+<p>材料設計風格提供您應用程式使用的新樣式、可以讓您設定色板的系統小工具，並針對輕觸回饋與操作行為轉換提供預設動畫。
 </p>
 
 <!-- two columns -->
@@ -136,11 +136,7 @@ Android 現已納入對材料設計應用程式的支援。
 
 <h3>動畫</h3>
 
-<<<<<<< HEAD
 <p>新的動畫 API 可針對 UI 控制項的輕觸回饋、視圖狀態中的變更，以及操作行為轉換，讓您建立自訂動畫。
-=======
-<p>新的動畫 API 可針對 UI 控制項的輕觸回饋、視圖狀態中的變更，以及 Activity 轉換，讓您建立自訂動畫。
->>>>>>> Docs: L10N update for design documentation
 </p>
 
 <p>這些 API 讓您可以：</p>
@@ -153,11 +149,7 @@ Android 現已納入對材料設計應用程式的支援。
 隱藏和顯示有<strong>循環顯示</strong>動畫的視圖。
 </li>
 <li style="margin-bottom:15px">
-<<<<<<< HEAD
 在包含自訂<strong>操作行為轉換</strong>動畫的行為間切換。
-=======
-在包含自訂 <strong>Activity 轉換</strong>動畫的 Activity 間切換。
->>>>>>> Docs: L10N update for design documentation
 </li>
 <li style="margin-bottom:15px">
 使用<strong>曲線動作</strong>建立更自然的動畫。
