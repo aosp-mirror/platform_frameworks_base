@@ -102,6 +102,7 @@
 
     <!-- Titles for logd limit size selection preference. [CHAR LIMIT=14] -->
     <string-array name="select_logd_size_titles">
+        <item>Off</item>
         <item>64K</item>
         <item>256K</item>
         <item>1M</item>
@@ -111,6 +112,7 @@
 
     <!-- Titles for logd limit size lowram selection preference. [CHAR LIMIT=14] -->
     <string-array name="select_logd_size_lowram_titles">
+        <item>Off</item>
         <item>64K</item>
         <item>256K</item>
         <item>1M</item>
@@ -118,6 +120,7 @@
 
     <!-- Values for logd limit size selection preference. -->
     <string-array name="select_logd_size_values" translatable="false" >
+        <item>32768</item>
         <item>65536</item>
         <item>262144</item>
         <item>1048576</item>
@@ -127,6 +130,7 @@
 
     <!-- Summaries for logd limit size selection preference. [CHAR LIMIT=30]-->
     <string-array name="select_logd_size_summaries" >
+        <item>Off</item>
         <item>64K per log buffer</item>
         <item>256K per log buffer</item>
         <item>1M per log buffer</item>
