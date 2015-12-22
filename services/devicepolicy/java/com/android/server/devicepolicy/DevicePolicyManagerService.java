@@ -424,6 +424,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_PACKAGE_LIST_ITEM  = "item";
         private static final String TAG_KEEP_UNINSTALLED_PACKAGES  = "keep-uninstalled-packages";
         private static final String TAG_USER_RESTRICTIONS = "user-restrictions";
+        private static final String TAG_SHORT_SUPPORT_MESSAGE = "short-support-message";
+        private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
 
         final DeviceAdminInfo info;
 
@@ -508,6 +510,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         List<String> crossProfileWidgetProviders;
 
         Bundle userRestrictions;
+
+        // Support text provided by the admin to display to the user.
+        String shortSupportMessage = null;
+        String longSupportMessage = null;
 
         ActiveAdmin(DeviceAdminInfo _info) {
             info = _info;
@@ -688,6 +694,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 UserRestrictionsUtils.writeRestrictions(
                         out, userRestrictions, TAG_USER_RESTRICTIONS);
             }
+            if (!TextUtils.isEmpty(shortSupportMessage)) {
+                out.startTag(null, TAG_SHORT_SUPPORT_MESSAGE);
+                out.text(shortSupportMessage);
+                out.endTag(null, TAG_SHORT_SUPPORT_MESSAGE);
+            }
+            if (!TextUtils.isEmpty(longSupportMessage)) {
+                out.startTag(null, TAG_LONG_SUPPORT_MESSAGE);
+                out.text(longSupportMessage);
+                out.endTag(null, TAG_LONG_SUPPORT_MESSAGE);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -801,6 +817,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     keepUninstalledPackages = readPackageList(parser, tag);
                 } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
                     UserRestrictionsUtils.readRestrictions(parser, ensureUserRestrictions());
+                } else if (TAG_SHORT_SUPPORT_MESSAGE.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        shortSupportMessage = parser.getText();
+                    } else {
+                        Log.w(LOG_TAG, "Missing text when loading short support message");
+                    }
+                } else if (TAG_LONG_SUPPORT_MESSAGE.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        longSupportMessage = parser.getText();
+                    } else {
+                        Log.w(LOG_TAG, "Missing text when loading long support message");
+                    }
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1599,6 +1629,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Find the admin for the component and userId bit of the uid, then check
+     * the admin's uid matches the uid.
+     */
+    private ActiveAdmin getActiveAdminForUidLocked(ComponentName who, int uid) {
+        final int userId = UserHandle.getUserId(uid);
+        final DevicePolicyData policy = getUserData(userId);
+        ActiveAdmin admin = policy.mAdminMap.get(who);
+        if (admin == null) {
+            throw new SecurityException("No active admin " + who);
+        }
+        if (admin.getUid() != uid) {
+            throw new SecurityException("Admin " + who + " is not owned by uid " + uid);
+        }
+        return admin;
+    }
+
     private ActiveAdmin getActiveAdminWithPolicyForUidLocked(ComponentName who, int reqPolicy,
             int uid) {
         // Try to find an admin which can use reqPolicy
@@ -1610,8 +1657,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException("No active admin " + who);
             }
             if (admin.getUid() != uid) {
-                throw new SecurityException("Admin " + who + " is not owned by uid "
-                        + mInjector.binderGetCallingUid());
+                throw new SecurityException("Admin " + who + " is not owned by uid " + uid);
             }
             if (isActiveAdminWithPolicyForUserLocked(admin, reqPolicy, userId)) {
                 return admin;
@@ -7104,4 +7150,99 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public void setShortSupportMessage(@NonNull ComponentName who, String message) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForUidLocked(who,
+                    mInjector.binderGetCallingUid());
+            if (!TextUtils.equals(admin.shortSupportMessage, message)) {
+                admin.shortSupportMessage = message;
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
+
+    @Override
+    public String getShortSupportMessage(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForUidLocked(who,
+                    mInjector.binderGetCallingUid());
+            return admin.shortSupportMessage;
+        }
+    }
+
+    @Override
+    public void setLongSupportMessage(@NonNull ComponentName who, String message) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForUidLocked(who,
+                    mInjector.binderGetCallingUid());
+            if (!TextUtils.equals(admin.longSupportMessage, message)) {
+                admin.longSupportMessage = message;
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
+
+    @Override
+    public String getLongSupportMessage(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForUidLocked(who,
+                    mInjector.binderGetCallingUid());
+            return admin.longSupportMessage;
+        }
+    }
+
+    @Override
+    public String getShortSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+            throw new SecurityException("Only the system can query support message for user");
+        }
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin != null) {
+                return admin.shortSupportMessage;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getLongSupportMessageForUser(@NonNull ComponentName who, int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+            throw new SecurityException("Only the system can query support message for user");
+        }
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin != null) {
+                return admin.longSupportMessage;
+            }
+        }
+        return null;
+    }
 }

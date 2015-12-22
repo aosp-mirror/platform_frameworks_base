@@ -1385,4 +1385,95 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.reboot(admin1);
     }
+
+    public void testSetGetSupportText() {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        dpm.setActiveAdmin(admin1, true);
+        dpm.setActiveAdmin(admin2, true);
+        mContext.callerPermissions.remove(permission.MANAGE_DEVICE_ADMINS);
+
+        // Null default support messages.
+        {
+            assertNull(dpm.getLongSupportMessage(admin1));
+            assertNull(dpm.getShortSupportMessage(admin1));
+            mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+            assertNull(dpm.getShortSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            assertNull(dpm.getLongSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            mMockContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        }
+
+        // Only system can call the per user versions.
+        {
+            try {
+                dpm.getShortSupportMessageForUser(admin1,
+                        DpmMockContext.CALLER_USER_HANDLE);
+                fail("Only system should be able to call getXXXForUser versions");
+            } catch (SecurityException expected) {
+                MoreAsserts.assertContainsRegex("message for user", expected.getMessage());
+            }
+            try {
+                dpm.getLongSupportMessageForUser(admin1,
+                        DpmMockContext.CALLER_USER_HANDLE);
+                fail("Only system should be able to call getXXXForUser versions");
+            } catch (SecurityException expected) {
+                MoreAsserts.assertContainsRegex("message for user", expected.getMessage());
+            }
+        }
+
+        // Can't set message for admin in another uid.
+        {
+            mContext.binder.callingUid = DpmMockContext.CALLER_UID + 1;
+            try {
+                dpm.setShortSupportMessage(admin1, "Some text");
+                fail("Admins should only be able to change their own support text.");
+            } catch (SecurityException expected) {
+                MoreAsserts.assertContainsRegex("is not owned by uid", expected.getMessage());
+            }
+            mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        }
+
+        // Set/Get short returns what it sets and other admins text isn't changed.
+        {
+            final String supportText = "Some text to test with.";
+            dpm.setShortSupportMessage(admin1, supportText);
+            assertEquals(supportText, dpm.getShortSupportMessage(admin1));
+            assertNull(dpm.getLongSupportMessage(admin1));
+            assertNull(dpm.getShortSupportMessage(admin2));
+
+            mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+            assertEquals(supportText, dpm.getShortSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            assertNull(dpm.getShortSupportMessageForUser(admin2,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            assertNull(dpm.getLongSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            mMockContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+            dpm.setShortSupportMessage(admin1, null);
+            assertNull(dpm.getShortSupportMessage(admin1));
+        }
+
+        // Set/Get long returns what it sets and other admins text isn't changed.
+        {
+            final String supportText = "Some text to test with.\nWith more text.";
+            dpm.setLongSupportMessage(admin1, supportText);
+            assertEquals(supportText, dpm.getLongSupportMessage(admin1));
+            assertNull(dpm.getShortSupportMessage(admin1));
+            assertNull(dpm.getLongSupportMessage(admin2));
+
+            mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+            assertEquals(supportText, dpm.getLongSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            assertNull(dpm.getLongSupportMessageForUser(admin2,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            assertNull(dpm.getShortSupportMessageForUser(admin1,
+                    DpmMockContext.CALLER_USER_HANDLE));
+            mMockContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+            dpm.setLongSupportMessage(admin1, null);
+            assertNull(dpm.getLongSupportMessage(admin1));
+        }
+    }
 }

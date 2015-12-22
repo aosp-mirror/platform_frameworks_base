@@ -245,4 +245,12 @@ interface IDevicePolicyManager {
     boolean isSystemOnlyUser(in ComponentName admin);
     String getWifiMacAddress();
     void reboot(in ComponentName admin);
+
+    void setShortSupportMessage(in ComponentName admin, in String message);
+    String getShortSupportMessage(in ComponentName admin);
+    void setLongSupportMessage(in ComponentName admin, in String message);
+    String getLongSupportMessage(in ComponentName admin);
+
+    String getShortSupportMessageForUser(in ComponentName admin, int userHandle);
+    String getLongSupportMessageForUser(in ComponentName admin, int userHandle);
 }
