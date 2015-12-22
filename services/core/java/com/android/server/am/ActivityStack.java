@@ -4314,6 +4314,7 @@ final class ActivityStack {
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),
                     new Configuration(r.task.mOverrideConfig), preserveWindow);
+            mStackSupervisor.activityRelaunchingLocked(r);
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.

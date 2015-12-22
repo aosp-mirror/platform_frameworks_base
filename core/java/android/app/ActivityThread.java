@@ -4161,6 +4161,15 @@ public final class ActivityThread {
                             r.pendingIntents = pendingNewIntents;
                         }
                     }
+
+                    // For each relaunch request, activity manager expects an answer
+                    if (!r.onlyLocalRequest && fromServer) {
+                        try {
+                            ActivityManagerNative.getDefault().activityRelaunched(token);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     break;
                 }
             }
@@ -4275,6 +4284,13 @@ public final class ActivityThread {
         ActivityClientRecord r = mActivities.get(tmp.token);
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handling relaunch of " + r);
         if (r == null) {
+            if (!tmp.onlyLocalRequest) {
+                try {
+                    ActivityManagerNative.getDefault().activityRelaunched(tmp.token);
+                } catch (RemoteException e) {
+                    // If the system process has died, it's game over for everyone.
+                }
+            }
             return;
         }
 
@@ -4320,6 +4336,14 @@ public final class ActivityThread {
         r.overrideConfig = tmp.overrideConfig;
 
         handleLaunchActivity(r, currentIntent);
+
+        if (!tmp.onlyLocalRequest) {
+            try {
+                ActivityManagerNative.getDefault().activityRelaunched(r.token);
+            } catch (RemoteException e) {
+                // If the system process has died, it's game over for everyone.
+            }
+        }
     }
 
     private void callCallActivityOnSaveInstanceState(ActivityClientRecord r) {

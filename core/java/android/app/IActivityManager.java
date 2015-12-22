@@ -122,6 +122,7 @@ public interface IActivityManager extends IInterface {
             PersistableBundle persistentState, CharSequence description) throws RemoteException;
     public void activitySlept(IBinder token) throws RemoteException;
     public void activityDestroyed(IBinder token) throws RemoteException;
+    public void activityRelaunched(IBinder token) throws RemoteException;
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
             int[] verticalSizeConfigurations, int[] smallestWidthConfigurations)
             throws RemoteException;
@@ -944,7 +945,8 @@ public interface IActivityManager extends IInterface {
     int IN_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
     int KILL_PACKAGE_DEPENDENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 354;
     int ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
-    int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 356;
+    int ACTIVITY_RELAUNCHED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 356;
     int GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 357;
     int RESIZE_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 358;
+    int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 359;
 }

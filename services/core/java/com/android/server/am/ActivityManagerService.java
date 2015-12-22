@@ -6772,6 +6772,15 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public final void activityRelaunched(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (this) {
+            mStackSupervisor.activityRelaunchedLocked(token);
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
     public void reportSizeConfigurations(IBinder token, int[] horizontalSizeConfiguration,
             int[] verticalSizeConfigurations, int[] smallestSizeConfigurations) {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Report configuration: " + token + " "
