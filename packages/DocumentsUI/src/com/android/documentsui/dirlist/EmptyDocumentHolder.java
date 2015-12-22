@@ -24,7 +24,7 @@ import com.android.documentsui.State;
 
 final class EmptyDocumentHolder extends DocumentHolder {
     public EmptyDocumentHolder(Context context) {
-        super(context, new View(context), null);
+        super(context, new View(context));
         itemView.setVisibility(View.GONE);
     }
 

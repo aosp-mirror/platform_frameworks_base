@@ -964,7 +964,16 @@ public class DirectoryFragment extends Fragment {
             final State state = getDisplayState();
             switch (state.derivedMode) {
                 case MODE_GRID:
-                    holder = new GridDocumentHolder(getContext(), parent, mIconHelper, viewType);
+                    switch (viewType) {
+                        case ITEM_TYPE_DIRECTORY:
+                            holder = new GridDirectoryHolder(getContext(), parent);
+                            break;
+                        case ITEM_TYPE_DOCUMENT:
+                            holder = new GridDocumentHolder(getContext(), parent, mIconHelper);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unsupported layout type.");
+                    }
                     break;
                 case MODE_LIST:
                     holder = new ListDocumentHolder(getContext(), parent, mIconHelper);
@@ -1031,7 +1040,10 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onModelUpdate(Model model) {
             mModelIds = Lists.newArrayList(model.getModelIds());
-            mDividerPosition = 0;
+            // Start the divider at the end. That way if the code below encounters no documents
+            // (i.e. in a directory containing only directories), the divider is placed at the end
+            // of the list, as expected.
+            mDividerPosition = mModelIds.size();
 
             // Walk down the list of IDs till we encounter something that's not a directory, and
             // insert a whitespace element - this introduces a visual break in the grid between

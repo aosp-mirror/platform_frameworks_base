@@ -40,9 +40,22 @@ import com.android.documentsui.State;
 final class GridDocumentHolder extends DocumentHolder {
     private static boolean mHideTitles;
 
-    public GridDocumentHolder(
-            Context context, ViewGroup parent, IconHelper thumbnailLoader, int viewType) {
-        super(context, parent, R.layout.item_doc_grid, thumbnailLoader);
+    final TextView mTitle;
+    final TextView mDate;
+    final TextView mSize;
+    final ImageView mIconMime;
+    final ImageView mIconThumb;
+    final IconHelper mIconHelper;
+
+    public GridDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
+        super(context, parent, R.layout.item_doc_grid);
+
+        mTitle = (TextView) itemView.findViewById(android.R.id.title);
+        mDate = (TextView) itemView.findViewById(R.id.date);
+        mSize = (TextView) itemView.findViewById(R.id.size);
+        mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
+        mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
+        mIconHelper = iconHelper;
     }
 
     /**
@@ -65,40 +78,34 @@ final class GridDocumentHolder extends DocumentHolder {
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-        final TextView title = (TextView) itemView.findViewById(android.R.id.title);
-        final TextView date = (TextView) itemView.findViewById(R.id.date);
-        final TextView size = (TextView) itemView.findViewById(R.id.size);
-        final ImageView iconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
-        final ImageView iconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
+        mIconHelper.stopLoading(mIconThumb);
 
-        mIconHelper.stopLoading(iconThumb);
-
-        iconMime.animate().cancel();
-        iconMime.setAlpha(1f);
-        iconThumb.animate().cancel();
-        iconThumb.setAlpha(0f);
+        mIconMime.animate().cancel();
+        mIconMime.setAlpha(1f);
+        mIconThumb.animate().cancel();
+        mIconThumb.setAlpha(0f);
 
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
-        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, iconThumb, iconMime);
+        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime);
 
         if (mHideTitles) {
-            title.setVisibility(View.GONE);
+            mTitle.setVisibility(View.GONE);
         } else {
-            title.setText(docDisplayName);
-            title.setVisibility(View.VISIBLE);
+            mTitle.setText(docDisplayName);
+            mTitle.setVisibility(View.VISIBLE);
         }
 
         if (docLastModified == -1) {
-            date.setText(null);
+            mDate.setText(null);
         } else {
-            date.setText(Shared.formatTime(mContext, docLastModified));
+            mDate.setText(Shared.formatTime(mContext, docLastModified));
         }
 
         if (!state.showSize || Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
-            size.setVisibility(View.GONE);
+            mSize.setVisibility(View.GONE);
         } else {
-            size.setVisibility(View.VISIBLE);
-            size.setText(Formatter.formatFileSize(mContext, docSize));
+            mSize.setVisibility(View.VISIBLE);
+            mSize.setText(Formatter.formatFileSize(mContext, docSize));
         }
     }
 
