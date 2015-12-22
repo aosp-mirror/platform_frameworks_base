@@ -228,7 +228,9 @@ a purchase order.</p>
   <tr>
     <td>{@code orderId}</td>
     <td>A unique order identifier for the transaction. This identifier
-      corresponds to the Google payments order ID.</td>
+      corresponds to the Google payments order ID. If the order is a test
+      purchase made through the In-app Billing Sandbox, {@code orderId} is
+      blank.</td>
   </tr>
   <tr>
     <td>{@code packageName}</td>
