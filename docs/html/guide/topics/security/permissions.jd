@@ -290,7 +290,7 @@ to be as high as possible. You can see which permissions were added with each re
     <em>Normal</em> permissions cover areas where your app needs to access data
     or resources outside the app's sandbox, but where there's very little risk
     to the user's privacy or the operation of other apps. For example,
-    permission to turn on the flashlight is a normal permission. If an app
+    permission to set the time zone is a normal permission. If an app
     declares that it needs a normal permission, the system automatically grants
     the permission to the app. For a full listing of the current normal
     permissions, see <a href="normal-permissions.html">Normal permissions</a>.
