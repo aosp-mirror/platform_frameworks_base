@@ -113,6 +113,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private final static String TAG = "PhoneWindow";
 
+    private static final boolean DEBUG = false;
+
     private final static int DEFAULT_BACKGROUND_FADE_DURATION_MS = 300;
 
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
@@ -2281,7 +2283,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         } else {
             context = getContext();
         }
-        return new DecorView(context, featureId, this);
+        return new DecorView(context, featureId, this, getAttributes());
     }
 
     protected ViewGroup generateLayout(DecorView decor) {
@@ -2360,6 +2362,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         a.getValue(R.styleable.Window_windowMinWidthMajor, mMinWidthMajor);
         a.getValue(R.styleable.Window_windowMinWidthMinor, mMinWidthMinor);
+        if (DEBUG) Log.d(TAG, "Min width minor: " + mMinWidthMinor.coerceToString()
+                + ", major: " + mMinWidthMajor.coerceToString());
         if (a.hasValue(R.styleable.Window_windowFixedWidthMajor)) {
             if (mFixedWidthMajor == null) mFixedWidthMajor = new TypedValue();
             a.getValue(R.styleable.Window_windowFixedWidthMajor,
@@ -3775,5 +3779,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     int getDecorCaptionShade() {
         return mDecorCaptionShade;
+    }
+
+    @Override
+    public void setAttributes(WindowManager.LayoutParams params) {
+        super.setAttributes(params);
+        if (mDecor != null) {
+            mDecor.updateLogTag(params);
+        }
     }
 }

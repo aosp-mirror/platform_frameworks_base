@@ -23,7 +23,6 @@ import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.MenuHelper;
-import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
@@ -72,6 +71,7 @@ import android.widget.PopupWindow;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
@@ -194,7 +194,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Drawable mCaptionBackgroundDrawable;
     private Drawable mUserCaptionBackgroundDrawable;
 
-    DecorView(Context context, int featureId, PhoneWindow window) {
+    private float mAvailableWidth;
+
+    String mLogTag = TAG;
+
+    DecorView(Context context, int featureId, PhoneWindow window,
+            WindowManager.LayoutParams params) {
         super(context);
         mFeatureId = featureId;
 
@@ -210,7 +215,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         mSemiTransparentStatusBarColor = context.getResources().getColor(
                 R.color.system_bar_background_semi_transparent, null /* theme */);
 
+        updateAvailableWidth();
+
         setWindow(window);
+
+        updateLogTag(params);
     }
 
     void setBackgroundFallback(int resId) {
@@ -408,7 +417,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         if (mFeatureId >= 0) {
             if (action == MotionEvent.ACTION_DOWN) {
-                Log.i(TAG, "Watchiing!");
+                Log.i(mLogTag, "Watchiing!");
                 mWatchingForMenu = true;
                 mDownY = (int) event.getY();
                 return false;
@@ -421,7 +430,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int y = (int)event.getY();
             if (action == MotionEvent.ACTION_MOVE) {
                 if (y > (mDownY+30)) {
-                    Log.i(TAG, "Closing!");
+                    Log.i(mLogTag, "Closing!");
                     mWindow.closePanel(mFeatureId);
                     mWatchingForMenu = false;
                     return true;
@@ -433,13 +442,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return false;
         }
 
-        //Log.i(TAG, "Intercept: action=" + action + " y=" + event.getY()
+        //Log.i(mLogTag, "Intercept: action=" + action + " y=" + event.getY()
         //        + " (in " + getHeight() + ")");
 
         if (action == MotionEvent.ACTION_DOWN) {
             int y = (int)event.getY();
             if (y >= (getHeight()-5) && !mWindow.hasChildren()) {
-                Log.i(TAG, "Watching!");
+                Log.i(mLogTag, "Watching!");
                 mWatchingForMenu = true;
             }
             return false;
@@ -452,7 +461,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         int y = (int)event.getY();
         if (action == MotionEvent.ACTION_MOVE) {
             if (y < (getHeight()-30)) {
-                Log.i(TAG, "Opening!");
+                Log.i(mLogTag, "Opening!");
                 mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, new KeyEvent(
                         KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MENU));
                 mWatchingForMenu = false;
@@ -543,15 +552,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-        final boolean isPortrait = metrics.widthPixels < metrics.heightPixels;
+        final boolean isPortrait =
+                getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
 
         final int widthMode = getMode(widthMeasureSpec);
         final int heightMode = getMode(heightMeasureSpec);
 
         boolean fixedWidth = false;
         if (widthMode == AT_MOST) {
-            final TypedValue tvw = isPortrait ? mWindow.mFixedWidthMinor
-                    : mWindow.mFixedWidthMajor;
+            final TypedValue tvw = isPortrait ? mWindow.mFixedWidthMinor : mWindow.mFixedWidthMajor;
             if (tvw != null && tvw.type != TypedValue.TYPE_NULL) {
                 final int w;
                 if (tvw.type == TypedValue.TYPE_DIMENSION) {
@@ -623,7 +632,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 if (tv.type == TypedValue.TYPE_DIMENSION) {
                     min = (int)tv.getDimension(metrics);
                 } else if (tv.type == TypedValue.TYPE_FRACTION) {
-                    min = (int)tv.getFraction(metrics.widthPixels, metrics.widthPixels);
+                    min = (int)tv.getFraction(mAvailableWidth, mAvailableWidth);
                 } else {
                     min = 0;
                 }
@@ -1217,7 +1226,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     int fop = fg.getOpacity();
                     int bop = bg.getOpacity();
                     if (false)
-                        Log.v(TAG, "Background opacity: " + bop + ", Frame opacity: " + fop);
+                        Log.v(mLogTag, "Background opacity: " + bop + ", Frame opacity: " + fop);
                     if (fop == PixelFormat.OPAQUE || bop == PixelFormat.OPAQUE) {
                         opacity = PixelFormat.OPAQUE;
                     } else if (fop == PixelFormat.UNKNOWN) {
@@ -1232,16 +1241,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     // frame with padding... there is no way to tell if the
                     // frame and background together will draw all pixels.
                     if (false)
-                        Log.v(TAG, "Padding: " + mFramePadding);
+                        Log.v(mLogTag, "Padding: " + mFramePadding);
                     opacity = PixelFormat.TRANSLUCENT;
                 }
             }
             if (false)
-                Log.v(TAG, "Background: " + bg + ", Frame: " + fg);
+                Log.v(mLogTag, "Background: " + bg + ", Frame: " + fg);
         }
 
         if (false)
-            Log.v(TAG, "Selected default opacity: " + opacity);
+            Log.v(mLogTag, "Selected default opacity: " + opacity);
 
         mDefaultOpacity = opacity;
         if (mFeatureId < 0) {
@@ -1600,6 +1609,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 enableCaption(StackId.hasWindowDecor(workspaceId));
             }
         }
+        updateAvailableWidth();
         initializeElevation();
     }
 
@@ -1744,7 +1754,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         // We shouldn't really get here as the background fallback should be always available since
         // it is defaulted by the system.
-        Log.w(TAG, "Failed to find background drawable for PhoneWindow=" + mWindow);
+        Log.w(mLogTag, "Failed to find background drawable for PhoneWindow=" + mWindow);
         return null;
     }
 
@@ -1761,7 +1771,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             try {
                 workspaceId = callback.getWindowStackId();
             } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to get the workspace ID of a PhoneWindow.");
+                Log.e(mLogTag, "Failed to get the workspace ID of a PhoneWindow.");
             }
         }
         if (workspaceId == INVALID_STACK_ID) {
@@ -1927,6 +1937,19 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
+    void updateLogTag(WindowManager.LayoutParams params) {
+        final String[] split = params.getTitle().toString().split("\\.");
+        if (split.length > 0) {
+            mLogTag = TAG + "[" + split[split.length - 1] + "]";
+        }
+    }
+
+    private void updateAvailableWidth() {
+        Resources res = getResources();
+        mAvailableWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                res.getConfiguration().screenWidthDp, res.getDisplayMetrics());
+    }
+
     private static class ColorViewState {
         View view = null;
         int targetVisibility = View.INVISIBLE;
@@ -1988,12 +2011,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 isPrimary = mode == mPrimaryActionMode;
                 isFloating = mode == mFloatingActionMode;
                 if (!isPrimary && mode.getType() == ActionMode.TYPE_PRIMARY) {
-                    Log.e(TAG, "Destroying unexpected ActionMode instance of TYPE_PRIMARY; "
+                    Log.e(mLogTag, "Destroying unexpected ActionMode instance of TYPE_PRIMARY; "
                             + mode + " was not the current primary action mode! Expected "
                             + mPrimaryActionMode);
                 }
                 if (!isFloating && mode.getType() == ActionMode.TYPE_FLOATING) {
-                    Log.e(TAG, "Destroying unexpected ActionMode instance of TYPE_FLOATING; "
+                    Log.e(mLogTag, "Destroying unexpected ActionMode instance of TYPE_FLOATING; "
                             + mode + " was not the current floating action mode! Expected "
                             + mFloatingActionMode);
                 }
