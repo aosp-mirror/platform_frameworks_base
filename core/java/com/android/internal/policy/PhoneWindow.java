@@ -274,6 +274,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     private int mDecorCaptionShade = DECOR_CAPTION_SHADE_AUTO;
 
+    private boolean mUseDecorContext = false;
+
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService("window"));
@@ -286,8 +288,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mLayoutInflater = LayoutInflater.from(context);
     }
 
+    /**
+     * Constructor for main window of an activity.
+     */
     public PhoneWindow(Context context, Window preservedWindow) {
         this(context);
+        // Only main activity windows use decor context, all the other windows depend on whatever
+        // context that was given to them.
+        mUseDecorContext = true;
         if (preservedWindow != null) {
             mDecor = (DecorView) preservedWindow.getDecorView();
             mElevation = preservedWindow.getElevation();
@@ -2259,15 +2267,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System process doesn't have application context and in that case we need to directly use
         // the context we have. Otherwise we want the application context, so we don't cling to the
         // activity.
-        Context applicationContext = getContext().getApplicationContext();
         Context context;
-        if (applicationContext == null) {
-            context = getContext();
-        } else {
-            context = new DecorContext(applicationContext);
-            if (mTheme != -1) {
-                context.setTheme(mTheme);
+        if (mUseDecorContext) {
+            Context applicationContext = getContext().getApplicationContext();
+            if (applicationContext == null) {
+                context = getContext();
+            } else {
+                context = new DecorContext(applicationContext);
+                if (mTheme != -1) {
+                    context.setTheme(mTheme);
+                }
             }
+        } else {
+            context = getContext();
         }
         return new DecorView(context, featureId, this);
     }
