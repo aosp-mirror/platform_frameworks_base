@@ -432,6 +432,10 @@ final class UserController {
             synchronized (mService) {
                 mService.mStackSupervisor.removeUserLocked(userId);
             }
+            // Remove the user if it is ephemeral.
+            if (getUserInfo(userId).isEphemeral()) {
+                mUserManager.removeUser(userId);
+            }
         }
     }
 
@@ -478,9 +482,9 @@ final class UserController {
     }
 
     /**
-     * Stops the guest user if it has gone to the background.
+     * Stops the guest or ephemeral user if it has gone to the background.
      */
-    private void stopGuestUserIfBackground() {
+    private void stopGuestOrEphemeralUserIfBackground() {
         synchronized (mService) {
             final int num = mUserLru.size();
             for (int i = 0; i < num; i++) {
@@ -492,7 +496,7 @@ final class UserController {
                     continue;
                 }
                 UserInfo userInfo = getUserInfo(oldUserId);
-                if (userInfo.isGuest()) {
+                if (userInfo.isGuest() || userInfo.isEphemeral()) {
                     // This is a user to be stopped.
                     stopUsersLocked(oldUserId, true, null);
                     break;
@@ -918,7 +922,7 @@ final class UserController {
             mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
                     newUserId, 0));
         }
-        stopGuestUserIfBackground();
+        stopGuestOrEphemeralUserIfBackground();
         stopBackgroundUsersIfEnforced(oldUserId);
     }
 
