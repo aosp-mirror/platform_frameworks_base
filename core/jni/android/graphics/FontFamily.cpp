@@ -36,12 +36,12 @@
 namespace android {
 
 static jlong FontFamily_create(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
-    if (lang == NULL) {
-        return (jlong)new FontFamily(variant);
+    FontLanguage fontLanguage;
+    if (lang != NULL) {
+        ScopedUtfChars str(env, lang);
+        fontLanguage = FontLanguage(str.c_str(), str.size());
     }
-    ScopedUtfChars str(env, lang);
-    uint32_t langId = FontStyle::registerLanguageList(str.c_str());
-    return (jlong)new FontFamily(langId, variant);
+    return (jlong)new FontFamily(fontLanguage, variant);
 }
 
 static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
