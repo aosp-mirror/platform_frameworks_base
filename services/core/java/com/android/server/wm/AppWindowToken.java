@@ -31,6 +31,7 @@ import com.android.server.wm.WindowManagerService.H;
 
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -39,6 +40,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
@@ -125,6 +127,8 @@ class AppWindowToken extends WindowToken {
     boolean mCropWindowsToStack;
 
     boolean mAlwaysFocusable;
+
+    ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
@@ -437,6 +441,23 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    /**
+     * Freezes the task bounds. The size of this task reported the app will be fixed to the bounds
+     * freezed by {@link Task#prepareFreezingBounds} until {@link #unfreezeBounds} gets called, even
+     * if they change in the meantime. If the bounds are already frozen, the bounds will be frozen
+     * with a queue.
+     */
+    void freezeBounds() {
+        mFrozenBounds.offer(new Rect(mTask.mPreparedFrozenBounds));
+    }
+
+    /**
+     * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
+     */
+    void unfreezeBounds() {
+        mFrozenBounds.remove();
+    }
+
     @Override
     void dump(PrintWriter pw, String prefix) {
         super.dump(pw, prefix);
@@ -482,6 +503,9 @@ class AppWindowToken extends WindowToken {
                     pw.print(" startingView="); pw.print(startingView);
                     pw.print(" startingDisplayed="); pw.print(startingDisplayed);
                     pw.print(" startingMoved"); pw.println(startingMoved);
+        }
+        if (!mFrozenBounds.isEmpty()) {
+            pw.print(prefix); pw.print("mFrozenBounds="); pw.print(mFrozenBounds);
         }
     }
 

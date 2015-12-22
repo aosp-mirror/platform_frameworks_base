@@ -203,7 +203,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
@@ -4843,6 +4842,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void prepareFreezingTaskBounds(int stackId) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                throw new IllegalArgumentException("prepareFreezingTaskBounds: stackId " + stackId
+                        + " not found.");
+            }
+            stack.prepareFreezingTaskBounds();
+        }
+    }
+
     public void positionTaskInStack(int taskId, int stackId, int position, Rect bounds,
             Configuration config) {
         synchronized (mWindowMap) {
@@ -9472,8 +9482,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void notifyAppRelaunching(IBinder token) {
         synchronized (mWindowMap) {
             AppWindowToken appWindow = findAppWindowToken(token);
-            if (appWindow != null) {
-                // TODO: Do something useful
+            if (canFreezeBounds(appWindow)) {
+                appWindow.freezeBounds();
             }
         }
     }
@@ -9481,10 +9491,18 @@ public class WindowManagerService extends IWindowManager.Stub
     public void notifyAppRelaunchingFinished(IBinder token) {
         synchronized (mWindowMap) {
             AppWindowToken appWindow = findAppWindowToken(token);
-            if (appWindow != null) {
-                // TODO: Do something useful
+            if (canFreezeBounds(appWindow)) {
+                appWindow.unfreezeBounds();
             }
         }
+    }
+
+    private boolean canFreezeBounds(AppWindowToken appWindow) {
+
+        // For freeform windows, we can't freeze the bounds at the moment because this would make
+        // the resizing unresponsive.
+        return appWindow != null && appWindow.mTask != null
+                && !appWindow.mTask.inFreeformWorkspace();
     }
 
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {

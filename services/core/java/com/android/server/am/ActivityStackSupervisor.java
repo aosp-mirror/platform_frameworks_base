@@ -1868,6 +1868,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
             }
         }
+
+        // We might trigger a configuration change. Save the current task bounds for freezing.
+        mWindowManager.prepareFreezingTaskBounds(stack.mStackId);
         stack.mFullscreen = mWindowManager.resizeStack(stack.mStackId, bounds, mTmpConfigs,
                 mTmpBounds, mTmpInsetBounds);
         stack.setBounds(bounds);

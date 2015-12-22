@@ -61,6 +61,7 @@ class Task implements DimLayer.DimLayerUser {
 
     // Content limits relative to the DisplayContent this sits in.
     private Rect mBounds = new Rect();
+    final Rect mPreparedFrozenBounds = new Rect();
 
     // Bounds used to calculate the insets.
     private final Rect mTempInsetBounds = new Rect();
@@ -200,8 +201,7 @@ class Task implements DimLayer.DimLayerUser {
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
-            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId,
-                    "removeAppToken: last token");
+            EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
             if (mDeferRemoval) {
                 removeLocked();
             }
@@ -312,6 +312,14 @@ class Task implements DimLayer.DimLayerUser {
             moveWindows();
         }
         return true;
+    }
+
+    /**
+     * Prepares the task bounds to be frozen with the current size. See
+     * {@link AppWindowToken#freezeBounds}.
+     */
+    void prepareFreezingBounds() {
+        mPreparedFrozenBounds.set(mBounds);
     }
 
     boolean scrollLocked(Rect bounds) {
@@ -601,5 +609,6 @@ class Task implements DimLayer.DimLayerUser {
             pw.print(prefix + prefix); pw.print("mBounds="); pw.println(mBounds.toShortString());
             pw.print(prefix + prefix); pw.print("mdr="); pw.println(mDeferRemoval);
             pw.print(prefix + prefix); pw.print("appTokens="); pw.println(mAppTokens);
+            pw.print(prefix + prefix); pw.print("mTempInsetBounds="); pw.println(mTempInsetBounds);
     }
 }

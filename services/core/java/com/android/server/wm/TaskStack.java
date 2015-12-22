@@ -148,6 +148,13 @@ public class TaskStack implements DimLayer.DimLayerUser {
         return true;
     }
 
+    void prepareFreezingTaskBounds() {
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTasks.get(taskNdx);
+            task.prepareFreezingBounds();
+        }
+    }
+
     boolean isFullscreenBounds(Rect bounds) {
         if (mDisplayContent == null || bounds == null) {
             return true;

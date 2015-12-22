@@ -624,6 +624,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         } else {
             task.getBounds(mContainingFrame);
             task.getTempInsetBounds(mInsetFrame);
+            if (mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) {
+
+                // If the bounds are frozen, we still want to translate the window freely and only
+                // freeze the size.
+                Rect frozen = mAppToken.mFrozenBounds.peek();
+                mContainingFrame.right = mContainingFrame.left + frozen.width();
+                mContainingFrame.bottom = mContainingFrame.top + frozen.height();
+            }
             final WindowState imeWin = mService.mInputMethodWindow;
             if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
                     && mContainingFrame.bottom > cf.bottom) {
@@ -2029,7 +2037,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (task.isDragResizing()) {
             return true;
         }
-        return mDisplayContent.mDividerControllerLocked.isResizing() &&
+
+        // If the bounds are currently frozen, it means that the layout size that the app sees
+        // and the bounds we clip this window to might be different. In order to avoid holes, we
+        // simulate that we are still resizing so the app fills the hole with the resizing
+        // background.
+        return (mDisplayContent.mDividerControllerLocked.isResizing()
+                        || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
                 !task.inFreeformWorkspace() && !task.isFullscreen();
     }
 
