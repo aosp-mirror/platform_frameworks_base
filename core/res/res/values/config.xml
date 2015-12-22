@@ -2442,4 +2442,7 @@
     <integer name="config_jobSchedulerInactivityIdleThreshold">4260000</integer>
     <!-- The alarm window (in milliseconds) that JobScheduler uses to enter the idle state -->
     <integer name="config_jobSchedulerIdleWindowSlop">300000</integer>
+
+    <!-- If true, all guest users created on the device will be ephemeral. -->
+    <bool name="config_guestUserEphemeral">false</bool>
 </resources>
