@@ -313,94 +313,10 @@ namespace PaintGlue {
         obj->setTextAlign(align);
     }
 
-    // generate bcp47 identifier for the supplied locale
-    static void toLanguageTag(char* output, size_t outSize,
-            const char* locale) {
-        if (output == NULL || outSize <= 0) {
-            return;
-        }
-        if (locale == NULL) {
-            output[0] = '\0';
-            return;
-        }
-        char canonicalChars[ULOC_FULLNAME_CAPACITY];
-        UErrorCode uErr = U_ZERO_ERROR;
-        uloc_canonicalize(locale, canonicalChars, ULOC_FULLNAME_CAPACITY,
-                &uErr);
-        if (U_SUCCESS(uErr)) {
-            char likelyChars[ULOC_FULLNAME_CAPACITY];
-            uErr = U_ZERO_ERROR;
-            uloc_addLikelySubtags(canonicalChars, likelyChars,
-                    ULOC_FULLNAME_CAPACITY, &uErr);
-            if (U_SUCCESS(uErr)) {
-                uErr = U_ZERO_ERROR;
-                uloc_toLanguageTag(likelyChars, output, outSize, FALSE, &uErr);
-                if (U_SUCCESS(uErr)) {
-                    return;
-                } else {
-                    ALOGD("uloc_toLanguageTag(\"%s\") failed: %s", likelyChars,
-                            u_errorName(uErr));
-                }
-            } else {
-                ALOGD("uloc_addLikelySubtags(\"%s\") failed: %s",
-                        canonicalChars, u_errorName(uErr));
-            }
-        } else {
-            ALOGD("uloc_canonicalize(\"%s\") failed: %s", locale,
-                    u_errorName(uErr));
-        }
-        // unable to build a proper language identifier
-        output[0] = '\0';
-    }
-
-    static void toLanguageTags(std::string* output, const char* locales) {
-        if (output == NULL) {
-            return;
-        }
-        if (locales == NULL) {
-            output->clear();
-            return;
-        }
-
-        char langTag[ULOC_FULLNAME_CAPACITY];
-        const char* commaLoc = strchr(locales, ',');
-        if (commaLoc == NULL) {
-            assert(locales[0] != '\0');  // the string should not be empty
-            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locales);
-            *output = langTag;
-            return;
-        }
-
-        size_t len = strlen(locales);
-        char locale[len];
-        output->clear();
-        output->reserve(len);
-        const char* lastStart = locales;
-        do {
-            assert(lastStart > commaLoc);  // the substring should not be empty
-            strncpy(locale, lastStart, commaLoc - lastStart);
-            locale[commaLoc - lastStart] = '\0';
-            toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, locale);
-            if (langTag[0] != '\0') {
-                output->append(langTag);
-                output->push_back(',');
-            }
-            lastStart = commaLoc + 1;
-            commaLoc = strchr(lastStart, ',');
-        } while (commaLoc != NULL);
-        assert(lastStart[0] != '\0');  // the final substring should not be empty
-        toLanguageTag(langTag, ULOC_FULLNAME_CAPACITY, lastStart);
-        if (langTag[0] != '\0') {
-            output->append(langTag);
-        }
-    }
-
     static jint setTextLocales(JNIEnv* env, jobject clazz, jlong objHandle, jstring locales) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         ScopedUtfChars localesChars(env, locales);
-        std::string buf;
-        toLanguageTags(&buf, localesChars.c_str());
-        jint minikinLangListId = FontStyle::registerLanguageList(buf);
+        jint minikinLangListId = FontStyle::registerLanguageList(localesChars.c_str());
         obj->setMinikinLangListId(minikinLangListId);
         return minikinLangListId;
     }
