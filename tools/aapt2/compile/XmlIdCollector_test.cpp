@@ -37,13 +37,13 @@ TEST(XmlIdCollectorTest, CollectsIds) {
     XmlIdCollector collector;
     ASSERT_TRUE(collector.consume(context.get(), doc.get()));
 
-    EXPECT_EQ(1u, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
+    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
                              SourcedResourceName{ test::parseNameOrDie(u"@id/foo"), 3u }));
 
-    EXPECT_EQ(1u, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
+    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
                              SourcedResourceName{ test::parseNameOrDie(u"@id/bar"), 3u }));
 
-    EXPECT_EQ(1u, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
+    EXPECT_EQ(1, std::count(doc->file.exportedSymbols.begin(), doc->file.exportedSymbols.end(),
                              SourcedResourceName{ test::parseNameOrDie(u"@id/car"), 6u }));
 }
 
