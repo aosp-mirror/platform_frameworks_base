@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy.PointerEventListener;
 
@@ -108,7 +109,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 final int x = (int) motionEvent.getX();
                 final int y = (int) motionEvent.getY();
                 final Task task = mDisplayContent.findTaskForControlPoint(x, y);
-                if (task == null) {
+                InputDevice inputDevice = motionEvent.getDevice();
+                if (task == null || inputDevice == null) {
                     mPointerIconShape = STYLE_NOT_SPECIFIED;
                     break;
                 }
@@ -130,7 +132,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                     }
                     if (mPointerIconShape != iconShape) {
                         mPointerIconShape = iconShape;
-                        motionEvent.getDevice().setPointerShape(iconShape);
+                        inputDevice.setPointerShape(iconShape);
                     }
                 } else {
                     mPointerIconShape = STYLE_NOT_SPECIFIED;
@@ -139,7 +141,10 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
             case MotionEvent.ACTION_HOVER_EXIT:
                 mPointerIconShape = STYLE_NOT_SPECIFIED;
-                motionEvent.getDevice().setPointerShape(STYLE_DEFAULT);
+                InputDevice inputDevice = motionEvent.getDevice();
+                if (inputDevice != null) {
+                    inputDevice.setPointerShape(STYLE_DEFAULT);
+                }
                 break;
 
             case MotionEvent.ACTION_UP:
