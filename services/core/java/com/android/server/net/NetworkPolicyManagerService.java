@@ -2223,12 +2223,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         uidRules.clear();
 
         // Fully update the app idle firewall chain.
+        final IPackageManager ipm = AppGlobals.getPackageManager();
         final List<UserInfo> users = mUserManager.getUsers();
         for (int ui = users.size() - 1; ui >= 0; ui--) {
             UserInfo user = users.get(ui);
             int[] idleUids = mUsageStats.getIdleUidsForUser(user.id);
             for (int uid : idleUids) {
                 if (!mPowerSaveTempWhitelistAppIds.get(UserHandle.getAppId(uid), false)) {
+                    // quick check: if this uid doesn't have INTERNET permission, it
+                    // doesn't have network access anyway, so it is a waste to mess
+                    // with it here.
+                    try {
+                        if (ipm.checkUidPermission(Manifest.permission.INTERNET, uid)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            continue;
+                        }
+                    } catch (RemoteException e) {
+                    }
                     uidRules.put(uid, FIREWALL_RULE_DENY);
                 }
             }
