@@ -190,7 +190,6 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
         if (alert) {
             HeadsUpEntry headsUpEntry = mHeadsUpEntries.get(headsUp.key);
             headsUpEntry.updateEntry();
-            mGroupManager.onEntryHeadsUped(headsUp);
             setEntryPinned(headsUpEntry, shouldHeadsUpBecomePinned(headsUp));
         }
     }

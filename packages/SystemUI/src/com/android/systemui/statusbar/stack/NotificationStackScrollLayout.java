@@ -138,6 +138,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final StackStateAnimator mStateAnimator = new StackStateAnimator(this);
     private boolean mAnimationsEnabled;
     private boolean mChangePositionInProgress;
+    private boolean mChildTransferInProgress;
 
     /**
      * The raw amount of the overScroll on the top, which is not rubber-banded.
@@ -1632,12 +1633,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    public void setChildTransferInProgress(boolean childTransferInProgress) {
+        mChildTransferInProgress = childTransferInProgress;
+    }
+
     @Override
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
         // we only call our internal methods if this is actually a removal and not just a
         // notification which becomes a child notification
-        if (!isChildInGroup(child)) {
+        if (!mChildTransferInProgress) {
             onViewRemovedInternal(child);
         }
     }
@@ -2819,13 +2824,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
-        for (NotificationData.Entry entry : group.children) {
-            ExpandableNotificationRow row = entry.row;
-            if (indexOfChild(row) != -1) {
-                removeView(row);
-                group.summary.row.addChildNotification(row);
-            }
-        }
+        mPhoneStatusBar.requestNotificationUpdate();
+    }
+
+    @Override
+    public void onChildIsolationChanged() {
+        mPhoneStatusBar.requestNotificationUpdate();
     }
 
     public void generateChildOrderChangedEvent() {

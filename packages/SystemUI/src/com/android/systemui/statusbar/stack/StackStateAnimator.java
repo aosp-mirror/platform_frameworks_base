@@ -898,7 +898,7 @@ public class StackStateAnimator {
                     event.animationType == NotificationStackScrollLayout
                             .AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
                 mHeadsUpDisappearChildren.add(changingView);
-                if (mHostLayout.indexOfChild(changingView) == -1) {
+                if (changingView.getParent() == null) {
                     // This notification was actually removed, so we need to add it to the overlay
                     mHostLayout.getOverlay().add(changingView);
                     mTmpState.initFrom(changingView);

@@ -16,12 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.Notification;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,18 +30,19 @@ import java.util.HashSet;
 /**
  * A class to handle notifications and their corresponding groups.
  */
-public class NotificationGroupManager {
+public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChangedListener {
 
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private OnGroupChangeListener mListener;
     private int mBarState = -1;
+    private ArraySet<String> mHeadsUpedEntries = new ArraySet<>();
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
     }
 
     public boolean isGroupExpanded(StatusBarNotification sbn) {
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
             return false;
         }
@@ -48,7 +50,7 @@ public class NotificationGroupManager {
     }
 
     public void setGroupExpanded(StatusBarNotification sbn, boolean expanded) {
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
             return;
         }
@@ -75,8 +77,7 @@ public class NotificationGroupManager {
      */
     private void onEntryRemovedInternal(NotificationData.Entry removed,
             final StatusBarNotification sbn) {
-        Notification notif = sbn.getNotification();
-        String groupKey = sbn.getGroupKey();
+        String groupKey = getGroupKey(sbn);
         final NotificationGroup group = mGroupMap.get(groupKey);
         if (group == null) {
             // When an app posts 2 different notifications as summary of the same group, then a
@@ -85,7 +86,7 @@ public class NotificationGroupManager {
             // the close future. See b/23676310 for reference.
             return;
         }
-        if (notif.isGroupChild()) {
+        if (isGroupChild(sbn)) {
             group.children.remove(removed);
         } else {
             group.summary = null;
@@ -97,16 +98,16 @@ public class NotificationGroupManager {
         }
     }
 
-    public void onEntryAdded(NotificationData.Entry added) {
-        StatusBarNotification sbn = added.notification;
-        Notification notif = sbn.getNotification();
-        String groupKey = sbn.getGroupKey();
+    public void onEntryAdded(final NotificationData.Entry added) {
+        final StatusBarNotification sbn = added.notification;
+        boolean isGroupChild = isGroupChild(sbn);
+        String groupKey = getGroupKey(sbn);
         NotificationGroup group = mGroupMap.get(groupKey);
         if (group == null) {
             group = new NotificationGroup();
             mGroupMap.put(groupKey, group);
         }
-        if (notif.isGroupChild()) {
+        if (isGroupChild) {
             group.children.add(added);
         } else {
             group.summary = added;
@@ -119,17 +120,17 @@ public class NotificationGroupManager {
 
     public void onEntryUpdated(NotificationData.Entry entry,
             StatusBarNotification oldNotification) {
-        if (mGroupMap.get(oldNotification.getGroupKey()) != null) {
+        if (mGroupMap.get(getGroupKey(oldNotification)) != null) {
             onEntryRemovedInternal(entry, oldNotification);
         }
         onEntryAdded(entry);
     }
 
     public boolean isVisible(StatusBarNotification sbn) {
-        if (!sbn.getNotification().isGroupChild()) {
+        if (!isGroupChild(sbn)) {
             return true;
         }
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group != null && (group.expanded || group.summary == null)) {
             return true;
         }
@@ -137,10 +138,10 @@ public class NotificationGroupManager {
     }
 
     public boolean hasGroupChildren(StatusBarNotification sbn) {
-        if (!sbn.getNotification().isGroupSummary()) {
+        if (!isGroupSummary(sbn)) {
             return false;
         }
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
             return false;
         }
@@ -165,10 +166,10 @@ public class NotificationGroupManager {
      * @return whether a given notification is a child in a group which has a summary
      */
     public boolean isChildInGroupWithSummary(StatusBarNotification sbn) {
-        if (!sbn.getNotification().isGroupChild()) {
+        if (!isGroupChild(sbn)) {
             return false;
         }
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null || group.summary == null) {
             return false;
         }
@@ -179,10 +180,10 @@ public class NotificationGroupManager {
      * @return whether a given notification is a summary in a group which has children
      */
     public boolean isSummaryOfGroup(StatusBarNotification sbn) {
-        if (!sbn.getNotification().isGroupSummary()) {
+        if (!isGroupSummary(sbn)) {
             return false;
         }
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
             return false;
         }
@@ -190,22 +191,86 @@ public class NotificationGroupManager {
     }
 
     public ExpandableNotificationRow getGroupSummary(StatusBarNotification sbn) {
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         return group == null ? null
                 : group.summary == null ? null
                 : group.summary.row;
     }
 
-    public void onEntryHeadsUped(NotificationData.Entry headsUp) {
-        // TODO: handle this nicely
-    }
-
     public void toggleGroupExpansion(StatusBarNotification sbn) {
-        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
             return;
         }
         setGroupExpanded(group, !group.expanded);
+    }
+
+    private boolean isIsolated(StatusBarNotification sbn) {
+        return mHeadsUpedEntries.contains(sbn.getKey()) && sbn.getNotification().isGroupChild();
+    }
+
+    private boolean isGroupSummary(StatusBarNotification sbn) {
+        if (isIsolated(sbn)) {
+            return true;
+        }
+        return sbn.getNotification().isGroupSummary();
+    }
+    private boolean isGroupChild(StatusBarNotification sbn) {
+        if (isIsolated(sbn)) {
+            return false;
+        }
+        return sbn.getNotification().isGroupChild();
+    }
+
+    private String getGroupKey(StatusBarNotification sbn) {
+        if (isIsolated(sbn)) {
+            return sbn.getKey();
+        }
+        return sbn.getGroupKey();
+    }
+
+    @Override
+    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
+    }
+
+    @Override
+    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    }
+
+    @Override
+    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    }
+
+    @Override
+    public void onHeadsUpStateChanged(NotificationData.Entry entry, boolean isHeadsUp) {
+        final StatusBarNotification sbn = entry.notification;
+        if (entry.row.isHeadsUp()) {
+            if (!mHeadsUpedEntries.contains(sbn.getKey())) {
+                final boolean groupChild = sbn.getNotification().isGroupChild();
+                if (groupChild) {
+                    // We will be isolated now, so lets update the groups
+                    onEntryRemovedInternal(entry, entry.notification);
+                }
+                mHeadsUpedEntries.add(sbn.getKey());
+                if (groupChild) {
+                    onEntryAdded(entry);
+                    mListener.onChildIsolationChanged();
+                }
+            }
+        } else {
+            if (mHeadsUpedEntries.contains(sbn.getKey())) {
+                boolean isolatedBefore = isIsolated(sbn);
+                if (isolatedBefore) {
+                    // not isolated anymore, we need to update the groups
+                    onEntryRemovedInternal(entry, entry.notification);
+                }
+                mHeadsUpedEntries.remove(sbn.getKey());
+                if (isolatedBefore) {
+                    onEntryAdded(entry);
+                    mListener.onChildIsolationChanged();
+                }
+            }
+        }
     }
 
     public static class NotificationGroup {
@@ -230,5 +295,10 @@ public class NotificationGroupManager {
          * @param group the group created
          */
         void onGroupCreatedFromChildren(NotificationGroup group);
+
+        /**
+         * The isolation of a child has changed i.e it's group changes.
+         */
+        void onChildIsolationChanged();
     }
 }

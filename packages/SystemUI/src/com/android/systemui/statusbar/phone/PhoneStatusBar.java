@@ -707,6 +707,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
+        mHeadsUpManager.addListener(mGroupManager);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
 
@@ -1408,16 +1409,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         }
 
-        ArrayList<View> toRemove = new ArrayList<>();
+        ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
         for (int i=0; i< mStackScroller.getChildCount(); i++) {
             View child = mStackScroller.getChildAt(i);
             if (!toShow.contains(child) && child instanceof ExpandableNotificationRow) {
-                toRemove.add(child);
+                toRemove.add((ExpandableNotificationRow) child);
             }
         }
 
-        for (View remove : toRemove) {
+        for (ExpandableNotificationRow remove : toRemove) {
+            if (mGroupManager.isChildInGroupWithSummary(remove.getStatusBarNotification())) {
+                // we are only transfering this notification to its parent, don't generate an animation
+                mStackScroller.setChildTransferInProgress(true);
+            }
             mStackScroller.removeView(remove);
+            mStackScroller.setChildTransferInProgress(false);
         }
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
@@ -1571,6 +1577,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         updateNotificationShade();
         mIconController.updateNotificationIcons(mNotificationData);
+    }
+
+    public void requestNotificationUpdate() {
+        updateNotifications();
     }
 
     @Override
