@@ -105,7 +105,7 @@ final class RootScanner {
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             int pollingCount = 0;
-            while (!Thread.interrupted()) {
+            while (true) {
                 boolean changed = false;
 
                 // Update devices.
@@ -147,8 +147,7 @@ final class RootScanner {
                     Thread.sleep(pollingCount > SHORT_POLLING_TIMES ?
                         LONG_POLLING_INTERVAL : SHORT_POLLING_INTERVAL);
                 } catch (InterruptedException exp) {
-                    // The while condition handles the interrupted flag.
-                    continue;
+                    break;
                 }
             }
         }
