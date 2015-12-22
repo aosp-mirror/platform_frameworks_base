@@ -39,6 +39,7 @@ import android.media.AudioManager;
 import android.media.AudioPatch;
 import android.media.AudioPort;
 import android.media.AudioPortConfig;
+import android.media.AudioSystem;
 import android.media.tv.ITvInputHardware;
 import android.media.tv.ITvInputHardwareCallback;
 import android.media.tv.TvInputHardwareInfo;
@@ -703,7 +704,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
             for (AudioDevicePort port : devicePorts) {
-                if ((port.type() & sinkDevice) != 0) {
+                if ((port.type() & sinkDevice) != 0 &&
+                    (port.type() & AudioSystem.DEVICE_BIT_IN) == 0) {
                     sinks.add(port);
                 }
             }
