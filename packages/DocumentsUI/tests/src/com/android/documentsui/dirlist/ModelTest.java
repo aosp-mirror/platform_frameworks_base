@@ -21,16 +21,10 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
-import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.view.ViewGroup;
 
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
@@ -49,6 +43,7 @@ public class ModelTest extends AndroidTestCase {
 
     private static final int ITEM_COUNT = 10;
     private static final String AUTHORITY = "test_authority";
+
     private static final String[] COLUMNS = new String[]{
         RootCursorWrapper.COLUMN_AUTHORITY,
         Document.COLUMN_DOCUMENT_ID,
@@ -57,23 +52,24 @@ public class ModelTest extends AndroidTestCase {
         Document.COLUMN_SIZE,
         Document.COLUMN_MIME_TYPE
     };
-    private static Cursor cursor;
 
+    private static final String[] NAMES = new String[] {
+            "4",
+            "foo",
+            "1",
+            "bar",
+            "*(Ljifl;a",
+            "0",
+            "baz",
+            "2",
+            "3",
+            "%$%VD"
+        };
+
+    private Cursor cursor;
     private Context context;
     private Model model;
     private TestContentProvider provider;
-    private static final String[] NAMES = new String[] {
-        "4",
-        "foo",
-        "1",
-        "bar",
-        "*(Ljifl;a",
-        "0",
-        "baz",
-        "2",
-        "3",
-        "%$%VD"
-    };
 
     public void setUp() {
         setupTestContext();
@@ -97,7 +93,7 @@ public class ModelTest extends AndroidTestCase {
         r.cursor = cursor;
 
         // Instantiate the model with a dummy view adapter and listener that (for now) do nothing.
-        model = new Model(context, new DummyAdapter());
+        model = new Model(context);
         model.addUpdateListener(new DummyListener());
         model.update(r);
     }
@@ -325,33 +321,5 @@ public class ModelTest extends AndroidTestCase {
     private static class DummyListener implements Model.UpdateListener {
         public void onModelUpdate(Model model) {}
         public void onModelUpdateFailed(Exception e) {}
-    }
-
-    private static class DummyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        public int getItemCount() { return 0; }
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {}
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
-        }
-    }
-
-    private static class TestContentProvider extends MockContentProvider {
-        List<Uri> mDeleted = new ArrayList<>();
-
-        @Override
-        public Bundle call(String method, String arg, Bundle extras) {
-            // Intercept and log delete method calls.
-            if (DocumentsContract.METHOD_DELETE_DOCUMENT.equals(method)) {
-                final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
-                mDeleted.add(documentUri);
-                return new Bundle();
-            } else {
-                return super.call(method, arg, extras);
-            }
-        }
-
-        public void assertWasDeleted(DocumentInfo doc) {
-            assertTrue(mDeleted.contains(doc.derivedUri));
-        }
     }
 }

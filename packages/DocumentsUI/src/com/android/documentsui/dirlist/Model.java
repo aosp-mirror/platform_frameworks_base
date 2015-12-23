@@ -35,7 +35,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.android.documentsui.BaseActivity.SiblingProvider;
@@ -74,7 +73,7 @@ public class Model implements SiblingProvider {
     @Nullable String info;
     @Nullable String error;
 
-    Model(Context context, RecyclerView.Adapter<?> viewAdapter) {
+    Model(Context context) {
         mContext = context;
     }
 

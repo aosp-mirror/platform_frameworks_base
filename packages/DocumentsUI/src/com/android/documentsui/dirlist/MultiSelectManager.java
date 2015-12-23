@@ -75,9 +75,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
     private boolean mSingleSelect;
 
-    // Payloads for notifyItemChange to distinguish between selection and other events.
-    public static final String SELECTION_CHANGED_MARKER = "Selection-Changed";
-
     @Nullable private BandController mBandManager;
 
     /**
@@ -339,7 +336,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
             return;
         }
-        toggleSelection(mEnvironment.getModelIdFromAdapterPosition(position));
+        String id = mEnvironment.getModelIdFromAdapterPosition(position);
+        if (id != null) {
+            toggleSelection(id);
+        }
     }
 
     /**
@@ -348,6 +348,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @param modelId
      */
     public void toggleSelection(String modelId) {
+        checkNotNull(modelId);
         boolean changed = false;
         if (mSelection.contains(modelId)) {
             changed = attemptDeselect(modelId);
@@ -405,6 +406,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         checkState(end >= begin);
         for (int i = begin; i <= end; i++) {
             String id = mEnvironment.getModelIdFromAdapterPosition(i);
+            if (id == null) {
+                continue;
+            }
+
             if (selected) {
                 boolean canSelect = notifyBeforeItemStateChange(id, true);
                 if (canSelect) {
@@ -436,6 +441,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @return True if the update was applied.
      */
     private boolean attemptDeselect(String id) {
+        checkArgument(id != null);
         if (notifyBeforeItemStateChange(id, false)) {
             mSelection.remove(id);
             notifyItemStateChanged(id, false);
@@ -462,6 +468,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * (identified by {@code position}) changes.
      */
     private void notifyItemStateChanged(String id, boolean selected) {
+        checkArgument(id != null);
         int lastListener = mCallbacks.size() - 1;
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(id, selected);
@@ -613,7 +620,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @param id
          * @return true if the position is currently selected.
          */
-        public boolean contains(String id) {
+        public boolean contains(@Nullable String id) {
             return mTotalSelection.contains(id);
         }
 
@@ -804,7 +811,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
         int getChildCount();
         int getVisibleChildCount();
         void focusItem(int position);
-        String getModelIdFromAdapterPosition(int position);
+        /**
+         * Returns null if non-useful item.
+         * @param position
+         * @return
+         */
+        @Nullable String getModelIdFromAdapterPosition(int position);
         int getItemCount();
         List<String> getModelIds();
         void notifyItemChanged(String id);
@@ -818,11 +830,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private final Drawable mBand;
 
         private boolean mIsOverlayShown = false;
-        private DirectoryFragment.DocumentsAdapter mAdapter;
+        private DocumentsAdapter mAdapter;
 
         RuntimeSelectionEnvironment(RecyclerView rv) {
             mView = rv;
-            mAdapter = (DirectoryFragment.DocumentsAdapter) rv.getAdapter();
+            mAdapter = (DocumentsAdapter) rv.getAdapter();
             mBand = mView.getContext().getTheme().getDrawable(R.drawable.band_select_overlay);
         }
 
@@ -841,7 +853,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public String getModelIdFromAdapterPosition(int position) {
+        public @Nullable String getModelIdFromAdapterPosition(int position) {
             return mAdapter.getModelId(position);
         }
 
@@ -964,7 +976,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         @Override
         public void notifyItemChanged(String id) {
-            mAdapter.notifyItemChanged(id, SELECTION_CHANGED_MARKER);
+            mAdapter.notifyItemSelectionChanged(id);
         }
 
         @Override
