@@ -97,7 +97,7 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Корисник: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Поставени се некои стандардни вредности"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Нема поставено стандардни вредности"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Подесувања на текст-во-говор"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Поставки на текст-во-говор"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Излез текст-во-говор"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Брзина на говор"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Брзина со која се кажува текстот"</string>
@@ -117,7 +117,7 @@
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> бара мрежно поврзување"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> не е поддржано"</string>
     <string name="tts_status_checking" msgid="5339150797940483592">"Се проверува..."</string>
-    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Подесувања на <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
+    <string name="tts_engine_settings_title" msgid="3499112142425680334">"Поставки на <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Стартувај подесувања на софтвер"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Претпочитан софтвер"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Општо"</string>
