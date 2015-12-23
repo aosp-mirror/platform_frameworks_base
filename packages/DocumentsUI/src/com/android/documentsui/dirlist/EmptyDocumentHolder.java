@@ -18,14 +18,18 @@ package com.android.documentsui.dirlist;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.view.View;
+import android.widget.Space;
 
+import com.android.documentsui.R;
 import com.android.documentsui.State;
 
 final class EmptyDocumentHolder extends DocumentHolder {
     public EmptyDocumentHolder(Context context) {
-        super(context, new View(context));
-        itemView.setVisibility(View.GONE);
+        super(context, new Space(context));
+
+        // Per UX spec, this puts a bigger gap between the folders and documents in the grid.
+        final int gridMargin = context.getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
+        itemView.setMinimumHeight(gridMargin * 2);
     }
 
     public void bind(Cursor cursor, String modelId, State state) {
