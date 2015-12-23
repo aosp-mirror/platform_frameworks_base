@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Бул эскертмелер үнсүз көрсөтүлсүн"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Эскертмелер тизмесинин эң жогорусунда үн чыгарып көрсөтүлсүн"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Үн менен коштолуп, экранга чыгарылсын"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Кадимки түстөр"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Түнкү түстөр"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Ыңгайлаштырылган түстөр"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Белгисиз түстөр"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Түсүн өзгөртүү"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Ыкчам жөндөөлөр тайлын көрсөтүү"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Ыңгайлаштырылган өзгөртүүнү иштетүү"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Колдонуу"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Жөндөөлөрдү ырастоо"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Айрым түс жөндөөлөрү бул түзмөктү колдонулгус кылып коюшу мүмкүн. Бул түс жөндөөлөрүн ырастоо үчүн OK баскычын чыкылдатыңыз, болбосо бул жөндөөлөр 10 секунддан кийин баштапкы абалына келтирилет."</string>
 </resources>

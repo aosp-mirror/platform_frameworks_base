@@ -454,7 +454,7 @@
     <string name="apply_to_app" msgid="363016783939815960">"Zastosuj do wszystkich powiadomień z tej aplikacji"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Zablokowane"</string>
     <string name="low_importance" msgid="4109929986107147930">"Mało ważne"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Mniej ważne"</string>
+    <string name="default_importance" msgid="8192107689995742653">"Ważne"</string>
     <string name="high_importance" msgid="1527066195614050263">"Bardzo ważne"</string>
     <string name="max_importance" msgid="5089005872719563894">"Pilne"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Nigdy nie pokazuj tych powiadomień"</string>
@@ -462,4 +462,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Pokazuj te powiadomienia bez sygnału dźwiękowego"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Pokazuj na górze listy powiadomień i sygnalizuj dźwiękiem"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Wyświetlaj na ekranie i odtwarzaj dźwięk"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Kolory standardowe"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Kolory nocne"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Kolory niestandardowe"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Nieznane kolory"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Zmiana koloru"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Pokazuj kafelek szybkich ustawień"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Włącz przekształcenie niestandardowe"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Zastosuj"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Potwierdź ustawienia"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Niektóre ustawienia kolorów mogą utrudniać korzystanie z urządzenia. Kliknij OK, by potwierdzić te ustawienia kolorów. Jeśli tego nie zrobisz, zostaną one zresetowane po 10 sekundach."</string>
 </resources>

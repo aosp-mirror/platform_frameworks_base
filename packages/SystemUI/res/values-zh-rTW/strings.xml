@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"顯示這些通知且不發出任何音效"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"顯示在通知清單頂端並發出音效"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"短暫顯示在螢幕上並發出音效"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"一般顏色"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"夜間顏色"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"自訂顏色"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"不明顏色"</string>
+    <string name="color_transform" msgid="6985460408079086090">"顏色修改"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"顯示快速設定圖塊"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"啟用自訂顏色變換"</string>
+    <string name="color_apply" msgid="9212602012641034283">"套用"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"確認設定"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"部分顏色設定可能會造成這部裝置無法使用。請按一下 [確定] 來確認您要使用這類顏色設定，否則系統將在 10 秒後重設這些設定。"</string>
 </resources>

@@ -462,4 +462,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Показывать уведомления без звука."</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Показывать со звуком в начале списка уведомлений."</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Показывать со звуком поверх всех окон."</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Обычные цвета"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Ночные цвета"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Цвета пользователя"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Неизвестные цвета"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Цветовые настройки"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Показывать панель быстрых настроек"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Включить настройки пользователя"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Применить"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Подтвердите настройки"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Некоторые цветовые настройки могут затруднить работу с устройством. Чтобы применить выбранные параметры, нажмите \"ОК\". В противном случае они будут сброшены через 10 секунд."</string>
 </resources>

@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"این اعلان‌ها بی‌صدا نشان داده شوند"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"در بالای فهرست اعلان‌ها و به همراه صدا نشان داده شود"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"در جلوی صفحه به همراه صدا نشان داده شود"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"رنگ‌های عادی"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"رنگ‌های شب"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"رنگ‌های سفارشی"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"رنگ‌های نامشخص"</string>
+    <string name="color_transform" msgid="6985460408079086090">"اصلاح رنگ"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"نمایش کاشی تنظیمات سریع"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"فعال کردن تبدیل سفارشی"</string>
+    <string name="color_apply" msgid="9212602012641034283">"اعمال‌ کردن"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"تأیید تنظیمات"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"بعضی از تنظیمات رنگ می‌توانند این دستگاه را غیرقابل استفاده کنند. برای تأیید این تنظیمات رنگ روی «تأیید» کلیک کنید، در غیر این صورت این تغییرات بعد از ۱۰ ثانیه بازنشانی می‌شوند."</string>
 </resources>

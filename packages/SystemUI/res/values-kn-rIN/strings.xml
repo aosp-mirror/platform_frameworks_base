@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"ಅಧಿಸೂಚನೆಗಳ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸು ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"ಸಾಮಾನ್ಯ ಬಣ್ಣಗಳು"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"ರಾತ್ರಿ ಬಣ್ಣಗಳು"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"ಕಸ್ಟಮ್ ಬಣ್ಣಗಳು"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"ಅಪರಿಚಿತ ಬಣ್ಣಗಳು"</string>
+    <string name="color_transform" msgid="6985460408079086090">"ಬಣ್ಣ ಬದಲಾವಣೆ"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಟೈಲ್ ತೋರಿಸು"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"ಕಸ್ಟಮ್ ಪರಿವರ್ತನೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="color_apply" msgid="9212602012641034283">"ಅನ್ವಯಿಸು"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಖಚಿತಪಡಿಸಿ"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"ಕೆಲವು ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಸಾಧನವನ್ನು ಅನುಪಯುಕ್ತಗೊಳಿಸಬಹುದು. ಈ ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಖಚಿತಪಡಿಸಲು ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ, ಇಲ್ಲವಾದರೆ ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು 10 ಸೆಕೆಂಡುಗಳ ನಂತರ ಮರುಹೊಂದಿಸಿ."</string>
 </resources>

@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"આ સૂચનાઓ ચુપચાપ બતાવો"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"સૂચનાઓની સૂચિની ટોચ પર બતાવો અને અવાજ કરો"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજ કરો"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"સામાન્ય રંગો"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"રાત્રિ રંગો"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"કસ્ટમ રંગો"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"અજાણ્યા રંગો"</string>
+    <string name="color_transform" msgid="6985460408079086090">"રંગ સંશોધન"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"ઝડપી સેટિંગ્સ ટાઇલ બતાવો"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"કસ્ટમ રૂપાંતરણને સક્ષમ કરો"</string>
+    <string name="color_apply" msgid="9212602012641034283">"લાગુ કરો"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"સેટિંગ્સની પુષ્ટિ કરો"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"કેટલીક રંગ સેટિંગ્સ આ ઉપકરણને બિનઉપયોગી બનાવી શકે છે. આ રંગ સેટિંગ્સની પુષ્ટિ કરવા માટે ઑકે ક્લિક કરો, અન્યથા 10 સેકંડ પછી આ સેટિંગ્સ ફરીથી સેટ થશે."</string>
 </resources>

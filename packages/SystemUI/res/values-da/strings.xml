@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Vis disse underretninger lydløst"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Vis øverst på listen over underretninger, og giv lyd"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Vis på skærmen, og giv lyd"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Almindelige farver"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Nattefarver"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Tilpassede farver"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Ukendte farver"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Farveændring"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Vis feltet Hurtige indstillinger"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Aktivér tilpasset farveændring"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Anvend"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Bekræft indstillingerne"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Nogle farveindstillinger kan medføre, at du ikke kan bruge enheden. Klik på OK for at bekræfte disse farveindstillinger. Ellers nulstilles disse indstillinger efter ti sekunder."</string>
 </resources>

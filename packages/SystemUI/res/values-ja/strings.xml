@@ -456,8 +456,18 @@
     <string name="high_importance" msgid="1527066195614050263">"重要度: 高"</string>
     <string name="max_importance" msgid="5089005872719563894">"重要度: 緊急"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"今後はこの通知を表示しない"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"通知リストの下にマナーモードで表示する"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"通知リストの末尾にマナーモードで表示する"</string>
     <string name="notification_importance_default" msgid="4926529615920610817">"この通知をマナーモードで表示する"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"通知リストの上に表示し、音声でも知らせる"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"画面にプレビューを表示し、音声でも知らせる"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"通知リストの先頭に表示し、音声でも知らせる"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"画面に数秒間表示し、音声でも知らせる"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"標準の色"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"夜間の色"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"カスタムの色"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"不明な色"</string>
+    <string name="color_transform" msgid="6985460408079086090">"色の変更"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"[クイック設定] タイルの表示"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"カスタム変換の有効化"</string>
+    <string name="color_apply" msgid="9212602012641034283">"適用"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"設定の確認"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"一部の色設定を適用すると、この端末を使用できなくなることがあります。この色設定を確認するには、[OK] をクリックしてください。確認しない場合、10 秒後に設定はリセットされます。"</string>
 </resources>

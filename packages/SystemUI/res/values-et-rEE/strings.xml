@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Kuva need märguanded vaikselt"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Kuva märguannete loendi ülaosas koos heliga"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Kuva ekraani servas koos heliga"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Tavalised värvid"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Öised värvid"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Kohandatud värvid"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Värvid on teadmata"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Värvi muutmine"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Kuva paan Kiirseaded"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Luba kohandatud teisendamine"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Rakenda"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Seadete kinnitamine"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Mõni värviseade ei saa seadet võib-olla kasutada. Nende värviseadete kinnitamiseks klõpsake OK, muidu lähtestatakse need seaded 10 sekundi pärast."</string>
 </resources>
