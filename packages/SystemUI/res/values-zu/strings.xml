@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Bonisa ngokuthulile lezi zaziso"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Bonisa ngaphezulu kohlu lwezaziso uphinde wenze umsindo"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Bheka kusikrini uphinde wenze umsindo"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Imibala ejwayelekile"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Imibala yasebusuku"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Imibala yangokwezifiso"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Imibala engaziwa"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Ukulungiswa kombala"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Bonisa ithayili lezilungiselelo ezisheshayo"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Nika amandla ukuguqulwa kwangokwezifiso"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Sebenzisa"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Qinisekisa izilungiselelo"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Ezinye izilungiselelo zombala zingenza le divayisi ingasebenziseki. Chofoza ku-KULUNGILE ukuze uqinisekise lezi zilungiselelo zombala, uma kungenjalo lezi zilungiselelo zizosethwa kabusha ngemuva kwamasekhondi angu-10."</string>
 </resources>

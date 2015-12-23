@@ -448,28 +448,36 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"开启"</string>
-    <!-- no translation found for apply_to_topic (3641403489318659666) -->
+    <string name="apply_to_topic" msgid="3641403489318659666">"应用于<xliff:g id="TOPIC_NAME">%1$s</xliff:g>通知"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"应用于来自此应用的所有通知"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"屏蔽"</string>
+    <string name="low_importance" msgid="4109929986107147930">"重要性：低"</string>
+    <string name="default_importance" msgid="8192107689995742653">"重要性：一般"</string>
+    <string name="high_importance" msgid="1527066195614050263">"重要性：高"</string>
+    <string name="max_importance" msgid="5089005872719563894">"重要性：紧急"</string>
+    <string name="notification_importance_blocked" msgid="2397192642657872872">"一律不显示这些通知"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"在通知列表底部显示，但不发出提示音"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"显示这些通知，但不发出提示音"</string>
+    <string name="notification_importance_high" msgid="3222680136612408223">"在通知列表顶部显示，并发出提示音"</string>
+    <string name="notification_importance_max" msgid="5236987171904756134">"在屏幕上持续显示，并发出提示音"</string>
+    <!-- no translation found for color_matrix_none (2121957926040543148) -->
     <skip />
-    <!-- no translation found for apply_to_app (363016783939815960) -->
+    <!-- no translation found for color_matrix_night (5943817622105307072) -->
     <skip />
-    <!-- no translation found for blocked_importance (5198578988978234161) -->
+    <!-- no translation found for color_matrix_custom (3655576492322298713) -->
     <skip />
-    <!-- no translation found for low_importance (4109929986107147930) -->
+    <!-- no translation found for color_matrix_unknown (2709202104256265107) -->
     <skip />
-    <!-- no translation found for default_importance (8192107689995742653) -->
+    <!-- no translation found for color_transform (6985460408079086090) -->
     <skip />
-    <!-- no translation found for high_importance (1527066195614050263) -->
+    <!-- no translation found for color_matrix_show_qs (1763244354399276679) -->
     <skip />
-    <!-- no translation found for max_importance (5089005872719563894) -->
+    <!-- no translation found for color_enable_custom (6729001308217347501) -->
     <skip />
-    <!-- no translation found for notification_importance_blocked (2397192642657872872) -->
+    <!-- no translation found for color_apply (9212602012641034283) -->
     <skip />
-    <!-- no translation found for notification_importance_low (4383563267370859725) -->
+    <!-- no translation found for color_revert_title (4746666545480534663) -->
     <skip />
-    <!-- no translation found for notification_importance_default (4926529615920610817) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (3222680136612408223) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (5236987171904756134) -->
+    <!-- no translation found for color_revert_message (9116001069397996691) -->
     <skip />
 </resources>

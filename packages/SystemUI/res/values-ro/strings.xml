@@ -461,4 +461,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Aceste notificări se afișează fără a se emite un sunet"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Se afișează în partea de sus a listei cu notificări și se emite un sunet"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Se afișează pentru o scurtă durată pe ecran și se emite un sunet"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Culori normale"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Culori de noapte"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Culori personalizate"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Culori necunoscute"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Modificarea culorilor"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Afișați caseta cu Setările rapide"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Activați transformarea personalizată"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Aplicați"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Confirmați setările"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Unele setări pentru culori pot face dispozitivul să nu mai funcționeze. Dați clic pe OK pentru a confirma aceste setări pentru culori. În caz contrar, acestea se vor reseta după 10 secunde."</string>
 </resources>

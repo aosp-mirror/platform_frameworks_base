@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Tunjukkan pemberitahuan ini secara senyap"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Tunjukkan pada bahagian atas senarai pemberitahuan dan bunyikan"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Intai pada skrin dan bunyikan"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Warna biasa"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Warna malam"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Warna tersuai"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Warna tidak diketahui"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Pengubahsuaian warna"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Tunjukkan jubin Tetapan Pantas"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Dayakan jelmaan tersuai"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Gunakan"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Sahkan tetapan"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Sesetengah tetapan warna boleh menjadikan peranti ini tidak dapat digunakan. Klik OK untuk mengesahkan tetapan warna ini, jika tidak tetapan ini akan ditetapkan semula selepas 10 saat."</string>
 </resources>

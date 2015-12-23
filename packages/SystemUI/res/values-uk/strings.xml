@@ -462,4 +462,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Показувати ці сповіщення без звукового сигналу"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Показувати сповіщення вгорі списку зі звуковим сигналом"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Показувати сповіщення на екрані зі звуковим сигналом"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Стандартні кольори"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Нічні кольори"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Користувацькі кольори"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Невідомі кольори"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Змінення кольорів"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Показати опцію швидких налаштувань"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Увімкнути користувацьке перетворення"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Застосувати"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Підтвердити налаштування"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Деякі налаштування кольорів можуть зробити цей пристрій непридатним для використання. Натисніть OK, щоб підтвердити налаштування, інакше їх буде скинуто через 10 секунд."</string>
 </resources>

@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"ఈ నోటిఫికేషన్‌లను శబ్దం లేకుండా చూపుతుంది"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"నోటిఫికేషన్‌ల జాబితా ఎగువ భాగంలో శబ్దంతో చూపుతుంది"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"స్క్రీన్‌పై శీఘ్రంగా శబ్దంతో చూపుతుంది"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"సాధారణ రంగులు"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"రాత్రి రంగులు"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"అనుకూల రంగులు"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"తెలియని రంగులు"</string>
+    <string name="color_transform" msgid="6985460408079086090">"రంగు సవరణ"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"శీఘ్ర సెట్టింగ్‌ల టైల్‌ను చూపండి"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"అనుకూల పరివర్తనను ప్రారంభించండి"</string>
+    <string name="color_apply" msgid="9212602012641034283">"వర్తింపజేయి"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"సెట్టింగ్‌లను నిర్ధారించండి"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"కొన్ని రంగు సెట్టింగ్‌ల వలన ఈ పరికరం ఉపయోగించలేని విధంగా అయిపోవచ్చు. ఈ రంగు సెట్టింగ్‌లను నిర్ధారించడానికి సరే క్లిక్ చేయండి లేదంటే ఈ సెట్టింగ్‌లు 10 సెకన్ల తర్వాత రీసెట్ చేయబడతాయి."</string>
 </resources>

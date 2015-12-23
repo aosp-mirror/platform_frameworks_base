@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Осы хабарландыруларды үнсіз көрсету"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Хабарландыруларды тізімінің жоғарғы жағында көрсету және дыбыс шығару"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Экранға бекіту және дыбыс шығару"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Қалыпты түстер"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Түнгі түстер"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Арнаулы түстер"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Белгісіз түстер"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Түсті өзгерту"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Жылдам параметрлер торын көрсету"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Арнаулы түрлендіруді қосу"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Қолдану"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Параметрлерді растау"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Кейбір түс параметрлері бұл құрылғыны пайдалану мүмкін емес етуі мүмкін. Бұл түс параметрлерін растау үшін OK түймесін басыңыз, әйтпесе параметрлер 10 секундтан кейін ысырылады."</string>
 </resources>

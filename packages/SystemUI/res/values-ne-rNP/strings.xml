@@ -449,15 +449,25 @@
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"सक्रिय पार्नुहोस्"</string>
     <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> सूचनाहरूमा लागू गर्नुहोस्"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"यो अनुप्रयोगबाट सबै सूचनाहरूमा लागू गर्नुहोस्"</string>
+    <string name="apply_to_app" msgid="363016783939815960">"यो अनुप्रयोगका सबै सूचनाहरूमा लागू गर्नुहोस्"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"रोकियो"</string>
     <string name="low_importance" msgid="4109929986107147930">"न्यून महत्त्व"</string>
     <string name="default_importance" msgid="8192107689995742653">"सामान्य महत्त्व"</string>
     <string name="high_importance" msgid="1527066195614050263">"उच्च महत्त्व"</string>
-    <string name="max_importance" msgid="5089005872719563894">"अत्यावश्यक महत्त्व"</string>
+    <string name="max_importance" msgid="5089005872719563894">"जरूरी महत्त्व"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"यी सूचनाहरू कहिल्यै नदेखाउनुहोस्"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"बिना आवाज सूचना सूचीको फेदमा देखाउनुहोस्"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"बिना आवाज यी सूचनाहरू देखाउनुहोस्"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"सूचीको फेदमा बिना आवाज देखाउनुहोस्"</string>
+    <string name="notification_importance_default" msgid="4926529615920610817">"यी सूचनाहरू बिना आवाज देखाउनुहोस्"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"सूचना सूचीको शीर्षमा देखाउनुहोस् र आवाज निकाल्नुहोस्"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"स्क्रिनमा हेर्नुहोस् र आवाज निकाल्नुहोस्"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"सामान्य रङहरू"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"रात्री रङहरू"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"अनुकूलन रङहरू"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"अज्ञात रङहरू"</string>
+    <string name="color_transform" msgid="6985460408079086090">"रङ परिमार्जन"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"द्रुत सेटिङहरू टाइल देखाउनुहोस्"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"अनुकूलन रूपान्तर सक्रिय गर्नुहोस्"</string>
+    <string name="color_apply" msgid="9212602012641034283">"लागू गर्नुहोस्"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"सेटिङहरूको पुष्टि गर्नुहोस्"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"केही रङ सेटिङहरू यस यन्त्रलाई अनुपयोगी बनाउन सक्छन्। यी रङ सेटिङहरू पुष्टि गर्न हुन्छ मा क्लिक गर्नुहोस्, अन्यथा यी सेटिङहरू 10 सेकेण्डपछि रिसेट हुनेछन्।"</string>
 </resources>

@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Mostrar estas notificaciones de manera silenciosa"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Mostrar en la parte superior de la lista de notificaciones y emitir sonido"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Mostrar en la pantalla y emitir sonido"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Colores normales"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Colores nocturnos"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Colores personalizados"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Colores desconocidos"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Modificación del color"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Mostrar el mosaico de Configuración rápida"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Habilitar la transformación personalizada"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Confirmar la configuración"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Algunas opciones de configuración de color pueden provocar que el dispositivo quede inutilizable. Haz clic en Aceptar para confirmar estos parámetros de color. De lo contrario, la configuración se restablecerá en diez segundos."</string>
 </resources>

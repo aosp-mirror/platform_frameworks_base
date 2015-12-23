@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Diese Benachrichtigungen ohne Ton anzeigen"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Mit Ton ganz oben in der Benachrichtigungsliste anzeigen"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Mit Ton auf dem Display einblenden"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"Standardfarben"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"Nachtfarben"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Benutzerdefinierte Farben"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"Unbekannte Farben"</string>
+    <string name="color_transform" msgid="6985460408079086090">"Farben ändern"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Kachel \"Schnelleinstellungen\" anzeigen"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Benutzerdefinierte Anpassung aktivieren"</string>
+    <string name="color_apply" msgid="9212602012641034283">"Übernehmen"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"Einstellungen bestätigen"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Einige Farbeinstellungen können dazu führen, dass das Gerät nicht mehr genutzt werden kann. Klicke auf \"OK\", um diese Farbeinstellungen zu bestätigen. Anderenfalls werden diese Einstellungen in 10 Sekunden zurückgesetzt."</string>
 </resources>

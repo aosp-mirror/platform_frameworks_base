@@ -460,4 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"እነዚህን ማሳወቂያዎች በጸጥታ አሳይ"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"በማሳወቂያዎች ዝርዝር ላይኛው ክፍል ላይ አሳይና ድምፅ አሰማ"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"ወደ ገጸ ማያው ይመልከቱና ድምፅ ይቅረጹ"</string>
+    <string name="color_matrix_none" msgid="2121957926040543148">"መደበኛ ቀለሞች"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"የለሊት ቀለሞች"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"ብጁ ቀለሞች"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"የማይታወቁ ቀለሞች"</string>
+    <string name="color_transform" msgid="6985460408079086090">"የቀለም ማሻሻያ"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"የፈጣን ቅንብሮች ሰቅን አሳይ"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"ብጁ ቅየራን አንቃ"</string>
+    <string name="color_apply" msgid="9212602012641034283">"ተግብር"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"ቅንብሮችን ያረጋግጡ"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"አንዳንድ የቀለም ቅንብሮች ይህን መሣሪያ የማይጠቅም ሊያደርጉት ይችላሉ። እነዚህን የቀለም ቅንብሮች ለማረጋገጥ እሺ የሚለውን ጠቅ ያድርጉ፣ አለበለዚያ እነዚህ ቅንብሮች ከ10 ሰከንዶች በኋላ ዳግም ይጀምራሉ።"</string>
 </resources>
