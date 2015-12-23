@@ -22,5 +22,4 @@
     <dimen name="grid_padding_horiz">16dp</dimen>
     <dimen name="grid_padding_vert">16dp</dimen>
 
-    <dimen name="grid_item_margin">8dp</dimen>
 </resources>
