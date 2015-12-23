@@ -383,6 +383,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @param position
      */
     void setSelectionRangeBegin(int position) {
+        if (position == RecyclerView.NO_POSITION) {
+            return;
+        }
+
         if (mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(position))) {
             mRanger = new Range(position);
         }
@@ -1160,13 +1164,15 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mSelection.applyProvisionalSelection();
             mModel.endSelection();
             int firstSelected = mModel.getPositionNearestOrigin();
-            if (!mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(firstSelected))) {
-                Log.w(TAG, "First selected by band is NOT in selection!");
-                // Sadly this is really happening. Need to figure out what's going on.
-            } else if (firstSelected != NOT_SET) {
-                // TODO: firstSelected should really be lastSelected, we want to anchor the item
-                // where the mouse-up occurred.
-                setSelectionRangeBegin(firstSelected);
+            if (firstSelected != NOT_SET) {
+                if (mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(firstSelected))) {
+                    // TODO: firstSelected should really be lastSelected, we want to anchor the item
+                    // where the mouse-up occurred.
+                    setSelectionRangeBegin(firstSelected);
+                } else {
+                    // TODO: Check if this is really happening.
+                    Log.w(TAG, "First selected by band is NOT in selection!");
+                }
             }
 
             mModel = null;
@@ -1558,18 +1564,22 @@ public final class MultiSelectManager implements View.OnKeyListener {
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
                 SparseIntArray items = mColumns.get(mColumnBounds.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
-                    int position = items.get(items.keyAt(row));
-                    String id = mHelper.getModelIdFromAdapterPosition(position);
-                    if (id != null) {
-                        // The adapter inserts items for UI layout purposes that aren't associated
-                        // with files.  Those will have a null model ID.  Don't select them.
-                        mSelection.add(id);
-                    }
-                    if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
-                            row, rowStartIndex, rowEndIndex)) {
-                        // If this is the position nearest the origin, record it now so that it
-                        // can be returned by endSelection() later.
-                        mPositionNearestOrigin = position;
+                    // The default return value for SparseIntArray.get is 0, which is a valid
+                    // position. Use a sentry value to prevent erroneously selecting item 0.
+                    int position = items.get(items.keyAt(row), NOT_SET);
+                    if (position != NOT_SET) {
+                        String id = mHelper.getModelIdFromAdapterPosition(position);
+                        if (id != null) {
+                            // The adapter inserts items for UI layout purposes that aren't associated
+                            // with files.  Those will have a null model ID.  Don't select them.
+                            mSelection.add(id);
+                        }
+                        if (isPossiblePositionNearestOrigin(column, columnStartIndex, columnEndIndex,
+                                row, rowStartIndex, rowEndIndex)) {
+                            // If this is the position nearest the origin, record it now so that it
+                            // can be returned by endSelection() later.
+                            mPositionNearestOrigin = position;
+                        }
                     }
                 }
             }
