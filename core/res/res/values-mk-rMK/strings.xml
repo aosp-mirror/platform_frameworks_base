@@ -1255,7 +1255,7 @@
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Поврзи се со уред"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Префрли екран на уред"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Пребарување за уреди..."</string>
-    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Подесувања"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Поставки"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Исклучи"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Скенирање..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Се поврзува..."</string>
