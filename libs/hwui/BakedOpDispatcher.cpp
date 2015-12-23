@@ -79,7 +79,9 @@ void BakedOpDispatcher::onMergedBitmapOps(BakedOpRenderer& renderer,
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    renderer.renderGlop(nullptr, opList.clipSideFlags ? &opList.clip : nullptr, glop);
+    ClipRect renderTargetClip(opList.clip);
+    const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
+    renderer.renderGlop(nullptr, clip, glop);
 }
 
 void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
@@ -183,7 +185,9 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
             .setTransform(Matrix4::identity(), TransformFlags::None)
             .setModelViewIdentityEmptyBounds()
             .build();
-    renderer.renderGlop(nullptr, opList.clipSideFlags ? &opList.clip : nullptr, glop);
+    ClipRect renderTargetClip(opList.clip);
+    const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
+    renderer.renderGlop(nullptr, clip, glop);
 }
 
 static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRenderer,
@@ -224,7 +228,7 @@ enum class TextRenderType {
 };
 
 static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state,
-        const Rect* renderClip, TextRenderType renderType) {
+        const ClipBase* renderClip, TextRenderType renderType) {
     FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
 
     if (CC_UNLIKELY(PaintUtils::hasTextShadow(op.paint))) {
@@ -272,7 +276,7 @@ static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const Bake
 
     bool forceFinish = (renderType == TextRenderType::Flush);
     bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
-    const Rect* localOpClip = pureTranslate ? &state.computedState.clipRect : nullptr;
+    const Rect* localOpClip = pureTranslate ? &state.computedState.clipRect() : nullptr;
     fontRenderer.renderPosText(op.paint, localOpClip,
             (const char*) op.glyphs, op.glyphCount, x, y,
             op.positions, mustDirtyRenderTarget ? &layerBounds : nullptr, &functor, forceFinish);
@@ -287,7 +291,8 @@ static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const Bake
 
 void BakedOpDispatcher::onMergedTextOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
-    const Rect* clip = opList.clipSideFlags ? &opList.clip : nullptr;
+    ClipRect renderTargetClip(opList.clip);
+    const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
     for (size_t i = 0; i < opList.count; i++) {
         const BakedOpState& state = *(opList.states[i]);
         const TextOp& op = *(static_cast<const TextOp*>(state.op));
@@ -701,14 +706,13 @@ void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleR
 }
 
 void BakedOpDispatcher::onTextOp(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state) {
-    const Rect* clip = state.computedState.clipSideFlags ? &state.computedState.clipRect : nullptr;
-    renderTextOp(renderer, op, state, clip, TextRenderType::Flush);
+    renderTextOp(renderer, op, state, state.computedState.getClipIfNeeded(), TextRenderType::Flush);
 }
 
 void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPathOp& op, const BakedOpState& state) {
     // Note: can't trust clipSideFlags since we record with unmappedBounds == clip.
     // TODO: respect clipSideFlags, once we record with bounds
-    const Rect* renderTargetClip = &state.computedState.clipRect;
+    auto renderTargetClip = state.computedState.clipState;
 
     FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
     fontRenderer.setFont(op.paint, SkMatrix::I());

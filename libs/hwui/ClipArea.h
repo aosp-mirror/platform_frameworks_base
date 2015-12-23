@@ -16,14 +16,16 @@
 #ifndef CLIPAREA_H
 #define CLIPAREA_H
 
-#include <SkRegion.h>
-
 #include "Matrix.h"
 #include "Rect.h"
 #include "utils/Pair.h"
 
+#include <SkRegion.h>
+
 namespace android {
 namespace uirenderer {
+
+class LinearAllocator;
 
 Rect transformAndCalculateBounds(const Rect& r, const Matrix4& transform);
 
@@ -50,6 +52,12 @@ public:
         return mTransform;
     }
 
+    void transform(const Matrix4& transform) {
+        Matrix4 t;
+        t.loadMultiply(transform, mTransform);
+        mTransform = t;
+    }
+
 private:
     Rect mBounds;
     Matrix4 mTransform;
@@ -66,27 +74,62 @@ public:
     void setEmpty();
     void set(const Rect& bounds, const Matrix4& transform);
     bool intersectWith(const Rect& bounds, const Matrix4& transform);
+    void transform(const Matrix4& transform);
 
     SkRegion convertToRegion(const SkRegion& clip) const;
     Rect calculateBounds() const;
 
-private:
     enum {
         kMaxTransformedRectangles = 5
     };
 
+private:
     int mTransformedRectanglesCount;
     TransformedRectangle mTransformedRectangles[kMaxTransformedRectangles];
 };
 
-class ClipArea {
-private:
-    enum class Mode {
-        Rectangle,
-        Region,
-        RectangleList
-    };
+enum class ClipMode {
+    Rectangle,
+    RectangleList,
 
+    // region and path - intersected. if either is empty, don't use
+    Region
+};
+
+struct ClipBase {
+    ClipBase(ClipMode mode)
+            : mode(mode) {}
+    ClipBase(const Rect& rect)
+            : mode(ClipMode::Rectangle)
+            , rect(rect) {}
+    const ClipMode mode;
+    // Bounds of the clipping area, used to define the scissor, and define which
+    // portion of the stencil is updated/used
+    Rect rect;
+};
+
+struct ClipRect : ClipBase {
+    ClipRect(const Rect& rect)
+            : ClipBase(rect) {}
+};
+
+struct ClipRectList : ClipBase {
+    ClipRectList(const RectangleList& rectList)
+            : ClipBase(ClipMode::RectangleList)
+            , rectList(rectList) {}
+    RectangleList rectList;
+};
+
+struct ClipRegion : ClipBase {
+    ClipRegion(const SkRegion& region)
+            : ClipBase(ClipMode::Region)
+            , region(region) {}
+    ClipRegion()
+            : ClipBase(ClipMode::Region) {}
+    SkRegion region;
+};
+
+class ClipArea {
 public:
     ClipArea();
 
@@ -117,16 +160,21 @@ public:
     }
 
     bool isRegion() const {
-        return Mode::Region == mMode;
+        return ClipMode::Region == mMode;
     }
 
     bool isSimple() const {
-        return mMode == Mode::Rectangle;
+        return mMode == ClipMode::Rectangle;
     }
 
     bool isRectangleList() const {
-        return mMode == Mode::RectangleList;
+        return mMode == ClipMode::RectangleList;
     }
+
+    const ClipBase* serializeClip(LinearAllocator& allocator);
+    const ClipBase* serializeIntersectedClip(LinearAllocator& allocator,
+            const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
+    void applyClip(const ClipBase* recordedClip, const Matrix4& recordedClipTransform);
 
 private:
     void enterRectangleMode();
@@ -145,6 +193,13 @@ private:
     void ensureClipRegion();
     void onClipRegionUpdated();
 
+    // Called by every state modifying public method.
+    void onClipUpdated() {
+        mPostViewportClipObserved = true;
+        mLastSerialization = nullptr;
+        mLastResolutionResult = nullptr;
+    }
+
     SkRegion createViewportRegion() {
         return SkRegion(mViewportBounds.toSkIRect());
     }
@@ -155,7 +210,22 @@ private:
         pathAsRegion.setPath(path, createViewportRegion());
     }
 
-    Mode mMode;
+    ClipMode mMode;
+    bool mPostViewportClipObserved = false;
+
+    /**
+     * If mLastSerialization is non-null, it represents an already serialized copy
+     * of the current clip state. If null, it has not been computed.
+     */
+    const ClipBase* mLastSerialization = nullptr;
+
+    /**
+     * This pair of pointers is a single entry cache of most recently seen
+     */
+    const ClipBase* mLastResolutionResult = nullptr;
+    const ClipBase* mLastResolutionClip = nullptr;
+    Matrix4 mLastResolutionTransform;
+
     Rect mViewportBounds;
     Rect mClipRect;
     SkRegion mClipRegion;

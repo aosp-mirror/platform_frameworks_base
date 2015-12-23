@@ -15,10 +15,11 @@
  */
 #include "ClipArea.h"
 
+#include "utils/LinearAllocator.h"
+
 #include <SkPath.h>
 #include <limits>
-
-#include "Rect.h"
+#include <type_traits>
 
 namespace android {
 namespace uirenderer {
@@ -171,12 +172,18 @@ SkRegion RectangleList::convertToRegion(const SkRegion& clip) const {
     return rectangleListAsRegion;
 }
 
+void RectangleList::transform(const Matrix4& transform) {
+    for (int index = 0; index < mTransformedRectanglesCount; index++) {
+        mTransformedRectangles[index].transform(transform);
+    }
+}
+
 /*
  * ClipArea
  */
 
 ClipArea::ClipArea()
-        : mMode(Mode::Rectangle) {
+        : mMode(ClipMode::Rectangle) {
 }
 
 /*
@@ -184,39 +191,44 @@ ClipArea::ClipArea()
  */
 
 void ClipArea::setViewportDimensions(int width, int height) {
+    mPostViewportClipObserved = false;
     mViewportBounds.set(0, 0, width, height);
     mClipRect = mViewportBounds;
 }
 
 void ClipArea::setEmpty() {
-    mMode = Mode::Rectangle;
+    onClipUpdated();
+    mMode = ClipMode::Rectangle;
     mClipRect.setEmpty();
     mClipRegion.setEmpty();
     mRectangleList.setEmpty();
 }
 
 void ClipArea::setClip(float left, float top, float right, float bottom) {
-    mMode = Mode::Rectangle;
+    onClipUpdated();
+    mMode = ClipMode::Rectangle;
     mClipRect.set(left, top, right, bottom);
     mClipRegion.setEmpty();
 }
 
 void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
         SkRegion::Op op) {
+    onClipUpdated();
     switch (mMode) {
-    case Mode::Rectangle:
+    case ClipMode::Rectangle:
         rectangleModeClipRectWithTransform(r, transform, op);
         break;
-    case Mode::RectangleList:
+    case ClipMode::RectangleList:
         rectangleListModeClipRectWithTransform(r, transform, op);
         break;
-    case Mode::Region:
+    case ClipMode::Region:
         regionModeClipRectWithTransform(r, transform, op);
         break;
     }
 }
 
 void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
+    onClipUpdated();
     enterRegionMode();
     mClipRegion.op(region, op);
     onClipRegionUpdated();
@@ -224,6 +236,7 @@ void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
 
 void ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
         SkRegion::Op op) {
+    onClipUpdated();
     SkMatrix skTransform;
     transform->copyTo(skTransform);
     SkPath transformed;
@@ -241,7 +254,7 @@ void ClipArea::enterRectangleMode() {
     // Entering rectangle mode discards any
     // existing clipping information from the other modes.
     // The only way this occurs is by a clip setting operation.
-    mMode = Mode::Rectangle;
+    mMode = ClipMode::Rectangle;
 }
 
 void ClipArea::rectangleModeClipRectWithTransform(const Rect& r,
@@ -276,8 +289,8 @@ void ClipArea::enterRectangleListMode() {
     // Is is only legal to enter rectangle list mode from
     // rectangle mode, since rectangle list mode cannot represent
     // all clip areas that can be represented by a region.
-    ALOG_ASSERT(mMode == Mode::Rectangle);
-    mMode = Mode::RectangleList;
+    ALOG_ASSERT(mMode == ClipMode::Rectangle);
+    mMode = ClipMode::RectangleList;
     mRectangleList.set(mClipRect, Matrix4::identity());
 }
 
@@ -295,12 +308,11 @@ void ClipArea::rectangleListModeClipRectWithTransform(const Rect& r,
  */
 
 void ClipArea::enterRegionMode() {
-    Mode oldMode = mMode;
-    mMode = Mode::Region;
-    if (oldMode != Mode::Region) {
-        if (oldMode == Mode::Rectangle) {
-            mClipRegion.setRect(mClipRect.left, mClipRect.top,
-                    mClipRect.right, mClipRect.bottom);
+    ClipMode oldMode = mMode;
+    mMode = ClipMode::Region;
+    if (oldMode != ClipMode::Region) {
+        if (oldMode == ClipMode::Rectangle) {
+            mClipRegion.setRect(mClipRect.toSkIRect());
         } else {
             mClipRegion = mRectangleList.convertToRegion(createViewportRegion());
             onClipRegionUpdated();
@@ -327,6 +339,173 @@ void ClipArea::onClipRegionUpdated() {
         }
     } else {
         mClipRect.setEmpty();
+    }
+}
+
+/**
+ * Clip serialization
+ */
+
+const ClipBase* ClipArea::serializeClip(LinearAllocator& allocator) {
+    if (!mPostViewportClipObserved) {
+        // Only initial clip-to-viewport observed, so no serialization of clip necessary
+        return nullptr;
+    }
+
+    static_assert(std::is_trivially_destructible<Rect>::value,
+            "expect Rect to be trivially destructible");
+    static_assert(std::is_trivially_destructible<RectangleList>::value,
+            "expect RectangleList to be trivially destructible");
+
+    if (mLastSerialization == nullptr) {
+        switch (mMode) {
+        case ClipMode::Rectangle:
+            mLastSerialization = allocator.create<ClipRect>(mClipRect);
+            break;
+        case ClipMode::RectangleList:
+            mLastSerialization = allocator.create<ClipRectList>(mRectangleList);
+            break;
+        case ClipMode::Region:
+            mLastSerialization = allocator.create<ClipRegion>(mClipRegion);
+            break;
+        }
+    }
+    return mLastSerialization;
+}
+
+inline static const Rect& getRect(const ClipBase* scb) {
+    return reinterpret_cast<const ClipRect*>(scb)->rect;
+}
+
+inline static const RectangleList& getRectList(const ClipBase* scb) {
+    return reinterpret_cast<const ClipRectList*>(scb)->rectList;
+}
+
+inline static const SkRegion& getRegion(const ClipBase* scb) {
+    return reinterpret_cast<const ClipRegion*>(scb)->region;
+}
+
+// Conservative check for too many rectangles to fit in rectangle list.
+// For simplicity, doesn't account for rect merging
+static bool cannotFitInRectangleList(const ClipArea& clipArea, const ClipBase* scb) {
+    int currentRectCount = clipArea.isRectangleList()
+            ? clipArea.getRectangleList().getTransformedRectanglesCount()
+            : 1;
+    int recordedRectCount = (scb->mode == ClipMode::RectangleList)
+            ? getRectList(scb).getTransformedRectanglesCount()
+            : 1;
+    return currentRectCount + recordedRectCount > RectangleList::kMaxTransformedRectangles;
+}
+
+const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
+        const ClipBase* recordedClip, const Matrix4& recordedClipTransform) {
+    // if no recordedClip passed, just serialize current state
+    if (!recordedClip) return serializeClip(allocator);
+
+    if (!mLastResolutionResult
+            || recordedClip != mLastResolutionClip
+            || recordedClipTransform != mLastResolutionTransform) {
+        mLastResolutionClip = recordedClip;
+        mLastResolutionTransform = recordedClipTransform;
+
+        if (CC_LIKELY(mMode == ClipMode::Rectangle
+                && recordedClip->mode == ClipMode::Rectangle
+                && recordedClipTransform.rectToRect())) {
+            // common case - result is a single rectangle
+            auto rectClip = allocator.create<ClipRect>(getRect(recordedClip));
+            recordedClipTransform.mapRect(rectClip->rect);
+            rectClip->rect.doIntersect(mClipRect);
+            mLastResolutionResult = rectClip;
+        } else if (CC_UNLIKELY(mMode == ClipMode::Region
+                || recordedClip->mode == ClipMode::Region
+                || cannotFitInRectangleList(*this, recordedClip))) {
+            // region case
+            SkRegion other;
+            switch (recordedClip->mode) {
+            case ClipMode::Rectangle:
+                if (CC_LIKELY(recordedClipTransform.rectToRect())) {
+                    // simple transform, skip creating SkPath
+                    Rect resultClip(getRect(recordedClip));
+                    recordedClipTransform.mapRect(resultClip);
+                    other.setRect(resultClip.toSkIRect());
+                } else {
+                    SkPath transformedRect = pathFromTransformedRectangle(getRect(recordedClip),
+                            recordedClipTransform);
+                    other.setPath(transformedRect, createViewportRegion());
+                }
+                break;
+            case ClipMode::RectangleList: {
+                RectangleList transformedList(getRectList(recordedClip));
+                transformedList.transform(recordedClipTransform);
+                other = transformedList.convertToRegion(createViewportRegion());
+                break;
+            }
+            case ClipMode::Region:
+                other = getRegion(recordedClip);
+
+                // TODO: handle non-translate transforms properly!
+                other.translate(recordedClipTransform.getTranslateX(),
+                        recordedClipTransform.getTranslateY());
+            }
+
+            ClipRegion* regionClip = allocator.create<ClipRegion>();
+            switch (mMode) {
+            case ClipMode::Rectangle:
+                regionClip->region.op(mClipRect.toSkIRect(), other, SkRegion::kIntersect_Op);
+                break;
+            case ClipMode::RectangleList:
+                regionClip->region.op(mRectangleList.convertToRegion(createViewportRegion()),
+                        other, SkRegion::kIntersect_Op);
+                break;
+            case ClipMode::Region:
+                regionClip->region.op(mClipRegion, other, SkRegion::kIntersect_Op);
+                break;
+            }
+            regionClip->rect.set(regionClip->region.getBounds());
+            mLastResolutionResult = regionClip;
+        } else {
+            auto rectListClip = allocator.create<ClipRectList>(mRectangleList);
+            auto&& rectList = rectListClip->rectList;
+            if (mMode == ClipMode::Rectangle) {
+                rectList.set(mClipRect, Matrix4::identity());
+            }
+
+            if (recordedClip->mode == ClipMode::Rectangle) {
+                rectList.intersectWith(getRect(recordedClip), recordedClipTransform);
+            } else {
+                const RectangleList& other = getRectList(recordedClip);
+                for (int i = 0; i < other.getTransformedRectanglesCount(); i++) {
+                    auto&& tr = other.getTransformedRectangle(i);
+                    Matrix4 totalTransform(recordedClipTransform);
+                    totalTransform.multiply(tr.getTransform());
+                    rectList.intersectWith(tr.getBounds(), totalTransform);
+                }
+            }
+            rectListClip->rect = rectList.calculateBounds();
+            mLastResolutionResult = rectListClip;
+        }
+    }
+    return mLastResolutionResult;
+}
+
+void ClipArea::applyClip(const ClipBase* clip, const Matrix4& transform) {
+    if (!clip) return; // nothing to do
+
+    if (CC_LIKELY(clip->mode == ClipMode::Rectangle)) {
+        clipRectWithTransform(getRect(clip), &transform, SkRegion::kIntersect_Op);
+    } else if (CC_LIKELY(clip->mode == ClipMode::RectangleList)) {
+        auto&& rectList = getRectList(clip);
+        for (int i = 0; i < rectList.getTransformedRectanglesCount(); i++) {
+            auto&& tr = rectList.getTransformedRectangle(i);
+            Matrix4 totalTransform(transform);
+            totalTransform.multiply(tr.getTransform());
+            clipRectWithTransform(tr.getBounds(), &totalTransform, SkRegion::kIntersect_Op);
+        }
+    } else {
+        SkRegion region(getRegion(clip));
+        // TODO: handle non-translate transforms properly!
+        region.translate(transform.getTranslateX(), transform.getTranslateY());
+        clipRegion(region, SkRegion::kIntersect_Op);
     }
 }
 

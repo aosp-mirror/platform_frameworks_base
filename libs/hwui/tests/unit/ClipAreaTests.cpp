@@ -119,5 +119,122 @@ TEST(ClipArea, replaceNegative) {
     EXPECT_EQ(expected, area.getClipRect());
 }
 
+TEST(ClipArea, serializeClip) {
+    ClipArea area(createClipArea());
+    LinearAllocator allocator;
+
+    // unset clip
+    EXPECT_EQ(nullptr, area.serializeClip(allocator));
+
+    // rect clip
+    area.setClip(0, 0, 200, 200);
+    {
+        auto serializedClip = area.serializeClip(allocator);
+        ASSERT_NE(nullptr, serializedClip);
+        ASSERT_EQ(ClipMode::Rectangle, serializedClip->mode);
+        auto clipRect = reinterpret_cast<const ClipRect*>(serializedClip);
+        ASSERT_EQ(Rect(200, 200), clipRect->rect);
+        EXPECT_EQ(serializedClip, area.serializeClip(allocator))
+                << "Requery of clip on unmodified ClipArea must return same pointer.";
+    }
+
+    // rect list
+    Matrix4 rotate;
+    rotate.loadRotate(2.0f);
+    area.clipRectWithTransform(Rect(200, 200), &rotate, SkRegion::kIntersect_Op);
+    {
+        auto serializedClip = area.serializeClip(allocator);
+        ASSERT_NE(nullptr, serializedClip);
+        ASSERT_EQ(ClipMode::RectangleList, serializedClip->mode);
+        auto clipRectList = reinterpret_cast<const ClipRectList*>(serializedClip);
+        ASSERT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
+        EXPECT_EQ(serializedClip, area.serializeClip(allocator))
+                << "Requery of clip on unmodified ClipArea must return same pointer.";
+    }
+
+    // region
+    SkPath circlePath;
+    circlePath.addCircle(100, 100, 100);
+    area.clipPathWithTransform(circlePath, &Matrix4::identity(), SkRegion::kReplace_Op);
+    {
+        auto serializedClip = area.serializeClip(allocator);
+        ASSERT_NE(nullptr, serializedClip);
+        ASSERT_EQ(ClipMode::Region, serializedClip->mode);
+        auto clipRegion = reinterpret_cast<const ClipRegion*>(serializedClip);
+        ASSERT_EQ(SkIRect::MakeWH(200, 200), clipRegion->region.getBounds())
+                << "Clip region should be 200x200";
+        EXPECT_EQ(serializedClip, area.serializeClip(allocator))
+                << "Requery of clip on unmodified ClipArea must return same pointer.";
+    }
 }
+
+TEST(ClipArea, serializeIntersectedClip) {
+    ClipArea area(createClipArea());
+    LinearAllocator allocator;
+
+    // simple state;
+    EXPECT_EQ(nullptr, area.serializeIntersectedClip(allocator, nullptr, Matrix4::identity()));
+    area.setClip(0, 0, 200, 200);
+    {
+        auto origRectClip = area.serializeClip(allocator);
+        ASSERT_NE(nullptr, origRectClip);
+        EXPECT_EQ(origRectClip, area.serializeIntersectedClip(allocator, nullptr, Matrix4::identity()));
+    }
+
+    // rect
+    {
+        ClipRect recordedClip(Rect(100, 100));
+        Matrix4 translateScale;
+        translateScale.loadTranslate(100, 100, 0);
+        translateScale.scale(2, 3, 1);
+        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, translateScale);
+        ASSERT_NE(nullptr, resolvedClip);
+        ASSERT_EQ(ClipMode::Rectangle, resolvedClip->mode);
+        EXPECT_EQ(Rect(100, 100, 200, 200),
+                reinterpret_cast<const ClipRect*>(resolvedClip)->rect);
+
+        EXPECT_EQ(resolvedClip, area.serializeIntersectedClip(allocator, &recordedClip, translateScale))
+                << "Must return previous serialization, since input is same";
+
+        ClipRect recordedClip2(Rect(100, 100));
+        EXPECT_NE(resolvedClip, area.serializeIntersectedClip(allocator, &recordedClip2, translateScale))
+                << "Shouldn't return previous serialization, since matrix location is different";
+    }
+
+    // rect list
+    Matrix4 rotate;
+    rotate.loadRotate(2.0f);
+    area.clipRectWithTransform(Rect(200, 200), &rotate, SkRegion::kIntersect_Op);
+    {
+        ClipRect recordedClip(Rect(100, 100));
+        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip, Matrix4::identity());
+        ASSERT_NE(nullptr, resolvedClip);
+        ASSERT_EQ(ClipMode::RectangleList, resolvedClip->mode);
+        auto clipRectList = reinterpret_cast<const ClipRectList*>(resolvedClip);
+        EXPECT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
+    }
+
+    // region
+    SkPath circlePath;
+    circlePath.addCircle(100, 100, 100);
+    area.clipPathWithTransform(circlePath, &Matrix4::identity(), SkRegion::kReplace_Op);
+    {
+        SkPath ovalPath;
+        ovalPath.addOval(SkRect::MakeLTRB(50, 0, 150, 200));
+
+        ClipRegion recordedClip;
+        recordedClip.region.setPath(ovalPath, SkRegion(SkIRect::MakeWH(200, 200)));
+
+        Matrix4 translate10x20;
+        translate10x20.loadTranslate(10, 20, 0);
+        auto resolvedClip = area.serializeIntersectedClip(allocator, &recordedClip,
+                translate10x20); // Note: only translate for now, others not handled correctly
+        ASSERT_NE(nullptr, resolvedClip);
+        ASSERT_EQ(ClipMode::Region, resolvedClip->mode);
+        auto clipRegion = reinterpret_cast<const ClipRegion*>(resolvedClip);
+        EXPECT_EQ(SkIRect::MakeLTRB(60, 20, 160, 200), clipRegion->region.getBounds());
+    }
 }
+
+} // namespace uirenderer
+} // namespace android

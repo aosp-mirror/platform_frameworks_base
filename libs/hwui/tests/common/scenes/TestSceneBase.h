@@ -22,6 +22,7 @@
 #include "tests/common/TestContext.h"
 #include "tests/common/TestScene.h"
 #include "tests/common/TestUtils.h"
+#include "utils/Color.h"
 
 #include <functional>
 

@@ -460,7 +460,7 @@ void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
             deferBeginLayerOp(*new (mAllocator) BeginLayerOp(
                     saveLayerBounds,
                     Matrix4::identity(),
-                    saveLayerBounds,
+                    nullptr, // no record-time clip - need only respect defer-time one
                     &saveLayerPaint));
             deferNodeOps(node);
             deferEndLayerOp(*new (mAllocator) EndLayerOp());
@@ -604,7 +604,7 @@ void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
             mCanvasState.getLocalClipBounds(),
             mCanvasState.currentSnapshot()->getRelativeLightCenter());
     BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
-            mAllocator, *mCanvasState.currentSnapshot(), shadowOp);
+            mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
     if (CC_LIKELY(bakedOpState)) {
         currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
     }
@@ -681,10 +681,10 @@ void OpReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) return;
     int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
-    // apply state from RecordedOp
+    // apply state from RecordedOp (clip first, since op's clip is transformed by current matrix)
+    mCanvasState.writableSnapshot()->mutateClipArea().applyClip(op.localClip,
+            *mCanvasState.currentSnapshot()->transform);
     mCanvasState.concatMatrix(op.localMatrix);
-    mCanvasState.clipRect(op.localClipRect.left, op.localClipRect.top,
-            op.localClipRect.right, op.localClipRect.bottom, SkRegion::kIntersect_Op);
 
     // then apply state from node properties, and defer ops
     deferNodePropsAndOps(*op.renderNode);
@@ -706,7 +706,7 @@ void OpReorderer::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.currentSnapshot(), op, strokeBehavior);
+            mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, batchId);
 }
@@ -769,7 +769,7 @@ void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
     const OvalOp* resolvedOp = new (mAllocator) OvalOp(
             unmappedBounds,
             op.localMatrix,
-            op.localClipRect,
+            op.localClip,
             op.paint);
     deferOvalOp(*resolvedOp);
 }
@@ -829,7 +829,7 @@ void OpReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     const RoundRectOp* resolvedOp = new (mAllocator) RoundRectOp(
             Rect(*(op.left), *(op.top), *(op.right), *(op.bottom)),
             op.localMatrix,
-            op.localClipRect,
+            op.localClip,
             op.paint, *op.rx, *op.ry);
     deferRoundRectOp(*resolvedOp);
 }
@@ -953,7 +953,7 @@ void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     LayerOp* drawLayerOp = new (mAllocator) LayerOp(
             beginLayerOp.unmappedBounds,
             beginLayerOp.localMatrix,
-            beginLayerOp.localClipRect,
+            beginLayerOp.localClip,
             beginLayerOp.paint,
             &mLayerReorderers[finishedLayerIndex].offscreenBuffer);
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);

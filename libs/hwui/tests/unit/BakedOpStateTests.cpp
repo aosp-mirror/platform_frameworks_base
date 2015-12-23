@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <BakedOpState.h>
+#include <ClipArea.h>
 #include <RecordedOp.h>
 #include <tests/common/TestUtils.h>
 
@@ -24,31 +25,33 @@ namespace android {
 namespace uirenderer {
 
 TEST(ResolvedRenderState, construct) {
+    LinearAllocator allocator;
     Matrix4 translate10x20;
     translate10x20.loadTranslate(10, 20, 0);
 
     SkPaint paint;
-    RectOp recordedOp(Rect(30, 40, 100, 200), translate10x20, Rect(100, 200), &paint);
+    ClipRect clip(Rect(100, 200));
+    RectOp recordedOp(Rect(30, 40, 100, 200), translate10x20, &clip, &paint);
     {
         // recorded with transform, no parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
         EXPECT_MATRIX_APPROX_EQ(state.transform, translate10x20);
-        EXPECT_EQ(Rect(100, 200), state.clipRect);
+        EXPECT_EQ(Rect(100, 200), state.clipRect());
         EXPECT_EQ(Rect(40, 60, 100, 200), state.clippedBounds); // translated and also clipped
         EXPECT_EQ(OpClipSideFlags::Right | OpClipSideFlags::Bottom, state.clipSideFlags);
     }
     {
         // recorded with transform and parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
-        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
 
         Matrix4 expectedTranslate;
         expectedTranslate.loadTranslate(20, 40, 0);
         EXPECT_MATRIX_APPROX_EQ(expectedTranslate, state.transform);
 
         // intersection of parent & transformed child clip
-        EXPECT_EQ(Rect(10, 20, 100, 200), state.clipRect);
+        EXPECT_EQ(Rect(10, 20, 100, 200), state.clipRect());
 
         // translated and also clipped
         EXPECT_EQ(Rect(50, 80, 100, 200), state.clippedBounds);
@@ -57,22 +60,24 @@ TEST(ResolvedRenderState, construct) {
 }
 
 TEST(ResolvedRenderState, computeLocalSpaceClip) {
+    LinearAllocator allocator;
     Matrix4 translate10x20;
     translate10x20.loadTranslate(10, 20, 0);
 
     SkPaint paint;
-    RectOp recordedOp(Rect(1000, 1000), translate10x20, Rect(100, 200), &paint);
+    ClipRect clip(Rect(100, 200));
+    RectOp recordedOp(Rect(1000, 1000), translate10x20, &clip, &paint);
     {
         // recorded with transform, no parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
         EXPECT_EQ(Rect(-10, -20, 90, 180), state.computeLocalSpaceClip())
             << "Local clip rect should be 100x200, offset by -10,-20";
     }
     {
         // recorded with transform + parent transform
         auto parentSnapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
-        ResolvedRenderState state(*parentSnapshot, recordedOp, false);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, false);
         EXPECT_EQ(Rect(-10, -20, 80, 160), state.computeLocalSpaceClip())
             << "Local clip rect should be 90x190, offset by -10,-20";
     }
@@ -149,6 +154,7 @@ const static StrokeTestCase sStrokeTestCases[] = {
 };
 
 TEST(ResolvedRenderState, construct_expandForStroke) {
+    LinearAllocator allocator;
     // Loop over table of test cases and verify different combinations of stroke width and transform
     for (auto&& testCase : sStrokeTestCases) {
         SkPaint strokedPaint;
@@ -156,14 +162,15 @@ TEST(ResolvedRenderState, construct_expandForStroke) {
         strokedPaint.setStyle(SkPaint::kStroke_Style);
         strokedPaint.setStrokeWidth(testCase.strokeWidth);
 
+        ClipRect clip(Rect(200, 200));
         RectOp recordedOp(Rect(50, 50, 150, 150),
-                Matrix4::identity(), Rect(200, 200), &strokedPaint);
+                Matrix4::identity(), &clip, &strokedPaint);
 
         Matrix4 snapshotMatrix;
         snapshotMatrix.loadScale(testCase.scale, testCase.scale, 1);
         auto parentSnapshot = TestUtils::makeSnapshot(snapshotMatrix, Rect(200, 200));
 
-        ResolvedRenderState state(*parentSnapshot, recordedOp, true);
+        ResolvedRenderState state(allocator, *parentSnapshot, recordedOp, true);
         testCase.validator(state);
     }
 }
@@ -175,8 +182,9 @@ TEST(BakedOpState, tryConstruct) {
     translate100x0.loadTranslate(100, 0, 0);
 
     SkPaint paint;
+    ClipRect clip(Rect(100, 200));
     {
-        RectOp rejectOp(Rect(30, 40, 100, 200), translate100x0, Rect(100, 200), &paint);
+        RectOp rejectOp(Rect(30, 40, 100, 200), translate100x0, &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
         BakedOpState* bakedState = BakedOpState::tryConstruct(allocator, *snapshot, rejectOp);
 
@@ -184,7 +192,7 @@ TEST(BakedOpState, tryConstruct) {
         EXPECT_GT(8u, allocator.usedSize()); // no significant allocation space used for rejected op
     }
     {
-        RectOp successOp(Rect(30, 40, 100, 200), Matrix4::identity(), Rect(100, 200), &paint);
+        RectOp successOp(Rect(30, 40, 100, 200), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
         BakedOpState* bakedState = BakedOpState::tryConstruct(allocator, *snapshot, successOp);
 
@@ -218,7 +226,8 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         SkPaint paint;
         paint.setStyle(SkPaint::kStrokeAndFill_Style);
         paint.setStrokeWidth(0.0f);
-        RectOp rejectOp(Rect(100, 200), Matrix4::identity(), Rect(100, 200), &paint);
+        ClipRect clip(Rect(100, 200));
+        RectOp rejectOp(Rect(100, 200), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
                 BakedOpState::StrokeBehavior::StyleDefined);
@@ -231,7 +240,8 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         SkPaint paint;
         paint.setStyle(SkPaint::kStrokeAndFill_Style);
         paint.setStrokeWidth(10.0f);
-        RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), Rect(200, 200), &paint);
+        ClipRect clip(Rect(200, 200));
+        RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
                 BakedOpState::StrokeBehavior::StyleDefined);
@@ -245,7 +255,8 @@ TEST(BakedOpState, tryStrokeableOpConstruct) {
         SkPaint paint;
         paint.setStyle(SkPaint::kFill_Style);
         paint.setStrokeWidth(10.0f);
-        RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), Rect(200, 200), &paint);
+        ClipRect clip(Rect(200, 200));
+        RectOp rejectOp(Rect(50, 50, 150, 150), Matrix4::identity(), &clip, &paint);
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(200, 200));
         auto bakedState = BakedOpState::tryStrokeableOpConstruct(allocator, *snapshot, rejectOp,
                 BakedOpState::StrokeBehavior::Forced);

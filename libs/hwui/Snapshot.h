@@ -167,6 +167,7 @@ public:
     const SkRegion& getClipRegion() const { return mClipArea->getClipRegion(); }
     bool clipIsSimple() const { return mClipArea->isSimple(); }
     const ClipArea& getClipArea() const { return *mClipArea; }
+    ClipArea& mutateClipArea() { return *mClipArea; }
 
     /**
      * Resets the clip to the specified rect.

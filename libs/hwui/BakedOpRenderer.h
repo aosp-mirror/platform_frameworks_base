@@ -27,6 +27,7 @@ class Caches;
 struct Glop;
 class Layer;
 class RenderState;
+struct ClipBase;
 
 /**
  * Main rendering manager for a collection of work - one frame + any contained FBOs.
@@ -59,7 +60,7 @@ public:
     Caches& caches() { return mCaches; }
 
     void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect);
-    void endFrame();
+    void endFrame(const Rect& repaintRect);
     OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
     void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect);
     void endLayer();
@@ -68,21 +69,23 @@ public:
     const LightInfo& getLightInfo() const { return mLightInfo; }
 
     void renderGlop(const BakedOpState& state, const Glop& glop) {
-        bool useScissor = state.computedState.clipSideFlags != OpClipSideFlags::None;
         renderGlop(&state.computedState.clippedBounds,
-                useScissor ? &state.computedState.clipRect : nullptr,
+                state.computedState.getClipIfNeeded(),
                 glop);
     }
     void renderFunctor(const FunctorOp& op, const BakedOpState& state);
 
-    void renderGlop(const Rect* dirtyBounds, const Rect* clip, const Glop& glop);
+    void renderGlop(const Rect* dirtyBounds, const ClipBase* clip, const Glop& glop);
     bool offscreenRenderTarget() { return mRenderTarget.offscreenBuffer != nullptr; }
     void dirtyRenderTarget(const Rect& dirtyRect);
     bool didDraw() const { return mHasDrawn; }
 private:
     void setViewport(uint32_t width, uint32_t height);
     void clearColorBuffer(const Rect& clearRect);
-    void prepareRender(const Rect* dirtyBounds, const Rect* clip);
+    void prepareRender(const Rect* dirtyBounds, const ClipBase* clip);
+    void setupStencilRectList(const ClipBase* clip);
+    void setupStencilRegion(const ClipBase* clip);
+    void setupStencilQuads(std::vector<Vertex>& quadVertices, int incrementThreshold);
 
     RenderState& mRenderState;
     Caches& mCaches;
@@ -97,6 +100,7 @@ private:
         uint32_t viewportWidth = 0;
         uint32_t viewportHeight = 0;
         Matrix4 orthoMatrix;
+        const ClipBase* lastStencilClip = nullptr;
     } mRenderTarget;
 
     const LightInfo mLightInfo;

@@ -39,7 +39,7 @@ void RecordingCanvas::reset(int width, int height) {
             "prepareDirty called a second time during a recording!");
     mDisplayList = new DisplayList();
 
-    mState.initializeSaveStack(width, height, 0, 0, width, height, Vector3());
+    mState.initializeRecordingSaveStack(width, height);
 
     mDeferredBarrierType = DeferredBarrierType::InOrder;
     mState.setDirtyClip(false);
@@ -155,6 +155,8 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
         return saveValue;
     }
 
+    auto previousClip = getRecordedClip(); // note: done while snapshot == previous
+
     snapshot.flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
     snapshot.initializeViewport(untransformedBounds.getWidth(), untransformedBounds.getHeight());
     snapshot.transform->loadTranslate(-untransformedBounds.left, -untransformedBounds.top, 0.0f);
@@ -167,7 +169,7 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
     addOp(new (alloc()) BeginLayerOp(
             Rect(left, top, right, bottom),
             *previous.transform, // transform to *draw* with
-            previous.getRenderTargetClip(), // clip to *draw* with
+            previousClip, // clip to *draw* with
             refPaint(paint)));
 
     return saveValue;
@@ -229,11 +231,10 @@ void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
-    // TODO: more efficient recording?
     addOp(new (alloc()) RectOp(
-            mState.getRenderTargetClipBounds(),
+            mState.getRenderTargetClipBounds(), // OK, since we've not passed transform
             Matrix4::identity(),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint)));
 }
 
@@ -253,7 +254,7 @@ void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPa
     addOp(new (alloc()) PointsOp(
             calcBoundsOfPoints(points, floatCount),
             *mState.currentSnapshot()->transform,
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), refBuffer<float>(points, floatCount), floatCount));
 }
 
@@ -264,7 +265,7 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
     addOp(new (alloc()) LinesOp(
             calcBoundsOfPoints(points, floatCount),
             *mState.currentSnapshot()->transform,
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), refBuffer<float>(points, floatCount), floatCount));
 }
 
@@ -272,7 +273,7 @@ void RecordingCanvas::drawRect(float left, float top, float right, float bottom,
     addOp(new (alloc()) RectOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint)));
 }
 
@@ -305,7 +306,7 @@ void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const
     addOp(new (alloc()) SimpleRectsOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(paint), rectData, vertexCount));
 }
 
@@ -339,7 +340,7 @@ void RecordingCanvas::drawRoundRect(float left, float top, float right, float bo
     addOp(new (alloc()) RoundRectOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), rx, ry));
 }
 
@@ -358,7 +359,7 @@ void RecordingCanvas::drawRoundRect(
     refBitmapsInShader(paint->value.getShader());
     addOp(new (alloc()) RoundRectPropsOp(
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             &paint->value,
             &left->value, &top->value, &right->value, &bottom->value,
             &rx->value, &ry->value));
@@ -380,7 +381,7 @@ void RecordingCanvas::drawCircle(
     refBitmapsInShader(paint->value.getShader());
     addOp(new (alloc()) CirclePropsOp(
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             &paint->value,
             &x->value, &y->value, &radius->value));
 }
@@ -390,7 +391,7 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
     addOp(new (alloc()) OvalOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint)));
 }
 
@@ -399,7 +400,7 @@ void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
     addOp(new (alloc()) ArcOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint),
             startAngle, sweepAngle, useCenter));
 }
@@ -408,7 +409,7 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
     addOp(new (alloc()) PathOp(
             Rect(path.getBounds()),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), refPath(&path)));
 }
 
@@ -459,7 +460,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
         addOp(new (alloc()) BitmapRectOp(
                 Rect(dstLeft, dstTop, dstRight, dstBottom),
                 *(mState.currentSnapshot()->transform),
-                mState.getRenderTargetClipBounds(),
+                getRecordedClip(),
                 refPaint(paint), refBitmap(bitmap),
                 Rect(srcLeft, srcTop, srcRight, srcBottom)));
     }
@@ -471,7 +472,7 @@ void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int 
     addOp(new (alloc()) BitmapMeshOp(
             calcBoundsOfPoints(vertices, vertexCount * 2),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(paint), refBitmap(bitmap), meshWidth, meshHeight,
             refBuffer<float>(vertices, vertexCount * 2), // 2 floats per vertex
             refBuffer<int>(colors, vertexCount))); // 1 color per vertex
@@ -483,7 +484,7 @@ void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_p
     addOp(new (alloc()) PatchOp(
             Rect(dstLeft, dstTop, dstRight, dstBottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(paint), refBitmap(bitmap), refPatch(&patch)));
 }
 
@@ -499,7 +500,7 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
     addOp(new (alloc()) TextOp(
             Rect(boundsLeft, boundsTop, boundsRight, boundsBottom),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), glyphs, positions, glyphCount, x, y));
     drawTextDecorations(x, y, totalAdvance, paint);
 }
@@ -509,9 +510,9 @@ void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, con
     if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
     addOp(new (alloc()) TextOnPathOp(
-            mState.getRenderTargetClipBounds(), // TODO: explicitly define bounds
+            mState.getLocalClipBounds(), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(&paint), glyphs, glyphCount, refPath(&path), hOffset, vOffset));
 }
 
@@ -519,7 +520,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     addOp(new (alloc()) BitmapOp(
             Rect(bitmap->width(), bitmap->height()),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             refPaint(paint), refBitmap(*bitmap)));
 }
 
@@ -528,7 +529,7 @@ void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
     RenderNodeOp* op = new (alloc()) RenderNodeOp(
             Rect(stagingProps.getWidth(), stagingProps.getHeight()),
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             renderNode);
     int opIndex = addOp(op);
     int childIndex = mDisplayList->addChild(op);
@@ -554,16 +555,16 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     addOp(new (alloc()) TextureLayerOp(
             Rect(layer->getWidth(), layer->getHeight()),
             totalTransform,
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             layer));
 }
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor) {
     mDisplayList->functors.push_back(functor);
     addOp(new (alloc()) FunctorOp(
-            mState.getRenderTargetClipBounds(), // TODO: explicitly define bounds
+            mState.getLocalClipBounds(), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
-            mState.getRenderTargetClipBounds(),
+            getRecordedClip(),
             functor));
 }
 

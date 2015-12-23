@@ -64,7 +64,7 @@ namespace TransformFlags {
 
         // Canvas transform isn't applied to the mesh at draw time,
         //since it's already built in.
-        MeshIgnoresCanvasTransform = 1 << 1, // TODO: remove
+        MeshIgnoresCanvasTransform = 1 << 1, // TODO: remove for HWUI_NEW_OPS
     };
 };
 

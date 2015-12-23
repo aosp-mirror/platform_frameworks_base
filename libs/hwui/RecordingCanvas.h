@@ -36,6 +36,7 @@
 namespace android {
 namespace uirenderer {
 
+struct ClipBase;
 class DeferredLayerUpdater;
 struct RecordedOp;
 
@@ -199,6 +200,9 @@ public:
     virtual bool drawTextAbsolutePos() const override { return false; }
 
 private:
+    const ClipBase* getRecordedClip() {
+        return mState.writableSnapshot()->mutateClipArea().serializeClip(alloc());
+    }
 
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);

@@ -56,12 +56,12 @@ public:
     void* alloc(size_t size);
 
     /**
-     * Allocates an instance of the template type with the default constructor
+     * Allocates an instance of the template type with the given construction parameters
      * and adds it to the automatic destruction list.
      */
-    template<class T>
-    T* alloc() {
-        T* ret = new (*this) T;
+    template<class T, typename... Params>
+    T* create(Params... params) {
+        T* ret = new (*this) T(params...);
         autoDestroy(ret);
         return ret;
     }

@@ -192,7 +192,7 @@ public:
         const LayerReorderer& fbo0 = mLayerReorderers[0];
         renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
         fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
-        renderer.endFrame();
+        renderer.endFrame(fbo0.repaintRect);
     }
 
     void dump() const {
@@ -223,7 +223,7 @@ private:
     LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
 
     BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
-        return BakedOpState::tryConstruct(mAllocator, *mCanvasState.currentSnapshot(), recordedOp);
+        return BakedOpState::tryConstruct(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
     }
 
     // should always be surrounded by a save/restore pair, and not called if DisplayList is null
