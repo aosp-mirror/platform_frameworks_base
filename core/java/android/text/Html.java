@@ -26,6 +26,8 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.app.ActivityThread;
+import android.app.Application;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -418,9 +420,19 @@ public class Html {
                     i = next;
                 }
                 if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("<font size =\"");
-                    out.append(((AbsoluteSizeSpan) style[j]).getSize() / 6);
-                    out.append("\">");
+                    AbsoluteSizeSpan s = ((AbsoluteSizeSpan) style[j]);
+                    float sizeDip = s.getSize();
+                    if (!s.getDip()) {
+                        Application application = ActivityThread.currentApplication();
+                        sizeDip /= application.getResources().getDisplayMetrics().density;
+                    }
+
+                    // px in CSS is the equivalance of dip in Android
+                    out.append(String.format("<span style=\"font-size:%.0fpx\";>", sizeDip));
+                }
+                if (style[j] instanceof RelativeSizeSpan) {
+                    float sizeEm = ((RelativeSizeSpan) style[j]).getSizeChange();
+                    out.append(String.format("<span style=\"font-size:%.2fem;\">", sizeEm));
                 }
                 if (style[j] instanceof ForegroundColorSpan) {
                     int color = ((ForegroundColorSpan) style[j]).getForegroundColor();
@@ -442,8 +454,11 @@ public class Html {
                 if (style[j] instanceof ForegroundColorSpan) {
                     out.append("</span>");
                 }
+                if (style[j] instanceof RelativeSizeSpan) {
+                    out.append("</span>");
+                }
                 if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("</font>");
+                    out.append("</span>");
                 }
                 if (style[j] instanceof URLSpan) {
                     out.append("</a>");
