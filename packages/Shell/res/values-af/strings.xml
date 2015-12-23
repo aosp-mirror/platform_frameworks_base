@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Foutverslaglêer kon nie gelees word nie"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"naamloos"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Besonderhede"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skermkiekie"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Skermkiekie suksesvol geneem."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Kon nie skermkiekie neem nie."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Foutverslagbesonderhede"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Kort naam"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"1-reëlopsomming"</string>

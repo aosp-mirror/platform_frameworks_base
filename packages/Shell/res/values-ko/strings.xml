@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"버그 신고 파일을 읽을 수 없습니다."</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"이름 없음"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"세부정보"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"스크린샷"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"스크린샷을 찍었습니다."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"스크린샷을 찍을 수 없습니다."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"버그 신고 세부정보"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"짧은 이름"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"한 줄 요약"</string>

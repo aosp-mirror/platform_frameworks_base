@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Feilrapportfilen kunne ikke leses"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"uten navn"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detaljer"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skjermdump"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Skjermdumpen er tatt."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Skjermdumpen kunne ikke tas."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Detaljer om feilrapporten"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Kallenavn"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Sammendrag på én linje"</string>

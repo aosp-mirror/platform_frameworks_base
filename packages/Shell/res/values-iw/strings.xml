@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"לא ניתן היה לקרוא את קובץ הדוח על הבאג"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ללא שם"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"פרטים"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"צילום מסך"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"צילום המסך בוצע בהצלחה."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"לא ניתן היה לצלם מסך."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"פרטי דוח על באג"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"כינוי"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"סיכום בשורה אחת"</string>

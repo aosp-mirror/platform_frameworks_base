@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Súbor s hlásením chyby sa nepodarilo prečítať"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"bez názvu"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Podrobnosti"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Snímka obrazovky"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Snímka obrazovky bola zaznamenaná."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Snímku obrazovky sa nepodarilo zaznamenať."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Podrobnosti hlásenia chyby"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Skrátený názov"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Jednoriadkové zhrnutie"</string>

@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"பிழை அறிக்கையைப் படிக்க முடியவில்லை"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"பெயரிடப்படாதது"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"விவரங்கள்"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ஸ்கிரீன் ஷாட்"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"ஸ்கிரீன் ஷாட் எடுக்கப்பட்டது."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ஸ்கிரீன் ஷாட்டை எடுக்க முடியவில்லை."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"பிழை அறிக்கை விவரங்கள்"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"சுருக்கப் பெயர்"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"சுருக்கவிவரம் (ஒரு வரியில்)"</string>

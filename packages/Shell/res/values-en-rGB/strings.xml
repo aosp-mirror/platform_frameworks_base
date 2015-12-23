@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Bug report file could not be read"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"unnamed"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Details"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Screenshot"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Screenshot taken successfully."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Screenshot could not be taken."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Bug report details"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Short name"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"1-line summary"</string>

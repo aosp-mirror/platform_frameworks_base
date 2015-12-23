@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Файлът със сигнал за програмна грешка не можа да бъде прочетен"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"без име"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Подробности"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Екранна снимка"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Екранната снимка бе направена успешно."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Екранната снимка не можа да бъде направена."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Подробности за сигнала за програмна грешка"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Кратко име"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Едноредово обобщение"</string>
