@@ -40,16 +40,15 @@ public abstract class DocumentHolder
     final int mDefaultItemColor;
     final boolean mAlwaysShowSummary;
     final Context mContext;
-    final IconHelper mIconHelper;
 
     private ListDocumentHolder.ClickListener mClickListener;
     private View.OnKeyListener mKeyListener;
 
-    public DocumentHolder(Context context, ViewGroup parent, int layout, IconHelper iconHelper) {
-        this(context, inflateLayout(context, parent, layout), iconHelper);
+    public DocumentHolder(Context context, ViewGroup parent, int layout) {
+        this(context, inflateLayout(context, parent, layout));
     }
 
-    public DocumentHolder(Context context, View item, IconHelper iconHelper) {
+    public DocumentHolder(Context context, View item) {
         super(item);
 
         itemView.setOnKeyListener(this);
@@ -59,8 +58,6 @@ public abstract class DocumentHolder
         mDefaultItemColor = context.getColor(R.color.item_doc_background);
         mSelectedItemColor = context.getColor(R.color.item_doc_background_selected);
         mAlwaysShowSummary = context.getResources().getBoolean(R.bool.always_show_summary);
-
-        mIconHelper = iconHelper;
     }
 
     /**

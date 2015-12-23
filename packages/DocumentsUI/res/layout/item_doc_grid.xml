@@ -19,6 +19,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/grid_item_margin"
     android:background="@color/item_doc_background"
+    android:elevation="5dp"
     android:focusable="true">
 
     <!-- Main item thumbnail.  Comprised of two overlapping images, the

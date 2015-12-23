@@ -38,16 +38,27 @@ import com.android.documentsui.Shared;
 import com.android.documentsui.State;
 
 final class ListDocumentHolder extends DocumentHolder {
+    final TextView mTitle;
+    final TextView mSummary;
+    final TextView mDate;
+    final TextView mSize;
     final ImageView mIconMime;
     final ImageView mIconThumb;
     final ImageView mIcon1;
+    final IconHelper mIconHelper;
 
-    public ListDocumentHolder(Context context, ViewGroup parent, IconHelper thumbnailLoader) {
-        super(context, parent, R.layout.item_doc_list, thumbnailLoader);
+    public ListDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
+        super(context, parent, R.layout.item_doc_list);
 
+        mTitle = (TextView) itemView.findViewById(android.R.id.title);
+        mSummary = (TextView) itemView.findViewById(android.R.id.summary);
+        mDate = (TextView) itemView.findViewById(R.id.date);
+        mSize = (TextView) itemView.findViewById(R.id.size);
         mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
         mIcon1 = (ImageView) itemView.findViewById(android.R.id.icon1);
+
+        mIconHelper = iconHelper;
     }
 
     /**
@@ -72,11 +83,6 @@ final class ListDocumentHolder extends DocumentHolder {
         final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
         final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-        final TextView title = (TextView) itemView.findViewById(android.R.id.title);
-        final TextView summary = (TextView) itemView.findViewById(android.R.id.summary);
-        final TextView date = (TextView) itemView.findViewById(R.id.date);
-        final TextView size = (TextView) itemView.findViewById(R.id.size);
-
         mIconHelper.stopLoading(mIconThumb);
 
         mIconMime.animate().cancel();
@@ -85,27 +91,27 @@ final class ListDocumentHolder extends DocumentHolder {
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
         mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime);
 
-        title.setText(docDisplayName);
-        title.setVisibility(View.VISIBLE);
+        mTitle.setText(docDisplayName);
+        mTitle.setVisibility(View.VISIBLE);
 
         if (docSummary != null) {
-            summary.setText(docSummary);
-            summary.setVisibility(View.VISIBLE);
+            mSummary.setText(docSummary);
+            mSummary.setVisibility(View.VISIBLE);
         } else {
-            summary.setVisibility(View.INVISIBLE);
+            mSummary.setVisibility(View.INVISIBLE);
         }
 
         if (docLastModified == -1) {
-            date.setText(null);
+            mDate.setText(null);
         } else {
-            date.setText(Shared.formatTime(mContext, docLastModified));
+            mDate.setText(Shared.formatTime(mContext, docLastModified));
         }
 
         if (!state.showSize || Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
-            size.setVisibility(View.GONE);
+            mSize.setVisibility(View.GONE);
         } else {
-            size.setVisibility(View.VISIBLE);
-            size.setText(Formatter.formatFileSize(mContext, docSize));
+            mSize.setVisibility(View.VISIBLE);
+            mSize.setText(Formatter.formatFileSize(mContext, docSize));
         }
     }
 
