@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ਬਗ ਰਿਪੋਰਟ ਫ਼ਾਈਲ ਪੜ੍ਹੀ ਨਹੀਂ ਜਾ ਸਕੀ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ਬਿਨਾਂ-ਨਾਮ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ਵੇਰਵੇ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਫਲਤਾਪੂਰਵਕ ਲਿਆ ਗਿਆ।"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਿਆ।"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ਬੱਗ ਰਿਪੋਰਟ ਵੇਰਵੇ"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"ਛੋਟਾ ਨਾਮ"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"1-ਲਾਈਨ ਸਾਰਾਂਸ਼"</string>

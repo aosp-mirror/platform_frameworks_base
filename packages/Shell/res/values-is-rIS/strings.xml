@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Ekki var hægt að lesa úr villuskýrslunni"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"án heitis"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Nánar"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skjámynd"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Tókst að taka skjámynd."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Ekki tókst að taka skjámynd."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Upplýsingar um villutilkynningu"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Stutt heiti"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Einnar línu samantekt"</string>

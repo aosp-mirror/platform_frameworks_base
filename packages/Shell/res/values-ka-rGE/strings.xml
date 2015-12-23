@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ხარვეზების შესახებ ანგარიშის წაკითხვა ვერ მოხერხდა"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"უსახელო"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"დეტალები"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ეკრანის ანაბეჭდი"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"ეკრანის ანაბეჭდი გადაღებულია წარმატებით."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ეკრანის ანაბეჭდის გადაღება ვერ მოხერხდა."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ხარვეზის შესახებ ანგარიშის დეტალები"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"მოკლე სახელი"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"1-ხაზიანი რეზიუმე"</string>

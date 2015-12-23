@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"ບໍ່ສາມາດອ່ານໄຟລ໌ລາຍງານຂໍ້ຜິດພາດໄດ້"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ບໍ່ມີຊື່"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ລາຍລະອຽດ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ພາບໜ້າຈໍ"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"ຖ່າຍພາບໜ້າຈໍສຳເລັດແລ້ວ."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ບໍ່ສາມາດຖ່າຍພາບໜ້າຈໍໄດ້."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ລາຍ​ລະ​ອຽດ​ການລາຍງານບັນຫາ"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"ຊື່ສັ້ນ"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"ສະຫຼຸບ 1 ແຖວ"</string>

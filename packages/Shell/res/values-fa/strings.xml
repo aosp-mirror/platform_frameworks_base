@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"فایل گزارش اشکال خوانده نشد"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"بی‌نام"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"جزئیات"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"عکس صفحه‌نمایش"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"عکس صفحه‌نمایش با موفقیت گرفته شد."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"نمی‌توان عکس صفحه‌نمایش گرفت."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"جزئیات گزارش اشکال"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"نام مخفف"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"خلاصه یک خطی"</string>

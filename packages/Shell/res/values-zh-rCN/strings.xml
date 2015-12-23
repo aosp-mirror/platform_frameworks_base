@@ -27,6 +27,12 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"无法读取错误报告文件"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"未命名"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"详细信息"</string>
+    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_taken (7175343181767429088) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
+    <skip />
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"错误报告详细信息"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"简称"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"简短摘要（1 行）"</string>

@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Fișierul cu raportul de eroare nu a putut fi citit"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"fără nume"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalii"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Captură de ecran"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Captura de ecran a fost făcută."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Captura de ecran nu a putut fi făcută."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Detalii privind raportul de eroare"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Nume scurt"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Rezumat de un rând"</string>

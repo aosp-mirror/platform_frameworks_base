@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Δεν ήταν δυνατή η ανάγνωση του αρχείου της αναφοράς σφαλμάτων"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ανώνυμη"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Λεπτομέρειες"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Στιγμιότυπο οθόνης"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Η λήψη του στιγμιότυπου οθόνης ολοκληρώθηκε με επιτυχία."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Δεν ήταν δυνατή η λήψη του στιγμιότυπου οθόνης."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Λεπτομέρειες αναφοράς σφαλμάτων"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Υποκοριστικό"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Σύνοψη μίας σειράς"</string>

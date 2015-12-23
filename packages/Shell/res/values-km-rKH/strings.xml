@@ -27,6 +27,9 @@
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"មិនអាចអានឯកសាររបាយកាណ៍កំហុសបានទេ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"គ្មានឈ្មោះ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ព័ត៌មានលម្អិត"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"រូបថតអេក្រង់"</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"បានថតរូបថតអេក្រង់ដោយជោគជ័យ"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"មិនអាចថតរូបថតអេក្រង់បានទេ"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ព័ត៌មានលម្អិតពីរបាយការណ៍កំហុស"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"ឈ្មោះ​ខ្លី"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"ការសង្ខេបមួយជួរ"</string>
