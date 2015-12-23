@@ -16,26 +16,25 @@
 
 package android.print.pdf;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.pdf.PdfDocument;
-import android.graphics.pdf.PdfDocument.Page;
-import android.graphics.pdf.PdfDocument.PageInfo;
 import android.print.PrintAttributes;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 
 /**
- * This class is a helper for creating a PDF file for given print
- * attributes. It is useful for implementing printing via the native
- * Android graphics APIs.
+ * This class is a helper for creating a PDF file for given print attributes. It is useful for
+ * implementing printing via the native Android graphics APIs.
  * <p>
- * This class computes the page width, page height, and content rectangle
- * from the provided print attributes and these precomputed values can be
- * accessed via {@link #getPageWidth()}, {@link #getPageHeight()}, and
- * {@link #getPageContentRect()}, respectively. The {@link #startPage(int)}
- * methods creates pages whose {@link PageInfo} is initialized with the
- * precomputed values for width, height, and content rectangle.
+ * This class computes the page width, page height, and content rectangle from the provided print
+ * attributes and these precomputed values can be accessed via {@link #getPageWidth()},
+ * {@link #getPageHeight()}, and {@link #getPageContentRect()}, respectively. The
+ * {@link #startPage(int)} methods creates pages whose
+ * {@link android.graphics.pdf.PdfDocument.PageInfo PageInfo} is initialized with the precomputed
+ * values for width, height, and content rectangle.
  * <p>
  * A typical use of the APIs looks like this:
  * </p>
@@ -81,7 +80,7 @@ public class PrintedPdfDocument extends PdfDocument {
      * @param context Context instance for accessing resources.
      * @param attributes The print attributes.
      */
-    public PrintedPdfDocument(Context context, PrintAttributes attributes) {
+    public PrintedPdfDocument(@NonNull Context context, @NonNull PrintAttributes attributes) {
         MediaSize mediaSize = attributes.getMediaSize();
 
         // Compute the size of the target canvas from the attributes.
@@ -105,28 +104,28 @@ public class PrintedPdfDocument extends PdfDocument {
     }
 
     /**
-     * Starts a new page. The page is created using width, height  and content
-     * rectangle computed from the print attributes passed in the constructor
-     * and the given page number to create an appropriate {@link PageInfo}.
+     * Starts a new page. The page is created using width, height and content rectangle computed
+     * from the print attributes passed in the constructor and the given page number to create an
+     * appropriate {@link android.graphics.pdf.PdfDocument.PageInfo PageInfo}.
      * <p>
-     * After the page is created you can draw arbitrary content on the page's
-     * canvas which you can get by calling {@link Page#getCanvas() Page.getCanvas()}.
+     * After the page is created you can draw arbitrary content on the page's canvas which you can
+     * get by calling {@link android.graphics.pdf.PdfDocument.Page#getCanvas() Page.getCanvas()}.
      * After you are done drawing the content you should finish the page by calling
-     * {@link #finishPage(Page)}. After the page is finished you should no longer
-     * access the page or its canvas.
+     * {@link #finishPage(Page)}. After the page is finished you should no longer access the page or
+     * its canvas.
      * </p>
      * <p>
-     * <strong>Note:</strong> Do not call this method after {@link #close()}.
-     * Also do not call this method if the last page returned by this method
-     * is not finished by calling {@link #finishPage(Page)}.
+     * <strong>Note:</strong> Do not call this method after {@link #close()}. Also do not call this
+     * method if the last page returned by this method is not finished by calling
+     * {@link #finishPage(Page)}.
      * </p>
      *
-     * @param pageNumber The page number. Must be a positive value.
+     * @param pageNumber The page number. Must be a non negative.
      * @return A blank page.
      *
      * @see #finishPage(Page)
      */
-    public Page startPage(int pageNumber) {
+    public @NonNull Page startPage(@IntRange(from = 0) int pageNumber) {
         PageInfo pageInfo = new PageInfo
                 .Builder(mPageWidth, mPageHeight, pageNumber)
                 .setContentRect(mContentRect)
@@ -139,7 +138,7 @@ public class PrintedPdfDocument extends PdfDocument {
      *
      * @return The page width in PostScript points (1/72th of an inch).
      */
-    public int getPageWidth() {
+    public @IntRange(from = 0) int getPageWidth() {
         return mPageWidth;
     }
 
@@ -148,7 +147,7 @@ public class PrintedPdfDocument extends PdfDocument {
      *
      * @return The page height in PostScript points (1/72th of an inch).
      */
-    public int getPageHeight() {
+    public @IntRange(from = 0) int getPageHeight() {
         return mPageHeight;
     }
 
@@ -158,7 +157,7 @@ public class PrintedPdfDocument extends PdfDocument {
      *
      * @return The content rectangle.
      */
-    public Rect getPageContentRect() {
+    public @NonNull Rect getPageContentRect() {
         return mContentRect;
     }
 }

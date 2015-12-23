@@ -16,9 +16,15 @@
 
 package android.print;
 
+import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class encapsulates information about a document for printing
@@ -74,6 +80,13 @@ public final class PrintDocumentInfo implements Parcelable {
      */
     public static final int PAGE_COUNT_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            CONTENT_TYPE_UNKNOWN, CONTENT_TYPE_DOCUMENT, CONTENT_TYPE_PHOTO
+    })
+    public @interface ContentType {
+    }
     /**
      * Content type: unknown.
      */
@@ -116,9 +129,9 @@ public final class PrintDocumentInfo implements Parcelable {
     /**
      * Creates a new instance.
      *
-     * @param Prototype from which to clone.
+     * @param prototype from which to clone.
      */
-    private PrintDocumentInfo(PrintDocumentInfo prototype) {
+    private PrintDocumentInfo(@NonNull PrintDocumentInfo prototype) {
         mName = prototype.mName;
         mPageCount = prototype.mPageCount;
         mContentType = prototype.mContentType;
@@ -143,7 +156,7 @@ public final class PrintDocumentInfo implements Parcelable {
      *
      * @return The document name.
      */
-    public String getName() {
+    public @NonNull String getName() {
         return mName;
     }
 
@@ -154,7 +167,7 @@ public final class PrintDocumentInfo implements Parcelable {
      *
      * @see #PAGE_COUNT_UNKNOWN
      */
-    public int getPageCount() {
+    public @IntRange(from = -1) int getPageCount() {
         return mPageCount;
     }
 
@@ -167,7 +180,7 @@ public final class PrintDocumentInfo implements Parcelable {
      * @see #CONTENT_TYPE_DOCUMENT
      * @see #CONTENT_TYPE_PHOTO
      */
-    public int getContentType() {
+    public @ContentType int getContentType() {
         return mContentType;
     }
 
@@ -176,7 +189,7 @@ public final class PrintDocumentInfo implements Parcelable {
      *
      * @return The data size.
      */
-    public long getDataSize() {
+    public @IntRange(from = 0) long getDataSize() {
         return mDataSize;
     }
 
@@ -187,7 +200,7 @@ public final class PrintDocumentInfo implements Parcelable {
      *
      * @hide
      */
-    public void setDataSize(long dataSize) {
+    public void setDataSize(@IntRange(from = 0) long dataSize) {
         mDataSize = dataSize;
     }
 
@@ -288,7 +301,7 @@ public final class PrintDocumentInfo implements Parcelable {
          * is the file name if the content it describes is saved as a PDF.
          * Cannot be empty. 
          */
-        public Builder(String name) {
+        public Builder(@NonNull String name) {
             if (TextUtils.isEmpty(name)) {
                 throw new IllegalArgumentException("name cannot be empty");
             }
@@ -302,10 +315,11 @@ public final class PrintDocumentInfo implements Parcelable {
          * <strong>Default: </strong> {@link #PAGE_COUNT_UNKNOWN}
          * </p>
          *
-         * @param pageCount The number of pages. Must be greater than
-         * or equal to zero or {@link PrintDocumentInfo#PAGE_COUNT_UNKNOWN}.
+         * @param pageCount The number of pages. Must be greater than or equal to zero or
+         *            {@link PrintDocumentInfo#PAGE_COUNT_UNKNOWN}.
+         * @return This builder.
          */
-        public Builder setPageCount(int pageCount) {
+        public @NonNull Builder setPageCount(@IntRange(from = -1) int pageCount) {
             if (pageCount < 0 && pageCount != PAGE_COUNT_UNKNOWN) {
                 throw new IllegalArgumentException("pageCount"
                         + " must be greater than or equal to zero or"
@@ -322,12 +336,12 @@ public final class PrintDocumentInfo implements Parcelable {
          * </p>
          *
          * @param type The content type.
-         *
+         * @return This builder.
          * @see #CONTENT_TYPE_UNKNOWN
          * @see #CONTENT_TYPE_DOCUMENT
          * @see #CONTENT_TYPE_PHOTO
          */
-        public Builder setContentType(int type) {
+        public @NonNull Builder setContentType(@ContentType int type) {
             mPrototype.mContentType = type;
             return this;
         }
@@ -337,7 +351,7 @@ public final class PrintDocumentInfo implements Parcelable {
          *
          * @return The new instance.
          */
-        public PrintDocumentInfo build() {
+        public @NonNull PrintDocumentInfo build() {
             // Zero pages is the same as unknown as in this case
             // we will have to ask for all pages and look a the
             // wiritten PDF file for the page count.

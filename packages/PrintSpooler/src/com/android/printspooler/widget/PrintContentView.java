@@ -415,6 +415,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             onDragProgress(progress);
         }
 
+        @Override
         public void onViewReleased(View child, float velocityX, float velocityY) {
             final int childTop = child.getTop();
 
@@ -435,14 +436,17 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
             invalidate();
         }
 
+        @Override
         public int getOrderedChildIndex(int index) {
             return getChildCount() - index - 1;
         }
 
+        @Override
         public int getViewVerticalDragRange(View child) {
             return mDraggableContent.getHeight();
         }
 
+        @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
             final int staticOptionBottom = mStaticContent.getBottom();
             return Math.max(Math.min(top, getOpenedOptionsY()), getClosedOptionsY());

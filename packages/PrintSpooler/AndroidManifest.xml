@@ -17,9 +17,7 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.printspooler"
-    android:versionName="1"
-    android:versionCode="1">
+    package="com.android.printspooler">
 
     <!-- Allows an application to call APIs that give it access to all print jobs
          on the device. Usually an app can access only the print jobs it created. -->

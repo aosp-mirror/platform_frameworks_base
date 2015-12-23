@@ -78,8 +78,8 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         mRecyclerView.setLayoutManager(mLayoutManger);
         mRecyclerView.setAdapter(mPageAdapter);
         mRecyclerView.setItemViewCacheSize(0);
-        mPreloadController = new PreloadController(mRecyclerView);
-        mRecyclerView.setOnScrollListener(mPreloadController);
+        mPreloadController = new PreloadController();
+        mRecyclerView.addOnScrollListener(mPreloadController);
 
         mContentView = (PrintContentView) activity.findViewById(R.id.options_content);
         mEmbeddedContentContainer = (EmbeddedContentContainer) activity.findViewById(
@@ -314,12 +314,9 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
     }
 
     private final class PreloadController extends RecyclerView.OnScrollListener {
-        private final RecyclerView mRecyclerView;
-
         private int mOldScrollState;
 
-        public PreloadController(RecyclerView recyclerView) {
-            mRecyclerView = recyclerView;
+        public PreloadController() {
             mOldScrollState = mRecyclerView.getScrollState();
         }
 
@@ -371,7 +368,8 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
                 View lastChild = layoutManager.getChildAt(layoutManager.getChildCount() - 1);
                 ViewHolder lastHolder = mRecyclerView.getChildViewHolder(lastChild);
 
-                return new PageRange(firstHolder.getPosition(), lastHolder.getPosition());
+                return new PageRange(firstHolder.getLayoutPosition(),
+                        lastHolder.getLayoutPosition());
             }
             return null;
         }

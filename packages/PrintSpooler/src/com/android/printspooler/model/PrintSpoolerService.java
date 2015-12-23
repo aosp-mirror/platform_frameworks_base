@@ -1303,7 +1303,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         private void expect(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
+                throws XmlPullParserException {
             if (!accept(parser, type, tag)) {
                 throw new XmlPullParserException("Exepected event: " + type
                         + " and tag: " + tag + " but got event: " + parser.getEventType()
@@ -1320,7 +1320,7 @@ public final class PrintSpoolerService extends Service {
         }
 
         private boolean accept(XmlPullParser parser, int type, String tag)
-                throws IOException, XmlPullParserException {
+                throws XmlPullParserException {
             if (parser.getEventType() != type) {
                 return false;
             }

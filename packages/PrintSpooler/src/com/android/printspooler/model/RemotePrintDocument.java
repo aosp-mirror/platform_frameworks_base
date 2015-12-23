@@ -870,7 +870,7 @@ public final class RemotePrintDocument {
         private final MutexFileProvider mFileProvider;
 
         private final IWriteResultCallback mRemoteResultCallback;
-        private final CommandDoneCallback mDoneCallback;
+        private final CommandDoneCallback mWriteDoneCallback;
 
         private final Context mContext;
         private final Handler mHandler;
@@ -885,7 +885,7 @@ public final class RemotePrintDocument {
             mPageCount = pageCount;
             mPages = Arrays.copyOf(pages, pages.length);
             mFileProvider = fileProvider;
-            mDoneCallback = callback;
+            mWriteDoneCallback = callback;
         }
 
         @Override
@@ -997,7 +997,7 @@ public final class RemotePrintDocument {
             mCancellation = null;
 
             // Done.
-            mDoneCallback.onDone();
+            mWriteDoneCallback.onDone();
         }
 
         private void handleOnWriteFailed(CharSequence error, int sequence) {
@@ -1015,7 +1015,7 @@ public final class RemotePrintDocument {
             mCancellation = null;
 
             // Done.
-            mDoneCallback.onDone();
+            mWriteDoneCallback.onDone();
         }
 
         private void handleOnWriteCanceled(int sequence) {
@@ -1033,7 +1033,7 @@ public final class RemotePrintDocument {
             mCancellation = null;
 
             // Done.
-            mDoneCallback.onDone();
+            mWriteDoneCallback.onDone();
         }
 
         private final class WriteHandler extends Handler {

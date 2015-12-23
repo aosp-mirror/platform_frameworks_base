@@ -16,6 +16,9 @@
 
 package android.print;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 /**
  * This class represents a print job from the perspective of an
  * application. It contains behavior methods for performing operations
@@ -41,7 +44,7 @@ public final class PrintJob {
      *
      * @return The id.
      */
-    public PrintJobId getId() {
+    public @NonNull PrintJobId getId() {
         return mCachedInfo.getId();
     }
 
@@ -55,7 +58,7 @@ public final class PrintJob {
      *
      * @return The print job info.
      */
-    public PrintJobInfo getInfo() {
+    public @Nullable PrintJobInfo getInfo() {
         if (isInImmutableState()) {
             return mCachedInfo;
         }

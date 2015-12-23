@@ -52,7 +52,7 @@ import java.util.List;
 /**
  * This class represents the adapter for the pages in the print preview list.
  */
-public final class PageAdapter extends Adapter {
+public final class PageAdapter extends Adapter<ViewHolder> {
     private static final String LOG_TAG = "PageAdapter";
 
     private static final int MAX_PREVIEW_PAGES_BATCH = 50;
@@ -409,7 +409,7 @@ public final class PageAdapter extends Adapter {
                 - horizontalPaddingAndMargins) / columnCount) + 0.5f);
 
         // Compute max page height.
-        final int pageContentDesiredHeight = (int) (((float) pageContentDesiredWidth
+        final int pageContentDesiredHeight = (int) ((pageContentDesiredWidth
                 / pageAspectRatio) + 0.5f);
 
         // If the page does not fit entirely in a vertical direction,

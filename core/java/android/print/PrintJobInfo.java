@@ -17,6 +17,9 @@
 package android.print;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Bundle;
@@ -25,6 +28,8 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -34,6 +39,15 @@ import java.util.Arrays;
  * change over time and this class represents a snapshot of this state.
  */
 public final class PrintJobInfo implements Parcelable {
+
+    /** @hide */
+    @IntDef({
+            STATE_CREATED, STATE_QUEUED, STATE_STARTED, STATE_BLOCKED, STATE_COMPLETED,
+            STATE_FAILED, STATE_CANCELED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {
+    }
 
     /**
      * Constant for matching any print job state.
@@ -200,7 +214,7 @@ public final class PrintJobInfo implements Parcelable {
         mAdvancedOptions = other.mAdvancedOptions;
     }
 
-    private PrintJobInfo(Parcel parcel) {
+    private PrintJobInfo(@NonNull Parcel parcel) {
         mId = parcel.readParcelable(null);
         mLabel = parcel.readString();
         mPrinterId = parcel.readParcelable(null);
@@ -230,7 +244,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The id.
      */
-    public PrintJobId getId() {
+    public @NonNull PrintJobId getId() {
         return mId;
     }
 
@@ -241,7 +255,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setId(PrintJobId id) {
+    public void setId(@NonNull PrintJobId id) {
         this.mId = id;
     }
 
@@ -250,7 +264,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The label.
      */
-    public String getLabel() {
+    public @NonNull String getLabel() {
         return mLabel;
     }
 
@@ -261,7 +275,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setLabel(String label) {
+    public void setLabel(@NonNull String label) {
         mLabel = label;
     }
 
@@ -270,7 +284,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The target printer id.
      */
-    public PrinterId getPrinterId() {
+    public @Nullable PrinterId getPrinterId() {
         return mPrinterId;
     }
 
@@ -281,7 +295,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setPrinterId(PrinterId printerId) {
+    public void setPrinterId(@NonNull PrinterId printerId) {
         mPrinterId = printerId;
     }
 
@@ -292,7 +306,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public String getPrinterName() {
+    public @Nullable String getPrinterName() {
         return mPrinterName;
     }
 
@@ -303,7 +317,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setPrinterName(String printerName) {
+    public void setPrinterName(@NonNull String printerName) {
         mPrinterName = printerName;
     }
 
@@ -320,7 +334,7 @@ public final class PrintJobInfo implements Parcelable {
      * @see #STATE_FAILED
      * @see #STATE_CANCELED
      */
-    public int getState() {
+    public @State int getState() {
         return mState;
     }
 
@@ -431,7 +445,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The number of copies or zero if not set.
      */
-    public int getCopies() {
+    public @IntRange(from = 0) int getCopies() {
         return mCopies;
     }
 
@@ -454,7 +468,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The included pages or <code>null</code> if not set.
      */
-    public PageRange[] getPages() {
+    public @Nullable PageRange[] getPages() {
         return mPageRanges;
     }
 
@@ -474,7 +488,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The attributes.
      */
-    public PrintAttributes getAttributes() {
+    public @NonNull PrintAttributes getAttributes() {
         return mAttributes;
     }
 
@@ -713,7 +727,7 @@ public final class PrintJobInfo implements Parcelable {
          * @param prototype Prototype to use as a starting point.
          * Can be <code>null</code>.
          */
-        public Builder(PrintJobInfo prototype) {
+        public Builder(@Nullable PrintJobInfo prototype) {
             mPrototype = (prototype != null)
                     ? new PrintJobInfo(prototype)
                     : new PrintJobInfo();
@@ -724,7 +738,7 @@ public final class PrintJobInfo implements Parcelable {
          *
          * @param copies The number of copies.
          */
-        public void setCopies(int copies) {
+        public void setCopies(@IntRange(from = 1) int copies) {
             mPrototype.mCopies = copies;
         }
 
@@ -733,7 +747,7 @@ public final class PrintJobInfo implements Parcelable {
          *
          * @param attributes The attributes.
          */
-        public void setAttributes(PrintAttributes attributes) {
+        public void setAttributes(@NonNull PrintAttributes attributes) {
             mPrototype.mAttributes = attributes;
         }
 
@@ -742,7 +756,7 @@ public final class PrintJobInfo implements Parcelable {
          *
          * @param pages The included pages.
          */
-        public void setPages(PageRange[] pages) {
+        public void setPages(@NonNull PageRange[] pages) {
             mPrototype.mPageRanges = pages;
         }
 
@@ -774,7 +788,7 @@ public final class PrintJobInfo implements Parcelable {
          * @param key The option key.
          * @param value The option value.
          */
-        public void putAdvancedOption(String key, String value) {
+        public void putAdvancedOption(@NonNull String key, @Nullable String value) {
             if (mPrototype.mAdvancedOptions == null) {
                 mPrototype.mAdvancedOptions = new Bundle();
             }
@@ -787,7 +801,7 @@ public final class PrintJobInfo implements Parcelable {
          * @param key The option key.
          * @param value The option value.
          */
-        public void putAdvancedOption(String key, int value) {
+        public void putAdvancedOption(@NonNull String key, int value) {
             if (mPrototype.mAdvancedOptions == null) {
                 mPrototype.mAdvancedOptions = new Bundle();
             }
@@ -799,7 +813,7 @@ public final class PrintJobInfo implements Parcelable {
          *
          * @return The new instance.
          */
-        public PrintJobInfo build() {
+        public @NonNull PrintJobInfo build() {
             return mPrototype;
         }
     }
