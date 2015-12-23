@@ -1349,4 +1349,40 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.wifiManager.getConnectionInfo()).thenReturn(wi);
         assertEquals("11:22:33:44:55:66", dpm.getWifiMacAddress());
     }
+
+    public void testRebootCanOnlyBeCalledByDeviceOwner() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        // In this test, change the caller user to "system".
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Make sure admin1 is installed on system user.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Set admin1 as DA.
+        dpm.setActiveAdmin(admin1, false);
+        assertTrue(dpm.isAdminActive(admin1));
+        try {
+            dpm.reboot(admin1);
+            fail("DA calls DPM.reboot(), did not throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex("does not own the device", expected.getMessage());
+        }
+
+        // Set admin1 as PO.
+        assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
+        try {
+            dpm.reboot(admin1);
+            fail("PO calls DPM.reboot(), did not throw expected SecurityException");
+        } catch (SecurityException expected) {
+            MoreAsserts.assertContainsRegex("does not own the device", expected.getMessage());
+        }
+
+        // Remove PO and add DO.
+        dpm.clearProfileOwner(admin1);
+        assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
+
+        dpm.reboot(admin1);
+    }
 }

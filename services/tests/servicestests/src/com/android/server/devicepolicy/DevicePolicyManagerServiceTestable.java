@@ -208,6 +208,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        void powerManagerReboot(String reason) {
+            context.powerManager.reboot(reason);
+        }
+
+        @Override
         boolean systemPropertiesGetBoolean(String key, boolean def) {
             return context.systemProperties.getBoolean(key, def);
         }
