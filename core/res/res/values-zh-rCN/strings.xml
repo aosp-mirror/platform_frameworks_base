@@ -859,15 +859,13 @@
     <string name="cut" msgid="3092569408438626261">"剪切"</string>
     <string name="copy" msgid="2681946229533511987">"复制"</string>
     <string name="paste" msgid="5629880836805036433">"粘贴"</string>
-    <!-- no translation found for paste_as_plain_text (5427792741908010675) -->
-    <skip />
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"以纯文本形式粘贴"</string>
     <string name="replace" msgid="5781686059063148930">"替换..."</string>
     <string name="delete" msgid="6098684844021697789">"删除"</string>
     <string name="copyUrl" msgid="2538211579596067402">"复制网址"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"选择文字"</string>
     <string name="undo" msgid="7905788502491742328">"撤消"</string>
-    <!-- no translation found for redo (7759464876566803888) -->
-    <skip />
+    <string name="redo" msgid="7759464876566803888">"重做"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"文字选择"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"添加到字典"</string>
     <string name="deleteText" msgid="6979668428458199034">"删除"</string>
@@ -1113,8 +1111,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"条件提供程序"</string>
-    <!-- no translation found for notification_assistant_binding_label (909456055569102952) -->
-    <skip />
+    <string name="notification_assistant_binding_label" msgid="909456055569102952">"通知助手"</string>
     <string name="vpn_title" msgid="19615213552042827">"已激活VPN"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>已激活VPN"</string>
     <string name="vpn_text" msgid="3011306607126450322">"触摸可管理网络。"</string>
