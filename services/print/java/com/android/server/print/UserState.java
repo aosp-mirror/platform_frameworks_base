@@ -1012,16 +1012,16 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
         private final List<PrinterId> mStateTrackedPrinters = new ArrayList<PrinterId>();
 
-        private final Handler mHandler;
+        private final Handler mSessionHandler;
 
         private boolean mIsDestroyed;
 
         public PrinterDiscoverySessionMediator(Context context) {
-            mHandler = new SessionHandler(context.getMainLooper());
+            mSessionHandler = new SessionHandler(context.getMainLooper());
             // Kick off the session creation.
             List<RemotePrintService> services = new ArrayList<RemotePrintService>(
                     mActiveServices.values());
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION, services)
                     .sendToTarget();
         }
@@ -1036,7 +1036,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = observer;
                 args.arg2 = printers;
-                mHandler.obtainMessage(SessionHandler.MSG_PRINTERS_ADDED,
+                mSessionHandler.obtainMessage(SessionHandler.MSG_PRINTERS_ADDED,
                         args).sendToTarget();
             }
         }
@@ -1079,7 +1079,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = services;
             args.arg2 = priorityList;
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_DISPATCH_START_PRINTER_DISCOVERY, args)
                     .sendToTarget();
         }
@@ -1099,7 +1099,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
             List<RemotePrintService> services = new ArrayList<RemotePrintService>(
                     mActiveServices.values());
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_DISPATCH_STOP_PRINTER_DISCOVERY, services)
                     .sendToTarget();
         }
@@ -1133,7 +1133,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     SomeArgs args = SomeArgs.obtain();
                     args.arg1 = service;
                     args.arg2 = updateList;
-                    mHandler.obtainMessage(SessionHandler
+                    mSessionHandler.obtainMessage(SessionHandler
                             .MSG_VALIDATE_PRINTERS, args)
                             .sendToTarget();
                 }
@@ -1165,7 +1165,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = service;
             args.arg2 = printerId;
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_START_PRINTER_STATE_TRACKING, args)
                     .sendToTarget();
         }
@@ -1192,7 +1192,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = service;
             args.arg2 = printerId;
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_STOP_PRINTER_STATE_TRACKING, args)
                     .sendToTarget();
         }
@@ -1222,7 +1222,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             // Tell the services we are done.
             List<RemotePrintService> services = new ArrayList<RemotePrintService>(
                     mActiveServices.values());
-            mHandler.obtainMessage(SessionHandler
+            mSessionHandler.obtainMessage(SessionHandler
                     .MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION, services)
                     .sendToTarget();
         }
@@ -1248,7 +1248,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 }
             }
             if (addedPrinters != null) {
-                mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
+                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
                         addedPrinters).sendToTarget();
             }
         }
@@ -1273,7 +1273,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 }
             }
             if (removedPrinterIds != null) {
-                mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
+                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
                         removedPrinterIds).sendToTarget();
             }
         }
@@ -1315,7 +1315,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
                 ArrayList<PrinterInfo> addedPrinters = new ArrayList<>(1);
                 addedPrinters.add(newPrinter);
-                mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
+                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
                         addedPrinters).sendToTarget();
             }
         }
@@ -1331,12 +1331,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 return;
             }
             // Tell the service to create a session.
-            mHandler.obtainMessage(
+            mSessionHandler.obtainMessage(
                     SessionHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
                     service).sendToTarget();
             // Start printer discovery if necessary.
             if (!mStartedPrinterDiscoveryTokens.isEmpty()) {
-                mHandler.obtainMessage(
+                mSessionHandler.obtainMessage(
                         SessionHandler.MSG_START_PRINTER_DISCOVERY,
                         service).sendToTarget();
             }
@@ -1348,7 +1348,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     SomeArgs args = SomeArgs.obtain();
                     args.arg1 = service;
                     args.arg2 = printerId;
-                    mHandler.obtainMessage(SessionHandler
+                    mSessionHandler.obtainMessage(SessionHandler
                             .MSG_START_PRINTER_STATE_TRACKING, args)
                             .sendToTarget();
                 }
@@ -1418,7 +1418,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 for (int i = 0; i < removedPrinterCount; i++) {
                     mPrinters.remove(removedPrinterIds.get(i));
                 }
-                mHandler.obtainMessage(
+                mSessionHandler.obtainMessage(
                         SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
                         removedPrinterIds).sendToTarget();
             }

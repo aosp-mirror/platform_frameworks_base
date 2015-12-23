@@ -16,8 +16,8 @@
 
 package android.print;
 
-import android.annotation.IntDef;
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -419,6 +419,7 @@ public final class PrinterInfo implements Parcelable {
          * Set a drawable resource as icon for this printer. If no icon is set the printer's
          * service's icon is used for the printer.
          *
+         * @param iconResourceId The resource ID of the icon.
          * @return This builder.
          * @see PrinterInfo.Builder#setHasCustomPrinterIcon
          */
