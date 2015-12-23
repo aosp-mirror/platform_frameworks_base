@@ -79,6 +79,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -128,7 +129,9 @@ public class SystemServicesProxy {
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
         mHasFreeformWorkspaceSupport =
-                mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+                mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT) ||
+                        Settings.Global.getInt(context.getContentResolver(),
+                                DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();

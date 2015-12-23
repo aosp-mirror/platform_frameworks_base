@@ -6374,6 +6374,13 @@ public final class Settings {
         public static final String DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES
                 = "force_resizable_activities";
 
+        /**
+         * Whether to enable experimental freeform support for windows.
+         * @hide
+         */
+        public static final String DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT
+                = "enable_freeform_support";
+
        /**
         * Whether user has enabled development settings.
         */
