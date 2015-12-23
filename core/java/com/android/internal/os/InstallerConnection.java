@@ -21,6 +21,7 @@ import android.net.LocalSocketAddress;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
@@ -139,14 +140,24 @@ public class InstallerConnection {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags) throws InstallerException {
-        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded, null /* outputPath */, dexFlags);
+            int dexFlags, String volumeUuid, boolean useProfiles) throws InstallerException {
+        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
+                null /*outputPath*/, dexFlags, volumeUuid, useProfiles);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, String outputPath, int dexFlags) throws InstallerException {
-        execute("dexopt", apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                dexFlags);
+            int dexoptNeeded, String outputPath, int dexFlags, String volumeUuid,
+            boolean useProfiles) throws InstallerException {
+        execute("dexopt",
+                apkPath,
+                uid,
+                pkgName,
+                instructionSet,
+                dexoptNeeded,
+                outputPath,
+                dexFlags,
+                volumeUuid,
+                useProfiles ? '1' : '0');
     }
 
     private boolean connect() {

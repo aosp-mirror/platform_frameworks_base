@@ -128,17 +128,19 @@ public final class Installer extends SystemService {
     }
 
     public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
-            int dexFlags) throws InstallerException {
+            int dexFlags, String volumeUuid, boolean useProfiles) throws InstallerException {
         assertValidInstructionSet(instructionSet);
-        mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags);
+        mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags,
+                volumeUuid, useProfiles);
     }
 
     public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, @Nullable String outputPath, int dexFlags)
+            int dexoptNeeded, @Nullable String outputPath, int dexFlags,
+            String volumeUuid, boolean useProfiles)
                     throws InstallerException {
         assertValidInstructionSet(instructionSet);
         mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
-                outputPath, dexFlags);
+                outputPath, dexFlags, volumeUuid, useProfiles);
     }
 
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
