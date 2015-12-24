@@ -61,8 +61,9 @@ public class MtpManagerTest extends InstrumentationTestCase {
                     @Override
                     public Boolean call() throws IOException {
                         try {
-                            mManager.readEvent(mUsbDevice.getDeviceId(), signal);
-                            return false;
+                            while (true) {
+                                mManager.readEvent(mUsbDevice.getDeviceId(), signal);
+                            }
                         } catch (OperationCanceledException exception) {
                             return true;
                         }
