@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/any/colors.xml
-**
-** Copyright 2006, The Android Open Source Project
+** Copyright 2015 The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -332,7 +330,6 @@
         <item>ko-KP</item> <!-- Korean (North Korea) -->
         <item>ko-KR</item> <!-- Korean (South Korea) -->
         <item>kok-IN</item> <!-- Konkani (India) -->
-        <item>ks-IN</item> <!-- Kashmiri (India) -->
         <item>ksb-TZ</item> <!-- Shambala (Tanzania) -->
         <item>ksf-CM</item> <!-- Bafia (Cameroon) -->
         <item>ksh-DE</item> <!-- Colognian (Germany) -->
@@ -347,8 +344,6 @@
         <item>ln-CF</item> <!-- Lingala (Central African Republic) -->
         <item>ln-CG</item> <!-- Lingala (Congo (Republic)) -->
         <item>lo-LA</item> <!-- Lao (Laos) -->
-        <item>lrc-IQ</item> <!-- Northern Luri (Iraq) -->
-        <item>lrc-IR</item> <!-- Northern Luri (Iran) -->
         <item>lt-LT</item> <!-- Lithuanian (Lithuania) -->
         <item>lu-CD</item> <!-- Luba-Katanga (Congo (DRC)) -->
         <item>luo-KE</item> <!-- Luo (Kenya) -->
@@ -369,7 +364,6 @@
         <item>ms-MY</item> <!-- Malay (Malaysia) -->
         <item>ms-SG</item> <!-- Malay (Singapore) -->
         <item>mt-MT</item> <!-- Maltese (Malta) -->
-        <item>mua-CM</item> <!-- Mundang (Cameroon) -->
         <item>my-MM</item> <!-- Burmese (Myanmar (Burma)) -->
         <item>mzn-IR</item> <!-- Mazanderani (Iran) -->
         <item>naq-NA</item> <!-- Nama (Namibia) -->
@@ -433,8 +427,6 @@
         <item>seh-MZ</item> <!-- Sena (Mozambique) -->
         <item>ses-ML</item> <!-- Koyraboro Senni (Mali) -->
         <item>sg-CF</item> <!-- Sango (Central African Republic) -->
-        <item>shi-Latn-MA</item> <!-- Tachelhit (Latin,Morocco) -->
-        <item>shi-Tfng-MA</item> <!-- Tachelhit (Tifinagh,Morocco) -->
         <item>si-LK</item> <!-- Sinhala (Sri Lanka) -->
         <item>sk-SK</item> <!-- Slovak (Slovakia) -->
         <item>sl-SI</item> <!-- Slovenian (Slovenia) -->
@@ -484,8 +476,6 @@
         <item>uz-Arab-AF</item> <!-- Uzbek (Arabic,Afghanistan) -->
         <item>uz-Cyrl-UZ</item> <!-- Uzbek (Cyrillic,Uzbekistan) -->
         <item>uz-Latn-UZ</item> <!-- Uzbek (Latin,Uzbekistan) -->
-        <item>vai-Latn-LR</item> <!-- Vai (Latin,Liberia) -->
-        <item>vai-Vaii-LR</item> <!-- Vai (Vai,Liberia) -->
         <item>vi-VN</item> <!-- Vietnamese (Vietnam) -->
         <item>vun-TZ</item> <!-- Vunjo (Tanzania) -->
         <item>wae-CH</item> <!-- Walser (Switzerland) -->
