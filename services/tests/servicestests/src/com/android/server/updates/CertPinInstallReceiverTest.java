@@ -16,6 +16,8 @@
 
 package com.android.server.updates;
 
+import com.android.internal.util.HexDump;
+
 import android.content.Context;
 import android.content.Intent;
 import android.test.AndroidTestCase;
@@ -128,7 +130,7 @@ public class CertPinInstallReceiverTest extends AndroidTestCase {
         MessageDigest dgst = MessageDigest.getInstance("SHA512");
         byte[] encoded = content.getBytes();
         byte[] fingerprint = dgst.digest(encoded);
-        return IntegralToString.bytesToHexString(fingerprint, false);
+        return HexDump.toHexString(fingerprint, false);
     }
 
     private static String getHashOfCurrentContent() throws Exception {
