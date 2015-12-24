@@ -916,7 +916,7 @@ public class ActivityStarter {
                 // is the case, so this is it!  And for paranoia, make
                 // sure we have correctly resumed the top activity.
                 if (doResume) {
-                    mSupervisor.resumeTopActivitiesLocked(targetStack, null, options);
+                    mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, null, options);
 
                     // Make sure to notify Keyguard as well if we are not running an app
                     // transition later.
@@ -1019,7 +1019,7 @@ public class ActivityStarter {
                 // don't use that intent!)  And for paranoia, make
                 // sure we have correctly resumed the top activity.
                 if (doResume) {
-                    targetStack.resumeTopActivityLocked(null, options);
+                    mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, null, options);
                     if (!movedToFront) {
                         // Make sure to notify Keyguard as well if we are not running an app
                         // transition later.
@@ -1055,7 +1055,7 @@ public class ActivityStarter {
                 // For paranoia, make sure we have correctly resumed the top activity.
                 topStack.mLastPausedActivity = null;
                 if (doResume) {
-                    mSupervisor.resumeTopActivitiesLocked();
+                    mSupervisor.resumeFocusedStackTopActivityLocked();
                 }
                 ActivityOptions.abort(options);
                 if ((startFlags & ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
@@ -1157,7 +1157,7 @@ public class ActivityStarter {
                     // resumed the top activity.
                     targetStack.mLastPausedActivity = null;
                     if (doResume) {
-                        targetStack.resumeTopActivityLocked(null);
+                        mSupervisor.resumeFocusedStackTopActivityLocked();
                     }
                     ActivityOptions.abort(options);
                     return ActivityManager.START_DELIVERED_TO_TOP;
@@ -1176,7 +1176,7 @@ public class ActivityStarter {
                     top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                     targetStack.mLastPausedActivity = null;
                     if (doResume) {
-                        targetStack.resumeTopActivityLocked(null);
+                        mSupervisor.resumeFocusedStackTopActivityLocked();
                     }
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
@@ -1266,9 +1266,11 @@ public class ActivityStarter {
         targetStack.startActivityLocked(r, newTask, keepCurTransition, options);
         if (doResume) {
             if (!launchTaskBehind) {
+                // TODO: Remove this code after verification that all the decision points above
+                // moved targetStack to the front which will also set the focus activity.
                 mService.setFocusedActivityLocked(r, "startedActivity");
             }
-            mSupervisor.resumeTopActivitiesLocked(targetStack, r, options);
+            mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, r, options);
         } else {
             targetStack.addRecentActivityLocked(r);
         }

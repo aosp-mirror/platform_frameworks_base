@@ -1321,7 +1321,12 @@ final class TaskRecord {
         }
     }
 
-    void reportPictureInPictureModeChange() {
+    void reportPictureInPictureModeChangeIfNeeded(ActivityStack prevStack) {
+        if (prevStack == null || prevStack == stack
+                || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
+            return;
+        }
+
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);
             if (r.app != null && r.app.thread != null) {

@@ -572,6 +572,10 @@ final class ActivityStack {
         }
     }
 
+    boolean isFocusable() {
+        return StackId.canReceiveKeys(mStackId);
+    }
+
     final boolean isAttached() {
         return mStacks != null;
     }
@@ -917,7 +921,7 @@ final class ActivityStack {
         if (prev == null) {
             if (!resuming) {
                 Slog.wtf(TAG, "Trying to pause when nothing is resumed");
-                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
             return false;
         }
@@ -1008,7 +1012,7 @@ final class ActivityStack {
             // pause, so just treat it as being paused now.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Activity not running, resuming next.");
             if (!resuming) {
-                mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
             return false;
         }
@@ -1075,7 +1079,7 @@ final class ActivityStack {
             } else {
                 if (r.configDestroy) {
                     destroyActivityLocked(r, true, "stop-config");
-                    mStackSupervisor.resumeTopActivitiesLocked();
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 } else {
                     mStackSupervisor.updatePreviousProcessLocked(r);
                 }
@@ -1131,17 +1135,16 @@ final class ActivityStack {
         if (resumeNext) {
             final ActivityStack topStack = mStackSupervisor.getFocusedStack();
             if (!mService.isSleepingOrShuttingDown()) {
-                mStackSupervisor.resumeTopActivitiesLocked(topStack, prev, null);
+                mStackSupervisor.resumeFocusedStackTopActivityLocked(topStack, prev, null);
             } else {
                 mStackSupervisor.checkReadyForSleepLocked();
                 ActivityRecord top = topStack.topRunningActivityLocked();
                 if (top == null || (prev != null && top != prev)) {
-                    // If there are no more activities available to run,
-                    // do resume anyway to start something.  Also if the top
-                    // activity on the stack is not the just paused activity,
-                    // we need to go ahead and resume it to ensure we complete
-                    // an in-flight app switch.
-                    mStackSupervisor.resumeTopActivitiesLocked(topStack, null, null);
+                    // If there are no more activities available to run, do resume anyway to start
+                    // something. Also if the top activity on the stack is not the just paused
+                    // activity, we need to go ahead and resume it to ensure we complete an
+                    // in-flight app switch.
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
         }
@@ -1478,7 +1481,7 @@ final class ActivityStack {
         boolean aboveTop = top != null;
         final boolean stackInvisible = !isStackVisibleLocked();
         boolean behindFullscreenActivity = stackInvisible;
-        boolean noStackActivityResumed = (isInStackLocked(starting) == null);
+        boolean resumeNextActivity = isFocusable() && (isInStackLocked(starting) == null);
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -1509,18 +1512,18 @@ final class ActivityStack {
 
                     if (r.app == null || r.app.thread == null) {
                         if (makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
-                                noStackActivityResumed, r)) {
+                                resumeNextActivity, r)) {
                             if (activityNdx >= activities.size()) {
                                 // Record may be removed if its process needs to restart.
                                 activityNdx = activities.size() - 1;
                             } else {
-                                noStackActivityResumed = false;
+                                resumeNextActivity = false;
                             }
                         }
                     } else if (r.visible) {
                         // If this activity is already visible, then there is nothing to do here.
                         if (handleAlreadyVisible(r)) {
-                            noStackActivityResumed = false;
+                            resumeNextActivity = false;
                         }
                     } else {
                         makeVisible(starting, r);
@@ -1561,7 +1564,7 @@ final class ActivityStack {
     }
 
     private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
-            boolean isTop, boolean noStackActivityResumed, ActivityRecord r) {
+            boolean isTop, boolean andResume, ActivityRecord r) {
         // We need to make sure the app is running if it's the top, or it is just made visible from
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
@@ -1578,7 +1581,7 @@ final class ActivityStack {
                 setVisible(r, true);
             }
             if (r != starting) {
-                mStackSupervisor.startSpecificActivityLocked(r, noStackActivityResumed, false);
+                mStackSupervisor.startSpecificActivityLocked(r, andResume, false);
                 return true;
             }
         }
@@ -1772,15 +1775,17 @@ final class ActivityStack {
      *
      * @param prev The previously resumed activity, for when in the process
      * of pausing; can be null to call from elsewhere.
+     * @param options Activity options.
      *
      * @return Returns true if something is being resumed, or false if
      * nothing happened.
+     *
+     * NOTE: It is not safe to call this method directly as it can cause an activity in a
+     *       non-focused stack to be resumed.
+     *       Use {@link ActivityStackSupervisor#resumeFocusedStackTopActivityLocked} to resume the
+     *       right activity for the current system state.
      */
-    final boolean resumeTopActivityLocked(ActivityRecord prev) {
-        return resumeTopActivityLocked(prev, null);
-    }
-
-    final boolean resumeTopActivityLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
         if (mStackSupervisor.inResumeTopActivity) {
             // Don't even start recursing.
             return false;
@@ -1836,7 +1841,7 @@ final class ActivityStack {
                 // stack is not covering the entire screen.
                 final ActivityStack stack = getNextVisibleStackLocked();
                 if (adjustFocusToNextVisibleStackLocked(stack, reason)) {
-                    return mStackSupervisor.resumeTopActivitiesLocked(stack, prev, null);
+                    return mStackSupervisor.resumeFocusedStackTopActivityLocked(stack, prev, null);
                 }
             }
             // Let's just start up the Launcher...
@@ -2897,10 +2902,7 @@ final class ActivityStack {
             }
         }
 
-        final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
-        if (top != null) {
-            mService.setFocusedActivityLocked(top, myReason);
-        }
+        mService.setFocusedActivityLocked(mStackSupervisor.topRunningActivityLocked(), myReason);
     }
 
     private boolean adjustFocusToNextVisibleStackLocked(ActivityStack inStack, String reason) {
@@ -2909,12 +2911,7 @@ final class ActivityStack {
         if (stack == null) {
             return false;
         }
-        final ActivityRecord top = stack.topRunningActivityLocked();
-        if (top == null) {
-            return false;
-        }
-        mService.setFocusedActivityLocked(top, myReason);
-        return true;
+        return mService.setFocusedActivityLocked(stack.topRunningActivityLocked(), myReason);
     }
 
     final void stopActivityLocked(ActivityRecord r) {
@@ -3224,7 +3221,7 @@ final class ActivityStack {
             r.makeFinishingLocked();
             boolean activityRemoved = destroyActivityLocked(r, true, "finish-imm");
             if (activityRemoved) {
-                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
             if (DEBUG_CONTAINERS) Slog.d(TAG_CONTAINERS,
                     "destroyActivityLocked: finishCurrentActivityLocked r=" + r +
@@ -3237,7 +3234,7 @@ final class ActivityStack {
         if (DEBUG_ALL) Slog.v(TAG, "Enqueueing pending finish: " + r);
         mStackSupervisor.mFinishingActivities.add(r);
         r.resumeKeyDispatchingLocked();
-        mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
         return r;
     }
 
@@ -3395,7 +3392,7 @@ final class ActivityStack {
         if (mPausingActivity == r) {
             mPausingActivity = null;
         }
-        mService.clearFocusedActivity(r);
+        mService.resetFocusedActivityIfNeededLocked(r);
 
         r.configDestroy = false;
         r.frozenBeforeDestroy = false;
@@ -3526,7 +3523,7 @@ final class ActivityStack {
             }
         }
         if (activityRemoved) {
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
         }
     }
 
@@ -3700,7 +3697,7 @@ final class ActivityStack {
                     removeActivityFromHistoryLocked(r, reason);
                 }
             }
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -3738,7 +3735,7 @@ final class ActivityStack {
             setVisibleBehindActivity(null);
             mStackSupervisor.scheduleIdleTimeoutLocked(null);
         }
-        mStackSupervisor.resumeTopActivitiesLocked();
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
     }
 
     boolean hasVisibleBehindActivity() {
@@ -3953,7 +3950,7 @@ final class ActivityStack {
             updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
 
-        mStackSupervisor.resumeTopActivitiesLocked();
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
 
         if (VALIDATE_TOKENS) {
@@ -4016,7 +4013,7 @@ final class ActivityStack {
             if (fullscreenStack != null && fullscreenStack.hasVisibleBehindActivity()) {
                 final ActivityRecord visibleBehind = fullscreenStack.getVisibleBehindActivity();
                 mService.setFocusedActivityLocked(visibleBehind, "moveTaskToBack");
-                mStackSupervisor.resumeTopActivitiesLocked(fullscreenStack, null, null);
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 return true;
             }
         }
@@ -4071,7 +4068,7 @@ final class ActivityStack {
             return mStackSupervisor.resumeHomeStackTask(taskToReturnTo, null, "moveTaskToBack");
         }
 
-        mStackSupervisor.resumeTopActivitiesLocked();
+        mStackSupervisor.resumeFocusedStackTopActivityLocked();
         return true;
     }
 
@@ -4734,10 +4731,7 @@ final class ActivityStack {
 
     private void postAddTask(TaskRecord task, ActivityStack prevStack) {
         if (prevStack != null) {
-            if (prevStack != this
-                    && (prevStack.mStackId == PINNED_STACK_ID || mStackId == PINNED_STACK_ID)) {
-                task.reportPictureInPictureModeChange();
-            }
+            task.reportPictureInPictureModeChangeIfNeeded(prevStack);
         } else if (task.voiceSession != null) {
             try {
                 task.voiceSession.taskStarted(task.intent, task.taskId);
@@ -4758,25 +4752,21 @@ final class ActivityStack {
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
-    void setFocusAndResumeStateIfNeeded(
-            ActivityRecord r, boolean setFocus, boolean setResume, String reason) {
-        // If the activity had focus before move focus to this stack.
-        if (setFocus) {
-            // If the activity owns the last resumed activity, transfer that together,
-            // so that we don't resume the same activity again in the new stack.
-            // Apps may depend on onResume()/onPause() being called in pairs.
-            if (setResume) {
-                mResumedActivity = r;
-                // Move the stack in which we are placing the activity to the front. We don't use
-                // ActivityManagerService.setFocusedActivityLocked, because if the activity is
-                // already focused, the call will short-circuit and do nothing.
-                moveToFront(reason);
-            } else {
-                // We need to not only move the stack to the front, but also have the activity
-                // focused. This will achieve both goals.
-                mService.setFocusedActivityLocked(r, reason);
-            }
+    void moveToFrontAndResumeStateIfNeeded(
+            ActivityRecord r, boolean moveToFront, boolean setResume, String reason) {
+        if (!moveToFront) {
+            return;
         }
+
+        // If the activity owns the last resumed activity, transfer that together,
+        // so that we don't resume the same activity again in the new stack.
+        // Apps may depend on onResume()/onPause() being called in pairs.
+        if (setResume) {
+            mResumedActivity = r;
+        }
+        // Move the stack in which we are placing the activity to the front. The call will also
+        // make sure the activity focus is set.
+        moveToFront(reason);
     }
 
     /**
@@ -4800,8 +4790,11 @@ final class ActivityStack {
         r.setTask(task, null);
         task.addActivityToTop(r);
         setAppTask(r, task);
-        task.reportPictureInPictureModeChange();
-        setFocusAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
+        task.reportPictureInPictureModeChangeIfNeeded(prevStack);
+        moveToFrontAndResumeStateIfNeeded(r, wasFocused, wasResumed, "moveActivityToStack");
+        if (wasResumed) {
+            prevStack.mResumedActivity = null;
+        }
     }
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {

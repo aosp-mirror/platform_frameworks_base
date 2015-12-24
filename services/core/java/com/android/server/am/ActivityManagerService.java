@@ -2743,9 +2743,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mAppBindArgs;
     }
 
-    final void setFocusedActivityLocked(ActivityRecord r, String reason) {
+    boolean setFocusedActivityLocked(ActivityRecord r, String reason) {
         if (r == null || mFocusedActivity == r) {
-            return;
+            return false;
         }
 
         if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
@@ -2783,7 +2783,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 finishVoiceTask(last.task.voiceSession);
             }
         }
-        if (mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity")) {
+        if (mStackSupervisor.moveActivityStackToFront(r, reason + " setFocusedActivity")) {
             mWindowManager.setFocusedApp(r.appToken, true);
         }
         applyUpdateLockStateLocked(r);
@@ -2799,23 +2799,35 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mFocusedActivity == null ? -1 : mFocusedActivity.userId,
                 mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName,
                 reason);
+        return true;
     }
 
-    final void clearFocusedActivity(ActivityRecord r) {
-        if (mFocusedActivity == r) {
-            ActivityStack stack = mStackSupervisor.getFocusedStack();
-            if (stack != null) {
-                ActivityRecord top = stack.topActivity();
-                if (top != null && top.userId != mLastFocusedUserId) {
-                    mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
-                    mHandler.sendMessage(mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG,
-                                    top.userId, 0));
-                    mLastFocusedUserId = top.userId;
-                }
-            }
-            mFocusedActivity = null;
-            EventLogTags.writeAmFocusedActivity(-1, "NULL", "clearFocusedActivity");
+    final void resetFocusedActivityIfNeededLocked(ActivityRecord goingAway) {
+        if (mFocusedActivity != goingAway) {
+            return;
         }
+
+        final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
+        if (focusedStack != null) {
+            final ActivityRecord top = focusedStack.topActivity();
+            if (top != null && top.userId != mLastFocusedUserId) {
+                mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG, top.userId, 0));
+                mLastFocusedUserId = top.userId;
+            }
+        }
+
+        // Try to move focus to another activity if possible.
+        if (setFocusedActivityLocked(
+                focusedStack.topRunningActivityLocked(), "resetFocusedActivityIfNeeded")) {
+            return;
+        }
+
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "resetFocusedActivityIfNeeded: Setting focus to NULL "
+                + "prev mFocusedActivity=" + mFocusedActivity + " goingAway=" + goingAway);
+        mFocusedActivity = null;
+        EventLogTags.writeAmFocusedActivity(-1, "NULL", "resetFocusedActivityIfNeeded");
     }
 
     @Override
@@ -2827,7 +2839,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ActivityRecord r = stack.topRunningActivityLocked();
                 if (r != null) {
                     setFocusedActivityLocked(r, "setFocusedStack");
-                    mStackSupervisor.resumeTopActivitiesLocked(stack, null, null);
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
         }
@@ -2844,7 +2856,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ActivityRecord r = task.topRunningActivityLocked();
                     if (r != null) {
                         setFocusedActivityLocked(r, "setFocusedTask");
-                        mStackSupervisor.resumeTopActivitiesLocked(task.stack, null, null);
+                        mStackSupervisor.resumeFocusedStackTopActivityLocked();
                     }
                 }
             }
@@ -4473,7 +4485,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (config != null) {
                 r.frozenBeforeDestroy = true;
                 if (!updateConfigurationLocked(config, r, false)) {
-                    mStackSupervisor.resumeTopActivitiesLocked();
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
             Binder.restoreCallingIdentity(origId);
@@ -4811,12 +4823,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
         }
 
-        if (!restarting && hasVisibleActivities && !mStackSupervisor.resumeTopActivitiesLocked()) {
-            // If there was nothing to resume, and we are not already
-            // restarting this process, but there is a visible activity that
-            // is hosted by the process...  then make sure all visible
-            // activities are running, taking care of restarting this
-            // process.
+        if (!restarting && hasVisibleActivities
+                && !mStackSupervisor.resumeFocusedStackTopActivityLocked()) {
+            // If there was nothing to resume, and we are not already restarting this process, but
+            // there is a visible activity that is hosted by the process...  then make sure all
+            // visible activities are running, taking care of restarting this process.
             mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         }
     }
@@ -5873,7 +5884,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Clean-up disabled activities.
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
                 packageName, disabledClasses, true, false, userId) && mBooted) {
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mStackSupervisor.scheduleIdleLocked();
         }
 
@@ -6061,7 +6072,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             if (mBooted) {
-                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 mStackSupervisor.scheduleIdleLocked();
             }
         }
@@ -8994,7 +9005,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 task.mResizeable = resizeable;
                 mWindowManager.setTaskResizeable(taskId, resizeable);
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
         }
     }
@@ -12603,7 +12614,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
             mUserController.sendUserSwitchBroadcastsLocked(-1, currentUserId);
         }
     }
@@ -12714,10 +12725,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 removeProcessLocked(app, false, false, "crash");
-                mStackSupervisor.resumeTopActivitiesLocked();
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 return false;
             }
-            mStackSupervisor.resumeTopActivitiesLocked();
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
         } else {
             mStackSupervisor.finishTopRunningActivityLocked(app, reason);
         }
