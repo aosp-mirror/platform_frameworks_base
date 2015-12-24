@@ -113,4 +113,8 @@
     <string name="kilobytespersecond_short">kB/s</string>
     <string name="megabytespersecond_short">MB/s</string>
 
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Show 4G instead of LTE</string>
+    <string name="show_fourg_summary">Replaces LTE statusbar indicators with 4G</string>
+
 </resources>

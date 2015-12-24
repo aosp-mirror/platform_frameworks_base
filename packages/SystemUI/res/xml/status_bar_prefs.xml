@@ -72,6 +72,13 @@
         android:key="mobile"
         android:title="@string/quick_settings_cellular_detail_title" />
 
+    <SwitchPreference
+        android:key="show_fourg"
+        android:title="@string/show_fourg_title"
+        android:summary="@string/show_fourg_summary"
+        android:dependency="mobile"
+        android:defaultValue="false" />
+
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="airplane"
         android:title="@string/status_bar_airplane" />
