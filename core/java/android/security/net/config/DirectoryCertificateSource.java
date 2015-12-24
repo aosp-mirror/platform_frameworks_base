@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.Set;
 import libcore.io.IoUtils;
 
+import com.android.org.conscrypt.Hex;
 import com.android.org.conscrypt.NativeCrypto;
 
 import javax.security.auth.x500.X500Principal;
@@ -136,7 +137,7 @@ abstract class DirectoryCertificateSource implements CertificateSource {
 
     private String getHash(X500Principal name) {
         int hash = NativeCrypto.X509_NAME_hash_old(name);
-        return IntegralToString.intToHexString(hash, false, 8);
+        return Hex.intToHexString(hash, 8);
     }
 
     private X509Certificate readCertificate(String file) {

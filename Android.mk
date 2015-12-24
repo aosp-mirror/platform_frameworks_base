@@ -423,7 +423,7 @@ LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/com/android/internal/R.java
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-libart conscrypt okhttp core-junit bouncycastle ext
+LOCAL_JAVA_LIBRARIES := core-oj core-libart conscrypt okhttp core-junit bouncycastle ext
 
 LOCAL_MODULE := framework
 
@@ -710,6 +710,7 @@ framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
 	$(framework_res_source_path)/com/android/internal/R.java
 
 framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
+	core-oj \
 	core-libart \
 	conscrypt \
 	bouncycastle \
@@ -733,6 +734,7 @@ framework_docs_LOCAL_DROIDDOC_HTML_DIR := docs/html
 # not be referenced in the documentation.
 framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -knowntags ./frameworks/base/docs/knowntags.txt \
+    -knowntags ./libcore/known_oj_tags.txt \
     -hidePackage com.android.org.conscrypt \
     -since $(SRC_API_DIR)/1.xml 1 \
     -since $(SRC_API_DIR)/2.xml 2 \
@@ -1093,7 +1095,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(ext_src_files)
 
 LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-libart
+LOCAL_JAVA_LIBRARIES := core-oj core-libart
 LOCAL_STATIC_JAVA_LIBRARIES := libphonenumber-platform
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := ext

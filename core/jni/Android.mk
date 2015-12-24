@@ -93,6 +93,7 @@ LOCAL_SRC_FILES:= \
     android_util_Process.cpp \
     android_util_StringBlock.cpp \
     android_util_XmlBlock.cpp \
+    android_util_jar_StrictJarFile.cpp \
     android_graphics_Canvas.cpp \
     android_graphics_Picture.cpp \
     android/graphics/AutoDecodeCancel.cpp \
