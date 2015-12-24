@@ -19,8 +19,9 @@ package android.mtp;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.os.CancellationSignal;
-import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
+
+import java.io.IOException;
 
 /**
  * This class represents an MTP or PTP device connected on the USB host bus. An application can
@@ -155,6 +156,22 @@ public final class MtpDevice {
      */
     public byte[] getObject(int objectHandle, int objectSize) {
         return native_get_object(objectHandle, objectSize);
+    }
+
+    /**
+     * Obtains object bytes in the specified range and writes it to an array.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices.
+     *
+     * @param objectHandle handle of the object to read
+     * @param offset Start index of reading range.
+     * @param size Size of reading range.
+     * @param buffer Array to write data.
+     * @return Size of bytes that are actually read.
+     */
+    public int getPartialObject(int objectHandle, int offset, int size, byte[] buffer)
+            throws IOException {
+        return native_get_partial_object(objectHandle, offset, size, buffer);
     }
 
     /**
@@ -323,6 +340,8 @@ public final class MtpDevice {
     private native int[] native_get_object_handles(int storageId, int format, int objectHandle);
     private native MtpObjectInfo native_get_object_info(int objectHandle);
     private native byte[] native_get_object(int objectHandle, int objectSize);
+    private native int native_get_partial_object(
+            int objectHandle, int offset, int objectSize, byte[] buffer) throws IOException;
     private native byte[] native_get_thumbnail(int objectHandle);
     private native boolean native_delete_object(int objectHandle);
     private native long native_get_parent(int objectHandle);
