@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -737,6 +738,10 @@ final class ActivityRecord {
                 info.persistableMode == ActivityInfo.PERSIST_ACROSS_REBOOTS) &&
                 (intent == null ||
                         (intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == 0);
+    }
+
+    boolean isFocusable() {
+        return StackId.canReceiveKeys(task.stack.mStackId);
     }
 
     void makeFinishingLocked() {
