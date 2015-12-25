@@ -39,7 +39,6 @@ import android.provider.DocumentsContract.Root;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,6 +59,7 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
@@ -111,6 +111,13 @@ public abstract class BaseActivity extends Activity {
         setContentView(mLayoutId);
 
         mRoots = DocumentsApplication.getRootsCache(this);
+        mRoots.setOnCacheUpdateListener(
+                new RootsCache.OnCacheUpdateListener() {
+                    @Override
+                    public void onCacheUpdate() {
+                        new HandleRootsChangedTask().execute(getCurrentRoot());
+                    }
+                });
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
         mSearchManager = new SearchManager();
 
@@ -203,7 +210,25 @@ public abstract class BaseActivity extends Activity {
         if (mRoots.isRecentsRoot(root)) {
             onCurrentDirectoryChanged(ANIM_SIDE);
         } else {
-            new PickRootTask(root).executeOnExecutor(getExecutorForCurrentDirectory());
+            new PickRootTask(root, true).executeOnExecutor(getExecutorForCurrentDirectory());
+        }
+    }
+
+    void setRoot(RootInfo root) {
+        // Clear entire backstack and start in new root
+        mState.stack.root = root;
+        mState.stack.clear();
+        mState.stackTouched = false;
+
+        mSearchManager.update(root);
+
+        // Recents is always in memory, so we just load it directly.
+        // Otherwise we delegate loading data from disk to a task
+        // to ensure a responsive ui.
+        if (mRoots.isRecentsRoot(root)) {
+            onCurrentDirectoryChanged(ANIM_SIDE);
+        } else {
+            new PickRootTask(root, false).executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -483,9 +508,11 @@ public abstract class BaseActivity extends Activity {
 
     final class PickRootTask extends AsyncTask<Void, Void, DocumentInfo> {
         private RootInfo mRoot;
+        private boolean mTouched;
 
-        public PickRootTask(RootInfo root) {
+        public PickRootTask(RootInfo root, boolean touched) {
             mRoot = root;
+            mTouched = touched;
         }
 
         @Override
@@ -504,7 +531,7 @@ public abstract class BaseActivity extends Activity {
         protected void onPostExecute(DocumentInfo result) {
             if (result != null) {
                 mState.stack.push(result);
-                mState.stackTouched = true;
+                mState.stackTouched = mTouched;
                 onCurrentDirectoryChanged(ANIM_SIDE);
             }
         }
@@ -587,6 +614,34 @@ public abstract class BaseActivity extends Activity {
             } else {
                 Log.w(mTag, "Failed to find root: " + mRootUri);
                 finish();
+            }
+        }
+    }
+
+    final class HandleRootsChangedTask extends AsyncTask<RootInfo, Void, RootInfo> {
+        @Override
+        protected RootInfo doInBackground(RootInfo... roots) {
+            Preconditions.checkArgument(roots.length == 1);
+            final RootInfo currentRoot = roots[0];
+            final Collection<RootInfo> cachedRoots = mRoots.getRootsBlocking();
+            RootInfo homeRoot = null;
+            for (final RootInfo root : cachedRoots) {
+                if (root.isHome()) {
+                    homeRoot = root;
+                }
+                if (root.getUri().equals(currentRoot.getUri())) {
+                    // We don't need to change the current root as the current root was not removed.
+                    return null;
+                }
+            }
+            Preconditions.checkNotNull(homeRoot);
+            return homeRoot;
+        }
+
+        @Override
+        protected void onPostExecute(RootInfo result) {
+            if (result != null) {
+                setRoot(result);
             }
         }
     }
