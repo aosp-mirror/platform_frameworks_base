@@ -245,7 +245,6 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     void closeDevice(int deviceId) throws IOException, InterruptedException {
         synchronized (mDeviceListLock) {
             closeDeviceInternal(deviceId);
-            mDatabase.removeDeviceRows(deviceId);
         }
         mRootScanner.resume();
     }
