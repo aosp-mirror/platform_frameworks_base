@@ -1444,7 +1444,7 @@ public class ActivityStarter {
         final boolean canUseFocusedStack =
                 focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
                         || focusedStackId == DOCKED_STACK_ID
-                        || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.info.resizeable);
+                        || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeable());
         if (canUseFocusedStack && (!newTask
                 || mSupervisor.mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,

@@ -3203,7 +3203,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            Rect taskBounds, Configuration config, boolean cropWindowsToStack) {
+            Rect taskBounds, Configuration config, boolean cropWindowsToStack,
+            boolean alwaysFocusable) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3238,6 +3239,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
             atoken.mLaunchTaskBehind = launchTaskBehind;
             atoken.mCropWindowsToStack = cropWindowsToStack;
+            atoken.mAlwaysFocusable = alwaysFocusable;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
@@ -9078,8 +9080,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (wtoken == token) {
                             break;
                         }
-                        if (mFocusedApp == token && token.stackCanReceiveKeys()) {
-                            // Whoops, we are below the focused app whose stack can receive keys...
+                        if (mFocusedApp == token && token.windowsAreFocusable()) {
+                            // Whoops, we are below the focused app whose windows are focusable...
                             // No focus for you!!!
                             if (localLOGV || DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM,
                                     "findFocusedWindow: Reached focused app=" + mFocusedApp);

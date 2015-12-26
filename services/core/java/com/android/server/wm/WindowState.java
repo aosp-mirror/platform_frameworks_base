@@ -1558,12 +1558,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE)
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
-                && stackCanReceiveKeys();
-    }
-
-    boolean stackCanReceiveKeys() {
-        final TaskStack stack = getStack();
-        return stack != null && StackId.canReceiveKeys(stack.mStackId);
+                && (mAppToken == null || mAppToken.windowsAreFocusable());
     }
 
     @Override

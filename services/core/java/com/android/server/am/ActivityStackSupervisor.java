@@ -1375,7 +1375,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
         Rect newBounds = null;
-        if (options != null && (r.info.resizeable || (inTask != null && inTask.mResizeable))) {
+        if (options != null && (r.isResizeable() || (inTask != null && inTask.mResizeable))) {
             if (canUseActivityOptionsLaunchBounds(options)) {
                 newBounds = options.getLaunchBounds();
             }
@@ -2172,7 +2172,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        if (!mService.mForceResizableActivities && !r.info.supportsPip) {
+        if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
                             + " r=" + r);

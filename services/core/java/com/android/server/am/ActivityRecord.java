@@ -18,6 +18,9 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_RESIZEABLE;
+import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
@@ -741,7 +744,19 @@ final class ActivityRecord {
     }
 
     boolean isFocusable() {
-        return StackId.canReceiveKeys(task.stack.mStackId);
+        return StackId.canReceiveKeys(task.stack.mStackId) || isAlwaysFocusable();
+    }
+
+    boolean isResizeable() {
+        return (info.flags & FLAG_RESIZEABLE) != 0;
+    }
+
+    boolean supportsPictureInPicture() {
+        return (info.flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
+    }
+
+    boolean isAlwaysFocusable() {
+        return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
     }
 
     void makeFinishingLocked() {

@@ -281,6 +281,29 @@ public class ActivityInfo extends ComponentInfo
      * {@see android.app.Activity#setVrMode(boolean)}.
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is resizeable to any dimension.
+     * See {@link android.R.attr#resizeableActivity}.
+     * @hide
+     */
+    public static final int FLAG_RESIZEABLE = 0x10000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is supports picture-in-picture form of
+     * multi-window mode. See {@link android.R.attr#supportsPictureInPicture}.
+     * @hide
+     */
+    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x20000;
+
+    /**
+     * Bit in {@link #flags} indicating if the activity is always focusable regardless of if it is
+     * in a task/stack whose activities are normally not focusable.
+     * See android.R.attr#alwaysFocusable.
+     * @hide
+     */
+    public static final int FLAG_ALWAYS_FOCUSABLE = 0x40000;
+
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
@@ -670,20 +693,6 @@ public class ActivityInfo extends ComponentInfo
      */
     public String parentActivityName;
 
-    /**
-     * Value indicating if the activity is resizeable to any dimension.
-     * See {@link android.R.attr#resizeableActivity}.
-     * @hide
-     */
-    public boolean resizeable;
-
-    /**
-     * Value indicating if the activity is supports picture-in-picture form of multi-window mode.
-     * See {@link android.R.attr#supportsPictureInPicture}.
-     * @hide
-     */
-    public boolean supportsPip;
-
     /** @hide */
     public static final int LOCK_TASK_LAUNCH_MODE_DEFAULT = 0;
     /** @hide */
@@ -735,8 +744,6 @@ public class ActivityInfo extends ComponentInfo
         uiOptions = orig.uiOptions;
         parentActivityName = orig.parentActivityName;
         maxRecents = orig.maxRecents;
-        resizeable = orig.resizeable;
-        supportsPip = orig.supportsPip;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
         layout = orig.layout;
     }
@@ -791,7 +798,6 @@ public class ActivityInfo extends ComponentInfo
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
         if ((flags&DUMP_FLAG_DETAILS) != 0) {
-            pw.println(prefix + "resizeable=" + resizeable + " supportsPip=" + supportsPip);
             pw.println(prefix + "lockTaskLaunchMode="
                     + lockTaskLaunchModeToString(lockTaskLaunchMode));
         }
@@ -829,8 +835,6 @@ public class ActivityInfo extends ComponentInfo
         dest.writeString(parentActivityName);
         dest.writeInt(persistableMode);
         dest.writeInt(maxRecents);
-        dest.writeInt(resizeable ? 1 : 0);
-        dest.writeInt(supportsPip ? 1 : 0);
         dest.writeInt(lockTaskLaunchMode);
         if (layout != null) {
             dest.writeInt(1);
@@ -871,8 +875,6 @@ public class ActivityInfo extends ComponentInfo
         parentActivityName = source.readString();
         persistableMode = source.readInt();
         maxRecents = source.readInt();
-        resizeable = (source.readInt() == 1);
-        supportsPip = (source.readInt() == 1);
         lockTaskLaunchMode = source.readInt();
         if (source.readInt() == 1) {
             layout = new Layout(source);
