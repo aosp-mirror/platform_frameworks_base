@@ -859,7 +859,7 @@
     <string name="cut" msgid="3092569408438626261">"Исечи"</string>
     <string name="copy" msgid="2681946229533511987">"Копирај"</string>
     <string name="paste" msgid="5629880836805036433">"Залепи"</string>
-    <string name="paste_as_plain_text" msgid="5427792741908010675">"Залепете како обичен текст"</string>
+    <string name="paste_as_plain_text" msgid="5427792741908010675">"Залепи како обичен текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замени..."</string>
     <string name="delete" msgid="6098684844021697789">"Избриши"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копирај УРЛ"</string>

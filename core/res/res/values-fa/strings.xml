@@ -931,7 +931,7 @@
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"لمس کردن برای بازکردن برنامه"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"برنامه عوض شود؟"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"برنامه دیگری از قبل در حال اجرا است که باید قبل از اینکه برنامه جدیدی را شروع کنید متوقف شود."</string>
+    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"برنامه دیگری از قبل در حال اجراست که باید متوقف شود تا بتوانید برنامه جدید را شروع کنید."</string>
     <string name="old_app_action" msgid="493129172238566282">"بازگشت به <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="2082094275580358049">"برنامه جدید شروع نشود."</string>
     <string name="new_app_action" msgid="5472756926945440706">"شروع <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>

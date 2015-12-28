@@ -384,8 +384,8 @@
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Telebistak ezagutzen dituen kontuen zerrenda lortzea baimentzen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak sar daitezke."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
-    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"sare-konexioak ikustea"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Sare-konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
+    <string name="permlab_accessNetworkState" msgid="4951027964348974773">"sareko konexioak ikustea"</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Sareko konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"Izan sarerako sarbide osoa"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Sare-socketak sortzeko eta sare-protokolo pertsonalizatuak erabiltzeko baimena ematen die aplikazioei. Arakatzaileak eta beste aplikazio batzuek Internetera konektatzeko moduak eskaintzen dituzte, beraz, baimen hori ez da beharrezkoa datuak Internetera bidaltzeko."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"aldatu sarearen konektagarritasuna"</string>
