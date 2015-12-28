@@ -310,7 +310,8 @@ public class SystemServicesProxy {
         try {
             final ActivityOptions options = ActivityOptions.makeBasic();
             options.setDockCreateMode(createMode);
-            mIam.startActivityFromRecents(taskId, DOCKED_STACK_ID, options.toBundle());
+            options.setLaunchStackId(DOCKED_STACK_ID);
+            mIam.startActivityFromRecents(taskId, options.toBundle());
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -836,8 +837,7 @@ public class SystemServicesProxy {
             ActivityOptions options) {
         if (mIam != null) {
             try {
-                mIam.startActivityFromRecents(
-                        taskId, INVALID_STACK_ID, options == null ? null : options.toBundle());
+                mIam.startActivityFromRecents(taskId, options == null ? null : options.toBundle());
                 return true;
             } catch (Exception e) {
                 Log.e(TAG, context.getString(R.string.recents_launch_error_message, taskName), e);

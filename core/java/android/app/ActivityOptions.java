@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.content.Context;
 import android.content.Intent;
@@ -67,7 +68,8 @@ public class ActivityOptions {
      * The bounds (window size) that the activity should be launched in. Set to null explicitly for
      * full screen. If the key is not found, previous bounds will be preserved.
      * NOTE: This value is ignored on devices that don't have
-     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} enabled.
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} or
+     * {@link android.content.pm.PackageManager#FEATURE_PICTURE_IN_PICTURE} enabled.
      * @hide
      */
     public static final String KEY_LAUNCH_BOUNDS = "android:activity.launchBounds";
@@ -145,6 +147,12 @@ public class ActivityOptions {
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
 
     /**
+     * The stack id the activity should be launched into.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_STACK_ID = "android.activity.launchStackId";
+
+    /**
      * Where the docked stack should be positioned.
      * @hide
      */
@@ -215,6 +223,7 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private int mLaunchStackId = INVALID_STACK_ID;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
     private AppTransitionAnimationSpec mAnimSpecs[];
 
@@ -754,6 +763,7 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -901,7 +911,19 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getDockCreateMode() { return mDockCreateMode; }
+    public int getLaunchStackId() {
+        return mLaunchStackId;
+    }
+
+    /** @hide */
+    public void setLaunchStackId(int launchStackId) {
+        mLaunchStackId = launchStackId;
+    }
+
+    /** @hide */
+    public int getDockCreateMode() {
+        return mDockCreateMode;
+    }
 
     /** @hide */
     public void setDockCreateMode(int dockCreateMode) {
@@ -1049,6 +1071,7 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);

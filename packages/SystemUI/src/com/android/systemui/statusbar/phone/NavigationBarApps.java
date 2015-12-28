@@ -746,7 +746,7 @@ class NavigationBarApps extends LinearLayout
         // Launch or bring the activity to front.
         final IActivityManager iAm = ActivityManagerNative.getDefault();
         try {
-            iAm.startActivityFromRecents(taskPersistentId, INVALID_STACK_ID, null /* options */);
+            iAm.startActivityFromRecents(taskPersistentId, null /* options */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception when activating a recent task", e);
         } catch (IllegalArgumentException e) {

@@ -4360,7 +4360,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public final int startActivityFromRecents(int taskId, int launchStackId, Bundle bOptions) {
+    public final int startActivityFromRecents(int taskId, Bundle bOptions) {
         if (checkCallingPermission(START_TASKS_FROM_RECENTS) != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: startActivityFromRecents called without " +
                     START_TASKS_FROM_RECENTS;
@@ -4369,19 +4369,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            return startActivityFromRecentsInner(taskId, launchStackId, bOptions);
+            return startActivityFromRecentsInner(taskId, bOptions);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
-    final int startActivityFromRecentsInner(int taskId, int launchStackId, Bundle bOptions) {
+    final int startActivityFromRecentsInner(int taskId, Bundle bOptions) {
         final TaskRecord task;
         final int callingUid;
         final String callingPackage;
         final Intent intent;
         final int userId;
         synchronized (this) {
+            final ActivityOptions activityOptions = (bOptions != null)
+                    ? new ActivityOptions(bOptions) : null;
+            final int launchStackId = (activityOptions != null)
+                    ? activityOptions.getLaunchStackId() : INVALID_STACK_ID;
+
             if (launchStackId == HOME_STACK_ID) {
                 throw new IllegalArgumentException("startActivityFromRecentsInner: Task "
                         + taskId + " can't be launch in the home stack.");
@@ -4394,10 +4399,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             if (launchStackId != INVALID_STACK_ID) {
-                if (launchStackId == DOCKED_STACK_ID && bOptions != null) {
-                    ActivityOptions activityOptions = new ActivityOptions(bOptions);
-                    mWindowManager.setDockedStackCreateState(activityOptions.getDockCreateMode(),
-                            null /* initialBounds */);
+                if (launchStackId == DOCKED_STACK_ID && activityOptions != null) {
+                    mWindowManager.setDockedStackCreateState(
+                            activityOptions.getDockCreateMode(), null /* initialBounds */);
                 }
                 if (task.stack.mStackId != launchStackId) {
                     mStackSupervisor.moveTaskToStackLocked(
@@ -20906,7 +20910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void moveToFront() {
             checkCaller();
             // Will bring task to front if it already has a root activity.
-            startActivityFromRecentsInner(mTaskId, INVALID_STACK_ID, null);
+            startActivityFromRecentsInner(mTaskId, null);
         }
 
         @Override
