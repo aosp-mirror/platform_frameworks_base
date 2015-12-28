@@ -59,10 +59,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> प्रिन्टरहरू भेटिए</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> प्रिन्टर भेटियो</item>
     </plurals>
-    <!-- no translation found for printer_extended_description_template (1366699227703381874) -->
-    <skip />
-    <!-- no translation found for printer_info_desc (7181988788991581654) -->
-    <skip />
+    <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
+    <string name="printer_info_desc" msgid="7181988788991581654">"यस प्रिन्टरको बारेमा थप जानकारी"</string>
     <string name="choose_print_service" msgid="3740309762324459694">"प्रिन्ट सेवा छनौट गर्नुहोस्"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिन्टरहरू खोज्दै"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"कुनै पनि मुद्रण सेवाहरू सक्रिय छैनन्"</string>
