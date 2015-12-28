@@ -456,7 +456,7 @@
     <string name="high_importance" msgid="1527066195614050263">"Garrantzi handia"</string>
     <string name="max_importance" msgid="5089005872719563894">"Premiazkoa"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Ez erakutsi jakinarazpen hauek inoiz"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Erakutsi jakinarazpen hauek zerrendaren behealdean"</string>
+    <string name="notification_importance_low" msgid="4383563267370859725">"Erakutsi jakinarazpen hauek zerrendaren behealdean, baina soinurik egin gabe"</string>
     <string name="notification_importance_default" msgid="4926529615920610817">"Erakutsi jakinarazpen hauek, baina soinurik egin gabe"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Erakutsi jakinarazpen hauek zerrendaren goialdean eta egin soinua"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Agerrarazi jakinarazpen hauek pantailan eta egin soinua"</string>

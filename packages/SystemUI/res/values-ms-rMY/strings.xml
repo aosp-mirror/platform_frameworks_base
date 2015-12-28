@@ -469,5 +469,5 @@
     <string name="color_enable_custom" msgid="6729001308217347501">"Dayakan jelmaan tersuai"</string>
     <string name="color_apply" msgid="9212602012641034283">"Gunakan"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Sahkan tetapan"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Sesetengah tetapan warna boleh menjadikan peranti ini tidak dapat digunakan. Klik OK untuk mengesahkan tetapan warna ini, jika tidak tetapan ini akan ditetapkan semula selepas 10 saat."</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Sesetengah tetapan warna boleh menjadikan peranti ini tidak dapat digunakan. Klik OK untuk mengesahkan tetapan warna ini, jika tidak, tetapan ini akan ditetapkan semula selepas 10 saat."</string>
 </resources>

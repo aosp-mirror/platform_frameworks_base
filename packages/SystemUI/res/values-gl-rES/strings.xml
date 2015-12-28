@@ -469,5 +469,5 @@
     <string name="color_enable_custom" msgid="6729001308217347501">"Activar transformación personalizada"</string>
     <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirmar configuración"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"Algunhas opcións de configuración de cor poden facer que este dispositivo sexa inutilizable. Fai clic en Aceptar para confirmar esta configuración de cor. En caso contrario, esta configuración restablecerase tras 10 segundos."</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"Algunhas opcións de configuración de cor poden facer que este dispositivo sexa inutilizable. Fai clic en Aceptar para confirmar esta configuración de cor; en caso contrario, a configuración restablecerase tras 10 segundos."</string>
 </resources>
