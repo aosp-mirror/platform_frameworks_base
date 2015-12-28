@@ -29,7 +29,7 @@
     <string name="bugreport_info_action" msgid="2158204228510576227">"詳細資訊"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"螢幕擷取畫面"</string>
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"成功拍攝螢幕擷取畫面。"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"無法拍攝螢幕擷取畫面。"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"無法擷取螢幕畫面。"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"錯誤報告詳情"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"簡稱"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"簡短摘要 (1 行)"</string>
