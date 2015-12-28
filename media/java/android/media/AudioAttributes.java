@@ -223,10 +223,19 @@ public final class AudioAttributes implements Parcelable {
     @SystemApi
     public final static int FLAG_BYPASS_MUTE = 0x1 << 7;
 
+    /**
+     * @hide
+     * Flag requesting a low latency path.
+     * When using this flag, the sample rate must match the native sample rate
+     * of the device. Effects processing is also unavailable.
+     */
+    public final static int FLAG_LOW_LATENCY = 0x1 << 8;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE;
-    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC;
+            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY;
+    private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
+            FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
     private int mUsage = USAGE_UNKNOWN;
     private int mContentType = CONTENT_TYPE_UNKNOWN;
