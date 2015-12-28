@@ -113,11 +113,27 @@ static void setLight_native(JNIEnv* /* env */, jobject /* clazz */, jlong ptr,
         return ;
     }
 
+    uint32_t version = devices->lights[light]->common.version;
+
     memset(&state, 0, sizeof(light_state_t));
-    state.color = colorARGB;
-    state.flashMode = flashMode;
-    state.flashOnMS = onMS;
-    state.flashOffMS = offMS;
+
+    if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
+        if (light != LIGHT_INDEX_BACKLIGHT) {
+            ALOGE("Cannot set low-persistence mode for non-backlight device.");
+            return;
+        }
+        if (version < LIGHTS_DEVICE_API_VERSION_2_0) {
+            // HAL impl has not been upgraded to support this.
+            return;
+        }
+    } else {
+        // Only set non-brightness settings when not in low-persistence mode
+        state.color = colorARGB;
+        state.flashMode = flashMode;
+        state.flashOnMS = onMS;
+        state.flashOffMS = offMS;
+    }
+
     state.brightnessMode = brightnessMode;
 
     {
