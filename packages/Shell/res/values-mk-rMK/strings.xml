@@ -28,8 +28,8 @@
     <string name="bugreport_unnamed" msgid="2800582406842092709">"неименувани"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Детали"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Слика од екранот"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Сликата од екранот е успешно преземена."</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Сликата од екранот не може да се преземе."</string>
+    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Успешно е направена слика од екранот."</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Не може да се направи слика од екранот."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Детали на извештајот за грешка"</string>
     <string name="bugreport_info_name" msgid="5089191832271852826">"Кратко име"</string>
     <string name="bugreport_info_title" msgid="127167853370557175">"Резиме во 1 ред"</string>
