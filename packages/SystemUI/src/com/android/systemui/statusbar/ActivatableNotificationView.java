@@ -608,8 +608,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                     onFinishedRunnable.run();
                 }
                 if (!mWasCancelled) {
-                    mAppearAnimationFraction = -1;
-                    setOutlineRect(null);
                     enableAppearDrawing(false);
                 }
             }
@@ -630,6 +628,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private void cancelAppearAnimation() {
         if (mAppearAnimator != null) {
             mAppearAnimator.cancel();
+            mAppearAnimator = null;
         }
     }
 
@@ -735,6 +734,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mDrawingAppearAnimation = enable;
             if (!enable) {
                 setContentAlpha(1.0f);
+                mAppearAnimationFraction = -1;
+                setOutlineRect(null);
             }
             invalidate();
         }
