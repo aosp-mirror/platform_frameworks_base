@@ -285,6 +285,8 @@ class Task implements DimLayer.DimLayerUser {
         }
         if ((boundsChanged & BOUNDS_CHANGE_SIZE) == BOUNDS_CHANGE_SIZE) {
             resizeWindows();
+        } else {
+            moveWindows();
         }
         return true;
     }
@@ -463,9 +465,20 @@ class Task implements DimLayer.DimLayerUser {
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (!resizingWindows.contains(win)) {
-                    if (DEBUG_RESIZE) Slog.d(TAG_WM, "setBounds: Resizing " + win);
+                    if (DEBUG_RESIZE) Slog.d(TAG_WM, "resizeWindows: Resizing " + win);
                     resizingWindows.add(win);
                 }
+            }
+        }
+    }
+
+    void moveWindows() {
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                if (DEBUG_RESIZE) Slog.d(TAG_WM, "moveWindows: Moving " + win);
+                win.mMovedByResize = true;
             }
         }
     }

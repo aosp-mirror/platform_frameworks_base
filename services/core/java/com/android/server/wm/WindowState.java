@@ -417,6 +417,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow = null;
 
+    // Whether this window is being moved via the resize API
+    boolean mMovedByResize;
     /**
      * Wake lock for drawing.
      * Even though it's slightly more expensive to do so, we will use a separate wake lock
@@ -1208,9 +1210,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * sense to call from performLayoutAndPlaceSurfacesLockedInner().)
      */
     boolean hasMoved() {
-        return mHasSurface && mContentChanged && !mExiting && !mWinAnimator.mLastHidden
-                && mService.okToDisplay() && (mFrame.top != mLastFrame.top
-                        || mFrame.left != mLastFrame.left)
+        return mHasSurface && (mContentChanged || mMovedByResize)
+                && !mExiting && !mWinAnimator.mLastHidden && mService.okToDisplay()
+                && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
 

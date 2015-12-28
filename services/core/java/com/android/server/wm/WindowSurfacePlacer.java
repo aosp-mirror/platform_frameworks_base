@@ -709,6 +709,7 @@ class WindowSurfacePlacer {
 
                 //Slog.i(TAG_WM, "Window " + this + " clearing mContentChanged - done placing");
                 w.mContentChanged = false;
+                w.mMovedByResize = false;
 
                 // Moved from updateWindowsAndWallpaperLocked().
                 if (w.mHasSurface) {
