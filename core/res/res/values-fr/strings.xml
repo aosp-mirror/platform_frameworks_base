@@ -189,7 +189,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Sonnerie activée"</string>
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Mise à jour du système Android"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Préparation de la mise à jour en cours…"</string>
-    <string name="reboot_to_update_package" msgid="3871302324500927291">"Traitement du package de mises à jour en cours…"</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Traitement du package de mise à jour…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Redémarrage en cours…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Rétablir la configuration d\'usine"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Redémarrage en cours…"</string>
