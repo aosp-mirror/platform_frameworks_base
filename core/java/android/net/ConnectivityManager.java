@@ -23,7 +23,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Handler;
@@ -46,11 +45,11 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Protocol;
 
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.HashMap;
-
 import libcore.net.event.NetworkEventDispatcher;
+
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -1611,7 +1610,7 @@ public class ConnectivityManager {
             // Have a provisioning app - must only let system apps (which check this app)
             // turn on tethering
             context.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.CONNECTIVITY_INTERNAL, "ConnectivityService");
+                    android.Manifest.permission.TETHER_PRIVILEGED, "ConnectivityService");
         } else {
             int uid = Binder.getCallingUid();
             Settings.checkAndNoteWriteSettingsOperation(context, uid, Settings
