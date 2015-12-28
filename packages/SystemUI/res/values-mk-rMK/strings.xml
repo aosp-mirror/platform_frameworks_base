@@ -462,11 +462,11 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Појави се на екранот и дај звучен сигнал"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Нормални бои"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Ноќни бои"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"Прилагодени бои"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"Приспособени бои"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Непознати бои"</string>
     <string name="color_transform" msgid="6985460408079086090">"Промена на бојата"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Прикажи плочка Брзи поставки"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"Овозможи прилагодено трансформирање"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"Овозможи приспособено трансформирање"</string>
     <string name="color_apply" msgid="9212602012641034283">"Примени"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Потврдете ги поставките"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Некои поставки на боите може да го направат уредот неупотреблив. Кликнете на Во ред за да ги потврдите овие поставки на боите, инаку тие поставки ќе се ресетираат по 10 секунди."</string>

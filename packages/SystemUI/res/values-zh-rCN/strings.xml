@@ -413,7 +413,7 @@
     <string name="system_ui_tuner" msgid="708224127392452018">"系统界面调谐器"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"嵌入式显示电池电量百分比 显示嵌入的电池电量百分比"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充电时在状态栏图标内显示电池电量百分比"</string>
-    <string name="quick_settings" msgid="10042998191725428">"快速设置"</string>
+    <string name="quick_settings" msgid="10042998191725428">"快捷设置"</string>
     <string name="status_bar" msgid="4877645476959324760">"状态栏"</string>
     <string name="overview" msgid="4018602013895926956">"概览"</string>
     <string name="demo_mode" msgid="2389163018533514619">"演示模式"</string>
@@ -429,7 +429,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"您在<xliff:g id="WHEN">%1$s</xliff:g>将不会听到下次闹钟响铃"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快速设置，<xliff:g id="TITLE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快捷设置，<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"热点"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作资料"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"是否有趣完全取决于个人感觉"</string>
@@ -442,8 +442,8 @@
     <string name="activity_not_found" msgid="348423244327799974">"您的设备中未安装此应用"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"显示时钟的秒数"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
-    <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快速设置"</string>
-    <string name="show_brightness" msgid="6613930842805942519">"在快速设置中显示亮度栏"</string>
+    <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快捷设置"</string>
+    <string name="show_brightness" msgid="6613930842805942519">"在快捷设置中显示亮度栏"</string>
     <string name="experimental" msgid="6198182315536726162">"实验性"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>
@@ -460,24 +460,14 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"显示这些通知，但不发出提示音"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"在通知列表顶部显示，并发出提示音"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"在屏幕上持续显示，并发出提示音"</string>
-    <!-- no translation found for color_matrix_none (2121957926040543148) -->
-    <skip />
-    <!-- no translation found for color_matrix_night (5943817622105307072) -->
-    <skip />
-    <!-- no translation found for color_matrix_custom (3655576492322298713) -->
-    <skip />
-    <!-- no translation found for color_matrix_unknown (2709202104256265107) -->
-    <skip />
-    <!-- no translation found for color_transform (6985460408079086090) -->
-    <skip />
-    <!-- no translation found for color_matrix_show_qs (1763244354399276679) -->
-    <skip />
-    <!-- no translation found for color_enable_custom (6729001308217347501) -->
-    <skip />
-    <!-- no translation found for color_apply (9212602012641034283) -->
-    <skip />
-    <!-- no translation found for color_revert_title (4746666545480534663) -->
-    <skip />
-    <!-- no translation found for color_revert_message (9116001069397996691) -->
-    <skip />
+    <string name="color_matrix_none" msgid="2121957926040543148">"常规颜色"</string>
+    <string name="color_matrix_night" msgid="5943817622105307072">"夜间颜色"</string>
+    <string name="color_matrix_custom" msgid="3655576492322298713">"自定义颜色"</string>
+    <string name="color_matrix_unknown" msgid="2709202104256265107">"未知颜色"</string>
+    <string name="color_transform" msgid="6985460408079086090">"颜色修改"</string>
+    <string name="color_matrix_show_qs" msgid="1763244354399276679">"显示“快捷设置”图块"</string>
+    <string name="color_enable_custom" msgid="6729001308217347501">"启用自定义转换"</string>
+    <string name="color_apply" msgid="9212602012641034283">"应用"</string>
+    <string name="color_revert_title" msgid="4746666545480534663">"确认设置"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"部分颜色设置可能会导致此设备无法使用。请点击“确定”确认这些颜色设置，否则，系统将在 10 秒后重置这些设置。"</string>
 </resources>

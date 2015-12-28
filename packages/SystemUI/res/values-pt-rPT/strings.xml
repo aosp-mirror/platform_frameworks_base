@@ -450,11 +450,11 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Ativar"</string>
     <string name="apply_to_topic" msgid="3641403489318659666">"Aplicar a notificações de <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
     <string name="apply_to_app" msgid="363016783939815960">"Aplicar a todas as notificações desta aplicação"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Bloqueada"</string>
+    <string name="blocked_importance" msgid="5198578988978234161">"Bloqueado"</string>
     <string name="low_importance" msgid="4109929986107147930">"Importância baixa"</string>
     <string name="default_importance" msgid="8192107689995742653">"Importância normal"</string>
     <string name="high_importance" msgid="1527066195614050263">"Importância alta"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Importância urgente"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Urgente"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Nunca mostrar estas notificações"</string>
     <string name="notification_importance_low" msgid="4383563267370859725">"Mostrar na parte inferior da lista de notificações sem som"</string>
     <string name="notification_importance_default" msgid="4926529615920610817">"Mostrar estas notificações sem som"</string>
