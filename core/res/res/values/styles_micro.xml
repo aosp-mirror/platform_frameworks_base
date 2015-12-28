@@ -26,6 +26,10 @@
         <item name="taskOpenExitAnimation">@null</item>
         <item name="taskCloseEnterAnimation">@null</item>
         <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
+        <item name="taskToFrontEnterAnimation">@anim/slide_in_micro</item>
+        <item name="taskToFrontExitAnimation">@null</item>
+        <item name="taskToBackEnterAnimation">@null</item>
+        <item name="taskToBackExitAnimation">@anim/slide_out_micro</item>
         <item name="wallpaperOpenEnterAnimation">@null</item>
         <item name="wallpaperOpenExitAnimation">@anim/slide_out_micro</item>
         <item name="wallpaperCloseEnterAnimation">@anim/slide_in_micro</item>
