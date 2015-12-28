@@ -89,53 +89,51 @@ public class FilesActivity extends BaseActivity {
 
         RootsFragment.show(getFragmentManager(), null);
 
-        if (mState.restored) {
-            if (DEBUG) Log.d(TAG, "Restored instance for uri: " + getIntent().getData());
-            onCurrentDirectoryChanged(ANIM_NONE);
-        } else {
-            Intent intent = getIntent();
-            Uri uri = intent.getData();
+        final Intent intent = getIntent();
+        final Uri uri = intent.getData();
 
-            if (DEBUG) Log.d(TAG, "Creating new instance for uri: " + uri);
+        if (mState.restored) {
+            if (DEBUG) Log.d(TAG, "Stack already resolved for uri: " + intent.getData());
+            onCurrentDirectoryChanged(ANIM_NONE);
+        } else if (!mState.stack.isEmpty()) {
             // If a non-empty stack is present in our state it was read (presumably)
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
             // loading or restoring the stack.
-            if (!mState.stack.isEmpty()) {
-                if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
-                // When restoring from a stack, if a URI is present, it should only ever
-                // be a launch URI. Launch URIs support sensible activity management, but
-                // don't specify a real content target.
-                checkState(uri == null || LauncherActivity.isLaunchUri(uri));
-                onCurrentDirectoryChanged(ANIM_NONE);
-            } else if (DocumentsContract.isRootUri(this, uri)) {
-                if (DEBUG) Log.d(TAG, "Launching with root URI.");
-                // If we've got a specific root to display, restore that root using a dedicated
-                // authority. That way a misbehaving provider won't result in an ANR.
-                new RestoreRootTask(uri).executeOnExecutor(
-                        ProviderExecutor.forAuthority(uri.getAuthority()));
-            } else {
-                if (DEBUG) Log.d(TAG, "Launching into Home directory.");
-                // If all else fails, try to load "Home" directory.
-                uri = DocumentsContract.buildHomeUri();
-                new RestoreRootTask(uri).executeOnExecutor(
-                        ProviderExecutor.forAuthority(uri.getAuthority()));
-            }
+            //
+            // When restoring from a stack, if a URI is present, it should only ever
+            // be a launch URI. Launch URIs support sensible activity management, but
+            // don't specify a real content target.
+            if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
+            checkState(uri == null || LauncherActivity.isLaunchUri(uri));
+            onCurrentDirectoryChanged(ANIM_NONE);
+        } else if (DocumentsContract.isRootUri(this, uri)) {
+            if (DEBUG) Log.d(TAG, "Launching with root URI.");
+            // If we've got a specific root to display, restore that root using a dedicated
+            // authority. That way a misbehaving provider won't result in an ANR.
+            new RestoreRootTask(uri).executeOnExecutor(
+                    ProviderExecutor.forAuthority(uri.getAuthority()));
+        } else {
+            if (DEBUG) Log.d(TAG, "Launching into Home directory.");
+            // If all else fails, try to load "Home" directory.
+            final Uri homeUri = DocumentsContract.buildHomeUri();
+            new RestoreRootTask(homeUri).executeOnExecutor(
+                    ProviderExecutor.forAuthority(homeUri.getAuthority()));
+        }
 
-            // TODO: Ensure we're handling CopyService errors correctly across all activities.
-            // Show a failure dialog if there was a failed operation.
-            final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
-            final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
-                    CopyService.TRANSFER_MODE_COPY);
-            if (failure != 0) {
-                final ArrayList<DocumentInfo> failedSrcList =
-                        intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
-                FailureDialogFragment.show(
-                        getFragmentManager(),
-                        failure,
-                        failedSrcList,
-                        mState.stack,
-                        transferMode);
-            }
+        final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
+        final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
+                CopyService.TRANSFER_MODE_COPY);
+        // DialogFragment takes care of restoring the dialog on configuration change.
+        // Only show it manually for the first time (icicle is null).
+        if (icicle == null && failure != 0) {
+            final ArrayList<DocumentInfo> failedSrcList =
+                    intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
+            FailureDialogFragment.show(
+                    getFragmentManager(),
+                    failure,
+                    failedSrcList,
+                    mState.stack,
+                    transferMode);
         }
     }
 
