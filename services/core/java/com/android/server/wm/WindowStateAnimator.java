@@ -1182,11 +1182,14 @@ class WindowStateAnimator {
         // We don't apply the stack bounds crop if:
         // 1. The window is currently animating docked mode or in freeform mode, otherwise the
         // animating window will be suddenly (docked) or for whole animation (freeform) cut off.
+        // (Note that we still need to apply the crop if the task being docked is non-resizeable,
+        // in which case the task is running in fullscreen size but cropped to stack bounds.)
         // 2. The window that is being replaced during animation, because it was living in a
         // different stack. If we suddenly crop it to the new stack bounds, it might get cut off.
         // We don't want it to happen, so we let it ignore the stack bounds until it gets removed.
         // The window that will replace it will abide them.
-        if (isAnimating() && (w.mWillReplaceWindow || w.inDockedWorkspace()
+        if (isAnimating() && (w.mWillReplaceWindow
+                || (w.inDockedWorkspace() && task.isResizeable())
                 || w.inFreeformWorkspace())) {
             return;
         }
