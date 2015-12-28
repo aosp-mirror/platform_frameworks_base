@@ -26,6 +26,7 @@
             android:layout_height="56dp"
             android:paddingEnd="4dp"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:visibility="gone"
             android:background="#ffeeeeee"
             >
