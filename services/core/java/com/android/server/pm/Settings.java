@@ -66,8 +66,11 @@ import com.android.server.pm.PackageManagerService.DumpState;
 import com.android.server.pm.PermissionsState.PermissionState;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Collection;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -2251,11 +2254,11 @@ final class Settings {
         JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
         final File writeTarget = journal.chooseForWrite();
-        FileOutputStream fstr = null;
-        BufferedOutputStream str = null;
+        FileOutputStream fstr;
+        BufferedWriter writer = null;
         try {
             fstr = new FileOutputStream(writeTarget);
-            str = new BufferedOutputStream(fstr);
+            writer = new BufferedWriter(new OutputStreamWriter(fstr, Charset.defaultCharset()));
             FileUtils.setPermissions(fstr.getFD(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
 
             StringBuilder sb = new StringBuilder();
@@ -2272,7 +2275,7 @@ final class Settings {
                 final int[] gids = pkg.getPermissionsState().computeGids(userIds);
 
                 // Avoid any application that has a space in its path.
-                if (dataPath.indexOf(" ") >= 0)
+                if (dataPath.indexOf(' ') >= 0)
                     continue;
 
                 // we store on each line the following information for now:
@@ -2294,7 +2297,7 @@ final class Settings {
                 sb.setLength(0);
                 sb.append(ai.packageName);
                 sb.append(" ");
-                sb.append((int)ai.uid);
+                sb.append(ai.uid);
                 sb.append(isDebug ? " 1 " : " 0 ");
                 sb.append(dataPath);
                 sb.append(" ");
@@ -2310,15 +2313,15 @@ final class Settings {
                     sb.append("none");
                 }
                 sb.append("\n");
-                str.write(sb.toString().getBytes());
+                writer.append(sb);
             }
-            str.flush();
+            writer.flush();
             FileUtils.sync(fstr);
-            str.close();
+            writer.close();
             journal.commit();
         } catch (Exception e) {
             Slog.wtf(TAG, "Failed to write packages.list", e);
-            IoUtils.closeQuietly(str);
+            IoUtils.closeQuietly(writer);
             journal.rollback();
         }
     }
