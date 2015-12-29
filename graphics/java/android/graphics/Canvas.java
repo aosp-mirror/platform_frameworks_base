@@ -31,6 +31,8 @@ import java.lang.annotation.RetentionPolicy;
 
 import javax.microedition.khronos.opengles.GL;
 
+import libcore.util.NativeAllocationRegistry;
+
 /**
  * The Canvas class holds the "draw" calls. To draw something, you need
  * 4 basic components: A Bitmap to hold the pixels, a Canvas to host
@@ -50,7 +52,7 @@ public class Canvas {
 
     /**
      * Should only be assigned in constructors (or setBitmap if software canvas),
-     * freed in finalizer.
+     * freed by NativeAllocation.
      * @hide
      */
     protected long mNativeCanvasWrapper;
@@ -85,32 +87,15 @@ public class Canvas {
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
 
+    // The approximate size of the native allocation associated with
+    // a Canvas object.
+    private static final long NATIVE_ALLOCATION_SIZE = 525;
+
+    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+        getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+
     // This field is used to finalize the native Canvas properly
-    private final CanvasFinalizer mFinalizer;
-
-    private static final class CanvasFinalizer {
-        private long mNativeCanvasWrapper;
-
-        public CanvasFinalizer(long nativeCanvas) {
-            mNativeCanvasWrapper = nativeCanvas;
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                dispose();
-            } finally {
-                super.finalize();
-            }
-        }
-
-        public void dispose() {
-            if (mNativeCanvasWrapper != 0) {
-                finalizer(mNativeCanvasWrapper);
-                mNativeCanvasWrapper = 0;
-            }
-        }
-    }
+    private Runnable mFinalizer;
 
     /**
      * Construct an empty raster canvas. Use setBitmap() to specify a bitmap to
@@ -122,7 +107,7 @@ public class Canvas {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
             mNativeCanvasWrapper = initRaster(null);
-            mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+            mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
         }
@@ -143,7 +128,7 @@ public class Canvas {
         }
         throwIfCannotDraw(bitmap);
         mNativeCanvasWrapper = initRaster(bitmap);
-        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+        mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
@@ -154,7 +139,7 @@ public class Canvas {
             throw new IllegalStateException();
         }
         mNativeCanvasWrapper = nativeCanvas;
-        mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
+        mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
     }
 
@@ -1980,7 +1965,11 @@ public class Canvas {
      * @hide
      */
     public void release() {
-        mFinalizer.dispose();
+        mNativeCanvasWrapper = 0;
+        if (mFinalizer != null) {
+            mFinalizer.run();
+            mFinalizer = null;
+        }
     }
 
     /**
@@ -2148,5 +2137,5 @@ public class Canvas {
                                                      float hOffset,
                                                      float vOffset,
                                                      int flags, long nativePaint, long nativeTypeface);
-    private static native void finalizer(long nativeCanvas);
+    private static native long getNativeFinalizer();
 }
