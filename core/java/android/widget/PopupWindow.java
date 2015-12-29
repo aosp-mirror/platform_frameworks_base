@@ -1467,10 +1467,14 @@ public class PopupWindow {
         }
 
         if (mClipToScreen) {
+            final int winOffsetX = mScreenLocation[0] - mDrawingLocation[0];
+            final int winOffsetY = mScreenLocation[1] - mDrawingLocation[1];
+            p.x += winOffsetX;
+            p.y += winOffsetY;
             final int displayFrameWidth = displayFrame.right - displayFrame.left;
             final int right = p.x + p.width;
-            if (right > displayFrameWidth) {
-                p.x -= right - displayFrameWidth;
+            if (right > displayFrame.right) {
+                p.x -= right - displayFrame.right;
             }
 
             if (p.x < displayFrame.left) {
@@ -1479,10 +1483,9 @@ public class PopupWindow {
             }
 
             if (mOverlapAnchor) {
-                final int displayFrameHeight = displayFrame.bottom - displayFrame.top;
                 final int bottom = p.y + p.height;
                 if (bottom > displayFrame.bottom) {
-                    p.y -= bottom - displayFrameHeight;
+                    p.y -= bottom - displayFrame.bottom;
                 }
             } else {
                 if (onTop) {
@@ -1494,6 +1497,8 @@ public class PopupWindow {
                     p.y = Math.max(p.y, displayFrame.top);
                 }
             }
+            p.x -= winOffsetX;
+            p.y -= winOffsetY;
         }
 
         p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
