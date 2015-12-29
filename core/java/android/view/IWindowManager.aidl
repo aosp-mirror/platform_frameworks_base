@@ -361,4 +361,13 @@ interface IWindowManager
      * the docked stack gets added/removed.
      */
     void registerDockedStackListener(IDockedStackListener listener);
+
+    /**
+     * Updates the dim layer used while resizing.
+     *
+     * @param visible Whether the dim layer should be visible.
+     * @param targetStackId The id of the task stack the dim layer should be placed on.
+     * @param alpha The translucency of the dim layer, between 0 and 1.
+     */
+    void setResizeDimLayer(boolean visible, int targetStackId, float alpha);
 }

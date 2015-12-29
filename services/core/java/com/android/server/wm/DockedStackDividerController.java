@@ -21,9 +21,14 @@ import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
+import android.view.SurfaceControl;
+
+import com.android.server.wm.DimLayer.DimLayerUser;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
@@ -34,7 +39,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 /**
  * Keeps information about the docked stack divider.
  */
-public class DockedStackDividerController {
+public class DockedStackDividerController implements DimLayerUser {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
 
@@ -48,6 +53,7 @@ public class DockedStackDividerController {
     private boolean mLastVisibility = false;
     private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
             = new RemoteCallbackList<>();
+    private final DimLayer mDimLayer;
 
     DockedStackDividerController(Context context, DisplayContent displayContent) {
         mDisplayContent = displayContent;
@@ -55,6 +61,7 @@ public class DockedStackDividerController {
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mDividerInsets = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
+        mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId());
     }
 
     boolean isResizing() {
@@ -85,6 +92,9 @@ public class DockedStackDividerController {
         }
         mLastVisibility = visible;
         notifyDockedDividerVisibilityChanged(visible);
+        if (!visible) {
+            setResizeDimLayer(false, INVALID_STACK_ID, 0f);
+        }
     }
 
     boolean wasVisible() {
@@ -157,5 +167,39 @@ public class DockedStackDividerController {
         notifyDockedDividerVisibilityChanged(wasVisible());
         notifyDockedStackExistsChanged(
                 mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID) != null);
+    }
+
+    void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
+        SurfaceControl.openTransaction();
+        TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(targetStackId);
+        if (visible && stack != null) {
+            stack.getDimBounds(mTmpRect);
+            mDimLayer.setBounds(mTmpRect);
+            mDimLayer.show(mDisplayContent.mService.mLayersController.getResizeDimLayer(), alpha,
+                    0 /* duration */);
+        } else {
+            mDimLayer.hide();
+        }
+        SurfaceControl.closeTransaction();
+    }
+
+    @Override
+    public boolean isFullscreen() {
+        return false;
+    }
+
+    @Override
+    public DisplayInfo getDisplayInfo() {
+        return mDisplayContent.getDisplayInfo();
+    }
+
+    @Override
+    public void getDimBounds(Rect outBounds) {
+        // This dim layer user doesn't need this.
+    }
+
+    @Override
+    public String toShortString() {
+        return TAG;
     }
 }

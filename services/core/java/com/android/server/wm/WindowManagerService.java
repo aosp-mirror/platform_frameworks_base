@@ -10209,6 +10209,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
+        synchronized (mWindowMap) {
+            getDefaultDisplayContentLocked().getDockedDividerController().setResizeDimLayer(
+                    visible, targetStackId, alpha);
+        }
+    }
+
     public void setTaskResizeable(int taskId, boolean resizeable) {
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);

@@ -51,6 +51,11 @@ public class WindowManagerProxy {
     private final Rect mTmpRect3 = new Rect();
     private final Rect mTmpRect4 = new Rect();
     private final Rect mTmpRect5 = new Rect();
+
+    private boolean mDimLayerVisible;
+    private int mDimLayerTargetStack;
+    private float mDimLayerAlpha;
+
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private final Runnable mResizeRunnable = new Runnable() {
@@ -92,6 +97,18 @@ public class WindowManagerProxy {
         public void run() {
             try {
                 ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, null, true);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to resize stack: " + e);
+            }
+        }
+    };
+
+    private final Runnable mDimLayerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                WindowManagerGlobal.getWindowManagerService().setResizeDimLayer(mDimLayerVisible,
+                        mDimLayerTargetStack, mDimLayerAlpha);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }
@@ -161,5 +178,12 @@ public class WindowManagerProxy {
             Log.w(TAG, "Failed to get dock side: " + e);
         }
         return DOCKED_INVALID;
+    }
+
+    public void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
+        mDimLayerVisible = visible;
+        mDimLayerTargetStack = targetStackId;
+        mDimLayerAlpha = alpha;
+        mExecutor.execute(mDimLayerRunnable);
     }
 }

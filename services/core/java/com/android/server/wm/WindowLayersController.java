@@ -1,15 +1,31 @@
-package com.android.server.wm;
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
+package com.android.server.wm;
 
 import android.app.ActivityManager.StackId;
 import android.util.Slog;
 import android.view.Display;
 
 import java.io.PrintWriter;
+
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.WINDOW_LAYER_MULTIPLIER;
 
 /**
  * Controller for assigning layers to windows on the display.
@@ -133,6 +149,14 @@ public class WindowLayersController {
         return 0;
     }
 
+    /**
+     * @return The layer used for dimming the apps when dismissing docked/fullscreen stack. Just
+     *         above all application surfaces.
+     */
+    int getResizeDimLayer() {
+        return mDockDivider.mLayer - 1;
+    }
+
     private void logDebugLayers(WindowList windows) {
         for (int i = 0, n = windows.size(); i < n; i++) {
             final WindowState w = windows.get(i);
@@ -175,6 +199,11 @@ public class WindowLayersController {
         // For pinned and docked stack window, we want to make them above other windows
         // also when these windows are animating.
         layer = assignAndIncreaseLayerIfNeeded(mDockedWindow, layer);
+
+        // Leave some space here so the dim layer while dismissing docked/fullscreen stack has space
+        // below the divider but above the app windows. It needs to be below the divider in because
+        // the divider sometimes overlaps the app windows.
+        layer++;
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
         // We know that we will be animating a relaunching window in the near future,
         // which will receive a z-order increase. We want the replaced window to

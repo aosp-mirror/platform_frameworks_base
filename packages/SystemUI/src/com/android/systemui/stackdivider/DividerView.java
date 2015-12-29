@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
+import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -60,6 +61,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final String TAG = "DividerView";
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
+    private static final float DIM_START_FRACTION = 0.5f;
+    private static final float DIM_DAMP_FACTOR = 1.7f;
 
     private ImageButton mHandle;
     private View mBackground;
@@ -264,6 +267,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         } else {
             mWindowManagerProxy.maximizeDockedStack();
         }
+        mWindowManagerProxy.setResizeDimLayer(false, -1, 0f);
     }
 
     private void liftBackground() {
@@ -419,6 +423,21 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     mOtherTaskRect, mOtherInsetRect);
         } else {
             mWindowManagerProxy.resizeDockedStack(mDockedRect, null, null, null, null);
+        }
+        float fraction = mSnapAlgorithm.calculateDismissingFraction(position);
+        fraction = Math.max(0,
+                Math.min((fraction / DIM_START_FRACTION - 1f) / DIM_DAMP_FACTOR, 1f));
+        mWindowManagerProxy.setResizeDimLayer(fraction != 0f,
+                getStackIdForDismissTarget(mSnapAlgorithm.getClosestDismissTarget(position)),
+                fraction);
+    }
+
+    private int getStackIdForDismissTarget(SnapTarget dismissTarget) {
+        if (dismissTarget.flag == SnapTarget.FLAG_DISMISS_START &&
+                (mDockSide == WindowManager.DOCKED_LEFT || mDockSide == WindowManager.DOCKED_TOP)) {
+            return StackId.DOCKED_STACK_ID;
+        } else {
+            return StackId.FULLSCREEN_WORKSPACE_STACK_ID;
         }
     }
 

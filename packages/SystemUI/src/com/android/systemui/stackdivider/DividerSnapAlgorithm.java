@@ -100,6 +100,24 @@ public class DividerSnapAlgorithm {
         }
     }
 
+    public float calculateDismissingFraction(int position) {
+        if (position < mFirstSplitTarget.position) {
+            return 1f - (float) position / mFirstSplitTarget.position;
+        } else if (position > mLastSplitTarget.position) {
+            return (float) (position - mLastSplitTarget.position)
+                    / (mDismissEndTarget.position - mLastSplitTarget.position);
+        }
+        return 0f;
+    }
+
+    public SnapTarget getClosestDismissTarget(int position) {
+        if (position - mDismissStartTarget.position < mDismissEndTarget.position - position) {
+            return mDismissStartTarget;
+        } else {
+            return mDismissEndTarget;
+        }
+    }
+
     private SnapTarget snap(int position) {
         int minIndex = -1;
         int minDistance = Integer.MAX_VALUE;
