@@ -49,7 +49,7 @@ import java.util.List;
  * <pre>
  * {@code
  * <service android:name="your.package.YourInCallServiceImplementation"
- *          android:permission="android.permission.BIND_IN_CALL_SERVICE">
+ *          android:permission="android.permission.BIND_INCALL_SERVICE">
  *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" />
  *      <intent-filter>
  *          <action android:name="android.telecom.InCallService"/>
