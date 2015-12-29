@@ -879,18 +879,16 @@ public final class BluetoothDevice implements Parcelable {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
-     * @param hash - Simple Secure pairing hash
-     * @param randomizer - The random key obtained using OOB
+     * @param transport - Transport to use
+     * @param oobData - Out Of Band data
      * @return false on immediate error, true if bonding will begin
      *
      * @hide
      */
-    public boolean createBondOutOfBand(byte[] hash, byte[] randomizer) {
-        //TODO(BT)
-        /*
+    public boolean createBondOutOfBand(int transport, OobData oobData) {
         try {
-            return sService.createBondOutOfBand(this, hash, randomizer);
-        } catch (RemoteException e) {Log.e(TAG, "", e);}*/
+            return sService.createBondOutOfBand(this, transport, oobData);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
 
