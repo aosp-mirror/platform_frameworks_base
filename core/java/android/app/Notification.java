@@ -145,6 +145,11 @@ public class Notification implements Parcelable
     private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
 
     /**
+     * Maximum entries of reply text that are accepted by Builder and friends.
+     */
+    private static final int MAX_REPLY_HISTORY = 5;
+
+    /**
      * A timestamp related to this notification, in milliseconds since the epoch.
      *
      * Default value: {@link System#currentTimeMillis() Now}.
@@ -743,6 +748,12 @@ public class Notification implements Parcelable
      * {@link Builder#setSubText(CharSequence)}.
      */
     public static final String EXTRA_SUB_TEXT = "android.subText";
+
+    /**
+     * {@link #extras} key: this is the remote input history, as supplied to
+     * {@link Builder#setRemoteInputHistory(CharSequence[])}.
+     */
+    public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
 
     /**
      * {@link #extras} key: this is a small piece of additional text as supplied to
@@ -2324,6 +2335,34 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Set the remote input history.
+         *
+         * This should be set to the most recent inputs that have been sent
+         * through a {@link RemoteInput} of this Notification and cleared once the it is no
+         * longer relevant (e.g. for chat notifications once the other party has responded).
+         *
+         * The most recent input must be stored at the 0 index, the second most recent at the
+         * 1 index, etc. Note that the system will limit both how far back the inputs will be shown
+         * and how much of each individual input is shown.
+         *
+         * <p>Note: The reply text will only be shown on notifications that have least one action
+         * with a {@code RemoteInput}.</p>
+         */
+        public Builder setRemoteInputHistory(CharSequence[] text) {
+            if (text == null) {
+                mN.extras.putCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY, null);
+            } else {
+                final int N = Math.min(MAX_REPLY_HISTORY, text.length);
+                CharSequence[] safe = new CharSequence[N];
+                for (int i = 0; i < N; i++) {
+                    safe[i] = safeCharSequence(text[i]);
+                }
+                mN.extras.putCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY, safe);
+            }
+            return this;
+        }
+
+        /**
          * Set the large number at the right-hand side of the notification.  This is
          * equivalent to setContentInfo, although it might show the number in a different
          * font size for readability.
@@ -3232,6 +3271,14 @@ public class Notification implements Parcelable
         private void resetStandardTemplateWithActions(RemoteViews big) {
             big.setViewVisibility(R.id.actions, View.GONE);
             big.removeAllViews(R.id.actions);
+
+            big.setViewVisibility(R.id.notification_material_reply_container, View.GONE);
+            big.setTextViewText(R.id.notification_material_reply_text_1, null);
+
+            big.setViewVisibility(R.id.notification_material_reply_text_2, View.GONE);
+            big.setTextViewText(R.id.notification_material_reply_text_2, null);
+            big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
+            big.setTextViewText(R.id.notification_material_reply_text_3, null);
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
@@ -3239,16 +3286,60 @@ public class Notification implements Parcelable
 
             resetStandardTemplateWithActions(big);
 
+            boolean validRemoteInput = false;
+
             int N = mActions.size();
             if (N > 0) {
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
-                    final RemoteViews button = generateActionButton(mActions.get(i));
+                    Action action = mActions.get(i);
+                    validRemoteInput |= hasValidRemoteInput(action);
+
+                    final RemoteViews button = generateActionButton(action);
                     big.addView(R.id.actions, button);
                 }
             }
+
+            CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
+            if (validRemoteInput && replyText != null
+                    && replyText.length > 0 && !TextUtils.isEmpty(replyText[0])) {
+                big.setViewVisibility(R.id.notification_material_reply_container, View.VISIBLE);
+                big.setTextViewText(R.id.notification_material_reply_text_1, replyText[0]);
+
+                if (replyText.length > 1 && !TextUtils.isEmpty(replyText[1])) {
+                    big.setViewVisibility(R.id.notification_material_reply_text_2, View.VISIBLE);
+                    big.setTextViewText(R.id.notification_material_reply_text_2, replyText[1]);
+
+                    if (replyText.length > 2 && !TextUtils.isEmpty(replyText[2])) {
+                        big.setViewVisibility(
+                                R.id.notification_material_reply_text_3, View.VISIBLE);
+                        big.setTextViewText(R.id.notification_material_reply_text_3, replyText[2]);
+                    }
+                }
+            }
+
             return big;
+        }
+
+        private boolean hasValidRemoteInput(Action action) {
+            if (TextUtils.isEmpty(action.title) || action.actionIntent == null) {
+                // Weird actions
+                return false;
+            }
+
+            RemoteInput[] remoteInputs = action.getRemoteInputs();
+            if (remoteInputs == null) {
+                return false;
+            }
+
+            for (RemoteInput r : remoteInputs) {
+                CharSequence[] choices = r.getChoices();
+                if (r.getAllowFreeFormInput() || (choices != null && choices.length != 0)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /**

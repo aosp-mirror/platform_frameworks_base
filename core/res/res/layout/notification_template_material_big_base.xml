@@ -55,6 +55,11 @@
         </FrameLayout>
         <include layout="@layout/notification_template_right_icon" />
     </FrameLayout>
+    <ViewStub android:layout="@layout/notification_material_reply_text"
+            android:id="@+id/notification_material_reply_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+    />
     <include
         layout="@layout/notification_material_action_list"
         android:layout_width="match_parent"

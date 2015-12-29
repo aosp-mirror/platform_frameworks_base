@@ -1990,7 +1990,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
             catch (RuntimeException e) {
                 // It failed to apply cleanly.
-                Log.w(TAG, "Couldn't reapply views for package " + n.contentView.getPackage(), e);
+                Log.w(TAG, "Couldn't reapply views for package " +
+                        notification.getPackageName(), e);
             }
         }
         if (!updateSuccessful) {
