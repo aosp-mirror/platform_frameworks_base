@@ -606,31 +606,31 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose, jstring instructionSet, jstring appDataDir) {
     jlong capabilities = 0;
+
+    // Grant CAP_WAKE_ALARM to the Bluetooth process.
     if (uid == AID_BLUETOOTH) {
-        // Grant CAP_WAKE_ALARM and CAP_BLOCK_SUSPEND to the Bluetooth process.
-        capabilities |= (1LL << CAP_WAKE_ALARM);
-        capabilities |= (1LL << CAP_BLOCK_SUSPEND);
+      capabilities |= (1LL << CAP_WAKE_ALARM);
+    }
 
-        // Add the Bluetooth process to the system group.
-        jsize length = env->GetArrayLength(reinterpret_cast<jarray>(gids));
-        jintArray gids_with_system = env->NewIntArray(length + 1);
-        if (!gids_with_system) {
-            RuntimeAbort(env, __LINE__, "could not allocate java array for gids");
+    // Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"
+    bool gid_wakelock_found = false;
+    if (gid == AID_WAKELOCK) {
+      gid_wakelock_found = true;
+    } else if (gids != NULL) {
+      jsize gids_num = env->GetArrayLength(gids);
+      ScopedIntArrayRO ar(env, gids);
+      if (ar.get() == NULL) {
+        RuntimeAbort(env, __LINE__, "Bad gids array");
+      }
+      for (int i = 0; i < gids_num; i++) {
+        if (ar[i] == AID_WAKELOCK) {
+          gid_wakelock_found = true;
+          break;
         }
-
-        jint *gids_elements = env->GetIntArrayElements(gids, NULL);
-        jint *gids_with_system_elements = env->GetIntArrayElements(gids_with_system, NULL);
-
-        if (!gids_elements || !gids_with_system_elements) {
-            RuntimeAbort(env, __LINE__, "could not allocate arrays for gids");
-        }
-
-        gids_with_system_elements[0] = AID_SYSTEM;
-        memcpy(&gids_with_system_elements[1], &gids_elements[0], length * sizeof(jint));
-
-        env->ReleaseIntArrayElements(gids, gids_elements, JNI_ABORT);
-        env->ReleaseIntArrayElements(gids_with_system, gids_with_system_elements, 0);
-        gids = gids_with_system;
+      }
+    }
+    if (gid_wakelock_found) {
+      capabilities |= (1LL << CAP_BLOCK_SUSPEND);
     }
 
     return ForkAndSpecializeCommon(env, uid, gid, gids, debug_flags,
