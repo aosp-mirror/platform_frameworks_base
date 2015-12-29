@@ -159,6 +159,7 @@ public class Am extends BaseCommand {
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]\n" +
                 "       am stack size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]\n" +
                 "       am stack move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
@@ -299,7 +300,11 @@ public class Am extends BaseCommand {
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>." +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.\n" +
+                "\n" +
+                "am stack resize-docked-stack: change docked stack to <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "   and supplying temporary different task bounds indicated by\n" +
+                "   <TASK_LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "\n" +
                 "am stack size-docked-stack-test: test command for sizing docked stack by\n" +
                 "   <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom\n" +
@@ -1683,6 +1688,9 @@ public class Am extends BaseCommand {
             case "resize":
                 runStackResize();
                 break;
+            case "resize-docked-stack":
+                runStackResizeDocked();
+                break;
             case "positiontask":
                 runStackPositionTask();
                 break;
@@ -1749,6 +1757,20 @@ public class Am extends BaseCommand {
             return;
         }
         resizeStack(stackId, bounds, 0);
+    }
+
+    private void runStackResizeDocked() throws Exception {
+        final Rect bounds = getBounds();
+        final Rect taskBounds = getBounds();
+        if (bounds == null || taskBounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
+        try {
+            mAm.resizeDockedStack(bounds, taskBounds, null, null, null);
+        } catch (RemoteException e) {
+            showError("Error: resizing docked stack " + e);
+        }
     }
 
     private void resizeStack(int stackId, Rect bounds, int delayMs) throws Exception {
