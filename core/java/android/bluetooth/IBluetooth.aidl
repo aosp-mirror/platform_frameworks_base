@@ -20,6 +20,7 @@ import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothStateChangeCallback;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.OobData;
 import android.os.ParcelUuid;
 import android.os.ParcelFileDescriptor;
 
@@ -56,6 +57,7 @@ interface IBluetooth
 
     BluetoothDevice[] getBondedDevices();
     boolean createBond(in BluetoothDevice device, in int transport);
+    boolean createBondOutOfBand(in BluetoothDevice device, in int transport, in OobData oobData);
     boolean cancelBondProcess(in BluetoothDevice device);
     boolean removeBond(in BluetoothDevice device);
     int getBondState(in BluetoothDevice device);
