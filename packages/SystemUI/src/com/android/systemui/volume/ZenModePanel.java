@@ -511,7 +511,7 @@ public class ZenModePanel extends LinearLayout {
         GregorianCalendar weekRange = new GregorianCalendar();
         final long now = weekRange.getTimeInMillis();
         setToMidnight(weekRange);
-        weekRange.roll(Calendar.DATE, 6);
+        weekRange.add(Calendar.DATE, 6);
         final long nextAlarmMs = mController.getNextAlarm();
         if (nextAlarmMs > 0) {
             GregorianCalendar nextAlarm = new GregorianCalendar();
