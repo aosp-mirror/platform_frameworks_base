@@ -86,7 +86,7 @@ hwui_src_files := \
     TextDropShadowCache.cpp \
     Texture.cpp \
     TextureCache.cpp \
-    VectorDrawablePath.cpp \
+    VectorDrawable.cpp \
     protos/hwui.proto
 
 hwui_test_common_src_files := \

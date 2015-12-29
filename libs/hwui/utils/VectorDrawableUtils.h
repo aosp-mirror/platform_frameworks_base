@@ -17,7 +17,7 @@
 #ifndef ANDROID_HWUI_VECTORDRAWABLE_UTILS_H
 #define ANDROID_HWUI_VECTORDRAWABLE_UTILS_H
 
-#include "VectorDrawablePath.h"
+#include "VectorDrawable.h"
 
 #include <cutils/compiler.h>
 #include "SkPath.h"

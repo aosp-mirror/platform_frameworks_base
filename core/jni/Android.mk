@@ -49,6 +49,7 @@ LOCAL_SRC_FILES:= \
     android_database_SQLiteConnection.cpp \
     android_database_SQLiteGlobal.cpp \
     android_database_SQLiteDebug.cpp \
+    android_graphics_drawable_VectorDrawable.cpp \
     android_view_DisplayEventReceiver.cpp \
     android_view_DisplayListCanvas.cpp \
     android_view_GraphicBuffer.cpp \

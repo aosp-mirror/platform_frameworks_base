@@ -17,7 +17,7 @@
 #ifndef ANDROID_HWUI_PATHPARSER_H
 #define ANDROID_HWUI_PATHPARSER_H
 
-#include "VectorDrawablePath.h"
+#include "VectorDrawable.h"
 #include "utils/VectorDrawableUtils.h"
 
 #include <jni.h>

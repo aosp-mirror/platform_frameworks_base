@@ -17,7 +17,7 @@
 #include <benchmark/Benchmark.h>
 
 #include "PathParser.h"
-#include "VectorDrawablePath.h"
+#include "VectorDrawable.h"
 
 #include <SkPath.h>
 
