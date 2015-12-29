@@ -18,18 +18,28 @@ package com.android.systemui.statusbar.notification;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
+
+import java.util.ArrayList;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.
  */
-public class HybridNotificationView extends AlphaOptimizedLinearLayout {
+public class HybridNotificationView extends AlphaOptimizedLinearLayout
+        implements TransformableView {
+
+    private ViewTransformationHelper mTransformationHelper;
 
     protected TextView mTitleView;
     protected TextView mTextView;
@@ -58,6 +68,9 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout {
         mTitleView = (TextView) findViewById(R.id.notification_title);
         mTextView = (TextView) findViewById(R.id.notification_text);
         mInvertHelper = new ViewInvertHelper(this, NotificationPanelView.DOZE_ANIMATION_DURATION);
+        mTransformationHelper = new ViewTransformationHelper();
+        mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TITLE, mTitleView);
+        mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TEXT, mTextView);
     }
 
     public void bind(CharSequence title) {
@@ -66,11 +79,38 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout {
 
     public void bind(CharSequence title, CharSequence text) {
         mTitleView.setText(title);
+        if (TextUtils.isEmpty(title)) {
+            mTitleView.setVisibility(GONE);
+        }
         mTextView.setText(text);
+        if (TextUtils.isEmpty(text)) {
+            mTextView.setVisibility(GONE);
+        }
         requestLayout();
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
         mInvertHelper.setInverted(dark, fade, delay);
+    }
+
+    @Override
+    public TransformState getCurrentState(int fadingView) {
+        return mTransformationHelper.getCurrentState(fadingView);
+    }
+
+    @Override
+    public void transformTo(TransformableView notification, Runnable endRunnable) {
+        mTransformationHelper.transformTo(notification, endRunnable);
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification) {
+        mTransformationHelper.transformFrom(notification);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        mTransformationHelper.setVisible(visible);
     }
 }

@@ -45,6 +45,7 @@ public abstract class ExpandableView extends FrameLayout {
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
     private int mMinClipTopAmount = 0;
+    private boolean mClipToActualHeight = true;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -326,12 +327,21 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     private void updateClipping() {
-        int top = mClipTopOptimization;
-        if (top >= getActualHeight()) {
-            top = getActualHeight() - 1;
+        if (mClipToActualHeight) {
+            int top = mClipTopOptimization;
+            if (top >= getActualHeight()) {
+                top = getActualHeight() - 1;
+            }
+            mClipRect.set(0, top, getWidth(), getActualHeight());
+            setClipBounds(mClipRect);
+        } else {
+            setClipBounds(null);
         }
-        mClipRect.set(0, top, getWidth(), getActualHeight());
-        setClipBounds(mClipRect);
+    }
+
+    public void setClipToActualHeight(boolean clipToActualHeight) {
+        mClipToActualHeight = clipToActualHeight;
+        updateClipping();
     }
 
     public int getClipTopOptimization() {

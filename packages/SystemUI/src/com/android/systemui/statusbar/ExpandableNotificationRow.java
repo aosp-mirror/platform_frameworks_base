@@ -635,6 +635,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.updateExpandButtons(isExpandable());
     }
 
+    @Override
+    public void setClipToActualHeight(boolean clipToActualHeight) {
+        super.setClipToActualHeight(clipToActualHeight);
+        getShowingLayout().setClipToActualHeight(clipToActualHeight);
+    }
+
     /**
      * @return whether the user has changed the expansion state
      */
@@ -1040,7 +1046,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             addView(mNotificationHeader, indexOfChild(mChildrenContainer) + 1);
         } else {
             header.reapply(getContext(), mNotificationHeader);
-            mNotificationHeaderWrapper.notifyContentUpdated();
+            mNotificationHeaderWrapper.notifyContentUpdated(mEntry.notification);
         }
         updateHeaderExpandButton();
         updateChildrenHeaderAppearance();

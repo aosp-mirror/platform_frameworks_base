@@ -17,14 +17,17 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.service.notification.StatusBarNotification;
 import android.view.NotificationHeaderView;
 import android.view.View;
+
+import com.android.systemui.statusbar.notification.TransformState;
 
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for
  * the individual templates and custom views.
  */
-public abstract class NotificationViewWrapper {
+public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
 
@@ -53,8 +56,9 @@ public abstract class NotificationViewWrapper {
 
     /**
      * Notifies this wrapper that the content of the view might have changed.
+     * @param notification
      */
-    public void notifyContentUpdated() {};
+    public void notifyContentUpdated(StatusBarNotification notification) {};
 
     /**
      * @return true if this template might need to be clipped with a round rect to make it look
@@ -77,5 +81,27 @@ public abstract class NotificationViewWrapper {
      */
     public NotificationHeaderView getNotificationHeader() {
         return null;
+    }
+
+    @Override
+    public TransformState getCurrentState(int fadingView) {
+        return null;
+    }
+
+    @Override
+    public void transformTo(TransformableView notification, Runnable endRunnable) {
+        // By default we are fading out completely
+        CrossFadeHelper.fadeOut(mView, endRunnable);
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification) {
+        // By default we are fading in completely
+        CrossFadeHelper.fadeIn(mView);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 }

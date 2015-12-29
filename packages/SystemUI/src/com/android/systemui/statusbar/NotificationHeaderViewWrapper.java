@@ -27,6 +27,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -35,6 +37,7 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.notification.TransformState;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.ArrayList;
@@ -52,6 +55,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected final Interpolator mLinearOutSlowInInterpolator;
     protected final ViewInvertHelper mInvertHelper;
 
+    protected final ViewTransformationHelper mTransformationHelper;
+
     protected int mColor;
     private ImageView mIcon;
 
@@ -64,7 +69,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
                 android.R.interpolator.linear_out_slow_in);
         mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
+        mTransformationHelper = new ViewTransformationHelper();
         resolveHeaderViews();
+        updateInvertHelper();
     }
 
     protected void resolveHeaderViews() {
@@ -73,12 +80,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mColor = resolveColor(mExpandButton);
         mNotificationHeader = (NotificationHeaderView) mView.findViewById(
                 com.android.internal.R.id.notification_header);
-        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
-            View child = mNotificationHeader.getChildAt(i);
-            if (child != mIcon) {
-                mInvertHelper.addTarget(child);
-            }
-        }
     }
 
     private int resolveColor(ImageView icon) {
@@ -92,10 +93,26 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void notifyContentUpdated() {
-        mInvertHelper.clearTargets();
+    public void notifyContentUpdated(StatusBarNotification notification) {
         // Reinspect the notification.
         resolveHeaderViews();
+        updateInvertHelper();
+        updateTransformedTypes();
+    }
+
+    protected void updateInvertHelper() {
+        mInvertHelper.clearTargets();
+        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
+            View child = mNotificationHeader.getChildAt(i);
+            if (child != mIcon) {
+                mInvertHelper.addTarget(child);
+            }
+        }
+    }
+
+    protected void updateTransformedTypes() {
+        mTransformationHelper.reset();
+        mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_HEADER, mNotificationHeader);
     }
 
     @Override
@@ -235,5 +252,26 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public NotificationHeaderView getNotificationHeader() {
         return mNotificationHeader;
+    }
+
+    @Override
+    public TransformState getCurrentState(int fadingView) {
+        return mTransformationHelper.getCurrentState(fadingView);
+    }
+
+    @Override
+    public void transformTo(TransformableView notification, Runnable endRunnable) {
+        mTransformationHelper.transformTo(notification, endRunnable);
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification) {
+        mTransformationHelper.transformFrom(notification);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        mTransformationHelper.setVisible(visible);
     }
 }

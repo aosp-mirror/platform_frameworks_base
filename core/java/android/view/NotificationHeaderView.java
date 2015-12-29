@@ -305,4 +305,13 @@ public class NotificationHeaderView extends LinearLayout {
         }
         return this;
     }
+
+    public ImageView getExpandButton() {
+        return mExpandButton;
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 }

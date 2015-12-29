@@ -20,9 +20,6 @@ import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.graphics.Outline;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
@@ -32,8 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -49,7 +44,6 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
  */
 public class NotificationContentView extends FrameLayout {
 
-    private static final long ANIMATION_DURATION_LENGTH = 170;
     private static final int VISIBLE_TYPE_CONTRACTED = 0;
     private static final int VISIBLE_TYPE_EXPANDED = 1;
     private static final int VISIBLE_TYPE_HEADSUP = 2;
@@ -57,7 +51,6 @@ public class NotificationContentView extends FrameLayout {
 
     private final Rect mClipBounds = new Rect();
     private final int mRoundRectRadius;
-    private final Interpolator mLinearInterpolator = new LinearInterpolator();
     private final boolean mRoundRectClippingEnabled;
     private final int mMinContractedHeight;
 
@@ -76,7 +69,6 @@ public class NotificationContentView extends FrameLayout {
     private int mUnrestrictedContentHeight;
     private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
     private boolean mDark;
-    private final Paint mFadePaint = new Paint();
     private boolean mAnimate;
     private boolean mIsHeadsUp;
     private boolean mShowingLegacyBackground;
@@ -108,11 +100,11 @@ public class NotificationContentView extends FrameLayout {
     private OnClickListener mExpandClickListener;
     private boolean mBeforeN;
     private boolean mExpandable;
+    private boolean mClipToActualHeight = true;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
-        mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
         mRoundRectRadius = getResources().getDimensionPixelSize(
                 R.dimen.notification_material_rounded_rect_radius);
         mRoundRectClippingEnabled = getResources().getBoolean(
@@ -357,8 +349,17 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private void updateClipping() {
-        mClipBounds.set(0, mClipTopAmount, getWidth(), mContentHeight);
-        setClipBounds(mClipBounds);
+        if (mClipToActualHeight) {
+            mClipBounds.set(0, mClipTopAmount, getWidth(), mContentHeight);
+            setClipBounds(mClipBounds);
+        } else {
+            setClipBounds(null);
+        }
+    }
+
+    public void setClipToActualHeight(boolean clipToActualHeight) {
+        mClipToActualHeight = clipToActualHeight;
+        updateClipping();
     }
 
     private void selectLayout(boolean animate, boolean force) {
@@ -371,7 +372,7 @@ public class NotificationContentView extends FrameLayout {
                     || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
                     || (visibleType == VISIBLE_TYPE_SINGLELINE && mSingleLineView != null)
                     || visibleType == VISIBLE_TYPE_CONTRACTED)) {
-                runSwitchAnimation(visibleType);
+                animateToVisibleType(visibleType);
             } else {
                 updateViewVisibilities(visibleType);
             }
@@ -381,55 +382,51 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateViewVisibilities(int visibleType) {
         boolean contractedVisible = visibleType == VISIBLE_TYPE_CONTRACTED;
-        mContractedChild.setVisibility(contractedVisible ? View.VISIBLE : View.INVISIBLE);
-        mContractedChild.setAlpha(contractedVisible ? 1f : 0f);
-        mContractedChild.setLayerType(LAYER_TYPE_NONE, null);
+        mContractedWrapper.setVisible(contractedVisible);
         if (mExpandedChild != null) {
             boolean expandedVisible = visibleType == VISIBLE_TYPE_EXPANDED;
-            mExpandedChild.setVisibility(expandedVisible ? View.VISIBLE : View.INVISIBLE);
-            mExpandedChild.setAlpha(expandedVisible ? 1f : 0f);
-            mExpandedChild.setLayerType(LAYER_TYPE_NONE, null);
+            mExpandedWrapper.setVisible(expandedVisible);
         }
         if (mHeadsUpChild != null) {
             boolean headsUpVisible = visibleType == VISIBLE_TYPE_HEADSUP;
-            mHeadsUpChild.setVisibility(headsUpVisible ? View.VISIBLE : View.INVISIBLE);
-            mHeadsUpChild.setAlpha(headsUpVisible ? 1f : 0f);
-            mHeadsUpChild.setLayerType(LAYER_TYPE_NONE, null);
+            mHeadsUpWrapper.setVisible(headsUpVisible);
         }
         if (mSingleLineView != null) {
             boolean singleLineVisible = visibleType == VISIBLE_TYPE_SINGLELINE;
-            mSingleLineView.setVisibility(singleLineVisible ? View.VISIBLE : View.INVISIBLE);
-            mSingleLineView.setAlpha(singleLineVisible ? 1f : 0f);
-            mSingleLineView.setLayerType(LAYER_TYPE_NONE, null);
+            mSingleLineView.setVisible(singleLineVisible);
         }
-        setLayerType(LAYER_TYPE_NONE, null);
         updateRoundRectClipping();
     }
 
-    private void runSwitchAnimation(int visibleType) {
-        View shownView = getViewForVisibleType(visibleType);
-        View hiddenView = getViewForVisibleType(mVisibleType);
-        shownView.setVisibility(View.VISIBLE);
-        hiddenView.setVisibility(View.VISIBLE);
-        shownView.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
-        hiddenView.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
-        setLayerType(LAYER_TYPE_HARDWARE, null);
-        hiddenView.animate()
-                .alpha(0f)
-                .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(mLinearInterpolator)
-                .withEndAction(null); // In case we have multiple changes in one frame.
-        shownView.animate()
-                .alpha(1f)
-                .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(mLinearInterpolator)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateViewVisibilities(mVisibleType);
-                    }
-                });
+    private void animateToVisibleType(int visibleType) {
+        final TransformableView shownView = getTransformableViewForVisibleType(visibleType);
+        final TransformableView hiddenView = getTransformableViewForVisibleType(mVisibleType);
+        shownView.transformFrom(hiddenView);
+        getViewForVisibleType(visibleType).setVisibility(View.VISIBLE);
+        hiddenView.transformTo(shownView, new Runnable() {
+            @Override
+            public void run() {
+                hiddenView.setVisible(false);
+            }
+        });
         updateRoundRectClipping();
+    }
+
+    /**
+     * @param visibleType one of the static enum types in this view
+     * @return the corresponding transformable view according to the given visible type
+     */
+    private TransformableView getTransformableViewForVisibleType(int visibleType) {
+        switch (visibleType) {
+            case VISIBLE_TYPE_EXPANDED:
+                return mExpandedWrapper;
+            case VISIBLE_TYPE_HEADSUP:
+                return mHeadsUpWrapper;
+            case VISIBLE_TYPE_SINGLELINE:
+                return mSingleLineView;
+            default:
+                return mContractedWrapper;
+        }
     }
 
     /**
@@ -520,14 +517,14 @@ public class NotificationContentView extends FrameLayout {
         applyRemoteInput(entry);
         selectLayout(false /* animate */, true /* force */);
         if (mContractedChild != null) {
-            mContractedWrapper.notifyContentUpdated();
+            mContractedWrapper.notifyContentUpdated(entry.notification);
             mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
         }
         if (mExpandedChild != null) {
-            mExpandedWrapper.notifyContentUpdated();
+            mExpandedWrapper.notifyContentUpdated(entry.notification);
         }
         if (mHeadsUpChild != null) {
-            mHeadsUpWrapper.notifyContentUpdated();
+            mHeadsUpWrapper.notifyContentUpdated(entry.notification);
         }
         updateRoundRectClipping();
     }
