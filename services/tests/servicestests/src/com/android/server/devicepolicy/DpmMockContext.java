@@ -134,6 +134,9 @@ public class DpmMockContext extends MockContext {
 
         public void goToSleep(long time, int reason, int flags) {
         }
+
+        public void reboot(String reason) {
+        }
     }
 
     public static class SystemPropertiesForMock {
