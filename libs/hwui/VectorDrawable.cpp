@@ -403,8 +403,15 @@ void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
     // canvas scale.
     outCanvas->getMatrix(&mCanvasMatrix);
     mBounds = bounds;
-    int scaledWidth = (int) (mBounds.width() * mCanvasMatrix.getScaleX());
-    int scaledHeight = (int) (mBounds.height() * mCanvasMatrix.getScaleY());
+    float canvasScaleX = 1.0f;
+    float canvasScaleY = 1.0f;
+    if (mCanvasMatrix.getSkewX() == 0 && mCanvasMatrix.getSkewY() == 0) {
+        // Only use the scale value when there's no skew or rotation in the canvas matrix.
+        canvasScaleX = mCanvasMatrix.getScaleX();
+        canvasScaleY = mCanvasMatrix.getScaleY();
+    }
+    int scaledWidth = (int) (mBounds.width() * canvasScaleX);
+    int scaledHeight = (int) (mBounds.height() * canvasScaleY);
     scaledWidth = std::min(Tree::MAX_CACHED_BITMAP_SIZE, scaledWidth);
     scaledHeight = std::min(Tree::MAX_CACHED_BITMAP_SIZE, scaledHeight);
 
