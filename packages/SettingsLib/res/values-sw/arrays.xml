@@ -59,23 +59,26 @@
     <item msgid="45075631231212732">"Kila wakati tumia ukakuaji wa HDCP"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="3100534874529240291">"K64"</item>
-    <item msgid="505611754508988476">"K256"</item>
-    <item msgid="6361286924268716397">"M1"</item>
-    <item msgid="6405203239560695266">"M4"</item>
-    <item msgid="3025431211013424097">"M16"</item>
+    <item msgid="8665206199209698501">"Imezimwa"</item>
+    <item msgid="1593289376502312923">"K64"</item>
+    <item msgid="487545340236145324">"K256"</item>
+    <item msgid="2423528675294333831">"M1"</item>
+    <item msgid="180883774509476541">"M4"</item>
+    <item msgid="2803199102589126938">"M16"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="524799395770610154">"K64"</item>
-    <item msgid="3534782711045262344">"K256"</item>
-    <item msgid="8085867209202153403">"M1"</item>
+    <item msgid="6089470720451068364">"Imezimwa"</item>
+    <item msgid="4622460333038586791">"K64"</item>
+    <item msgid="2212125625169582330">"K256"</item>
+    <item msgid="1704946766699242653">"M1"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="7346595473588765019">"K64 kwa kumbukumbu"</item>
-    <item msgid="2822309747675758628">"K256 kwa kumbukumbu"</item>
-    <item msgid="6699306198357496731">"M1 kwa kumbukumbu"</item>
-    <item msgid="5748528643937500349">"M4 kwa kumbukumbu"</item>
-    <item msgid="1978629051085111592">"M16 kwa kumbukumbu"</item>
+    <item msgid="6921048829791179331">"Imezimwa"</item>
+    <item msgid="2969458029344750262">"K64 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="1342285115665698168">"K256 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="1314234299552254621">"M1 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="3606047780792894151">"M4 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="5431354956856655120">"M16 kwa kila akiba ya kumbukumbu"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Haiwani imezimwa"</item>

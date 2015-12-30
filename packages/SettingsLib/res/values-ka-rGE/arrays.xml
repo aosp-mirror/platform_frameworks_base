@@ -59,23 +59,26 @@
     <item msgid="45075631231212732">"ყოველთვის გამოიყენე HDCP შემოწმება"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="3100534874529240291">"64K"</item>
-    <item msgid="505611754508988476">"256K"</item>
-    <item msgid="6361286924268716397">"1M"</item>
-    <item msgid="6405203239560695266">"4M"</item>
-    <item msgid="3025431211013424097">"16M"</item>
+    <item msgid="8665206199209698501">"გამორთული"</item>
+    <item msgid="1593289376502312923">"64 კბაიტი"</item>
+    <item msgid="487545340236145324">"256 კბაიტი"</item>
+    <item msgid="2423528675294333831">"1 მბაიტი"</item>
+    <item msgid="180883774509476541">"4 მბაიტი"</item>
+    <item msgid="2803199102589126938">"16 მბაიტი"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="524799395770610154">"64K"</item>
-    <item msgid="3534782711045262344">"256K"</item>
-    <item msgid="8085867209202153403">"1M"</item>
+    <item msgid="6089470720451068364">"გამორთული"</item>
+    <item msgid="4622460333038586791">"64 კბაიტი"</item>
+    <item msgid="2212125625169582330">"256 კბაიტი"</item>
+    <item msgid="1704946766699242653">"1 მბაიტი"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="7346595473588765019">"64K / ჟურნ. ბუფერზე"</item>
-    <item msgid="2822309747675758628">"256K/ჟურნ. ბუფერზე"</item>
-    <item msgid="6699306198357496731">"1M / ჟურნ. ბუფერზე"</item>
-    <item msgid="5748528643937500349">"4M / ჟურნ. ბუფერზე"</item>
-    <item msgid="1978629051085111592">"16M / ჟურნ. ბუფერზე"</item>
+    <item msgid="6921048829791179331">"გამორთული"</item>
+    <item msgid="2969458029344750262">"64 კბაიტი / ჟურნალის ბუფერი"</item>
+    <item msgid="1342285115665698168">"256 კბაიტი / ჟურნალის ბუფერი"</item>
+    <item msgid="1314234299552254621">"1 მბაიტი / ჟურნალის ბუფერი"</item>
+    <item msgid="3606047780792894151">"4 მბაიტი / ჟურნალის ბუფერი"</item>
+    <item msgid="5431354956856655120">"16 მბაიტი / ჟურნალის ბუფერი"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"ანიმაციის გამორთვა"</item>

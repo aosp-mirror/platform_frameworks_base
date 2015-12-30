@@ -59,23 +59,26 @@
     <item msgid="45075631231212732">"‏همیشه از بررسی HDCP استفاده شود"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="3100534874529240291">"۶۴ کیلوبایت"</item>
-    <item msgid="505611754508988476">"۲۵۶ کیلوبایت"</item>
-    <item msgid="6361286924268716397">"۱ مگابایت"</item>
-    <item msgid="6405203239560695266">"۴ مگابایت"</item>
-    <item msgid="3025431211013424097">"۱۶ مگابایت"</item>
+    <item msgid="8665206199209698501">"خاموش"</item>
+    <item msgid="1593289376502312923">"۶۴ هزار"</item>
+    <item msgid="487545340236145324">"۲۵۶ هزار"</item>
+    <item msgid="2423528675294333831">"۱ میلیون"</item>
+    <item msgid="180883774509476541">"۴ میلیون"</item>
+    <item msgid="2803199102589126938">"۱۶ میلیون"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="524799395770610154">"۶۴ کیلوبایت"</item>
-    <item msgid="3534782711045262344">"۲۵۶ کیلوبایت"</item>
-    <item msgid="8085867209202153403">"۱ مگابایت"</item>
+    <item msgid="6089470720451068364">"خاموش"</item>
+    <item msgid="4622460333038586791">"۶۴ هزار"</item>
+    <item msgid="2212125625169582330">"۲۵۶ هزار"</item>
+    <item msgid="1704946766699242653">"۱ میلیون"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="7346595473588765019">"‏۶۴K در حافظه موقت ثبت"</item>
-    <item msgid="2822309747675758628">"‏۲۵۶Kدر حافظه موقت ثبت"</item>
-    <item msgid="6699306198357496731">"‏۱Mدر حافظه موقت ثبت"</item>
-    <item msgid="5748528643937500349">"‏۴M در حافظه موقت ثبت"</item>
-    <item msgid="1978629051085111592">"‏۱۶M در حافظه موقت ثبت"</item>
+    <item msgid="6921048829791179331">"خاموش"</item>
+    <item msgid="2969458029344750262">"۶۴ هزار در هر بافر گزارش"</item>
+    <item msgid="1342285115665698168">"۲۵۶ هزار در هر بافر گزارش"</item>
+    <item msgid="1314234299552254621">"۱ میلیون در هر بافر گزارش"</item>
+    <item msgid="3606047780792894151">"۴ میلیون در هر بافر گزارش"</item>
+    <item msgid="5431354956856655120">"۱۶ میلیون در هر بافر گزارش"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"پویانمایی خاموش"</item>
