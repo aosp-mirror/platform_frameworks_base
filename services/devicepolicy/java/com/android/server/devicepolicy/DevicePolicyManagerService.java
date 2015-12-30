@@ -5971,7 +5971,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (activeAdmin.getUid() != mInjector.binderGetCallingUid()) {
                 mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+                        "Calling uid " + mInjector.binderGetCallingUid() + " neither owns the admin"
+                        + " " + who + " nor has MANAGE_PROFILE_AND_DEVICE_OWNERS permission");
             }
             return activeAdmin.userRestrictions;
         }
