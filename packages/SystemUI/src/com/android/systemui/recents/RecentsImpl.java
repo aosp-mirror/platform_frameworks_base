@@ -104,6 +104,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             mHandler.post(this);
         }
 
+        @Override
+        public void onActivityPinned() {
+        }
+
         /** Preloads the next task */
         public void run() {
             // TODO: Temporarily skip this if multi stack is enabled

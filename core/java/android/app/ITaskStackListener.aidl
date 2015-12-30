@@ -18,5 +18,9 @@ package android.app;
 
 /** @hide */
 oneway interface ITaskStackListener {
+    /** Called whenever there are changes to the state of tasks in a stack. */
     void onTaskStackChanged();
+
+    /** Called whenever an Activity is moved to the pinned stack from another stack. */
+    void onActivityPinned();
 }

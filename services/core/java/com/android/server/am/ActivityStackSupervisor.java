@@ -2200,6 +2200,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
+
+        if (stackId == PINNED_STACK_ID) {
+            mService.notifyActivityPinnedLocked();
+        }
     }
 
     void positionTaskInStackLocked(int taskId, int stackId, int position) {

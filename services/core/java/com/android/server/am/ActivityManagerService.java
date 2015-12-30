@@ -244,6 +244,7 @@ import libcore.util.EmptyArray;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
@@ -1445,6 +1446,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SYSTEM_USER_UNLOCK_MSG = 61;
     static final int LOG_STACK_STATE = 62;
     static final int VR_MODE_CHANGE_MSG = 63;
+    static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1998,12 +2000,24 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    int i = mTaskStackListeners.beginBroadcast();
-                    while (i > 0) {
-                        i--;
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
                         try {
                             // Make a one-way callback to the listener
                             mTaskStackListeners.getBroadcastItem(i).onTaskStackChanged();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onActivityPinned();
                         } catch (RemoteException e){
                             // Handled by the RemoteCallbackList
                         }
@@ -2874,7 +2888,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException {
-        synchronized (ActivityManagerService.this) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "registerTaskStackListener()");
+        synchronized (this) {
             if (listener != null) {
                 mTaskStackListeners.register(listener);
             }
@@ -9022,8 +9037,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void resizeTask(int taskId, Rect bounds, int resizeMode) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "resizeTask()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeTask()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9073,8 +9087,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public Rect getTaskBounds(int taskId) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getTaskBounds()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getTaskBounds()");
         long ident = Binder.clearCallingIdentity();
         Rect rect = new Rect();
         try {
@@ -9376,8 +9389,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "createActivityContainer()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "createActivityContainer()");
         synchronized (this) {
             if (parentActivityToken == null) {
                 throw new IllegalArgumentException("parent token must not be null");
@@ -9395,8 +9407,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void deleteActivityContainer(IActivityContainer container) throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "deleteActivityContainer()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "deleteActivityContainer()");
         synchronized (this) {
             mStackSupervisor.deleteActivityContainer(container);
         }
@@ -9404,8 +9415,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public IActivityContainer createStackOnDisplay(int displayId) throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "createStackOnDisplay()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "createStackOnDisplay()");
         synchronized (this) {
             final int stackId = mStackSupervisor.getNextStackId();
             final ActivityStack stack =
@@ -9465,8 +9475,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "moveTaskToStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToStack()");
         if (stackId == HOME_STACK_ID) {
             throw new IllegalArgumentException(
                     "moveTaskToStack: Attempt to move task " + taskId + " to home stack");
@@ -9501,8 +9510,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "moveTaskToDockedStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
@@ -9528,8 +9536,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     @Override
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "moveTopActivityToPinnedStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTopActivityToPinnedStack()");
         synchronized (this) {
             if (!mSupportsPictureInPicture) {
                 throw new IllegalStateException("moveTopActivityToPinnedStack:"
@@ -9547,8 +9554,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "resizeStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeStack()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9562,8 +9568,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void positionTaskInStack(int taskId, int stackId, int position) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "positionTaskInStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "positionTaskInStack()");
         if (stackId == HOME_STACK_ID) {
             throw new IllegalArgumentException(
                     "positionTaskInStack: Attempt to change the position of task "
@@ -9584,8 +9589,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public List<StackInfo> getAllStackInfos() {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getAllStackInfos()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9598,8 +9602,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public StackInfo getStackInfo(int stackId) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackInfo()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9612,8 +9615,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean isInHomeStack(int taskId) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "getStackInfo()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9727,8 +9729,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void startLockTaskModeOnCurrent() throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "startLockTaskModeOnCurrent");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startLockTaskModeOnCurrent");
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -9780,8 +9781,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void stopLockTaskModeOnCurrent() throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "stopLockTaskModeOnCurrent");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "stopLockTaskModeOnCurrent");
         long ident = Binder.clearCallingIdentity();
         try {
             stopLockTaskMode();
@@ -11052,6 +11052,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         Message nmsg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         mHandler.sendMessageDelayed(nmsg, NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY);
+    }
+
+    /** Notifies all listeners when an Activity is pinned. */
+    void notifyActivityPinnedLocked() {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
+        mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG).sendToTarget();
     }
 
     @Override
@@ -17954,8 +17960,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "suppressResizeConfigChanges()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "suppressResizeConfigChanges()");
         synchronized (this) {
             mSuppressResizeConfigChanges = suppress;
         }
@@ -17963,8 +17968,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void moveTasksToFullscreenStack(int fromStackId) {
-        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
-                "moveTasksToFullscreenStack()");
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTasksToFullscreenStack()");
         if (fromStackId == HOME_STACK_ID) {
             throw new IllegalArgumentException("You can't move tasks from the home stack.");
         }
