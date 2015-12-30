@@ -59,8 +59,9 @@ they are able to access each other's files.  To conserve system resources, apps 
 same user ID can also arrange to run in the same Linux process and share the same VM (the
 apps must also be signed with the same certificate).</li>
   <li>An app can request permission to access device data such as the user's
-contacts, SMS messages, the mountable storage (SD card), camera, Bluetooth, and more. All
-app permissions must be granted by the user at install time.</li>
+contacts, SMS messages, the mountable storage (SD card), camera, Bluetooth, and more. The user has
+to explicitly grant these permissions. For more information, see
+<a href="{@docRoot}training/permissions/index.html">Working with System Permissions</a>.</li>
 </ul>
 
 <p>That covers the basics regarding how an Android app exists within the system. The rest of
@@ -390,7 +391,7 @@ for users when they search for apps from their device.</p>
 
 <p>For example, if your app requires a camera and uses APIs introduced in Android 2.1 (<a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Level</a> 7),
-you should declare these as requirements in your manifest file like this:</p> 
+you should declare these as requirements in your manifest file like this:</p>
 
 <pre>
 &lt;manifest ... >
