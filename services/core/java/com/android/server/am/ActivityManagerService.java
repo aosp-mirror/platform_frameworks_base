@@ -141,6 +141,7 @@ import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -270,6 +271,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
+import static android.provider.Settings.System.FONT_SCALE;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -1014,6 +1016,25 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     CoreSettingsObserver mCoreSettingsObserver;
+
+    FontScaleSettingObserver mFontScaleSettingObserver;
+
+    private final class FontScaleSettingObserver extends ContentObserver {
+        private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
+
+        public FontScaleSettingObserver() {
+            super(mHandler);
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(mFontScaleUri, false, this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (mFontScaleUri.equals(uri)) {
+                updateFontScaleIfNeeded();
+            }
+        }
+    }
 
     /**
      * Thread-local storage used to carry caller permissions over through
@@ -10916,6 +10937,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mCoreSettingsObserver = new CoreSettingsObserver(this);
+        mFontScaleSettingObserver = new FontScaleSettingObserver();
 
         //mUsageStatsService.monitorPackages();
     }
@@ -18285,6 +18307,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             updateConfigurationLocked(values, null, false, true, userId);
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    private void updateFontScaleIfNeeded() {
+        final int currentUserId;
+        synchronized(this) {
+            currentUserId = mUserController.getCurrentUserIdLocked();
+        }
+        final float scaleFactor = Settings.System.getFloatForUser(mContext.getContentResolver(),
+                FONT_SCALE, 1.0f, currentUserId);
+        if (mConfiguration.fontScale != scaleFactor) {
+            final Configuration configuration = mWindowManager.computeNewConfiguration();
+            configuration.fontScale = scaleFactor;
+            updatePersistentConfiguration(configuration);
         }
     }
 

@@ -3278,6 +3278,7 @@ public final class Settings {
             WIFI_STATIC_DNS2,
             BLUETOOTH_DISCOVERABILITY,
             BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+            FONT_SCALE,
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
             SCREEN_BRIGHTNESS,
