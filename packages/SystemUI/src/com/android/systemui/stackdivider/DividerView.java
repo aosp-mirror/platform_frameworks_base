@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
@@ -37,6 +38,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
@@ -63,6 +65,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
     private static final float DIM_START_FRACTION = 0.5f;
     private static final float DIM_DAMP_FACTOR = 1.7f;
+
+    private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
+            new PathInterpolator(0.5f, 1f, 0.5f, 1f);
 
     private ImageButton mHandle;
     private View mBackground;
@@ -202,7 +207,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     int position = calculatePosition(x, y);
                     SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
                             0 /* velocity */);
-                    resizeStack(calculatePosition(x, y), snapTarget.position);
+                    resizeStack(calculatePosition(x, y), snapTarget.position, snapTarget);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -235,7 +240,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 resizeStack((Integer) animation.getAnimatedValue(),
                         animation.getAnimatedFraction() == 1f
                                 ? TASK_POSITION_SAME
-                                : snapTarget.position);
+                                : snapTarget.position, snapTarget);
             }
         });
         anim.addListener(new AnimatorListenerAdapter() {
@@ -393,7 +398,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 containingRect.right, containingRect.bottom);
     }
 
-    public void resizeStack(int position, int taskPosition) {
+    public void resizeStack(int position, int taskPosition, SnapTarget taskSnapTarget) {
         calculateBoundsForPosition(position, mDockSide, mDockedRect);
 
         if (mDockedRect.equals(mLastResizeRect)) {
@@ -406,19 +411,28 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mLastResizeRect.set(mDockedRect);
         if (taskPosition != TASK_POSITION_SAME) {
             calculateBoundsForPosition(position, invertDockSide(mDockSide), mOtherRect);
-            calculateBoundsForPosition(taskPosition, mDockSide, mDockedTaskRect);
-            calculateBoundsForPosition(taskPosition, invertDockSide(mDockSide), mOtherTaskRect);
+            int dockSideInverted = invertDockSide(mDockSide);
+            int taskPositionDocked =
+                    restrictDismissingTaskPosition(taskPosition, mDockSide, taskSnapTarget);
+            int taskPositionOther =
+                    restrictDismissingTaskPosition(taskPosition, dockSideInverted, taskSnapTarget);
+            calculateBoundsForPosition(taskPositionDocked, mDockSide, mDockedTaskRect);
+            calculateBoundsForPosition(taskPositionOther, dockSideInverted, mOtherTaskRect);
             alignTopLeft(mDockedRect, mDockedTaskRect);
             alignTopLeft(mOtherRect, mOtherTaskRect);
             mDockedInsetRect.set(mDockedTaskRect);
             mOtherInsetRect.set(mOtherTaskRect);
-            if (mDockSide == WindowManager.DOCKED_LEFT || mDockSide == WindowManager.DOCKED_TOP) {
+            if (dockSideTopLeft(mDockSide)) {
                 alignTopLeft(mDockedRect, mDockedInsetRect);
                 alignBottomRight(mOtherRect, mOtherInsetRect);
             } else {
                 alignBottomRight(mDockedRect, mDockedInsetRect);
                 alignTopLeft(mOtherRect, mOtherInsetRect);
             }
+            applyDismissingParallax(mDockedTaskRect, mDockSide, taskSnapTarget, position,
+                    taskPositionDocked);
+            applyDismissingParallax(mOtherTaskRect, dockSideInverted, taskSnapTarget, position,
+                    taskPositionOther);
             mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, mDockedInsetRect,
                     mOtherTaskRect, mOtherInsetRect);
         } else {
@@ -432,6 +446,86 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 fraction);
     }
 
+    /**
+     * When the snap target is dismissing one side, make sure that the dismissing side doesn't get
+     * 0 size.
+     */
+    private int restrictDismissingTaskPosition(int taskPosition, int dockSide,
+            SnapTarget snapTarget) {
+        if (snapTarget.flag == SnapTarget.FLAG_DISMISS_START && dockSideTopLeft(dockSide)) {
+            return mSnapAlgorithm.getFirstSplitTarget().position;
+        } else if (snapTarget.flag == SnapTarget.FLAG_DISMISS_END
+                && dockSideBottomRight(dockSide)) {
+            return mSnapAlgorithm.getLastSplitTarget().position;
+        } else {
+            return taskPosition;
+        }
+    }
+
+    /**
+     * Applies a parallax to the task when dismissing.
+     */
+    private void applyDismissingParallax(Rect taskRect, int dockSide, SnapTarget snapTarget,
+            int position, int taskPosition) {
+        float fraction = Math.min(1, Math.max(0,
+                mSnapAlgorithm.calculateDismissingFraction(position)));
+        SnapTarget dismissTarget = null;
+        SnapTarget splitTarget = null;
+        if ((snapTarget.flag == SnapTarget.FLAG_DISMISS_START
+                || snapTarget == mSnapAlgorithm.getFirstSplitTarget())
+                && dockSideTopLeft(dockSide)) {
+            dismissTarget = mSnapAlgorithm.getDismissStartTarget();
+            splitTarget = mSnapAlgorithm.getFirstSplitTarget();
+        } else if ((snapTarget.flag == SnapTarget.FLAG_DISMISS_END
+                || snapTarget == mSnapAlgorithm.getLastSplitTarget())
+                && dockSideBottomRight(dockSide)) {
+            dismissTarget = mSnapAlgorithm.getDismissEndTarget();
+            splitTarget = mSnapAlgorithm.getLastSplitTarget();
+        }
+        if (dismissTarget != null && fraction > 0f
+                && isDismissing(splitTarget, position, dockSide)) {
+            fraction = calculateParallaxDismissingFraction(fraction);
+            int offsetPosition = (int) (taskPosition +
+                    fraction * (dismissTarget.position - splitTarget.position));
+            int width = taskRect.width();
+            int height = taskRect.height();
+            switch (dockSide) {
+                case WindowManager.DOCKED_LEFT:
+                    taskRect.left = offsetPosition - width;
+                    taskRect.right = offsetPosition;
+                    break;
+                case WindowManager.DOCKED_RIGHT:
+                    taskRect.left = offsetPosition + mDividerSize;
+                    taskRect.right = offsetPosition + width + mDividerSize;
+                    break;
+                case WindowManager.DOCKED_TOP:
+                    taskRect.top = offsetPosition - height;
+                    taskRect.bottom = offsetPosition;
+                    break;
+                case WindowManager.DOCKED_BOTTOM:
+                    taskRect.top = offsetPosition + mDividerSize;
+                    taskRect.bottom = offsetPosition + height + mDividerSize;
+                    break;
+            }
+        }
+    }
+
+    /**
+     * @return for a specified {@code fraction}, this returns an adjusted value that simulates a
+     *         slowing down parallax effect
+     */
+    private static float calculateParallaxDismissingFraction(float fraction) {
+        return SLOWDOWN_INTERPOLATOR.getInterpolation(fraction) / 3.5f;
+    }
+
+    private static boolean isDismissing(SnapTarget snapTarget, int position, int dockSide) {
+        if (dockSide == WindowManager.DOCKED_TOP || dockSide == WindowManager.DOCKED_LEFT) {
+            return position < snapTarget.position;
+        } else {
+            return position > snapTarget.position;
+        }
+    }
+
     private int getStackIdForDismissTarget(SnapTarget dismissTarget) {
         if (dismissTarget.flag == SnapTarget.FLAG_DISMISS_START &&
                 (mDockSide == WindowManager.DOCKED_LEFT || mDockSide == WindowManager.DOCKED_TOP)) {
@@ -439,6 +533,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         } else {
             return StackId.FULLSCREEN_WORKSPACE_STACK_ID;
         }
+    }
+
+    /**
+     * @return true if and only if {@code dockSide} is top or left
+     */
+    private static boolean dockSideTopLeft(int dockSide) {
+        return dockSide == WindowManager.DOCKED_TOP || dockSide == WindowManager.DOCKED_LEFT;
+    }
+
+    /**
+     * @return true if and only if {@code dockSide} is bottom or right
+     */
+    private static boolean dockSideBottomRight(int dockSide) {
+        return dockSide == WindowManager.DOCKED_BOTTOM || dockSide == WindowManager.DOCKED_RIGHT;
     }
 
     @Override

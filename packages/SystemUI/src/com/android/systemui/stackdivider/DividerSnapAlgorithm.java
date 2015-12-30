@@ -118,6 +118,22 @@ public class DividerSnapAlgorithm {
         }
     }
 
+    public SnapTarget getFirstSplitTarget() {
+        return mFirstSplitTarget;
+    }
+
+    public SnapTarget getLastSplitTarget() {
+        return mLastSplitTarget;
+    }
+
+    public SnapTarget getDismissStartTarget() {
+        return mDismissStartTarget;
+    }
+
+    public SnapTarget getDismissEndTarget() {
+        return mDismissEndTarget;
+    }
+
     private SnapTarget snap(int position) {
         int minIndex = -1;
         int minDistance = Integer.MAX_VALUE;
