@@ -59,23 +59,26 @@
     <item msgid="45075631231212732">"Увек користи HDCP проверу"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="3100534874529240291">"64 kB"</item>
-    <item msgid="505611754508988476">"256 kB"</item>
-    <item msgid="6361286924268716397">"1 MB"</item>
-    <item msgid="6405203239560695266">"4 MB"</item>
-    <item msgid="3025431211013424097">"16 MB"</item>
+    <item msgid="8665206199209698501">"Искључено"</item>
+    <item msgid="1593289376502312923">"64 kB"</item>
+    <item msgid="487545340236145324">"256 kB"</item>
+    <item msgid="2423528675294333831">"1 MB"</item>
+    <item msgid="180883774509476541">"4 MB"</item>
+    <item msgid="2803199102589126938">"16 MB"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="524799395770610154">"64 kB"</item>
-    <item msgid="3534782711045262344">"256 kB"</item>
-    <item msgid="8085867209202153403">"1 MB"</item>
+    <item msgid="6089470720451068364">"Искључено"</item>
+    <item msgid="4622460333038586791">"64 kB"</item>
+    <item msgid="2212125625169582330">"256 kB"</item>
+    <item msgid="1704946766699242653">"1 MB"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="7346595473588765019">"64 kB по баферу евиденције"</item>
-    <item msgid="2822309747675758628">"256 kB по баферу евиденције"</item>
-    <item msgid="6699306198357496731">"1 MB по баферу евиденције"</item>
-    <item msgid="5748528643937500349">"4 MB по баферу евиденције"</item>
-    <item msgid="1978629051085111592">"16 MB по баферу евиденције"</item>
+    <item msgid="6921048829791179331">"Искључено"</item>
+    <item msgid="2969458029344750262">"64 kB по међумеморији евиденције"</item>
+    <item msgid="1342285115665698168">"256 kB по међумеморији евиденције"</item>
+    <item msgid="1314234299552254621">"1 MB по међумеморији евиденције"</item>
+    <item msgid="3606047780792894151">"4 MB по међумеморији евиденције"</item>
+    <item msgid="5431354956856655120">"16 MB по међумеморији евиденције"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Анимација је искључена"</item>
