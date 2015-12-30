@@ -1207,7 +1207,7 @@ public class SubscriptionManager {
             }
         } catch (RemoteException ex) {
         }
-        logd("getSimStateForSubscriber: simState=" + simState + " slotIdx=" + slotIdx);
+
         return simState;
     }
 
