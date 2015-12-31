@@ -29,8 +29,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.stackdivider.DividerSnapAlgorithm.SnapTarget;
-import com.android.systemui.stackdivider.DividerView;
+import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.tuner.TunerService;
 
 import static android.view.WindowManager.*;
