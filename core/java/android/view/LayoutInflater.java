@@ -555,6 +555,26 @@ public abstract class LayoutInflater {
         }
     }
 
+    private static final ClassLoader BOOT_CLASS_LOADER = LayoutInflater.class.getClassLoader();
+
+    private final boolean verifyClassLoader(Constructor<? extends View> constructor) {
+        final ClassLoader constructorLoader = constructor.getDeclaringClass().getClassLoader();
+        if (constructorLoader == BOOT_CLASS_LOADER) {
+            // fast path for boot class loader (most common case?) - always ok
+            return true;
+        }
+        // in all normal cases (no dynamic code loading), we will exit the following loop on the
+        // first iteration (i.e. when the declaring classloader is the contexts class loader).
+        ClassLoader cl = mContext.getClassLoader();
+        do {
+            if (constructorLoader == cl) {
+                return true;
+            }
+            cl = cl.getParent();
+        } while (cl != null);
+        return false;
+    }
+
     /**
      * Low-level function for instantiating a view by name. This attempts to
      * instantiate a view class of the given <var>name</var> found in this
@@ -575,6 +595,10 @@ public abstract class LayoutInflater {
     public final View createView(String name, String prefix, AttributeSet attrs)
             throws ClassNotFoundException, InflateException {
         Constructor<? extends View> constructor = sConstructorMap.get(name);
+        if (constructor != null && !verifyClassLoader(constructor)) {
+            constructor = null;
+            sConstructorMap.remove(name);
+        }
         Class<? extends View> clazz = null;
 
         try {
