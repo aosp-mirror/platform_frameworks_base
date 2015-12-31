@@ -90,9 +90,11 @@ import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.IRecoverySystem;
 import android.os.IUserManager;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RecoverySystem;
 import android.os.ServiceManager;
 import android.os.SystemVibrator;
 import android.os.UserHandle;
@@ -377,6 +379,18 @@ final class SystemServiceRegistry {
                 }
                 return new PowerManager(ctx.getOuterContext(),
                         service, ctx.mMainThread.getHandler());
+            }});
+
+        registerService(Context.RECOVERY_SERVICE, RecoverySystem.class,
+                new CachedServiceFetcher<RecoverySystem>() {
+            @Override
+            public RecoverySystem createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.RECOVERY_SERVICE);
+                IRecoverySystem service = IRecoverySystem.Stub.asInterface(b);
+                if (service == null) {
+                    Log.wtf(TAG, "Failed to get recovery service.");
+                }
+                return new RecoverySystem(service);
             }});
 
         registerService(Context.SEARCH_SERVICE, SearchManager.class,

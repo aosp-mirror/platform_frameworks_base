@@ -341,8 +341,8 @@ public final class SystemServer {
             // always make sure uncrypt gets executed properly when needed.
             // If '/cache/recovery/block.map' hasn't been created, stop the
             // reboot which will fail for sure, and get a chance to capture a
-            // bugreport when that's still feasible. (Bug; 26444951)
-            if (PowerManager.REBOOT_RECOVERY.equals(reason)) {
+            // bugreport when that's still feasible. (Bug: 26444951)
+            if (PowerManager.REBOOT_RECOVERY_UPDATE.equals(reason)) {
                 File packageFile = new File(UNCRYPT_PACKAGE_FILE);
                 if (packageFile.exists()) {
                     String filename = null;
@@ -830,6 +830,10 @@ public final class SystemServer {
                     reportWtf("starting UpdateLockService", e);
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            }
+
+            if (!disableNonCoreServices) {
+                mSystemServiceManager.startService(RecoverySystemService.class);
             }
 
             /*
