@@ -1138,6 +1138,19 @@ public final class Settings {
     /** @hide */ public static final String EXTRA_APP_UID = "app_uid";
     /** @hide */ public static final String EXTRA_APP_PACKAGE = "app_package";
 
+    /**
+     * Activity Action: Show a dialog with disabled by policy message.
+     * <p> If an user action is disabled by policy, this dialog can be triggered to let
+     * the user know about this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS
+            = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
+
     // End of Intent actions for Settings
 
     /**
