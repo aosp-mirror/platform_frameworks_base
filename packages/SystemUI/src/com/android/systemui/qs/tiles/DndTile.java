@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.view.LayoutInflater;
@@ -99,14 +100,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
-        if (mController.isVolumeRestricted()) {
-            // Collapse the panels, so the user can see the toast.
-            mHost.collapsePanels();
-            SysUIToast.makeText(mContext, mContext.getString(
-                    com.android.internal.R.string.error_message_change_not_allowed),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         if (mState.value) {
             mController.setZen(Global.ZEN_MODE_OFF, null, TAG);
@@ -123,6 +116,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         final boolean newValue = zen != Global.ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
         state.value = newValue;
+        state.disabledByPolicy = mController.isVolumeRestricted();
+        checkIfRestrictionEnforced(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);

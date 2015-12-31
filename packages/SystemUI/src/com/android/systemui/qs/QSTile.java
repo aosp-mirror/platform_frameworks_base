@@ -23,10 +23,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -45,6 +48,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Collection;
 import java.util.Objects;
+
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Base quick-settings tile, extend this to create a new tile.
@@ -253,6 +258,18 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mCallback = null;
     }
 
+    protected void checkIfRestrictionEnforced(State state, String userRestriction) {
+        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                userRestriction, UserHandle.myUserId());
+        if (admin != null) {
+            state.disabledByPolicy = true;
+            state.enforcedAdmin = admin;
+        } else {
+            state.disabledByPolicy = false;
+            state.enforcedAdmin = null;
+        }
+    }
+
     protected final class H extends Handler {
         private static final int SET_CALLBACK = 1;
         private static final int CLICK = 2;
@@ -279,8 +296,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     handleSetCallback((QSTile.Callback)msg.obj);
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
-                    mAnnounceNextStateChange = true;
-                    handleClick();
+                    if (mState.disabledByPolicy) {
+                        Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
+                                mContext, mState.enforcedAdmin);
+                        mHost.startActivityDismissingKeyguard(intent);
+                    } else {
+                        mAnnounceNextStateChange = true;
+                        handleClick();
+                    }
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
                     handleSecondaryClick();
@@ -433,6 +456,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public CharSequence contentDescription;
         public CharSequence dualLabelContentDescription;
         public boolean autoMirrorDrawable = true;
+        public boolean disabledByPolicy;
+        public EnforcedAdmin enforcedAdmin;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -442,12 +467,16 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     || !Objects.equals(other.contentDescription, contentDescription)
                     || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
                     || !Objects.equals(other.dualLabelContentDescription,
-                    dualLabelContentDescription);
+                    dualLabelContentDescription)
+                    || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
+                    || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
             other.autoMirrorDrawable = autoMirrorDrawable;
+            other.disabledByPolicy = disabledByPolicy;
+            enforcedAdmin.copyTo(other.enforcedAdmin);
             return changed;
         }
 
@@ -463,6 +492,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
             sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
+            sb.append(",disabledByPolicy=").append(disabledByPolicy);
+            sb.append(",enforcedAdmin=").append(enforcedAdmin);
             return sb.append(']');
         }
     }

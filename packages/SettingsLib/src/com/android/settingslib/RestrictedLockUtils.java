@@ -190,18 +190,27 @@ public class RestrictedLockUtils {
      * Send the intent to trigger the {@link android.settings.ShowAdminSupportDetailsDialog}.
      */
     public static void sendShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
-        Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
+        final Intent intent = getShowAdminSupportDetailsIntent(context, admin);
         int adminUserId = UserHandle.myUserId();
+        if (admin.userId != UserHandle.USER_NULL) {
+            adminUserId = admin.userId;
+        }
+        context.startActivityAsUser(intent, new UserHandle(adminUserId));
+    }
+
+    public static Intent getShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
+        final Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
         if (admin != null) {
             if (admin.component != null) {
                 intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin.component);
             }
+            int adminUserId = UserHandle.myUserId();
             if (admin.userId != UserHandle.USER_NULL) {
                 adminUserId = admin.userId;
             }
             intent.putExtra(Intent.EXTRA_USER_ID, adminUserId);
         }
-        context.startActivityAsUser(intent, new UserHandle(adminUserId));
+        return intent;
     }
 
     public static void setTextViewPadlock(Context context,
@@ -222,6 +231,34 @@ public class RestrictedLockUtils {
         public EnforcedAdmin(ComponentName component, int userId) {
             this.component = component;
             this.userId = userId;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object == this) return true;
+            if (!(object instanceof EnforcedAdmin)) return false;
+            EnforcedAdmin other = (EnforcedAdmin) object;
+            if (userId != other.userId) {
+                return false;
+            }
+            if ((component == null && other == null) ||
+                    (component != null && component.equals(other))) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "EnforcedAdmin{component=" + component + ",userId=" + userId + "}";
+        }
+
+        public void copyTo(EnforcedAdmin other) {
+            if (other == null) {
+                other = new EnforcedAdmin();
+            }
+            other.component = component;
+            other.userId = userId;
         }
 
         public EnforcedAdmin() {}

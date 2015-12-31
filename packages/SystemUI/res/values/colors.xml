@@ -36,7 +36,6 @@
     <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
     <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
-    <color name="qs_tile_text">#B3FFFFFF</color><!-- 70% white -->
     <color name="qs_subhead">#99FFFFFF</color><!-- 60% white -->
     <color name="qs_detail_empty">#24B0BEC5</color><!-- 14% blue grey 200 -->
     <color name="qs_detail_button">#FFB0BEC5</color><!-- 100% blue grey 200 -->
@@ -48,6 +47,7 @@
     <color name="data_usage_graph_warning">#FFFFFFFF</color>
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
+    <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>

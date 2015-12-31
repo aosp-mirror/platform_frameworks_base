@@ -23,6 +23,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Shader;
@@ -41,6 +44,7 @@ public class UserAvatarView extends View {
     private float mFramePadding;
     private Bitmap mBitmap;
     private Drawable mDrawable;
+    private boolean mIsDisabled;
 
     private final Paint mFramePaint = new Paint();
     private final Paint mBitmapPaint = new Paint();
@@ -238,5 +242,29 @@ public class UserAvatarView extends View {
         if (mDrawable != null && mDrawable.isStateful()) {
             mDrawable.setState(getDrawableState());
         }
+    }
+
+    public void setDisabled(boolean disabled) {
+        if (mIsDisabled == disabled) {
+            return;
+        }
+        mIsDisabled = disabled;
+        int disabledColor = getContext().getColor(R.color.qs_tile_disabled_color);
+        PorterDuffColorFilter filter = new PorterDuffColorFilter(disabledColor,
+                PorterDuff.Mode.SRC_ATOP);
+        if (mBitmap != null) {
+            if (disabled) {
+                mBitmapPaint.setColorFilter(filter);
+            } else {
+                mBitmapPaint.setColorFilter(null);
+            }
+        } else if (mDrawable != null) {
+            if (disabled) {
+                mDrawable.setColorFilter(filter);
+            } else {
+                mDrawable.setColorFilter(null);
+            }
+        }
+        invalidate();
     }
 }

@@ -22,7 +22,9 @@ import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -48,11 +51,13 @@ import android.widget.BaseAdapter;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.UserIcons;
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.BitmapHelper;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.UserDetailView;
+import com.android.systemui.statusbar.phone.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.FileDescriptor;
@@ -60,6 +65,8 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Keeps a list of all users on the device for user switching.
@@ -88,6 +95,7 @@ public class UserSwitcherController {
             = new GuestResumeSessionReceiver();
     private final KeyguardMonitor mKeyguardMonitor;
     private final Handler mHandler;
+    private final ActivityStarter mActivityStarter;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
@@ -99,11 +107,12 @@ public class UserSwitcherController {
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
-            Handler handler) {
+            Handler handler, ActivityStarter activityStarter) {
         mContext = context;
         mGuestResumeSessionReceiver.register(context);
         mKeyguardMonitor = keyguardMonitor;
         mHandler = handler;
+        mActivityStarter = activityStarter;
         mUserManager = UserManager.get(context);
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -206,25 +215,23 @@ public class UserSwitcherController {
                     }
                 }
 
-                boolean systemCanCreateUsers = !mUserManager.hasUserRestriction(
-                                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
                 boolean currentUserCanCreateUsers = currentUserInfo != null
                         && (currentUserInfo.isAdmin()
-                                || currentUserInfo.id == UserHandle.USER_SYSTEM)
-                        && systemCanCreateUsers;
-                boolean anyoneCanCreateUsers = systemCanCreateUsers && addUsersWhenLocked;
-                boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
+                                || currentUserInfo.id == UserHandle.USER_SYSTEM);
+                boolean canCreateGuest = (currentUserCanCreateUsers || addUsersWhenLocked)
                         && guestRecord == null;
-                boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
+                boolean canCreateUser = (currentUserCanCreateUsers || addUsersWhenLocked)
                         && mUserManager.canAddMoreUsers();
                 boolean createIsRestricted = !addUsersWhenLocked;
 
                 if (!mSimpleUserSwitcher) {
                     if (guestRecord == null) {
                         if (canCreateGuest) {
-                            records.add(new UserRecord(null /* info */, null /* picture */,
+                            guestRecord = new UserRecord(null /* info */, null /* picture */,
                                     true /* isGuest */, false /* isCurrent */,
-                                    false /* isAddUser */, createIsRestricted));
+                                    false /* isAddUser */, createIsRestricted);
+                            checkIfAddUserDisallowed(guestRecord);
+                            records.add(guestRecord);
                         }
                     } else {
                         int index = guestRecord.isCurrent ? 0 : records.size();
@@ -233,9 +240,11 @@ public class UserSwitcherController {
                 }
 
                 if (!mSimpleUserSwitcher && canCreateUser) {
-                    records.add(new UserRecord(null /* info */, null /* picture */,
+                    UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted));
+                            createIsRestricted);
+                    checkIfAddUserDisallowed(addUserRecord);
+                    records.add(addUserRecord);
                 }
 
                 return records;
@@ -594,6 +603,22 @@ public class UserSwitcherController {
         }
     }
 
+    private void checkIfAddUserDisallowed(UserRecord record) {
+        EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                UserManager.DISALLOW_ADD_USER, UserHandle.myUserId());
+        if (admin != null) {
+            record.isDisabledByAdmin = true;
+            record.enforcedAdmin = admin;
+        } else {
+            record.isDisabledByAdmin = false;
+            record.enforcedAdmin = null;
+        }
+    }
+
+    public void startActivity(Intent intent) {
+        mActivityStarter.startActivity(intent, true);
+    }
+
     public static final class UserRecord {
         public final UserInfo info;
         public final Bitmap picture;
@@ -602,6 +627,8 @@ public class UserSwitcherController {
         public final boolean isAddUser;
         /** If true, the record is only visible to the owner and only when unlocked. */
         public final boolean isRestricted;
+        public boolean isDisabledByAdmin;
+        public EnforcedAdmin enforcedAdmin;
 
         public UserRecord(UserInfo info, Bitmap picture, boolean isGuest, boolean isCurrent,
                 boolean isAddUser, boolean isRestricted) {
@@ -634,6 +661,10 @@ public class UserSwitcherController {
             if (isCurrent) sb.append(" <isCurrent>");
             if (picture != null) sb.append(" <hasPicture>");
             if (isRestricted) sb.append(" <isRestricted>");
+            if (isDisabledByAdmin) {
+                sb.append(" <isDisabledByAdmin>");
+                sb.append(" enforcedAdmin=" + enforcedAdmin);
+            }
             sb.append(')');
             return sb.toString();
         }

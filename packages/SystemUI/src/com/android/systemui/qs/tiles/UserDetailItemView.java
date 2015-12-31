@@ -43,6 +43,7 @@ public class UserDetailItemView extends LinearLayout {
     private TextView mName;
     private Typeface mRegularTypeface;
     private Typeface mActivatedTypeface;
+    private View mRestrictedPadlock;
 
     public UserDetailItemView(Context context) {
         this(context, null);
@@ -59,6 +60,7 @@ public class UserDetailItemView extends LinearLayout {
     public UserDetailItemView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.UserDetailItemView, defStyleAttr, defStyleRes);
         final int N = a.getIndexCount();
@@ -95,6 +97,12 @@ public class UserDetailItemView extends LinearLayout {
         mAvatar.setDrawable(picture);
     }
 
+    public void setDisabledByAdmin(boolean disabled) {
+        mRestrictedPadlock.setVisibility(disabled ? View.VISIBLE : View.GONE);
+        mName.setEnabled(!disabled);
+        mAvatar.setDisabled(disabled);
+    }
+
     @Override
     protected void onFinishInflate() {
         mAvatar = (UserAvatarView) findViewById(R.id.user_picture);
@@ -106,6 +114,7 @@ public class UserDetailItemView extends LinearLayout {
             mActivatedTypeface = mName.getTypeface();
         }
         updateTypeface();
+        mRestrictedPadlock = findViewById(R.id.restricted_padlock);
     }
 
     @Override
