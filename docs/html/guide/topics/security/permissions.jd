@@ -245,8 +245,6 @@ your broadcast or who can send a broadcast to you.</li>
 <li>Binding to or starting a service.</li>
 </ul>
 
-
-
 <h3 id="auto-adjustments">Automatic permission adjustments</h3>
 
 <p> Over time,
@@ -365,7 +363,7 @@ to be as high as possible. You can see which permissions were added with each re
   Any permission can belong to a permission group, including normal permissions
   and permissions defined by your app.
   However, a permission's group only affects the user experience if the
-  perimission is dangerous. You can ignore the permission group for normal
+  permission is dangerous. You can ignore the permission group for normal
   permissions.
 </p>
 
@@ -778,10 +776,6 @@ android:grantUriPermissions} attribute or
 {@link android.content.Context#revokeUriPermission Context.revokeUriPermission()}, and
 {@link android.content.Context#checkUriPermission Context.checkUriPermission()}
 methods.</p>
-
-
-
-
 
 <div class="next-docs">
 <div class="col-6">
