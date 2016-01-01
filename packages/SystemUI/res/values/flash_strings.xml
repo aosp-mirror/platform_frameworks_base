@@ -40,4 +40,13 @@
     <string name="quick_settings_doze_notifications_label">Doze notifications</string>
     <string name="quick_settings_doze_notifications_user">Doze notifications</string>
     <string name="quick_settings_doze_notifications_off">No doze notifications</string>
+
+    <!-- ADB over network Tile -->
+    <string name="quick_settings_adb_network">ADB network</string>
+    <string name="quick_settings_network_adb_enabled_label">Enabled</string>
+    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
+    <string name="accessibility_quick_settings_network_adb_off">ADB over network off.</string>
+    <string name="accessibility_quick_settings_network_adb_on">ADB over network on.</string>
+    <string name="accessibility_quick_settings_network_adb_changed_off">ADB over network turned off.</string>
+    <string name="accessibility_quick_settings_network_adb_changed_on">ADB over network turned on.</string>
 </resources>
