@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.notification;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,19 +28,20 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
-import android.util.ArrayMap;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
-import com.android.systemui.statusbar.notification.TransformState;
+import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * Wraps a notification header view.
@@ -98,6 +99,28 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         resolveHeaderViews();
         updateInvertHelper();
         updateTransformedTypes();
+        updateCropToPaddingForImageViews();
+    }
+
+    /**
+     * Since we are deactivating the clipping when transforming the ImageViews don't get clipped
+     * anymore during these transitions. We can avoid that by using
+     * {@link ImageView#setCropToPadding(boolean)} on all ImageViews.
+     */
+    private void updateCropToPaddingForImageViews() {
+        Stack<View> stack = new Stack<>();
+        stack.push(mView);
+        while (!stack.isEmpty()) {
+            View child = stack.pop();
+            if (child instanceof ImageView) {
+                ((ImageView) child).setCropToPadding(true);
+            } else if (child instanceof ViewGroup){
+                ViewGroup group = (ViewGroup) child;
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    stack.push(group.getChildAt(i));
+                }
+            }
+        }
     }
 
     protected void updateInvertHelper() {
@@ -112,7 +135,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_HEADER, mNotificationHeader);
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_HEADER, mNotificationHeader);
     }
 
     @Override

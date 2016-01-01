@@ -14,14 +14,15 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
-import com.android.systemui.statusbar.notification.TransformState;
+import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.TransformableView;
 
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for
@@ -33,6 +34,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
+            if ("bigPicture".equals(v.getTag())) {
+                return new NotificationBigPictureTemplateViewWrapper(ctx, v);
+            }
             return new NotificationTemplateViewWrapper(ctx, v);
         } else if (v instanceof NotificationHeaderView) {
             return new NotificationHeaderViewWrapper(ctx, v);

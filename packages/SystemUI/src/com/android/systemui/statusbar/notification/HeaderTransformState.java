@@ -98,6 +98,7 @@ public class HeaderTransformState extends TransformState {
 
     @Override
     public void recycle() {
+        super.recycle();
         sInstancePool.release(this);
     }
 

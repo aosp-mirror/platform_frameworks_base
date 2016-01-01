@@ -34,6 +34,8 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
+import com.android.systemui.statusbar.notification.NotificationCustomViewWrapper;
+import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 

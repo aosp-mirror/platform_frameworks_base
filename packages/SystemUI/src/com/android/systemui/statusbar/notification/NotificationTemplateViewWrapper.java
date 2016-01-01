@@ -14,22 +14,18 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.notification;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.service.notification.StatusBarNotification;
-import android.util.ArrayMap;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.systemui.statusbar.notification.ImageTransformState;
-import com.android.systemui.statusbar.notification.TransformState;
-
-import java.util.ArrayList;
+import com.android.systemui.statusbar.TransformableView;
 
 /**
  * Wraps a notification view inflated from a template.
@@ -49,10 +45,8 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     private void resolveTemplateViews(StatusBarNotification notification) {
         mPicture = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
-        if (notification != null) {
-            mPicture.setTag(ImageTransformState.ICON_TAG,
-                    notification.getNotification().getLargeIcon());
-        }
+        mPicture.setTag(ImageTransformState.ICON_TAG,
+                notification.getNotification().getLargeIcon());
         mTitle = (TextView) mView.findViewById(com.android.internal.R.id.title);
         mText = (TextView) mView.findViewById(com.android.internal.R.id.text);
         final View progress = mView.findViewById(com.android.internal.R.id.progress);
@@ -95,16 +89,16 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         // This also clears the existing types
         super.updateTransformedTypes();
         if (mTitle != null) {
-            mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TITLE, mTitle);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE, mTitle);
         }
         if (mText != null) {
-            mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TEXT, mText);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TEXT, mText);
         }
         if (mPicture != null) {
-            mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_IMAGE, mPicture);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_IMAGE, mPicture);
         }
         if (mProgressBar != null) {
-            mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_PROGRESS, mProgressBar);
+            mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_PROGRESS, mProgressBar);
         }
     }
 

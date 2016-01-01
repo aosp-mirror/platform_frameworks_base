@@ -63,6 +63,7 @@ public class ImageTransformState extends TransformState {
 
     @Override
     public void recycle() {
+        super.recycle();
         sInstancePool.release(this);
     }
 

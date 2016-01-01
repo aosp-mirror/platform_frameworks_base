@@ -58,6 +58,7 @@ public class TextViewTransformState extends TransformState {
 
     @Override
     public void recycle() {
+        super.recycle();
         sInstancePool.release(this);
     }
 

@@ -57,7 +57,7 @@ public abstract class TransformState {
         } else {
             CrossFadeHelper.fadeIn(mTransformedView);
         }
-
+        final View transformedView = mTransformedView;
         // lets animate the positions correctly
         int[] otherPosition = otherState.getLocationOnScreen();
         int[] ownStablePosition = getLaidOutLocationOnScreen();
@@ -70,10 +70,10 @@ public abstract class TransformState {
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        setClippingDeactivated(false);
+                        setClippingDeactivated(transformedView, false);
                     }
                 });
-        setClippingDeactivated(true);
+        setClippingDeactivated(mTransformedView, true);
     }
 
     /**
@@ -95,6 +95,7 @@ public abstract class TransformState {
         // lets animate the positions correctly
         int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
         int[] ownPosition = getLaidOutLocationOnScreen();
+        final View transformedView = mTransformedView;
         mTransformedView.animate()
                 .translationX(otherStablePosition[0] - ownPosition[0])
                 .translationY(otherStablePosition[1] - ownPosition[1])
@@ -105,15 +106,15 @@ public abstract class TransformState {
                         if (endRunnable != null) {
                             endRunnable.run();
                         }
-                        setClippingDeactivated(false);
+                        setClippingDeactivated(transformedView, false);
                     }
                 });
-        setClippingDeactivated(true);
+        setClippingDeactivated(mTransformedView, true);
         return true;
     }
 
-    private void setClippingDeactivated(boolean deactivated) {
-        ViewGroup view = (ViewGroup) mTransformedView.getParent();
+    private void setClippingDeactivated(final View transformedView, boolean deactivated) {
+        ViewGroup view = (ViewGroup) transformedView.getParent();
         while (true) {
             ArraySet<View> clipSet = (ArraySet<View>) view.getTag(CLIP_CLIPPING_SET);
             if (clipSet == null) {
@@ -134,7 +135,7 @@ public abstract class TransformState {
                     ? (ExpandableNotificationRow) view
                     : null;
             if (!deactivated) {
-                clipSet.remove(mTransformedView);
+                clipSet.remove(transformedView);
                 if (clipSet.isEmpty()) {
                     view.setClipChildren(clipChildren);
                     view.setClipToPadding(clipToPadding);
@@ -144,7 +145,7 @@ public abstract class TransformState {
                     }
                 }
             } else {
-                clipSet.add(mTransformedView);
+                clipSet.add(transformedView);
                 view.setClipChildren(false);
                 view.setClipToPadding(false);
                 if (row != null && row.isChildInGroup()) {

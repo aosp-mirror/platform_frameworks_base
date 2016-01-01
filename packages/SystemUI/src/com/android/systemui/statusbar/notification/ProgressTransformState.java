@@ -44,6 +44,7 @@ public class ProgressTransformState extends TransformState {
 
     @Override
     public void recycle() {
+        super.recycle();
         sInstancePool.release(this);
     }
 }
