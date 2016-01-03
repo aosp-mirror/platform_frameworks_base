@@ -60,19 +60,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     @Override
     public void notifyContentUpdated(StatusBarNotification notification) {
-        // Reinspect the notification.
+        // Reinspect the notification. Before the super call, because the super call also updates
+        // the transformation types and we need to have our values set by then.
         resolveTemplateViews(notification);
         super.notifyContentUpdated(notification);
-        addRemainingTransformTypes();
-    }
-
-    /**
-     * Adds the remaining TransformTypes to the TransformHelper. This is done to make sure that each
-     * child is faded automatically and doesn't have to be manually added.
-     * The keys used for the views are the ids.
-     */
-    private void addRemainingTransformTypes() {
-
     }
 
     @Override

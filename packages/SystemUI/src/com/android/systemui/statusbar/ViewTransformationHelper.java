@@ -19,13 +19,20 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.util.ArrayMap;
 import android.view.View;
+import android.view.ViewGroup;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.TransformState;
+
+import java.util.Stack;
 
 /**
  * A view that can be transformed to and from.
  */
 public class ViewTransformationHelper implements TransformableView {
+
+    private static final int TAG_CONTAINS_TRANSFORMED_VIEW = R.id.contains_transformed_view;
+
     private final Handler mHandler = new Handler();
     private ArrayMap<Integer, View> mTransformedViews = new ArrayMap<>();
 
@@ -102,6 +109,48 @@ public class ViewTransformationHelper implements TransformableView {
             if (ownState != null) {
                 ownState.setVisible(visible);
                 ownState.recycle();
+            }
+        }
+    }
+
+    /**
+     * Add the remaining transformation views such that all views are being transformed correctly
+     * @param viewRoot the root below which all elements need to be transformed
+     */
+    public void addRemainingTransformTypes(View viewRoot) {
+        // lets now tag the right views
+        int numValues = mTransformedViews.size();
+        for (int i = 0; i < numValues; i++) {
+            View view = mTransformedViews.valueAt(i);
+            while (view != viewRoot.getParent()) {
+                view.setTag(TAG_CONTAINS_TRANSFORMED_VIEW, true);
+                view = (View) view.getParent();
+            }
+        }
+        Stack<View> stack = new Stack<>();
+        // Add the right views now
+        stack.push(viewRoot);
+        while (!stack.isEmpty()) {
+            View child = stack.pop();
+            if (child.getVisibility() == View.GONE) {
+                continue;
+            }
+            Boolean containsView = (Boolean) child.getTag(TAG_CONTAINS_TRANSFORMED_VIEW);
+            if (containsView == null) {
+                // This one is unhandled, let's add it to our list.
+                int id = child.getId();
+                if (id != View.NO_ID) {
+                    // We only fade views with an id
+                    addTransformedView(id, child);
+                    continue;
+                }
+            }
+            child.setTag(TAG_CONTAINS_TRANSFORMED_VIEW, null);
+            if (child instanceof ViewGroup && !mTransformedViews.containsValue(child)){
+                ViewGroup group = (ViewGroup) child;
+                for (int i = 0; i < group.getChildCount(); i++) {
+                    stack.push(group.getChildAt(i));
+                }
             }
         }
     }

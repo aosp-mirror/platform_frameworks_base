@@ -28,6 +28,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
+import java.util.Collection;
 import java.util.Stack;
 
 /**
@@ -99,7 +101,17 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         resolveHeaderViews();
         updateInvertHelper();
         updateTransformedTypes();
+        addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
+    }
+
+    /**
+     * Adds the remaining TransformTypes to the TransformHelper. This is done to make sure that each
+     * child is faded automatically and doesn't have to be manually added.
+     * The keys used for the views are the ids.
+     */
+    private void addRemainingTransformTypes() {
+        mTransformationHelper.addRemainingTransformTypes(mView);
     }
 
     /**

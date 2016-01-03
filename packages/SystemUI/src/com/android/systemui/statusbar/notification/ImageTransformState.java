@@ -44,7 +44,7 @@ public class ImageTransformState extends TransformState {
     @Override
     protected boolean sameAs(TransformState otherState) {
         if (otherState instanceof ImageTransformState) {
-            return mIcon.sameAs(((ImageTransformState) otherState).getIcon());
+            return mIcon != null && mIcon.sameAs(((ImageTransformState) otherState).getIcon());
         }
         return super.sameAs(otherState);
     }

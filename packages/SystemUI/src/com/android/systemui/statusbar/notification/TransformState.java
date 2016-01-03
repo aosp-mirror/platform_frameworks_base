@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import android.util.ArraySet;
+import android.util.Pools;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,8 +33,9 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 /**
  * A transform state of a view.
 */
-public abstract class TransformState {
+public class TransformState {
 
+    private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
     private static final int CLIP_CLIPPING_SET = R.id.clip_children_set_tag;
     private static final int CLIP_CHILDREN_TAG = R.id.clip_children_tag;
     private static final int CLIP_TO_PADDING = R.id.clip_to_padding_tag;
@@ -202,11 +204,16 @@ public abstract class TransformState {
             result.initFrom(view);
             return result;
         }
-        return null;
+        TransformState result = obtain();
+        result.initFrom(view);
+        return result;
     }
 
     public void recycle() {
         reset();
+        if (getClass() == TransformState.class) {
+            sInstancePool.release(this);
+        }
     }
 
     protected void reset() {
@@ -224,5 +231,13 @@ public abstract class TransformState {
     }
 
     public void prepareFadeIn() {
+    }
+
+    public static TransformState obtain() {
+        TransformState instance = sInstancePool.acquire();
+        if (instance != null) {
+            return instance;
+        }
+        return new TransformState();
     }
 }

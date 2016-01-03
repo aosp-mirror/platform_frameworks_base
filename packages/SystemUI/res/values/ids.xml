@@ -54,6 +54,7 @@
     <item type="id" name="clip_children_set_tag" />
     <item type="id" name="clip_to_padding_tag" />
     <item type="id" name="image_icon_tag" />
+    <item type="id" name="contains_transformed_view" />
     <item type="id" name="is_clicked_heads_up_tag" />
 </resources>
 
