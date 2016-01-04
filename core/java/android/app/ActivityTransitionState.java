@@ -206,7 +206,7 @@ class ActivityTransitionState {
     }
 
     private void startEnter() {
-        if (mEnterActivityOptions.isReturning()) {
+        if (mEnterTransitionCoordinator.isReturning()) {
             if (mExitingToView != null) {
                 mEnterTransitionCoordinator.viewInstancesReady(mExitingFrom, mExitingTo,
                         mExitingToView);
@@ -238,6 +238,7 @@ class ActivityTransitionState {
 
     public void onResume() {
         restoreExitedViews();
+        restoreReenteringViews();
     }
 
     public void clear() {
@@ -255,6 +256,15 @@ class ActivityTransitionState {
         if (mCalledExitCoordinator != null) {
             mCalledExitCoordinator.resetViews();
             mCalledExitCoordinator = null;
+        }
+    }
+
+    private void restoreReenteringViews() {
+        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning()) {
+            mEnterTransitionCoordinator.forceViewsToAppear();
+            mExitingFrom = null;
+            mExitingTo = null;
+            mExitingToView = null;
         }
     }
 

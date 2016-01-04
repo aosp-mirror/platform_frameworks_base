@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.Window;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -57,6 +58,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mAreViewsReady;
     private boolean mIsViewsTransitionStarted;
     private Transition mEnterViewsTransition;
+    private OnPreDrawListener mViewsReadyListener;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
             ArrayList<String> sharedElementNames, boolean isReturning) {
@@ -138,15 +140,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()))) {
             viewsReady(sharedElements);
         } else {
-            decor.getViewTreeObserver()
-                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            decor.getViewTreeObserver().removeOnPreDrawListener(this);
-                            viewsReady(sharedElements);
-                            return true;
-                        }
-                    });
+            mViewsReadyListener = new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mViewsReadyListener = null;
+                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
+                    viewsReady(sharedElements);
+                    return true;
+                }
+            };
+            decor.getViewTreeObserver().addOnPreDrawListener(mViewsReadyListener);
         }
     }
 
@@ -239,6 +242,50 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 cancel();
                 break;
         }
+    }
+
+    /**
+     * This is called onResume. If an Activity is resuming and the transitions
+     * haven't started yet, force the views to appear. This is likely to be
+     * caused by the top Activity finishing before the transitions started.
+     * In that case, we can finish any transition that was started, but we
+     * should cancel any pending transition and just bring those Views visible.
+     */
+    public void forceViewsToAppear() {
+        if (!mIsReturning) {
+            return;
+        }
+        if (!mIsReadyForTransition) {
+            mIsReadyForTransition = true;
+            final ViewGroup decor = getDecor();
+            if (decor != null && mViewsReadyListener != null) {
+                decor.getViewTreeObserver().removeOnPreDrawListener(mViewsReadyListener);
+                mViewsReadyListener = null;
+            }
+            showViews(mTransitioningViews, true);
+            mSharedElements.clear();
+            mAllSharedElementNames.clear();
+            mTransitioningViews.clear();
+            mIsReadyForTransition = true;
+            viewsTransitionComplete();
+            sharedElementTransitionComplete();
+        } else {
+            if (!mSharedElementTransitionStarted) {
+                moveSharedElementsFromOverlay();
+                mSharedElementTransitionStarted = true;
+                showViews(mSharedElements, true);
+                mSharedElements.clear();
+                sharedElementTransitionComplete();
+            }
+            if (!mIsViewsTransitionStarted) {
+                mIsViewsTransitionStarted = true;
+                showViews(mTransitioningViews, true);
+                mTransitioningViews.clear();
+                viewsTransitionComplete();
+            }
+            cancelPendingTransitions();
+        }
+        mAreViewsReady = true;
     }
 
     private void cancel() {
@@ -659,5 +706,4 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             }
         });
     }
-
 }
