@@ -26,17 +26,17 @@ import android.os.RemoteException;
 import android.view.WindowManager;
 
 /**
- * A QSTileService provides the user a tile that can be added to Quick Settings.
+ * A TileService provides the user a tile that can be added to Quick Settings.
  * Quick Settings is a space provided that allows the user to change settings and
  * take quick actions without leaving the context of their current app.
  *
- * <p>The lifecycle of a QSTileService is different from some other services in
+ * <p>The lifecycle of a TileService is different from some other services in
  * that it may be unbound during parts of its lifecycle.  Any of the following
  * lifecycle events can happen indepently in a separate binding/creation of the
  * service.</p>
  *
  * <ul>
- * <li>When a tile is added by the user its QSTileService will be bound to and
+ * <li>When a tile is added by the user its TileService will be bound to and
  * {@link #onTileAdded()} will be called.</li>
  *
  * <li>When a tile should be up to date and listing will be indicated by
@@ -45,10 +45,10 @@ import android.view.WindowManager;
  * <li>When the user removes a tile from Quick Settings {@link #onStopListening()}
  * will be called.</li>
  * </ul>
- * <p>QSTileService will be detected by tiles that match the {@value #ACTION_QS_TILE}
+ * <p>TileService will be detected by tiles that match the {@value #ACTION_QS_TILE}
  * and require the permission "android.permission.BIND_QUICK_SETTINGS_TILE".
  * The label and icon for the service will be used as the default label and
- * icon for the tile. Here is an example QSTileService declaration.</p>
+ * icon for the tile. Here is an example TileService declaration.</p>
  * <pre class="prettyprint">
  * {@literal
  * <service
@@ -67,7 +67,7 @@ import android.view.WindowManager;
 public class TileService extends Service {
 
     /**
-     * Action that identifies a Service as being a QSTileService.
+     * Action that identifies a Service as being a TileService.
      */
     public static final String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
 

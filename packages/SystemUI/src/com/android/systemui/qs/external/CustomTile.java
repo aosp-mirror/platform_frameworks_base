@@ -11,23 +11,17 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
+package com.android.systemui.qs.external;
 
-package com.android.systemui.qs.tiles;
-
-import android.app.ActivityManager;
-import android.app.Service;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -36,7 +30,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTileServiceWrapper;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 public class CustomTile extends QSTile<QSTile.State> {
@@ -52,8 +45,9 @@ public class CustomTile extends QSTile<QSTile.State> {
     private final Tile mTile;
     private final IWindowManager mWindowManager;
     private final IBinder mToken = new Binder();
+    private final IQSTileService mService;
+    private final TileServiceManager mServiceManager;
 
-    private QSTileServiceWrapper mService;
     private boolean mListening;
     private boolean mBound;
     private boolean mIsTokenGranted;
@@ -63,7 +57,9 @@ public class CustomTile extends QSTile<QSTile.State> {
         super(host);
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
-        mTile = new Tile(mComponent, host);
+        mServiceManager = host.getTileServices().getTileWrapper(this);
+        mService = mServiceManager.getTileService();
+        mTile = new Tile(mComponent, host.getTileServices());
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent, 0);
@@ -96,42 +92,32 @@ public class CustomTile extends QSTile<QSTile.State> {
     public void setListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
-        if (listening) {
-            mHandler.removeCallbacks(mUnbind);
-            if (!mBound) {
-                // TODO: Guarantee re-bind on user-switch.
-                mContext.bindServiceAsUser(new Intent().setComponent(mComponent),
-                        mServiceConnection, Service.BIND_AUTO_CREATE,
-                        new UserHandle(ActivityManager.getCurrentUser()));
-                mBound = true;
+        try {
+            if (listening) {
+                mServiceManager.setBindRequested(true);
+                mService.setQSTile(mTile);
+                mService.onStartListening();
             } else {
-                if (mService != null) {
-                    mService.onStartListening();
-                } else {
-                    Log.d(TAG, "Can't start service listening");
-                }
-            }
-        } else {
-            if (mService != null) {
                 mService.onStopListening();
-            }
-            if (mIsTokenGranted && !mIsShowingDialog) {
-                try {
-                    if (DEBUG) Log.d(TAG, "Removing token");
-                    mWindowManager.removeWindowToken(mToken);
-                } catch (RemoteException e) {
+                if (mIsTokenGranted && !mIsShowingDialog) {
+                    try {
+                        if (DEBUG) Log.d(TAG, "Removing token");
+                        mWindowManager.removeWindowToken(mToken);
+                    } catch (RemoteException e) {
+                    }
+                    mIsTokenGranted = false;
                 }
-                mIsTokenGranted = false;
+                mIsShowingDialog = false;
+                mServiceManager.setBindRequested(false);
             }
-            mIsShowingDialog = false;
-            mHandler.postDelayed(mUnbind, UNBIND_DELAY);
+        } catch (RemoteException e) {
+            // Called through wrapper, won't happen here.
         }
     }
 
     @Override
     protected void handleDestroy() {
         super.handleDestroy();
-        mHandler.removeCallbacks(mUnbind);
         if (mIsTokenGranted) {
             try {
                 if (DEBUG) Log.d(TAG, "Removing token");
@@ -139,7 +125,6 @@ public class CustomTile extends QSTile<QSTile.State> {
             } catch (RemoteException e) {
             }
         }
-        mUnbind.run();
     }
 
     @Override
@@ -161,7 +146,11 @@ public class CustomTile extends QSTile<QSTile.State> {
                 mIsTokenGranted = true;
             } catch (RemoteException e) {
             }
-            mService.onClick(mToken);
+            try {
+                mService.onClick(mToken);
+            } catch (RemoteException e) {
+                // Called through wrapper, won't happen here.
+            }
         } else {
             Log.e(TAG, "Click with no service " + getTileSpec());
         }
@@ -187,33 +176,8 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_INTENT;
+        return MetricsLogger.QS_CUSTOM;
     }
-
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = new QSTileServiceWrapper(IQSTileService.Stub.asInterface(service));
-            if (mListening) {
-                mService.setQSTile(mTile);
-                mService.onStartListening();
-            } else {
-                mService.onStopListening();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
-    private final Runnable mUnbind = new Runnable() {
-        @Override
-        public void run() {
-            mContext.unbindService(mServiceConnection);
-            mBound = false;
-        }
-    };
 
     public static ComponentName getComponentFromSpec(String spec) {
         final String action = spec.substring(PREFIX.length(), spec.length() - 1);

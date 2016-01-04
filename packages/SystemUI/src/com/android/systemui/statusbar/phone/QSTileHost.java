@@ -18,30 +18,25 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
-import android.os.RemoteException;
 import android.provider.Settings;
-import android.service.quicksettings.IQSService;
-import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatteryTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
-import com.android.systemui.qs.tiles.CustomTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
@@ -76,7 +71,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Platform implementation of the quick settings tile host **/
-public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tunable {
+public final class QSTileHost implements QSTile.Host, Tunable {
     private static final String TAG = "QSTileHost";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -100,6 +95,7 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
     private final KeyguardMonitor mKeyguard;
     private final SecurityController mSecurity;
     private final BatteryController mBattery;
+    private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
 
@@ -130,6 +126,8 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
                 Process.THREAD_PRIORITY_BACKGROUND);
         ht.start();
         mLooper = ht.getLooper();
+
+        mServices = new TileServices(this, mLooper);
 
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
     }
@@ -256,6 +254,10 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         return mSecurity;
     }
 
+    public TileServices getTileServices() {
+        return mServices;
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!TILES_SETTING.equals(key)) {
@@ -304,50 +306,6 @@ public final class QSTileHost extends IQSService.Stub implements QSTile.Host, Tu
         specs.remove(tileSpec);
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", specs), ActivityManager.getCurrentUser());
-    }
-
-    @Override
-    public void updateQsTile(Tile tile) throws RemoteException {
-        verifyCaller(tile.getComponentName().getPackageName());
-        CustomTile customTile = getTileForComponent(tile.getComponentName());
-        if (customTile != null) {
-            customTile.updateState(tile);
-            customTile.refreshState();
-        }
-    }
-
-    @Override
-    public void onShowDialog(Tile tile) throws RemoteException {
-        verifyCaller(tile.getComponentName().getPackageName());
-        CustomTile customTile = getTileForComponent(tile.getComponentName());
-        if (customTile != null) {
-            customTile.onDialogShown();
-            collapsePanels();
-        }
-    }
-
-    private void verifyCaller(String packageName) {
-        try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName,
-                    Binder.getCallingUserHandle().getIdentifier());
-            if (Binder.getCallingUid() != uid) {
-                throw new SecurityException("Component outside caller's uid");
-            }
-        } catch (NameNotFoundException e) {
-            throw new SecurityException(e);
-        }
-    }
-
-    private CustomTile getTileForComponent(ComponentName component) {
-        // TODO: Build map for easier lookup.
-        for (QSTile<?> qsTile : mTiles.values()) {
-            if (qsTile instanceof CustomTile) {
-                if (((CustomTile) qsTile).getComponent().equals(component)) {
-                    return (CustomTile) qsTile;
-                }
-            }
-        }
-        return null;
     }
 
     public QSTile<?> createTile(String tileSpec) {
