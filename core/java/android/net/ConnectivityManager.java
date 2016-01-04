@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -892,6 +893,24 @@ public class ConnectivityManager {
     public NetworkCapabilities getNetworkCapabilities(Network network) {
         try {
             return mService.getNetworkCapabilities(network);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the URL that should be used for resolving whether a captive portal is present.
+     * 1. This URL should respond with a 204 response to a GET request to indicate no captive
+     *    portal is present.
+     * 2. This URL must be HTTP as redirect responses are used to find captive portal
+     *    sign-in pages. Captive portals cannot respond to HTTPS requests with redirects.
+     *
+     * @hide
+     */
+    @SystemApi
+    public String getCaptivePortalServerUrl() {
+        try {
+            return mService.getCaptivePortalServerUrl();
         } catch (RemoteException e) {
             return null;
         }

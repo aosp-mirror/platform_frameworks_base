@@ -59,6 +59,7 @@ import android.os.MessageQueue;
 import android.os.MessageQueue.IdleHandler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
@@ -1503,5 +1504,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
         ka3.stop();
         callback3.expectStopped();
+    }
+
+    @SmallTest
+    public void testGetCaptivePortalServerUrl() throws Exception {
+        String url = mCm.getCaptivePortalServerUrl();
+        assertEquals("http://connectivitycheck.gstatic.com/generate_204", url);
     }
 }

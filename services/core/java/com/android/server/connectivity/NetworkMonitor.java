@@ -223,7 +223,6 @@ public class NetworkMonitor extends StateMachine {
     private final AlarmManager mAlarmManager;
     private final NetworkRequest mDefaultRequest;
 
-    private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
@@ -264,10 +263,6 @@ public class NetworkMonitor extends StateMachine {
             addState(mCaptivePortalState, mMaybeNotifyState);
         addState(mLingeringState, mDefaultState);
         setInitialState(mDefaultState);
-
-        mServer = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.CAPTIVE_PORTAL_SERVER);
-        if (mServer == null) mServer = DEFAULT_SERVER;
 
         mLingerDelayMs = SystemProperties.getInt(LINGER_DELAY_PROPERTY, DEFAULT_LINGER_DELAY_MS);
 
@@ -622,6 +617,13 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
+    public static String getCaptivePortalServerUrl(Context context) {
+        String server = Settings.Global.getString(context.getContentResolver(),
+                Settings.Global.CAPTIVE_PORTAL_SERVER);
+        if (server == null) server = DEFAULT_SERVER;
+        return "http://" + server + "/generate_204";
+    }
+
     /**
      * Do a URL fetch on a known server to see if we get the data we expect.
      * Returns HTTP response code.
@@ -633,9 +635,9 @@ public class NetworkMonitor extends StateMachine {
         HttpURLConnection urlConnection = null;
         int httpResponseCode = 599;
         try {
-            URL url = new URL("http", mServer, "/generate_204");
+            URL url = new URL(getCaptivePortalServerUrl(mContext));
             // On networks with a PAC instead of fetching a URL that should result in a 204
-            // reponse, we instead simply fetch the PAC script.  This is done for a few reasons:
+            // response, we instead simply fetch the PAC script.  This is done for a few reasons:
             // 1. At present our PAC code does not yet handle multiple PACs on multiple networks
             //    until something like https://android-review.googlesource.com/#/c/115180/ lands.
             //    Network.openConnection() will ignore network-specific PACs and instead fetch
@@ -644,7 +646,8 @@ public class NetworkMonitor extends StateMachine {
             // 2. To proxy the generate_204 fetch through a PAC would require a number of things
             //    happen before the fetch can commence, namely:
             //        a) the PAC script be fetched
-            //        b) a PAC script resolver service be fired up and resolve mServer
+            //        b) a PAC script resolver service be fired up and resolve the captive portal
+            //           server.
             //    Network validation could be delayed until these prerequisities are satisifed or
             //    could simply be left to race them.  Neither is an optimal solution.
             // 3. PAC scripts are sometimes used to block or restrict Internet access and may in
