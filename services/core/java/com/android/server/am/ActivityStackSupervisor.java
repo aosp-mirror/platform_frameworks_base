@@ -492,8 +492,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
             }
 
-            createStackOnDisplay(HOME_STACK_ID, Display.DEFAULT_DISPLAY, true);
-            mHomeStack = mFocusedStack = mLastFocusedStack = getStack(HOME_STACK_ID);
+            mHomeStack = mFocusedStack = mLastFocusedStack =
+                    getStack(HOME_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
 
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         }
@@ -538,10 +538,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     /** NOTE: Should only be called from {@link ActivityStack#moveToFront} */
-    void setFocusStack(String reason, ActivityStack focusedStack) {
-        if (focusedStack != mFocusedStack) {
+    void setFocusStackUnchecked(String reason, ActivityStack focusCandidate) {
+        if (!focusCandidate.isFocusable()) {
+            // The focus candidate isn't focusable. Move focus to the top stack that is focusable.
+            focusCandidate = focusCandidate.getNextFocusableStackLocked();
+        }
+
+        if (focusCandidate != mFocusedStack) {
             mLastFocusedStack = mFocusedStack;
-            mFocusedStack = focusedStack;
+            mFocusedStack = focusCandidate;
 
             EventLogTags.writeAmFocusedStack(
                     mCurrentUser, mFocusedStack == null ? -1 : mFocusedStack.getStackId(),
@@ -904,7 +909,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = stacks.get(stackNdx);
-            if (stack != focusedStack && isFrontStack(stack)) {
+            if (stack != focusedStack && isFrontStack(stack) && stack.isFocusable()) {
                 r = stack.topRunningActivityLocked();
                 if (r != null) {
                     return r;

@@ -2748,6 +2748,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
+        if (!r.isFocusable()) {
+            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
+                    "setFocusedActivityLocked: unfocusable r=" + r);
+            return false;
+        }
+
         if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
         final ActivityRecord last = mFocusedActivity;
         mFocusedActivity = r;
