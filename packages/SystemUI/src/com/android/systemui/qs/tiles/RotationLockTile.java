@@ -63,15 +63,14 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         final boolean newState = !mState.value;
         mController.setRotationLocked(newState);
-        refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
+        refreshState(newState);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (mController == null) return;
-        final boolean rotationLocked = arg != null ? ((UserBoolean) arg).value
+        final boolean rotationLocked = arg != null ? (Boolean) arg
                 : mController.isRotationLocked();
-        final boolean userInitiated = arg != null ? ((UserBoolean) arg).userInitiated : false;
         // TODO: Handle accessibility rotation lock and whatnot.
 //        state.visible = mController.isRotationLockAffordanceVisible();
         if (state.value == rotationLocked && state.contentDescription != null) {
@@ -80,18 +79,15 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         }
         state.value = rotationLocked;
         final boolean portrait = isCurrentOrientationLockPortrait();
-        final AnimationIcon icon;
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
                     : R.string.quick_settings_rotation_locked_landscape_label;
             state.label = mContext.getString(label);
-            icon = portrait ? mAutoToPortrait : mAutoToLandscape;
+            state.icon = portrait ? mAutoToPortrait : mAutoToLandscape;
         } else {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-            icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
+            state.icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
         }
-        icon.setAllowAnimation(userInitiated);
-        state.icon = icon;
         state.contentDescription = getAccessibilityString(rotationLocked,
                 R.string.accessibility_rotation_lock_on_portrait,
                 R.string.accessibility_rotation_lock_on_landscape,
@@ -145,8 +141,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     private final RotationLockControllerCallback mCallback = new RotationLockControllerCallback() {
         @Override
         public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
-            refreshState(rotationLocked ? UserBoolean.BACKGROUND_TRUE
-                    : UserBoolean.BACKGROUND_FALSE);
+            refreshState(rotationLocked);
         }
     };
 }

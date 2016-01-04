@@ -59,8 +59,6 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         final boolean isEnabled = (Boolean) mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setHotspotEnabled(!isEnabled);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     @Override

@@ -93,12 +93,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
     }
 
     private void refreshQuietModeState(boolean backgroundRefresh) {
-        if (backgroundRefresh) {
-            refreshState(isWorkModeEnabled() ? UserBoolean.BACKGROUND_TRUE
-                    : UserBoolean.BACKGROUND_FALSE);
-        } else {
-            refreshState(isWorkModeEnabled() ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
-        }
+        refreshState(isWorkModeEnabled());
     }
 
     @Override
@@ -108,28 +103,22 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
             return;
         }
 
-        final boolean userInitialized;
-        if (arg instanceof UserBoolean) {
-            state.value = ((UserBoolean) arg).value;
-            userInitialized = ((UserBoolean) arg).userInitiated;
+        if (arg instanceof Boolean) {
+            state.value = (Boolean) arg;
         } else {
             state.value = isWorkModeEnabled();
-            userInitialized = false;
         }
 
-        final AnimationIcon icon;
         state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         if (state.value) {
-            icon = mEnable;
+            state.icon = mEnable;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_on);
         } else {
-            icon = mDisable;
+            state.icon = mDisable;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
         }
-        icon.setAllowAnimation(userInitialized);
-        state.icon = icon;
     }
 
     @Override

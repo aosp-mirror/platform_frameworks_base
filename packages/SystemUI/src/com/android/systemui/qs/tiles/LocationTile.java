@@ -67,8 +67,6 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
                     mHost.openPanels();
                     MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
                     mController.setLocationEnabled(!wasEnabled);
-                    mEnable.setAllowAnimation(true);
-                    mDisable.setAllowAnimation(true);
                 }
             });
             return;
@@ -76,8 +74,6 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         final boolean wasEnabled = (Boolean) mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !wasEnabled);
         mController.setLocationEnabled(!wasEnabled);
-        mEnable.setAllowAnimation(true);
-        mDisable.setAllowAnimation(true);
     }
 
     @Override
