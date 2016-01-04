@@ -931,7 +931,7 @@ final class UserController {
         if (homeInFront) {
             mService.startHomeActivityLocked(newUserId, "moveUserToForeground");
         } else {
-            mService.mStackSupervisor.resumeTopActivitiesLocked();
+            mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
         }
         EventLogTags.writeAmSwitchUser(newUserId);
         getUserManager().onUserForeground(newUserId);
