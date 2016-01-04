@@ -153,6 +153,17 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public static final int RIL_RADIO_TECHNOLOGY_IWLAN = 18;
+
+    /** @hide */
+    public static final int RIL_RADIO_CDMA_TECHNOLOGY_BITMASK =
+            (1 << (RIL_RADIO_TECHNOLOGY_IS95A - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_IS95B - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_1xRTT - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_0 - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_A - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_B - 1))
+                    | (1 << (RIL_RADIO_TECHNOLOGY_EHRPD - 1));
+
     /**
      * Available registration states for GSM, UMTS and CDMA.
      */
@@ -1141,16 +1152,8 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public static boolean hasCdma(int radioTechnologyBitmask) {
-        int cdmaBitmask = (RIL_RADIO_TECHNOLOGY_IS95A
-                | RIL_RADIO_TECHNOLOGY_IS95B
-                | RIL_RADIO_TECHNOLOGY_1xRTT
-                | RIL_RADIO_TECHNOLOGY_EVDO_0
-                | RIL_RADIO_TECHNOLOGY_EVDO_A
-                | RIL_RADIO_TECHNOLOGY_EVDO_B
-                | RIL_RADIO_TECHNOLOGY_EHRPD);
-
-        return ((radioTechnologyBitmask & cdmaBitmask) != 0);
+    public static boolean bearerBitmapHasCdma(int radioTechnologyBitmap) {
+        return (RIL_RADIO_CDMA_TECHNOLOGY_BITMASK & radioTechnologyBitmap) != 0;
     }
 
     /** @hide */
