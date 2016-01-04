@@ -587,10 +587,6 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
     return doDecode(env, stream.release(), NULL, options);
 }
 
-static void nativeRequestCancel(JNIEnv*, jobject joptions) {
-    // Deprecated
-}
-
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
@@ -630,10 +626,6 @@ static const JNINativeMethod gMethods[] = {
     },
 };
 
-static const JNINativeMethod gOptionsMethods[] = {
-    {   "requestCancel", "()V", (void*)nativeRequestCancel }
-};
-
 int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass options_class = FindClassOrDie(env, "android/graphics/BitmapFactory$Options");
     gOptions_bitmapFieldID = GetFieldIDOrDie(env, options_class, "inBitmap",
@@ -665,8 +657,6 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gInsetStruct_constructorMethodID = GetMethodIDOrDie(env, gInsetStruct_class, "<init>",
                                                         "(IIIIIIIIFIF)V");
 
-    android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory$Options",
-                                  gOptionsMethods, NELEM(gOptionsMethods));
     return android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory",
                                          gMethods, NELEM(gMethods));
 }
