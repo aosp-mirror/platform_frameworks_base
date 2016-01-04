@@ -338,14 +338,18 @@ void StringPool::sortByConfig()
 
     // Now trim any entries at the end of the new style array that are
     // not needed.
-    for (ssize_t i=newEntryStyleArray.size()-1; i>=0; i--) {
+    ssize_t i;
+    for (i=newEntryStyleArray.size()-1; i>=0; i--) {
         const entry_style& style = newEntryStyleArray[i];
         if (style.spans.size() > 0) {
             // That's it.
             break;
         }
-        // This one is not needed; remove.
-        newEntryStyleArray.removeAt(i);
+    }
+
+    ssize_t nToRemove=newEntryStyleArray.size()-(i+1);
+    if (nToRemove) {
+        newEntryStyleArray.removeItemsAt(i+1, nToRemove);
     }
 
     // All done, install the new data structures and upate mValues with
