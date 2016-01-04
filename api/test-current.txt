@@ -4082,11 +4082,14 @@ package android.app {
   }
 
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
+    ctor public DatePickerDialog(android.content.Context);
+    ctor public DatePickerDialog(android.content.Context, int);
     ctor public DatePickerDialog(android.content.Context, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
     ctor public DatePickerDialog(android.content.Context, int, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
     method public android.widget.DatePicker getDatePicker();
     method public void onClick(android.content.DialogInterface, int);
     method public void onDateChanged(android.widget.DatePicker, int, int, int);
+    method public void setOnDateSetListener(android.app.DatePickerDialog.OnDateSetListener);
     method public void updateDate(int, int, int);
   }
 
