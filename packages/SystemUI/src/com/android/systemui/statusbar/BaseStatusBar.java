@@ -970,7 +970,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
 
-        final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
+        final View settingsButton = guts.findViewById(R.id.more_settings);
         if (appUid >= 0) {
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -982,6 +982,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         } else {
             settingsButton.setVisibility(View.GONE);
         }
+
+        row.findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismissPopups();
+            }
+        });
 
         guts.bindImportance(sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }

@@ -317,4 +317,12 @@
         <item name="@dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
+    <style name="TextAppearance.NotificationGuts">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/notification_guts_btn_color</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+    </style>
+
 </resources>
