@@ -16,6 +16,8 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.MenuItem;
 import android.view.View;
@@ -73,7 +75,7 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
     public abstract void setOnDismissListener(PopupWindow.OnDismissListener listener);
 
     @Override
-    public void initForMenu(Context context, MenuBuilder menu) {
+    public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu) {
         // Don't need to do anything; we added as a presenter in the constructor.
     }
 

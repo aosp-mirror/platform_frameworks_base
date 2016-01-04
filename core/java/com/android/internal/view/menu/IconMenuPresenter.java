@@ -17,6 +17,8 @@ package com.android.internal.view.menu;
 
 import com.android.internal.view.menu.MenuView.ItemView;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -49,7 +51,7 @@ public class IconMenuPresenter extends BaseMenuPresenter {
     }
 
     @Override
-    public void initForMenu(Context context, MenuBuilder menu) {
+    public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu) {
         super.initForMenu(context, menu);
         mMaxItems = -1;
     }

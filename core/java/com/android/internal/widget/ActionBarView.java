@@ -17,6 +17,8 @@
 package com.android.internal.widget;
 
 import android.animation.LayoutTransition;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -1593,7 +1595,7 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         MenuItemImpl mCurrentExpandedItem;
 
         @Override
-        public void initForMenu(Context context, MenuBuilder menu) {
+        public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu) {
             // Clear the expanded action view when menus change.
             if (mMenu != null && mCurrentExpandedItem != null) {
                 mMenu.collapseItemActionView(mCurrentExpandedItem);

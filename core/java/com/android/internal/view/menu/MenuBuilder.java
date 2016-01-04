@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1027,23 +1028,24 @@ public class MenuBuilder implements Menu {
         mIsActionItemsStale = true;
         onItemsChanged(true);
     }
-    
+
+    @NonNull
     public ArrayList<MenuItemImpl> getVisibleItems() {
         if (!mIsVisibleItemsStale) return mVisibleItems;
-        
+
         // Refresh the visible items
         mVisibleItems.clear();
-        
+
         final int itemsSize = mItems.size(); 
         MenuItemImpl item;
         for (int i = 0; i < itemsSize; i++) {
             item = mItems.get(i);
             if (item.isVisible()) mVisibleItems.add(item);
         }
-        
+
         mIsVisibleItemsStale = false;
         mIsActionItemsStale = true;
-        
+
         return mVisibleItems;
     }
 
