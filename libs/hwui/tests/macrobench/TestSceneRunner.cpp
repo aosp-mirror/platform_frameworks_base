@@ -38,6 +38,30 @@ public:
     }
 };
 
+template<class T>
+class ModifiedMovingAverage {
+public:
+    ModifiedMovingAverage(int weight) : mWeight(weight) {}
+
+    T add(T today) {
+        if (!mHasValue) {
+            mAverage = today;
+        } else {
+            mAverage = (((mWeight - 1) * mAverage) + today) / mWeight;
+        }
+        return mAverage;
+    }
+
+    T average() {
+        return mAverage;
+    }
+
+private:
+    bool mHasValue = false;
+    int mWeight;
+    T mAverage;
+};
+
 void run(const TestScene::Info& info, const TestScene::Options& opts) {
     // Switch to the real display
     gDisplay = getBuiltInDisplay();
@@ -67,22 +91,35 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
     proxy->setLightCenter((Vector3){lightX, dp(-200.0f), dp(800.0f)});
 
     // Do a few cold runs then reset the stats so that the caches are all hot
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 5; i++) {
         testContext.waitForVsync();
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
         UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
         proxy->syncAndDrawFrame();
     }
+
     proxy->resetProfileInfo();
+    proxy->fence();
+
+    ModifiedMovingAverage<double> avgMs(opts.reportFrametimeWeight);
 
     for (int i = 0; i < opts.count; i++) {
         testContext.waitForVsync();
-
-        ATRACE_NAME("UI-Draw Frame");
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
-        UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
-        scene->doFrame(i);
-        proxy->syncAndDrawFrame();
+        {
+            ATRACE_NAME("UI-Draw Frame");
+            UiFrameInfoBuilder(proxy->frameInfo()).setVsync(vsync, vsync);
+            scene->doFrame(i);
+            proxy->syncAndDrawFrame();
+        }
+        proxy->fence();
+        nsecs_t done = systemTime(CLOCK_MONOTONIC);
+        if (opts.reportFrametimeWeight) {
+            avgMs.add((done - vsync) / 1000000.0);
+            if (i % 10 == 9) {
+                printf("Average frametime %.3fms\n", avgMs.average());
+            }
+        }
     }
 
     proxy->dumpProfileInfo(STDOUT_FILENO, 0);

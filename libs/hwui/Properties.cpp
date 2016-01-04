@@ -53,6 +53,8 @@ int Properties::overrideSpotShadowStrength = -1;
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
 
+bool Properties::waitForGpuCompletion = false;
+
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {'\0',};
 

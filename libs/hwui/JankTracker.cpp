@@ -243,6 +243,7 @@ void JankTracker::dumpData(const ProfileData* data, int fd) {
     dprintf(fd, "\nTotal frames rendered: %u", data->totalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", data->jankFrameCount,
             (float) data->jankFrameCount / (float) data->totalFrameCount * 100.0f);
+    dprintf(fd, "\n50th percentile: %ums", findPercentile(data, 50));
     dprintf(fd, "\n90th percentile: %ums", findPercentile(data, 90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(data, 95));
     dprintf(fd, "\n99th percentile: %ums", findPercentile(data, 99));

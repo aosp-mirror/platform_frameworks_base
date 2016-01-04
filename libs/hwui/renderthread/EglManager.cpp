@@ -29,8 +29,6 @@
 
 #define GLES_VERSION 2
 
-#define WAIT_FOR_GPU_COMPLETION 0
-
 // Android-specific addition that is used to show when frames began in systrace
 EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
 
@@ -179,7 +177,10 @@ void EglManager::loadConfig() {
 }
 
 void EglManager::createContext() {
-    EGLint attribs[] = { EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION, EGL_NONE };
+    EGLint attribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION,
+            EGL_NONE
+    };
     mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attribs);
     LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT,
         "Failed to create context, error = %s", egl_error_str());
@@ -318,12 +319,10 @@ void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
 
 bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
 
-#if WAIT_FOR_GPU_COMPLETION
-    {
+    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
         fence();
     }
-#endif
 
     EGLint rects[4];
     frame.map(screenDirty, rects);
