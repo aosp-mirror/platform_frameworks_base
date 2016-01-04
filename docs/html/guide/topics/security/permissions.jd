@@ -373,7 +373,7 @@ to be as high as possible. You can see which permissions were added with each re
   ><code>targetSdkVersion</code></a> is 22 or lower, the system asks the user
   to grant the permissions at install time. Once again, the system just tells
   the user what permission <em>groups</em> the app needs, not the individual
-  permissions
+  permissions.
 </p>
 
 <p class="table-caption" id="permission-groups">
