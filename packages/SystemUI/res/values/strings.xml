@@ -1228,6 +1228,11 @@
     <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
     <string name="notification_importance_max">Peek onto the screen and make sound</string>
 
+    <!-- Notification: Control panel: Label for button that launches notification settings. [CHAR LIMIT=NONE] -->
+    <string name="notification_more_settings">More settings</string>
+    <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
+    <string name="notification_done">Done</string>
+
     <!-- Label for no color transform [CHAR LIMIT=30] -->
     <string name="color_matrix_none">Normal colors</string>
 
