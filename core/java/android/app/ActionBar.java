@@ -1082,6 +1082,10 @@ public abstract class ActionBar {
         return false;
     }
 
+    /** @hide */
+    public void onDestroy() {
+    }
+
     /**
      * Common implementation for requestFocus that takes in the Toolbar and moves focus
      * to the contents. This makes the ViewGroups containing the toolbar allow focus while it stays
