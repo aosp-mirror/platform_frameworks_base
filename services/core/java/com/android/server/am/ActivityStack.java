@@ -4749,9 +4749,9 @@ final class ActivityStack {
         task.updateOverrideConfiguration(bounds);
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                (r.info.flags & ActivityInfo.FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId,
-                r.info.configChanges, task.voiceSession != null, r.mLaunchTaskBehind,
-                bounds, task.mOverrideConfig, !r.isHomeActivity());
+                (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
+                task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
+                !r.isHomeActivity(), r.isAlwaysFocusable());
         mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }

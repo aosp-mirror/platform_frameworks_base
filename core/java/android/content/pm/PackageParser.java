@@ -3223,12 +3223,19 @@ public class PackageParser {
                 a.info.flags |= ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
             }
 
-            a.info.resizeable = sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_resizeableActivity,
-                    owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N);
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity,
+                    owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N)) {
+                a.info.flags |= ActivityInfo.FLAG_RESIZEABLE;
 
-            a.info.supportsPip = a.info.resizeable ? sa.getBoolean(
-                    R.styleable.AndroidManifestActivity_supportsPictureInPicture, false) : false;
+                if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
+                        false)) {
+                    a.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+                }
+            }
+
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
+                a.info.flags |= ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+            }
 
             a.info.screenOrientation = sa.getInt(
                     R.styleable.AndroidManifestActivity_screenOrientation,

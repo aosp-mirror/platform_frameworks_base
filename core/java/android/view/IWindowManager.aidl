@@ -101,11 +101,14 @@ interface IWindowManager
      *                   the task doesn't exist yet.
      * @param configuration Configuration that is being used with this task.
      * @param cropWindowsToStack True if the app windows should be cropped to the stack bounds.
+     * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
+     *                        they are in.
      */
     void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            in Rect taskBounds, in Configuration configuration, boolean cropWindowsToStack);
+            in Rect taskBounds, in Configuration configuration, boolean cropWindowsToStack,
+            boolean alwaysFocusable);
     /**
      *
      * @param token The token we are adding to the input task Id.

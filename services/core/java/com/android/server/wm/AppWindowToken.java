@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.StackId;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -122,6 +123,8 @@ class AppWindowToken extends WindowToken {
 
     // True if the windows associated with this token should be cropped to their stack bounds.
     boolean mCropWindowsToStack;
+
+    boolean mAlwaysFocusable;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
@@ -256,8 +259,8 @@ class AppWindowToken extends WindowToken {
         return candidate;
     }
 
-    boolean stackCanReceiveKeys() {
-        return (windows.size() > 0) ? windows.get(windows.size() - 1).stackCanReceiveKeys() : false;
+    boolean windowsAreFocusable() {
+        return StackId.canReceiveKeys(mTask.mStack.mStackId) || mAlwaysFocusable;
     }
 
     boolean isVisible() {

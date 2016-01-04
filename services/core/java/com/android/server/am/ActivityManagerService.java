@@ -7274,7 +7274,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + "Can't find activity for token=" + token);
                 }
 
-                if (!r.info.supportsPip) {
+                if (!r.supportsPictureInPicture()) {
                     throw new IllegalArgumentException("enterPictureInPictureMode: "
                             + "Picture-In-Picture not supported for r=" + r);
                 }
