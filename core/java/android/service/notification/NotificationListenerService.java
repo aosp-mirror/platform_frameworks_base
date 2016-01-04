@@ -15,6 +15,7 @@
  */
 
 package android.service.notification;
+import android.service.notification.IStatusBarNotificationHolder;
 
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
@@ -151,7 +152,8 @@ public abstract class NotificationListenerService extends Service {
     @SystemApi
     public static final int TRIM_LIGHT = 1;
 
-    private INotificationListenerWrapper mWrapper = null;
+    /** @hide */
+    protected NotificationListenerWrapper mWrapper = null;
     private RankingMap mRankingMap;
 
     private INotificationManager mNoMan;
@@ -291,7 +293,8 @@ public abstract class NotificationListenerService extends Service {
         // optional
     }
 
-    private final INotificationManager getNotificationInterface() {
+    /** @hide */
+    protected final INotificationManager getNotificationInterface() {
         if (mNoMan == null) {
             mNoMan = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
@@ -634,12 +637,13 @@ public abstract class NotificationListenerService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         if (mWrapper == null) {
-            mWrapper = new INotificationListenerWrapper();
+            mWrapper = new NotificationListenerWrapper();
         }
         return mWrapper;
     }
 
-    private boolean isBound() {
+    /** @hide */
+    protected boolean isBound() {
         if (mWrapper == null) {
             Log.w(TAG, "Notification listener service not yet bound.");
             return false;
@@ -664,7 +668,7 @@ public abstract class NotificationListenerService extends Service {
             int currentUser) throws RemoteException {
         mSystemContext = context;
         if (mWrapper == null) {
-            mWrapper = new INotificationListenerWrapper();
+            mWrapper = new NotificationListenerWrapper();
         }
         INotificationManager noMan = getNotificationInterface();
         noMan.registerListener(mWrapper, componentName, currentUser);
@@ -716,7 +720,8 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
-    private class INotificationListenerWrapper extends INotificationListener.Stub {
+    /** @hide */
+    protected class NotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(IStatusBarNotificationHolder sbnHolder,
                 NotificationRankingUpdate update) {
@@ -816,6 +821,35 @@ public abstract class NotificationListenerService extends Service {
             } catch (Throwable t) {
                 Log.w(TAG, "Error running onInterruptionFilterChanged", t);
             }
+        }
+
+        @Override
+        public void onNotificationEnqueued(IStatusBarNotificationHolder notificationHolder,
+                                           int importance, boolean user) throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationVisibilityChanged(String key, long time, boolean visible)
+                throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationClick(String key, long time) throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationActionClick(String key, long time, int actionIndex)
+                throws RemoteException {
+            // no-op in the listener
+        }
+
+        @Override
+        public void onNotificationRemovedReason(String key, long time, int reason)
+                throws RemoteException {
+            // no-op in the listener
         }
     }
 

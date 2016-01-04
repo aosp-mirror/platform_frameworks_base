@@ -19,10 +19,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Handler;
-import android.os.Message;
 import android.os.UserHandle;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -40,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class RankingHelper implements RankingConfig {
     private static final String TAG = "RankingHelper";
@@ -73,10 +69,10 @@ public class RankingHelper implements RankingConfig {
     private final ArrayMap<String, Record> mRestoredWithoutUids = new ArrayMap<>(); // pkg => Record
 
     private final Context mContext;
-    private final Handler mRankingHandler;
+    private final RankingHandler mRankingHandler;
 
-    public RankingHelper(Context context, Handler rankingHandler, NotificationUsageStats usageStats,
-            String[] extractorNames) {
+    public RankingHelper(Context context, RankingHandler rankingHandler,
+            NotificationUsageStats usageStats, String[] extractorNames) {
         mContext = context;
         mRankingHandler = rankingHandler;
 
@@ -119,10 +115,7 @@ public class RankingHelper implements RankingConfig {
             try {
                 RankingReconsideration recon = extractor.process(r);
                 if (recon != null) {
-                    Message m = Message.obtain(mRankingHandler,
-                            NotificationManagerService.MESSAGE_RECONSIDER_RANKING, recon);
-                    long delay = recon.getDelay(TimeUnit.MILLISECONDS);
-                    mRankingHandler.sendMessageDelayed(m, delay);
+                    mRankingHandler.requestReconsideration(recon);
                 }
             } catch (Throwable t) {
                 Slog.w(TAG, "NotificationSignalExtractor failed.", t);
@@ -287,7 +280,7 @@ public class RankingHelper implements RankingConfig {
         for (int i = 0; i < N; i++) {
             mSignalExtractors[i].setConfig(this);
         }
-        mRankingHandler.sendEmptyMessage(NotificationManagerService.MESSAGE_RANKING_CONFIG_CHANGE);
+        mRankingHandler.requestSort();
     }
 
     public void sort(ArrayList<NotificationRecord> notificationList) {

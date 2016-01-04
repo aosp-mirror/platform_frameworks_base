@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 public class RankingHelperTest extends AndroidTestCase {
     @Mock NotificationUsageStats mUsageStats;
-    @Mock Handler handler;
+    @Mock RankingHandler handler;
 
     private Notification mNotiGroupGSortA;
     private Notification mNotiGroupGSortB;
