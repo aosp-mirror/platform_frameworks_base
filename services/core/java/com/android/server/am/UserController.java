@@ -304,7 +304,10 @@ final class UserController {
                         + relatedUserId);
                 // We still need to stop the requested user if it's a force stop.
                 if (force) {
+                    Slog.i(TAG,
+                            "Force stop user " + userId + ". Related users will not be stopped");
                     stopSingleUserLocked(userId, callback);
+                    return USER_OP_SUCCESS;
                 }
                 return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
             }
