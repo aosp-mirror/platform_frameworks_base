@@ -58,7 +58,6 @@ public class WindowLayersController {
     private WindowState mPinnedWindow = null;
     private WindowState mDockedWindow = null;
     private WindowState mDockDivider = null;
-    private WindowState mImeWindow = null;
     private WindowState mReplacingWindow = null;
 
     final void assignLayersLocked(WindowList windows) {
@@ -170,16 +169,13 @@ public class WindowLayersController {
 
     private void clear() {
         mHighestApplicationLayer = 0;
-        mImeWindow = null;
         mPinnedWindow = null;
         mDockedWindow = null;
         mDockDivider = null;
     }
 
     private void collectSpecialWindows(WindowState w) {
-        if (w.mIsImWindow) {
-            mImeWindow = w;
-        } else if (w.mAttrs.type == TYPE_DOCK_DIVIDER) {
+        if (w.mAttrs.type == TYPE_DOCK_DIVIDER) {
             mDockDivider = w;
         } else {
             final TaskStack stack = w.getStack();
@@ -210,12 +206,6 @@ public class WindowLayersController {
         // immediately receive the same treatment, e.g. to be above the dock divider.
         layer = assignAndIncreaseLayerIfNeeded(mReplacingWindow, layer);
         layer = assignAndIncreaseLayerIfNeeded(mPinnedWindow, layer);
-        final WindowState inputMethodTarget = mService.mInputMethodTarget;
-        // There might be no applications windows yet, so we need to make sure we uplift the input
-        // method above the target.
-        layer = Math.max(layer,
-                inputMethodTarget != null ? inputMethodTarget.mWinAnimator.mAnimLayer + 1 : 0);
-        layer = assignAndIncreaseLayerIfNeeded(mImeWindow, layer);
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
