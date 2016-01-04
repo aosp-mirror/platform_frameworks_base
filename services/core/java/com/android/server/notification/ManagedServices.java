@@ -86,7 +86,7 @@ abstract public class ManagedServices {
     protected final ArrayList<ManagedServiceInfo> mServices = new ArrayList<ManagedServiceInfo>();
     // things that will be put into mServices as soon as they're ready
     private final ArrayList<String> mServicesBinding = new ArrayList<String>();
-    // lists the component names of all enabled (and therefore connected)
+    // lists the component names of all enabled (and therefore potentially connected)
     // app services for current profiles.
     private ArraySet<ComponentName> mEnabledServicesForCurrentProfiles
             = new ArraySet<ComponentName>();
@@ -97,6 +97,8 @@ abstract public class ManagedServices {
     private ArraySet<String> mRestoredPackages = new ArraySet<>();
     // State of current service categories
     private ArrayMap<String, Boolean> mCategoryEnabled = new ArrayMap<>();
+    // List of enabled packages that have nevertheless asked not to be run
+    private ArraySet<ComponentName> mSnoozingForCurrentProfiles = new ArraySet<>();
 
 
     // Kept to de-dupe user change events (experienced after boot, when we receive a settings and a
@@ -174,6 +176,12 @@ abstract public class ManagedServices {
                     + (info.isSystem?" SYSTEM":"")
                     + (info.isGuest(this)?" GUEST":""));
         }
+
+        pw.println("    Snoozed " + getCaption() + "s (" +
+                mSnoozingForCurrentProfiles.size() + "):");
+        for (ComponentName name : mSnoozingForCurrentProfiles) {
+            pw.println("      " + name.flattenToShortString());
+        }
     }
 
     // By convention, restored settings are replicated to another settings
@@ -242,13 +250,24 @@ abstract public class ManagedServices {
         rebindServices();
     }
 
-    public ManagedServiceInfo checkServiceTokenLocked(IInterface service) {
-        checkNotNull(service);
+    public ManagedServiceInfo getServiceFromTokenLocked(IInterface service) {
+        if (service == null) {
+            return null;
+        }
         final IBinder token = service.asBinder();
         final int N = mServices.size();
         for (int i = 0; i < N; i++) {
             final ManagedServiceInfo info = mServices.get(i);
             if (info.service.asBinder() == token) return info;
+        }
+        return null;
+    }
+
+    public ManagedServiceInfo checkServiceTokenLocked(IInterface service) {
+        checkNotNull(service);
+        ManagedServiceInfo info = getServiceFromTokenLocked(service);
+        if (info != null) {
+            return info;
         }
         throw new SecurityException("Disallowed call from unknown " + getCaption() + ": "
                 + service);
@@ -278,6 +297,35 @@ abstract public class ManagedServices {
         checkType(guest.service);
         if (registerServiceImpl(guest) != null) {
             onServiceAdded(guest);
+            onServiceAdded(guest);
+        }
+    }
+
+    public void setComponentState(ComponentName component, boolean enabled) {
+        boolean previous = !mSnoozingForCurrentProfiles.contains(component);
+        if (previous == enabled) {
+            return;
+        }
+
+        if (enabled) {
+            mSnoozingForCurrentProfiles.remove(component);
+        } else {
+            mSnoozingForCurrentProfiles.add(component);
+        }
+
+        // State changed
+        if (DEBUG) {
+            Slog.d(TAG, ((enabled) ? "Enabling " : "Disabling ") + "component " +
+                    component.flattenToShortString());
+        }
+
+        final int[] userIds = mUserProfiles.getCurrentProfileIds();
+        for (int userId : userIds) {
+            if (enabled) {
+                registerServiceLocked(component, userId);
+            } else {
+                unregisterServiceLocked(component, userId);
+            }
         }
     }
 
@@ -324,6 +372,7 @@ abstract public class ManagedServices {
 
     private void rebuildRestoredPackages() {
         mRestoredPackages.clear();
+        mSnoozingForCurrentProfiles.clear();
         String settingName = restoredSettingName(mConfig);
         int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int N = userIds.length;
@@ -525,6 +574,7 @@ abstract public class ManagedServices {
                         add.removeAll(c);
                     }
                 }
+                add.removeAll(mSnoozingForCurrentProfiles);
 
                 toAdd.put(userIds[i], add);
 
@@ -803,6 +853,10 @@ abstract public class ManagedServices {
             return ManagedServices.this != host;
         }
 
+        public ManagedServices getOwner() {
+            return ManagedServices.this;
+        }
+
         @Override
         public String toString() {
             return new StringBuilder("ManagedServiceInfo[")
@@ -844,6 +898,11 @@ abstract public class ManagedServices {
             if (this.connection == null) return false;
             return mEnabledServicesForCurrentProfiles.contains(this.component);
         }
+    }
+
+    /** convenience method for looking in mEnabledServicesForCurrentProfiles */
+    public boolean isComponentEnabledForCurrentProfiles(ComponentName component) {
+        return mEnabledServicesForCurrentProfiles.contains(component);
     }
 
     public static class UserProfiles {

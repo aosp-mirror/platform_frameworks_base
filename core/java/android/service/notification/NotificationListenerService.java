@@ -690,6 +690,36 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
+    /**
+     * Request that the listener be rebound, after a previous call to (@link requestUnbind).
+     *
+     * <P>This method will fail for assistants that have
+     * not been granted the permission by the user.
+     *
+     * <P>The service should wait for the {@link #onListenerConnected()} event
+     * before performing any operations.
+     */
+    public static final void requestRebind(ComponentName componentName)
+            throws RemoteException {
+        INotificationManager noMan = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        noMan.requestBindListener(componentName);
+    }
+
+    /**
+     * Request that the service be unbound.
+     *
+     * <P>This will no longer receive updates until
+     * {@link #requestRebind(ComponentName)} is called.
+     * The service will likely be kiled by the system after this call.
+     */
+    public final void requestUnbind() throws RemoteException {
+        if (mWrapper != null) {
+            INotificationManager noMan = getNotificationInterface();
+            noMan.requestUnbindListener(mWrapper);
+        }
+    }
+
     /** Convert new-style Icons to legacy representations for pre-M clients. */
     private void createLegacyIconExtras(Notification n) {
         Icon smallIcon = n.getSmallIcon();

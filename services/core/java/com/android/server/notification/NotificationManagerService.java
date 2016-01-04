@@ -1445,6 +1445,37 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        /**
+         * Handle request from an approved listener to re-enable itself.
+         *
+         * @param component The componenet to be re-enabled, caller must match package.
+         */
+        @Override
+        public void requestBindListener(ComponentName component) {
+            checkCallerIsSystemOrSameApp(component.getPackageName());
+            long identity = Binder.clearCallingIdentity();
+            try {
+                ManagedServices manager = mAssistant.isComponentEnabledForCurrentProfiles(component)
+                        ? mAssistant
+                        : mListeners;
+                manager.setComponentState(component, true);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void requestUnbindListener(INotificationListener token) {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                // allow bound services to disable themselves
+                final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                info.getOwner().setComponentState(info.component, false);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
         @Override
         public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
             long identity = Binder.clearCallingIdentity();
@@ -3431,6 +3462,7 @@ public class NotificationManagerService extends SystemService {
                 // we tried
             }
         }
+
 
         @Override
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
