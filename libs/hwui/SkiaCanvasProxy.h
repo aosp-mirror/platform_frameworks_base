@@ -47,7 +47,7 @@ protected:
     virtual SkSurface* onNewSurface(const SkImageInfo&, const SkSurfaceProps&) override;
 
     virtual void willSave() override;
-    virtual SaveLayerStrategy willSaveLayer(const SkRect*, const SkPaint*, SaveFlags) override;
+    virtual SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
     virtual void willRestore() override;
 
     virtual void didConcat(const SkMatrix&) override;

@@ -162,15 +162,15 @@ void SkiaCanvasProxy::willSave() {
     mCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
 }
 
-SkCanvas::SaveLayerStrategy SkiaCanvasProxy::willSaveLayer(const SkRect* rectPtr,
-        const SkPaint* paint, SaveFlags flags) {
+SkCanvas::SaveLayerStrategy SkiaCanvasProxy::getSaveLayerStrategy(const SaveLayerRec& saveLayerRec) {
     SkRect rect;
-    if (rectPtr) {
-        rect = *rectPtr;
-    } else if(!mCanvas->getClipBounds(&rect)) {
+    if (saveLayerRec.fBounds) {
+        rect = *saveLayerRec.fBounds;
+    } else if (!mCanvas->getClipBounds(&rect)) {
         rect = SkRect::MakeEmpty();
     }
-    mCanvas->saveLayer(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom, paint, flags);
+    mCanvas->saveLayer(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom, saveLayerRec.fPaint,
+                       (SkCanvas::SaveFlags) SaveLayerFlagsToSaveFlags(saveLayerRec.fSaveLayerFlags));
     return SkCanvas::kNoLayer_SaveLayerStrategy;
 }
 
