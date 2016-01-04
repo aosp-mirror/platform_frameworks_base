@@ -812,6 +812,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sLayoutParamsAlwaysChanged = false;
 
     /**
+     * Allow setForeground/setBackground to be called (and ignored) on a textureview,
+     * without throwing
+     */
+    static boolean sTextureViewIgnoresDrawableSetters = false;
+
+    /**
      * This view does not want keystrokes. Use with TAKES_FOCUS_MASK when
      * calling setFlags.
      */
@@ -3983,6 +3989,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // subsequent call to setLayoutParams() and they would usually
             // work. Partial layout breaks this assumption.
             sLayoutParamsAlwaysChanged = targetSdkVersion <= M;
+
+            // Prior to N, TextureView would silently ignore calls to setBackground/setForeground.
+            // On N+, we throw, but that breaks compatibility with apps that use these methods.
+            sTextureViewIgnoresDrawableSetters = targetSdkVersion <= M;
 
             sCompatibilityDone = true;
         }
