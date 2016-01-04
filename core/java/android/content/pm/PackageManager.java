@@ -93,6 +93,109 @@ public abstract class PackageManager {
     }
 
     /**
+     * As a guiding principle:
+     * <p>
+     * {@code GET_} flags are used to request additional data that may have been
+     * elided to save wire space.
+     * <p>
+     * {@code MATCH_} flags are used to include components or packages that
+     * would have otherwise been omitted from a result set by current system
+     * state.
+     */
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_ACTIVITIES,
+            GET_RECEIVERS,
+            GET_SERVICES,
+            GET_PROVIDERS,
+            GET_INSTRUMENTATION,
+            GET_INTENT_FILTERS,
+            GET_SIGNATURES,
+            GET_META_DATA,
+            GET_GIDS,
+            GET_SHARED_LIBRARY_FILES,
+            GET_URI_PERMISSION_PATTERNS,
+            GET_PERMISSIONS,
+            GET_CONFIGURATIONS,
+            MATCH_UNINSTALLED_PACKAGES,
+            MATCH_DISABLED_COMPONENTS,
+            MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_DEBUG_TRIAGED_MISSING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PackageInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+            GET_SHARED_LIBRARY_FILES,
+            MATCH_UNINSTALLED_PACKAGES,
+            MATCH_SYSTEM_ONLY,
+            MATCH_DEBUG_TRIAGED_MISSING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ApplicationInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+            GET_SHARED_LIBRARY_FILES,
+            MATCH_UNINSTALLED_PACKAGES,
+            MATCH_DISABLED_COMPONENTS,
+            MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_ALL,
+            MATCH_DEFAULT_ONLY,
+            MATCH_ENCRYPTION_AWARE,
+            MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
+            MATCH_ENCRYPTION_UNAWARE,
+            MATCH_SYSTEM_ONLY,
+            MATCH_DEBUG_TRIAGED_MISSING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ComponentInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+            GET_SHARED_LIBRARY_FILES,
+            GET_RESOLVED_FILTER,
+            MATCH_UNINSTALLED_PACKAGES,
+            MATCH_DISABLED_COMPONENTS,
+            MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_ALL,
+            MATCH_DEFAULT_ONLY,
+            MATCH_ENCRYPTION_AWARE,
+            MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
+            MATCH_ENCRYPTION_UNAWARE,
+            MATCH_SYSTEM_ONLY,
+            MATCH_DEBUG_TRIAGED_MISSING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResolveInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionGroupInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            GET_META_DATA,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstrumentationInfoFlags {}
+
+    /**
      * {@link PackageInfo} flag: return information about
      * activities in the package in {@link PackageInfo#activities}.
      */
@@ -161,9 +264,15 @@ public abstract class PackageManager {
     public static final int GET_GIDS                    = 0x00000100;
 
     /**
+     * @deprecated replaced with {@link #MATCH_DISABLED_COMPONENTS}
+     */
+    @Deprecated
+    public static final int GET_DISABLED_COMPONENTS = 0x00000200;
+
+    /**
      * {@link PackageInfo} flag: include disabled components in the returned info.
      */
-    public static final int GET_DISABLED_COMPONENTS     = 0x00000200;
+    public static final int MATCH_DISABLED_COMPONENTS = 0x00000200;
 
     /**
      * {@link ApplicationInfo} flag: return the
@@ -190,6 +299,12 @@ public abstract class PackageManager {
     public static final int GET_PERMISSIONS               = 0x00001000;
 
     /**
+     * @deprecated replaced with {@link #MATCH_UNINSTALLED_PACKAGES}
+     */
+    @Deprecated
+    public static final int GET_UNINSTALLED_PACKAGES = 0x00002000;
+
+    /**
      * Flag parameter to retrieve some information about all applications (even
      * uninstalled ones) which have data directories. This state could have
      * resulted if applications have been deleted with flag
@@ -199,7 +314,7 @@ public abstract class PackageManager {
      * Note: this flag may cause less information about currently installed
      * applications to be returned.
      */
-    public static final int GET_UNINSTALLED_PACKAGES = 0x00002000;
+    public static final int MATCH_UNINSTALLED_PACKAGES = 0x00002000;
 
     /**
      * {@link PackageInfo} flag: return information about
@@ -211,12 +326,18 @@ public abstract class PackageManager {
     public static final int GET_CONFIGURATIONS = 0x00004000;
 
     /**
+     * @deprecated replaced with {@link #MATCH_DISABLED_UNTIL_USED_COMPONENTS}.
+     */
+    @Deprecated
+    public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 0x00008000;
+
+    /**
      * {@link PackageInfo} flag: include disabled components which are in
      * that state only because of {@link #COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED}
      * in the returned info.  Note that if you set this flag, applications
      * that are in this disabled state will be reported as enabled.
      */
-    public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 0x00008000;
+    public static final int MATCH_DISABLED_UNTIL_USED_COMPONENTS = 0x00008000;
 
     /**
      * Resolution and querying flag: if set, only filters that support the
@@ -227,48 +348,55 @@ public abstract class PackageManager {
     public static final int MATCH_DEFAULT_ONLY  = 0x00010000;
 
     /**
-     * Querying flag: if set and if the platform is doing any filtering of the results, then
-     * the filtering will not happen. This is a synonym for saying that all results should
-     * be returned.
+     * Querying flag: if set and if the platform is doing any filtering of the
+     * results, then the filtering will not happen. This is a synonym for saying
+     * that all results should be returned.
+     * <p>
+     * <em>This flag should be used with extreme care.</em>
      */
     public static final int MATCH_ALL = 0x00020000;
 
     /**
-     * {@link PackageInfo} flag: include only components which are encryption
-     * unaware in the returned info, regardless of the current user state.
+     * Querying flag: include only components which are encryption unaware in
+     * the returned info, regardless of the current user state.
      */
-    public static final int MATCH_ENCRYPTION_UNAWARE_ONLY = 0x00040000;
+    public static final int MATCH_ENCRYPTION_UNAWARE = 0x00040000;
 
     /**
-     * {@link PackageInfo} flag: include only components which are encryption
-     * aware in the returned info, regardless of the current user state.
+     * Querying flag: include only components which are encryption aware in the
+     * returned info, regardless of the current user state.
      */
-    public static final int MATCH_ENCRYPTION_AWARE_ONLY = 0x00080000;
+    public static final int MATCH_ENCRYPTION_AWARE = 0x00080000;
 
     /**
-     * {@link PackageInfo} flag: include both encryption aware and unaware
-     * components in the returned info, regardless of the current user state.
+     * Querying flag: include both encryption aware and unaware components in
+     * the returned info, regardless of the current user state.
      */
-    public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = MATCH_ENCRYPTION_AWARE_ONLY
-            | MATCH_ENCRYPTION_UNAWARE_ONLY;
+    public static final int MATCH_ENCRYPTION_AWARE_AND_UNAWARE = MATCH_ENCRYPTION_AWARE
+            | MATCH_ENCRYPTION_UNAWARE;
 
     /**
-     * {@link PackageInfo} flag: include only components from applications that
-     * are marked with {@link ApplicationInfo#FLAG_SYSTEM}.
-     *
-     * @hide
+     * Querying flag: include only components from applications that are marked
+     * with {@link ApplicationInfo#FLAG_SYSTEM}.
      */
     public static final int MATCH_SYSTEM_ONLY = 0x00100000;
 
     /**
-     * {@link PackageInfo} flag: use the default encryption matching behavior
-     * based on user state. Internal flag used to indicate that a system
-     * component has done their homework and verified their encryption-aware
-     * behavior.
+     * Internal flag used to indicate that a system component has done their
+     * homework and verified that they correctly handle packages and components
+     * that come and go over time. In particular:
+     * <ul>
+     * <li>Apps installed on external storage, which will appear to be
+     * uninstalled while the the device is ejected.
+     * <li>Apps with encryption unaware components, which will appear to not
+     * exist while the device is locked.
+     * </ul>
      *
+     * @see #MATCH_UNINSTALLED_PACKAGES
+     * @see #MATCH_ENCRYPTION_AWARE_AND_UNAWARE
      * @hide
      */
-    public static final int MATCH_ENCRYPTION_DEFAULT = 0x10000000;
+    public static final int MATCH_DEBUG_TRIAGED_MISSING = 0x10000000;
 
     /**
      * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
@@ -2131,7 +2259,7 @@ public abstract class PackageManager {
      * @see #GET_SIGNATURES
      * @see #GET_UNINSTALLED_PACKAGES
      */
-    public abstract PackageInfo getPackageInfo(String packageName, int flags)
+    public abstract PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags)
             throws NameNotFoundException;
 
     /**
@@ -2171,8 +2299,8 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
-    public abstract PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
-            throws NameNotFoundException;
+    public abstract PackageInfo getPackageInfoAsUser(String packageName,
+            @PackageInfoFlags int flags, int userId) throws NameNotFoundException;
 
     /**
      * Map from the current package names in use on the device to whatever
@@ -2270,7 +2398,7 @@ public abstract class PackageManager {
      * @return Returns a {@link PermissionInfo} containing information about the
      *         permission.
      */
-    public abstract PermissionInfo getPermissionInfo(String name, int flags)
+    public abstract PermissionInfo getPermissionInfo(String name, @PermissionInfoFlags int flags)
             throws NameNotFoundException;
 
     /**
@@ -2289,7 +2417,7 @@ public abstract class PackageManager {
      * about all of the permissions in the given group.
      */
     public abstract List<PermissionInfo> queryPermissionsByGroup(String group,
-            int flags) throws NameNotFoundException;
+            @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the information we know about a particular group of
@@ -2307,7 +2435,7 @@ public abstract class PackageManager {
      * about the permission.
      */
     public abstract PermissionGroupInfo getPermissionGroupInfo(String name,
-            int flags) throws NameNotFoundException;
+            @PermissionGroupInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the known permission groups in the system.
@@ -2318,7 +2446,8 @@ public abstract class PackageManager {
      * @return Returns a list of {@link PermissionGroupInfo} containing
      * information about all of the known permission groups.
      */
-    public abstract List<PermissionGroupInfo> getAllPermissionGroups(int flags);
+    public abstract List<PermissionGroupInfo> getAllPermissionGroups(
+            @PermissionGroupInfoFlags int flags);
 
     /**
      * Retrieve all of the information we know about a particular
@@ -2348,7 +2477,7 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract ApplicationInfo getApplicationInfo(String packageName,
-            int flags) throws NameNotFoundException;
+            @ApplicationInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the information we know about a particular activity
@@ -2371,7 +2500,7 @@ public abstract class PackageManager {
      * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ActivityInfo getActivityInfo(ComponentName component,
-            int flags) throws NameNotFoundException;
+            @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the information we know about a particular receiver
@@ -2394,7 +2523,7 @@ public abstract class PackageManager {
      * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ActivityInfo getReceiverInfo(ComponentName component,
-            int flags) throws NameNotFoundException;
+            @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the information we know about a particular service
@@ -2416,7 +2545,7 @@ public abstract class PackageManager {
      * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ServiceInfo getServiceInfo(ComponentName component,
-            int flags) throws NameNotFoundException;
+            @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve all of the information we know about a particular content
@@ -2438,7 +2567,7 @@ public abstract class PackageManager {
      * @see #GET_SHARED_LIBRARY_FILES
      */
     public abstract ProviderInfo getProviderInfo(ComponentName component,
-            int flags) throws NameNotFoundException;
+            @ComponentInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Return a List of all packages that are installed
@@ -2474,7 +2603,7 @@ public abstract class PackageManager {
      * @see #GET_SIGNATURES
      * @see #GET_UNINSTALLED_PACKAGES
      */
-    public abstract List<PackageInfo> getInstalledPackages(int flags);
+    public abstract List<PackageInfo> getInstalledPackages(@PackageInfoFlags int flags);
 
     /**
      * Return a List of all installed packages that are currently
@@ -2507,7 +2636,7 @@ public abstract class PackageManager {
      * @see #GET_UNINSTALLED_PACKAGES
      */
     public abstract List<PackageInfo> getPackagesHoldingPermissions(
-            String[] permissions, int flags);
+            String[] permissions, @PackageInfoFlags int flags);
 
     /**
      * Return a List of all packages that are installed on the device, for a specific user.
@@ -2546,7 +2675,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract List<PackageInfo> getInstalledPackages(int flags, int userId);
+    public abstract List<PackageInfo> getInstalledPackages(@PackageInfoFlags int flags, int userId);
 
     /**
      * Check whether a particular package has been granted a particular
@@ -2886,7 +3015,7 @@ public abstract class PackageManager {
      * @see #GET_SHARED_LIBRARY_FILES
      * @see #GET_UNINSTALLED_PACKAGES
      */
-    public abstract List<ApplicationInfo> getInstalledApplications(int flags);
+    public abstract List<ApplicationInfo> getInstalledApplications(@ApplicationInfoFlags int flags);
 
     /**
      * Gets the ephemeral applications the user recently used. Requires
@@ -3021,7 +3150,7 @@ public abstract class PackageManager {
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
      */
-    public abstract ResolveInfo resolveActivity(Intent intent, int flags);
+    public abstract ResolveInfo resolveActivity(Intent intent, @ResolveInfoFlags int flags);
 
     /**
      * Determine the best action to perform for a given Intent for a given user. This
@@ -3054,7 +3183,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract ResolveInfo resolveActivityAsUser(Intent intent, int flags, int userId);
+    public abstract ResolveInfo resolveActivityAsUser(Intent intent, @ResolveInfoFlags int flags,
+            int userId);
 
     /**
      * Retrieve all activities that can be performed for the given intent.
@@ -3077,7 +3207,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      */
     public abstract List<ResolveInfo> queryIntentActivities(Intent intent,
-            int flags);
+            @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all activities that can be performed for the given intent, for a specific user.
@@ -3101,8 +3231,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-            int flags, int userId);
-
+            @ResolveInfoFlags int flags, int userId);
 
     /**
      * Retrieve a set of activities that should be presented to the user as
@@ -3134,7 +3263,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      */
     public abstract List<ResolveInfo> queryIntentActivityOptions(
-            ComponentName caller, Intent[] specifics, Intent intent, int flags);
+            ComponentName caller, Intent[] specifics, Intent intent, @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
@@ -3151,7 +3280,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      */
     public abstract List<ResolveInfo> queryBroadcastReceivers(Intent intent,
-            int flags);
+            @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent, for a specific
@@ -3171,7 +3300,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryBroadcastReceivers(Intent intent,
-            int flags, int userId);
+            @ResolveInfoFlags int flags, int userId);
 
     /**
      * Determine the best service to handle for a given Intent.
@@ -3187,7 +3316,7 @@ public abstract class PackageManager {
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
      */
-    public abstract ResolveInfo resolveService(Intent intent, int flags);
+    public abstract ResolveInfo resolveService(Intent intent, @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all services that can match the given intent.
@@ -3205,7 +3334,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      */
     public abstract List<ResolveInfo> queryIntentServices(Intent intent,
-            int flags);
+            @ResolveInfoFlags int flags);
 
     /**
      * Retrieve all services that can match the given intent for a given user.
@@ -3226,11 +3355,11 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
-            int flags, int userId);
+            @ResolveInfoFlags int flags, int userId);
 
     /** {@hide} */
     public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
-            Intent intent, int flags, int userId);
+            Intent intent, @ResolveInfoFlags int flags, int userId);
 
     /**
      * Retrieve all providers that can match the given intent.
@@ -3244,7 +3373,8 @@ public abstract class PackageManager {
      * @see #GET_INTENT_FILTERS
      * @see #GET_RESOLVED_FILTER
      */
-    public abstract List<ResolveInfo> queryIntentContentProviders(Intent intent, int flags);
+    public abstract List<ResolveInfo> queryIntentContentProviders(Intent intent,
+            @ResolveInfoFlags int flags);
 
     /**
      * Find a single content provider by its base path name.
@@ -3256,7 +3386,7 @@ public abstract class PackageManager {
      *         else null.
      */
     public abstract ProviderInfo resolveContentProvider(String name,
-            int flags);
+            @ComponentInfoFlags int flags);
 
     /**
      * Find a single content provider by its base path name.
@@ -3269,7 +3399,8 @@ public abstract class PackageManager {
      *         else null.
      * @hide
      */
-    public abstract ProviderInfo resolveContentProviderAsUser(String name, int flags, int userId);
+    public abstract ProviderInfo resolveContentProviderAsUser(String name,
+            @ComponentInfoFlags int flags, int userId);
 
     /**
      * Retrieve content provider information.
@@ -3290,7 +3421,7 @@ public abstract class PackageManager {
      *         <em>If there are no matching providers, null is returned.</em>
      */
     public abstract List<ProviderInfo> queryContentProviders(
-            String processName, int uid, int flags);
+            String processName, int uid, @ComponentInfoFlags int flags);
 
     /**
      * Retrieve all of the information we know about a particular
@@ -3307,8 +3438,8 @@ public abstract class PackageManager {
      * @return InstrumentationInfo containing information about the
      *         instrumentation.
      */
-    public abstract InstrumentationInfo getInstrumentationInfo(
-            ComponentName className, int flags) throws NameNotFoundException;
+    public abstract InstrumentationInfo getInstrumentationInfo(ComponentName className,
+            @InstrumentationInfoFlags int flags) throws NameNotFoundException;
 
     /**
      * Retrieve information about available instrumentation code.  May be used
@@ -3324,8 +3455,8 @@ public abstract class PackageManager {
      *         matching available Instrumentation.  Returns an empty list if
      *         there is no instrumentation available for the given package.
      */
-    public abstract List<InstrumentationInfo> queryInstrumentation(
-            String targetPackage, int flags);
+    public abstract List<InstrumentationInfo> queryInstrumentation(String targetPackage,
+            @InstrumentationInfoFlags int flags);
 
     /**
      * Retrieve an image from a package.  This is a low-level API used by
@@ -3761,7 +3892,7 @@ public abstract class PackageManager {
      * @see #GET_SIGNATURES
      *
      */
-    public PackageInfo getPackageArchiveInfo(String archiveFilePath, int flags) {
+    public PackageInfo getPackageArchiveInfo(String archiveFilePath, @PackageInfoFlags int flags) {
         final PackageParser parser = new PackageParser();
         final File apkFile = new File(archiveFilePath);
         try {
@@ -4423,7 +4554,7 @@ public abstract class PackageManager {
      * @see #GET_SERVICES
      * @see #GET_SIGNATURES
      */
-    public abstract List<PackageInfo> getPreferredPackages(int flags);
+    public abstract List<PackageInfo> getPreferredPackages(@PackageInfoFlags int flags);
 
     /**
      * @deprecated This is a protected API that should not have been available

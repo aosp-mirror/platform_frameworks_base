@@ -155,8 +155,7 @@ public class DefaultDialerManager {
 
         // Get the list of apps registered for the DIAL intent with empty scheme
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent,
-                PackageManager.MATCH_ENCRYPTION_DEFAULT);
+        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent, 0);
 
         List<String> packageNames = new ArrayList<>();
 
@@ -209,7 +208,7 @@ public class DefaultDialerManager {
 
         final List<String> result = new ArrayList<>();
         final List<ResolveInfo> resolveInfoList = context.getPackageManager()
-                .queryIntentActivities(intent, PackageManager.MATCH_ENCRYPTION_DEFAULT);
+                .queryIntentActivities(intent, 0);
         final int length = resolveInfoList.size();
         for (int i = 0; i < length; i++) {
             final ActivityInfo info = resolveInfoList.get(i).activityInfo;

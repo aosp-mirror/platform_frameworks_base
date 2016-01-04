@@ -106,6 +106,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AppsQueryHelper;
+import android.content.pm.ComponentInfo;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.EphemeralResolveInfo.EphemeralResolveIntentInfo;
@@ -207,7 +208,6 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -308,7 +308,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_DEXOPT = false;
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_EPHEMERAL = false;
-    private static final boolean DEBUG_ENCRYPTION_AWARE = false;
+    private static final boolean DEBUG_TRIAGED_MISSING = false;
 
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
@@ -2848,6 +2848,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package info");
         // reader
         synchronized (mPackages) {
@@ -2898,6 +2899,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public int getPackageUidEtc(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return -1;
+        flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package uid");
 
         // reader
@@ -2924,10 +2926,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public int[] getPackageGidsEtc(String packageName, int flags, int userId) {
-        if (!sUserManager.exists(userId)) {
-            return null;
-        }
-
+        if (!sUserManager.exists(userId)) return null;
+        flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
                 "getPackageGids");
 
@@ -2949,8 +2949,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    static PermissionInfo generatePermissionInfo(
-            BasePermission bp, int flags) {
+    static PermissionInfo generatePermissionInfo(BasePermission bp, int flags) {
         if (bp.perm != null) {
             return PackageParser.generatePermissionInfo(bp.perm, flags);
         }
@@ -3068,6 +3067,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
+        flags = updateFlagsForApplication(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get application info");
         // writer
         synchronized (mPackages) {
@@ -3182,46 +3182,88 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Augment the given flags depending on current user running state. This is
-     * purposefully done before acquiring {@link #mPackages} lock.
+     * Update given flags based on encryption status of current user.
      */
-    private int augmentFlagsForUser(int flags, int userId, Object cookie) {
-        if (cookie instanceof Intent) {
-            // If intent claims to be triaged, then we're fine with default
-            // matching behavior below
-            final Intent intent = (Intent) cookie;
-            if ((intent.getFlags() & Intent.FLAG_DEBUG_ENCRYPTION_TRIAGED) != 0) {
-                flags |= PackageManager.MATCH_ENCRYPTION_DEFAULT;
-            }
-        }
-
-        if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE_ONLY
-                | PackageManager.MATCH_ENCRYPTION_AWARE_ONLY)) != 0) {
-            // Caller expressed an opinion about what components they want to
-            // see, so fall through and give them what they want
+    private int updateFlagsForEncryption(int flags, int userId) {
+        if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
+                | PackageManager.MATCH_ENCRYPTION_AWARE)) != 0) {
+            // Caller expressed an explicit opinion about what encryption
+            // aware/unaware components they want to see, so fall through and
+            // give them what they want
         } else {
             // Caller expressed no opinion, so match based on user state
             if (isUserKeyUnlocked(userId)) {
                 flags |= PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
             } else {
-                flags |= PackageManager.MATCH_ENCRYPTION_AWARE_ONLY;
-
-                // If we have a system caller that hasn't done their homework to
-                // decide they want this default behavior, yell at them
-                if (DEBUG_ENCRYPTION_AWARE && (Binder.getCallingUid() == Process.SYSTEM_UID)
-                        && ((flags & PackageManager.MATCH_ENCRYPTION_DEFAULT) == 0)) {
-                    Log.v(TAG, "Caller hasn't been triaged for FBE; they asked about " + cookie,
-                            new Throwable());
-                }
+                flags |= PackageManager.MATCH_ENCRYPTION_AWARE;
             }
         }
         return flags;
     }
 
+    /**
+     * Update given flags when being used to request {@link PackageInfo}.
+     */
+    private int updateFlagsForPackage(int flags, int userId, Object cookie) {
+        boolean triaged = true;
+        if ((flags & PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
+                | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS) != 0) {
+            // Caller is asking for component details, so they'd better be
+            // asking for specific encryption matching behavior, or be triaged
+            if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
+                    | PackageManager.MATCH_ENCRYPTION_AWARE
+                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
+                triaged = false;
+            }
+        }
+        if ((flags & (PackageManager.MATCH_UNINSTALLED_PACKAGES
+                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
+            triaged = false;
+        }
+        if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
+            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie,
+                    new Throwable());
+        }
+        return updateFlagsForEncryption(flags, userId);
+    }
+
+    /**
+     * Update given flags when being used to request {@link ApplicationInfo}.
+     */
+    private int updateFlagsForApplication(int flags, int userId, Object cookie) {
+        return updateFlagsForPackage(flags, userId, cookie);
+    }
+
+    /**
+     * Update given flags when being used to request {@link ComponentInfo}.
+     */
+    private int updateFlagsForComponent(int flags, int userId, Object cookie) {
+        boolean triaged = true;
+        // Caller is asking for component details, so they'd better be
+        // asking for specific encryption matching behavior, or be triaged
+        if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
+                | PackageManager.MATCH_ENCRYPTION_AWARE
+                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
+            triaged = false;
+        }
+        if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
+            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie,
+                    new Throwable());
+        }
+        return updateFlagsForEncryption(flags, userId);
+    }
+
+    /**
+     * Update given flags when being used to request {@link ResolveInfo}.
+     */
+    private int updateFlagsForResolve(int flags, int userId, Object cookie) {
+        return updateFlagsForComponent(flags, userId, cookie);
+    }
+
     @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId, component);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get activity info");
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
@@ -3266,7 +3308,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId, component);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get receiver info");
         synchronized (mPackages) {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
@@ -3285,7 +3327,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId, component);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get service info");
         synchronized (mPackages) {
             PackageParser.Service s = mServices.mServices.get(component);
@@ -3304,7 +3346,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId, component);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get provider info");
         synchronized (mPackages) {
             PackageParser.Provider p = mProviders.mProviders.get(component);
@@ -4429,7 +4471,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "resolve intent");
         List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
         final ResolveInfo bestChoice =
@@ -4687,7 +4729,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             List<ResolveInfo> query, int priority, boolean always,
             boolean removeMatches, boolean debug, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         // writer
         synchronized (mPackages) {
             if (intent.getSelector() != null) {
@@ -4886,7 +4928,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentActivities(Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "query intent activities");
         ComponentName comp = intent.getComponent();
         if (comp == null) {
@@ -5370,7 +5412,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Intent[] specifics, String[] specificTypes, Intent intent,
             String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false,
                 false, "query intent activity options");
         final String resultsAction = intent.getAction();
@@ -5543,7 +5585,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentReceivers(Intent intent, String resolvedType, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5580,7 +5622,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
         if (query != null) {
             if (query.size() >= 1) {
@@ -5596,7 +5638,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentServices(Intent intent, String resolvedType, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5634,7 +5676,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public List<ResolveInfo> queryIntentContentProviders(
             Intent intent, String resolvedType, int flags, int userId) {
         if (!sUserManager.exists(userId)) return Collections.emptyList();
-        flags = augmentFlagsForUser(flags, userId, intent);
+        flags = updateFlagsForResolve(flags, userId, intent);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -5670,8 +5712,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
+        if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
+        flags = updateFlagsForPackage(flags, userId, null);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
-
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "get installed packages");
 
         // writer
@@ -5750,7 +5793,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
             String[] permissions, int flags, int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
+        flags = updateFlagsForPackage(flags, userId, permissions);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5777,7 +5821,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
-        if (!sUserManager.exists(userId)) return null;
+        if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
+        flags = updateFlagsForApplication(flags, userId, null);
         final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
 
         // writer
@@ -5920,7 +5965,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public ProviderInfo resolveContentProvider(String name, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, name);
+        flags = updateFlagsForComponent(flags, userId, name);
         // reader
         synchronized (mPackages) {
             final PackageParser.Provider provider = mProvidersByAuthority.get(name);
@@ -5972,7 +6017,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
         if (!sUserManager.exists(userId)) return null;
-        flags = augmentFlagsForUser(flags, userId, processName);
+        flags = updateFlagsForComponent(flags, userId, processName);
 
         ArrayList<ProviderInfo> finalList = null;
         // reader
@@ -6009,8 +6054,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public InstrumentationInfo getInstrumentationInfo(ComponentName name,
-            int flags) {
+    public InstrumentationInfo getInstrumentationInfo(ComponentName name, int flags) {
         // reader
         synchronized (mPackages) {
             final PackageParser.Instrumentation i = mInstrumentation.get(name);

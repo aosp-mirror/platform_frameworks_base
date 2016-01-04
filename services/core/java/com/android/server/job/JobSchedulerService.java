@@ -161,8 +161,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Slog.d(TAG, "Receieved: " + intent.getAction());
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+            final String action = intent.getAction();
+            Slog.d(TAG, "Receieved: " + action);
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
                 // If this is an outright uninstall rather than the first half of an
                 // app update sequence, cancel the jobs associated with the app.
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -172,18 +173,21 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     cancelJobsForUid(uidRemoved, true);
                 }
-            } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
-            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())
-                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())) {
+            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(action)
+                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
                 updateIdleMode(mPowerManager != null
                         ? (mPowerManager.isDeviceIdleMode()
                                 || mPowerManager.isLightDeviceIdleMode())
                         : false);
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
+                // Kick off pending jobs for any apps that re-appeared
+                mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
         }
     };
@@ -425,17 +429,24 @@ public class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            // Register br for package removals and user removals.
+            // Register for package removals and user removals.
             final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
             filter.addDataScheme("package");
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
             userFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             userFilter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
-            mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
+
+            final IntentFilter storageFilter = new IntentFilter();
+            storageFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+            getContext().registerReceiverAsUser(
+                    mBroadcastReceiver, UserHandle.ALL, storageFilter, null, null);
+
+            mPowerManager = getContext().getSystemService(PowerManager.class);
             try {
                 ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_IDLE);
@@ -834,7 +845,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final boolean componentPresent;
             try {
                 componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
-                        job.getServiceComponent(), PackageManager.MATCH_ENCRYPTION_DEFAULT,
+                        job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                         userId) != null);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -924,8 +935,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             final IPackageManager pm = AppGlobals.getPackageManager();
             final ComponentName service = job.getService();
             try {
-                ServiceInfo si = pm.getServiceInfo(service, PackageManager.MATCH_ENCRYPTION_DEFAULT,
-                        UserHandle.getUserId(uid));
+                ServiceInfo si = pm.getServiceInfo(service,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(uid));
                 if (si == null) {
                     throw new IllegalArgumentException("No such service " + service);
                 }
