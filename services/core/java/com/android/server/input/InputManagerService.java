@@ -1022,30 +1022,53 @@ public class InputManagerService extends IInputManager.Stub
         return list.toArray(new KeyboardLayout[list.size()]);
     }
 
-    @Override
+    @Override // Binder call
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             final InputDeviceIdentifier identifier) {
-        final ArrayList<KeyboardLayout> list = new ArrayList<KeyboardLayout>();
+        final String[] enabledLayoutDescriptors =
+            getEnabledKeyboardLayoutsForInputDevice(identifier);
+        final ArrayList<KeyboardLayout> enabledLayouts =
+            new ArrayList<KeyboardLayout>(enabledLayoutDescriptors.length);
+        final ArrayList<KeyboardLayout> potentialLayouts = new ArrayList<KeyboardLayout>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             boolean mHasSeenDeviceSpecificLayout;
 
             @Override
             public void visitKeyboardLayout(Resources resources,
                     int keyboardLayoutResId, KeyboardLayout layout) {
+                // First check if it's enabled. If the keyboard layout is enabled then we always
+                // want to return it as a possible layout for the device.
+                for (String s : enabledLayoutDescriptors) {
+                    if (s != null && s.equals(layout.getDescriptor())) {
+                        enabledLayouts.add(layout);
+                        return;
+                    }
+                }
+                // Next find any potential layouts that aren't yet enabled for the device. For
+                // devices that have special layouts we assume there's a reason that the generic
+                // layouts don't work for them so we don't want to return them since it's likely
+                // to result in a poor user experience.
                 if (layout.getVendorId() == identifier.getVendorId()
                         && layout.getProductId() == identifier.getProductId()) {
                     if (!mHasSeenDeviceSpecificLayout) {
                         mHasSeenDeviceSpecificLayout = true;
-                        list.clear();
+                        potentialLayouts.clear();
                     }
-                    list.add(layout);
+                    potentialLayouts.add(layout);
                 } else if (layout.getVendorId() == -1 && layout.getProductId() == -1
                         && !mHasSeenDeviceSpecificLayout) {
-                    list.add(layout);
+                    potentialLayouts.add(layout);
                 }
             }
         });
-        return list.toArray(new KeyboardLayout[list.size()]);
+        final int enabledLayoutSize = enabledLayouts.size();
+        final int potentialLayoutSize = potentialLayouts.size();
+        KeyboardLayout[] layouts = new KeyboardLayout[enabledLayoutSize + potentialLayoutSize];
+        enabledLayouts.toArray(layouts);
+        for (int i = 0; i < potentialLayoutSize; i++) {
+            layouts[enabledLayoutSize + i] = potentialLayouts.get(i);
+        }
+        return layouts;
     }
 
     @Override // Binder call
