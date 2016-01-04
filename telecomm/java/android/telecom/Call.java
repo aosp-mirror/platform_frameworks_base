@@ -269,7 +269,7 @@ public final class Call {
          * @return Whether the specified capability is supported.
          */
         public static boolean can(int capabilities, int capability) {
-            return (capabilities & capability) != 0;
+            return (capabilities & capability) == capability;
         }
 
         /**
@@ -351,7 +351,7 @@ public final class Call {
          * @return Whether the specified property is supported.
          */
         public static boolean hasProperty(int properties, int property) {
-            return (properties & property) != 0;
+            return (properties & property) == property;
         }
 
         /**

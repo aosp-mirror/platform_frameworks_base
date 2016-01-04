@@ -294,7 +294,7 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     public static boolean can(int capabilities, int capability) {
-        return (capabilities & capability) != 0;
+        return (capabilities & capability) == capability;
     }
 
     /**
