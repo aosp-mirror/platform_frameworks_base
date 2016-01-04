@@ -82,9 +82,11 @@ accounts.</p>
 <p>Once authorized for testing access, those users can make purchases without
 being charged.
 Test purchases are real orders and Google Play processes them in the same way as
-other orders. When purchases are complete, Google Play prevents the orders from
+other orders. However, the <code>orderId</code> field for test purchases is
+blank.
+When purchases are complete, Google Play prevents the orders from
 going to financial processing, ensuring that there are no actual charges to user
-accounts, and automatically canceling the completed orders after 14 days. </p>
+accounts, and automatically canceling the completed orders after 14 days.</p>
 
 <p class="note">
   <strong>Note:</strong> Test subscription purchases recur daily, regardless of
