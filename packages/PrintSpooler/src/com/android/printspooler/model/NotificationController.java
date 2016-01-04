@@ -158,11 +158,14 @@ final class NotificationController {
             builder.addAction(secondAction);
         }
 
-        if (printJob.getState() == PrintJobInfo.STATE_STARTED) {
+        if (printJob.getState() == PrintJobInfo.STATE_STARTED
+                || printJob.getState() == PrintJobInfo.STATE_QUEUED) {
             float progress = printJob.getProgress();
             if (progress >= 0) {
-                builder.setProgress(Integer.MAX_VALUE, (int)(Integer.MAX_VALUE * progress),
+                builder.setProgress(Integer.MAX_VALUE, (int) (Integer.MAX_VALUE * progress),
                         false);
+            } else {
+                builder.setProgress(Integer.MAX_VALUE, 0, true);
             }
         }
 
