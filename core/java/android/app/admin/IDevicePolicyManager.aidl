@@ -202,6 +202,9 @@ interface IDevicePolicyManager {
     void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
+    void setCrossProfileContactsSearchDisabled(in ComponentName who, boolean disabled);
+    boolean getCrossProfileContactsSearchDisabled(in ComponentName who);
+    boolean getCrossProfileContactsSearchDisabledForUser(int userId);
     void startManagedQuickContact(String lookupKey, long contactId, long directoryId, in Intent originalIntent);
 
     void setBluetoothContactSharingDisabled(in ComponentName who, boolean disabled);

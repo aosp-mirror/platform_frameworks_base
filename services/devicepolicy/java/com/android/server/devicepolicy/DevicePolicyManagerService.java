@@ -387,6 +387,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
         private static final String TAG_DISABLE_CAMERA = "disable-camera";
         private static final String TAG_DISABLE_CALLER_ID = "disable-caller-id";
+        private static final String TAG_DISABLE_CONTACTS_SEARCH = "disable-contacts-search";
         private static final String TAG_DISABLE_BLUETOOTH_CONTACT_SHARING
                 = "disable-bt-contacts-sharing";
         private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
@@ -472,6 +473,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean encryptionRequested = false;
         boolean disableCamera = false;
         boolean disableCallerId = false;
+        boolean disableContactsSearch = false;
         boolean disableBluetoothContactSharing = true;
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
@@ -618,6 +620,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, TAG_DISABLE_CALLER_ID);
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableCallerId));
                 out.endTag(null, TAG_DISABLE_CALLER_ID);
+            }
+            if (disableContactsSearch) {
+                out.startTag(null, TAG_DISABLE_CONTACTS_SEARCH);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(disableContactsSearch));
+                out.endTag(null, TAG_DISABLE_CONTACTS_SEARCH);
             }
             if (disableBluetoothContactSharing) {
                 out.startTag(null, TAG_DISABLE_BLUETOOTH_CONTACT_SHARING);
@@ -774,6 +781,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_CALLER_ID.equals(tag)) {
                     disableCallerId = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_DISABLE_CONTACTS_SEARCH.equals(tag)) {
+                    disableContactsSearch = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_BLUETOOTH_CONTACT_SHARING.equals(tag)) {
                     disableBluetoothContactSharing = Boolean.parseBoolean(parser
@@ -983,6 +993,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableCamera);
             pw.print(prefix); pw.print("disableCallerId=");
                     pw.println(disableCallerId);
+            pw.print(prefix); pw.print("disableContactsSearch=");
+                    pw.println(disableContactsSearch);
             pw.print(prefix); pw.print("disableBluetoothContactSharing=");
                     pw.println(disableBluetoothContactSharing);
             pw.print(prefix); pw.print("disableScreenCapture=");
@@ -1741,7 +1753,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         Intent resolveIntent = new Intent();
         resolveIntent.setComponent(adminName);
         List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceivers(
@@ -2344,7 +2356,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Bundle onEnableData) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
 
         DevicePolicyData policy = getUserData(userHandle);
         DeviceAdminInfo info = findAdmin(adminReceiver, userHandle,
@@ -2390,7 +2402,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             return getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null;
         }
@@ -2401,7 +2413,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policyData = getUserData(userHandle);
             return policyData.mRemovingAdmins.contains(adminReceiver);
@@ -2413,7 +2425,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             ActiveAdmin administrator = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
             if (administrator == null) {
@@ -2430,7 +2442,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return Collections.EMPTY_LIST;
         }
 
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
             final int N = policy.mAdminList.size();
@@ -2450,7 +2462,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             DevicePolicyData policy = getUserData(userHandle);
             final int N = policy.mAdminList.size();
@@ -2468,7 +2480,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
             if (admin == null) {
@@ -2518,7 +2530,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int mode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
@@ -2565,7 +2577,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -2612,7 +2624,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -2672,7 +2684,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0L;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             long timeout = 0L;
 
@@ -2799,7 +2811,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0L;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             return getPasswordExpirationLocked(who, userHandle);
         }
@@ -2827,7 +2839,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -2871,7 +2883,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -2918,7 +2930,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -2968,7 +2980,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -3018,7 +3030,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -3068,7 +3080,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             int length = 0;
 
@@ -3101,7 +3113,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return true;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
 
         synchronized (this) {
             int id = getCredentialOwner(userHandle);
@@ -3167,7 +3179,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             ActiveAdmin admin = (who != null) ? getActiveAdminUncheckedLocked(who, userHandle)
                     : getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
@@ -3180,7 +3192,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return UserHandle.USER_NULL;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             ActiveAdmin admin = getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
             return admin != null ? admin.getUserHandle().getIdentifier() : UserHandle.USER_NULL;
@@ -3479,7 +3491,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             long time = 0;
 
@@ -3801,7 +3813,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         final int userHandle = mInjector.userHandleGetCallingUserId();
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
@@ -3880,7 +3892,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
@@ -3909,7 +3921,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         // Managed Profile password can only be changed when per user encryption is present.
         if (!LockPatternUtils.isSeparateWorkChallengeEnabled()) {
             enforceNotManagedProfile(userHandle, "set the active password");
@@ -3978,7 +3990,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void reportFailedPasswordAttempt(int userHandle) {
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         enforceNotManagedProfile(userHandle, "report failed password attempt");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
@@ -4020,7 +4032,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void reportSuccessfulPasswordAttempt(int userHandle) {
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
 
@@ -4104,7 +4116,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized(this) {
             DevicePolicyData policy = getUserData(UserHandle.USER_SYSTEM);
             // Scan through active admins and find if anyone has already
@@ -4241,7 +4253,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             // Check for permissions if a particular caller is specified
             if (who != null) {
@@ -4271,7 +4283,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             // Ok to return current status.
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         return getEncryptionStatus();
     }
 
@@ -4519,7 +4531,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return 0;
         }
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         long ident = mInjector.binderClearCallingIdentity();
         try {
             synchronized (this) {
@@ -5080,17 +5092,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void enforceCrossUserPermission(int userHandle) {
+    private void enforceFullCrossUsersPermission(int userHandle) {
+        enforceSystemUserOrPermission(userHandle,
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+    }
+
+    private void enforceCrossUsersPermission(int userHandle) {
+        enforceSystemUserOrPermission(userHandle,
+                android.Manifest.permission.INTERACT_ACROSS_USERS);
+    }
+
+    private void enforceSystemUserOrPermission(int userHandle, String permission) {
         if (userHandle < 0) {
             throw new IllegalArgumentException("Invalid userId " + userHandle);
         }
         final int callingUid = mInjector.binderGetCallingUid();
-        if (userHandle == UserHandle.getUserId(callingUid)) return;
+        if (userHandle == UserHandle.getUserId(callingUid)) {
+            return;
+        }
         if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID)) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, "Must be system or have"
-                    + " INTERACT_ACROSS_USERS_FULL permission");
+            mContext.enforceCallingOrSelfPermission(permission,
+                    "Must be system or have " + permission + " permission");
         }
     }
 
@@ -5300,7 +5323,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         Preconditions.checkNotNull(agent, "agent null");
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
 
         synchronized (this) {
             final String componentName = agent.flattenToString();
@@ -5963,7 +5986,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public Bundle getUserRestrictions(ComponentName who, int userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        enforceCrossUserPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
             ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(who, userHandle);
             if (activeAdmin == null) {
@@ -6155,7 +6178,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String[] getAccountTypesWithManagementDisabledAsUser(int userId) {
-        enforceCrossUserPermission(userId);
+        enforceFullCrossUsersPermission(userId);
         if (!mHasFeature) {
             return null;
         }
@@ -6227,7 +6250,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (admin.disableCallerId != disabled) {
                 admin.disableCallerId = disabled;
-                saveSettingsLocked(UserHandle.getCallingUserId());
+                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
             }
         }
     }
@@ -6247,11 +6270,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean getCrossProfileCallerIdDisabledForUser(int userId) {
-        // TODO: Should there be a check to make sure this relationship is within a profile group?
-        //enforceSystemProcess("getCrossProfileCallerIdDisabled can only be called by system");
+        enforceCrossUsersPermission(userId);
         synchronized (this) {
             ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
             return (admin != null) ? admin.disableCallerId : false;
+        }
+    }
+
+    @Override
+    public void setCrossProfileContactsSearchDisabled(ComponentName who, boolean disabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (admin.disableContactsSearch != disabled) {
+                admin.disableContactsSearch = disabled;
+                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+            }
+        }
+    }
+
+    @Override
+    public boolean getCrossProfileContactsSearchDisabled(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.disableContactsSearch;
+        }
+    }
+
+    @Override
+    public boolean getCrossProfileContactsSearchDisabledForUser(int userId) {
+        enforceCrossUsersPermission(userId);
+        synchronized (this) {
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
+            return (admin != null) ? admin.disableContactsSearch : false;
         }
     }
 
