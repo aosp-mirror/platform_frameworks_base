@@ -74,11 +74,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"Өчүк"</item>
-    <item msgid="2969458029344750262">"64K каттоо буфери үчүн"</item>
-    <item msgid="1342285115665698168">"256K каттоо буфери үчүн"</item>
-    <item msgid="1314234299552254621">"1M каттоо буфери үчүн"</item>
-    <item msgid="3606047780792894151">"4M каттоо буфери үчүн"</item>
-    <item msgid="5431354956856655120">"16M каттоо буфери үчүн"</item>
+    <item msgid="2969458029344750262">"Буфер: 64КБ ашпашы керек"</item>
+    <item msgid="1342285115665698168">"Буфер: 256КБ ашпашы керек"</item>
+    <item msgid="1314234299552254621">"Буфер: 1М ашпашы керек"</item>
+    <item msgid="3606047780792894151">"Буфер: 4М ашпашы керек"</item>
+    <item msgid="5431354956856655120">"Буфер: 16М ашпашы керек"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Анимацияны өчүрүү"</item>

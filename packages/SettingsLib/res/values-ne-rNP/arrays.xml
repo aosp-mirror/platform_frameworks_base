@@ -63,8 +63,8 @@
     <item msgid="1593289376502312923">"६४के"</item>
     <item msgid="487545340236145324">"२५६के"</item>
     <item msgid="2423528675294333831">"१एम"</item>
-    <item msgid="180883774509476541">"4एम"</item>
-    <item msgid="2803199102589126938">"16एम"</item>
+    <item msgid="180883774509476541">"४एम"</item>
+    <item msgid="2803199102589126938">"१६एम"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="6089470720451068364">"निष्क्रिय गर्नुहोस्"</item>
@@ -74,11 +74,11 @@
   </string-array>
   <string-array name="select_logd_size_summaries">
     <item msgid="6921048829791179331">"निष्क्रिय गर्नुहोस्"</item>
-    <item msgid="2969458029344750262">"64के प्रति लग बफर"</item>
-    <item msgid="1342285115665698168">"256के प्रति लग बफर"</item>
-    <item msgid="1314234299552254621">"1एम प्रति लग बफर"</item>
-    <item msgid="3606047780792894151">"4एम प्रति लग बफर"</item>
-    <item msgid="5431354956856655120">"16एम प्रति लग बफर"</item>
+    <item msgid="2969458029344750262">"६४के प्रति लग बफर"</item>
+    <item msgid="1342285115665698168">"२५६के प्रति लग बफर"</item>
+    <item msgid="1314234299552254621">"१एम प्रति लग बफर"</item>
+    <item msgid="3606047780792894151">"४एम प्रति लग बफर"</item>
+    <item msgid="5431354956856655120">"१६एम प्रति लग बफर"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"सजीविकरण बन्द"</item>

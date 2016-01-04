@@ -58,22 +58,28 @@
     <item msgid="3878793616631049349">"仅使用 HDCP 检查 DRM 内容"</item>
     <item msgid="45075631231212732">"始终使用 HDCP 检查"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:0 (8665206199209698501) -->
-    <!-- no translation found for select_logd_size_titles:1 (1593289376502312923) -->
-    <!-- no translation found for select_logd_size_titles:2 (487545340236145324) -->
-    <!-- no translation found for select_logd_size_titles:3 (2423528675294333831) -->
-    <!-- no translation found for select_logd_size_titles:4 (180883774509476541) -->
-    <!-- no translation found for select_logd_size_titles:5 (2803199102589126938) -->
-    <!-- no translation found for select_logd_size_lowram_titles:0 (6089470720451068364) -->
-    <!-- no translation found for select_logd_size_lowram_titles:1 (4622460333038586791) -->
-    <!-- no translation found for select_logd_size_lowram_titles:2 (2212125625169582330) -->
-    <!-- no translation found for select_logd_size_lowram_titles:3 (1704946766699242653) -->
-    <!-- no translation found for select_logd_size_summaries:0 (6921048829791179331) -->
-    <!-- no translation found for select_logd_size_summaries:1 (2969458029344750262) -->
-    <!-- no translation found for select_logd_size_summaries:2 (1342285115665698168) -->
-    <!-- no translation found for select_logd_size_summaries:3 (1314234299552254621) -->
-    <!-- no translation found for select_logd_size_summaries:4 (3606047780792894151) -->
-    <!-- no translation found for select_logd_size_summaries:5 (5431354956856655120) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="8665206199209698501">"关闭"</item>
+    <item msgid="1593289376502312923">"64K"</item>
+    <item msgid="487545340236145324">"256K"</item>
+    <item msgid="2423528675294333831">"1M"</item>
+    <item msgid="180883774509476541">"4M"</item>
+    <item msgid="2803199102589126938">"16M"</item>
+  </string-array>
+  <string-array name="select_logd_size_lowram_titles">
+    <item msgid="6089470720451068364">"关闭"</item>
+    <item msgid="4622460333038586791">"64K"</item>
+    <item msgid="2212125625169582330">"256K"</item>
+    <item msgid="1704946766699242653">"1M"</item>
+  </string-array>
+  <string-array name="select_logd_size_summaries">
+    <item msgid="6921048829791179331">"关闭"</item>
+    <item msgid="2969458029344750262">"每个日志缓冲区 64K"</item>
+    <item msgid="1342285115665698168">"每个日志缓冲区 256K"</item>
+    <item msgid="1314234299552254621">"每个日志缓冲区 1M"</item>
+    <item msgid="3606047780792894151">"每个日志缓冲区 4M"</item>
+    <item msgid="5431354956856655120">"每个日志缓冲区 16M"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"关闭动画"</item>
     <item msgid="6624864048416710414">"动画缩放 0.5x"</item>
