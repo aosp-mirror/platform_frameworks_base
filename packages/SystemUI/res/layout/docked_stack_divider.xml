@@ -24,10 +24,9 @@
         android:id="@+id/docked_divider_background"
         android:background="@color/docked_divider_background"/>
 
-    <ImageButton
+    <com.android.systemui.stackdivider.DividerHandleView
         style="@style/DockedDividerHandle"
         android:id="@+id/docked_divider_handle"
-        android:background="@null"
-        android:src="@drawable/docked_divider_handle"/>
+        android:background="@null"/>
 
 </com.android.systemui.stackdivider.DividerView>

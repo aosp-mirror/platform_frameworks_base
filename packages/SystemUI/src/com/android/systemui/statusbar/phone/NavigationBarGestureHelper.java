@@ -191,7 +191,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                 mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS, createMode,
                         initialBounds);
                 if (mDragMode == DRAG_MODE_DIVIDER) {
-                    mDivider.getView().startDragging();
+                    mDivider.getView().startDragging(false /* animate */);
                 }
                 mDockWindowTouchSlopExceeded = true;
                 MetricsLogger.action(mContext,

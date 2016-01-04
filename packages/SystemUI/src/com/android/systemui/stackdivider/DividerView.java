@@ -60,6 +60,11 @@ import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
 public class DividerView extends FrameLayout implements OnTouchListener,
         OnComputeInternalInsetsListener {
 
+    static final long TOUCH_ANIMATION_DURATION = 150;
+    static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
+    static final Interpolator TOUCH_RESPONSE_INTERPOLATOR =
+            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
+
     private static final String TAG = "DividerView";
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
@@ -69,7 +74,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
 
-    private ImageButton mHandle;
+    private DividerHandleView mHandle;
     private View mBackground;
     private int mStartX;
     private int mStartY;
@@ -93,8 +98,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mLastResizeRect = new Rect();
     private final WindowManagerProxy mWindowManagerProxy = WindowManagerProxy.getInstance();
     private Interpolator mFastOutSlowInInterpolator;
-    private final Interpolator mTouchResponseInterpolator =
-            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
     private DividerWindowManager mWindowManager;
     private VelocityTracker mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -121,7 +124,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mHandle = (ImageButton) findViewById(R.id.docked_divider_handle);
+        mHandle = (DividerHandleView) findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
         mHandle.setOnTouchListener(this);
         mDividerWindowWidth = getResources().getDimensionPixelSize(
@@ -157,7 +160,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mWindowManagerProxy;
     }
 
-    public boolean startDragging() {
+    public boolean startDragging(boolean animate) {
+        mHandle.setTouching(true, animate);
         mDockSide = mWindowManagerProxy.getDockSide();
         mSnapAlgorithm = new DividerSnapAlgorithm(getContext(), mFlingAnimationUtils, mDisplayWidth,
                 mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
@@ -172,6 +176,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public void stopDragging(int position, float velocity) {
+        mHandle.setTouching(false, true /* animate */);
         fling(position, velocity);
         mWindowManager.setSlippery(true);
         releaseBackground();
@@ -192,7 +197,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mStartX = (int) event.getX();
                 mStartY = (int) event.getY();
                 getLocationOnScreen(mTempInt2);
-                boolean result = startDragging();
+                boolean result = startDragging(true /* animate */);
                 if (isHorizontalDivision()) {
                     mStartPosition = mTempInt2[1] + mDividerInsets;
                 } else {
@@ -282,29 +287,33 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mBackground.animate().scaleX(1.4f);
         }
         mBackground.animate()
-                .setInterpolator(mTouchResponseInterpolator)
-                .setDuration(150)
-                .translationZ(mTouchElevation);
+                .setInterpolator(TOUCH_RESPONSE_INTERPOLATOR)
+                .setDuration(TOUCH_ANIMATION_DURATION)
+                .translationZ(mTouchElevation)
+                .start();
 
         // Lift handle as well so it doesn't get behind the background, even though it doesn't
         // cast shadow.
         mHandle.animate()
-                .setInterpolator(mTouchResponseInterpolator)
-                .setDuration(150)
-                .translationZ(mTouchElevation);
+                .setInterpolator(TOUCH_RESPONSE_INTERPOLATOR)
+                .setDuration(TOUCH_ANIMATION_DURATION)
+                .translationZ(mTouchElevation)
+                .start();
     }
 
     private void releaseBackground() {
         mBackground.animate()
                 .setInterpolator(mFastOutSlowInInterpolator)
-                .setDuration(200)
+                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
                 .translationZ(0)
                 .scaleX(1f)
-                .scaleY(1f);
+                .scaleY(1f)
+                .start();
         mHandle.animate()
                 .setInterpolator(mFastOutSlowInInterpolator)
-                .setDuration(200)
-                .translationZ(0);
+                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
+                .translationZ(0)
+                .start();
     }
 
     @Override
