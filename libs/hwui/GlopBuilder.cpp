@@ -78,7 +78,7 @@ GlopBuilder& GlopBuilder::setMeshTexturedIndexedVbo(GLuint vbo, GLsizei elementC
     mOutGlop->mesh.vertices = {
             vbo,
             VertexAttribFlags::TextureCoord,
-            nullptr, nullptr, nullptr,
+            nullptr, (const void*) kMeshTextureOffset, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = elementCount;
     return *this;

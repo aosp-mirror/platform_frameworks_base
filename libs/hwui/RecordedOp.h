@@ -391,9 +391,9 @@ struct LayerOp : RecordedOp {
     LayerOp(BASE_PARAMS, OffscreenBuffer** layerHandle)
             : SUPER_PAINTLESS(LayerOp)
             , layerHandle(layerHandle)
-            , alpha(paint->getAlpha() / 255.0f)
+            , alpha(paint ? paint->getAlpha() / 255.0f : 1.0f)
             , mode(PaintUtils::getXfermodeDirect(paint))
-            , colorFilter(paint->getColorFilter())
+            , colorFilter(paint ? paint->getColorFilter() : nullptr)
             , destroy(true) {}
 
     LayerOp(RenderNode& node)

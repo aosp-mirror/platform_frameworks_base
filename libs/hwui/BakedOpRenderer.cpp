@@ -60,9 +60,17 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
 }
 
 void BakedOpRenderer::endLayer() {
-    mRenderTarget.offscreenBuffer->updateMeshFromRegion();
-    mRenderTarget.offscreenBuffer = nullptr;
+    if (mRenderTarget.stencil) {
+        // if stencil was used for clipping, detach it and return it to pool
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "glfbrb endlayer failed");
+        mCaches.renderBufferCache.put(mRenderTarget.stencil);
+        mRenderTarget.stencil = nullptr;
+    }
     mRenderTarget.lastStencilClip = nullptr;
+
+    mRenderTarget.offscreenBuffer->updateMeshFromRegion();
+    mRenderTarget.offscreenBuffer = nullptr; // It's in drawLayerOp's hands now.
 
     // Detach the texture from the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
@@ -75,7 +83,6 @@ void BakedOpRenderer::startFrame(uint32_t width, uint32_t height, const Rect& re
     LOG_ALWAYS_FATAL_IF(mRenderTarget.frameBufferId != 0, "primary framebufferId must be 0");
     mRenderState.bindFramebuffer(0);
     setViewport(width, height);
-    mCaches.clearGarbage();
 
     if (!mOpaque) {
         clearColorBuffer(repaintRect);
@@ -113,6 +120,7 @@ void BakedOpRenderer::endFrame(const Rect& repaintRect) {
         mRenderState.stencil().disable();
     }
 
+    mCaches.clearGarbage();
     mCaches.pathCache.trim();
     mCaches.tessellationCache.trim();
 
@@ -232,28 +240,45 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
     mRenderState.scissor().setEnabled(clip != nullptr);
     if (clip) {
         mRenderState.scissor().set(mRenderTarget.viewportHeight, clip->rect);
-        if (CC_LIKELY(!Properties::debugOverdraw)) {
-            // only modify stencil mode and content when it's not used for overdraw visualization
-            if (CC_UNLIKELY(clip->mode != ClipMode::Rectangle)) {
-                // NOTE: this pointer check is only safe for non-rect clips,
-                // since rect clips may be created on the stack
-                if (mRenderTarget.lastStencilClip != clip) {
-                    // Stencil needed, but current stencil isn't up to date
-                    mRenderTarget.lastStencilClip = clip;
+    }
 
-                    if (mRenderTarget.offscreenBuffer) {
-                        LOG_ALWAYS_FATAL("prepare layer stencil");
-                    }
+    if (CC_LIKELY(!Properties::debugOverdraw)) {
+        // only modify stencil mode and content when it's not used for overdraw visualization
+        if (CC_UNLIKELY(clip && clip->mode != ClipMode::Rectangle)) {
+            // NOTE: this pointer check is only safe for non-rect clips,
+            // since rect clips may be created on the stack
+            if (mRenderTarget.lastStencilClip != clip) {
+                // Stencil needed, but current stencil isn't up to date
+                mRenderTarget.lastStencilClip = clip;
 
-                    if (clip->mode == ClipMode::RectangleList) {
-                        setupStencilRectList(clip);
-                    } else {
-                        setupStencilRegion(clip);
-                    }
+                if (mRenderTarget.frameBufferId != 0 && !mRenderTarget.stencil) {
+                    OffscreenBuffer* layer = mRenderTarget.offscreenBuffer;
+                    mRenderTarget.stencil = mCaches.renderBufferCache.get(
+                            Stencil::getLayerStencilFormat(),
+                            layer->texture.width, layer->texture.height);
+                    // stencil is bound + allocated - associate it with current FBO
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                            GL_RENDERBUFFER, mRenderTarget.stencil->getName());
+                }
+
+                if (clip->mode == ClipMode::RectangleList) {
+                    setupStencilRectList(clip);
+                } else {
+                    setupStencilRegion(clip);
                 }
             } else {
-                mRenderState.stencil().disable();
+                // stencil is up to date - just need to ensure it's enabled (since an unclipped
+                // or scissor-only clipped op may have been drawn, disabling the stencil)
+                int incrementThreshold = 0;
+                if (CC_LIKELY(clip->mode == ClipMode::RectangleList)) {
+                    auto&& rectList = reinterpret_cast<const ClipRectList*>(clip)->rectList;
+                    incrementThreshold = rectList.getTransformedRectanglesCount();
+                }
+                mRenderState.stencil().enableTest(incrementThreshold);
             }
+        } else {
+            // either scissor or no clip, so disable stencil test
+            mRenderState.stencil().disable();
         }
     }
 
