@@ -82,5 +82,9 @@ interface IAccessibilityServiceConnection {
 
     void setMagnificationCallbackEnabled(boolean enabled);
 
+    boolean setSoftKeyboardShowMode(int showMode);
+
+    void setSoftKeyboardCallbackEnabled(boolean enabled);
+
     void sendMotionEvents(int sequence, in ParceledListSlice events);
 }

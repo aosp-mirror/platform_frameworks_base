@@ -17,6 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.GestureDescription.MotionEventGenerator;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
@@ -29,6 +30,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -46,6 +48,8 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -378,8 +382,25 @@ public abstract class AccessibilityService extends Service {
         public boolean onKeyEvent(KeyEvent event);
         public void onMagnificationChanged(@NonNull Region region,
                 float scale, float centerX, float centerY);
+        public void onSoftKeyboardShowModeChanged(int showMode);
         public void onPerformGestureResult(int sequence, boolean completedSuccessfully);
     }
+
+    /**
+     * Annotations for Soft Keyboard show modes so tools can catch invalid show modes.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SHOW_MODE_AUTO, SHOW_MODE_HIDDEN})
+    public @interface SoftKeyboardShowMode {};
+    /**
+     * @hide
+     */
+    public static final int SHOW_MODE_AUTO = 0;
+    /**
+     * @hide
+     */
+    public static final int SHOW_MODE_HIDDEN = 1;
 
     private int mConnectionId;
 
@@ -390,6 +411,7 @@ public abstract class AccessibilityService extends Service {
     private WindowManager mWindowManager;
 
     private MagnificationController mMagnificationController;
+    private SoftKeyboardController mSoftKeyboardController;
 
     private int mGestureStatusCallbackSequence;
 
@@ -554,10 +576,12 @@ public abstract class AccessibilityService extends Service {
      */
     @NonNull
     public final MagnificationController getMagnificationController() {
-        if (mMagnificationController == null) {
-            mMagnificationController = new MagnificationController(this);
+        synchronized (mLock) {
+            if (mMagnificationController == null) {
+                mMagnificationController = new MagnificationController(this, mLock);
+            }
+            return mMagnificationController;
         }
-        return mMagnificationController;
     }
 
     /**
@@ -661,17 +685,21 @@ public abstract class AccessibilityService extends Service {
          * first magnification listener.
          */
         private ArrayMap<OnMagnificationChangedListener, Handler> mListeners;
+        private final Object mLock;
 
-        MagnificationController(@NonNull AccessibilityService service) {
+        MagnificationController(@NonNull AccessibilityService service, @NonNull Object lock) {
             mService = service;
+            mLock = lock;
         }
 
         /**
          * Called when the service is connected.
          */
         void onServiceConnected() {
-            if (mListeners != null && !mListeners.isEmpty()) {
-                setMagnificationCallbackEnabled(true);
+            synchronized (mLock) {
+                if (mListeners != null && !mListeners.isEmpty()) {
+                    setMagnificationCallbackEnabled(true);
+                }
             }
         }
 
@@ -698,17 +726,19 @@ public abstract class AccessibilityService extends Service {
          */
         public void addListener(@NonNull OnMagnificationChangedListener listener,
                 @Nullable Handler handler) {
-            if (mListeners == null) {
-                mListeners = new ArrayMap<>();
-            }
+            synchronized (mLock) {
+                if (mListeners == null) {
+                    mListeners = new ArrayMap<>();
+                }
 
-            final boolean shouldEnableCallback = mListeners.isEmpty();
-            mListeners.put(listener, handler);
+                final boolean shouldEnableCallback = mListeners.isEmpty();
+                mListeners.put(listener, handler);
 
-            if (shouldEnableCallback) {
-                // This may fail if the service is not connected yet, but if we
-                // still have listeners when it connects then we can try again.
-                setMagnificationCallbackEnabled(true);
+                if (shouldEnableCallback) {
+                    // This may fail if the service is not connected yet, but if we
+                    // still have listeners when it connects then we can try again.
+                    setMagnificationCallbackEnabled(true);
+                }
             }
         }
 
@@ -725,19 +755,21 @@ public abstract class AccessibilityService extends Service {
                 return false;
             }
 
-            final int keyIndex = mListeners.indexOfKey(listener);
-            final boolean hasKey = keyIndex >= 0;
-            if (hasKey) {
-                mListeners.removeAt(keyIndex);
-            }
+            synchronized (mLock) {
+                final int keyIndex = mListeners.indexOfKey(listener);
+                final boolean hasKey = keyIndex >= 0;
+                if (hasKey) {
+                    mListeners.removeAt(keyIndex);
+                }
 
-            if (hasKey && mListeners.isEmpty()) {
-                // We just removed the last listener, so we don't need
-                // callbacks from the service anymore.
-                setMagnificationCallbackEnabled(false);
-            }
+                if (hasKey && mListeners.isEmpty()) {
+                    // We just removed the last listener, so we don't need
+                    // callbacks from the service anymore.
+                    setMagnificationCallbackEnabled(false);
+                }
 
-            return hasKey;
+                return hasKey;
+            }
         }
 
         private void setMagnificationCallbackEnabled(boolean enabled) {
@@ -759,17 +791,19 @@ public abstract class AccessibilityService extends Service {
          */
         void dispatchMagnificationChanged(final @NonNull Region region, final float scale,
                 final float centerX, final float centerY) {
-            if (mListeners == null || mListeners.isEmpty()) {
-                Slog.d(LOG_TAG, "Received magnification changed "
-                        + "callback with no listeners registered!");
-                setMagnificationCallbackEnabled(false);
-                return;
-            }
+            final ArrayMap<OnMagnificationChangedListener, Handler> entries;
+            synchronized (mLock) {
+                if (mListeners == null || mListeners.isEmpty()) {
+                    Slog.d(LOG_TAG, "Received magnification changed "
+                            + "callback with no listeners registered!");
+                    setMagnificationCallbackEnabled(false);
+                    return;
+                }
 
-            // Listeners may remove themselves. Perform a shallow copy to avoid
-            // concurrent modification.
-            final ArrayMap<OnMagnificationChangedListener, Handler> entries =
-                    new ArrayMap<>(mListeners);
+                // Listeners may remove themselves. Perform a shallow copy to avoid concurrent
+                // modification.
+                entries = new ArrayMap<>(mListeners);
+            }
 
             for (int i = 0, count = entries.size(); i < count; i++) {
                 final OnMagnificationChangedListener listener = entries.keyAt(i);
@@ -1002,6 +1036,243 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
+     * Returns the soft keyboard controller, which may be used to query and modify the soft keyboard
+     * show mode.
+     *
+     * @return the soft keyboard controller
+     */
+    @NonNull
+    public final SoftKeyboardController getSoftKeyboardController() {
+        synchronized (mLock) {
+            if (mSoftKeyboardController == null) {
+                mSoftKeyboardController = new SoftKeyboardController(this, mLock);
+            }
+            return mSoftKeyboardController;
+        }
+    }
+
+    private void onSoftKeyboardShowModeChanged(int showMode) {
+        if (mSoftKeyboardController != null) {
+            mSoftKeyboardController.dispatchSoftKeyboardShowModeChanged(showMode);
+        }
+    }
+
+    /**
+     * Used to control and query the soft keyboard show mode.
+     */
+    public static final class SoftKeyboardController {
+        private final AccessibilityService mService;
+
+        /**
+         * Map of listeners to their handlers. Lazily created when adding the first
+         * soft keyboard change listener.
+         */
+        private ArrayMap<OnShowModeChangedListener, Handler> mListeners;
+        private final Object mLock;
+
+        SoftKeyboardController(@NonNull AccessibilityService service, @NonNull Object lock) {
+            mService = service;
+            mLock = lock;
+        }
+
+        /**
+         * Called when the service is connected.
+         */
+        void onServiceConnected() {
+            synchronized(mLock) {
+                if (mListeners != null && !mListeners.isEmpty()) {
+                    setSoftKeyboardCallbackEnabled(true);
+                }
+            }
+        }
+
+        /**
+         * Adds the specified change listener to the list of show mode change listeners. The
+         * callback will occur on the service's main thread. Listener is not called on registration.
+         */
+        public void addOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener) {
+            addOnShowModeChangedListener(listener, null);
+        }
+
+        /**
+         * Adds the specified change listener to the list of soft keyboard show mode change
+         * listeners. The callback will occur on the specified {@link Handler}'s thread, or on the
+         * services's main thread if the handler is {@code null}.
+         *
+         * @param listener the listener to add, must be non-null
+         * @param handler the handler on which to callback should execute, or {@code null} to
+         *        execute on the service's main thread
+         */
+        public void addOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener,
+                @Nullable Handler handler) {
+            synchronized (mLock) {
+                if (mListeners == null) {
+                    mListeners = new ArrayMap<>();
+                }
+
+                final boolean shouldEnableCallback = mListeners.isEmpty();
+                mListeners.put(listener, handler);
+
+                if (shouldEnableCallback) {
+                    // This may fail if the service is not connected yet, but if we still have
+                    // listeners when it connects, we can try again.
+                    setSoftKeyboardCallbackEnabled(true);
+                }
+            }
+        }
+
+        /**
+         * Removes all instances of the specified change listener from teh list of magnification
+         * change listeners.
+         *
+         * @param listener the listener to remove, must be non-null
+         * @return {@code true} if at least one instance of the listener was removed
+         */
+        public boolean removeOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener) {
+            if (mListeners == null) {
+                return false;
+            }
+
+            synchronized (mLock) {
+                final int keyIndex = mListeners.indexOfKey(listener);
+                final boolean hasKey = keyIndex >= 0;
+                if (hasKey) {
+                    mListeners.removeAt(keyIndex);
+                }
+
+                if (hasKey && mListeners.isEmpty()) {
+                    // We just removed the last listener, so we don't need callbacks from the
+                    // service anymore.
+                    setSoftKeyboardCallbackEnabled(false);
+                }
+
+                return hasKey;
+            }
+        }
+
+        private void setSoftKeyboardCallbackEnabled(boolean enabled) {
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    connection.setSoftKeyboardCallbackEnabled(enabled);
+                } catch (RemoteException re) {
+                    throw new RuntimeException(re);
+                }
+            }
+        }
+
+        /**
+         * Dispatches the soft keyboard show mode change to any registered listeners. This should
+         * be called on the service's main thread.
+         */
+        void dispatchSoftKeyboardShowModeChanged(final int showMode) {
+            final ArrayMap<OnShowModeChangedListener, Handler> entries;
+            synchronized (mLock) {
+                if (mListeners == null || mListeners.isEmpty()) {
+                    Slog.d(LOG_TAG, "Received soft keyboard show mode changed callback"
+                            + " with no listeners registered!");
+                    setSoftKeyboardCallbackEnabled(false);
+                    return;
+                }
+
+                // Listeners may remove themselves. Perform a shallow copy to avoid concurrent
+                // modification.
+                entries = new ArrayMap<>(mListeners);
+            }
+
+            for (int i = 0, count = entries.size(); i < count; i++) {
+                final OnShowModeChangedListener listener = entries.keyAt(i);
+                final Handler handler = entries.valueAt(i);
+                if (handler != null) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onShowModeChanged(SoftKeyboardController.this, showMode);
+                        }
+                    });
+                } else {
+                    // We're already on the main thread, just run the listener.
+                    listener.onShowModeChanged(this, showMode);
+                }
+            }
+        }
+
+        /**
+         * Returns the show mode of the soft keyboard. The default show mode is
+         * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
+         * input field is focused. An AccessibilityService can also request the show mode
+         * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+         *
+         * @return the current soft keyboard show mode
+         *
+         * @see Settings#Secure#SHOW_MODE_AUTO
+         * @see Settings#Secure#SHOW_MODE_HIDDEN
+         */
+        @SoftKeyboardShowMode
+        public int getShowMode() {
+           try {
+               return Settings.Secure.getInt(mService.getContentResolver(),
+                       Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
+           } catch (Settings.SettingNotFoundException e) {
+               Log.v(LOG_TAG, "Failed to obtain the soft keyboard mode", e);
+               // The settings hasn't been changed yet, so it's value is null. Return the default.
+               return 0;
+           }
+        }
+
+        /**
+         * Sets the soft keyboard show mode. The default show mode is
+         * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
+         * input field is focused. An AccessibilityService can also request the show mode
+         * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown. The
+         * The lastto this method will be honored, regardless of any previous calls (including those
+         * made by other AccessibilityServices).
+         * <p>
+         * <strong>Note:</strong> If the service is not yet conected (e.g.
+         * {@link AccessibilityService#onServiceConnected()} has not yet been called) or the
+         * service has been disconnected, this method will hav no effect and return {@code false}.
+         *
+         * @param showMode the new show mode for the soft keyboard
+         * @return {@code true} on success
+         *
+         * @see Settings#Secure#SHOW_MODE_AUTO
+         * @see Settings#Secure#SHOW_MODE_HIDDEN
+         */
+        public boolean setShowMode(@SoftKeyboardShowMode int showMode) {
+           final IAccessibilityServiceConnection connection =
+                   AccessibilityInteractionClient.getInstance().getConnection(
+                           mService.mConnectionId);
+           if (connection != null) {
+               try {
+                   return connection.setSoftKeyboardShowMode(showMode);
+               } catch (RemoteException re) {
+                   Log.w(LOG_TAG, "Falied to set soft keyboard behavior", re);
+               }
+           }
+           return false;
+        }
+
+        /**
+         * Listener for changes in the soft keyboard show mode.
+         */
+        public interface OnShowModeChangedListener {
+           /**
+            * Called when the soft keyboard behavior changes. The default show mode is
+            * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
+            * input field is focused. An AccessibilityService can also request the show mode
+            * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+            *
+            * @param controller the soft keyboard controller
+            * @param showMode the current soft keyboard show mode
+            */
+            void onShowModeChanged(@NonNull SoftKeyboardController controller,
+                    @SoftKeyboardShowMode int showMode);
+        }
+    }
+
+    /**
      * Performs a global action. Such an action can be performed
      * at any moment regardless of the current application or user
      * location in that application. For example going back, going
@@ -1175,6 +1446,11 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
+            public void onSoftKeyboardShowModeChanged(int showMode) {
+                AccessibilityService.this.onSoftKeyboardShowModeChanged(showMode);
+            }
+
+            @Override
             public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
                 AccessibilityService.this.onPerformGestureResult(sequence, completedSuccessfully);
             }
@@ -1196,7 +1472,8 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
         private static final int DO_ON_KEY_EVENT = 6;
         private static final int DO_ON_MAGNIFICATION_CHANGED = 7;
-        private static final int DO_GESTURE_COMPLETE = 8;
+        private static final int DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED = 8;
+        private static final int DO_GESTURE_COMPLETE = 9;
 
         private final HandlerCaller mCaller;
 
@@ -1253,6 +1530,12 @@ public abstract class AccessibilityService extends Service {
 
             final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
             mCaller.sendMessage(message);
+        }
+
+        public void onSoftKeyboardShowModeChanged(int showMode) {
+          final Message message =
+                  mCaller.obtainMessageI(DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED, showMode);
+          mCaller.sendMessage(message);
         }
 
         public void onPerformGestureResult(int sequence, boolean successfully) {
@@ -1343,6 +1626,11 @@ public abstract class AccessibilityService extends Service {
                     final float centerX = (float) args.arg3;
                     final float centerY = (float) args.arg4;
                     mCallback.onMagnificationChanged(region, scale, centerX, centerY);
+                } return;
+
+                case DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED: {
+                    final int showMode = (int) message.arg1;
+                    mCallback.onSoftKeyboardShowModeChanged(showMode);
                 } return;
 
                 case DO_GESTURE_COMPLETE: {
