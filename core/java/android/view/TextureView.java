@@ -297,7 +297,7 @@ public class TextureView extends View {
 
     @Override
     public void setForeground(Drawable foreground) {
-        if (foreground != null) {
+        if (foreground != null && !sTextureViewIgnoresDrawableSetters) {
             throw new UnsupportedOperationException(
                     "TextureView doesn't support displaying a foreground drawable");
         }
@@ -305,7 +305,7 @@ public class TextureView extends View {
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
-        if (background != null) {
+        if (background != null && !sTextureViewIgnoresDrawableSetters) {
             throw new UnsupportedOperationException(
                     "TextureView doesn't support displaying a background drawable");
         }
