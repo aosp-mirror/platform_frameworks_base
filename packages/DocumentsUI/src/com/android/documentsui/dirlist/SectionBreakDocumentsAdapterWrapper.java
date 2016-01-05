@@ -43,40 +43,9 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
         mEnv = environment;
         mDelegate = delegate;
 
-        // Events and information flows two ways between recycler view and adapter.
-        // So we need to listen to events on our delegate and forward them
-        // to our listeners with a corrected position.
-        AdapterDataObserver adapterDataObserver = new AdapterDataObserver() {
-            public void onChanged() {
-                throw new UnsupportedOperationException();
-            }
-
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                checkArgument(itemCount == 1);
-            }
-
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                checkArgument(itemCount == 1);
-                if (positionStart < mBreakPosition) {
-                    mBreakPosition++;
-                }
-                notifyItemRangeInserted(toViewPosition(positionStart), itemCount);
-            }
-
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                checkArgument(itemCount == 1);
-                if (positionStart < mBreakPosition) {
-                    mBreakPosition--;
-                }
-                notifyItemRangeRemoved(toViewPosition(positionStart), itemCount);
-            }
-
-            public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
-                throw new UnsupportedOperationException();
-            }
-        };
-
-        mDelegate.registerAdapterDataObserver(adapterDataObserver);
+        // Relay events published by our delegate to our listeners (presumably RecyclerView)
+        // with adjusted positions.
+        mDelegate.registerAdapterDataObserver(new EventRelay());
     }
 
     public GridLayoutManager.SpanSizeLookup createSpanSizeLookup() {
@@ -205,7 +174,44 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
     }
 
     @Override
-    public void notifyItemSelectionChanged(String id) {
-        mDelegate.notifyItemSelectionChanged(id);
+    public void onItemSelectionChanged(String id) {
+        mDelegate.onItemSelectionChanged(id);
+    }
+
+    // Listener we add to our delegate. This allows us to relay events published
+    // by the delegate to our listeners (presumably RecyclerView) with adjusted positions.
+    private final class EventRelay extends AdapterDataObserver {
+        public void onChanged() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void onItemRangeChanged(int positionStart, int itemCount) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+            checkArgument(itemCount == 1);
+            notifyItemRangeChanged(toViewPosition(positionStart), itemCount, payload);
+        }
+
+        public void onItemRangeInserted(int positionStart, int itemCount) {
+            checkArgument(itemCount == 1);
+            if (positionStart < mBreakPosition) {
+                mBreakPosition++;
+            }
+            notifyItemRangeInserted(toViewPosition(positionStart), itemCount);
+        }
+
+        public void onItemRangeRemoved(int positionStart, int itemCount) {
+            checkArgument(itemCount == 1);
+            if (positionStart < mBreakPosition) {
+                mBreakPosition--;
+            }
+            notifyItemRangeRemoved(toViewPosition(positionStart), itemCount);
+        }
+
+        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

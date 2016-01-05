@@ -976,7 +976,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
         @Override
         public void notifyItemChanged(String id) {
-            mAdapter.notifyItemSelectionChanged(id);
+            mAdapter.onItemSelectionChanged(id);
         }
 
         @Override

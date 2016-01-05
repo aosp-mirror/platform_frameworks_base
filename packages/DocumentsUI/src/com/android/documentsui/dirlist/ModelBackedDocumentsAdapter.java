@@ -25,7 +25,6 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
-import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
@@ -187,9 +186,17 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
     @Override
     public void unhide(SparseArray<String> ids) {
         if (DEBUG) Log.d(TAG, "Un-iding ids: " + ids);
-        // Proceed backwards through the list of items, because each addition causes the
-        // positions of all subsequent items to change.
-        for (int i = ids.size() - 1; i >= 0; --i) {
+
+        // An ArrayList can shrink at runtime...and in fact
+        // it does when we clear it completely.
+        // This means we can't call add(pos, id) without
+        // first checking the list size.
+        List<String> oldIds = mModelIds;
+        mModelIds = new ArrayList<>(oldIds.size() + ids.size());
+        mModelIds.addAll(oldIds);
+
+        // Finally insert the unhidden items.
+        for (int i = 0; i < ids.size(); i++) {
             int pos = ids.keyAt(i);
             String id = ids.get(pos);
             mHiddenIds.remove(id);
@@ -211,7 +218,7 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
     }
 
     @Override
-    public void notifyItemSelectionChanged(String id) {
+    public void onItemSelectionChanged(String id) {
         int position = mModelIds.indexOf(id);
 
         if (position >= 0) {
