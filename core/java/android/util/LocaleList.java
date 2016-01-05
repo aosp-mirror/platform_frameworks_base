@@ -28,12 +28,6 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.HashSet;
 import java.util.Locale;
 
-// TODO: We don't except too many LocaleLists to exist at the same time, and
-// we need access to the data at native level, so we should pass the data
-// down to the native level, create a map of every list seen there, take a
-// pointer back, and just keep that pointer in the Java-level object, so
-// things could be copied very quickly.
-
 /**
  * LocaleList is an immutable list of Locales, typically used to keep an
  * ordered user preferences for locales.
