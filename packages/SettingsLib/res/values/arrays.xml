@@ -128,7 +128,7 @@
         <item>16777216</item>
     </string-array>
 
-    <!-- Summaries for logd limit size selection preference. [CHAR LIMIT=30]-->
+    <!-- Summaries for logd limit size selection preference. [CHAR LIMIT=50]-->
     <string-array name="select_logd_size_summaries" >
         <item>Off</item>
         <item>64K per log buffer</item>
