@@ -380,10 +380,11 @@ public class Main {
     }
 
     /**
-     * Create a new rendering session and test that rendering given layout on nexus 5
-     * doesn't throw any exceptions and matches the provided image.
-     * <p/>If frameTimeNanos is >= 0 a frame will be executed during the rendering. The time
-     * indicates how far in the future is.
+     * Create a new rendering session and test that rendering the given layout doesn't throw any
+     * exceptions and matches the provided image.
+     * <p>
+     * If frameTimeNanos is >= 0 a frame will be executed during the rendering. The time indicates
+     * how far in the future is.
      */
     private void renderAndVerify(SessionParams params, String goldenFileName, long frameTimeNanos)
             throws ClassNotFoundException {
@@ -414,8 +415,8 @@ public class Main {
     }
 
     /**
-     * Create a new rendering session and test that rendering given layout on nexus 5
-     * doesn't throw any exceptions and matches the provided image.
+     * Create a new rendering session and test that rendering the given layout doesn't throw any
+     * exceptions and matches the provided image.
      */
     private void renderAndVerify(SessionParams params, String goldenFileName)
             throws ClassNotFoundException {
@@ -423,7 +424,7 @@ public class Main {
     }
 
     /**
-     * Create a new rendering session and test that rendering given layout on nexus 5
+     * Create a new rendering session and test that rendering the given layout on nexus 5
      * doesn't throw any exceptions and matches the provided image.
      */
     private void renderAndVerify(String layoutFileName, String goldenFileName)
@@ -432,7 +433,7 @@ public class Main {
     }
 
     /**
-     * Create a new rendering session and test that rendering given layout on given device
+     * Create a new rendering session and test that rendering the given layout on given device
      * doesn't throw any exceptions and matches the provided image.
      */
     private void renderAndVerify(String layoutFileName, String goldenFileName,
