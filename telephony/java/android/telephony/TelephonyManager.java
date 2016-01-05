@@ -3492,10 +3492,13 @@ public class TelephonyManager {
     /**
      * Returns the response of SIM Authentication through RIL for the default subscription.
      * Returns null if the Authentication hasn't been successful
+     *
+     * <p>Requires that the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges
+     *
      * @param appType ICC application type (@see com.android.internal.telephony.PhoneConstants#APPTYPE_xxx)
      * @param data authentication challenge data
      * @return the response of SIM Authentication, or null if not available
-     * @hide
      */
     public String getIccSimChallengeResponse(int appType, String data) {
         return getIccSimChallengeResponse(getDefaultSubscription(), appType, data);
