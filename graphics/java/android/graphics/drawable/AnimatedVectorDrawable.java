@@ -19,6 +19,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
@@ -140,6 +141,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     /** Local, mutable animator set. */
     private final AnimatorSet mAnimatorSet = new AnimatorSet();
 
+
+    private final ValueAnimator.AnimatorUpdateListener mUpdateListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    invalidateSelf();
+                }
+            };
+
     /**
      * The resources against which this drawable was created. Used to attempt
      * to inflate animators if applyTheme() doesn't get called.
@@ -201,9 +211,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @Override
     public void draw(Canvas canvas) {
         mAnimatedVectorState.mVectorDrawable.draw(canvas);
-        if (isStarted()) {
-            invalidateSelf();
-        }
     }
 
     @Override
@@ -486,6 +493,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
          *            animators, or {@code null} if not available
          */
         public void prepareLocalAnimators(@NonNull AnimatorSet animatorSet,
+                @NonNull ValueAnimator.AnimatorUpdateListener updateListener,
                 @Nullable Resources res) {
             // Check for uninflated animators. We can remove this after we add
             // support for Animator.applyTheme(). See comments in inflate().
@@ -511,6 +519,17 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                     final Animator nextAnim = prepareLocalAnimator(i);
                     builder.with(nextAnim);
                 }
+
+                // Setup a value animator to get animation update callbacks.
+                long totalDuration = animatorSet.getTotalDuration();
+                ValueAnimator updateAnim = ValueAnimator.ofFloat(0f, 1f);
+                if (totalDuration == ValueAnimator.DURATION_INFINITE) {
+                    updateAnim.setRepeatCount(ValueAnimator.INFINITE);
+                } else {
+                    updateAnim.setDuration(totalDuration);
+                }
+                updateAnim.addUpdateListener(updateListener);
+                builder.with(updateAnim);
             }
         }
 
@@ -603,7 +622,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @NonNull
     private void ensureAnimatorSet() {
         if (!mHasAnimatorSet) {
-            mAnimatedVectorState.prepareLocalAnimators(mAnimatorSet, mRes);
+            mAnimatedVectorState.prepareLocalAnimators(mAnimatorSet, mUpdateListener, mRes);
             mHasAnimatorSet = true;
             mRes = null;
         }
