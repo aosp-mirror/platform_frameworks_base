@@ -465,8 +465,13 @@ public class NavigationBarView extends LinearLayout {
                 }
 
                 @Override
-                public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
-                    updateRecentsIcon(exists);
+                public void onDockedStackExistsChanged(final boolean exists) throws RemoteException {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateRecentsIcon(exists);
+                        }
+                    });
                 }
             });
         } catch (RemoteException e) {
