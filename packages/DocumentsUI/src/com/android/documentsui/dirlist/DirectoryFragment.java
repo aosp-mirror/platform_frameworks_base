@@ -53,6 +53,7 @@ import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
@@ -99,18 +100,17 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Display the documents inside a single directory.
  */
-public class DirectoryFragment extends Fragment {
+public class DirectoryFragment extends Fragment implements DocumentsAdapter.Environment {
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
@@ -126,7 +126,7 @@ public class DirectoryFragment extends Fragment {
     private static final String TAG = "DirectoryFragment";
 
     private static final int LOADER_ID = 42;
-    private static final boolean DEBUG_ENABLE_DND = true;
+    static final boolean DEBUG_ENABLE_DND = true;
 
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_ROOT = "root";
@@ -289,7 +289,11 @@ public class DirectoryFragment extends Fragment {
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
 
-        mAdapter = new DocumentsAdapter();
+        mIconHelper = new IconHelper(context, state.derivedMode);
+
+        mAdapter = new SectionBreakDocumentsAdapterWrapper(
+                this, new ModelBackedDocumentsAdapter(this, mIconHelper));
+
         mRecView.setAdapter(mAdapter);
 
         GestureDetector.SimpleOnGestureListener listener =
@@ -333,7 +337,7 @@ public class DirectoryFragment extends Fragment {
                     : MultiSelectManager.MODE_SINGLE);
         mSelectionManager.addCallback(new SelectionModeListener());
 
-        mModel = new Model(context, mAdapter);
+        mModel = new Model(context);
         mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
 
@@ -342,8 +346,6 @@ public class DirectoryFragment extends Fragment {
 
         mTuner = FragmentTuner.pick(state);
         mClipper = new DocumentClipper(context);
-
-        mIconHelper = new IconHelper(context, state.derivedMode);
 
         boolean hideGridTitles;
         if (mType == TYPE_RECENT_OPEN) {
@@ -574,7 +576,10 @@ public class DirectoryFragment extends Fragment {
             case MODE_GRID:
                 if (mGridLayout == null) {
                     mGridLayout = new GridLayoutManager(getContext(), mColumnCount);
-                    mGridLayout.setSpanSizeLookup(mAdapter.createSpanSizeLookup());
+                    SpanSizeLookup lookup = mAdapter.createSpanSizeLookup();
+                    if (lookup != null) {
+                        mGridLayout.setSpanSizeLookup(lookup);
+                    }
                 }
                 layout = mGridLayout;
                 break;
@@ -607,6 +612,11 @@ public class DirectoryFragment extends Fragment {
                 (mRecView.getWidth() - viewPadding) / (cellWidth + cellMargin));
 
         return columnCount;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return mColumnCount;
     }
 
     /**
@@ -893,8 +903,32 @@ public class DirectoryFragment extends Fragment {
         }.execute(selected);
     }
 
-    private State getDisplayState() {
+    @Override
+    public void initDocumentHolder(DocumentHolder holder) {
+        holder.addClickListener(mItemClickListener);
+        holder.addOnKeyListener(mSelectionManager);
+    }
+
+    @Override
+    public void onBindDocumentHolder(DocumentHolder holder, Cursor cursor) {
+        if (DEBUG_ENABLE_DND) {
+            setupDragAndDropOnDocumentView(holder.itemView, cursor);
+        }
+    }
+
+    @Override
+    public State getDisplayState() {
         return ((BaseActivity) getActivity()).getDisplayState();
+    }
+
+    @Override
+    public Model getModel() {
+        return mModel;
+    }
+
+    @Override
+    public boolean isDocumentEnabled(String docMimeType, int docFlags) {
+        return mTuner.isDocumentEnabled(docMimeType, docFlags);
     }
 
     void showEmptyView() {
@@ -918,240 +952,6 @@ public class DirectoryFragment extends Fragment {
     void showRecyclerView() {
         mEmptyView.setVisibility(View.GONE);
         mRecView.setVisibility(View.VISIBLE);
-    }
-
-    final class DocumentsAdapter
-            extends RecyclerView.Adapter<DocumentHolder>
-            implements Model.UpdateListener {
-
-        private static final String TAG = "DocumentsAdapter";
-        public static final int ITEM_TYPE_LAYOUT_DIVIDER = 0;
-        public static final int ITEM_TYPE_DOCUMENT = 1;
-        public static final int ITEM_TYPE_DIRECTORY = 2;
-
-        /**
-         * An ordered list of model IDs. This is the data structure that determines what shows up in
-         * the UI, and where.
-         */
-        private List<String> mModelIds = new ArrayList<>();
-
-        // The list is divided into two segments - directories, and everything else. Record the
-        // position where the transition happens.
-        private int mDividerPosition;
-
-        public GridLayoutManager.SpanSizeLookup createSpanSizeLookup() {
-            return new GridLayoutManager.SpanSizeLookup() {
-                @Override
-                public int getSpanSize(int position) {
-                    // Make layout whitespace span the grid. This has the effect of breaking
-                    // grid rows whenever layout whitespace is encountered.
-                    if (getItemViewType(position) == ITEM_TYPE_LAYOUT_DIVIDER) {
-                        return mColumnCount;
-                    } else {
-                        return 1;
-                    }
-                }
-            };
-        }
-
-        @Override
-        public DocumentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if (viewType == ITEM_TYPE_LAYOUT_DIVIDER) {
-                return new EmptyDocumentHolder(getContext());
-            };
-
-            DocumentHolder holder = null;
-            final State state = getDisplayState();
-            switch (state.derivedMode) {
-                case MODE_GRID:
-                    switch (viewType) {
-                        case ITEM_TYPE_DIRECTORY:
-                            holder = new GridDirectoryHolder(getContext(), parent);
-                            break;
-                        case ITEM_TYPE_DOCUMENT:
-                            holder = new GridDocumentHolder(getContext(), parent, mIconHelper);
-                            break;
-                        default:
-                            throw new IllegalStateException("Unsupported layout type.");
-                    }
-                    break;
-                case MODE_LIST:
-                    holder = new ListDocumentHolder(getContext(), parent, mIconHelper);
-                    break;
-                case MODE_UNKNOWN:
-                default:
-                    throw new IllegalStateException("Unsupported layout mode.");
-            }
-
-            holder.addClickListener(mItemClickListener);
-            holder.addOnKeyListener(mSelectionManager);
-            return holder;
-        }
-
-        /**
-         * Deal with selection changed events by using a custom ItemAnimator that just changes the
-         * background color.  This works around focus issues (otherwise items lose focus when their
-         * selection state changes) but also optimizes change animations for selection.
-         */
-        @Override
-        public void onBindViewHolder(DocumentHolder holder, int position, List<Object> payload) {
-            if (holder.getItemViewType() == ITEM_TYPE_LAYOUT_DIVIDER) {
-                // Whitespace items are hidden elements with no data to bind.
-                return;
-            }
-
-            final View itemView = holder.itemView;
-
-            if (payload.contains(MultiSelectManager.SELECTION_CHANGED_MARKER)) {
-                final boolean selected = isSelected(mModelIds.get(position));
-                itemView.setActivated(selected);
-                return;
-            } else {
-                onBindViewHolder(holder, position);
-            }
-        }
-
-        @Override
-        public void onBindViewHolder(DocumentHolder holder, int position) {
-            if (holder.getItemViewType() == ITEM_TYPE_LAYOUT_DIVIDER) {
-                // Whitespace items are hidden elements with no data to bind.
-                return;
-            }
-
-            String modelId = mModelIds.get(position);
-            Cursor cursor = mModel.getItem(modelId);
-            holder.bind(cursor, modelId, getDisplayState());
-
-            final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-
-            holder.setSelected(isSelected(modelId));
-            holder.setEnabled(mTuner.isDocumentEnabled(docMimeType, docFlags));
-            if (DEBUG_ENABLE_DND) {
-                setupDragAndDropOnDocumentView(holder.itemView, cursor);
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return mModelIds.size();
-        }
-
-        @Override
-        public void onModelUpdate(Model model) {
-            mModelIds = Lists.newArrayList(model.getModelIds());
-            // Start the divider at the end. That way if the code below encounters no documents
-            // (i.e. in a directory containing only directories), the divider is placed at the end
-            // of the list, as expected.
-            mDividerPosition = mModelIds.size();
-
-            // Walk down the list of IDs till we encounter something that's not a directory, and
-            // insert a whitespace element - this introduces a visual break in the grid between
-            // folders and documents.
-            // TODO: This code makes assumptions about the model, namely, that it performs a
-            // bucketed sort where directories will always be ordered before other files.  CBB.
-            for (int i = 0; i < mModelIds.size(); ++i) {
-                final String mimeType = getCursorString(
-                        model.getItem(mModelIds.get(i)), Document.COLUMN_MIME_TYPE);
-                if (!Document.MIME_TYPE_DIR.equals(mimeType)) {
-                    mDividerPosition = i;
-                    break;
-                }
-            }
-
-            mModelIds.add(mDividerPosition, null);
-        }
-
-        @Override
-        public void onModelUpdateFailed(Exception e) {
-            if (DEBUG) Log.d(TAG, "onModelUpdateFailed called ");
-            mModelIds.clear();
-        }
-
-        /**
-         * @return The model ID of the item at the given adapter position.
-         */
-        public String getModelId(int adapterPosition) {
-            return mModelIds.get(adapterPosition);
-        }
-
-        /**
-         * Hides a set of items from the associated RecyclerView.
-         *
-         * @param ids The Model IDs of the items to hide.
-         * @return A SparseArray that maps the hidden IDs to their old positions. This can be used
-         *         to {@link #unhide} the items if necessary.
-         */
-        public SparseArray<String> hide(String... ids) {
-            Set<String> toHide = Sets.newHashSet(ids);
-
-            // Proceed backwards through the list of items, because each removal causes the
-            // positions of all subsequent items to change.
-            SparseArray<String> hiddenItems = new SparseArray<>();
-            for (int i = mModelIds.size() - 1; i >= 0; --i) {
-                String id = mModelIds.get(i);
-                if (toHide.contains(id)) {
-                    hiddenItems.put(i, mModelIds.remove(i));
-                    notifyItemRemoved(i);
-                }
-            }
-
-            return hiddenItems;
-        }
-
-        /**
-         * Unhides a set of previously hidden items.
-         *
-         * @param ids A sparse array of IDs from a previous call to {@link #hide}.
-         */
-        public void unhide(SparseArray<String> ids) {
-            // Proceed backwards through the list of items, because each addition causes the
-            // positions of all subsequent items to change.
-            for (int i = ids.size() - 1; i >= 0; --i) {
-                int pos = ids.keyAt(i);
-                String id = ids.get(pos);
-                mModelIds.add(pos, id);
-                notifyItemInserted(pos);
-            }
-        }
-
-        /**
-         * Returns a list of model IDs of items currently in the adapter. Excludes items that are
-         * currently hidden (see {@link #hide(String...)}).
-         *
-         * @return A list of Model IDs.
-         */
-        public List<String> getModelIds() {
-            return mModelIds;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (position < mDividerPosition) {
-                return ITEM_TYPE_DIRECTORY;
-            } else if (position == mDividerPosition) {
-                return ITEM_TYPE_LAYOUT_DIVIDER;
-            } else {
-                return ITEM_TYPE_DOCUMENT;
-            }
-        }
-
-        /**
-         * Triggers item-change notifications by stable ID. Passing an unrecognized ID will result
-         * in a warning in logcat, but no other error.
-         *
-         * @param id
-         * @param selectionChangedMarker
-         */
-        public void notifyItemChanged(String id, String selectionChangedMarker) {
-            int position = mModelIds.indexOf(id);
-
-            if (position >= 0) {
-                notifyItemChanged(position, selectionChangedMarker);
-            } else {
-                Log.w(TAG, "Item change notification received for unknown item: " + id);
-            }
-        }
     }
 
     private String findCommonMimeType(List<String> mimeTypes) {
@@ -1504,7 +1304,8 @@ public class DirectoryFragment extends Fragment {
         abstract void onDocumentsReady(List<DocumentInfo> docs);
     }
 
-    boolean isSelected(String modelId) {
+    @Override
+    public boolean isSelected(String modelId) {
         return mSelectionManager.getSelection().contains(modelId);
     }
 
@@ -1520,7 +1321,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private class ModelUpdateListener implements Model.UpdateListener {
+    private final class ModelUpdateListener implements Model.UpdateListener {
         @Override
         public void onModelUpdate(Model model) {
             if (model.info != null || model.error != null) {
