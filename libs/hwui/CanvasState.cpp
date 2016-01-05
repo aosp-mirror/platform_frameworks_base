@@ -45,6 +45,21 @@ CanvasState::~CanvasState() {
     }
 }
 
+void CanvasState::initializeRecordingSaveStack(int viewportWidth, int viewportHeight) {
+    if (mWidth != viewportWidth || mHeight != viewportHeight) {
+        mWidth = viewportWidth;
+        mHeight = viewportHeight;
+        mFirstSnapshot.initializeViewport(viewportWidth, viewportHeight);
+        mCanvas.onViewportInitialized();
+    }
+
+    freeAllSnapshots();
+    mSnapshot = allocSnapshot(&mFirstSnapshot,
+            SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    mSnapshot->setRelativeLightCenter(Vector3());
+    mSaveCount = 1;
+}
+
 void CanvasState::initializeSaveStack(
         int viewportWidth, int viewportHeight,
         float clipLeft, float clipTop,

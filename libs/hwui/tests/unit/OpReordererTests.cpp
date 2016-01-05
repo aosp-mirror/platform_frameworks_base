@@ -64,7 +64,7 @@ public:
         ADD_FAILURE() << "Layer updates not expected in this test";
     }
     virtual void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) {}
-    virtual void endFrame() {}
+    virtual void endFrame(const Rect& repaintRect) {}
 
     // define virtual defaults for single draw methods
 #define X(Type) \
@@ -127,7 +127,7 @@ TEST(OpReorderer, simple) {
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
             EXPECT_EQ(2, mIndex++);
         }
-        void endFrame() override {
+        void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(3, mIndex++);
         }
     };
@@ -327,7 +327,7 @@ RENDERTHREAD_TEST(OpReorderer, textureLayer) {
     public:
         void onTextureLayerOp(const TextureLayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(0, mIndex++);
-            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clipRect);
+            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clipRect());
             EXPECT_EQ(Rect(50, 50, 105, 105), state.computedState.clippedBounds);
 
             Matrix4 expected;
@@ -405,7 +405,7 @@ TEST(OpReorderer, clipped) {
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
             EXPECT_EQ(0, mIndex++);
             EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clippedBounds);
-            EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect);
+            EXPECT_EQ(Rect(10, 20, 30, 40), state.computedState.clipRect());
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
     };
@@ -439,7 +439,7 @@ TEST(OpReorderer, saveLayerSimple) {
             EXPECT_EQ(1, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), op.unmappedBounds);
             EXPECT_EQ(Rect(180, 180), state.computedState.clippedBounds);
-            EXPECT_EQ(Rect(180, 180), state.computedState.clipRect);
+            EXPECT_EQ(Rect(180, 180), state.computedState.clipRect());
 
             Matrix4 expectedTransform;
             expectedTransform.loadTranslate(-10, -10, 0);
@@ -448,7 +448,7 @@ TEST(OpReorderer, saveLayerSimple) {
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(3, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
-            EXPECT_EQ(Rect(200, 200), state.computedState.clipRect);
+            EXPECT_EQ(Rect(200, 200), state.computedState.clipRect());
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
     };
@@ -494,7 +494,7 @@ TEST(OpReorderer, saveLayerNested) {
         void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
             EXPECT_EQ(7, mIndex++);
         }
-        void endFrame() override {
+        void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(9, mIndex++);
         }
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
@@ -574,7 +574,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
             EXPECT_TRUE(state.computedState.transform.isIdentity())
                     << "Transform should be reset within layer";
 
-            EXPECT_EQ(state.computedState.clipRect, Rect(25, 25, 75, 75))
+            EXPECT_EQ(Rect(25, 25, 75, 75), state.computedState.clipRect())
                     << "Damage rect should be used to clip layer content";
         }
         void endLayer() override {
@@ -586,7 +586,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(4, mIndex++);
         }
-        void endFrame() override {
+        void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(5, mIndex++);
         }
     };
@@ -675,7 +675,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
                 EXPECT_EQ(200u, layer->viewportHeight);
             } else { ADD_FAILURE(); }
         }
-        void endFrame() override {
+        void endFrame(const Rect& repaintRect) override {
             EXPECT_EQ(12, mIndex++);
         }
     };

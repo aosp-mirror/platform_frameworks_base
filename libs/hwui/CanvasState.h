@@ -80,6 +80,12 @@ public:
      * Initializes the first snapshot, computing the projection matrix,
      * and stores the dimensions of the render target.
      */
+    void initializeRecordingSaveStack(int viewportWidth, int viewportHeight);
+
+    /**
+     * Initializes the first snapshot, computing the projection matrix,
+     * and stores the dimensions of the render target.
+     */
     void initializeSaveStack(int viewportWidth, int viewportHeight,
             float clipLeft, float clipTop, float clipRight, float clipBottom,
             const Vector3& lightCenter);
@@ -168,6 +174,7 @@ private:
     void freeAllSnapshots();
 
     /// indicates that the clip has been changed since the last time it was consumed
+    // TODO: delete when switching to HWUI_NEW_OPS
     bool mDirtyClip;
 
     /// Dimensions of the drawing surface

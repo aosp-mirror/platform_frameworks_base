@@ -108,6 +108,7 @@ ifeq (true, $(HWUI_NEW_OPS))
     hwui_src_files += \
         BakedOpDispatcher.cpp \
         BakedOpRenderer.cpp \
+        BakedOpState.cpp \
         OpReorderer.cpp \
         RecordingCanvas.cpp
 

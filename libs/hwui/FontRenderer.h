@@ -47,6 +47,7 @@ namespace uirenderer {
 #if HWUI_NEW_OPS
 class BakedOpState;
 class BakedOpRenderer;
+struct ClipBase;
 #else
 class OpenGLRenderer;
 #endif
@@ -57,7 +58,7 @@ public:
 #if HWUI_NEW_OPS
             BakedOpRenderer* renderer,
             const BakedOpState* bakedState,
-            const Rect* clip,
+            const ClipBase* clip,
 #else
             OpenGLRenderer* renderer,
 #endif
@@ -81,7 +82,7 @@ public:
 #if HWUI_NEW_OPS
     BakedOpRenderer* renderer;
     const BakedOpState* bakedState;
-    const Rect* clip;
+    const ClipBase* clip;
 #else
     OpenGLRenderer* renderer;
 #endif

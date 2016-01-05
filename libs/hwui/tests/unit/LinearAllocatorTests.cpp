@@ -27,7 +27,7 @@ struct SimplePair {
     int two = 2;
 };
 
-TEST(LinearAllocator, alloc) {
+TEST(LinearAllocator, create) {
     LinearAllocator la;
     EXPECT_EQ(0u, la.usedSize());
     la.alloc(64);
@@ -35,7 +35,7 @@ TEST(LinearAllocator, alloc) {
     // so the usedSize isn't strictly defined
     EXPECT_LE(64u, la.usedSize());
     EXPECT_GT(80u, la.usedSize());
-    auto pair = la.alloc<SimplePair>();
+    auto pair = la.create<SimplePair>();
     EXPECT_LE(64u + sizeof(SimplePair), la.usedSize());
     EXPECT_GT(80u + sizeof(SimplePair), la.usedSize());
     EXPECT_EQ(1, pair->one);
@@ -47,8 +47,8 @@ TEST(LinearAllocator, dtor) {
     {
         LinearAllocator la;
         for (int i = 0; i < 5; i++) {
-            la.alloc<TestUtils::SignalingDtor>()->setSignal(destroyed + i);
-            la.alloc<SimplePair>();
+            la.create<TestUtils::SignalingDtor>()->setSignal(destroyed + i);
+            la.create<SimplePair>();
         }
         la.alloc(100);
         for (int i = 0; i < 5; i++) {
@@ -75,7 +75,7 @@ TEST(LinearAllocator, rewind) {
         la.rewindIfLastAlloc(addr, 100);
         EXPECT_GT(16u, la.usedSize());
         size_t emptySize = la.usedSize();
-        auto sigdtor = la.alloc<TestUtils::SignalingDtor>();
+        auto sigdtor = la.create<TestUtils::SignalingDtor>();
         sigdtor->setSignal(&destroyed);
         EXPECT_EQ(0, destroyed);
         EXPECT_LE(emptySize, la.usedSize());

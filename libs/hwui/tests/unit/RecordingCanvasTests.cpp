@@ -33,12 +33,36 @@ static void playbackOps(const DisplayList& displayList,
     }
 }
 
+#define EXPECT_CLIP_RECT(expRect, clipStatePtr) \
+    EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped"; \
+    if ((clipStatePtr)->mode == ClipMode::Rectangle) { \
+        EXPECT_EQ((expRect), reinterpret_cast<const ClipRect*>(clipStatePtr)->rect); \
+    } else { \
+        ADD_FAILURE() << "ClipState not a rect"; \
+    }
+
 TEST(RecordingCanvas, emptyPlayback) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
         canvas.restore();
     });
     playbackOps(*dl, [](const RecordedOp& op) { ADD_FAILURE(); });
+}
+
+TEST(RecordingCanvas, clipRect) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 100, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
+        canvas.drawRect(0, 0, 50, 50, SkPaint());
+        canvas.drawRect(50, 50, 100, 100, SkPaint());
+        canvas.restore();
+    });
+
+    ASSERT_EQ(2u, dl->getOps().size()) << "Must be exactly two ops";
+    EXPECT_CLIP_RECT(Rect(100, 100), dl->getOps()[0]->localClip);
+    EXPECT_CLIP_RECT(Rect(100, 100), dl->getOps()[1]->localClip);
+    EXPECT_EQ(dl->getOps()[0]->localClip, dl->getOps()[1]->localClip)
+            << "Clip should be serialized once";
 }
 
 TEST(RecordingCanvas, drawLines) {
@@ -66,7 +90,7 @@ TEST(RecordingCanvas, drawRect) {
     ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
     auto op = *(dl->getOps()[0]);
     ASSERT_EQ(RecordedOpId::RectOp, op.opId);
-    EXPECT_EQ(Rect(100, 200), op.localClipRect);
+    EXPECT_EQ(nullptr, op.localClip);
     EXPECT_EQ(Rect(10, 20, 90, 180), op.unmappedBounds);
 }
 
@@ -83,7 +107,7 @@ TEST(RecordingCanvas, drawText) {
     playbackOps(*dl, [&count](const RecordedOp& op) {
         count++;
         ASSERT_EQ(RecordedOpId::TextOp, op.opId);
-        EXPECT_EQ(Rect(200, 200), op.localClipRect);
+        EXPECT_EQ(nullptr, op.localClip);
         EXPECT_TRUE(op.localMatrix.isIdentity());
         EXPECT_TRUE(op.unmappedBounds.contains(25, 15, 50, 25))
                 << "Op expected to be 25+ pixels wide, 10+ pixels tall";
@@ -185,7 +209,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
             ASSERT_NE(nullptr, op.paint);
             EXPECT_EQ(SK_ColorBLUE, op.paint->getColor());
             EXPECT_EQ(Rect(100, 200), op.unmappedBounds);
-            EXPECT_EQ(Rect(100, 200), op.localClipRect);
+            EXPECT_EQ(nullptr, op.localClip);
 
             Matrix4 expectedMatrix;
             expectedMatrix.loadIdentity();
@@ -194,7 +218,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
             ASSERT_EQ(RecordedOpId::BitmapOp, op.opId);
             EXPECT_EQ(nullptr, op.paint);
             EXPECT_EQ(Rect(25, 25), op.unmappedBounds);
-            EXPECT_EQ(Rect(100, 200), op.localClipRect);
+            EXPECT_EQ(nullptr, op.localClip);
 
             Matrix4 expectedMatrix;
             expectedMatrix.loadTranslate(25, 25, 0);
@@ -219,12 +243,12 @@ TEST(RecordingCanvas, saveLayer_simple) {
         case 0:
             EXPECT_EQ(RecordedOpId::BeginLayerOp, op.opId);
             EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
-            EXPECT_EQ(Rect(200, 200), op.localClipRect);
+            EXPECT_EQ(nullptr, op.localClip);
             EXPECT_TRUE(op.localMatrix.isIdentity());
             break;
         case 1:
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
-            EXPECT_EQ(Rect(180, 160), op.localClipRect);
+            EXPECT_CLIP_RECT(Rect(180, 160), op.localClip);
             EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
             expectedMatrix.loadTranslate(-10, -20, 0);
             EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
@@ -254,8 +278,8 @@ TEST(RecordingCanvas, saveLayer_viewportCrop) {
         if (count++ == 1) {
             Matrix4 expectedMatrix;
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
-            EXPECT_EQ(Rect(100, 100), op.localClipRect) << "Recorded clip rect should be"
-                    " intersection of viewport and saveLayer bounds, in layer space";
+            EXPECT_CLIP_RECT(Rect(100, 100), op.localClip) // Recorded clip rect should be
+            // intersection of viewport and saveLayer bounds, in layer space;
             EXPECT_EQ(Rect(400, 400), op.unmappedBounds);
             expectedMatrix.loadTranslate(-100, -100, 0);
             EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);
@@ -281,7 +305,7 @@ TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
     playbackOps(*dl, [&count](const RecordedOp& op) {
         if (count++ == 1) {
             EXPECT_EQ(RecordedOpId::RectOp, op.opId);
-            EXPECT_EQ(Rect(100, 100), op.localClipRect);
+            EXPECT_CLIP_RECT(Rect(100, 100), op.localClip);
             EXPECT_EQ(Rect(100, 100), op.unmappedBounds);
             EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), op.localMatrix)
                     << "Recorded op shouldn't see any canvas transform before the saveLayer";
@@ -312,7 +336,16 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
 
             // ...and get about 58.6, 58.6, 341.4 341.4, because the bounds are clipped by
             // the parent 200x200 viewport, but prior to rotation
-            EXPECT_RECT_APPROX_EQ(Rect(58.57864, 58.57864, 341.42136, 341.42136), op.localClipRect);
+            ASSERT_NE(nullptr, op.localClip);
+            ASSERT_EQ(ClipMode::Rectangle, op.localClip->mode);
+            // NOTE: this check relies on saveLayer altering the clip post-viewport init. This
+            // causes the clip to be recorded by contained draw commands, though it's not necessary
+            // since the same clip will be computed at draw time. If such a change is made, this
+            // check could be done at record time by querying the clip, or the clip could be altered
+            // slightly so that it is serialized.
+            EXPECT_RECT_APPROX_EQ(Rect(58.57864, 58.57864, 341.42136, 341.42136),
+                    (reinterpret_cast<const ClipRect*>(op.localClip))->rect);
+
             EXPECT_EQ(Rect(400, 400), op.unmappedBounds);
             expectedMatrix.loadIdentity();
             EXPECT_MATRIX_APPROX_EQ(expectedMatrix, op.localMatrix);

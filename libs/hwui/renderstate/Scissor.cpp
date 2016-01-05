@@ -15,6 +15,8 @@
  */
 #include "renderstate/Scissor.h"
 
+#include "Rect.h"
+
 #include <utils/Log.h>
 
 namespace android {
@@ -69,6 +71,26 @@ bool Scissor::set(GLint x, GLint y, GLint width, GLint height) {
         return true;
     }
     return false;
+}
+
+void Scissor::set(int viewportHeight, const Rect& clip) {
+    // transform to Y-flipped GL space, and prevent negatives
+    GLint x = std::max(0, (int)clip.left);
+    GLint y = std::max(0, viewportHeight - (int)clip.bottom);
+    GLint width = std::max(0, ((int)clip.right) - x);
+    GLint height = std::max(0, (viewportHeight - (int)clip.top) - y);
+
+    if (x != mScissorX
+            || y != mScissorY
+            || width != mScissorWidth
+            || height != mScissorHeight) {
+        glScissor(x, y, width, height);
+
+        mScissorX = x;
+        mScissorY = y;
+        mScissorWidth = width;
+        mScissorHeight = height;
+    }
 }
 
 void Scissor::reset() {

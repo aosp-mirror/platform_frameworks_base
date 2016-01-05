@@ -33,6 +33,7 @@ class SkPaint;
 namespace android {
 namespace uirenderer {
 
+struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
 struct Vertex;
@@ -91,10 +92,10 @@ namespace RecordedOpId {
 static_assert(RecordedOpId::ArcOp == 0,
         "First index must be zero for LUTs to work");
 
-#define BASE_PARAMS const Rect& unmappedBounds, const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint
-#define BASE_PARAMS_PAINTLESS const Rect& unmappedBounds, const Matrix4& localMatrix, const Rect& localClipRect
-#define SUPER(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClipRect, paint)
-#define SUPER_PAINTLESS(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClipRect, nullptr)
+#define BASE_PARAMS const Rect& unmappedBounds, const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint
+#define BASE_PARAMS_PAINTLESS const Rect& unmappedBounds, const Matrix4& localMatrix, const ClipBase* localClip
+#define SUPER(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClip, paint)
+#define SUPER_PAINTLESS(Type) RecordedOp(RecordedOpId::Type, unmappedBounds, localMatrix, localClip, nullptr)
 
 struct RecordedOp {
     /* ID from RecordedOpId - generally used for jumping into function tables */
@@ -106,8 +107,8 @@ struct RecordedOp {
     /* transform in recording space (vs DisplayList origin) */
     const Matrix4 localMatrix;
 
-    /* clip in recording space */
-    const Rect localClipRect;
+    /* clip in recording space - nullptr if not clipped */
+    const ClipBase* localClip;
 
     /* optional paint, stored in base object to simplify merging logic */
     const SkPaint* paint;
@@ -116,7 +117,7 @@ protected:
             : opId(opId)
             , unmappedBounds(unmappedBounds)
             , localMatrix(localMatrix)
-            , localClipRect(localClipRect)
+            , localClip(localClip)
             , paint(paint) {}
 };
 
@@ -187,9 +188,9 @@ struct BitmapRectOp : RecordedOp {
 };
 
 struct CirclePropsOp : RecordedOp {
-    CirclePropsOp(const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint,
+    CirclePropsOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
             float* x, float* y, float* radius)
-            : RecordedOp(RecordedOpId::CirclePropsOp, Rect(), localMatrix, localClipRect, paint)
+            : RecordedOp(RecordedOpId::CirclePropsOp, Rect(), localMatrix, localClip, paint)
             , x(x)
             , y(y)
             , radius(radius) {}
@@ -259,9 +260,9 @@ struct RoundRectOp : RecordedOp {
 };
 
 struct RoundRectPropsOp : RecordedOp {
-    RoundRectPropsOp(const Matrix4& localMatrix, const Rect& localClipRect, const SkPaint* paint,
+    RoundRectPropsOp(const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint,
             float* left, float* top, float* right, float* bottom, float *rx, float *ry)
-            : RecordedOp(RecordedOpId::RoundRectPropsOp, Rect(), localMatrix, localClipRect, paint)
+            : RecordedOp(RecordedOpId::RoundRectPropsOp, Rect(), localMatrix, localClip, paint)
             , left(left)
             , top(top)
             , right(right)
@@ -286,12 +287,13 @@ struct RoundRectPropsOp : RecordedOp {
  */
 struct ShadowOp : RecordedOp {
     ShadowOp(const RenderNodeOp& casterOp, float casterAlpha, const SkPath* casterPath,
-            const Rect& clipRect, const Vector3& lightCenter)
-            : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), clipRect, nullptr)
+            const Rect& localClipRect, const Vector3& lightCenter)
+            : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), nullptr, nullptr)
             , shadowMatrixXY(casterOp.localMatrix)
             , shadowMatrixZ(casterOp.localMatrix)
             , casterAlpha(casterAlpha)
             , casterPath(casterPath)
+            , localClipRect(localClipRect)
             , lightCenter(lightCenter) {
         const RenderNode& node = *casterOp.renderNode;
         node.applyViewPropertyTransforms(shadowMatrixXY, false);
@@ -301,6 +303,7 @@ struct ShadowOp : RecordedOp {
     Matrix4 shadowMatrixZ;
     const float casterAlpha;
     const SkPath* casterPath;
+    const Rect localClipRect;
     const Vector3 lightCenter;
 };
 
@@ -374,7 +377,7 @@ struct BeginLayerOp : RecordedOp {
  */
 struct EndLayerOp : RecordedOp {
     EndLayerOp()
-            : RecordedOp(RecordedOpId::EndLayerOp, Rect(), Matrix4::identity(), Rect(), nullptr) {}
+            : RecordedOp(RecordedOpId::EndLayerOp, Rect(), Matrix4::identity(), nullptr, nullptr) {}
 };
 
 /**
@@ -394,7 +397,7 @@ struct LayerOp : RecordedOp {
             , destroy(true) {}
 
     LayerOp(RenderNode& node)
-        : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), Rect(node.getWidth(), node.getHeight()), nullptr)
+        : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
         , layerHandle(node.getLayerHandle())
         , alpha(node.properties().layerProperties().alpha() / 255.0f)
         , mode(node.properties().layerProperties().xferMode())
