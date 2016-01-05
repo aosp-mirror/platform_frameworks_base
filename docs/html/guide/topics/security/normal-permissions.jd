@@ -99,9 +99,6 @@ page.tags=permissions,normal
   <li>{@link android.Manifest.permission#EXPAND_STATUS_BAR EXPAND_STATUS_BAR}
   </li>
 
-  <li>{@link android.Manifest.permission#FLASHLIGHT FLASHLIGHT}
-  </li>
-
   <li>{@link android.Manifest.permission#GET_PACKAGE_SIZE GET_PACKAGE_SIZE}
   </li>
 
