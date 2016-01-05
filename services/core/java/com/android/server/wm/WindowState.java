@@ -2352,10 +2352,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void setReplacing(boolean animate) {
-        if ((mAttrs.privateFlags & PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH) == 0) {
-            mWillReplaceWindow = true;
-            mReplacingWindow = null;
-            mAnimateReplacingWindow = animate;
+        if ((mAttrs.privateFlags & PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH) != 0
+                || mAttrs.type == TYPE_APPLICATION_STARTING) {
+            // We don't set replacing on starting windows since they are added by window manager and
+            // not the client so won't be replaced by the client.
+            return;
         }
+
+        mWillReplaceWindow = true;
+        mReplacingWindow = null;
+        mAnimateReplacingWindow = animate;
     }
 }
