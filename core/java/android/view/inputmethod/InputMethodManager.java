@@ -2163,6 +2163,17 @@ public final class InputMethodManager {
      * by changing its extra value. The different subtype won't get affected by the stored past
      * status. (You may want to take a look at {@link InputMethodSubtype#hashCode()} to refer
      * to the current implementation.)
+     *
+     * <p>NOTE: If the same subtype exists in both the manifest XML file and additional subtypes
+     * specified by {@code subtypes}, those multiple instances are automatically merged into one
+     * instance.</p>
+     *
+     * <p>CAVEAT: In API Level 23 and prior, the system may do nothing if an empty
+     * {@link InputMethodSubtype} is specified in {@code subtypes}, which prevents you from removing
+     * the last one entry of additional subtypes. If your IME statically defines one or more
+     * subtypes in the manifest XML file, you may be able to work around this limitation by
+     * specifying one of those statically defined subtypes in {@code subtypes}.</p>
+     *
      * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
      */
