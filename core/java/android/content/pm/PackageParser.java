@@ -1032,31 +1032,6 @@ public class PackageParser {
     }
 
     /**
-     * Gathers the {@link ManifestDigest} for {@code pkg} if it exists in the
-     * APK. If it successfully scanned the package and found the
-     * {@code AndroidManifest.xml}, {@code true} is returned.
-     */
-    public void collectManifestDigest(Package pkg) throws PackageParserException {
-        pkg.manifestDigest = null;
-
-        // TODO: extend to gather digest for split APKs
-        try {
-            final StrictJarFile jarFile = new StrictJarFile(pkg.baseCodePath);
-            try {
-                final ZipEntry je = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
-                if (je != null) {
-                    pkg.manifestDigest = ManifestDigest.fromInputStream(jarFile.getInputStream(je));
-                }
-            } finally {
-                jarFile.close();
-            }
-        } catch (IOException | RuntimeException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                    "Failed to collect manifest digest");
-        }
-    }
-
-    /**
      * Collect certificates from all the APKs described in the given package,
      * populating {@link Package#mSignatures}. Also asserts that all APK
      * contents are signed correctly and consistently.
@@ -4498,12 +4473,6 @@ public class PackageParser {
 
         /* The required account type without which this application will not function */
         public String mRequiredAccountType;
-
-        /**
-         * Digest suitable for comparing whether this package's manifest is the
-         * same as another.
-         */
-        public ManifestDigest manifestDigest;
 
         public String mOverlayTarget;
         public int mOverlayPriority;
