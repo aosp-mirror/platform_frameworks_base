@@ -230,7 +230,7 @@ public class ContactsFragment extends Fragment implements
     {@link android.provider.ContactsContract.Contacts#DISPLAY_NAME_PRIMARY
     Contacts.DISPLAY_NAME_PRIMARY} requires Android 3.0 (API version 11) or later, setting your
     app's <code>minSdkVersion</code> to 10 or below generates an Android Lint warning in
-    Eclipse with ADK. To turn off this warning, add the annotation
+    Android Studio. To turn off this warning, add the annotation
     <code>@SuppressLint("InlinedApi")</code> before the definition of <code>FROM_COLUMNS</code>.
 </p>
 <h3 id="InitializeFragment">Initialize the Fragment</h3>

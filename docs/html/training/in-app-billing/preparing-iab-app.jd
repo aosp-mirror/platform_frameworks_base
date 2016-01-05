@@ -84,9 +84,9 @@ presented with the welcome screen.</li>
 <p>To add the In-app Billing Version 3 library to your new In-app Billing project:</p>
 <ol>
 <li>Copy the {@code TrivialDrive} sample files into your Android project.</li>
-<li>Modify the package name in the files you copied to use the package name for your project. In Eclipse, you can use this shortcut: right-click the package name, then  select <strong>Refactor</strong> > <strong>Rename</strong>.</li>
+<li>Modify the package name in the files you copied to use the package name for your project. In Android Studio, you can use this shortcut: right-click the package name, then  select <strong>Refactor</strong> > <strong>Rename</strong>.</li>
 <li>Open the {@code AndroidManifest.xml} file and update the package attribute value to use the package name for your project.</li>
-<li>Fix import statements as needed so that your project compiles correctly.  In Eclipse, you can use this shortcut: press <strong>Ctrl+Shift+O</strong> in each file showing errors.</li>
+<li>Fix import statements as needed so that your project compiles correctly.  In Android Studio, you can use this shortcut: press <strong>Ctrl+Shift+O</strong> in each file showing errors.</li>
 <li>Modify the sample to create your own application. Remember to copy the Base64 public license key for your application from the Developer Console over to your {@code MainActivity.java}.</li>
 </ol>
 
@@ -98,7 +98,6 @@ presented with the welcome screen.</li>
   <li>In Android Studio: Create a directory named {@code aidl} under {@code src/main}, add a new
   package {@code com.android.vending.billing} in this directory, and import the
   {@code IInAppBillingService.aidl} file into this package.</li>
-  <li>In Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory.</li>
   <li>In other dev environments: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory.</li>
   </ul>
 </li>

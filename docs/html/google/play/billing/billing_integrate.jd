@@ -95,34 +95,38 @@ method calls.</p>
 <p>To add the AIDL to your project:</p>
 
 <ol>
-  <li>Copy the {@code IInAppBillingService.aidl} file to your Android project.
+  <li>First, download the Google Play Billing Library to your Android project:
+      <ol type="a">
+      <li>Select <strong>Tools > Android > SDK Manager</strong>.</li>
+      <li>Under <strong>Appearance & Behavior > System Settings > Android SDK</strong>,
+          select the <em>SDK Tools</em> tab to select and download <em>Google Play Billing
+          Library</em>.</li></ol>
+
+  <li>Next, copy the {@code IInAppBillingService.aidl} file to your project.
     <ul>
-      <li>If you are using Eclipse:
+      <li>If you are using Android Studio:
         <ol type="a">
-          <li>If you are starting from an existing Android project, open the
-          project in Eclipse. If you are creating a new Android project from
-          scratch, click <strong>File</strong> &gt; <strong>New</strong> &gt;
-          <strong>Android Application Project</strong>, then follow the
-          instructions in the <strong>New Android Application</strong> wizard
-          to create a new project in your workspace.
-          </li>
+          <li>Navigate to {@code src/main} in the Project tool window.</li>
 
-          <li>In the {@code /src} directory, click <strong>File</strong> &gt;
-          <strong>New</strong> &gt; <strong>Package</strong>, then create a
-          package named {@code com.android.vending.billing}.
-          </li>
+          <li>Select <strong>File > New > Directory</strong> and enter {@code aidl} in the
+          <em>New Directory</em> window, then select <strong>OK</strong>.
 
-          <li>Copy the {@code IInAppBillingService.aidl} file from {@code
-          &lt;sdk&gt;/extras/google/play_billing/} and paste it into the {@code
-          src/com.android.vending.billing/} folder in your workspace.
+          <li>Select <strong>File > New > Package</strong> and enter 
+          {@code com.android.vending.billing} in the <em>New Package</em> window, then select
+          <strong>OK</strong>.</li>
+
+          <li>Using your operating system file explorer, navigate to 
+          {@code &lt;sdk&gt;/extras/google/play_billing/}, copy the 
+          {@code IInAppBillingService.aidl} file, and paste it into the 
+          {@code com.android.vending.billing} package in your project.
           </li>
         </ol>
       </li>
 
-      <li>If you are developing in a non-Eclipse environment: Create the
+      <li>If you are developing in a non-Android Studio environment: Create the
       following directory {@code /src/com/android/vending/billing} and copy the
       {@code IInAppBillingService.aidl} file into this directory. Put the AIDL
-      file into your project and use the Ant tool to build your project so that
+      file into your project and use the Gradle tool to build your project so that
       the <code>IInAppBillingService.java</code> file gets generated.
       </li>
     </ul>

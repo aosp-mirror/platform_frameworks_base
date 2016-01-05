@@ -34,7 +34,7 @@ SDK checking: </p>
 </ul>
 
 <p class="note"><strong>Tip:</strong> The standalone SDK Manager is still available from the
-command line, but we recommend it only for use with Eclipse ADT and standalone SDK installations.</p>
+command line, but we recommend it only for use with standalone SDK installations.</p>
 
 <p>By default, the SDK Manager installs the latest packages and tools. Click the checkbox next to
 each additional SDK platform and tool that you want to install. Clear the
@@ -99,7 +99,7 @@ Android Virtual Devices (AVDs) in the
 Android APIs (such as <a href="{@docRoot}guide/components/fragments.html">fragments</a>,
 plus others not included in the framework at all) on devices running
 a platform version as old as Android 1.6. All of the activity templates available when creating
-a new project with the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a>
+a new project with Android Studio
 require this. For more information, read <a
 href="{@docRoot}tools/support-library/index.html">Support Library</a>.</dd>
 
