@@ -86,8 +86,19 @@ public class Model implements SiblingProvider {
     private static String createModelId(Cursor c) {
         // TODO: Maybe more efficient to use just the document ID, in cases where there is only one
         // authority (which should be the majority of cases).
-        return getCursorString(c, RootCursorWrapper.COLUMN_AUTHORITY) +
-                "|" + getCursorString(c, Document.COLUMN_DOCUMENT_ID);
+        return createModelId(
+                getCursorString(c, RootCursorWrapper.COLUMN_AUTHORITY),
+                getCursorString(c, Document.COLUMN_DOCUMENT_ID));
+    }
+
+    /**
+     * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
+     * string that can be used to identify the document referred to by the cursor.
+     *
+     * @param c A cursor that refers to a document.
+     */
+    static String createModelId(String authority, String docId) {
+        return authority + "|" + docId;
     }
 
     private void notifyUpdateListeners() {

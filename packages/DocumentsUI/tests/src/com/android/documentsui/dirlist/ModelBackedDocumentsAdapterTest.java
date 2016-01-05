@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
@@ -44,32 +45,53 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
             "%$%VD"
     };
 
-    private TestModel model;
-    private ModelBackedDocumentsAdapter adapter;
+    private TestModel mModel;
+    private ModelBackedDocumentsAdapter mAdapter;
 
     public void setUp() {
 
         final Context testContext = TestContext.createStorageTestContext(getContext(), AUTHORITY);
-        model = new TestModel(testContext, AUTHORITY);
-        model.update(NAMES);
+        mModel = new TestModel(testContext, AUTHORITY);
+        mModel.update(NAMES);
 
         DocumentsAdapter.Environment env = new TestEnvironment(testContext);
 
-        adapter = new ModelBackedDocumentsAdapter(
+        mAdapter = new ModelBackedDocumentsAdapter(
                 env, new IconHelper(testContext, State.MODE_GRID));
-        adapter.onModelUpdate(model);
+        mAdapter.onModelUpdate(mModel);
     }
 
     // Tests that the item count is correct.
     public void testItemCount() {
-        assertEquals(model.getItemCount(), adapter.getItemCount());
+        assertEquals(mModel.getItemCount(), mAdapter.getItemCount());
     }
 
     // Tests that the item count is correct.
     public void testHide_ItemCount() {
-        List<String> ids = model.getModelIds();
-        adapter.hide(ids.get(0), ids.get(1));
-        assertEquals(model.getItemCount() - 2, adapter.getItemCount());
+        List<String> ids = mModel.getModelIds();
+        mAdapter.hide(ids.get(0), ids.get(1));
+        assertEquals(mModel.getItemCount() - 2, mAdapter.getItemCount());
+    }
+
+    // Tests that the items can be hidden and unhidden.
+    public void testUnhide_ItemCount() {
+        List<String> ids = mModel.getModelIds();
+        SparseArray<String> hidden = mAdapter.hide(ids.toArray(new String[ids.size()]));
+        mAdapter.unhide(hidden);
+        assertEquals(mModel.getItemCount(), mAdapter.getItemCount());
+    }
+
+    // Tests that the items can be hidden and unhidden.
+    public void testUnhide_PreservesOrder() {
+        List<String> ids = mModel.getModelIds();
+        SparseArray<String> hidden = mAdapter.hide(ids.toArray(new String[ids.size()]));
+        mAdapter.unhide(hidden);
+
+        // Finally ensure the restored items are in the original order
+        // by checking them against the model.
+        for (int i = 0; i < mAdapter.getItemCount(); i++) {
+            assertEquals(mModel.idForPosition(i), mAdapter.getModelId(i));
+        }
     }
 
     private final class TestEnvironment implements DocumentsAdapter.Environment {
@@ -94,7 +116,7 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
 
         @Override
         public Model getModel() {
-            return model;
+            return mModel;
         }
 
         @Override
