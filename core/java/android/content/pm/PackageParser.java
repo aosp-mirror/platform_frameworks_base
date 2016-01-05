@@ -51,6 +51,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.jar.StrictJarFile;
 import android.view.Gravity;
 
@@ -1054,11 +1055,56 @@ public class PackageParser {
         final boolean requireCode = ((parseFlags & PARSE_ENFORCE_CODE) != 0) && hasCode;
         final String apkPath = apkFile.getAbsolutePath();
 
+        // Try to verify the APK using APK Signature Scheme v2.
+        boolean verified = false;
+        {
+            Certificate[][] allSignersCerts = null;
+            Signature[] signatures = null;
+            try {
+                allSignersCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
+                signatures = convertToSignatures(allSignersCerts);
+                // APK verified using APK Signature Scheme v2.
+                verified = true;
+            } catch (ApkSignatureSchemeV2Verifier.SignatureNotFoundException e) {
+                // No APK Signature Scheme v2 signature found
+            } catch (Exception e) {
+                // APK Signature Scheme v2 signature was found but did not verify
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                        "Failed to collect certificates from " + apkPath
+                                + " using APK Signature Scheme v2",
+                        e);
+            }
+
+            if (verified) {
+                if (pkg.mCertificates == null) {
+                    pkg.mCertificates = allSignersCerts;
+                    pkg.mSignatures = signatures;
+                    pkg.mSigningKeys = new ArraySet<>(allSignersCerts.length);
+                    for (int i = 0; i < allSignersCerts.length; i++) {
+                        Certificate[] signerCerts = allSignersCerts[i];
+                        Certificate signerCert = signerCerts[0];
+                        pkg.mSigningKeys.add(signerCert.getPublicKey());
+                    }
+                } else {
+                    if (!Signature.areExactMatch(pkg.mSignatures, signatures)) {
+                        throw new PackageParserException(
+                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                apkPath + " has mismatched certificates");
+                    }
+                }
+                // Not yet done, because we need to confirm that AndroidManifest.xml exists and,
+                // if requested, that classes.dex exists.
+            }
+        }
+
         boolean codeFound = false;
         StrictJarFile jarFile = null;
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
-            jarFile = new StrictJarFile(apkPath);
+            jarFile = new StrictJarFile(
+                    apkPath,
+                    !verified // whether to verify JAR signature
+                    );
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
             // Always verify manifest, regardless of source
@@ -1068,6 +1114,16 @@ public class PackageParser {
                         "Package " + apkPath + " has no manifest");
             }
 
+            // Optimization: early termination when APK already verified
+            if (verified) {
+                if ((requireCode) && (jarFile.findEntry(BYTECODE_FILENAME) == null)) {
+                    throw new PackageParserException(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                            "Package " + apkPath + " code is missing");
+                }
+                return;
+            }
+
+            // APK's integrity needs to be verified using JAR signature scheme.
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "buildVerifyList");
             final List<ZipEntry> toVerify = new ArrayList<>();
             toVerify.add(manifestEntry);

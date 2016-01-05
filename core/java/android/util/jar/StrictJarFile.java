@@ -18,7 +18,6 @@
 package android.util.jar;
 
 import dalvik.system.CloseGuard;
-import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +29,7 @@ import java.util.Set;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -59,7 +56,13 @@ public final class StrictJarFile {
     private final CloseGuard guard = CloseGuard.get();
     private boolean closed;
 
-    public StrictJarFile(String fileName) throws IOException, SecurityException {
+    public StrictJarFile(String fileName)
+            throws IOException, SecurityException {
+        this(fileName, true);
+    }
+
+    public StrictJarFile(String fileName, boolean verify)
+            throws IOException, SecurityException {
         this.nativeHandle = nativeOpenJarFile(fileName);
         this.raf = new RandomAccessFile(fileName, "r");
 
@@ -67,17 +70,23 @@ public final class StrictJarFile {
             // Read the MANIFEST and signature files up front and try to
             // parse them. We never want to accept a JAR File with broken signatures
             // or manifests, so it's best to throw as early as possible.
-            HashMap<String, byte[]> metaEntries = getMetaEntries();
-            this.manifest = new StrictJarManifest(metaEntries.get(JarFile.MANIFEST_NAME), true);
-            this.verifier = new StrictJarVerifier(fileName, manifest, metaEntries);
-            Set<String> files = manifest.getEntries().keySet();
-            for (String file : files) {
-                if (findEntry(file) == null) {
-                    throw new SecurityException(fileName + ": File " + file + " in manifest does not exist");
+            if (verify) {
+                HashMap<String, byte[]> metaEntries = getMetaEntries();
+                this.manifest = new StrictJarManifest(metaEntries.get(JarFile.MANIFEST_NAME), true);
+                this.verifier = new StrictJarVerifier(fileName, manifest, metaEntries);
+                Set<String> files = manifest.getEntries().keySet();
+                for (String file : files) {
+                    if (findEntry(file) == null) {
+                        throw new SecurityException(fileName + ": File " + file + " in manifest does not exist");
+                    }
                 }
-            }
 
-            isSigned = verifier.readCertificates() && verifier.isSignedJar();
+                isSigned = verifier.readCertificates() && verifier.isSignedJar();
+            } else {
+                isSigned = false;
+                this.manifest = null;
+                this.verifier = null;
+            }
         } catch (IOException | SecurityException e) {
             nativeClose(this.nativeHandle);
             IoUtils.closeQuietly(this.raf);
