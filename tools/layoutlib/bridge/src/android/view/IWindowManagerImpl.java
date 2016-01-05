@@ -543,6 +543,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void registerDockDividerVisibilityListener(IDockDividerVisibilityListener listener) {
+    public void registerDockedStackListener(IDockedStackListener listener) throws RemoteException {
+    }
+
+    @Override
+    public void setResizeDimLayer(boolean visible, int targetStackId, float alpha)
+            throws RemoteException {
     }
 }
