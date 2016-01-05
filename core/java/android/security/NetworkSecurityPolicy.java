@@ -68,7 +68,6 @@ public class NetworkSecurityPolicy {
      * TLS or STARTTLS) is permitted for communicating with {@code hostname} for this process.
      *
      * @see #isCleartextTrafficPermitted()
-     * @hide
      */
     public boolean isCleartextTrafficPermitted(String hostname) {
         return libcore.net.NetworkSecurityPolicy.getInstance()
