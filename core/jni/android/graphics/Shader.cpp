@@ -60,19 +60,7 @@ static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, j
     // as all the data needed is contained within the newly created LocalMatrixShader.
     SkASSERT(shaderHandle);
     SkAutoTUnref<SkShader> currentShader(reinterpret_cast<SkShader*>(shaderHandle));
-
-    SkMatrix currentMatrix;
-    SkAutoTUnref<SkShader> baseShader(currentShader->refAsALocalMatrixShader(&currentMatrix));
-    if (baseShader.get()) {
-        // if the matrices are same then there is no need to allocate a new
-        // shader that is identical to the existing one.
-        if (currentMatrix == *matrix) {
-            return reinterpret_cast<jlong>(currentShader.detach());
-        }
-        return reinterpret_cast<jlong>(SkShader::CreateLocalMatrixShader(baseShader, *matrix));
-    }
-
-    return reinterpret_cast<jlong>(SkShader::CreateLocalMatrixShader(currentShader, *matrix));
+    return reinterpret_cast<jlong>(currentShader->newWithLocalMatrix(*matrix));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
