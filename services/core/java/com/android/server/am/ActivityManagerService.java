@@ -18117,10 +18117,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
                 if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
-                    if (mSupportedSystemLocales == null) {
-                        mSupportedSystemLocales = Resources.getSystem().getAssets().getLocales();
+                    final Locale locale;
+                    if (values.getLocales().size() == 1) {
+                        // This is an optimization to avoid the JNI call when the result of
+                        // getFirstMatch() does not depend on the supported locales.
+                        locale = values.getLocales().getPrimary();
+                    } else {
+                        if (mSupportedSystemLocales == null) {
+                            mSupportedSystemLocales =
+                                    Resources.getSystem().getAssets().getLocales();
+                        }
+                        locale = values.getLocales().getFirstMatch(mSupportedSystemLocales);
                     }
-                    final Locale locale = values.getLocales().getFirstMatch(mSupportedSystemLocales);
                     SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
                     mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
                             locale));
