@@ -4120,32 +4120,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return false;
     }
 
-    // Recents
-
-    @Override
-    protected void showRecents(boolean triggeredFromAltTab) {
-        // Set the recents visibility flag
-        mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
-        notifyUiVisibilityChanged(mSystemUiVisibility);
-        super.showRecents(triggeredFromAltTab);
-    }
-
-    @Override
-    protected void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        // Unset the recents visibility flag
-        mSystemUiVisibility &= ~View.RECENT_APPS_VISIBLE;
-        notifyUiVisibilityChanged(mSystemUiVisibility);
-        super.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
-    }
-
-    @Override
-    protected void toggleRecents() {
-        // Toggle the recents visibility flag
-        mSystemUiVisibility ^= View.RECENT_APPS_VISIBLE;
-        notifyUiVisibilityChanged(mSystemUiVisibility);
-        super.toggleRecents();
-    }
-
     public void updateRecentsVisibility(boolean visible) {
         // Update the recents visibility flag
         if (visible) {

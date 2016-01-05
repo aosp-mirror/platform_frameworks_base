@@ -3381,7 +3381,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (awakenFromDreams) {
                 awakenDreams();
             }
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             hideRecentApps(false, true);
         } else {
             // Otherwise, just launch Home
