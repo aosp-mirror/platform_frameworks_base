@@ -1,8 +1,12 @@
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
@@ -638,7 +642,7 @@ public class ActivityStarter {
         final Intent intent = r.intent;
         final int callingUid = r.launchedFromUid;
 
-        final Rect newBounds = mSupervisor.getOverrideBounds(r, options, inTask);
+        final Rect newBounds = getOverrideBounds(r, options, inTask);
         final boolean overrideBounds = newBounds != null;
 
         // In some flows in to this function, we retrieve the task record and hold on to it
@@ -882,8 +886,9 @@ public class ActivityStarter {
                         intentActivity.setTaskToAffiliateWith(sourceRecord.task);
                     }
                     movedHome = true;
-                    final ActivityStack sideStack = getLaunchToSideStack(r, launchFlags, r.task);
-                    if (sideStack == null || sideStack == targetStack) {
+                    final ActivityStack launchStack =
+                            getLaunchStack(r, launchFlags, r.task, options, true);
+                    if (launchStack == null || launchStack == targetStack) {
                         // We only want to move to the front, if we aren't going to launch on a
                         // different stack. If we launch on a different stack, we will put the
                         // task on top there.
@@ -966,8 +971,8 @@ public class ActivityStarter {
                     if (task != null && task.stack == null) {
                         // Target stack got cleared when we all activities were removed
                         // above. Go ahead and reset it.
-                        targetStack = computeStackFocus(
-                                sourceRecord, false /* newTask */, null /* bounds */, launchFlags);
+                        targetStack = computeStackFocus(sourceRecord, false /* newTask */,
+                                null /* bounds */, launchFlags, options);
                         targetStack.addTask(task,
                                 !launchTaskBehind /* toTop */, "startActivityUnchecked");
                     }
@@ -1085,7 +1090,7 @@ public class ActivityStarter {
         if (r.resultTo == null && inTask == null && !addingToTask
                 && (launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            targetStack = computeStackFocus(r, newTask, newBounds, launchFlags);
+            targetStack = computeStackFocus(r, newTask, newBounds, launchFlags, options);
             if (doResume) {
                 targetStack.moveToFront("startingNewTask");
             }
@@ -1123,13 +1128,12 @@ public class ActivityStarter {
                 Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            targetStack = null;
-            if (sourceTask.stack.topTask() != sourceTask) {
-                // We only want to allow changing stack if the target task is not the top one,
-                // otherwise we would move the launching task to the other side, rather than show
-                // two side by side.
-                targetStack = getLaunchToSideStack(r, launchFlags, r.task);
-            }
+            // We only want to allow changing stack if the target task is not the top one,
+            // otherwise we would move the launching task to the other side, rather than show
+            // two side by side.
+            final boolean launchToSideAllowed = sourceTask.stack.topTask() != sourceTask;
+            targetStack = getLaunchStack(r, launchFlags, r.task, options, launchToSideAllowed);
+
             if (targetStack == null) {
                 targetStack = sourceTask.stack;
             } else if (targetStack != sourceTask.stack) {
@@ -1240,7 +1244,7 @@ public class ActivityStarter {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = computeStackFocus(r, newTask, null /* bounds */, launchFlags);
+            targetStack = computeStackFocus(r, newTask, null /* bounds */, launchFlags, options);
             if (doResume) {
                 targetStack.moveToFront("addingToTopTask");
             }
@@ -1402,13 +1406,13 @@ public class ActivityStarter {
     }
 
     private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
-            int launchFlags) {
+            int launchFlags, ActivityOptions aOptions) {
         final TaskRecord task = r.task;
         if (!(r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
             return mSupervisor.mHomeStack;
         }
 
-        ActivityStack stack = getLaunchToSideStack(r, launchFlags, task);
+        ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions, true);
         if (stack != null) {
             return stack;
         }
@@ -1473,10 +1477,19 @@ public class ActivityStarter {
         return stack;
     }
 
-    private ActivityStack getLaunchToSideStack(ActivityRecord r, int launchFlags, TaskRecord task) {
-        if ((launchFlags & FLAG_ACTIVITY_LAUNCH_TO_SIDE) == 0) {
+    private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
+            ActivityOptions aOptions, boolean launchToSideAllowed) {
+        final int launchStackId =
+                (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
+
+        if (isValidLaunchStackId(launchStackId, r)) {
+            return mSupervisor.getStack(launchStackId, CREATE_IF_NEEDED, ON_TOP);
+        }
+
+        if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_TO_SIDE) == 0) {
             return null;
         }
+
         // The parent activity doesn't want to launch the activity on top of itself, but
         // instead tries to put it onto other side in side-by-side mode.
         final ActivityStack parentStack = task != null ? task.stack
@@ -1498,6 +1511,30 @@ public class ActivityStarter {
                 return stack;
             }
         }
+    }
+
+    private boolean isValidLaunchStackId(int stackId, ActivityRecord r) {
+        if (stackId == INVALID_STACK_ID || stackId == HOME_STACK_ID
+                || !StackId.isStaticStack(stackId)) {
+            return false;
+        }
+
+        final boolean resizeable = r.isResizeable() || mService.mForceResizableActivities;
+
+        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID && !resizeable) {
+            return false;
+        }
+
+        if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
+            return false;
+        }
+
+        final boolean supportsPip = mService.mSupportsPictureInPicture
+                && (r.supportsPictureInPicture() || mService.mForceResizableActivities);
+        if (stackId == PINNED_STACK_ID && !supportsPip) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -1530,6 +1567,17 @@ public class ActivityStarter {
                     : mSupervisor.findTaskLocked(r);
         }
         return intentActivity;
+    }
+
+    Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
+        Rect newBounds = null;
+        if (options != null && (r.isResizeable() || (inTask != null && inTask.mResizeable))) {
+            if (mSupervisor.canUseActivityOptionsLaunchBounds(
+                    options, options.getLaunchStackId())) {
+                newBounds = options.getLaunchBounds();
+            }
+        }
+        return newBounds;
     }
 
     void setWindowManager(WindowManagerService wm) {

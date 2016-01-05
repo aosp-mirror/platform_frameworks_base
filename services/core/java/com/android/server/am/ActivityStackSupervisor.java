@@ -1373,16 +1373,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return true;
     }
 
-    Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
-        Rect newBounds = null;
-        if (options != null && (r.isResizeable() || (inTask != null && inTask.mResizeable))) {
-            if (canUseActivityOptionsLaunchBounds(options)) {
-                newBounds = options.getLaunchBounds();
-            }
-        }
-        return newBounds;
-    }
-
     void setLaunchSource(int uid) {
         mLaunchingActivity.setWorkSource(new WorkSource(uid));
     }
@@ -1677,10 +1667,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         if (task.mResizeable && options != null) {
-            if (canUseActivityOptionsLaunchBounds(options)) {
+            int stackId = options.getLaunchStackId();
+            if (canUseActivityOptionsLaunchBounds(options, stackId)) {
                 Rect bounds = options.getLaunchBounds();
                 task.updateOverrideConfiguration(bounds);
-                final int stackId = task.getLaunchStackId();
+                if (stackId == INVALID_STACK_ID) {
+                    stackId = task.getLaunchStackId();
+                }
                 if (stackId != task.stack.mStackId) {
                     moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
@@ -1702,10 +1695,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 "findTaskToMoveToFront: moved to front of stack=" + task.stack);
     }
 
-    private boolean canUseActivityOptionsLaunchBounds(ActivityOptions options) {
+    boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
         // We use the launch bounds in the activity options is the device supports freeform
-        // window management.
-        return options.hasLaunchBounds() && mService.mSupportsFreeformWindowManagement;
+        // window management or is launching into the pinned stack.
+        if (!options.hasLaunchBounds()) {
+            return false;
+        }
+        return (mService.mSupportsPictureInPicture && launchStackId == PINNED_STACK_ID)
+                || mService.mSupportsFreeformWindowManagement;
     }
 
     ActivityStack getStack(int stackId) {

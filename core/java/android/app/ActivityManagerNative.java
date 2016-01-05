@@ -332,10 +332,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         {
             data.enforceInterface(IActivityManager.descriptor);
             final int taskId = data.readInt();
-            final int launchStackId = data.readInt();
             final Bundle options =
                     data.readInt() == 0 ? null : Bundle.CREATOR.createFromParcel(data);
-            final int result = startActivityFromRecents(taskId, launchStackId, options);
+            final int result = startActivityFromRecents(taskId, options);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -3088,13 +3087,12 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result != 0;
     }
-    public int startActivityFromRecents(int taskId, int launchStackId, Bundle options)
+    public int startActivityFromRecents(int taskId, Bundle options)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(taskId);
-        data.writeInt(launchStackId);
         if (options == null) {
             data.writeInt(0);
         } else {
