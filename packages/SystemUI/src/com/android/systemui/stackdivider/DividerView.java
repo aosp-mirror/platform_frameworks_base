@@ -36,6 +36,7 @@ import android.view.PointerIcon;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.Window;
@@ -81,6 +82,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private int mStartPosition;
     private int mDockSide;
     private final int[] mTempInt2 = new int[2];
+    private boolean mMoving;
+    private int mTouchSlop;
 
     private int mDividerInsets;
     private int mDisplayWidth;
@@ -136,6 +139,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 R.dimen.docked_stack_divider_lift_elevation);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
+        mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.3f);
         updateDisplayInfo();
         boolean landscape = getResources().getConfiguration().orientation
@@ -203,12 +207,21 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 } else {
                     mStartPosition = mTempInt2[0] + mDividerInsets;
                 }
+                mMoving = false;
                 return result;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-                if (mDockSide != WindowManager.DOCKED_INVALID) {
+                boolean exceededTouchSlop =
+                        isHorizontalDivision() && Math.abs(y - mStartY) > mTouchSlop
+                                || (!isHorizontalDivision() && Math.abs(x - mStartX) > mTouchSlop);
+                if (!mMoving && exceededTouchSlop) {
+                    mStartX = x;
+                    mStartY = y;
+                    mMoving = true;
+                }
+                if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
                     int position = calculatePosition(x, y);
                     SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
                             0 /* velocity */);
@@ -226,6 +239,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
                         : mVelocityTracker.getXVelocity());
+                mMoving = false;
                 break;
         }
         return true;
