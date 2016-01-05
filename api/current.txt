@@ -33106,6 +33106,7 @@ package android.security {
   public class NetworkSecurityPolicy {
     method public static android.security.NetworkSecurityPolicy getInstance();
     method public boolean isCleartextTrafficPermitted();
+    method public boolean isCleartextTrafficPermitted(java.lang.String);
   }
 
 }
