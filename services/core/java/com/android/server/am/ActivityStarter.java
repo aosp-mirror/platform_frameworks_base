@@ -1,5 +1,13 @@
 package com.android.server.am;
 
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
+import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
+import static android.app.ActivityManager.START_FLAG_ONLY_IF_NEEDED;
+import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
+import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
+import static android.app.ActivityManager.START_SUCCESS;
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -11,8 +19,20 @@ import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
+import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
+import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
+import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -83,7 +103,7 @@ import java.util.ArrayList;
  * This class collects all the logic for determining how an intent and flags should be turned into
  * an activity and associated task and stack.
  */
-public class ActivityStarter {
+class ActivityStarter {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStarter" : TAG_AM;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
@@ -95,6 +115,79 @@ public class ActivityStarter {
     private WindowManagerService mWindowManager;
 
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches = new ArrayList<>();
+
+    // Share state variable among methods when starting an activity.
+    private ActivityRecord mStartActivity;
+    private Intent mIntent;
+    private int mCallingUid;
+    private ActivityOptions mOptions;
+
+    private boolean mLaunchSingleTop;
+    private boolean mLaunchSingleInstance;
+    private boolean mLaunchSingleTask;
+    private boolean mLaunchTaskBehind;
+    private int mLaunchFlags;
+
+    private Rect mLaunchBounds;
+
+    private ActivityRecord mNotTop;
+    private boolean mDoResume;
+    private int mStartFlags;
+    private ActivityRecord mSourceRecord;
+
+    private TaskRecord mInTask;
+    private boolean mAddingToTask;
+    private TaskRecord mReuseTask;
+
+    private ActivityInfo mNewTaskInfo;
+    private Intent mNewTaskIntent;
+    private ActivityStack mSourceStack;
+    private ActivityStack mTargetStack;
+    // TODO: Is the mMoveHome flag really needed?
+    private boolean mMovedHome;
+    private boolean mMovedToFront;
+    private boolean mNoAnimation;
+    private boolean mKeepCurTransition;
+
+    private IVoiceInteractionSession mVoiceSession;
+    private IVoiceInteractor mVoiceInteractor;
+
+    private void reset() {
+        mStartActivity = null;
+        mIntent = null;
+        mCallingUid = -1;
+        mOptions = null;
+
+        mLaunchSingleTop = false;
+        mLaunchSingleInstance = false;
+        mLaunchSingleTask = false;
+        mLaunchTaskBehind = false;
+        mLaunchFlags = 0;
+
+        mLaunchBounds = null;
+
+        mNotTop = null;
+        mDoResume = false;
+        mStartFlags = 0;
+        mSourceRecord = null;
+
+        mInTask = null;
+        mAddingToTask = false;
+        mReuseTask = null;
+
+        mNewTaskInfo = null;
+        mNewTaskIntent = null;
+        mSourceStack = null;
+
+        mTargetStack = null;
+        mMovedHome = false;
+        mMovedToFront = false;
+        mNoAnimation = false;
+        mKeepCurTransition = false;
+
+        mVoiceSession = null;
+        mVoiceInteractor = null;
+    }
 
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
@@ -238,11 +331,10 @@ public class ActivityStarter {
 
         final ActivityStack resultStack = resultRecord == null ? null : resultRecord.task.stack;
 
-        if (err != ActivityManager.START_SUCCESS) {
+        if (err != START_SUCCESS) {
             if (resultRecord != null) {
-                resultStack.sendActivityResultLocked(-1,
-                        resultRecord, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null);
+                resultStack.sendActivityResultLocked(
+                        -1, resultRecord, resultWho, requestCode, RESULT_CANCELED, null);
             }
             ActivityOptions.abort(options);
             return err;
@@ -302,12 +394,12 @@ public class ActivityStarter {
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
-                        Activity.RESULT_CANCELED, null);
+                        RESULT_CANCELED, null);
             }
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
             ActivityOptions.abort(options);
-            return ActivityManager.START_SUCCESS;
+            return START_SUCCESS;
         }
 
         // If permissions need a review before any of the app components can run, we
@@ -433,8 +525,8 @@ public class ActivityStarter {
 
         doPendingActivityLaunchesLocked(false);
 
-        err = startActivityUncheckedLocked(r, sourceRecord, voiceSession,
-                voiceInteractor, startFlags, true, options, inTask);
+        err = startActivityUnchecked(
+                r, sourceRecord, voiceSession, voiceInteractor, startFlags, true, options, inTask);
 
         if (err < 0) {
             // If someone asked to have the keyguard dismissed on the next
@@ -612,7 +704,7 @@ public class ActivityStarter {
                         } catch (InterruptedException e) {
                         }
                     } while (!outResult.timeout && outResult.who == null);
-                } else if (res == ActivityManager.START_TASK_TO_FRONT) {
+                } else if (res == START_TASK_TO_FRONT) {
                     ActivityRecord r = stack.topRunningActivityLocked();
                     if (r.nowVisible && r.state == RESUMED) {
                         outResult.timeout = false;
@@ -634,684 +726,6 @@ public class ActivityStarter {
 
             return res;
         }
-    }
-
-    final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
-            boolean doResume, ActivityOptions options, TaskRecord inTask) {
-        final Intent intent = r.intent;
-        final int callingUid = r.launchedFromUid;
-
-        final Rect newBounds = getOverrideBounds(r, options, inTask);
-        final boolean overrideBounds = newBounds != null;
-
-        // In some flows in to this function, we retrieve the task record and hold on to it
-        // without a lock before calling back in to here...  so the task at this point may
-        // not actually be in recents.  Check for that, and if it isn't in recents just
-        // consider it invalid.
-        if (inTask != null && !inTask.inRecents) {
-            Slog.w(TAG, "Starting activity in task not in recents: " + inTask);
-            inTask = null;
-        }
-
-        final boolean launchSingleTop = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP;
-        final boolean launchSingleInstance = r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE;
-        final boolean launchSingleTask = r.launchMode == ActivityInfo.LAUNCH_SINGLE_TASK;
-        int launchFlags = adjustLaunchFlagsToDocumentMode(r, launchSingleInstance, launchSingleTask,
-                intent.getFlags());
-        final boolean launchTaskBehind = r.mLaunchTaskBehind
-                && !launchSingleTask && !launchSingleInstance
-                && (launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
-
-        if (r.resultTo != null && (launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0
-                && r.resultTo.task.stack != null) {
-            // For whatever reason this activity is being launched into a new
-            // task...  yet the caller has requested a result back.  Well, that
-            // is pretty messed up, so instead immediately send back a cancel
-            // and let the new task continue launched as normal without a
-            // dependency on its originator.
-            Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
-            r.resultTo.task.stack.sendActivityResultLocked(-1,
-                    r.resultTo, r.resultWho, r.requestCode,
-                    Activity.RESULT_CANCELED, null);
-            r.resultTo = null;
-        }
-
-        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 && r.resultTo == null) {
-            launchFlags |= FLAG_ACTIVITY_NEW_TASK;
-        }
-
-        // If we are actually going to launch in to a new task, there are some cases where
-        // we further want to do multiple task.
-        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
-            if (launchTaskBehind
-                    || r.info.documentLaunchMode == ActivityInfo.DOCUMENT_LAUNCH_ALWAYS) {
-                launchFlags |= FLAG_ACTIVITY_MULTIPLE_TASK;
-            }
-        }
-
-        // We'll invoke onUserLeaving before onPause only if the launching
-        // activity did not explicitly state that this is an automated launch.
-        mSupervisor.mUserLeaving = (launchFlags & Intent.FLAG_ACTIVITY_NO_USER_ACTION) == 0;
-        if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
-                "startActivity() => mUserLeaving=" + mSupervisor.mUserLeaving);
-
-        // If the caller has asked not to resume at this point, we make note
-        // of this in the record so that we can skip it when trying to find
-        // the top running activity.
-        if (!doResume || !mSupervisor.okToShowLocked(r)) {
-            r.delayedResume = true;
-            doResume = false;
-        }
-
-        final ActivityRecord notTop =
-                (launchFlags & Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
-
-        // If the onlyIfNeeded flag is set, then we can do this if the activity
-        // being launched is the same as the one making the call...  or, as
-        // a special case, if we do not know the caller then we count the
-        // current top activity as the caller.
-        if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
-            ActivityRecord checkedCaller = sourceRecord;
-            if (checkedCaller == null) {
-                checkedCaller = mSupervisor.mFocusedStack.topRunningNonDelayedActivityLocked(
-                        notTop);
-            }
-            if (!checkedCaller.realActivity.equals(r.realActivity)) {
-                // Caller is not the same as launcher, so always needed.
-                startFlags &= ~ActivityManager.START_FLAG_ONLY_IF_NEEDED;
-            }
-        }
-
-        boolean addingToTask = false;
-        TaskRecord reuseTask = null;
-
-        // If the caller is not coming from another activity, but has given us an
-        // explicit task into which they would like us to launch the new activity,
-        // then let's see about doing that.
-        if (sourceRecord == null && inTask != null && inTask.stack != null) {
-            final Intent baseIntent = inTask.getBaseIntent();
-            final ActivityRecord root = inTask.getRootActivity();
-            if (baseIntent == null) {
-                ActivityOptions.abort(options);
-                throw new IllegalArgumentException("Launching into task without base intent: "
-                        + inTask);
-            }
-
-            // If this task is empty, then we are adding the first activity -- it
-            // determines the root, and must be launching as a NEW_TASK.
-            if (launchSingleInstance || launchSingleTask) {
-                if (!baseIntent.getComponent().equals(r.intent.getComponent())) {
-                    ActivityOptions.abort(options);
-                    throw new IllegalArgumentException("Trying to launch singleInstance/Task "
-                            + r + " into different task " + inTask);
-                }
-                if (root != null) {
-                    ActivityOptions.abort(options);
-                    throw new IllegalArgumentException("Caller with inTask " + inTask
-                            + " has root " + root + " but target is singleInstance/Task");
-                }
-            }
-
-            // If task is empty, then adopt the interesting intent launch flags in to the
-            // activity being started.
-            if (root == null) {
-                final int flagsOfInterest = FLAG_ACTIVITY_NEW_TASK
-                        | FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-                        | Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
-                launchFlags = (launchFlags&~flagsOfInterest)
-                        | (baseIntent.getFlags()&flagsOfInterest);
-                intent.setFlags(launchFlags);
-                inTask.setIntent(r);
-                addingToTask = true;
-
-                // If the task is not empty and the caller is asking to start it as the root
-                // of a new task, then we don't actually want to start this on the task.  We
-                // will bring the task to the front, and possibly give it a new intent.
-            } else if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
-                addingToTask = false;
-
-            } else {
-                addingToTask = true;
-            }
-
-            reuseTask = inTask;
-        } else {
-            inTask = null;
-            // Launch ResolverActivity in the source task, so that it stays in the task
-            // bounds when in freeform workspace.
-            // Also put noDisplay activities in the source task. These by itself can
-            // be placed in any task/stack, however it could launch other activities
-            // like ResolverActivity, and we want those to stay in the original task.
-            if ((r.isResolverActivity() || r.noDisplay) && sourceRecord != null
-                    && sourceRecord.isFreeform())  {
-                addingToTask = true;
-            }
-        }
-
-        if (inTask == null) {
-            if (sourceRecord == null) {
-                // This activity is not being started from another...  in this
-                // case we -always- start a new task.
-                if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) == 0 && inTask == null) {
-                    Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
-                            "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
-                    launchFlags |= FLAG_ACTIVITY_NEW_TASK;
-                }
-            } else if (sourceRecord.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
-                // The original activity who is starting us is running as a single
-                // instance...  this new activity it is starting must go on its
-                // own task.
-                launchFlags |= FLAG_ACTIVITY_NEW_TASK;
-            } else if (launchSingleInstance || launchSingleTask) {
-                // The activity being started is a single instance...  it always
-                // gets launched into its own task.
-                launchFlags |= FLAG_ACTIVITY_NEW_TASK;
-            }
-        }
-
-        ActivityInfo newTaskInfo = null;
-        Intent newTaskIntent = null;
-        final ActivityStack sourceStack;
-        if (sourceRecord != null) {
-            if (sourceRecord.finishing) {
-                // If the source is finishing, we can't further count it as our source.  This
-                // is because the task it is associated with may now be empty and on its way out,
-                // so we don't want to blindly throw it in to that task.  Instead we will take
-                // the NEW_TASK flow and try to find a task for it. But save the task information
-                // so it can be used when creating the new task.
-                if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) == 0) {
-                    Slog.w(TAG, "startActivity called from finishing " + sourceRecord
-                            + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + intent);
-                    launchFlags |= FLAG_ACTIVITY_NEW_TASK;
-                    newTaskInfo = sourceRecord.info;
-                    newTaskIntent = sourceRecord.task.intent;
-                }
-                sourceRecord = null;
-                sourceStack = null;
-            } else {
-                sourceStack = sourceRecord.task.stack;
-            }
-        } else {
-            sourceStack = null;
-        }
-
-        boolean movedHome = false;
-        ActivityStack targetStack;
-
-        intent.setFlags(launchFlags);
-        final boolean noAnimation = (launchFlags & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0;
-
-        ActivityRecord intentActivity = getReusableIntentActivity(r, inTask, intent,
-                launchSingleInstance, launchSingleTask, launchFlags);
-        if (intentActivity != null) {
-            // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused
-            // but still needs to be a lock task mode violation since the task gets
-            // cleared out and the device would otherwise leave the locked task.
-            if (mSupervisor.isLockTaskModeViolation(intentActivity.task,
-                    (launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
-                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
-                mSupervisor.showLockTaskToast();
-                Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
-                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-            if (r.task == null) {
-                r.task = intentActivity.task;
-            }
-            if (intentActivity.task.intent == null) {
-                // This task was started because of movement of the activity based on affinity...
-                // Now that we are actually launching it, we can assign the base intent.
-                intentActivity.task.setIntent(r);
-            }
-
-            targetStack = intentActivity.task.stack;
-            targetStack.mLastPausedActivity = null;
-            // If the target task is not in the front, then we need
-            // to bring it to the front...  except...  well, with
-            // SINGLE_TASK_LAUNCH it's not entirely clear.  We'd like
-            // to have the same behavior as if a new instance was
-            // being started, which means not bringing it to the front
-            // if the caller is not itself in the front.
-            final ActivityStack focusStack = mSupervisor.getFocusedStack();
-            ActivityRecord curTop = (focusStack == null)
-                    ? null : focusStack.topRunningNonDelayedActivityLocked(notTop);
-            boolean movedToFront = false;
-            if (curTop != null && (curTop.task != intentActivity.task ||
-                    curTop.task != focusStack.topTask())) {
-                r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                if (sourceRecord == null || (sourceStack.topActivity() != null &&
-                        sourceStack.topActivity().task == sourceRecord.task)) {
-                    // We really do want to push this one into the user's face, right now.
-                    if (launchTaskBehind && sourceRecord != null) {
-                        intentActivity.setTaskToAffiliateWith(sourceRecord.task);
-                    }
-                    movedHome = true;
-                    final ActivityStack launchStack =
-                            getLaunchStack(r, launchFlags, r.task, options, true);
-                    if (launchStack == null || launchStack == targetStack) {
-                        // We only want to move to the front, if we aren't going to launch on a
-                        // different stack. If we launch on a different stack, we will put the
-                        // task on top there.
-                        targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
-                                options, r.appTimeTracker, "bringingFoundTaskToFront");
-                        movedToFront = true;
-                    }
-                    if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-                        // Caller wants to appear on home activity.
-                        intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-                    }
-                    options = null;
-                }
-            }
-            if (!movedToFront && doResume) {
-                if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + targetStack
-                        + " from " + intentActivity);
-                targetStack.moveToFront("intentActivityFound");
-            }
-
-            // If the caller has requested that the target task be
-            // reset, then do so.
-            if ((launchFlags & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
-                intentActivity = targetStack.resetTaskIfNeededLocked(intentActivity, r);
-            }
-            if ((startFlags & ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
-                // We don't need to start a new activity, and
-                // the client said not to do anything if that
-                // is the case, so this is it!  And for paranoia, make
-                // sure we have correctly resumed the top activity.
-                if (doResume) {
-                    mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, null, options);
-
-                    // Make sure to notify Keyguard as well if we are not running an app
-                    // transition later.
-                    if (!movedToFront) {
-                        mSupervisor.notifyActivityDrawnForKeyguard();
-                    }
-                } else {
-                    ActivityOptions.abort(options);
-                }
-                mSupervisor.updateUserStackLocked(r.userId, targetStack);
-                return ActivityManager.START_RETURN_INTENT_TO_CALLER;
-            }
-            if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
-                    == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK)) {
-                // The caller has requested to completely replace any
-                // existing task with its new activity.  Well that should
-                // not be too hard...
-                reuseTask = intentActivity.task;
-                reuseTask.performClearTaskLocked();
-                reuseTask.setIntent(r);
-            } else if ((launchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
-                    || launchSingleInstance || launchSingleTask) {
-                // In this situation we want to remove all activities
-                // from the task up to the one being started.  In most
-                // cases this means we are resetting the task to its
-                // initial state.
-                ActivityRecord top = intentActivity.task.performClearTaskLocked(r, launchFlags);
-                if (top != null) {
-                    if (top.frontOfTask) {
-                        // Activity aliases may mean we use different
-                        // intents for the top activity, so make sure
-                        // the task now has the identity of the new
-                        // intent.
-                        top.task.setIntent(r);
-                    }
-                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                } else {
-                    // A special case: we need to start the activity because it is not
-                    // currently running, and the caller has asked to clear the current
-                    // task to have this activity at the top.
-                    addingToTask = true;
-                    // Now pretend like this activity is being started by the top of its
-                    // task, so it is put in the right place.
-                    sourceRecord = intentActivity;
-                    TaskRecord task = sourceRecord.task;
-                    if (task != null && task.stack == null) {
-                        // Target stack got cleared when we all activities were removed
-                        // above. Go ahead and reset it.
-                        targetStack = computeStackFocus(sourceRecord, false /* newTask */,
-                                null /* bounds */, launchFlags, options);
-                        targetStack.addTask(task,
-                                !launchTaskBehind /* toTop */, "startActivityUnchecked");
-                    }
-
-                }
-            } else if (r.realActivity.equals(intentActivity.task.realActivity)) {
-                // In this case the top activity on the task is the
-                // same as the one being launched, so we take that
-                // as a request to bring the task to the foreground.
-                // If the top activity in the task is the root
-                // activity, deliver this new intent to it if it
-                // desires.
-                if (((launchFlags&Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0 || launchSingleTop)
-                        && intentActivity.realActivity.equals(r.realActivity)) {
-                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r,
-                            intentActivity.task);
-                    if (intentActivity.frontOfTask) {
-                        intentActivity.task.setIntent(r);
-                    }
-                    intentActivity.deliverNewIntentLocked(callingUid, r.intent,
-                            r.launchedFromPackage);
-                } else if (!r.intent.filterEquals(intentActivity.task.intent)) {
-                    // In this case we are launching the root activity
-                    // of the task, but with a different intent.  We
-                    // should start a new instance on top.
-                    addingToTask = true;
-                    sourceRecord = intentActivity;
-                }
-            } else if ((launchFlags&Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) == 0) {
-                // In this case an activity is being launched in to an
-                // existing task, without resetting that task.  This
-                // is typically the situation of launching an activity
-                // from a notification or shortcut.  We want to place
-                // the new activity on top of the current task.
-                addingToTask = true;
-                sourceRecord = intentActivity;
-            } else if (!intentActivity.task.rootWasReset) {
-                // In this case we are launching in to an existing task
-                // that has not yet been started from its front door.
-                // The current task has been brought to the front.
-                // Ideally, we'd probably like to place this new task
-                // at the bottom of its stack, but that's a little hard
-                // to do with the current organization of the code so
-                // for now we'll just drop it.
-                intentActivity.task.setIntent(r);
-            }
-            if (!addingToTask && reuseTask == null) {
-                // We didn't do anything...  but it was needed (a.k.a., client
-                // don't use that intent!)  And for paranoia, make
-                // sure we have correctly resumed the top activity.
-                if (doResume) {
-                    mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, null, options);
-                    if (!movedToFront) {
-                        // Make sure to notify Keyguard as well if we are not running an app
-                        // transition later.
-                        mSupervisor.notifyActivityDrawnForKeyguard();
-                    }
-                } else {
-                    ActivityOptions.abort(options);
-                }
-                mSupervisor.updateUserStackLocked(r.userId, targetStack);
-                return ActivityManager.START_TASK_TO_FRONT;
-            }
-        }
-
-        //String uri = r.intent.toURI();
-        //Intent intent2 = new Intent(uri);
-        //Slog.i(TAG, "Given intent: " + r.intent);
-        //Slog.i(TAG, "URI is: " + uri);
-        //Slog.i(TAG, "To intent: " + intent2);
-
-        if (r.packageName != null) {
-            // If the activity being launched is the same as the one currently
-            // at the top, then we need to check if it should only be launched
-            // once.
-            ActivityStack topStack = mSupervisor.mFocusedStack;
-            ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(notTop);
-            final boolean dontStart = top != null && r.resultTo == null
-                    && top.realActivity.equals(r.realActivity) && top.userId == r.userId
-                    && top.app != null && top.app.thread != null
-                    && ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                    || launchSingleTop || launchSingleTask);
-            if (dontStart) {
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
-                // For paranoia, make sure we have correctly resumed the top activity.
-                topStack.mLastPausedActivity = null;
-                if (doResume) {
-                    mSupervisor.resumeFocusedStackTopActivityLocked();
-                }
-                ActivityOptions.abort(options);
-                if ((startFlags & ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
-                    // We don't need to start a new activity, and the client said not to do
-                    // anything if that is the case, so this is it!
-                    return ActivityManager.START_RETURN_INTENT_TO_CALLER;
-                }
-                top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                return ActivityManager.START_DELIVERED_TO_TOP;
-            }
-        } else {
-            if (r.resultTo != null && r.resultTo.task.stack != null) {
-                r.resultTo.task.stack.sendActivityResultLocked(-1, r.resultTo, r.resultWho,
-                        r.requestCode, Activity.RESULT_CANCELED, null);
-            }
-            ActivityOptions.abort(options);
-            return ActivityManager.START_CLASS_NOT_FOUND;
-        }
-
-        boolean newTask = false;
-        boolean keepCurTransition = false;
-
-        final TaskRecord taskToAffiliate = launchTaskBehind && sourceRecord != null ?
-                sourceRecord.task : null;
-
-        // Should this be considered a new task?
-        if (r.resultTo == null && inTask == null && !addingToTask
-                && (launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
-            newTask = true;
-            targetStack = computeStackFocus(r, newTask, newBounds, launchFlags, options);
-            if (doResume) {
-                targetStack.moveToFront("startingNewTask");
-            }
-
-            if (reuseTask == null) {
-                r.setTask(targetStack.createTaskRecord(mSupervisor.getNextTaskId(),
-                        newTaskInfo != null ? newTaskInfo : r.info,
-                        newTaskIntent != null ? newTaskIntent : intent,
-                        voiceSession, voiceInteractor, !launchTaskBehind /* toTop */),
-                        taskToAffiliate);
-                if (overrideBounds) {
-                    r.task.updateOverrideConfiguration(newBounds);
-                }
-                if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                        "Starting new activity " + r + " in new task " + r.task);
-            } else {
-                r.setTask(reuseTask, taskToAffiliate);
-            }
-            if (mSupervisor.isLockTaskModeViolation(r.task)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
-                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-            if (!movedHome) {
-                if ((launchFlags &
-                        (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                        == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-                    // Caller wants to appear on home activity, so before starting
-                    // their own activity we will bring home to the front.
-                    r.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-                }
-            }
-        } else if (sourceRecord != null) {
-            final TaskRecord sourceTask = sourceRecord.task;
-            if (mSupervisor.isLockTaskModeViolation(sourceTask)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
-                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-            // We only want to allow changing stack if the target task is not the top one,
-            // otherwise we would move the launching task to the other side, rather than show
-            // two side by side.
-            final boolean launchToSideAllowed = sourceTask.stack.topTask() != sourceTask;
-            targetStack = getLaunchStack(r, launchFlags, r.task, options, launchToSideAllowed);
-
-            if (targetStack == null) {
-                targetStack = sourceTask.stack;
-            } else if (targetStack != sourceTask.stack) {
-                mSupervisor.moveTaskToStackLocked(sourceTask.taskId, targetStack.mStackId,
-                        ON_TOP, FORCE_FOCUS, "launchToSide", !ANIMATE);
-            }
-            if (doResume) {
-                targetStack.moveToFront("sourceStackToFront");
-            }
-            final TaskRecord topTask = targetStack.topTask();
-            if (topTask != sourceTask) {
-                targetStack.moveTaskToFrontLocked(sourceTask, noAnimation, options,
-                        r.appTimeTracker, "sourceTaskToFront");
-            }
-            if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                // In this case, we are adding the activity to an existing
-                // task, but the caller has asked to clear that task if the
-                // activity is already running.
-                ActivityRecord top = sourceTask.performClearTaskLocked(r, launchFlags);
-                keepCurTransition = true;
-                if (top != null) {
-                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                    // For paranoia, make sure we have correctly
-                    // resumed the top activity.
-                    targetStack.mLastPausedActivity = null;
-                    if (doResume) {
-                        mSupervisor.resumeFocusedStackTopActivityLocked();
-                    }
-                    ActivityOptions.abort(options);
-                    return ActivityManager.START_DELIVERED_TO_TOP;
-                }
-            } else if (!addingToTask &&
-                    (launchFlags&Intent.FLAG_ACTIVITY_REORDER_TO_FRONT) != 0) {
-                // In this case, we are launching an activity in our own task
-                // that may already be running somewhere in the history, and
-                // we want to shuffle it to the front of the stack if so.
-                final ActivityRecord top = sourceTask.findActivityInHistoryLocked(r);
-                if (top != null) {
-                    final TaskRecord task = top.task;
-                    task.moveActivityToFrontLocked(top);
-                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, task);
-                    top.updateOptionsLocked(options);
-                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                    targetStack.mLastPausedActivity = null;
-                    if (doResume) {
-                        mSupervisor.resumeFocusedStackTopActivityLocked();
-                    }
-                    return ActivityManager.START_DELIVERED_TO_TOP;
-                }
-            }
-            // An existing activity is starting this new activity, so we want
-            // to keep the new one in the same task as the one that is starting
-            // it.
-            r.setTask(sourceTask, null);
-            if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + r
-                    + " in existing task " + r.task + " from source " + sourceRecord);
-
-        } else if (inTask != null) {
-            // The caller is asking that the new activity be started in an explicit
-            // task it has provided to us.
-            if (mSupervisor.isLockTaskModeViolation(inTask)) {
-                Slog.e(TAG, "Attempted Lock Task Mode violation r=" + r);
-                return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
-            }
-            if (overrideBounds) {
-                inTask.updateOverrideConfiguration(newBounds);
-                int stackId = inTask.getLaunchStackId();
-                if (stackId != inTask.stack.mStackId) {
-                    mSupervisor.moveTaskToStackUncheckedLocked(
-                            inTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
-                }
-            }
-            targetStack = inTask.stack;
-            targetStack.moveTaskToFrontLocked(inTask, noAnimation, options, r.appTimeTracker,
-                    "inTaskToFront");
-
-            // Check whether we should actually launch the new activity in to the task,
-            // or just reuse the current activity on top.
-            ActivityRecord top = inTask.getTopActivity();
-            if (top != null && top.realActivity.equals(r.realActivity) && top.userId == r.userId) {
-                if ((launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0
-                        || launchSingleTop || launchSingleTask) {
-                    ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
-                    if ((startFlags&ActivityManager.START_FLAG_ONLY_IF_NEEDED) != 0) {
-                        // We don't need to start a new activity, and
-                        // the client said not to do anything if that
-                        // is the case, so this is it!
-                        return ActivityManager.START_RETURN_INTENT_TO_CALLER;
-                    }
-                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
-                    return ActivityManager.START_DELIVERED_TO_TOP;
-                }
-            }
-
-            if (!addingToTask) {
-                // We don't actually want to have this activity added to the task, so just
-                // stop here but still tell the caller that we consumed the intent.
-                ActivityOptions.abort(options);
-                return ActivityManager.START_TASK_TO_FRONT;
-            }
-
-            r.setTask(inTask, null);
-            if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + r
-                    + " in explicit task " + r.task);
-
-        } else {
-            // This not being started from an existing activity, and not part
-            // of a new task...  just put it in the top task, though these days
-            // this case should never happen.
-            targetStack = computeStackFocus(r, newTask, null /* bounds */, launchFlags, options);
-            if (doResume) {
-                targetStack.moveToFront("addingToTopTask");
-            }
-            ActivityRecord prev = targetStack.topActivity();
-            r.setTask(prev != null ? prev.task : targetStack.createTaskRecord(
-                    mSupervisor.getNextTaskId(), r.info, intent, null, null, true), null);
-            mWindowManager.moveTaskToTop(r.task.taskId);
-            if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + r
-                    + " in new guessed " + r.task);
-        }
-
-        mService.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
-                intent, r.getUriPermissionsLocked(), r.userId);
-
-        if (sourceRecord != null && sourceRecord.isRecentsActivity()) {
-            r.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
-        }
-        if (newTask) {
-            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, r.userId, r.task.taskId);
-        }
-        ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
-        targetStack.mLastPausedActivity = null;
-        targetStack.startActivityLocked(r, newTask, keepCurTransition, options);
-        if (doResume) {
-            if (!launchTaskBehind) {
-                // TODO: Remove this code after verification that all the decision points above
-                // moved targetStack to the front which will also set the focus activity.
-                mService.setFocusedActivityLocked(r, "startedActivity");
-            }
-            mSupervisor.resumeFocusedStackTopActivityLocked(targetStack, r, options);
-        } else {
-            targetStack.addRecentActivityLocked(r);
-        }
-        mSupervisor.updateUserStackLocked(r.userId, targetStack);
-
-        if (!r.task.mResizeable && mSupervisor.isStackDockedInEffect(targetStack.mStackId)) {
-            mSupervisor.showNonResizeableDockToast(r.task.taskId);
-        }
-
-        return ActivityManager.START_SUCCESS;
-    }
-
-    private int adjustLaunchFlagsToDocumentMode(ActivityRecord r, boolean launchSingleInstance,
-            boolean launchSingleTask, int launchFlags) {
-        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
-                (launchSingleInstance || launchSingleTask)) {
-            // We have a conflict between the Intent and the Activity manifest, manifest wins.
-            Slog.i(TAG, "Ignoring FLAG_ACTIVITY_NEW_DOCUMENT, launchMode is " +
-                    "\"singleInstance\" or \"singleTask\"");
-            launchFlags &=
-                    ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_MULTIPLE_TASK);
-        } else {
-            switch (r.info.documentLaunchMode) {
-                case ActivityInfo.DOCUMENT_LAUNCH_NONE:
-                    break;
-                case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
-                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-                    break;
-                case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
-                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-                    break;
-                case ActivityInfo.DOCUMENT_LAUNCH_NEVER:
-                    launchFlags &= ~FLAG_ACTIVITY_MULTIPLE_TASK;
-                    break;
-            }
-        }
-        return launchFlags;
     }
 
     final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
@@ -1387,7 +801,743 @@ public class ActivityStarter {
             Binder.restoreCallingIdentity(origId);
         }
 
-        return ActivityManager.START_SUCCESS;
+        return START_SUCCESS;
+    }
+
+    private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
+
+        setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
+                voiceInteractor);
+
+        computeLaunchingTaskFlags();
+
+        computeSourceStack();
+
+        mIntent.setFlags(mLaunchFlags);
+
+        ActivityRecord intentActivity = getReusableIntentActivity();
+
+        if (intentActivity != null) {
+            // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
+            // still needs to be a lock task mode violation since the task gets cleared out and
+            // the device would otherwise leave the locked task.
+            if (mSupervisor.isLockTaskModeViolation(intentActivity.task,
+                    (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
+                            == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
+                mSupervisor.showLockTaskToast();
+                Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+
+            if (mStartActivity.task == null) {
+                mStartActivity.task = intentActivity.task;
+            }
+            if (intentActivity.task.intent == null) {
+                // This task was started because of movement of the activity based on affinity...
+                // Now that we are actually launching it, we can assign the base intent.
+                intentActivity.task.setIntent(mStartActivity);
+            }
+
+            intentActivity = setTargetStackAndMoveToFrontIfNeeded(intentActivity);
+
+            if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
+                // We don't need to start a new activity, and the client said not to do anything
+                // if that is the case, so this is it!  And for paranoia, make sure we have
+                // correctly resumed the top activity.
+                resumeTargetStackIfNeeded();
+                return START_RETURN_INTENT_TO_CALLER;
+            }
+
+            setTaskFromIntentActivity(intentActivity);
+
+            if (!mAddingToTask && mReuseTask == null) {
+                // We didn't do anything...  but it was needed (a.k.a., client don't use that
+                // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
+                resumeTargetStackIfNeeded();
+                return START_TASK_TO_FRONT;
+            }
+        }
+
+        if (mStartActivity.packageName == null) {
+            if (mStartActivity.resultTo != null && mStartActivity.resultTo.task.stack != null) {
+                mStartActivity.resultTo.task.stack.sendActivityResultLocked(
+                        -1, mStartActivity.resultTo, mStartActivity.resultWho,
+                        mStartActivity.requestCode, RESULT_CANCELED, null);
+            }
+            ActivityOptions.abort(mOptions);
+            return START_CLASS_NOT_FOUND;
+        }
+
+        // If the activity being launched is the same as the one currently at the top, then
+        // we need to check if it should only be launched once.
+        final ActivityStack topStack = mSupervisor.mFocusedStack;
+        final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
+        final boolean dontStart = top != null && mStartActivity.resultTo == null
+                && top.realActivity.equals(mStartActivity.realActivity)
+                && top.userId == mStartActivity.userId
+                && top.app != null && top.app.thread != null
+                && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
+                || mLaunchSingleTop || mLaunchSingleTask);
+        if (dontStart) {
+            ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+            // For paranoia, make sure we have correctly resumed the top activity.
+            topStack.mLastPausedActivity = null;
+            if (mDoResume) {
+                mSupervisor.resumeFocusedStackTopActivityLocked();
+            }
+            ActivityOptions.abort(mOptions);
+            if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
+                // We don't need to start a new activity, and the client said not to do
+                // anything if that is the case, so this is it!
+                return START_RETURN_INTENT_TO_CALLER;
+            }
+            top.deliverNewIntentLocked(
+                    mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+            return START_DELIVERED_TO_TOP;
+        }
+
+        boolean newTask = false;
+        final TaskRecord taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
+                ? mSourceRecord.task : null;
+
+        // Should this be considered a new task?
+        if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
+                && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
+            newTask = true;
+            setTaskFromReuseOrCreateNewTask(taskToAffiliate);
+
+            if (mSupervisor.isLockTaskModeViolation(mStartActivity.task)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+            if (!mMovedHome
+                    && (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+                    == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
+                // Caller wants to appear on home activity, so before starting
+                // their own activity we will bring home to the front.
+                mStartActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            }
+        } else if (mSourceRecord != null) {
+            if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+
+            final int result = setTaskFromSourceRecord();
+            if (result != START_SUCCESS) {
+                return result;
+            }
+        } else if (mInTask != null) {
+            // The caller is asking that the new activity be started in an explicit
+            // task it has provided to us.
+            if (mSupervisor.isLockTaskModeViolation(mInTask)) {
+                Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
+                return START_RETURN_LOCK_TASK_MODE_VIOLATION;
+            }
+
+            final int result = setTaskFromInTask();
+            if (result != START_SUCCESS) {
+                return result;
+            }
+        } else {
+            // This not being started from an existing activity, and not part of a new task...
+            // just put it in the top task, though these days this case should never happen.
+            setTaskToCurrentTopOrCreateNewTask();
+        }
+
+        mService.grantUriPermissionFromIntentLocked(mCallingUid, mStartActivity.packageName,
+                mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
+
+        if (mSourceRecord != null && mSourceRecord.isRecentsActivity()) {
+            mStartActivity.task.setTaskToReturnTo(RECENTS_ACTIVITY_TYPE);
+        }
+        if (newTask) {
+            EventLog.writeEvent(
+                    EventLogTags.AM_CREATE_TASK, mStartActivity.userId, mStartActivity.task.taskId);
+        }
+        ActivityStack.logStartActivity(
+                EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.task);
+        mTargetStack.mLastPausedActivity = null;
+        mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
+        if (mDoResume) {
+            if (!mLaunchTaskBehind) {
+                // TODO(b/26381750): Remove this code after verification that all the decision
+                // points above moved targetStack to the front which will also set the focus
+                // activity.
+                mService.setFocusedActivityLocked(mStartActivity, "startedActivity");
+            }
+            mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
+                    mOptions);
+        } else {
+            mTargetStack.addRecentActivityLocked(mStartActivity);
+        }
+        mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
+
+        if (!mStartActivity.task.mResizeable
+                && mSupervisor.isStackDockedInEffect(mTargetStack.mStackId)) {
+            mSupervisor.showNonResizeableDockToast(mStartActivity.task.taskId);
+        }
+
+        return START_SUCCESS;
+    }
+
+    private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,
+            boolean doResume, int startFlags, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+        reset();
+
+        mStartActivity = r;
+        mIntent = r.intent;
+        mOptions = options;
+        mCallingUid = r.launchedFromUid;
+        mSourceRecord = sourceRecord;
+        mVoiceSession = voiceSession;
+        mVoiceInteractor = voiceInteractor;
+
+        mLaunchBounds = getOverrideBounds(r, options, inTask);
+
+        mLaunchSingleTop = r.launchMode == LAUNCH_SINGLE_TOP;
+        mLaunchSingleInstance = r.launchMode == LAUNCH_SINGLE_INSTANCE;
+        mLaunchSingleTask = r.launchMode == LAUNCH_SINGLE_TASK;
+        mLaunchFlags = adjustLaunchFlagsToDocumentMode(
+                r, mLaunchSingleInstance, mLaunchSingleTask, mIntent.getFlags());
+        mLaunchTaskBehind = r.mLaunchTaskBehind
+                && !mLaunchSingleTask && !mLaunchSingleInstance
+                && (mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
+
+        sendNewTaskResultRequestIfNeeded();
+
+        if ((mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0 && r.resultTo == null) {
+            mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+        }
+
+        // If we are actually going to launch in to a new task, there are some cases where
+        // we further want to do multiple task.
+        if ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
+            if (mLaunchTaskBehind
+                    || r.info.documentLaunchMode == DOCUMENT_LAUNCH_ALWAYS) {
+                mLaunchFlags |= FLAG_ACTIVITY_MULTIPLE_TASK;
+            }
+        }
+
+        // We'll invoke onUserLeaving before onPause only if the launching
+        // activity did not explicitly state that this is an automated launch.
+        mSupervisor.mUserLeaving = (mLaunchFlags & FLAG_ACTIVITY_NO_USER_ACTION) == 0;
+        if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
+                "startActivity() => mUserLeaving=" + mSupervisor.mUserLeaving);
+
+        // If the caller has asked not to resume at this point, we make note
+        // of this in the record so that we can skip it when trying to find
+        // the top running activity.
+        mDoResume = doResume;
+        if (!doResume || !mSupervisor.okToShowLocked(r)) {
+            r.delayedResume = true;
+            mDoResume = false;
+        }
+
+        mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
+
+        mInTask = inTask;
+        // In some flows in to this function, we retrieve the task record and hold on to it
+        // without a lock before calling back in to here...  so the task at this point may
+        // not actually be in recents.  Check for that, and if it isn't in recents just
+        // consider it invalid.
+        if (inTask != null && !inTask.inRecents) {
+            Slog.w(TAG, "Starting activity in task not in recents: " + inTask);
+            mInTask = null;
+        }
+
+        mStartFlags = startFlags;
+        // If the onlyIfNeeded flag is set, then we can do this if the activity being launched
+        // is the same as the one making the call...  or, as a special case, if we do not know
+        // the caller then we count the current top activity as the caller.
+        if ((startFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
+            ActivityRecord checkedCaller = sourceRecord;
+            if (checkedCaller == null) {
+                checkedCaller = mSupervisor.mFocusedStack.topRunningNonDelayedActivityLocked(
+                        mNotTop);
+            }
+            if (!checkedCaller.realActivity.equals(r.realActivity)) {
+                // Caller is not the same as launcher, so always needed.
+                mStartFlags &= ~START_FLAG_ONLY_IF_NEEDED;
+            }
+        }
+
+        mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
+    }
+
+    private void sendNewTaskResultRequestIfNeeded() {
+        if (mStartActivity.resultTo != null && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0
+                && mStartActivity.resultTo.task.stack != null) {
+            // For whatever reason this activity is being launched into a new task...
+            // yet the caller has requested a result back.  Well, that is pretty messed up,
+            // so instead immediately send back a cancel and let the new task continue launched
+            // as normal without a dependency on its originator.
+            Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
+            mStartActivity.resultTo.task.stack.sendActivityResultLocked(-1, mStartActivity.resultTo,
+                    mStartActivity.resultWho, mStartActivity.requestCode, RESULT_CANCELED, null);
+            mStartActivity.resultTo = null;
+        }
+    }
+
+    private void computeLaunchingTaskFlags() {
+        // If the caller is not coming from another activity, but has given us an explicit task into
+        // which they would like us to launch the new activity, then let's see about doing that.
+        if (mSourceRecord == null && mInTask != null && mInTask.stack != null) {
+            final Intent baseIntent = mInTask.getBaseIntent();
+            final ActivityRecord root = mInTask.getRootActivity();
+            if (baseIntent == null) {
+                ActivityOptions.abort(mOptions);
+                throw new IllegalArgumentException("Launching into task without base intent: "
+                        + mInTask);
+            }
+
+            // If this task is empty, then we are adding the first activity -- it
+            // determines the root, and must be launching as a NEW_TASK.
+            if (mLaunchSingleInstance || mLaunchSingleTask) {
+                if (!baseIntent.getComponent().equals(mStartActivity.intent.getComponent())) {
+                    ActivityOptions.abort(mOptions);
+                    throw new IllegalArgumentException("Trying to launch singleInstance/Task "
+                            + mStartActivity + " into different task " + mInTask);
+                }
+                if (root != null) {
+                    ActivityOptions.abort(mOptions);
+                    throw new IllegalArgumentException("Caller with mInTask " + mInTask
+                            + " has root " + root + " but target is singleInstance/Task");
+                }
+            }
+
+            // If task is empty, then adopt the interesting intent launch flags in to the
+            // activity being started.
+            if (root == null) {
+                final int flagsOfInterest = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK
+                        | FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+                mLaunchFlags = (mLaunchFlags & ~flagsOfInterest)
+                        | (baseIntent.getFlags() & flagsOfInterest);
+                mIntent.setFlags(mLaunchFlags);
+                mInTask.setIntent(mStartActivity);
+                mAddingToTask = true;
+
+                // If the task is not empty and the caller is asking to start it as the root of
+                // a new task, then we don't actually want to start this on the task. We will
+                // bring the task to the front, and possibly give it a new intent.
+            } else if ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
+                mAddingToTask = false;
+
+            } else {
+                mAddingToTask = true;
+            }
+
+            mReuseTask = mInTask;
+        } else {
+            mInTask = null;
+            // Launch ResolverActivity in the source task, so that it stays in the task bounds
+            // when in freeform workspace.
+            // Also put noDisplay activities in the source task. These by itself can be placed
+            // in any task/stack, however it could launch other activities like ResolverActivity,
+            // and we want those to stay in the original task.
+            if ((mStartActivity.isResolverActivity() || mStartActivity.noDisplay) && mSourceRecord != null
+                    && mSourceRecord.isFreeform())  {
+                mAddingToTask = true;
+            }
+        }
+
+        if (mInTask == null) {
+            if (mSourceRecord == null) {
+                // This activity is not being started from another...  in this
+                // case we -always- start a new task.
+                if ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0 && mInTask == null) {
+                    Slog.w(TAG, "startActivity called from non-Activity context; forcing " +
+                            "Intent.FLAG_ACTIVITY_NEW_TASK for: " + mIntent);
+                    mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+                }
+            } else if (mSourceRecord.launchMode == LAUNCH_SINGLE_INSTANCE) {
+                // The original activity who is starting us is running as a single
+                // instance...  this new activity it is starting must go on its
+                // own task.
+                mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+            } else if (mLaunchSingleInstance || mLaunchSingleTask) {
+                // The activity being started is a single instance...  it always
+                // gets launched into its own task.
+                mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+            }
+        }
+    }
+
+    private void computeSourceStack() {
+        if (mSourceRecord == null) {
+            mSourceStack = null;
+            return;
+        }
+        if (!mSourceRecord.finishing) {
+            mSourceStack = mSourceRecord.task.stack;
+            return;
+        }
+
+        // If the source is finishing, we can't further count it as our source. This is because the
+        // task it is associated with may now be empty and on its way out, so we don't want to
+        // blindly throw it in to that task.  Instead we will take the NEW_TASK flow and try to find
+        // a task for it. But save the task information so it can be used when creating the new task.
+        if ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0) {
+            Slog.w(TAG, "startActivity called from finishing " + mSourceRecord
+                    + "; forcing " + "Intent.FLAG_ACTIVITY_NEW_TASK for: " + mIntent);
+            mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
+            mNewTaskInfo = mSourceRecord.info;
+            mNewTaskIntent = mSourceRecord.task.intent;
+        }
+        mSourceRecord = null;
+        mSourceStack = null;
+    }
+
+    /**
+     * Decide whether the new activity should be inserted into an existing task. Returns null
+     * if not or an ActivityRecord with the task into which the new activity should be added.
+     */
+    private ActivityRecord getReusableIntentActivity() {
+        // We may want to try to place the new activity in to an existing task.  We always
+        // do this if the target activity is singleTask or singleInstance; we will also do
+        // this if NEW_TASK has been requested, and there is not an additional qualifier telling
+        // us to still place it in a new task: multi task, always doc mode, or being asked to
+        // launch this as a new task behind the current one.
+        boolean putIntoExistingTask = ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0 &&
+                (mLaunchFlags & FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
+                || mLaunchSingleInstance || mLaunchSingleTask;
+        // If bring to front is requested, and no result is requested and we have not been given
+        // an explicit task to launch in to, and we can find a task that was started with this
+        // same component, then instead of launching bring that one to the front.
+        putIntoExistingTask &= mInTask == null && mStartActivity.resultTo == null;
+        ActivityRecord intentActivity = null;
+        if (putIntoExistingTask) {
+            // See if there is a task to bring to the front.  If this is a SINGLE_INSTANCE
+            // activity, there can be one and only one instance of it in the history, and it is
+            // always in its own unique task, so we do a special search.
+            intentActivity = mLaunchSingleInstance ? mSupervisor.findActivityLocked(mIntent, mStartActivity.info)
+                    : mSupervisor.findTaskLocked(mStartActivity);
+        }
+        return intentActivity;
+    }
+
+    private ActivityRecord setTargetStackAndMoveToFrontIfNeeded(ActivityRecord intentActivity) {
+        mTargetStack = intentActivity.task.stack;
+        mTargetStack.mLastPausedActivity = null;
+        // If the target task is not in the front, then we need to bring it to the front...
+        // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
+        // the same behavior as if a new instance was being started, which means not bringing it
+        // to the front if the caller is not itself in the front.
+        final ActivityStack focusStack = mSupervisor.getFocusedStack();
+        ActivityRecord curTop = (focusStack == null)
+                ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
+
+        if (curTop != null && (curTop.task != intentActivity.task ||
+                curTop.task != focusStack.topTask())) {
+            mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+            if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
+                    mSourceStack.topActivity().task == mSourceRecord.task)) {
+                // We really do want to push this one into the user's face, right now.
+                if (mLaunchTaskBehind && mSourceRecord != null) {
+                    intentActivity.setTaskToAffiliateWith(mSourceRecord.task);
+                }
+                mMovedHome = true;
+                final ActivityStack launchStack =
+                        getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task,
+                                mOptions, true);
+                if (launchStack == null || launchStack == mTargetStack) {
+                    // We only want to move to the front, if we aren't going to launch on a
+                    // different stack. If we launch on a different stack, we will put the
+                    // task on top there.
+                    mTargetStack.moveTaskToFrontLocked(intentActivity.task, mNoAnimation,
+                            mOptions, mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
+                    mMovedToFront = true;
+                }
+                if ((mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+                        == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
+                    // Caller wants to appear on home activity.
+                    intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+                }
+                mOptions = null;
+            }
+        }
+        if (!mMovedToFront && mDoResume) {
+            if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + mTargetStack
+                    + " from " + intentActivity);
+            mTargetStack.moveToFront("intentActivityFound");
+        }
+
+        // If the caller has requested that the target task be reset, then do so.
+        if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+            return mTargetStack.resetTaskIfNeededLocked(intentActivity, mStartActivity);
+        }
+        return intentActivity;
+    }
+
+    private void setTaskFromIntentActivity(ActivityRecord intentActivity) {
+        if ((mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
+                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK)) {
+            // The caller has requested to completely replace any existing task with its new
+            // activity. Well that should not be too hard...
+            mReuseTask = intentActivity.task;
+            mReuseTask.performClearTaskLocked();
+            mReuseTask.setIntent(mStartActivity);
+        } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
+                || mLaunchSingleInstance || mLaunchSingleTask) {
+            // In this situation we want to remove all activities from the task up to the one
+            // being started. In most cases this means we are resetting the task to its initial
+            // state.
+            ActivityRecord top = intentActivity.task.performClearTaskLocked(mStartActivity,
+                    mLaunchFlags);
+            if (top != null) {
+                if (top.frontOfTask) {
+                    // Activity aliases may mean we use different intents for the top activity,
+                    // so make sure the task now has the identity of the new intent.
+                    top.task.setIntent(mStartActivity);
+                }
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, top.task);
+                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+            } else {
+                // A special case: we need to start the activity because it is not currently
+                // running, and the caller has asked to clear the current task to have this
+                // activity at the top.
+                mAddingToTask = true;
+                // Now pretend like this activity is being started by the top of its task, so it
+                // is put in the right place.
+                mSourceRecord = intentActivity;
+                final TaskRecord task = mSourceRecord.task;
+                if (task != null && task.stack == null) {
+                    // Target stack got cleared when we all activities were removed above.
+                    // Go ahead and reset it.
+                    mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
+                            null /* bounds */, mLaunchFlags, mOptions);
+                    mTargetStack.addTask(task,
+                            !mLaunchTaskBehind /* toTop */, "startActivityUnchecked");
+                }
+            }
+        } else if (mStartActivity.realActivity.equals(intentActivity.task.realActivity)) {
+            // In this case the top activity on the task is the same as the one being launched,
+            // so we take that as a request to bring the task to the foreground. If the top
+            // activity in the task is the root activity, deliver this new intent to it if it
+            // desires.
+            if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0 || mLaunchSingleTop)
+                    && intentActivity.realActivity.equals(mStartActivity.realActivity)) {
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity,
+                        intentActivity.task);
+                if (intentActivity.frontOfTask) {
+                    intentActivity.task.setIntent(mStartActivity);
+                }
+                intentActivity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+                        mStartActivity.launchedFromPackage);
+            } else if (!mStartActivity.intent.filterEquals(intentActivity.task.intent)) {
+                // In this case we are launching the root activity of the task, but with a
+                // different intent. We should start a new instance on top.
+                mAddingToTask = true;
+                mSourceRecord = intentActivity;
+            }
+        } else if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) == 0) {
+            // In this case an activity is being launched in to an existing task, without
+            // resetting that task. This is typically the situation of launching an activity
+            // from a notification or shortcut. We want to place the new activity on top of the
+            // current task.
+            mAddingToTask = true;
+            mSourceRecord = intentActivity;
+        } else if (!intentActivity.task.rootWasReset) {
+            // In this case we are launching into an existing task that has not yet been started
+            // from its front door. The current task has been brought to the front. Ideally,
+            // we'd probably like to place this new task at the bottom of its stack, but that's
+            // a little hard to do with the current organization of the code so for now we'll
+            // just drop it.
+            intentActivity.task.setIntent(mStartActivity);
+        }
+    }
+
+    private void resumeTargetStackIfNeeded() {
+        if (mDoResume) {
+            mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, null, mOptions);
+            if (!mMovedToFront) {
+                // Make sure to notify Keyguard as well if we are not running an app transition
+                // later.
+                mSupervisor.notifyActivityDrawnForKeyguard();
+            }
+        } else {
+            ActivityOptions.abort(mOptions);
+        }
+        mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
+    }
+
+    private void setTaskFromReuseOrCreateNewTask(TaskRecord taskToAffiliate) {
+        mTargetStack = computeStackFocus(mStartActivity, true, mLaunchBounds, mLaunchFlags,
+                mOptions);
+        if (mDoResume) {
+            mTargetStack.moveToFront("startingNewTask");
+        }
+
+        if (mReuseTask == null) {
+            final TaskRecord task = mTargetStack.createTaskRecord(mSupervisor.getNextTaskId(),
+                    mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
+                    mNewTaskIntent != null ? mNewTaskIntent : mIntent,
+                    mVoiceSession, mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
+            mStartActivity.setTask(task, taskToAffiliate);
+            if (mLaunchBounds != null) {
+                mStartActivity.task.updateOverrideConfiguration(mLaunchBounds);
+            }
+            if (DEBUG_TASKS) Slog.v(TAG_TASKS,
+                    "Starting new activity " +
+                            mStartActivity + " in new task " + mStartActivity.task);
+        } else {
+            mStartActivity.setTask(mReuseTask, taskToAffiliate);
+        }
+    }
+
+    private int setTaskFromSourceRecord() {
+        final TaskRecord sourceTask = mSourceRecord.task;
+        // We only want to allow changing stack if the target task is not the top one,
+        // otherwise we would move the launching task to the other side, rather than show
+        // two side by side.
+        final boolean launchToSideAllowed = sourceTask.stack.topTask() != sourceTask;
+        mTargetStack = getLaunchStack(mStartActivity, mLaunchFlags, mStartActivity.task, mOptions, launchToSideAllowed);
+
+        if (mTargetStack == null) {
+            mTargetStack = sourceTask.stack;
+        } else if (mTargetStack != sourceTask.stack) {
+            mSupervisor.moveTaskToStackLocked(sourceTask.taskId, mTargetStack.mStackId,
+                    ON_TOP, FORCE_FOCUS, "launchToSide", !ANIMATE);
+        }
+        if (mDoResume) {
+            mTargetStack.moveToFront("sourceStackToFront");
+        }
+        final TaskRecord topTask = mTargetStack.topTask();
+        if (topTask != sourceTask) {
+            mTargetStack.moveTaskToFrontLocked(sourceTask, mNoAnimation, mOptions,
+                    mStartActivity.appTimeTracker, "sourceTaskToFront");
+        }
+        if (!mAddingToTask && (mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0) {
+            // In this case, we are adding the activity to an existing task, but the caller has
+            // asked to clear that task if the activity is already running.
+            ActivityRecord top = sourceTask.performClearTaskLocked(mStartActivity, mLaunchFlags);
+            mKeepCurTransition = true;
+            if (top != null) {
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, top.task);
+                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                // For paranoia, make sure we have correctly resumed the top activity.
+                mTargetStack.mLastPausedActivity = null;
+                if (mDoResume) {
+                    mSupervisor.resumeFocusedStackTopActivityLocked();
+                }
+                ActivityOptions.abort(mOptions);
+                return START_DELIVERED_TO_TOP;
+            }
+        } else if (!mAddingToTask && (mLaunchFlags & FLAG_ACTIVITY_REORDER_TO_FRONT) != 0) {
+            // In this case, we are launching an activity in our own task that may already be
+            // running somewhere in the history, and we want to shuffle it to the front of the
+            // stack if so.
+            final ActivityRecord top = sourceTask.findActivityInHistoryLocked(mStartActivity);
+            if (top != null) {
+                final TaskRecord task = top.task;
+                task.moveActivityToFrontLocked(top);
+                top.updateOptionsLocked(mOptions);
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, task);
+                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                mTargetStack.mLastPausedActivity = null;
+                if (mDoResume) {
+                    mSupervisor.resumeFocusedStackTopActivityLocked();
+                }
+                return START_DELIVERED_TO_TOP;
+            }
+        }
+
+        // An existing activity is starting this new activity, so we want to keep the new one in
+        // the same task as the one that is starting it.
+        mStartActivity.setTask(sourceTask, null);
+        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
+                + " in existing task " + mStartActivity.task + " from source " + mSourceRecord);
+        return START_SUCCESS;
+    }
+
+    private int setTaskFromInTask() {
+        if (mLaunchBounds != null) {
+            mInTask.updateOverrideConfiguration(mLaunchBounds);
+            int stackId = mInTask.getLaunchStackId();
+            if (stackId != mInTask.stack.mStackId) {
+                mSupervisor.moveTaskToStackUncheckedLocked(
+                        mInTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
+            }
+        }
+        mTargetStack = mInTask.stack;
+        mTargetStack.moveTaskToFrontLocked(
+                mInTask, mNoAnimation, mOptions, mStartActivity.appTimeTracker, "inTaskToFront");
+
+        // Check whether we should actually launch the new activity in to the task,
+        // or just reuse the current activity on top.
+        ActivityRecord top = mInTask.getTopActivity();
+        if (top != null && top.realActivity.equals(mStartActivity.realActivity) && top.userId == mStartActivity.userId) {
+            if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
+                    || mLaunchSingleTop || mLaunchSingleTask) {
+                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+                if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
+                    // We don't need to start a new activity, and the client said not to do
+                    // anything if that is the case, so this is it!
+                    return START_RETURN_INTENT_TO_CALLER;
+                }
+                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
+                return START_DELIVERED_TO_TOP;
+            }
+        }
+
+        if (!mAddingToTask) {
+            // We don't actually want to have this activity added to the task, so just
+            // stop here but still tell the caller that we consumed the intent.
+            ActivityOptions.abort(mOptions);
+            return START_TASK_TO_FRONT;
+        }
+
+        mStartActivity.setTask(mInTask, null);
+        if (DEBUG_TASKS) Slog.v(TAG_TASKS,
+                "Starting new activity " + mStartActivity + " in explicit task " + mStartActivity.task);
+
+        return START_SUCCESS;
+    }
+
+    private void setTaskToCurrentTopOrCreateNewTask() {
+        mTargetStack = computeStackFocus(mStartActivity, false, null /* bounds */, mLaunchFlags,
+                mOptions);
+        if (mDoResume) {
+            mTargetStack.moveToFront("addingToTopTask");
+        }
+        final ActivityRecord prev = mTargetStack.topActivity();
+        final TaskRecord task = prev != null ? prev.task
+                : mTargetStack.createTaskRecord(
+                mSupervisor.getNextTaskId(), mStartActivity.info, mIntent, null, null, true);
+        mStartActivity.setTask(task, null);
+        mWindowManager.moveTaskToTop(mStartActivity.task.taskId);
+        if (DEBUG_TASKS) Slog.v(TAG_TASKS,
+                "Starting new activity " + mStartActivity + " in new guessed " + mStartActivity.task);
+    }
+
+    private int adjustLaunchFlagsToDocumentMode(ActivityRecord r, boolean launchSingleInstance,
+            boolean launchSingleTask, int launchFlags) {
+        if ((launchFlags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0 &&
+                (launchSingleInstance || launchSingleTask)) {
+            // We have a conflict between the Intent and the Activity manifest, manifest wins.
+            Slog.i(TAG, "Ignoring FLAG_ACTIVITY_NEW_DOCUMENT, launchMode is " +
+                    "\"singleInstance\" or \"singleTask\"");
+            launchFlags &=
+                    ~(Intent.FLAG_ACTIVITY_NEW_DOCUMENT | FLAG_ACTIVITY_MULTIPLE_TASK);
+        } else {
+            switch (r.info.documentLaunchMode) {
+                case ActivityInfo.DOCUMENT_LAUNCH_NONE:
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_INTO_EXISTING:
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_ALWAYS:
+                    launchFlags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                    break;
+                case ActivityInfo.DOCUMENT_LAUNCH_NEVER:
+                    launchFlags &= ~FLAG_ACTIVITY_MULTIPLE_TASK;
+                    break;
+            }
+        }
+        return launchFlags;
     }
 
     final void doPendingActivityLaunchesLocked(boolean doResume) {
@@ -1395,9 +1545,8 @@ public class ActivityStarter {
             PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
 
             try {
-                startActivityUncheckedLocked(pal.r, pal.sourceRecord, null, null,
-                        pal.startFlags, doResume && mPendingActivityLaunches.isEmpty(),
-                        null, null);
+                startActivityUnchecked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
+                        doResume && mPendingActivityLaunches.isEmpty(), null, null);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());
@@ -1535,38 +1684,6 @@ public class ActivityStarter {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Decide whether the new activity should be inserted into an existing task. Returns null if not
-     * or an ActivityRecord with the task into which the new activity should be added.
-     */
-    private ActivityRecord getReusableIntentActivity(ActivityRecord r, TaskRecord inTask,
-            Intent intent, boolean launchSingleInstance, boolean launchSingleTask,
-            int launchFlags) {
-        // We may want to try to place the new activity in to an existing task.  We always
-        // do this if the target activity is singleTask or singleInstance; we will also do
-        // this if NEW_TASK has been requested, and there is not an additional qualifier telling
-        // us to still place it in a new task: multi task, always doc mode, or being asked to
-        // launch this as a new task behind the current one.
-        boolean putIntoExistingTask = ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                (launchFlags & FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
-                || launchSingleInstance || launchSingleTask;
-        // If bring to front is requested, and no result is requested and we have not
-        // been given an explicit task to launch in to, and
-        // we can find a task that was started with this same
-        // component, then instead of launching bring that one to the front.
-        putIntoExistingTask &= inTask == null && r.resultTo == null;
-        ActivityRecord intentActivity = null;
-        if (putIntoExistingTask) {
-            // See if there is a task to bring to the front.  If this is
-            // a SINGLE_INSTANCE activity, there can be one and only one
-            // instance of it in the history, and it is always in its own
-            // unique task, so we do a special search.
-            intentActivity = launchSingleInstance ? mSupervisor.findActivityLocked(intent, r.info)
-                    : mSupervisor.findTaskLocked(r);
-        }
-        return intentActivity;
     }
 
     Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
