@@ -1552,9 +1552,9 @@ public:
 
     status_t add(Asset* asset, const int32_t cookie=-1, bool copyData=false);
     status_t add(Asset* asset, Asset* idmapAsset, const int32_t cookie=-1, bool copyData=false,
-            bool appAsLib=false);
+            bool appAsLib=false, bool isSystemAsset=false);
 
-    status_t add(ResTable* src);
+    status_t add(ResTable* src, bool isSystemAsset=false);
     status_t addEmpty(const int32_t cookie);
 
     status_t getError() const;
@@ -1822,9 +1822,9 @@ public:
 
     // Return the configurations (ResTable_config) that we know about
     void getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap=false,
-            bool ignoreAndroidPackage=false) const;
+            bool ignoreAndroidPackage=false, bool includeSystemConfigs=true) const;
 
-    void getLocales(Vector<String8>* locales) const;
+    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true) const;
 
     // Generate an idmap.
     //
@@ -1860,7 +1860,7 @@ private:
     typedef Vector<Type*> TypeList;
 
     status_t addInternal(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
-            bool appAsLib, const int32_t cookie, bool copyData);
+            bool appAsLib, const int32_t cookie, bool copyData, bool isSystemAsset=false);
 
     ssize_t getResourcePackageIndex(uint32_t resID) const;
 
@@ -1873,10 +1873,11 @@ private:
             size_t nameLen, uint32_t* outTypeSpecFlags) const;
 
     status_t parsePackage(
-        const ResTable_package* const pkg, const Header* const header, bool appAsLib);
+        const ResTable_package* const pkg, const Header* const header,
+        bool appAsLib, bool isSystemAsset);
 
     void print_value(const Package* pkg, const Res_value& value) const;
-    
+
     mutable Mutex               mLock;
 
     status_t                    mError;

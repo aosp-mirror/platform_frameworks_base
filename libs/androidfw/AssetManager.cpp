@@ -176,7 +176,8 @@ AssetManager::~AssetManager(void)
     delete[] mVendor;
 }
 
-bool AssetManager::addAssetPath(const String8& path, int32_t* cookie, bool appAsLib)
+bool AssetManager::addAssetPath(
+        const String8& path, int32_t* cookie, bool appAsLib, bool isSystemAsset)
 {
     AutoMutex _l(mLock);
 
@@ -222,6 +223,7 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie, bool appAs
     }
     delete manifestAsset;
 
+    ap.isSystemAsset = isSystemAsset;
     mAssetPaths.add(ap);
 
     // new paths are always added at the end
@@ -233,6 +235,7 @@ bool AssetManager::addAssetPath(const String8& path, int32_t* cookie, bool appAs
     // Load overlays, if any
     asset_path oap;
     for (size_t idx = 0; mZipSet.getOverlay(ap.path, idx, &oap); idx++) {
+        oap.isSystemAsset = isSystemAsset;
         mAssetPaths.add(oap);
     }
 #endif
@@ -340,7 +343,7 @@ bool AssetManager::addDefaultAssets()
     String8 path(root);
     path.appendPath(kSystemAssets);
 
-    return addAssetPath(path, NULL);
+    return addAssetPath(path, NULL, false /* appAsLib */, true /* isSystemAsset */);
 }
 
 int32_t AssetManager::nextAssetPath(const int32_t cookie) const
@@ -682,10 +685,10 @@ bool AssetManager::appendPathToResTable(const asset_path& ap, bool appAsLib) con
         ALOGV("Installing resource asset %p in to table %p\n", ass, mResources);
         if (sharedRes != NULL) {
             ALOGV("Copying existing resources for %s", ap.path.string());
-            mResources->add(sharedRes);
+            mResources->add(sharedRes, ap.isSystemAsset);
         } else {
             ALOGV("Parsing resources for %s", ap.path.string());
-            mResources->add(ass, idmap, nextEntryIdx + 1, !shared, appAsLib);
+            mResources->add(ass, idmap, nextEntryIdx + 1, !shared, appAsLib, ap.isSystemAsset);
         }
         onlyEmptyResources = false;
 
@@ -831,11 +834,11 @@ bool AssetManager::isUpToDate()
     return mZipSet.isUpToDate();
 }
 
-void AssetManager::getLocales(Vector<String8>* locales) const
+void AssetManager::getLocales(Vector<String8>* locales, bool includeSystemLocales) const
 {
     ResTable* res = mResources;
     if (res != NULL) {
-        res->getLocales(locales);
+        res->getLocales(locales, includeSystemLocales);
     }
 
     const size_t numLocales = locales->size();

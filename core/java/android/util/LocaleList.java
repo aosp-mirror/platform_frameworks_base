@@ -213,11 +213,30 @@ public final class LocaleList implements Parcelable {
         }
     }
 
+    private static final String STRING_EN_XA = "en-XA";
+    private static final String STRING_AR_XB = "ar-XB";
+    private static final Locale LOCALE_EN_XA = new Locale("en", "XA");
+    private static final Locale LOCALE_AR_XB = new Locale("ar", "XB");
+    private static final int NUM_PSEUDO_LOCALES = 2;
+
+    private static boolean isPseudoLocale(String locale) {
+        return STRING_EN_XA.equals(locale) || STRING_AR_XB.equals(locale);
+    }
+
+    private static boolean isPseudoLocale(Locale locale) {
+        return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
+    }
+
     private static int matchScore(Locale supported, Locale desired) {
         if (supported.equals(desired)) {
             return 1;  // return early so we don't do unnecessary computation
         }
         if (!supported.getLanguage().equals(desired.getLanguage())) {
+            return 0;
+        }
+        if (isPseudoLocale(supported) || isPseudoLocale(desired)) {
+            // The locales are not the same, but the languages are the same, and one of the locales
+            // is a pseudo-locale. So this is not a match.
             return 0;
         }
         // There is no match if the two locales use different scripts. This will most imporantly
@@ -241,7 +260,6 @@ public final class LocaleList implements Parcelable {
         if (mList.length == 0) {  // empty locale list
             return null;
         }
-        // TODO: Figure out what to if en-XA or ar-XB are in the locale list
         int bestIndex = Integer.MAX_VALUE;
         for (String tag : supportedLocales) {
             final Locale supportedLocale = Locale.forLanguageTag(tag);
@@ -263,6 +281,27 @@ public final class LocaleList implements Parcelable {
         } else {
             return mList[bestIndex];
         }
+    }
+
+    /**
+     * Returns true if the array of locale tags only contains empty locales and pseudolocales.
+     * Assumes that there is no repetition in the input.
+     * {@hide}
+     */
+    public static boolean isPseudoLocalesOnly(String[] supportedLocales) {
+        if (supportedLocales.length > NUM_PSEUDO_LOCALES + 1) {
+            // This is for optimization. Since there's no repetition in the input, if we have more
+            // than the number of pseudo-locales plus one for the empty string, it's guaranteed
+            // that we have some meaninful locale in the list, so the list is not "practically
+            // empty".
+            return false;
+        }
+        for (String locale : supportedLocales) {
+            if (!locale.isEmpty() && !isPseudoLocale(locale)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private final static Object sLock = new Object();

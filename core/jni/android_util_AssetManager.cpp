@@ -578,7 +578,7 @@ static jboolean android_content_AssetManager_isUpToDate(JNIEnv* env, jobject cla
     return am->isUpToDate() ? JNI_TRUE : JNI_FALSE;
 }
 
-static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject clazz)
+static jobjectArray getLocales(JNIEnv* env, jobject clazz, bool includeSystemLocales)
 {
     Vector<String8> locales;
 
@@ -587,7 +587,7 @@ static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject
         return NULL;
     }
 
-    am->getLocales(&locales);
+    am->getLocales(&locales, includeSystemLocales);
 
     const int N = locales.size();
 
@@ -606,6 +606,16 @@ static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject
     }
 
     return result;
+}
+
+static jobjectArray android_content_AssetManager_getLocales(JNIEnv* env, jobject clazz)
+{
+    return getLocales(env, clazz, true /* include system locales */);
+}
+
+static jobjectArray android_content_AssetManager_getNonSystemLocales(JNIEnv* env, jobject clazz)
+{
+    return getLocales(env, clazz, false /* don't include system locales */);
 }
 
 static jobject constructConfigurationObject(JNIEnv* env, const ResTable_config& config) {
@@ -2154,6 +2164,8 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     // Resources.
     { "getLocales",      "()[Ljava/lang/String;",
         (void*) android_content_AssetManager_getLocales },
+    { "getNonSystemLocales", "()[Ljava/lang/String;",
+        (void*) android_content_AssetManager_getNonSystemLocales },
     { "getSizeConfigurations", "()[Landroid/content/res/Configuration;",
         (void*) android_content_AssetManager_getSizeConfigurations },
     { "setConfiguration", "!(IILjava/lang/String;IIIIIIIIIIIIII)V",

@@ -100,16 +100,17 @@ public:
      * then on success, *cookie is set to the value corresponding to the
      * newly-added asset source.
      */
-    bool addAssetPath(const String8& path, int32_t* cookie, bool appAsLib=false);
+    bool addAssetPath(const String8& path, int32_t* cookie,
+        bool appAsLib=false, bool isSystemAsset=false);
     bool addOverlayPath(const String8& path, int32_t* cookie);
 
-    /*                                                                       
+    /*
      * Convenience for adding the standard system assets.  Uses the
      * ANDROID_ROOT environment variable to find them.
      */
     bool addDefaultAssets();
 
-    /*                                                                       
+    /*
      * Iterate over the asset paths in this manager.  (Previously
      * added via addAssetPath() and addDefaultAssets().)  On first call,
      * 'cookie' must be 0, resulting in the first cookie being returned.
@@ -118,7 +119,7 @@ public:
      */
     int32_t nextAssetPath(const int32_t cookie) const;
 
-    /*                                                                       
+    /*
      * Return an asset path in the manager.  'which' must be between 0 and
      * countAssetPaths().
      */
@@ -221,11 +222,11 @@ public:
      * the current data.
      */
     bool isUpToDate();
-    
+
     /**
      * Get the known locales for this asset manager object.
      */
-    void getLocales(Vector<String8>* locales) const;
+    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true) const;
 
     /**
      * Generate idmap data to translate resources IDs between a package and a
@@ -237,11 +238,13 @@ public:
 private:
     struct asset_path
     {
-        asset_path() : path(""), type(kFileTypeRegular), idmap(""), isSystemOverlay(false) {}
+        asset_path() : path(""), type(kFileTypeRegular), idmap(""),
+                       isSystemOverlay(false), isSystemAsset(false) {}
         String8 path;
         FileType type;
         String8 idmap;
         bool isSystemOverlay;
+        bool isSystemAsset;
     };
 
     Asset* openInPathLocked(const char* fileName, AccessMode mode,

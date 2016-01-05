@@ -1976,7 +1976,21 @@ public class Resources {
 
             if (setLocalesToDefault || mResolvedLocale == null
                     || (configChanges & Configuration.NATIVE_CONFIG_LOCALE) != 0) {
-                mResolvedLocale = locales.getFirstMatch(mAssets.getLocales());
+                if (locales.size() == 1) {
+                    // This is an optimization to avoid the JNI call(s) when the result of
+                    // getFirstMatch() does not depend on the supported locales.
+                    mResolvedLocale = locales.getPrimary();
+                } else {
+                    String[] supportedLocales = mAssets.getNonSystemLocales();
+                    if (LocaleList.isPseudoLocalesOnly(supportedLocales)) {
+                        // We fallback to all locales (including system locales) if there was no
+                        // locale specifically supported by the assets. This is to properly support
+                        // apps that only rely on the shared system assets and don't need assets of
+                        // their own.
+                        supportedLocales = mAssets.getLocales();
+                    }
+                    mResolvedLocale = locales.getFirstMatch(supportedLocales);
+                }
             }
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
                     adjustLanguageTag(mResolvedLocale.toLanguageTag()),
