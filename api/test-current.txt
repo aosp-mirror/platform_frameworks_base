@@ -9496,8 +9496,6 @@ package android.content.pm {
     method public abstract android.graphics.drawable.Drawable getDefaultActivityIcon();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
-    method public abstract byte[] getEphemeralCookie();
-    method public abstract int getEphemeralCookieMaxSizeBytes();
     method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public abstract java.lang.String getInstallerPackageName(java.lang.String);
@@ -9531,7 +9529,6 @@ package android.content.pm {
     method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract boolean hasSystemFeature(java.lang.String);
-    method public abstract boolean isEphemeralApplication();
     method public abstract boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public abstract boolean isSafeMode();
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -9549,7 +9546,6 @@ package android.content.pm {
     method public abstract android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
     method public abstract void setApplicationEnabledSetting(java.lang.String, int, int);
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
-    method public abstract boolean setEphemeralCookie(byte[]);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
     method public abstract void verifyPendingInstall(int, int);
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
@@ -36857,8 +36853,6 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getDefaultActivityIcon();
     method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
-    method public byte[] getEphemeralCookie();
-    method public int getEphemeralCookieMaxSizeBytes();
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplications(int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public java.lang.String getInstallerPackageName(java.lang.String);
@@ -36891,7 +36885,6 @@ package android.test.mock {
     method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public boolean hasSystemFeature(java.lang.String);
-    method public boolean isEphemeralApplication();
     method public boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public boolean isSafeMode();
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -36909,7 +36902,6 @@ package android.test.mock {
     method public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
     method public void setApplicationEnabledSetting(java.lang.String, int, int);
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
-    method public boolean setEphemeralCookie(byte[]);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void verifyPendingInstall(int, int);
   }

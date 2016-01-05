@@ -318,6 +318,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
+    private static final boolean DISABLE_EPHEMERAL_APPS = true;
+
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
     private static final int NFC_UID = Process.NFC_UID;
@@ -4469,6 +4471,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean isEphemeralAllowed(
             Intent intent, List<ResolveInfo> resolvedActivites, int userId) {
         // Short circuit and return early if possible.
+        if (DISABLE_EPHEMERAL_APPS) {
+            return false;
+        }
         final int callingUser = UserHandle.getCallingUserId();
         if (callingUser != UserHandle.USER_SYSTEM) {
             return false;
@@ -5803,6 +5808,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ParceledListSlice<EphemeralApplicationInfo> getEphemeralApplications(int userId) {
+        if (DISABLE_EPHEMERAL_APPS) {
+            return null;
+        }
+
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
                 "getEphemeralApplications");
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
@@ -5821,6 +5830,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     public boolean isEphemeralApplication(String packageName, int userId) {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "isEphemeral");
+        if (DISABLE_EPHEMERAL_APPS) {
+            return false;
+        }
+
         if (!isCallerSameApp(packageName)) {
             return false;
         }
@@ -5835,6 +5848,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public byte[] getEphemeralApplicationCookie(String packageName, int userId) {
+        if (DISABLE_EPHEMERAL_APPS) {
+            return null;
+        }
+
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "getCookie");
         if (!isCallerSameApp(packageName)) {
@@ -5848,6 +5865,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean setEphemeralApplicationCookie(String packageName, byte[] cookie, int userId) {
+        if (DISABLE_EPHEMERAL_APPS) {
+            return true;
+        }
+
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,
                 "setCookie");
         if (!isCallerSameApp(packageName)) {
@@ -5861,6 +5882,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public Bitmap getEphemeralApplicationIcon(String packageName, int userId) {
+        if (DISABLE_EPHEMERAL_APPS) {
+            return null;
+        }
+
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_EPHEMERAL_APPS,
                 "getEphemeralApplicationIcon");
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false,

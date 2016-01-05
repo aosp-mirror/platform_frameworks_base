@@ -322,21 +322,25 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
     @Override
     public byte[] getEphemeralCookie() {
         return new byte[0];
     }
 
+    /** @hide */
     @Override
     public boolean isEphemeralApplication() {
         return false;
     }
 
+    /** @hide */
     @Override
     public int getEphemeralCookieMaxSizeBytes() {
         return 0;
     }
 
+    /** @hide */
     @Override
     public boolean setEphemeralCookie(@NonNull byte[] cookie) {
         return false;

@@ -3258,6 +3258,8 @@ public abstract class PackageManager {
      * @see #setEphemeralCookie(byte[])
      * @see #getEphemeralCookie()
      * @see #getEphemeralCookieMaxSizeBytes()
+     *
+     * @hide
      */
     public abstract boolean isEphemeralApplication();
 
@@ -3270,6 +3272,8 @@ public abstract class PackageManager {
      * @see #isEphemeralApplication()
      * @see #setEphemeralCookie(byte[])
      * @see #getEphemeralCookie()
+     *
+     * @hide
      */
     public abstract int getEphemeralCookieMaxSizeBytes();
 
@@ -3286,6 +3290,8 @@ public abstract class PackageManager {
      * @see #isEphemeralApplication()
      * @see #setEphemeralCookie(byte[])
      * @see #getEphemeralCookieMaxSizeBytes()
+     *
+     * @hide
      */
     public abstract @NonNull byte[] getEphemeralCookie();
 
@@ -3304,6 +3310,8 @@ public abstract class PackageManager {
      * @see #isEphemeralApplication()
      * @see #getEphemeralCookieMaxSizeBytes()
      * @see #getEphemeralCookie()
+     *
+     * @hide
      */
     public abstract boolean setEphemeralCookie(@NonNull  byte[] cookie);
 
