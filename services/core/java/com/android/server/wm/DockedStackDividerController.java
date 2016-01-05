@@ -175,7 +175,7 @@ public class DockedStackDividerController implements DimLayerUser {
         boolean visibleAndValid = visible && stack != null;
         if (visibleAndValid) {
             stack.getDimBounds(mTmpRect);
-            if (mTmpRect.height() > 0) {
+            if (mTmpRect.height() > 0 && mTmpRect.width() > 0) {
                 mDimLayer.setBounds(mTmpRect);
                 mDimLayer.show(mDisplayContent.mService.mLayersController.getResizeDimLayer(),
                         alpha, 0 /* duration */);
