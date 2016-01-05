@@ -333,7 +333,6 @@ public class TaskStackLayoutAlgorithm {
      * including the search bar.
      */
     public void initialize(Rect taskStackBounds, StackState state) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         RecentsConfiguration config = Recents.getConfiguration();
         int widthPadding = (int) (config.taskStackWidthPaddingPct * taskStackBounds.width());
         int heightPadding = mContext.getResources().getDimensionPixelSize(

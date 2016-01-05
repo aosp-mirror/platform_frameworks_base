@@ -77,6 +77,7 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
+import com.android.systemui.statusbar.BaseStatusBar;
 
 import java.util.ArrayList;
 
@@ -298,12 +299,23 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      */
     void dismissRecentsToHome(boolean animated) {
         if (animated) {
-            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger(null,
-                    mFinishLaunchHomeRunnable, null);
+            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger();
+            exitTrigger.increment();
+            exitTrigger.addLastDecrementRunnable(mFinishLaunchHomeRunnable);
+            exitTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    Recents.getSystemServices().sendCloseSystemWindows(
+                            BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+                }
+            });
             mRecentsView.startExitToHomeAnimation(
                     new ViewAnimation.TaskViewExitContext(exitTrigger));
+            exitTrigger.decrement();
         } else {
             mFinishLaunchHomeRunnable.run();
+            Recents.getSystemServices().sendCloseSystemWindows(
+                    BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
         }
     }
 
@@ -343,7 +355,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().register(this, EVENT_BUS_PRIORITY);
 
         // Initialize the widget host (the host id is static and does not change)
-        if (!RecentsDebugFlags.Static.DisableSearchBar) {
+        if (RecentsDebugFlags.Static.EnableSearchBar) {
             mAppWidgetHost = new RecentsAppWidgetHost(this, RecentsAppWidgetHost.HOST_ID);
         }
         mPackageMonitor = new RecentsPackageMonitor();
@@ -368,14 +380,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
 
         // Bind the search app widget when we first start up
-        if (!RecentsDebugFlags.Static.DisableSearchBar) {
+        if (RecentsDebugFlags.Static.EnableSearchBar) {
             mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
         }
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        if (!RecentsDebugFlags.Static.DisableSearchBar) {
+        if (RecentsDebugFlags.Static.EnableSearchBar) {
             filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         }
         registerReceiver(mSystemBroadcastReceiver, filter);
@@ -475,7 +487,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mPackageMonitor.unregister();
 
         // Stop listening for widget package changes if there was one bound
-        if (!RecentsDebugFlags.Static.DisableSearchBar) {
+        if (RecentsDebugFlags.Static.EnableSearchBar) {
             mAppWidgetHost.stopListening();
         }
 
@@ -656,8 +668,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         ReferenceCountedTrigger t = new ReferenceCountedTrigger();
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         ctx.postAnimationTrigger.increment();
-        if (mSearchWidgetInfo != null) {
-            if (!RecentsDebugFlags.Static.DisableSearchBar) {
+        if (RecentsDebugFlags.Static.EnableSearchBar) {
+            if (mSearchWidgetInfo != null) {
                 ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                     @Override
                     public void run() {

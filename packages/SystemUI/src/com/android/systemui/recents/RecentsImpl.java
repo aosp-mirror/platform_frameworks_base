@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,7 @@ import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
@@ -364,6 +366,9 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
                 // Otherwise, start the recents activity
                 startRecentsActivity(topTask, isTopTaskHome.value, true /* animate */);
+
+                // Only close the other system windows if we are actually showing recents
+                ssp.sendCloseSystemWindows(BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
                 mLastToggleTime = SystemClock.elapsedRealtime();
             }
         } catch (ActivityNotFoundException e) {
@@ -578,7 +583,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         // Update the configuration for the current state
         config.update(windowRect);
 
-        if (!RecentsDebugFlags.Static.DisableSearchBar && tryAndBindSearchWidget) {
+        if (RecentsDebugFlags.Static.EnableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
             // have the right thumbnail bounds to animate to.
             // Note: We have to reload the widget id before we get the task stack bounds below
@@ -854,11 +859,19 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         if (!useThumbnailTransition) {
             // If there is no thumbnail transition, but is launching from home into recents, then
             // use a quick home transition and do the animation from home
-            if (!RecentsDebugFlags.Static.DisableSearchBar && hasRecentTasks) {
+            if (hasRecentTasks) {
                 SystemServicesProxy ssp = Recents.getSystemServices();
                 String homeActivityPackage = ssp.getHomeActivityPackageName();
-                String searchWidgetPackage = Prefs.getString(mContext,
-                        Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
+                String searchWidgetPackage = null;
+                if (RecentsDebugFlags.Static.EnableSearchBar) {
+                    searchWidgetPackage = Prefs.getString(mContext,
+                            Prefs.Key.OVERVIEW_SEARCH_APP_WIDGET_PACKAGE, null);
+                } else {
+                    AppWidgetProviderInfo searchWidgetInfo = ssp.resolveSearchAppWidget();
+                    if (searchWidgetInfo != null) {
+                        searchWidgetPackage = searchWidgetInfo.provider.getPackageName();
+                    }
+                }
 
                 // Determine whether we are coming from a search owned home activity
                 boolean fromSearchHome = (homeActivityPackage != null) &&

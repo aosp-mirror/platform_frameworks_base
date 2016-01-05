@@ -317,7 +317,7 @@ public class RecentsView extends FrameLayout {
      * Hides the task stack and shows the empty view.
      */
     public void showEmptyView() {
-        if (!RecentsDebugFlags.Static.DisableSearchBar && (mSearchBar != null)) {
+        if (RecentsDebugFlags.Static.EnableSearchBar && (mSearchBar != null)) {
             mSearchBar.setVisibility(View.INVISIBLE);
         }
         mTaskStackView.setVisibility(View.INVISIBLE);
@@ -332,7 +332,7 @@ public class RecentsView extends FrameLayout {
     public void hideEmptyView() {
         mEmptyView.setVisibility(View.INVISIBLE);
         mTaskStackView.setVisibility(View.VISIBLE);
-        if (!RecentsDebugFlags.Static.DisableSearchBar && (mSearchBar != null)) {
+        if (RecentsDebugFlags.Static.EnableSearchBar && (mSearchBar != null)) {
             mSearchBar.setVisibility(View.VISIBLE);
         }
         mTaskStackView.bringToFront();

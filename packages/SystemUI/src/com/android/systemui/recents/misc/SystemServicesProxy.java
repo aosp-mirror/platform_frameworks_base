@@ -68,6 +68,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
+import com.android.systemui.statusbar.BaseStatusBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -502,6 +503,18 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Sends a message to close other system windows.
+     */
+    public void sendCloseSystemWindows(String reason) {
+        if (ActivityManagerNative.isSystemReady()) {
+            try {
+                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
      * Returns the activity info for a given component name.
      *
      * @param cn The component name of the activity.
@@ -638,7 +651,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
         if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return null;
 
-        ArrayList<ResolveInfo> homeActivities = new ArrayList<ResolveInfo>();
+        ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
         ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);
         if (defaultHomeActivity != null) {
             return defaultHomeActivity.getPackageName();
@@ -726,7 +739,7 @@ public class SystemServicesProxy {
     /**
      * Returns the first Recents widget from the same package as the global assist activity.
      */
-    private AppWidgetProviderInfo resolveSearchAppWidget() {
+    public AppWidgetProviderInfo resolveSearchAppWidget() {
         if (mAssistComponent == null) return null;
         List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
