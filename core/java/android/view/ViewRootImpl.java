@@ -3315,6 +3315,7 @@ public final class ViewRootImpl implements ViewParent,
                         && mPendingStableInsets.equals(args.arg6)
                         && mPendingVisibleInsets.equals(args.arg3)
                         && mPendingOutsets.equals(args.arg7)
+                        && mPendingBackDropFrame.equals(args.arg8)
                         && args.arg4 == null) {
                     break;
                 }
