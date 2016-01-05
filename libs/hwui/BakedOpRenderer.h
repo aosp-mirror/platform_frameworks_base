@@ -95,12 +95,24 @@ private:
     // render target state - setup by start/end layer/frame
     // only valid to use in between start/end pairs.
     struct {
+        // If not drawing to a layer: fbo = 0, offscreenBuffer = null,
+        // Otherwise these refer to currently painting layer's state
         GLuint frameBufferId = 0;
         OffscreenBuffer* offscreenBuffer = nullptr;
+
+        // Used when drawing to a layer and using stencil clipping. otherwise null.
+        RenderBuffer* stencil = nullptr;
+
+        // value representing the ClipRectList* or ClipRegion* currently stored in
+        // the stencil of the current render target
+        const ClipBase* lastStencilClip = nullptr;
+
+        // Size of renderable region in current render target - for layers, may not match actual
+        // bounds of FBO texture. offscreenBuffer->texture has this information.
         uint32_t viewportWidth = 0;
         uint32_t viewportHeight = 0;
+
         Matrix4 orthoMatrix;
-        const ClipBase* lastStencilClip = nullptr;
     } mRenderTarget;
 
     const LightInfo mLightInfo;

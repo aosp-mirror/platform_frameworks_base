@@ -30,8 +30,6 @@ public:
     sp<RenderNode> card;
     void createContent(int width, int height, TestCanvas& canvas) override {
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
-        canvas.insertReorderBarrier(true);
-
         card = TestUtils::createNode(0, 0, 200, 400,
                 [](RenderProperties& props, TestCanvas& canvas) {
             canvas.save(SkCanvas::kMatrixClip_SaveFlag);
@@ -53,10 +51,12 @@ public:
                 canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
             }
             canvas.restore();
+
+            // put on a layer, to test stencil attachment
+            props.mutateLayerProperties().setType(LayerType::RenderLayer);
+            props.setAlpha(0.9f);
         });
         canvas.drawRenderNode(card.get());
-
-        canvas.insertReorderBarrier(false);
     }
     void doFrame(int frameNr) override {
         int curFrame = frameNr % 150;
