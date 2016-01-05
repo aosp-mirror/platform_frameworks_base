@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -82,11 +81,9 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -647,13 +644,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 android.R.interpolator.fast_out_linear_in);
 
         // Connect in to the status bar manager service
-        StatusBarIconList iconList = new StatusBarIconList();
-        mCommandQueue = new CommandQueue(this, iconList);
+        mCommandQueue = new CommandQueue(this);
 
         int[] switches = new int[8];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
+        ArrayList<String> iconSlots = new ArrayList<>();
+        ArrayList<StatusBarIcon> icons = new ArrayList<>();
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconList, switches, binders);
+            mBarService.registerStatusBar(mCommandQueue, iconSlots, icons, switches, binders);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
@@ -668,14 +666,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         setImeWindowStatus(binders.get(0), switches[3], switches[4], switches[5] != 0);
 
         // Set up the initial icon state
-        int N = iconList.size();
+        int N = iconSlots.size();
         int viewIndex = 0;
-        for (int i=0; i<N; i++) {
-            StatusBarIcon icon = iconList.getIcon(i);
-            if (icon != null) {
-                addIcon(iconList.getSlot(i), i, viewIndex, icon);
-                viewIndex++;
-            }
+        for (int i=0; i < N; i++) {
+            setIcon(iconSlots.get(i), icons.get(i));
         }
 
         // Set up the initial notification state.
@@ -691,7 +685,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) {
             Log.d(TAG, String.format(
                     "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
-                   iconList.size(),
+                   icons.size(),
                    switches[0],
                    switches[1],
                    switches[2],

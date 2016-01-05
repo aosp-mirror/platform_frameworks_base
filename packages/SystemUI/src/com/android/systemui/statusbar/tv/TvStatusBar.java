@@ -33,16 +33,11 @@ import com.android.systemui.statusbar.NotificationData;
 public class TvStatusBar extends BaseStatusBar {
 
     @Override
-    public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
+    public void setIcon(String slot, StatusBarIcon icon) {
     }
 
     @Override
-    public void updateIcon(String slot, int index, int viewIndex, StatusBarIcon old,
-            StatusBarIcon icon) {
-    }
-
-    @Override
-    public void removeIcon(String slot, int index, int viewIndex) {
+    public void removeIcon(String slot) {
     }
 
     @Override

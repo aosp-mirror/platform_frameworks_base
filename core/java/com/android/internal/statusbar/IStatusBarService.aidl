@@ -44,7 +44,8 @@ interface IStatusBarService
 
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
-    void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
+    void registerStatusBar(IStatusBar callbacks, out List<String> iconSlots,
+            out List<StatusBarIcon> iconList,
             out int[] switches, out List<IBinder> binders);
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();

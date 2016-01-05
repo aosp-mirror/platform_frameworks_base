@@ -24,8 +24,8 @@ import com.android.internal.statusbar.StatusBarIcon;
 /** @hide */
 oneway interface IStatusBar
 {
-    void setIcon(int index, in StatusBarIcon icon);
-    void removeIcon(int index);
+    void setIcon(String slot, in StatusBarIcon icon);
+    void removeIcon(String slot);
     void disable(int state1, int state2);
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
