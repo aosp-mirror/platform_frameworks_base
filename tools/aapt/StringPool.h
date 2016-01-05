@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <errno.h>
+#include <map>
 
 using namespace android;
 
@@ -172,7 +173,7 @@ private:
 
     // Unique set of all the strings added to the pool, mapped to
     // the first index of mEntryArray where the value was added.
-    DefaultKeyedVector<String16, ssize_t>   mValues;
+    std::map<String16, ssize_t>             mValues;
     // This array maps from the original position a string was placed at
     // in mEntryArray to its new position after being sorted with sortByConfig().
     Vector<size_t>                          mOriginalPosToNewPos;
