@@ -2415,6 +2415,53 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device or profile owner to configure an always-on VPN connection through a
+     * specific application for the current user.
+     * This connection is automatically granted and persisted after a reboot.
+     *
+     * <p>The designated package should declare a {@link android.net.VpnService} in its
+     *    manifest guarded by {@link android.Manifest.permission#BIND_VPN_SERVICE},
+     *    otherwise the call will fail.
+     *
+     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
+     *                   to remove an existing always-on VPN configuration.
+     *
+     * @return {@code true} if the package is set as always-on VPN controller;
+     *         {@code false} otherwise.
+     */
+    public boolean setAlwaysOnVpnPackage(@NonNull ComponentName admin,
+            @Nullable String vpnPackage) {
+        if (mService != null) {
+            try {
+                return mService.setAlwaysOnVpnPackage(admin, vpnPackage);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by a device or profile owner to read the name of the package administering an
+     * always-on VPN connection for the current user.
+     * If there is no such package, or the always-on VPN is provided by the system instead
+     * of by an application, {@code null} will be returned.
+     *
+     * @return Package name of VPN controller responsible for always-on VPN,
+     *         or {@code null} if none is set.
+     */
+    public String getAlwaysOnVpnPackage(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getAlwaysOnVpnPackage(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Called by an application that is administering the device to disable all cameras
      * on the device, for this user. After setting this, no applications running as this user
      * will be able to access any cameras on the device.

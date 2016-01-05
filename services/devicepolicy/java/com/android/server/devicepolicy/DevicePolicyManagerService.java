@@ -3782,6 +3782,42 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage)
+            throws SecurityException {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+
+        final int userId = mInjector.userHandleGetCallingUserId();
+        final long token = mInjector.binderClearCallingIdentity();
+        try{
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public String getAlwaysOnVpnPackage(ComponentName admin)
+            throws SecurityException {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+
+        final int userId = mInjector.userHandleGetCallingUserId();
+        final long token = mInjector.binderClearCallingIdentity();
+        try{
+            ConnectivityManager connectivityManager = (ConnectivityManager)
+                    mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            return connectivityManager.getAlwaysOnVpnPackageForUser(userId);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(token);
+        }
+    }
+
     private void wipeDataLocked(boolean wipeExtRequested, String reason) {
         if (wipeExtRequested) {
             StorageManager sm = (StorageManager) mContext.getSystemService(

@@ -144,6 +144,9 @@ interface IDevicePolicyManager {
     void setCertInstallerPackage(in ComponentName who, String installerPackage);
     String getCertInstallerPackage(in ComponentName who);
 
+    boolean setAlwaysOnVpnPackage(in ComponentName who, String vpnPackage);
+    String getAlwaysOnVpnPackage(in ComponentName who);
+
     void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
     void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
 

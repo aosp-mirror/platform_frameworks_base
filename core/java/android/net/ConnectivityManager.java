@@ -17,6 +17,7 @@ package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
@@ -680,6 +681,47 @@ public class ConnectivityManager {
     public Network getActiveNetwork() {
         try {
             return mService.getActiveNetwork();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Configures an always-on VPN connection through a specific application.
+     * This connection is automatically granted and persisted after a reboot.
+     *
+     * <p>The designated package should declare a {@link VpnService} in its
+     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
+     *    otherwise the call will fail.
+     *
+     * @param userId The identifier of the user to set an always-on VPN for.
+     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
+     *                   to remove an existing always-on VPN configuration.
+
+     * @return {@code true} if the package is set as always-on VPN controller;
+     *         {@code false} otherwise.
+     * @hide
+     */
+    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage) {
+        try {
+            return mService.setAlwaysOnVpnPackage(userId, vpnPackage);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the package name of the currently set always-on VPN application.
+     * If there is no always-on VPN set, or the VPN is provided by the system instead
+     * of by an app, {@code null} will be returned.
+     *
+     * @return Package name of VPN controller responsible for always-on VPN,
+     *         or {@code null} if none is set.
+     * @hide
+     */
+    public String getAlwaysOnVpnPackageForUser(int userId) {
+        try {
+            return mService.getAlwaysOnVpnPackage(userId);
         } catch (RemoteException e) {
             return null;
         }

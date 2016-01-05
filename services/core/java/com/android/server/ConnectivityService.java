@@ -1568,12 +1568,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // load the global proxy at startup
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_APPLY_GLOBAL_HTTP_PROXY));
 
-        // Try bringing up tracker, but if KeyStore isn't ready yet, wait
-        // for user to unlock device.
-        if (!updateLockdownVpn()) {
-            final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
-            mContext.registerReceiver(mUserPresentReceiver, filter);
-        }
+        // Try bringing up tracker, but KeyStore won't be ready yet for secondary users so wait
+        // for user to unlock device too.
+        updateLockdownVpn();
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+        mContext.registerReceiverAsUser(mUserPresentReceiver, UserHandle.ALL, filter, null, null);
 
         // Configure whether mobile data is always on.
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON));
@@ -1586,10 +1585,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private BroadcastReceiver mUserPresentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // User that sent this intent = user that was just unlocked
+            final int unlockedUser = getSendingUserId();
+
             // Try creating lockdown tracker, since user present usually means
             // unlocked keystore.
-            if (updateLockdownVpn()) {
-                mContext.unregisterReceiver(this);
+            if (mUserManager.getUserInfo(unlockedUser).isPrimary() &&
+                    LockdownVpnTracker.isEnabled()) {
+                updateLockdownVpn();
+            } else {
+                updateAlwaysOnVpn(unlockedUser);
             }
         }
     };
@@ -3255,6 +3260,76 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void throwIfLockdownEnabled() {
         if (mLockdownEnabled) {
             throw new IllegalStateException("Unavailable in lockdown mode");
+        }
+    }
+
+    /**
+     * Sets up or tears down the always-on VPN for user {@param user} as appropriate.
+     *
+     * @return {@code false} in case of errors; {@code true} otherwise.
+     */
+    private boolean updateAlwaysOnVpn(int user) {
+        final String lockdownPackage = getAlwaysOnVpnPackage(user);
+        if (lockdownPackage == null) {
+            return true;
+        }
+
+        // Create an intent to start the VPN service declared in the app's manifest.
+        Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
+        serviceIntent.setPackage(lockdownPackage);
+
+        try {
+            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(user)) != null;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean setAlwaysOnVpnPackage(int userId, String packageName) {
+        enforceConnectivityInternalPermission();
+        enforceCrossUserPermission(userId);
+
+        // Can't set always-on VPN if legacy VPN is already in lockdown mode.
+        if (LockdownVpnTracker.isEnabled()) {
+            return false;
+        }
+
+        // If the current VPN package is the same as the new one, this is a no-op
+        final String oldPackage = getAlwaysOnVpnPackage(userId);
+        if (TextUtils.equals(oldPackage, packageName)) {
+            return true;
+        }
+
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(userId);
+            if (vpn == null) {
+                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                return false;
+            }
+            if (!vpn.setAlwaysOnPackage(packageName)) {
+                return false;
+            }
+            if (!updateAlwaysOnVpn(userId)) {
+                vpn.setAlwaysOnPackage(null);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String getAlwaysOnVpnPackage(int userId) {
+        enforceConnectivityInternalPermission();
+        enforceCrossUserPermission(userId);
+
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(userId);
+            if (vpn == null) {
+                Slog.w(TAG, "User " + userId + " has no Vpn configuration");
+                return null;
+            }
+            return vpn.getAlwaysOnPackage();
         }
     }
 

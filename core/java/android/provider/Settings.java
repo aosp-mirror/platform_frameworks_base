@@ -4402,6 +4402,13 @@ public final class Settings {
         public static final String HTTP_PROXY = Global.HTTP_PROXY;
 
         /**
+         * Package designated as always-on VPN provider.
+         *
+         * @hide
+         */
+        public static final String ALWAYS_ON_VPN_APP = "always_on_vpn_app";
+
+        /**
          * Whether applications can be installed for this user via the system's
          * {@link Intent#ACTION_INSTALL_PACKAGE} mechanism.
          *
