@@ -1269,19 +1269,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            // Stop screensaver if the notification has a full-screen intent.
-            // (like an incoming phone call)
-            awakenDreams();
+            if (mNotificationData.shouldSuppressScreenOn(notification.getKey())) {
+                if (DEBUG) {
+                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
+                }
+            } else {
+                // Stop screensaver if the notification has a full-screen intent.
+                // (like an incoming phone call)
+                awakenDreams();
 
-            // not immersive & a full-screen alert should be shown
-            if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
-            try {
-                EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                        notification.getKey());
-                notification.getNotification().fullScreenIntent.send();
-                shadeEntry.notifyFullScreenIntentLaunched();
-                MetricsLogger.count(mContext, "note_fullscreen", 1);
-            } catch (PendingIntent.CanceledException e) {
+                // not immersive & a full-screen alert should be shown
+                if (DEBUG)
+                    Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
+                try {
+                    EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
+                            notification.getKey());
+                    notification.getNotification().fullScreenIntent.send();
+                    shadeEntry.notifyFullScreenIntentLaunched();
+                    MetricsLogger.count(mContext, "note_fullscreen", 1);
+                } catch (PendingIntent.CanceledException e) {
+                }
             }
         }
         addNotificationViews(shadeEntry, ranking);

@@ -637,10 +637,12 @@ public class NotificationManager
         public static final int SUPPRESSED_EFFECTS_UNSET = -1;
         public static final int SUPPRESSED_EFFECT_LIGHTS = 1 << 0;
         public static final int SUPPRESSED_EFFECT_PEEK = 1 << 1;
+        public static final int SUPPRESSED_EFFECT_SCREEN_ON = 1 << 2;
 
         private static final int[] ALL_SUPPRESSED_EFFECTS = {
                 SUPPRESSED_EFFECT_LIGHTS,
                 SUPPRESSED_EFFECT_PEEK,
+                SUPPRESSED_EFFECT_SCREEN_ON,
         };
 
         /**
@@ -750,6 +752,7 @@ public class NotificationManager
             switch (effect) {
                 case SUPPRESSED_EFFECT_LIGHTS: return "SUPPRESSED_EFFECT_LIGHTS";
                 case SUPPRESSED_EFFECT_PEEK: return "SUPPRESSED_EFFECT_PEEK";
+                case SUPPRESSED_EFFECT_SCREEN_ON: return "SUPPRESSED_EFFECT_SCREEN_ON";
                 case SUPPRESSED_EFFECTS_UNSET: return "SUPPRESSED_EFFECTS_UNSET";
                 default: return "UNKNOWN_" + effect;
             }

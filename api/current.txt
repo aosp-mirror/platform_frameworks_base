@@ -5197,6 +5197,7 @@ package android.app {
     field public static final int SUPPRESSED_EFFECTS_UNSET = -1; // 0xffffffff
     field public static final int SUPPRESSED_EFFECT_LIGHTS = 1; // 0x1
     field public static final int SUPPRESSED_EFFECT_PEEK = 2; // 0x2
+    field public static final int SUPPRESSED_EFFECT_SCREEN_ON = 4; // 0x4
     field public final int priorityCallSenders;
     field public final int priorityCategories;
     field public final int priorityMessageSenders;
@@ -33560,6 +33561,7 @@ package android.service.notification {
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationListenerService";
     field public static final int SUPPRESSED_EFFECT_LIGHTS = 1; // 0x1
     field public static final int SUPPRESSED_EFFECT_PEEK = 2; // 0x2
+    field public static final int SUPPRESSED_EFFECT_SCREEN_ON = 4; // 0x4
   }
 
   public static class NotificationListenerService.Ranking {

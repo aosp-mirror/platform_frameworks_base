@@ -33,6 +33,7 @@ import static android.service.notification.NotificationListenerService.HINT_HOST
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -2563,9 +2564,14 @@ public class NotificationManagerService extends SystemService {
             updateLightsLocked();
         }
         if (buzz || beep || blink) {
-            EventLogTags.writeNotificationAlert(record.getKey(),
-                    buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
-            mHandler.post(mBuzzBeepBlinked);
+            if (((record.getSuppressedVisualEffects()
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0)) {
+                if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
+            } else {
+                EventLogTags.writeNotificationAlert(record.getKey(),
+                        buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
+                mHandler.post(mBuzzBeepBlinked);
+            }
         }
     }
 
@@ -2744,7 +2750,8 @@ public class NotificationManagerService extends SystemService {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
         if (record.isIntercepted()) {
             int suppressed = (mZenModeHelper.shouldSuppressLight() ? SUPPRESSED_EFFECT_LIGHTS : 0)
-                    | (mZenModeHelper.shouldSuppressPeek() ? SUPPRESSED_EFFECT_PEEK : 0);
+                    | (mZenModeHelper.shouldSuppressPeek() ? SUPPRESSED_EFFECT_PEEK : 0)
+                    | (mZenModeHelper.shouldSuppressScreenOn() ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
             record.setSuppressedVisualEffects(suppressed);
         }
     }
