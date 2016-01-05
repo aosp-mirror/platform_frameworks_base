@@ -19,6 +19,7 @@ package com.android.server.usb;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -381,6 +382,14 @@ public class UsbService extends IUsbManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        if (mHostManager != null) {
+            mHostManager.setUsbDeviceConnectionHandler(usbDeviceConnectionHandler);
         }
     }
 
