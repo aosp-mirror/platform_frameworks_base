@@ -224,11 +224,14 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowManagerService" : TAG_WM;
+
     static final int LAYOUT_REPEAT_THRESHOLD = 4;
 
     static final boolean PROFILE_ORIENTATION = false;
@@ -2428,13 +2431,17 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setInsetsWindow(Session session, IWindow client,
-            int touchableInsets, Rect contentInsets,
+    void setInsetsWindow(Session session, IWindow client, int touchableInsets, Rect contentInsets,
             Rect visibleInsets, Region touchableRegion) {
         long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
+                if (DEBUG_LAYOUT) Slog.d(TAG, "setInsetsWindow " + w
+                        + ", contentInsets=" + w.mGivenContentInsets + " -> " + contentInsets
+                        + ", visibleInsets=" + w.mGivenVisibleInsets + " -> " + visibleInsets
+                        + ", touchableRegion=" + w.mGivenTouchableRegion + " -> " + touchableRegion
+                        + ", touchableInsets " + w.mTouchableInsets + " -> " + touchableInsets);
                 if (w != null) {
                     w.mGivenInsetsPending = false;
                     w.mGivenContentInsets.set(contentInsets);
