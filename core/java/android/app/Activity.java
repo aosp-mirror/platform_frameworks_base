@@ -1703,6 +1703,10 @@ public class Activity extends ContextThemeWrapper
             mSearchManager.stopSearch();
         }
 
+        if (mActionBar != null) {
+            mActionBar.onDestroy();
+        }
+
         getApplication().dispatchActivityDestroyed(this);
     }
 
@@ -2208,13 +2212,21 @@ public class Activity extends ContextThemeWrapper
      * @param toolbar Toolbar to set as the Activity's action bar
      */
     public void setActionBar(@Nullable Toolbar toolbar) {
-        if (getActionBar() instanceof WindowDecorActionBar) {
+        final ActionBar ab = getActionBar();
+        if (ab instanceof WindowDecorActionBar) {
             throw new IllegalStateException("This Activity already has an action bar supplied " +
                     "by the window decor. Do not request Window.FEATURE_ACTION_BAR and set " +
                     "android:windowActionBar to false in your theme to use a Toolbar instead.");
         }
-        // Clear out the MenuInflater to make sure that it is valid for the new Action Bar
+
+        // If we reach here then we're setting a new action bar
+        // First clear out the MenuInflater to make sure that it is valid for the new Action Bar
         mMenuInflater = null;
+
+        // If we have an action bar currently, destroy it
+        if (ab != null) {
+            ab.onDestroy();
+        }
 
         ToolbarActionBar tbab = new ToolbarActionBar(toolbar, getTitle(), this);
         mActionBar = tbab;
