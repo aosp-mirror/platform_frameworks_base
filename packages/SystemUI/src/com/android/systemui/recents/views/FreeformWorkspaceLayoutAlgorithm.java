@@ -33,9 +33,6 @@ import java.util.List;
  */
 public class FreeformWorkspaceLayoutAlgorithm {
 
-    private static final String TAG = "FreeformWorkspaceLayoutAlgorithm";
-    private static final boolean DEBUG = false;
-
     // Optimization, allows for quick lookup of task -> rect
     private HashMap<Task.TaskKey, RectF> mTaskRectMap = new HashMap<>();
 
@@ -177,10 +174,6 @@ public class FreeformWorkspaceLayoutAlgorithm {
             transformOut.rect.offset(stackLayout.mFreeformRect.left, stackLayout.mFreeformRect.top);
             transformOut.visible = true;
             transformOut.p = 1f;
-
-            if (DEBUG) {
-                Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);
-            }
             return transformOut;
         }
         return null;

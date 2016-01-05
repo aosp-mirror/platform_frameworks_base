@@ -21,15 +21,14 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**
- * This event is sent to request that the given {@link TaskView} is dismissed.
+ * This is sent when the data associated with a given {@link Task} should be deleted from the
+ * system.
  */
-public class DismissTaskViewEvent extends EventBus.AnimatedEvent {
+public class DeleteTaskDataEvent extends EventBus.Event {
 
-    public final TaskView taskView;
     public final Task task;
 
-    public DismissTaskViewEvent(TaskView taskView, Task task) {
-        this.taskView = taskView;
+    public DeleteTaskDataEvent(Task task) {
         this.task = task;
     }
 }

@@ -17,9 +17,10 @@
 package com.android.systemui.recents.events.ui.focus;
 
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.views.TaskView;
 
 /**
- * Dismisses the currently focused task view.
+ * This event is sent to request that the currently focused {@link TaskView} is dismissed.
  */
 public class DismissFocusedTaskViewEvent extends EventBus.Event {
     // Simple event

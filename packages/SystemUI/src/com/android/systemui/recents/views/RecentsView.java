@@ -262,39 +262,6 @@ public class RecentsView extends FrameLayout {
         return false;
     }
 
-    /** Requests all task stacks to start their enter-recents animation */
-    public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
-        // We have to increment/decrement the post animation trigger in case there are no children
-        // to ensure that it runs
-        ctx.postAnimationTrigger.increment();
-        if (mTaskStackView != null) {
-            mTaskStackView.startEnterRecentsAnimation(ctx);
-        }
-        ctx.postAnimationTrigger.decrement();
-    }
-
-    /** Requests all task stacks to start their exit-recents animation */
-    public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
-        // We have to increment/decrement the post animation trigger in case there are no children
-        // to ensure that it runs
-        ctx.postAnimationTrigger.increment();
-        if (mTaskStackView != null) {
-            mTaskStackView.startExitToHomeAnimation(ctx);
-        }
-        ctx.postAnimationTrigger.decrement();
-
-        // Hide the history button
-        int taskViewExitToHomeDuration = getResources().getInteger(
-                R.integer.recents_task_exit_to_home_duration);
-        hideHistoryButton(taskViewExitToHomeDuration);
-
-        // If we are going home, cancel the previous task's window transition
-        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
-
-        // Notify sof the exit animation
-        EventBus.getDefault().send(new DismissRecentsToHomeAnimationStarted());
-    }
-
     /** Adds the search bar */
     public void setSearchBar(RecentsAppWidgetHostView searchBar) {
         // Remove the previous search bar if one exists
@@ -494,6 +461,16 @@ public class RecentsView extends FrameLayout {
         mLastTaskLaunchedWasFreeform = event.task.isFreeformTask();
         mTransitionHelper.launchTaskFromRecents(mStack, event.task, mTaskStackView, event.taskView,
                 event.screenPinningRequested, event.targetTaskBounds, event.targetTaskStack);
+    }
+
+    public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
+        // Hide the history button
+        int taskViewExitToHomeDuration = getResources().getInteger(
+                R.integer.recents_task_exit_to_home_duration);
+        hideHistoryButton(taskViewExitToHomeDuration);
+
+        // If we are going home, cancel the previous task's window transition
+        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
     }
 
     public final void onBusEvent(DragStartEvent event) {

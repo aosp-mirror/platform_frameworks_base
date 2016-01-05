@@ -103,9 +103,6 @@ class Range {
  */
 public class TaskStackLayoutAlgorithm {
 
-    private static final String TAG = "TaskStackViewLayoutAlgorithm";
-    private static final boolean DEBUG = false;
-
     // The scale factor to apply to the user movement in the stack to unfocus it
     private static final float UNFOCUS_MULTIPLIER = 0.8f;
 
@@ -130,7 +127,7 @@ public class TaskStackLayoutAlgorithm {
          *                          allocate to the freeform workspace
          * @param freeformBackgroundAlpha the background alpha for the freeform workspace
          */
-        StackState(float freeformHeightPct, int freeformBackgroundAlpha) {
+        private StackState(float freeformHeightPct, int freeformBackgroundAlpha) {
             this.freeformHeightPct = freeformHeightPct;
             this.freeformBackgroundAlpha = freeformBackgroundAlpha;
         }
@@ -368,14 +365,6 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedCurveInterpolator = new FreePathInterpolator(mUnfocusedCurve);
         mFocusedCurve = constructFocusedCurve();
         mFocusedCurveInterpolator = new FreePathInterpolator(mFocusedCurve);
-
-        if (DEBUG) {
-            Log.d(TAG, "initialize");
-            Log.d(TAG, "\tmFreeformRect: " + mFreeformRect);
-            Log.d(TAG, "\tmStackRect: " + mStackRect);
-            Log.d(TAG, "\tmTaskRect: " + mTaskRect);
-            Log.d(TAG, "\tmSystemInsets: " + mSystemInsets);
-        }
     }
 
     /**
@@ -454,13 +443,6 @@ public class TaskStackLayoutAlgorithm {
                 float normX = mUnfocusedCurveInterpolator.getX(offsetPct);
                 mInitialScrollP = (mNumStackTasks - 1) - mUnfocusedRange.getAbsoluteX(normX);
             }
-        }
-
-        if (DEBUG) {
-            Log.d(TAG, "mNumStackTasks: " + mNumStackTasks);
-            Log.d(TAG, "mNumFreeformTasks: " + mNumFreeformTasks);
-            Log.d(TAG, "mMinScrollP: " + mMinScrollP);
-            Log.d(TAG, "mMaxScrollP: " + mMaxScrollP);
         }
     }
 
@@ -616,9 +598,6 @@ public class TaskStackLayoutAlgorithm {
                     frontTransform);
             if (task.thumbnail != null) {
                 transformOut.thumbnailScale = (float) mTaskRect.width() / task.thumbnail.getWidth();
-            }
-            if (DEBUG) {
-                Log.d(TAG, "getTransform: " + task.key + ", " + transformOut);
             }
             return transformOut;
         }

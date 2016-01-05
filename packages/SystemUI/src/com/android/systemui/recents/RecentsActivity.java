@@ -43,8 +43,10 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
+import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
@@ -56,8 +58,7 @@ import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
-import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -76,7 +77,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
-import com.android.systemui.recents.views.ViewAnimation;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 import java.util.ArrayList;
@@ -274,7 +274,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchPreviousTask()) return true;
             // If none of the other cases apply, then just go Home
-            dismissRecentsToHome(true);
+            dismissRecentsToHome(true /* animateTaskViews */);
         }
         return false;
     }
@@ -288,7 +288,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // If we have a focused Task, launch that Task now
             if (mRecentsView.launchFocusedTask()) return true;
             // If none of the other cases apply, then just go Home
-            dismissRecentsToHome(true);
+            dismissRecentsToHome(true /* animateTaskViews */);
             return true;
         }
         return false;
@@ -297,32 +297,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     /**
      * Dismisses Recents directly to Home without checking whether it is currently visible.
      */
-    void dismissRecentsToHome(boolean animated) {
-        if (animated) {
-            ReferenceCountedTrigger exitTrigger = new ReferenceCountedTrigger();
-            exitTrigger.increment();
-            exitTrigger.addLastDecrementRunnable(mFinishLaunchHomeRunnable);
-            exitTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    Recents.getSystemServices().sendCloseSystemWindows(
-                            BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
-                }
-            });
-            mRecentsView.startExitToHomeAnimation(
-                    new ViewAnimation.TaskViewExitContext(exitTrigger));
-            exitTrigger.decrement();
-        } else {
-            mFinishLaunchHomeRunnable.run();
-            Recents.getSystemServices().sendCloseSystemWindows(
-                    BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
-        }
-    }
-
-    /** Dismisses Recents directly to Home without transition animation. */
-    void dismissRecentsToHomeWithoutTransitionAnimation() {
-        finish();
-        overridePendingTransition(0, 0);
+    void dismissRecentsToHome(boolean animateTaskViews) {
+        DismissRecentsToHomeAnimationStarted dismissEvent =
+                new DismissRecentsToHomeAnimationStarted(animateTaskViews);
+        dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
+        dismissEvent.addPostAnimationCallback(new Runnable() {
+            @Override
+            public void run() {
+                Recents.getSystemServices().sendCloseSystemWindows(
+                        BaseStatusBar.SYSTEM_DIALOG_REASON_HOME_KEY);
+            }
+        });
+        EventBus.getDefault().send(dismissEvent);
     }
 
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
@@ -609,7 +595,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (!dismissHistory()) {
             RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
             if (launchState.launchedFromHome) {
-                dismissRecentsToHome(true);
+                dismissRecentsToHome(true /* animateTaskViews */);
             } else {
                 dismissRecentsToLaunchTargetTaskOrHome();
             }
@@ -650,13 +636,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 hideEvent.addPostAnimationCallback(new Runnable() {
                     @Override
                     public void run() {
-                        dismissRecentsToHome(true /* animated */);
+                        dismissRecentsToHome(true /* animateTaskViews */);
                     }
                 });
                 EventBus.getDefault().send(hideEvent);
 
             } else {
-                dismissRecentsToHome(true /* animated */);
+                dismissRecentsToHome(true /* animateTaskViews */);
             }
         } else {
             // Do nothing
@@ -665,12 +651,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         // Try and start the enter animation (or restart it on configuration changed)
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger();
-        ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
-        ctx.postAnimationTrigger.increment();
         if (RecentsDebugFlags.Static.EnableSearchBar) {
             if (mSearchWidgetInfo != null) {
-                ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                event.addPostAnimationCallback(new Runnable() {
                     @Override
                     public void run() {
                         // Start listening for widget package changes if there is one bound
@@ -681,8 +664,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 });
             }
         }
-        mRecentsView.startEnterRecentsAnimation(ctx);
-        ctx.postAnimationTrigger.decrement();
     }
 
     public final void onBusEvent(EnterRecentsWindowLastAnimationFrameEvent event) {
@@ -727,7 +708,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.count(this, "overview_app_info", 1);
     }
 
-    public final void onBusEvent(DismissTaskEvent event) {
+    public final void onBusEvent(DeleteTaskDataEvent event) {
         // Remove any stored data from the loader
         RecentsTaskLoader loader = Recents.getTaskLoader();
         loader.deleteTaskData(event.task, false);
@@ -743,7 +724,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             mRecentsView.showEmptyView();
         } else {
             // Just go straight home (no animation necessary because there are no more task views)
-            dismissRecentsToHome(false /* animated */);
+            dismissRecentsToHome(false /* animateTaskViews */);
         }
 
         // Keep track of all-deletions
@@ -756,7 +737,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(LaunchTaskFailedEvent event) {
         // Return to Home
-        dismissRecentsToHome(true);
+        dismissRecentsToHome(true /* animateTaskViews */);
 
         MetricsLogger.count(this, "overview_task_launch_failed", 1);
     }

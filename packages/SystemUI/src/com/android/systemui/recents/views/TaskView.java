@@ -47,6 +47,7 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -541,12 +542,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void dismissTask() {
         // Animate out the view and call the callback
         final TaskView tv = this;
-        startDeleteTaskAnimation(new Runnable() {
+        DismissTaskViewEvent dismissEvent = new DismissTaskViewEvent(tv, mTask);
+        dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
-                EventBus.getDefault().send(new DismissTaskViewEvent(mTask, tv));
+                EventBus.getDefault().send(new TaskViewDismissedEvent(mTask, tv));
             }
-        }, 0);
+        });
+        EventBus.getDefault().send(dismissEvent);
     }
 
     /**

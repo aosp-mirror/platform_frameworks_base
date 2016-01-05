@@ -32,15 +32,16 @@ import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
-import com.android.systemui.recents.ExitRecentsWindowFirstAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
-import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -90,7 +91,7 @@ public class RecentsTransitionHelper {
      */
     public void launchTaskFromRecents(final TaskStack stack, @Nullable final Task task,
             final TaskStackView stackView, final TaskView taskView,
-            final boolean lockToTask, final Rect bounds, int destinationStack) {
+            final boolean screenPinningRequested, final Rect bounds, int destinationStack) {
         final ActivityOptions opts = ActivityOptions.makeBasic();
         if (bounds != null) {
             opts.setLaunchBounds(bounds.isEmpty() ? null : bounds);
@@ -109,7 +110,7 @@ public class RecentsTransitionHelper {
                     EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
 
-                    if (lockToTask) {
+                    if (screenPinningRequested) {
                         // Request screen pinning after the animation runs
                         mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                     }
@@ -131,16 +132,19 @@ public class RecentsTransitionHelper {
             // task views, and we can launch immediately
             startTaskActivity(stack, task, taskView, opts, transitionFuture, animStartedListener);
         } else {
+            LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
+                    screenPinningRequested);
             if (task.group != null && !task.group.isFrontMostTask(task)) {
-                stackView.startLaunchTaskAnimation(taskView, new Runnable() {
+                launchStartedEvent.addPostAnimationCallback(new Runnable() {
                     @Override
                     public void run() {
                         startTaskActivity(stack, task, taskView, opts, transitionFuture,
                                 animStartedListener);
                     }
-                }, lockToTask);
+                });
+                EventBus.getDefault().send(launchStartedEvent);
             } else {
-                stackView.startLaunchTaskAnimation(taskView, null, lockToTask);
+                EventBus.getDefault().send(launchStartedEvent);
                 startTaskActivity(stack, task, taskView, opts, transitionFuture,
                         animStartedListener);
             }
@@ -167,7 +171,7 @@ public class RecentsTransitionHelper {
             EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
         } else {
             // Dismiss the task if we fail to launch it
-            EventBus.getDefault().send(new DismissTaskViewEvent(task, taskView));
+            taskView.dismissTask();
 
             // Keep track of failed launches
             EventBus.getDefault().send(new LaunchTaskFailedEvent());

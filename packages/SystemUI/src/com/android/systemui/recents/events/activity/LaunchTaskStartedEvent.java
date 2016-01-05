@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents;
+package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.views.TaskView;
 
 /**
- * Event sent when the exit animation is started.
- *
- * This is sent so parts of UI can synchronize on this event and adjust their appearance. An example
- * of that is hiding the tasks when the launched application window becomes visible.
+ * This event is sent following {@link LaunchTaskEvent} after the call to the system is made to
+ * start the task.
  */
-public class ExitRecentsWindowFirstAnimationFrameEvent extends EventBus.Event {
+public class LaunchTaskStartedEvent extends EventBus.AnimatedEvent {
+
+    public final TaskView taskView;
+    public final boolean screenPinningRequested;
+
+    public LaunchTaskStartedEvent(TaskView taskView, boolean screenPinningRequested) {
+        this.taskView = taskView;
+        this.screenPinningRequested = screenPinningRequested;
+    }
+
 }
