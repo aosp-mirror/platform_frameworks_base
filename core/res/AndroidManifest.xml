@@ -889,6 +889,11 @@
         android:protectionLevel="normal"
         android:permissionFlags="hidden"/>
 
+    <!-- @hide We need to keep this around for backwards compatibility -->
+    <permission android:name="android.permission.FLASHLIGHT"
+        android:protectionLevel="normal"
+        android:permissionFlags="hidden"/>
+
     <!-- ====================================================================== -->
     <!-- INSTALL PERMISSIONS                                                    -->
     <!-- ====================================================================== -->
@@ -1192,14 +1197,6 @@
     <permission android:name="android.permission.VIBRATE"
         android:label="@string/permlab_vibrate"
         android:description="@string/permdesc_vibrate"
-        android:protectionLevel="normal" />
-
-    <!-- Allows access to the flashlight.
-         <p>Protection level: normal
-    -->
-    <permission android:name="android.permission.FLASHLIGHT"
-        android:label="@string/permlab_flashlight"
-        android:description="@string/permdesc_flashlight"
         android:protectionLevel="normal" />
 
     <!-- Allows using PowerManager WakeLocks to keep processor from sleeping or screen

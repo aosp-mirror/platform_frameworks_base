@@ -1026,11 +1026,6 @@
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_flashlight">control flashlight</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_flashlight">Allows the app to control the flashlight.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_callPhone">directly call phone numbers</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_callPhone">Allows the app to call phone numbers
