@@ -155,6 +155,12 @@ public class ZenModeHelper {
         }
     }
 
+    public boolean shouldSuppressScreenOn() {
+        synchronized (mConfig) {
+            return !mConfig.allowScreenOn;
+        }
+    }
+
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
     }
@@ -435,11 +441,12 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
-                + "events=%s,reminders=%s,lights=%s,peek=%s)\n",
+                + "events=%s,reminders=%s,lights=%s,peek=%s,screenOn=%s)\n",
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
-                config.allowEvents, config.allowReminders, config.allowLights, config.allowPeek);
+                config.allowEvents, config.allowReminders, config.allowLights, config.allowPeek,
+                config.allowScreenOn);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();

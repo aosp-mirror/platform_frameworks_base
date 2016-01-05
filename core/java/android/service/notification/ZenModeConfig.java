@@ -79,6 +79,7 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_REPEAT_CALLERS = false;
     private static final boolean DEFAULT_ALLOW_PEEK = true;
     private static final boolean DEFAULT_ALLOW_LIGHTS = true;
+    private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
     private static final int XML_VERSION = 2;
     private static final String ZEN_TAG = "zen";
@@ -95,6 +96,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_EVENTS = "events";
     private static final String ALLOW_ATT_PEEK = "peek";
     private static final String ALLOW_ATT_LIGHTS = "lights";
+    private static final String ALLOW_ATT_SCREEN_ON = "screen_on";
 
     private static final String CONDITION_TAG = "condition";
     private static final String CONDITION_ATT_COMPONENT = "component";
@@ -128,6 +130,7 @@ public class ZenModeConfig implements Parcelable {
     public int user = UserHandle.USER_SYSTEM;
     public boolean allowPeek = DEFAULT_ALLOW_PEEK;
     public boolean allowLights = DEFAULT_ALLOW_LIGHTS;
+    public boolean allowScreenOn = DEFAULT_ALLOW_SCREEN_ON;
 
     public ZenRule manualRule;
     public ArrayMap<String, ZenRule> automaticRules = new ArrayMap<>();
@@ -156,6 +159,7 @@ public class ZenModeConfig implements Parcelable {
         }
         allowPeek = source.readInt() == 1;
         allowLights = source.readInt() == 1;
+        allowScreenOn = source.readInt() == 1;
     }
 
     @Override
@@ -185,6 +189,7 @@ public class ZenModeConfig implements Parcelable {
         }
         dest.writeInt(allowPeek ? 1 : 0);
         dest.writeInt(allowLights ? 1 : 0);
+        dest.writeInt(allowScreenOn ? 1 : 0);
     }
 
     @Override
@@ -200,6 +205,7 @@ public class ZenModeConfig implements Parcelable {
                 .append(",allowEvents=").append(allowEvents)
                 .append(",allowPeek=").append(allowPeek)
                 .append(",allowLights=").append(allowLights)
+                .append(",allowScreenOn=").append(allowScreenOn)
                 .append(",automaticRules=").append(automaticRules)
                 .append(",manualRule=").append(manualRule)
                 .append(']').toString();
@@ -239,6 +245,9 @@ public class ZenModeConfig implements Parcelable {
         }
         if (allowLights != to.allowLights) {
             d.addLine("allowLights", allowLights, to.allowLights);
+        }
+        if (allowScreenOn != to.allowScreenOn) {
+            d.addLine("allowScreenOn", allowScreenOn, to.allowScreenOn);
         }
         final ArraySet<String> allRules = new ArraySet<>();
         addKeys(allRules, automaticRules);
@@ -339,6 +348,7 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowEvents == allowEvents
                 && other.allowPeek == allowPeek
                 && other.allowLights == allowLights
+                && other.allowScreenOn == allowScreenOn
                 && other.user == user
                 && Objects.equals(other.automaticRules, automaticRules)
                 && Objects.equals(other.manualRule, manualRule);
@@ -348,7 +358,7 @@ public class ZenModeConfig implements Parcelable {
     public int hashCode() {
         return Objects.hash(allowCalls, allowRepeatCallers, allowMessages, allowCallsFrom,
                 allowMessagesFrom, allowReminders, allowEvents, allowPeek, allowLights,
-                user, automaticRules, manualRule);
+                allowScreenOn, user, automaticRules, manualRule);
     }
 
     private static String toDayList(int[] days) {
@@ -435,6 +445,8 @@ public class ZenModeConfig implements Parcelable {
                     }
                     rt.allowPeek = safeBoolean(parser, ALLOW_ATT_PEEK, DEFAULT_ALLOW_PEEK);
                     rt.allowLights = safeBoolean(parser, ALLOW_ATT_LIGHTS, DEFAULT_ALLOW_LIGHTS);
+                    rt.allowScreenOn =
+                            safeBoolean(parser, ALLOW_ATT_SCREEN_ON, DEFAULT_ALLOW_SCREEN_ON);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
                 } else if (AUTOMATIC_TAG.equals(tag)) {
@@ -465,6 +477,7 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_MESSAGES_FROM, Integer.toString(allowMessagesFrom));
         out.attribute(null, ALLOW_ATT_PEEK, Boolean.toString(allowPeek));
         out.attribute(null, ALLOW_ATT_LIGHTS, Boolean.toString(allowLights));
+        out.attribute(null, ALLOW_ATT_SCREEN_ON, Boolean.toString(allowScreenOn));
         out.endTag(null, ALLOW_TAG);
 
         if (manualRule != null) {
@@ -643,6 +656,9 @@ public class ZenModeConfig implements Parcelable {
         if (!allowLights) {
             suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
         }
+        if (!allowScreenOn) {
+            suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_SCREEN_ON;
+        }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
         return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
@@ -681,6 +697,8 @@ public class ZenModeConfig implements Parcelable {
         if (policy.suppressedVisualEffects != Policy.SUPPRESSED_EFFECTS_UNSET) {
             allowPeek = (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_PEEK) == 0;
             allowLights = (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_LIGHTS) == 0;
+            allowScreenOn =
+                    (policy.suppressedVisualEffects & Policy.SUPPRESSED_EFFECT_SCREEN_ON) == 0;
         }
     }
 

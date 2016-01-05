@@ -123,6 +123,8 @@ public abstract class NotificationListenerService extends Service {
             NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
     public static final int SUPPRESSED_EFFECT_PEEK =
             NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+    public static final int SUPPRESSED_EFFECT_SCREEN_ON =
+            NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 
     /**
      * The full trim of the StatusBarNotification including all its features.
@@ -961,7 +963,8 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Returns the type(s) of visual effects that should be suppressed for this notification.
-         * See {@link #SUPPRESSED_EFFECT_LIGHTS}, {@link #SUPPRESSED_EFFECT_PEEK}}.
+         * See {@link #SUPPRESSED_EFFECT_LIGHTS}, {@link #SUPPRESSED_EFFECT_PEEK},
+         * {@link #SUPPRESSED_EFFECT_SCREEN_ON}.
          */
         public int getSuppressedVisualEffects() {
             return mSuppressedVisualEffects;

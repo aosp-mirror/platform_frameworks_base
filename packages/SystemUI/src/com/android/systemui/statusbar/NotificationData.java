@@ -292,6 +292,15 @@ public class NotificationData {
         return false;
     }
 
+    public boolean shouldSuppressScreenOn(String key) {
+        if (mRankingMap != null) {
+            mRankingMap.getRanking(key, mTmpRanking);
+            return (mTmpRanking.getSuppressedVisualEffects()
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0;
+        }
+        return false;
+    }
+
     public int getImportance(String key) {
         if (mRankingMap != null) {
             mRankingMap.getRanking(key, mTmpRanking);
