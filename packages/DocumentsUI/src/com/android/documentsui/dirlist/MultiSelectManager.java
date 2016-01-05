@@ -68,21 +68,23 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
     private final Selection mSelection = new Selection();
 
-    private Range mRanger;
-    private SelectionEnvironment mEnvironment;
-
+    private final SelectionEnvironment mEnvironment;
+    private final DocumentsAdapter mAdapter;
     private final List<MultiSelectManager.Callback> mCallbacks = new ArrayList<>(1);
 
+    private Range mRanger;
     private boolean mSingleSelect;
 
     @Nullable private BandController mBandManager;
+
 
     /**
      * @param recyclerView
      * @param mode Selection mode
      */
-    public MultiSelectManager(final RecyclerView recyclerView, int mode) {
-        this(new RuntimeSelectionEnvironment(recyclerView), mode);
+    public MultiSelectManager(
+            final RecyclerView recyclerView, DocumentsAdapter adapter, int mode) {
+        this(new RuntimeSelectionEnvironment(recyclerView), adapter, mode);
 
         if (mode == MODE_MULTIPLE) {
             mBandManager = new BandController();
@@ -133,11 +135,12 @@ public final class MultiSelectManager implements View.OnKeyListener {
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(SelectionEnvironment environment, int mode) {
+    MultiSelectManager(SelectionEnvironment environment, DocumentsAdapter adapter, int mode) {
         mEnvironment = checkNotNull(environment, "'environment' cannot be null.");
+        mAdapter = checkNotNull(adapter, "'adapter' cannot be null.");
         mSingleSelect = mode == MODE_SINGLE;
 
-        mEnvironment.registerDataObserver(
+        mAdapter.registerAdapterDataObserver(
                 new RecyclerView.AdapterDataObserver() {
 
                     private List<String> mModelIds;
@@ -146,7 +149,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     public void onChanged() {
                         // TODO: This is causing b/22765812
                         mSelection.clear();
-                        mModelIds = mEnvironment.getModelIds();
+                        mModelIds = mAdapter.getModelIds();
                     }
 
                     @Override
@@ -336,7 +339,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (DEBUG) Log.d(TAG, "Ignoring toggle for element with no position.");
             return;
         }
-        String id = mEnvironment.getModelIdFromAdapterPosition(position);
+        String id = mAdapter.getModelId(position);
         if (id != null) {
             toggleSelection(id);
         }
@@ -388,7 +391,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return;
         }
 
-        if (mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(position))) {
+        if (mSelection.contains(mAdapter.getModelId(position))) {
             mRanger = new Range(position);
         }
     }
@@ -405,7 +408,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
     private void updateRange(int begin, int end, boolean selected) {
         checkState(end >= begin);
         for (int i = begin; i <= end; i++) {
-            String id = mEnvironment.getModelIdFromAdapterPosition(i);
+            String id = mAdapter.getModelId(i);
             if (id == null) {
                 continue;
             }
@@ -473,7 +476,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(id, selected);
         }
-        mEnvironment.notifyItemChanged(id);
+        mAdapter.onItemSelectionChanged(id);
     }
 
     /**
@@ -811,16 +814,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
         int getChildCount();
         int getVisibleChildCount();
         void focusItem(int position);
-        /**
-         * Returns null if non-useful item.
-         * @param position
-         * @return
-         */
-        @Nullable String getModelIdFromAdapterPosition(int position);
-        int getItemCount();
-        List<String> getModelIds();
-        void notifyItemChanged(String id);
-        void registerDataObserver(RecyclerView.AdapterDataObserver observer);
     }
 
     /** Recycler view facade implementation backed by good ol' RecyclerView. */
@@ -830,11 +823,9 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private final Drawable mBand;
 
         private boolean mIsOverlayShown = false;
-        private DocumentsAdapter mAdapter;
 
-        RuntimeSelectionEnvironment(RecyclerView rv) {
-            mView = rv;
-            mAdapter = (DocumentsAdapter) rv.getAdapter();
+        RuntimeSelectionEnvironment(RecyclerView view) {
+            mView = view;
             mBand = mView.getContext().getTheme().getDrawable(R.drawable.band_select_overlay);
         }
 
@@ -850,11 +841,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
         @Override
         public int getAdapterPositionAt(int index) {
             return getAdapterPositionForChildView(mView.getChildAt(index));
-        }
-
-        @Override
-        public @Nullable String getModelIdFromAdapterPosition(int position) {
-            return mAdapter.getModelId(position);
         }
 
         @Override
@@ -973,26 +959,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     });
             }
         }
-
-        @Override
-        public void notifyItemChanged(String id) {
-            mAdapter.onItemSelectionChanged(id);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mAdapter.getItemCount();
-        }
-
-        @Override
-        public void registerDataObserver(RecyclerView.AdapterDataObserver observer) {
-            mAdapter.registerAdapterDataObserver(observer);
-        }
-
-        @Override
-        public List<String> getModelIds() {
-            return mAdapter.getModelIds();
-        }
     }
 
     public interface Callback {
@@ -1049,7 +1015,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mModelBuilder = new Runnable() {
                 @Override
                 public void run() {
-                    mModel = new GridModel(mEnvironment);
+                    mModel = new GridModel(mEnvironment, mAdapter);
                     mModel.addOnSelectionChangedListener(BandController.this);
                 }
             };
@@ -1100,7 +1066,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return !isActive()
                     && e.isMouseEvent()  // a mouse
                     && e.isActionDown()  // the initial button press
-                    && mEnvironment.getItemCount() > 0
+                    && mAdapter.getItemCount() > 0
                     && e.getItemPosition() == RecyclerView.NO_ID;  // in empty space
         }
 
@@ -1177,7 +1143,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mModel.endSelection();
             int firstSelected = mModel.getPositionNearestOrigin();
             if (firstSelected != NOT_SET) {
-                if (mSelection.contains(mEnvironment.getModelIdFromAdapterPosition(firstSelected))) {
+                if (mSelection.contains(mAdapter.getModelId(firstSelected))) {
                     // TODO: firstSelected should really be lastSelected, we want to anchor the item
                     // where the mouse-up occurred.
                     setSelectionRangeBegin(firstSelected);
@@ -1339,6 +1305,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private static final int LOWER_RIGHT = LOWER | RIGHT;
 
         private final SelectionEnvironment mHelper;
+        private final DocumentsAdapter mAdapter;
+
         private final List<OnSelectionChangedListener> mOnSelectionChangedListeners =
                 new ArrayList<>();
 
@@ -1376,8 +1344,9 @@ public final class MultiSelectManager implements View.OnKeyListener {
         // should expand from when Shift+click is used.
         private int mPositionNearestOrigin = NOT_SET;
 
-        GridModel(SelectionEnvironment helper) {
+        GridModel(SelectionEnvironment helper, DocumentsAdapter adapter) {
             mHelper = helper;
+            mAdapter = adapter;
             mHelper.addOnScrollListener(this);
         }
 
@@ -1580,7 +1549,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
                     // position. Use a sentry value to prevent erroneously selecting item 0.
                     int position = items.get(items.keyAt(row), NOT_SET);
                     if (position != NOT_SET) {
-                        String id = mHelper.getModelIdFromAdapterPosition(position);
+                        String id = mAdapter.getModelId(position);
                         if (id != null) {
                             // The adapter inserts items for UI layout purposes that aren't associated
                             // with files.  Those will have a null model ID.  Don't select them.
@@ -1989,7 +1958,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
             position = 0;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
-            position = mEnvironment.getItemCount() - 1;
+            position = mAdapter.getItemCount() - 1;
         } else {
             // Find a navigation target based on the arrow key that the user pressed.  Ignore
             // navigation targets that aren't items in the recycler view.

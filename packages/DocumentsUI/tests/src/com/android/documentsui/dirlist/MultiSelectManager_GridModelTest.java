@@ -20,7 +20,6 @@ import static com.android.documentsui.dirlist.MultiSelectManager.GridModel.NOT_S
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -28,7 +27,7 @@ import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 @SmallTest
@@ -38,15 +37,28 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     private static final int CHILD_VIEW_EDGE_PX = 100;
     private static final int VIEWPORT_HEIGHT = 500;
 
-    private static GridModel model;
-    private static TestEnvironment env;
-    private static Set<String> lastSelection;
-    private static int viewWidth;
+    private GridModel model;
+    private TestEnvironment env;
+    private TestDocumentsAdapter adapter;
+    private Set<String> lastSelection;
+    private int viewWidth;
 
-    private static void setUp(int numChildren, int numColumns) {
+    private void initData(final int numChildren, int numColumns) {
         env = new TestEnvironment(numChildren, numColumns);
+        adapter = new TestDocumentsAdapter(new ArrayList<String>()) {
+            @Override
+            public String getModelId(int position) {
+                return Integer.toString(position);
+            }
+
+            @Override
+            public int getItemCount() {
+                return numChildren;
+            }
+        };
+
         viewWidth = VIEW_PADDING_PX + numColumns * (VIEW_PADDING_PX + CHILD_VIEW_EDGE_PX);
-        model = new GridModel(env);
+        model = new GridModel(env, adapter);
         model.addOnSelectionChangedListener(
                 new GridModel.OnSelectionChangedListener() {
                     @Override
@@ -64,7 +76,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testSelectionLeftOfItems() {
-        setUp(20, 5);
+        initData(20, 5);
         model.startSelection(new Point(0, 10));
         model.resizeSelection(new Point(1, 11));
         assertSelected();
@@ -72,7 +84,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testSelectionRightOfItems() {
-        setUp(20, 4);
+        initData(20, 4);
         model.startSelection(new Point(viewWidth - 1, 10));
         model.resizeSelection(new Point(viewWidth - 2, 11));
         assertSelected();
@@ -80,7 +92,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testSelectionAboveItems() {
-        setUp(20, 4);
+        initData(20, 4);
         model.startSelection(new Point(10, 0));
         model.resizeSelection(new Point(11, 1));
         assertSelected();
@@ -88,7 +100,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testSelectionBelowItems() {
-        setUp(5, 4);
+        initData(5, 4);
         model.startSelection(new Point(10, VIEWPORT_HEIGHT - 1));
         model.resizeSelection(new Point(11, VIEWPORT_HEIGHT - 2));
         assertSelected();
@@ -96,7 +108,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testVerticalSelectionBetweenItems() {
-        setUp(20, 4);
+        initData(20, 4);
         model.startSelection(new Point(106, 0));
         model.resizeSelection(new Point(107, 200));
         assertSelected();
@@ -104,7 +116,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testHorizontalSelectionBetweenItems() {
-        setUp(20, 4);
+        initData(20, 4);
         model.startSelection(new Point(0, 105));
         model.resizeSelection(new Point(200, 106));
         assertSelected();
@@ -112,7 +124,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testGrowingAndShrinkingSelection() {
-        setUp(20, 4);
+        initData(20, 4);
         model.startSelection(new Point(0, 0));
         model.resizeSelection(new Point(5, 5));
         assertSelected(0);
@@ -142,7 +154,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testSelectionMovingAroundOrigin() {
-        setUp(16, 4);
+        initData(16, 4);
         model.startSelection(new Point(210, 210));
         model.resizeSelection(new Point(viewWidth - 1, 0));
         assertSelected(2, 3, 6, 7);
@@ -156,7 +168,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
     }
 
     public void testScrollingBandSelect() {
-        setUp(40, 4);
+        initData(40, 4);
         model.startSelection(new Point(0, 0));
         model.resizeSelection(new Point(100, VIEWPORT_HEIGHT - 1));
         assertSelected(0, 4, 8, 12, 16);
@@ -173,14 +185,14 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         assertEquals(0, model.getPositionNearestOrigin());
     }
 
-    private static void assertSelected(int... selectedPositions) {
+    private void assertSelected(int... selectedPositions) {
         assertEquals(selectedPositions.length, lastSelection.size());
         for (int position : selectedPositions) {
             assertTrue(lastSelection.contains(Integer.toString(position)));
         }
     }
 
-    private static void scroll(int dy) {
+    private void scroll(int dy) {
         assertTrue(env.verticalOffset + VIEWPORT_HEIGHT + dy <= env.getTotalHeight());
         env.verticalOffset += dy;
         model.onScrolled(null, 0, dy);
@@ -320,31 +332,6 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
         @Override
         public void focusItem(int i) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getModelIdFromAdapterPosition(int position) {
-            return Integer.toString(position);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mNumChildren;
-        }
-
-        @Override
-        public List<String> getModelIds() {
-            return null;
-        }
-
-        @Override
-        public void notifyItemChanged(String id) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void registerDataObserver(AdapterDataObserver observer) {
             throw new UnsupportedOperationException();
         }
     }

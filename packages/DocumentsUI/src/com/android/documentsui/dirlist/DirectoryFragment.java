@@ -332,6 +332,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         // into the selection manager.
         mSelectionManager = new MultiSelectManager(
                 mRecView,
+                mAdapter,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE);

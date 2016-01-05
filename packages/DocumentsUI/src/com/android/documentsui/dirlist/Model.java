@@ -414,8 +414,14 @@ public class Model implements SiblingProvider {
 
         @Override
         protected Void doInBackground(Selection... selected) {
-            List<DocumentInfo> toDelete = getDocuments(selected[0]);
-            mHadTrouble = false;
+            List<DocumentInfo> toDelete = null;
+            try {
+                toDelete = getDocuments(selected[0]);
+            } catch (NullPointerException e) {
+                Log.w(TAG, "Failed to retrieve documents for delete.");
+                mHadTrouble = true;
+                return null;
+            }
 
             for (DocumentInfo doc : toDelete) {
                 if (!doc.isDeleteSupported()) {

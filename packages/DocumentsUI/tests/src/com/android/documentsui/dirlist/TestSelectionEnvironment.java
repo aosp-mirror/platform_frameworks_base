@@ -18,7 +18,6 @@ package com.android.documentsui.dirlist;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.View;
 
@@ -28,10 +27,7 @@ import java.util.List;
 
 public class TestSelectionEnvironment implements SelectionEnvironment {
 
-    private List<String> mItems;
-
     public TestSelectionEnvironment(List<String> items) {
-        mItems = items;
     }
 
     @Override
@@ -113,28 +109,5 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
 
     @Override
     public void focusItem(int position) {
-    }
-
-    @Override
-    public String getModelIdFromAdapterPosition(int position) {
-        return mItems.get(position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return mItems.size();
-    }
-
-    @Override
-    public List<String> getModelIds() {
-        return null;
-    }
-
-    @Override
-    public void notifyItemChanged(String id) {
-    }
-
-    @Override
-    public void registerDataObserver(AdapterDataObserver observer) {
     }
 }

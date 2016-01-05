@@ -84,7 +84,8 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
     // Tests that the items can be hidden and unhidden.
     public void testUnhide_PreservesOrder() {
         List<String> ids = mModel.getModelIds();
-        SparseArray<String> hidden = mAdapter.hide(ids.toArray(new String[ids.size()]));
+        SparseArray<String> hidden = mAdapter.hide(
+                ids.get(0), ids.get(1), ids.get(5), ids.get(9));
         mAdapter.unhide(hidden);
 
         // Finally ensure the restored items are in the original order

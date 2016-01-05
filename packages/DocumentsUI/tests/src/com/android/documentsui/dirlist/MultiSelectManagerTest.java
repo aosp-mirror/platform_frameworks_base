@@ -23,6 +23,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.documentsui.TestInputEvent;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
+
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -44,11 +45,13 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     private MultiSelectManager mManager;
     private TestCallback mCallback;
     private TestSelectionEnvironment mEnv;
+    private TestDocumentsAdapter mAdapter;
 
     public void setUp() throws Exception {
         mCallback = new TestCallback();
         mEnv = new TestSelectionEnvironment(items);
-        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_MULTIPLE);
+        mAdapter = new TestDocumentsAdapter(items);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_MULTIPLE);
         mManager.addCallback(mCallback);
     }
 
@@ -164,7 +167,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
@@ -172,7 +175,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
@@ -180,7 +183,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftDoesNotExtendSelection() {
-        mManager = new MultiSelectManager(mEnv, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
         keyToPosition(22, true);
