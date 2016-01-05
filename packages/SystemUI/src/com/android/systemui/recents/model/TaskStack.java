@@ -564,6 +564,22 @@ public class TaskStack {
     }
 
     /**
+     * Returns the set of "freeform" tasks in the stack.
+     */
+    public ArrayList<Task> getFreeformTasks() {
+        ArrayList<Task> freeformTasks = new ArrayList<>();
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (task.isFreeformTask()) {
+                freeformTasks.add(task);
+            }
+        }
+        return freeformTasks;
+    }
+
+    /**
      * Computes a set of all the active and historical tasks ordered by their last active time.
      */
     public ArrayList<Task> computeAllTasksList() {

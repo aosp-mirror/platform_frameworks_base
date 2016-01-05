@@ -88,6 +88,15 @@ public class Utilities {
     }
 
     /**
+     * Cancels an animation.
+     */
+    public static void cancelAnimation(Animator animator) {
+        if (animator != null) {
+            animator.cancel();
+        }
+    }
+
+    /**
      * Cancels an animation ensuring that if it has listeners, onCancel and onEnd
      * are not called.
      */

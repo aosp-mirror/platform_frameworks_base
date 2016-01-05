@@ -34,7 +34,7 @@ public class TaskStackViewScroller {
     private static final boolean DEBUG = false;
 
     public interface TaskStackViewScrollerCallbacks {
-        void onScrollChanged(float prevScroll, float curScroll);
+        void onScrollChanged(float prevScroll, float curScroll, TaskViewAnimation animation);
     }
 
     Context mContext;
@@ -57,7 +57,6 @@ public class TaskStackViewScroller {
         mLayoutAlgorithm = layoutAlgorithm;
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
-        setStackScroll(getStackScroll());
     }
 
     /** Resets the task scroller. */
@@ -75,12 +74,22 @@ public class TaskStackViewScroller {
         return mStackScrollP;
     }
 
-    /** Sets the current stack scroll */
+    /**
+     * Sets the current stack scroll immediately.
+     */
     public void setStackScroll(float s) {
+        setStackScroll(s, TaskViewAnimation.IMMEDIATE);
+    }
+
+    /**
+     * Sets the current stack scroll, but indicates to the callback the preferred animation to
+     * update to this new scroll.
+     */
+    public void setStackScroll(float s, TaskViewAnimation animation) {
         float prevStackScroll = mStackScrollP;
         mStackScrollP = s;
         if (mCb != null) {
-            mCb.onScrollChanged(prevStackScroll, mStackScrollP);
+            mCb.onScrollChanged(prevStackScroll, mStackScrollP, animation);
         }
     }
 

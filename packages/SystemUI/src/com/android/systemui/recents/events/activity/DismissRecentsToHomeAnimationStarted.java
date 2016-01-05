@@ -28,5 +28,4 @@ public class DismissRecentsToHomeAnimationStarted extends EventBus.AnimatedEvent
     public DismissRecentsToHomeAnimationStarted(boolean animated) {
         this.animated = animated;
     }
-
 }

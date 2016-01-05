@@ -26,7 +26,6 @@ import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEve
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
@@ -57,9 +56,6 @@ class DockRegion {
  * Handles touch events for a RecentsView.
  */
 public class RecentsViewTouchHandler {
-
-    private static final String TAG = "RecentsViewTouchHandler";
-    private static final boolean DEBUG = false;
 
     private RecentsView mRv;
 
@@ -128,7 +124,6 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationX(x);
         mTaskView.setTranslationY(y);
 
-        RecentsConfiguration config = Recents.getConfiguration();
         if (!ssp.hasDockedTask()) {
             // Add the dock state drop targets (these take priority)
             TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();

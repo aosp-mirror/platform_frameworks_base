@@ -230,8 +230,7 @@ public class Task {
     public void notifyTaskDataUnloaded(Bitmap defaultThumbnail, Drawable defaultApplicationIcon) {
         icon = defaultApplicationIcon;
         thumbnail = defaultThumbnail;
-        int callbackCount = mCallbacks.size();
-        for (int i = 0; i < callbackCount; i++) {
+        for (int i = mCallbacks.size() - 1; i >= 0; i--) {
             mCallbacks.get(i).onTaskDataUnloaded();
         }
     }
