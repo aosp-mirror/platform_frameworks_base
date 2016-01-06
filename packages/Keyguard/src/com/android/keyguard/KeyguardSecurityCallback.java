@@ -36,11 +36,12 @@ public interface KeyguardSecurityCallback {
 
     /**
      * Call to report an unlock attempt.
+     * @param userId id of the user whose unlock attempt is recorded.
      * @param success set to 'true' if user correctly entered security credentials.
      * @param timeoutMs timeout in milliseconds to wait before reattempting an unlock.
      *                  Only nonzero if 'success' is false
      */
-    void reportUnlockAttempt(boolean success, int timeoutMs);
+    void reportUnlockAttempt(int userId, boolean success, int timeoutMs);
 
     /**
      * Resets the keyguard view.

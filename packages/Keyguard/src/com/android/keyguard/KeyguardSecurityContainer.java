@@ -205,7 +205,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         if (messageId != 0) {
             final String message = mContext.getString(messageId,
-                    KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts(),
+                    KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts(
+                            KeyguardUpdateMonitor.getCurrentUser()),
                     timeoutInSeconds);
             showDialog(null, message);
         }
@@ -249,16 +250,15 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         showDialog(null, message);
     }
 
-    private void reportFailedUnlockAttempt(int timeoutMs) {
+    private void reportFailedUnlockAttempt(int userId, int timeoutMs) {
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        final int failedAttempts = monitor.getFailedUnlockAttempts() + 1; // +1 for this time
+        final int failedAttempts = monitor.getFailedUnlockAttempts(userId) + 1; // +1 for this time
 
         if (DEBUG) Log.d(TAG, "reportFailedPatternAttempt: #" + failedAttempts);
 
-        final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
         final DevicePolicyManager dpm = mLockPatternUtils.getDevicePolicyManager();
         final int failedAttemptsBeforeWipe =
-                dpm.getMaximumFailedPasswordsForWipe(null, currentUser);
+                dpm.getMaximumFailedPasswordsForWipe(null, userId);
 
         final int remainingBeforeWipe = failedAttemptsBeforeWipe > 0 ?
                 (failedAttemptsBeforeWipe - failedAttempts)
@@ -268,9 +268,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             // N attempts. Once we get below the grace period, we post this dialog every time as a
             // clear warning until the deletion fires.
             // Check which profile has the strictest policy for failed password attempts
-            final int expiringUser = dpm.getProfileWithMinimumFailedPasswordsForWipe(currentUser);
+            final int expiringUser = dpm.getProfileWithMinimumFailedPasswordsForWipe(userId);
             int userType = USER_TYPE_PRIMARY;
-            if (expiringUser == currentUser) {
+            if (expiringUser == userId) {
                 // TODO: http://b/23522538
                 if (expiringUser != UserHandle.USER_SYSTEM) {
                     userType = USER_TYPE_SECONDARY_USER;
@@ -286,8 +286,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 showWipeDialog(failedAttempts, userType);
             }
         }
-        monitor.reportFailedStrongAuthUnlockAttempt();
-        mLockPatternUtils.reportFailedPasswordAttempt(KeyguardUpdateMonitor.getCurrentUser());
+        monitor.reportFailedStrongAuthUnlockAttempt(userId);
+        mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
             showTimeoutDialog(timeoutMs);
         }
@@ -422,14 +422,13 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             return mIsVerifyUnlockOnly;
         }
 
-        public void reportUnlockAttempt(boolean success, int timeoutMs) {
+        public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 monitor.clearFailedUnlockAttempts();
-                mLockPatternUtils.reportSuccessfulPasswordAttempt(
-                        KeyguardUpdateMonitor.getCurrentUser());
+                mLockPatternUtils.reportSuccessfulPasswordAttempt(userId);
             } else {
-                KeyguardSecurityContainer.this.reportFailedUnlockAttempt(timeoutMs);
+                KeyguardSecurityContainer.this.reportFailedUnlockAttempt(userId, timeoutMs);
             }
         }
 
@@ -445,7 +444,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         @Override
         public void userActivity() { }
         @Override
-        public void reportUnlockAttempt(boolean success, int timeoutMs) { }
+        public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) { }
         @Override
         public boolean isVerifyUnlockOnly() { return false; }
         @Override

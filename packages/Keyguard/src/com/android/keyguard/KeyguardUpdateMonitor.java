@@ -1552,12 +1552,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mFailedAttempts.delete(sCurrentUser);
     }
 
-    public int getFailedUnlockAttempts() {
-        return mFailedAttempts.get(sCurrentUser, 0);
+    public int getFailedUnlockAttempts(int userId) {
+        return mFailedAttempts.get(userId, 0);
     }
 
-    public void reportFailedStrongAuthUnlockAttempt() {
-        mFailedAttempts.put(sCurrentUser, getFailedUnlockAttempts() + 1);
+    public void reportFailedStrongAuthUnlockAttempt(int userId) {
+        mFailedAttempts.put(userId, getFailedUnlockAttempts(userId) + 1);
     }
 
     public void clearFingerprintRecognized() {
