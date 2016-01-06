@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -539,20 +540,32 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 outBounds.set(mService.mDockedStackCreateBounds);
                 return;
             }
-            // The initial bounds of the docked stack when it is created half the screen space and
-            // its bounds can be adjusted after that. The bounds of all other stacks are adjusted
-            // to occupy whatever screen space the docked stack isn't occupying.
+
+            // The initial bounds of the docked stack when it is created about half the screen space
+            // and its bounds can be adjusted after that. The bounds of all other stacks are
+            // adjusted to occupy whatever screen space the docked stack isn't occupying.
+            final DisplayInfo di = mDisplayContent.getDisplayInfo();
+            mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
+                    mTmpRect2);
+            final int position = new DividerSnapAlgorithm(mService.mContext.getResources(),
+                    0 /* minFlingVelocityPxPerSecond */,
+                    di.logicalWidth,
+                    di.logicalHeight,
+                    dockDividerWidth,
+                    mService.mCurConfiguration.orientation == ORIENTATION_PORTRAIT,
+                    mTmpRect2).getMiddleTarget().position;
+
             if (dockOnTopOrLeft) {
                 if (splitHorizontally) {
-                    outBounds.right = displayRect.centerX() - dockDividerWidth / 2;
+                    outBounds.right = position;
                 } else {
-                    outBounds.bottom = displayRect.centerY() - dockDividerWidth / 2;
+                    outBounds.bottom = position;
                 }
             } else {
                 if (splitHorizontally) {
-                    outBounds.left = displayRect.centerX() + dockDividerWidth / 2;
+                    outBounds.left = position - dockDividerWidth;
                 } else {
-                    outBounds.top = displayRect.centerY() + dockDividerWidth / 2;
+                    outBounds.top = position - dockDividerWidth;
                 }
             }
             return;
