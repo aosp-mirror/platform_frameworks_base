@@ -719,7 +719,7 @@ final class BackStackRecord extends FragmentTransaction implements
                     Fragment f = op.fragment;
                     int containerId = f.mContainerId;
                     if (mManager.mAdded != null) {
-                        for (int i = 0; i < mManager.mAdded.size(); i++) {
+                        for (int i = mManager.mAdded.size() - 1; i >= 0; i--) {
                             Fragment old = mManager.mAdded.get(i);
                             if (FragmentManagerImpl.DEBUG) {
                                 Log.v(TAG,
