@@ -43,12 +43,28 @@ struct Vertex;
  * the functions to which they dispatch. Parameter macros are executed for each op,
  * in order, based on the op's type.
  *
- * There are 4 types of op:
+ * There are 4 types of op, which defines dispatch/LUT capability:
  *
- * Pre render - not directly consumed by renderer, reorder stage resolves this into renderable type
- * Render only - generated renderable ops - never passed to a reorderer
- * Unmergeable - reorderable, renderable (but not mergeable)
- * Mergeable - reorderable, renderable (and mergeable)
+ *              | DisplayList |   Render    |    Merge    |
+ * -------------|-------------|-------------|-------------|
+ * PRE RENDER   |     Yes     |             |             |
+ * RENDER ONLY  |             |     Yes     |             |
+ * UNMERGEABLE  |     Yes     |     Yes     |             |
+ * MERGEABLE    |     Yes     |     Yes     |     Yes     |
+ *
+ * PRE RENDER - These ops are recorded into DisplayLists, but can't be directly rendered. This
+ *      may be because they need to be transformed into other op types (e.g. CirclePropsOp),
+ *      be traversed to access multiple renderable ops within (e.g. RenderNodeOp), or because they
+ *      modify renderbuffer lifecycle, instead of directly rendering content (the various LayerOps).
+ *
+ * RENDER ONLY - These ops cannot be recorded into DisplayLists, and are instead implicitly
+ *      constructed from other commands/RenderNode properties. They cannot be merged.
+ *
+ * UNMERGEABLE - These ops can be recorded into DisplayLists and rendered directly, but do not
+ *      support merged rendering.
+ *
+ * MERGEABLE - These ops can be recorded into DisplayLists and rendered individually, or merged
+ *      under certain circumstances.
  */
 #define MAP_OPS_BASED_ON_TYPE(PRE_RENDER_OP_FN, RENDER_ONLY_OP_FN, UNMERGEABLE_OP_FN, MERGEABLE_OP_FN) \
         PRE_RENDER_OP_FN(RenderNodeOp) \
@@ -56,9 +72,13 @@ struct Vertex;
         PRE_RENDER_OP_FN(RoundRectPropsOp) \
         PRE_RENDER_OP_FN(BeginLayerOp) \
         PRE_RENDER_OP_FN(EndLayerOp) \
+        PRE_RENDER_OP_FN(BeginUnclippedLayerOp) \
+        PRE_RENDER_OP_FN(EndUnclippedLayerOp) \
         \
         RENDER_ONLY_OP_FN(ShadowOp) \
         RENDER_ONLY_OP_FN(LayerOp) \
+        RENDER_ONLY_OP_FN(CopyToLayerOp) \
+        RENDER_ONLY_OP_FN(CopyFromLayerOp) \
         \
         UNMERGEABLE_OP_FN(ArcOp) \
         UNMERGEABLE_OP_FN(BitmapMeshOp) \
@@ -99,14 +119,14 @@ struct Vertex;
  */
 #define NULL_OP_FN(Type)
 
+#define MAP_DEFERRABLE_OPS(OP_FN) \
+        MAP_OPS_BASED_ON_TYPE(OP_FN, NULL_OP_FN, OP_FN, OP_FN)
+
 #define MAP_MERGEABLE_OPS(OP_FN) \
         MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, NULL_OP_FN, NULL_OP_FN, OP_FN)
 
 #define MAP_RENDERABLE_OPS(OP_FN) \
         MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, OP_FN, OP_FN, OP_FN)
-
-#define MAP_DEFERRABLE_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_TYPE(OP_FN, NULL_OP_FN, OP_FN, OP_FN)
 
 // Generate OpId enum
 #define IDENTITY_FN(Type) Type,
@@ -407,6 +427,46 @@ struct EndLayerOp : RecordedOp {
             : RecordedOp(RecordedOpId::EndLayerOp, Rect(), Matrix4::identity(), nullptr, nullptr) {}
 };
 
+struct BeginUnclippedLayerOp : RecordedOp {
+    BeginUnclippedLayerOp(BASE_PARAMS)
+            : SUPER(BeginUnclippedLayerOp) {}
+};
+
+struct EndUnclippedLayerOp : RecordedOp {
+    EndUnclippedLayerOp()
+            : RecordedOp(RecordedOpId::EndUnclippedLayerOp, Rect(), Matrix4::identity(), nullptr, nullptr) {}
+};
+
+struct CopyToLayerOp : RecordedOp {
+    CopyToLayerOp(const RecordedOp& op, OffscreenBuffer** layerHandle)
+            : RecordedOp(RecordedOpId::CopyToLayerOp,
+                    op.unmappedBounds,
+                    op.localMatrix,
+                    nullptr, // clip intentionally ignored
+                    op.paint)
+            , layerHandle(layerHandle) {}
+
+    // Records a handle to the Layer object, since the Layer itself won't be
+    // constructed until after this operation is constructed.
+    OffscreenBuffer** layerHandle;
+};
+
+
+// draw the parameter layer underneath
+struct CopyFromLayerOp : RecordedOp {
+    CopyFromLayerOp(const RecordedOp& op, OffscreenBuffer** layerHandle)
+            : RecordedOp(RecordedOpId::CopyFromLayerOp,
+                    op.unmappedBounds,
+                    op.localMatrix,
+                    nullptr, // clip intentionally ignored
+                    op.paint)
+            , layerHandle(layerHandle) {}
+
+    // Records a handle to the Layer object, since the Layer itself won't be
+    // constructed until after this operation is constructed.
+    OffscreenBuffer** layerHandle;
+};
+
 /**
  * Draws an OffscreenBuffer.
  *
@@ -424,12 +484,12 @@ struct LayerOp : RecordedOp {
             , destroy(true) {}
 
     LayerOp(RenderNode& node)
-        : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
-        , layerHandle(node.getLayerHandle())
-        , alpha(node.properties().layerProperties().alpha() / 255.0f)
-        , mode(node.properties().layerProperties().xferMode())
-        , colorFilter(node.properties().layerProperties().colorFilter())
-        , destroy(false) {}
+            : RecordedOp(RecordedOpId::LayerOp, Rect(node.getWidth(), node.getHeight()), Matrix4::identity(), nullptr, nullptr)
+            , layerHandle(node.getLayerHandle())
+            , alpha(node.properties().layerProperties().alpha() / 255.0f)
+            , mode(node.properties().layerProperties().xferMode())
+            , colorFilter(node.properties().layerProperties().colorFilter())
+            , destroy(false) {}
 
     // Records a handle to the Layer object, since the Layer itself won't be
     // constructed until after this operation is constructed.

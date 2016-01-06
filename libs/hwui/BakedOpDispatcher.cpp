@@ -753,5 +753,13 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
     }
 }
 
+void BakedOpDispatcher::onCopyToLayerOp(BakedOpRenderer& renderer, const CopyToLayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("TODO!");
+}
+
+void BakedOpDispatcher::onCopyFromLayerOp(BakedOpRenderer& renderer, const CopyFromLayerOp& op, const BakedOpState& state) {
+    LOG_ALWAYS_FATAL("TODO!");
+}
+
 } // namespace uirenderer
 } // namespace android

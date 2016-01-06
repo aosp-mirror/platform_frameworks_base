@@ -116,7 +116,7 @@ public:
          * Indicates that this snapshot or an ancestor snapshot is
          * an FBO layer.
          */
-        kFlagFboTarget = 0x8,
+        kFlagFboTarget = 0x8, // TODO: remove for HWUI_NEW_OPS
     };
 
     /**

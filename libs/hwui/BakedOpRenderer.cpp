@@ -236,12 +236,13 @@ void BakedOpRenderer::setupStencilRegion(const ClipBase* clip) {
 }
 
 void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* clip) {
-    // prepare scissor / stencil
+    // Prepare scissor (done before stencil, to simplify filling stencil)
     mRenderState.scissor().setEnabled(clip != nullptr);
     if (clip) {
         mRenderState.scissor().set(mRenderTarget.viewportHeight, clip->rect);
     }
 
+    // If stencil may be used for clipping, enable it, fill it, or disable it as appropriate
     if (CC_LIKELY(!Properties::debugOverdraw)) {
         // only modify stencil mode and content when it's not used for overdraw visualization
         if (CC_UNLIKELY(clip && clip->mode != ClipMode::Rectangle)) {

@@ -58,6 +58,10 @@ public:
     // Constructor for unbounded ops without transform/clip (namely shadows)
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot);
 
+    // Constructor for primitive ops without clip or transform
+    // NOTE: these ops can't be queried for RT clip / local clip
+    ResolvedRenderState(const Rect& dstRect);
+
     Rect computeLocalSpaceClip() const {
         Matrix4 inverse;
         inverse.loadInverse(transform);
@@ -67,10 +71,12 @@ public:
         return outClip;
     }
 
-    Matrix4 transform;
+    // NOTE: Can only be used on clipped/snapshot based ops
     const Rect& clipRect() const {
         return clipState->rect;
     }
+
+    // NOTE: Can only be used on clipped/snapshot based ops
     bool requiresClip() const {
         return clipSideFlags != OpClipSideFlags::None
                 || CC_UNLIKELY(clipState->mode != ClipMode::Rectangle);
@@ -80,9 +86,11 @@ public:
     const ClipBase* getClipIfNeeded() const {
         return requiresClip() ? clipState : nullptr;
     }
+
+    Matrix4 transform;
     const ClipBase* clipState = nullptr;
-    int clipSideFlags = 0;
     Rect clippedBounds;
+    int clipSideFlags = 0;
 };
 
 /**
@@ -135,12 +143,17 @@ public:
         return new (allocator) BakedOpState(allocator, snapshot, shadowOpPtr);
     }
 
+    static BakedOpState* directConstruct(LinearAllocator& allocator,
+            const Rect& dstRect, const RecordedOp& recordedOp) {
+        return new (allocator) BakedOpState(dstRect, recordedOp);
+    }
+
     static void* operator new(size_t size, LinearAllocator& allocator) {
         return allocator.alloc(size);
     }
 
     // computed state:
-    const ResolvedRenderState computedState;
+    ResolvedRenderState computedState;
 
     // simple state (straight pointer/value storage):
     const float alpha;
@@ -163,6 +176,13 @@ private:
             , roundRectClipState(snapshot.roundRectClipState)
             , projectionPathMask(snapshot.projectionPathMask)
             , op(shadowOpPtr) {}
+
+    BakedOpState(const Rect& dstRect, const RecordedOp& recordedOp)
+            : computedState(dstRect)
+            , alpha(1.0f)
+            , roundRectClipState(nullptr)
+            , projectionPathMask(nullptr)
+            , op(&recordedOp) {}
 };
 
 }; // namespace uirenderer

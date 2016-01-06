@@ -314,7 +314,6 @@ private:
     DisplayList* mDisplayList = nullptr;
     bool mHighContrastText = false;
     SkAutoTUnref<SkDrawFilter> mDrawFilter;
-    int mRestoreSaveCount = -1;
 }; // class RecordingCanvas
 
 }; // namespace uirenderer

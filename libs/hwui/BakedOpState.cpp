@@ -75,5 +75,11 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     clipSideFlags = OpClipSideFlags::Full;
 }
 
+ResolvedRenderState::ResolvedRenderState(const Rect& dstRect)
+        : transform(Matrix4::identity())
+        , clipState(nullptr)
+        , clippedBounds(dstRect)
+        , clipSideFlags(OpClipSideFlags::None) {}
+
 } // namespace uirenderer
 } // namespace android
