@@ -48,11 +48,11 @@ struct ResourceParserTest : public ::testing::Test {
     }
 
     ::testing::AssertionResult testParse(const StringPiece& str,
-                                         Maybe<std::u16string> product = {}) {
+                                         std::initializer_list<std::u16string> products = {}) {
         std::stringstream input(kXmlPreamble);
         input << "<resources>\n" << str << "\n</resources>" << std::endl;
         ResourceParserOptions parserOptions;
-        parserOptions.product = product;
+        parserOptions.products = products;
         ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {},
                               parserOptions);
         xml::XmlPullParser xmlParser(input);
@@ -514,11 +514,15 @@ TEST_F(ResourceParserTest, ParsePublicIdAsDefinition) {
 }
 
 TEST_F(ResourceParserTest, FilterProductsThatDontMatch) {
-    std::string input = "<string name=\"foo\" product=\"phone\">hi</string>\n"
-                        "<string name=\"foo\" product=\"no-sdcard\">ho</string>\n"
-                        "<string name=\"bar\" product=\"\">wee</string>\n"
-                        "<string name=\"baz\">woo</string>\n";
-    ASSERT_TRUE(testParse(input, std::u16string(u"no-sdcard")));
+    std::string input = R"EOF(
+        <string name="foo" product="phone">hi</string>
+        <string name="foo" product="no-sdcard">ho</string>
+        <string name="bar" product="">wee</string>
+        <string name="baz">woo</string>
+        <string name="bit" product="phablet">hoot</string>
+        <string name="bot" product="default">yes</string>
+    )EOF";
+    ASSERT_TRUE(testParse(input, { std::u16string(u"no-sdcard"), std::u16string(u"phablet") }));
 
     String* fooStr = test::getValue<String>(&mTable, u"@string/foo");
     ASSERT_NE(nullptr, fooStr);
@@ -526,11 +530,25 @@ TEST_F(ResourceParserTest, FilterProductsThatDontMatch) {
 
     EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bar"));
     EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/baz"));
+    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bit"));
+    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bot"));
+}
+
+TEST_F(ResourceParserTest, FilterProductsThatBothMatchInOrder) {
+    std::string input = R"EOF(
+        <string name="foo" product="phone">phone</string>
+        <string name="foo" product="default">default</string>
+    )EOF";
+    ASSERT_TRUE(testParse(input, { std::u16string(u"phone") }));
+
+    String* foo = test::getValue<String>(&mTable, u"@string/foo");
+    ASSERT_NE(nullptr, foo);
+    EXPECT_EQ(std::u16string(u"phone"), *foo->value);
 }
 
 TEST_F(ResourceParserTest, FailWhenProductFilterStripsOutAllVersionsOfResource) {
     std::string input = "<string name=\"foo\" product=\"tablet\">hello</string>\n";
-    ASSERT_FALSE(testParse(input, std::u16string(u"phone")));
+    ASSERT_FALSE(testParse(input, { std::u16string(u"phone") }));
 }
 
 TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
