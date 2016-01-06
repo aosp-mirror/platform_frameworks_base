@@ -36,7 +36,7 @@ public class State implements android.os.Parcelable {
     /** Explicit user choice */
     public int userMode = MODE_UNKNOWN;
     /** Derived after loader */
-    public int derivedMode = MODE_LIST;
+    public int derivedMode = MODE_GRID;
 
     /** Explicit user choice */
     public int userSortOrder = SORT_ORDER_UNKNOWN;

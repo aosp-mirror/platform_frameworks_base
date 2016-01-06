@@ -114,11 +114,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         if (userMode != State.MODE_UNKNOWN) {
             result.mode = userMode;
         } else {
-            if ((mDoc.flags & Document.FLAG_DIR_PREFERS_GRID) != 0) {
-                result.mode = State.MODE_GRID;
-            } else {
-                result.mode = State.MODE_LIST;
-            }
+            result.mode = State.MODE_GRID;
         }
 
         if (mUserSortOrder != State.SORT_ORDER_UNKNOWN) {
