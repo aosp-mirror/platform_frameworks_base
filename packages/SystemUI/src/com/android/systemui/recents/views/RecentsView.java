@@ -145,14 +145,11 @@ public class RecentsView extends FrameLayout {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         mStack = stack;
-        // Disable reusing task stack views until the visibility bug is fixed. b/25998134
-        if (false && launchState.launchedReuseTaskStackViews) {
+        if (launchState.launchedReuseTaskStackViews) {
             if (mTaskStackView != null) {
                 // If onRecentsHidden is not triggered, we need to the stack view again here
                 mTaskStackView.reset();
                 mTaskStackView.setStack(stack);
-                removeView(mTaskStackView);
-                addView(mTaskStackView);
             } else {
                 mTaskStackView = new TaskStackView(getContext(), stack);
                 addView(mTaskStackView);
