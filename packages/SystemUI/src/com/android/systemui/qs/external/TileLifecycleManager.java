@@ -76,6 +76,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @VisibleForTesting
     boolean mReceiverRegistered;
     private IQSService mService;
+    private boolean mUnbindImmediate;
 
     public TileLifecycleManager(Handler handler, Context context, Intent intent, UserHandle user) {
         mContext = context;
@@ -92,6 +93,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         synchronized (mQueuedMessages) {
             return mQueuedMessages.contains(MSG_ON_CLICK);
         }
+    }
+
+    /**
+     * Binds just long enough to send any queued messages, then unbinds.
+     */
+    public void flushMessagesAndUnbind() {
+        mUnbindImmediate = true;
+        setBindService(true);
     }
 
     public void setBindService(boolean bind) {
@@ -172,6 +181,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 onStopListening();
             }
             onTileRemoved();
+        }
+        if (mUnbindImmediate) {
+            mUnbindImmediate = false;
+            setBindService(false);
         }
     }
 
