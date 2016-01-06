@@ -30,6 +30,7 @@ import android.view.WindowManager;
 import com.android.keyguard.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 
 import java.io.FileDescriptor;
@@ -39,7 +40,7 @@ import java.lang.reflect.Field;
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-public class StatusBarWindowManager {
+public class StatusBarWindowManager implements RemoteInputController.Callback {
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -292,7 +293,8 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
-    public void setRemoteInputActive(boolean remoteInputActive) {
+    @Override
+    public void onRemoteInputActive(boolean remoteInputActive) {
         mCurrentState.remoteInputActive = remoteInputActive;
         apply(mCurrentState);
     }
