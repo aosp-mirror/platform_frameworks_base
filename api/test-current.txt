@@ -39023,7 +39023,9 @@ package android.util {
     method public static android.util.LocaleList getEmptyLocaleList();
     method public java.util.Locale getFirstMatch(java.lang.String[]);
     method public java.util.Locale getPrimary();
+    method public int indexOf(java.util.Locale);
     method public boolean isEmpty();
+    method public static void setDefault(android.util.LocaleList);
     method public int size();
     method public java.lang.String toLanguageTags();
     method public void writeToParcel(android.os.Parcel, int);
