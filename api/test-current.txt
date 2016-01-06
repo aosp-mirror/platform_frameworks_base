@@ -9514,6 +9514,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_CONNECTION_SERVICE = "android.software.connectionservice";
     field public static final java.lang.String FEATURE_CONSUMER_IR = "android.hardware.consumerir";
     field public static final java.lang.String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
+    field public static final java.lang.String FEATURE_ETHERNET = "android.hardware.ethernet";
     field public static final java.lang.String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
     field public static final java.lang.String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
