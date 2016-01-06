@@ -49,6 +49,7 @@
         <item>ar-SY</item> <!-- Arabic (Syria) -->
         <item>ar-TD</item> <!-- Arabic (Chad) -->
         <item>ar-TN</item> <!-- Arabic (Tunisia) -->
+        <item>ar-XB</item> <!-- Right-to-left pseudolocale -->
         <item>ar-YE</item> <!-- Arabic (Yemen) -->
         <item>as-IN</item> <!-- Assamese (India) -->
         <item>asa-TZ</item> <!-- Asu (Tanzania) -->
@@ -195,6 +196,7 @@
         <item>en-VI</item> <!-- English (U.S. Virgin Islands) -->
         <item>en-VU</item> <!-- English (Vanuatu) -->
         <item>en-WS</item> <!-- English (Samoa) -->
+        <item>en-XA</item> <!-- Left-to-right pseudolocale -->
         <item>en-ZA</item> <!-- English (South Africa) -->
         <item>en-ZM</item> <!-- English (Zambia) -->
         <item>en-ZW</item> <!-- English (Zimbabwe) -->
