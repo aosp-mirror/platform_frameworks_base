@@ -1326,7 +1326,7 @@ public class DeviceIdleController extends SystemService
     void addPowerSaveTempWhitelistAppInternal(int callingUid, String packageName,
             long duration, int userId, boolean sync, String reason) {
         try {
-            int uid = getContext().getPackageManager().getPackageUid(packageName, userId);
+            int uid = getContext().getPackageManager().getPackageUidAsUser(packageName, userId);
             int appId = UserHandle.getAppId(uid);
             addPowerSaveTempWhitelistAppDirectInternal(callingUid, appId, duration, sync, reason);
         } catch (NameNotFoundException e) {

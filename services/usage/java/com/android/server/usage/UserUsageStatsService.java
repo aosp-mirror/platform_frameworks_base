@@ -148,7 +148,7 @@ class UserUsageStatsService {
     private void initializeDefaultsForApps(long currentTimeMillis, long deviceUsageTime,
             boolean firstUpdate) {
         PackageManager pm = mContext.getPackageManager();
-        List<PackageInfo> packages = pm.getInstalledPackages(0, mUserId);
+        List<PackageInfo> packages = pm.getInstalledPackagesAsUser(0, mUserId);
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
             final PackageInfo pi = packages.get(i);

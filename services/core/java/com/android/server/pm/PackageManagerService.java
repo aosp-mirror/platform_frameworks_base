@@ -813,7 +813,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         packageName);
             }
             if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "Adding verification filter for " + packageName + " : " + filter);
+                Slog.d(TAG, "Adding verification filter for " + packageName + ": " + filter);
             }
             ivs.addFilter(filter);
             return true;
@@ -2597,7 +2597,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + "' does not handle web links");
                 }
             } else {
-                Slog.w(TAG, "Unknown package '" + packageName + "' in sysconfig <app-link>");
+                Slog.w(TAG, "Unknown package " + packageName + " in sysconfig <app-link>");
             }
         }
 
@@ -3711,8 +3711,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-                throw new SecurityException("Cannot grant system fixed permission: "
-                        + name + " for package: " + packageName);
+                throw new SecurityException("Cannot grant system fixed permission "
+                        + name + " for package " + packageName);
             }
 
             if (bp.isDevelopment()) {
@@ -3820,8 +3820,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final int flags = permissionsState.getPermissionFlags(name, userId);
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0) {
-                throw new SecurityException("Cannot revoke system fixed permission: "
-                        + name + " for package: " + packageName);
+                throw new SecurityException("Cannot revoke system fixed permission "
+                        + name + " for package " + packageName);
             }
 
             if (bp.isDevelopment()) {
@@ -6273,7 +6273,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
                     if (!updatedPkg.codePath.equals(scanFile)) {
-                        Slog.w(PackageManagerService.TAG, "Code path for hidden system pkg : "
+                        Slog.w(PackageManagerService.TAG, "Code path for hidden system pkg "
                                 + ps.name + " changing from " + updatedPkg.codePathString
                                 + " to " + scanFile);
                         updatedPkg.codePath = scanFile;
@@ -6398,7 +6398,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 baseResourcePath = ps.resourcePathString;
             } else {
                 // Should not happen at all. Just log an error.
-                Slog.e(TAG, "Resource path not set for pkg : " + pkg.packageName);
+                Slog.e(TAG, "Resource path not set for package " + pkg.packageName);
             }
         } else {
             resourcePath = pkg.codePath;
@@ -6647,7 +6647,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             pkg = mPackages.get(packageName);
             if (pkg == null) {
-                throw new IllegalArgumentException("Missing package: " + packageName);
+                throw new IllegalArgumentException("Unknown package: " + packageName);
             }
         }
 
@@ -7157,7 +7157,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                               pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
                             throw new PackageManagerException(
                                     INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                            "Signature mismatch for shared user : "
+                                            "Signature mismatch for shared user: "
                                             + pkgSetting.sharedUser);
                         }
                     }
@@ -7409,7 +7409,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if ((scanFlags & SCAN_NO_DEX) == 0 && (scanFlags & SCAN_NEW_INSTALL) != 0) {
             if (cpuAbiOverride == null && pkgSetting.cpuAbiOverrideString != null) {
                 Slog.w(TAG, "Ignoring persisted ABI override " + cpuAbiOverride +
-                        " for package: " + pkg.packageName);
+                        " for package " + pkg.packageName);
             }
         }
 
@@ -8116,7 +8116,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ps.primaryCpuAbiString = adjustedAbi;
                     if (ps.pkg != null && ps.pkg.applicationInfo != null) {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
-                        Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
+                        Slog.i(TAG, "Adjusting ABI for " + ps.name + " to " + adjustedAbi);
                         mInstaller.rmdex(ps.codePathString,
                                 getDexCodeInstructionSet(getPreferredInstructionSet()));
                     }
@@ -8354,7 +8354,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // 64 bit apps will see a 64 bit primary ABI,
 
             if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) == 0) {
-                Slog.e(TAG, "Package: " + pkg + " has multiple bundled libs, but is not multiarch.");
+                Slog.e(TAG, "Package " + pkg + " has multiple bundled libs, but is not multiarch.");
             }
 
             if (VMRuntime.is64BitInstructionSet(getPreferredInstructionSet())) {
@@ -10600,7 +10600,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     throw new SecurityException("Bad object " + obj + " for uid " + uid);
                 }
             } else {
-                throw new SecurityException("Unknown calling uid " + uid);
+                throw new SecurityException("Unknown calling UID: " + uid);
             }
 
             // Verify: can't set installerPackageName to a package that is
@@ -11514,8 +11514,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                     int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
                     if (retCode < 0) {
-                        Slog.w(TAG, "Couldn't remove dex file for package: "
-                                + " at location " + codePath + ", retcode=" + retCode);
+                        Slog.w(TAG, "Couldn't remove dex file for package at location " + codePath
+                                + ", retcode=" + retCode);
                         // we don't consider this to be a failure of the core package deletion
                     }
                 }
@@ -12549,7 +12549,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if((oldPkg == null) || (oldPkg.applicationInfo == null) ||
                     (oldPkgSetting == null)) {
                 res.setError(INSTALL_FAILED_REPLACE_COULDNT_DELETE,
-                        "Couldn't find package:" + packageName + " information");
+                        "Couldn't find package " + packageName + " information");
                 return;
             }
         }
@@ -13634,7 +13634,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             newPkg = scanPackageTracedLI(disabledPs.codePath, parseFlags, SCAN_NO_PATHS, 0, null);
         } catch (PackageManagerException e) {
-            Slog.w(TAG, "Failed to restore system package:" + newPs.name + ": " + e.getMessage());
+            Slog.w(TAG, "Failed to restore system package " + newPs.name + ": " + e.getMessage());
             return false;
         }
 
@@ -13852,13 +13852,13 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         boolean ret = false;
         if (isSystemApp(ps)) {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package:" + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.name);
             // When an updated system application is deleted we delete the existing resources as well and
             // fall back to existing code in system partition
             ret = deleteSystemPackageLI(ps, allUserHandles, perUserInstalled,
                     flags, outInfo, writeSettings);
         } else {
-            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package:" + ps.name);
+            if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, ps.appId, "uninstall pkg");
             ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags,
@@ -14007,7 +14007,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // resorting to a full data wipe.
         int retCode = mInstaller.clearUserData(pkg.volumeUuid, packageName, userId);
         if (retCode < 0) {
-            Slog.w(TAG, "Couldn't remove cache files for package: " + packageName);
+            Slog.w(TAG, "Couldn't remove cache files for package " + packageName);
             return false;
         }
 
@@ -14237,7 +14237,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         int retCode = mInstaller.deleteCacheFiles(p.volumeUuid, packageName, userId);
         if (retCode < 0) {
-            Slog.w(TAG, "Couldn't remove cache files for package: "
+            Slog.w(TAG, "Couldn't remove cache files for package "
                        + packageName + " u" + userId);
             return false;
         }
@@ -14682,7 +14682,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         synchronized (mPackages) {
             Slog.i(TAG, "Adding persistent preferred activity " + activity + " for user " + userId +
-                    " :");
+                    ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
@@ -15087,12 +15087,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgSetting = mSettings.mPackages.get(packageName);
             if (pkgSetting == null) {
                 if (className == null) {
-                    throw new IllegalArgumentException(
-                            "Unknown package: " + packageName);
+                    throw new IllegalArgumentException("Unknown package: " + packageName);
                 }
                 throw new IllegalArgumentException(
-                        "Unknown component: " + packageName
-                        + "/" + className);
+                        "Unknown component: " + packageName + "/" + className);
             }
             // Allow root and verify that userId is not being specified by a different user
             if (!allowedByPermission && !UserHandle.isSameApp(uid, pkgSetting.appId)) {
@@ -17134,7 +17132,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             KeySetManagerService ksms = mSettings.mKeySetManagerService;
@@ -17150,7 +17148,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             if (pkg.applicationInfo.uid != Binder.getCallingUid()
@@ -17170,7 +17168,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             IBinder ksh = ks.getToken();
@@ -17190,7 +17188,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized(mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                Slog.w(TAG, "KeySet requested for unknown package:" + packageName);
+                Slog.w(TAG, "KeySet requested for unknown package: " + packageName);
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
             IBinder ksh = ks.getToken();

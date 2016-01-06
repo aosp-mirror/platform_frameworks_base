@@ -1114,7 +1114,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else {
                     // Not an option, last argument must be a package name.
                     try {
-                        reqUid = mContext.getPackageManager().getPackageUid(arg,
+                        reqUid = mContext.getPackageManager().getPackageUidAsUser(arg,
                                 UserHandle.getCallingUserId());
                     } catch (PackageManager.NameNotFoundException e) {
                         pw.println("Unknown package: " + arg);

@@ -758,7 +758,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(mContext.userManager.getUserRestrictions()).thenReturn(new Bundle());
 
         // Now call clear.
-        doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(mContext.packageManager).getPackageUid(
+        doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(mContext.packageManager).getPackageUidAsUser(
                 eq(admin1.getPackageName()),
                 anyInt());
         dpm.clearDeviceOwnerApp(admin1.getPackageName());
@@ -797,7 +797,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
 
         // Now call clear.
-        doReturn(DpmMockContext.CALLER_UID).when(mContext.packageManager).getPackageUid(
+        doReturn(DpmMockContext.CALLER_UID).when(mContext.packageManager).getPackageUidAsUser(
                 eq(admin1.getPackageName()),
                 anyInt());
         try {
@@ -951,7 +951,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int appRestrictionsManagerAppId = 20987;
         final int appRestrictionsManagerUid = UserHandle.getUid(
                 DpmMockContext.CALLER_USER_HANDLE, appRestrictionsManagerAppId);
-        doReturn(appRestrictionsManagerUid).when(mContext.packageManager).getPackageUid(
+        doReturn(appRestrictionsManagerUid).when(mContext.packageManager).getPackageUidAsUser(
                 eq(appRestrictionsManagerPackage),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
         mContext.binder.callingUid = appRestrictionsManagerUid;

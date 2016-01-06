@@ -431,7 +431,7 @@ final class Settings {
     boolean disableSystemPackageLPw(String name) {
         final PackageSetting p = mPackages.get(name);
         if(p == null) {
-            Log.w(PackageManagerService.TAG, "Package:"+name+" is not an installed package");
+            Log.w(PackageManagerService.TAG, "Package " + name + " is not an installed package");
             return false;
         }
         final PackageSetting dp = mDisabledSysPackages.get(name);
@@ -456,7 +456,7 @@ final class Settings {
     PackageSetting enableSystemPackageLPw(String name) {
         PackageSetting p = mDisabledSysPackages.get(name);
         if(p == null) {
-            Log.w(PackageManagerService.TAG, "Package:"+name+" is not disabled");
+            Log.w(PackageManagerService.TAG, "Package " + name + " is not disabled");
             return null;
         }
         // Reset flag in ApplicationInfo object
@@ -1343,7 +1343,7 @@ final class Settings {
             throws XmlPullParserException, IOException {
         IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
         packageSetting.setIntentFilterVerificationInfo(ivi);
-        Log.d(TAG, "Read domain verification for package:" + ivi.getPackageName());
+        Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
     }
 
     private void readRestoredIntentFilterVerifications(XmlPullParser parser)
@@ -1477,7 +1477,7 @@ final class Settings {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
                     ps = mPackages.get(name);
                     if (ps == null) {
-                        Slog.w(PackageManagerService.TAG, "No package known for stopped package: "
+                        Slog.w(PackageManagerService.TAG, "No package known for stopped package "
                                 + name);
                         XmlUtils.skipCurrentTag(parser);
                         continue;
@@ -2041,7 +2041,7 @@ final class Settings {
                         }
                     } else {
                         Slog.w(PackageManagerService.TAG,
-                                "No package known for stopped package: " + name);
+                                "No package known for stopped package " + name);
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else {

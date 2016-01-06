@@ -374,7 +374,7 @@ public class UsageStatsService extends SystemService implements
         for (int i = 0; i < userIds.length; i++) {
             final int userId = userIds[i];
             List<PackageInfo> packages =
-                    getContext().getPackageManager().getInstalledPackages(
+                    getContext().getPackageManager().getInstalledPackagesAsUser(
                             PackageManager.GET_DISABLED_COMPONENTS
                                 | PackageManager.GET_UNINSTALLED_PACKAGES,
                             userId);

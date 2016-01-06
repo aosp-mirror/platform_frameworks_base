@@ -103,7 +103,7 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public int getPackageUid(String packageName, int userHandle)
+    public int getPackageUidAsUser(String packageName, int userHandle)
             throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
@@ -174,7 +174,7 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
+    public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -355,7 +355,7 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -746,7 +746,7 @@ public class MockPackageManager extends PackageManager {
      * @hide - to match hiding in superclass
      */
     @Override
-    public void getPackageSizeInfo(String packageName, int userHandle,
+    public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
         throw new UnsupportedOperationException();
     }
@@ -890,7 +890,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public int getIntentVerificationStatus(String packageName, int userId) {
+    public int getIntentVerificationStatusAsUser(String packageName, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -898,7 +898,7 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+    public boolean updateIntentVerificationStatusAsUser(String packageName, int status, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -915,13 +915,27 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** {@removed} */
+    @Deprecated
     public String getDefaultBrowserPackageName(int userId) {
         throw new UnsupportedOperationException();
     }
 
+    /** {@hide} */
     @Override
+    public String getDefaultBrowserPackageNameAsUser(int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@removed} */
+    @Deprecated
     public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         throw new UnsupportedOperationException();
     }
 

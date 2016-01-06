@@ -316,7 +316,7 @@ public class ApplicationsState {
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
             if (entry != null) {
-                mPm.getPackageSizeInfo(packageName, userId, mBackgroundHandler.mStatsObserver);
+                mPm.getPackageSizeInfoAsUser(packageName, userId, mBackgroundHandler.mStatsObserver);
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...requestSize releasing lock");
         }
@@ -906,7 +906,7 @@ public class ApplicationsState {
                                     entry.sizeLoadStart = now;
                                     mCurComputingSizePkg = entry.info.packageName;
                                     mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
-                                    mPm.getPackageSizeInfo(mCurComputingSizePkg,
+                                    mPm.getPackageSizeInfoAsUser(mCurComputingSizePkg,
                                             mCurComputingSizeUserId, mStatsObserver);
                                 }
                                 if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
