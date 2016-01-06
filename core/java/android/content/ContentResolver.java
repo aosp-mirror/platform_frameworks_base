@@ -47,10 +47,10 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
-import dalvik.system.CloseGuard;
-
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+
+import dalvik.system.CloseGuard;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,9 +59,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This class provides applications access to the content model.
@@ -514,8 +514,9 @@ public abstract class ContentResolver {
             maybeLogQueryToEventLog(durationMillis, uri, projection, selection, sortOrder);
 
             // Wrap the cursor object into CursorWrapperInner object.
-            CursorWrapperInner wrapper = new CursorWrapperInner(qCursor,
-                    stableProvider != null ? stableProvider : acquireProvider(uri));
+            final IContentProvider provider = (stableProvider != null) ? stableProvider
+                    : acquireProvider(uri);
+            final CursorWrapperInner wrapper = new CursorWrapperInner(qCursor, provider);
             stableProvider = null;
             qCursor = null;
             return wrapper;
@@ -2503,41 +2504,31 @@ public abstract class ContentResolver {
 
     private final class CursorWrapperInner extends CrossProcessCursorWrapper {
         private final IContentProvider mContentProvider;
-        public static final String TAG="CursorWrapperInner";
+        private final AtomicBoolean mProviderReleased = new AtomicBoolean();
 
         private final CloseGuard mCloseGuard = CloseGuard.get();
-        private boolean mProviderReleased;
 
-        CursorWrapperInner(Cursor cursor, IContentProvider icp) {
+        CursorWrapperInner(Cursor cursor, IContentProvider contentProvider) {
             super(cursor);
-            mContentProvider = icp;
+            mContentProvider = contentProvider;
             mCloseGuard.open("close");
         }
 
         @Override
         public void close() {
+            mCloseGuard.close();
             super.close();
-            ContentResolver.this.releaseProvider(mContentProvider);
-            mProviderReleased = true;
 
-            if (mCloseGuard != null) {
-                mCloseGuard.close();
+            if (mProviderReleased.compareAndSet(false, true)) {
+                ContentResolver.this.releaseProvider(mContentProvider);
             }
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
-                if (mCloseGuard != null) {
-                    mCloseGuard.warnIfOpen();
-                }
-
-                if (!mProviderReleased && mContentProvider != null) {
-                    // Even though we are using CloseGuard, log this anyway so that
-                    // application developers always see the message in the log.
-                    Log.w(TAG, "Cursor finalized without prior close()");
-                    ContentResolver.this.releaseProvider(mContentProvider);
-                }
+                mCloseGuard.warnIfOpen();
+                close();
             } finally {
                 super.finalize();
             }
@@ -2546,7 +2537,7 @@ public abstract class ContentResolver {
 
     private final class ParcelFileDescriptorInner extends ParcelFileDescriptor {
         private final IContentProvider mContentProvider;
-        private boolean mProviderReleased;
+        private final AtomicBoolean mProviderReleased = new AtomicBoolean();
 
         ParcelFileDescriptorInner(ParcelFileDescriptor pfd, IContentProvider icp) {
             super(pfd);
@@ -2555,9 +2546,8 @@ public abstract class ContentResolver {
 
         @Override
         public void releaseResources() {
-            if (!mProviderReleased) {
+            if (mProviderReleased.compareAndSet(false, true)) {
                 ContentResolver.this.releaseProvider(mContentProvider);
-                mProviderReleased = true;
             }
         }
     }
@@ -2584,7 +2574,9 @@ public abstract class ContentResolver {
 
     private static IContentService sContentService;
     private final Context mContext;
+
     final String mPackageName;
+
     private static final String TAG = "ContentResolver";
 
     /** @hide */

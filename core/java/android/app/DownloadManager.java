@@ -27,6 +27,7 @@ import android.database.CursorWrapper;
 import android.net.ConnectivityManager;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.Downloads;
@@ -105,8 +106,17 @@ public class DownloadManager {
     public final static String COLUMN_LOCAL_URI = "local_uri";
 
     /**
-     * The pathname of the file where the download is stored.
+     * Path to the downloaded file on disk.
+     * <p>
+     * Note that apps may not have filesystem permissions to directly access
+     * this path. Instead of trying to open this path directly, apps should use
+     * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain access.
+     *
+     * @deprecated apps should transition to using
+     *             {@link ContentResolver#openFileDescriptor(Uri, String)}
+     *             instead.
      */
+    @Deprecated
     public final static String COLUMN_LOCAL_FILENAME = "local_filename";
 
     /**
@@ -908,16 +918,19 @@ public class DownloadManager {
         }
     }
 
-    private ContentResolver mResolver;
-    private String mPackageName;
+    private final ContentResolver mResolver;
+    private final String mPackageName;
+    private final int mTargetSdkVersion;
+
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     /**
      * @hide
      */
-    public DownloadManager(ContentResolver resolver, String packageName) {
-        mResolver = resolver;
-        mPackageName = packageName;
+    public DownloadManager(Context context) {
+        mResolver = context.getContentResolver();
+        mPackageName = context.getPackageName();
+        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
     }
 
     /**
@@ -997,7 +1010,7 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, mBaseUri);
+        return new CursorTranslator(underlyingCursor, mBaseUri, mTargetSdkVersion);
     }
 
     /**
@@ -1265,11 +1278,13 @@ public class DownloadManager {
      * underlying data.
      */
     private static class CursorTranslator extends CursorWrapper {
-        private Uri mBaseUri;
+        private final Uri mBaseUri;
+        private final int mTargetSdkVersion;
 
-        public CursorTranslator(Cursor cursor, Uri baseUri) {
+        public CursorTranslator(Cursor cursor, Uri baseUri, int targetSdkVersion) {
             super(cursor);
             mBaseUri = baseUri;
+            mTargetSdkVersion = targetSdkVersion;
         }
 
         @Override
@@ -1290,8 +1305,19 @@ public class DownloadManager {
 
         @Override
         public String getString(int columnIndex) {
-            return (getColumnName(columnIndex).equals(COLUMN_LOCAL_URI)) ? getLocalUri() :
-                    super.getString(columnIndex);
+            final String columnName = getColumnName(columnIndex);
+            switch (columnName) {
+                case COLUMN_LOCAL_URI:
+                    return getLocalUri();
+                case COLUMN_LOCAL_FILENAME:
+                    if (mTargetSdkVersion >= Build.VERSION_CODES.N) {
+                        throw new IllegalArgumentException(
+                                "COLUMN_LOCAL_FILENAME is deprecated;"
+                                        + " use ContentResolver.openFileDescriptor() instead");
+                    }
+                default:
+                    return super.getString(columnIndex);
+            }
         }
 
         private String getLocalUri() {

@@ -4228,7 +4228,7 @@ package android.app {
     field public static final java.lang.String COLUMN_DESCRIPTION = "description";
     field public static final java.lang.String COLUMN_ID = "_id";
     field public static final java.lang.String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
-    field public static final java.lang.String COLUMN_LOCAL_FILENAME = "local_filename";
+    field public static final deprecated java.lang.String COLUMN_LOCAL_FILENAME = "local_filename";
     field public static final java.lang.String COLUMN_LOCAL_URI = "local_uri";
     field public static final java.lang.String COLUMN_MEDIAPROVIDER_URI = "mediaprovider_uri";
     field public static final java.lang.String COLUMN_MEDIA_TYPE = "media_type";
@@ -7568,11 +7568,12 @@ package android.content {
     method public abstract void writeDataToPipe(android.os.ParcelFileDescriptor, android.net.Uri, java.lang.String, android.os.Bundle, T);
   }
 
-  public class ContentProviderClient {
+  public class ContentProviderClient implements java.lang.AutoCloseable {
     method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>) throws android.content.OperationApplicationException, android.os.RemoteException;
     method public int bulkInsert(android.net.Uri, android.content.ContentValues[]) throws android.os.RemoteException;
     method public android.os.Bundle call(java.lang.String, java.lang.String, android.os.Bundle) throws android.os.RemoteException;
     method public final android.net.Uri canonicalize(android.net.Uri) throws android.os.RemoteException;
+    method public void close();
     method public int delete(android.net.Uri, java.lang.String, java.lang.String[]) throws android.os.RemoteException;
     method public android.content.ContentProvider getLocalContentProvider();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String) throws android.os.RemoteException;
@@ -7586,7 +7587,7 @@ package android.content {
     method public final android.content.res.AssetFileDescriptor openTypedAssetFileDescriptor(android.net.Uri, java.lang.String, android.os.Bundle, android.os.CancellationSignal) throws java.io.FileNotFoundException, android.os.RemoteException;
     method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) throws android.os.RemoteException;
     method public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.os.CancellationSignal) throws android.os.RemoteException;
-    method public boolean release();
+    method public deprecated boolean release();
     method public final android.net.Uri uncanonicalize(android.net.Uri) throws android.os.RemoteException;
     method public int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]) throws android.os.RemoteException;
   }
@@ -10844,7 +10845,7 @@ package android.drm {
     field public final int statusCode;
   }
 
-  public class DrmManagerClient {
+  public class DrmManagerClient implements java.lang.AutoCloseable {
     ctor public DrmManagerClient(android.content.Context);
     method public android.drm.DrmInfo acquireDrmInfo(android.drm.DrmInfoRequest);
     method public int acquireRights(android.drm.DrmInfoRequest);
@@ -10854,6 +10855,7 @@ package android.drm {
     method public int checkRightsStatus(android.net.Uri);
     method public int checkRightsStatus(java.lang.String, int);
     method public int checkRightsStatus(android.net.Uri, int);
+    method public void close();
     method public android.drm.DrmConvertedStatus closeConvertSession(int);
     method public android.drm.DrmConvertedStatus convertData(int, byte[]);
     method public java.lang.String[] getAvailableDrmEngines();
@@ -10867,7 +10869,7 @@ package android.drm {
     method public java.lang.String getOriginalMimeType(android.net.Uri);
     method public int openConvertSession(java.lang.String);
     method public int processDrmInfo(android.drm.DrmInfo);
-    method public void release();
+    method public deprecated void release();
     method public int removeAllRights();
     method public int removeRights(java.lang.String);
     method public int removeRights(android.net.Uri);

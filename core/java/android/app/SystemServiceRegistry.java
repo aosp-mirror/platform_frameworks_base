@@ -247,7 +247,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<DownloadManager>() {
             @Override
             public DownloadManager createService(ContextImpl ctx) {
-                return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
+                return new DownloadManager(ctx);
             }});
 
         registerService(Context.BATTERY_SERVICE, BatteryManager.class,
