@@ -97,7 +97,22 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public int[] getPackageGids(String packageName, int flags) throws NameNotFoundException {
+        return new int[0];
+    }
+
+    @Override
+    public int getPackageUid(String packageName, int flags) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
     public int getPackageUidAsUser(String packageName, int userHandle) throws NameNotFoundException {
+        return 0;
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, int flags, int userHandle) throws NameNotFoundException {
         return 0;
     }
 

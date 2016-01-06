@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -1611,7 +1612,7 @@ public abstract class ContentResolver {
 
     /** @hide - designated user version */
     public final void registerContentObserver(Uri uri, boolean notifyForDescendents,
-            ContentObserver observer, int userHandle) {
+            ContentObserver observer, @UserIdInt int userHandle) {
         try {
             getContentService().registerContentObserver(uri, notifyForDescendents,
                     observer.getContentObserver(), userHandle);
@@ -1685,7 +1686,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork,
-            int userHandle) {
+            @UserIdInt int userHandle) {
         try {
             getContentService().notifyChange(
                     uri, observer == null ? null : observer.getContentObserver(),
@@ -1826,7 +1827,7 @@ public abstract class ContentResolver {
      * @see #requestSync(Account, String, Bundle)
      * @hide
      */
-    public static void requestSyncAsUser(Account account, String authority, int userId,
+    public static void requestSyncAsUser(Account account, String authority, @UserIdInt int userId,
             Bundle extras) {
         if (extras == null) {
             throw new IllegalArgumentException("Must specify extras.");
@@ -1923,7 +1924,7 @@ public abstract class ContentResolver {
      * @see #cancelSync(Account, String)
      * @hide
      */
-    public static void cancelSyncAsUser(Account account, String authority, int userId) {
+    public static void cancelSyncAsUser(Account account, String authority, @UserIdInt int userId) {
         try {
             getContentService().cancelSyncAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
@@ -1946,7 +1947,7 @@ public abstract class ContentResolver {
      * @see #getSyncAdapterTypes()
      * @hide
      */
-    public static SyncAdapterType[] getSyncAdapterTypesAsUser(int userId) {
+    public static SyncAdapterType[] getSyncAdapterTypesAsUser(@UserIdInt int userId) {
         try {
             return getContentService().getSyncAdapterTypesAsUser(userId);
         } catch (RemoteException e) {
@@ -1960,7 +1961,7 @@ public abstract class ContentResolver {
      */
     @TestApi
     public static String[] getSyncAdapterPackagesForAuthorityAsUser(String authority,
-            int userId) {
+            @UserIdInt int userId) {
         try {
             return getContentService().getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
         } catch (RemoteException e) {
@@ -1990,7 +1991,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public static boolean getSyncAutomaticallyAsUser(Account account, String authority,
-            int userId) {
+            @UserIdInt int userId) {
         try {
             return getContentService().getSyncAutomaticallyAsUser(account, authority, userId);
         } catch (RemoteException e) {
@@ -2016,7 +2017,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public static void setSyncAutomaticallyAsUser(Account account, String authority, boolean sync,
-            int userId) {
+            @UserIdInt int userId) {
         try {
             getContentService().setSyncAutomaticallyAsUser(account, authority, sync, userId);
         } catch (RemoteException e) {
@@ -2175,7 +2176,8 @@ public abstract class ContentResolver {
      * @see #getIsSyncable(Account, String)
      * @hide
      */
-    public static int getIsSyncableAsUser(Account account, String authority, int userId) {
+    public static int getIsSyncableAsUser(Account account, String authority,
+            @UserIdInt int userId) {
         try {
             return getContentService().getIsSyncableAsUser(account, authority, userId);
         } catch (RemoteException e) {
@@ -2218,7 +2220,7 @@ public abstract class ContentResolver {
      * @see #getMasterSyncAutomatically()
      * @hide
      */
-    public static boolean getMasterSyncAutomaticallyAsUser(int userId) {
+    public static boolean getMasterSyncAutomaticallyAsUser(@UserIdInt int userId) {
         try {
             return getContentService().getMasterSyncAutomaticallyAsUser(userId);
         } catch (RemoteException e) {
@@ -2242,7 +2244,7 @@ public abstract class ContentResolver {
      * @see #setMasterSyncAutomatically(boolean)
      * @hide
      */
-    public static void setMasterSyncAutomaticallyAsUser(boolean sync, int userId) {
+    public static void setMasterSyncAutomaticallyAsUser(boolean sync, @UserIdInt int userId) {
         try {
             getContentService().setMasterSyncAutomaticallyAsUser(sync, userId);
         } catch (RemoteException e) {
@@ -2322,7 +2324,7 @@ public abstract class ContentResolver {
      * @see #getCurrentSyncs()
      * @hide
      */
-    public static List<SyncInfo> getCurrentSyncsAsUser(int userId) {
+    public static List<SyncInfo> getCurrentSyncsAsUser(@UserIdInt int userId) {
         try {
             return getContentService().getCurrentSyncsAsUser(userId);
         } catch (RemoteException e) {
@@ -2350,7 +2352,7 @@ public abstract class ContentResolver {
      * @hide
      */
     public static SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
-            int userId) {
+            @UserIdInt int userId) {
         try {
             return getContentService().getSyncStatusAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
@@ -2374,7 +2376,8 @@ public abstract class ContentResolver {
      * @see #requestSync(Account, String, Bundle)
      * @hide
      */
-    public static boolean isSyncPendingAsUser(Account account, String authority, int userId) {
+    public static boolean isSyncPendingAsUser(Account account, String authority,
+            @UserIdInt int userId) {
         try {
             return getContentService().isSyncPendingAsUser(account, authority, null, userId);
         } catch (RemoteException e) {

@@ -20,6 +20,7 @@ import android.accounts.AccountManager;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
@@ -601,7 +602,7 @@ public class UserManager {
      * @return the user handle of this process.
      * @hide
      */
-    public int getUserHandle() {
+    public @UserIdInt int getUserHandle() {
         return UserHandle.myUserId();
     }
 
@@ -671,7 +672,7 @@ public class UserManager {
      * Returns whether the provided user is an admin user. There can be more than one admin
      * user.
      */
-    public boolean isUserAdmin(int userId) {
+    public boolean isUserAdmin(@UserIdInt int userId) {
         UserInfo user = getUserInfo(userId);
         return user != null && user.isAdmin();
     }
@@ -695,7 +696,7 @@ public class UserManager {
      * Checks if specified user can have restricted profile.
      * @hide
      */
-    public boolean canHaveRestrictedProfile(int userId) {
+    public boolean canHaveRestrictedProfile(@UserIdInt int userId) {
         try {
             return mService.canHaveRestrictedProfile(userId);
         } catch (RemoteException re) {
@@ -741,7 +742,7 @@ public class UserManager {
      * Returns whether the specified user is ephemeral.
      * @hide
      */
-    public boolean isUserEphemeral(int userId) {
+    public boolean isUserEphemeral(@UserIdInt int userId) {
         final UserInfo user = getUserInfo(userId);
         return user != null && user.isEphemeral();
     }
@@ -861,7 +862,7 @@ public class UserManager {
     }
 
     /** {@hide} */
-    public boolean isUserUnlocked(int userId) {
+    public boolean isUserUnlocked(@UserIdInt int userId) {
         // TODO: eventually pivot this back to look at ActivityManager state,
         // but there is race where we can start a non-encryption-aware launcher
         // before that lifecycle has entered the running unlocked state.
@@ -875,7 +876,7 @@ public class UserManager {
      * @return the UserInfo object for a specific user.
      * @hide
      */
-    public UserInfo getUserInfo(int userHandle) {
+    public UserInfo getUserInfo(@UserIdInt int userHandle) {
         try {
             return mService.getUserInfo(userHandle);
         } catch (RemoteException re) {
@@ -1093,7 +1094,7 @@ public class UserManager {
      * @return the UserInfo object for the created user, or null if the user could not be created.
      * @hide
      */
-    public UserInfo createProfileForUser(String name, int flags, int userHandle) {
+    public UserInfo createProfileForUser(String name, int flags, @UserIdInt int userHandle) {
         try {
             return mService.createProfileForUser(name, flags, userHandle);
         } catch (RemoteException re) {
@@ -1133,7 +1134,7 @@ public class UserManager {
      * @param userHandle
      * @return
      */
-    public boolean markGuestForDeletion(int userHandle) {
+    public boolean markGuestForDeletion(@UserIdInt int userHandle) {
         try {
             return mService.markGuestForDeletion(userHandle);
         } catch (RemoteException re) {
@@ -1150,7 +1151,7 @@ public class UserManager {
      * @param userHandle the id of the profile to enable
      * @hide
      */
-    public void setUserEnabled(int userHandle) {
+    public void setUserEnabled(@UserIdInt int userHandle) {
         try {
             mService.setUserEnabled(userHandle);
         } catch (RemoteException e) {
@@ -1189,7 +1190,7 @@ public class UserManager {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.MANAGE_USERS
     })
-    public @Nullable String getUserAccount(int userHandle) {
+    public @Nullable String getUserAccount(@UserIdInt int userHandle) {
         try {
             return mService.getUserAccount(userHandle);
         } catch (RemoteException re) {
@@ -1206,7 +1207,7 @@ public class UserManager {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             Manifest.permission.MANAGE_USERS
     })
-    public void setUserAccount(int userHandle, @Nullable String accountName) {
+    public void setUserAccount(@UserIdInt int userHandle, @Nullable String accountName) {
         try {
             mService.setUserAccount(userHandle, accountName);
         } catch (RemoteException re) {
@@ -1259,7 +1260,7 @@ public class UserManager {
      * @return true if more managed profiles can be added, false if limit has been reached.
      * @hide
      */
-    public boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne) {
+    public boolean canAddMoreManagedProfiles(@UserIdInt int userId, boolean allowedToRemoveOne) {
         try {
             return mService.canAddMoreManagedProfiles(userId, allowedToRemoveOne);
         } catch (RemoteException re) {
@@ -1279,7 +1280,7 @@ public class UserManager {
      * @return the list of profiles.
      * @hide
      */
-    public List<UserInfo> getProfiles(int userHandle) {
+    public List<UserInfo> getProfiles(@UserIdInt int userHandle) {
         try {
             return mService.getProfiles(userHandle, false /* enabledOnly */);
         } catch (RemoteException re) {
@@ -1295,7 +1296,7 @@ public class UserManager {
      * @return true if the two user ids are in the same profile group.
      * @hide
      */
-    public boolean isSameProfileGroup(int userId, int otherUserId) {
+    public boolean isSameProfileGroup(@UserIdInt int userId, int otherUserId) {
         try {
             return mService.isSameProfileGroup(userId, otherUserId);
         } catch (RemoteException re) {
@@ -1314,7 +1315,7 @@ public class UserManager {
      * @return the list of profiles.
      * @hide
      */
-    public List<UserInfo> getEnabledProfiles(int userHandle) {
+    public List<UserInfo> getEnabledProfiles(@UserIdInt int userHandle) {
         try {
             return mService.getProfiles(userHandle, true /* enabledOnly */);
         } catch (RemoteException re) {
@@ -1352,7 +1353,7 @@ public class UserManager {
      *
      * @hide
      */
-    public int getCredentialOwnerProfile(int userHandle) {
+    public int getCredentialOwnerProfile(@UserIdInt int userHandle) {
         try {
             return mService.getCredentialOwnerProfile(userHandle);
         } catch (RemoteException re) {
@@ -1367,7 +1368,7 @@ public class UserManager {
      *
      * @hide
      */
-    public UserInfo getProfileParent(int userHandle) {
+    public UserInfo getProfileParent(@UserIdInt int userHandle) {
         try {
             return mService.getProfileParent(userHandle);
         } catch (RemoteException re) {
@@ -1383,7 +1384,7 @@ public class UserManager {
      * @param enableQuietMode Whether quiet mode should be enabled or disabled.
      * @hide
      */
-    public void setQuietModeEnabled(int userHandle, boolean enableQuietMode) {
+    public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
         try {
             mService.setQuietModeEnabled(userHandle, enableQuietMode);
         } catch (RemoteException e) {
@@ -1499,7 +1500,7 @@ public class UserManager {
      * @param userHandle the integer handle of the user, where 0 is the primary user.
      * @hide
      */
-    public boolean removeUser(int userHandle) {
+    public boolean removeUser(@UserIdInt int userHandle) {
         try {
             return mService.removeUser(userHandle);
         } catch (RemoteException re) {
@@ -1516,7 +1517,7 @@ public class UserManager {
      * @param name the new name for the user
      * @hide
      */
-    public void setUserName(int userHandle, String name) {
+    public void setUserName(@UserIdInt int userHandle, String name) {
         try {
             mService.setUserName(userHandle, name);
         } catch (RemoteException re) {
@@ -1530,7 +1531,7 @@ public class UserManager {
      * @param icon the bitmap to set as the photo.
      * @hide
      */
-    public void setUserIcon(int userHandle, Bitmap icon) {
+    public void setUserIcon(@UserIdInt int userHandle, Bitmap icon) {
         try {
             mService.setUserIcon(userHandle, icon);
         } catch (RemoteException re) {
@@ -1545,7 +1546,7 @@ public class UserManager {
      * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
      * @hide
      */
-    public Bitmap getUserIcon(int userHandle) {
+    public Bitmap getUserIcon(@UserIdInt int userHandle) {
         try {
             ParcelFileDescriptor fd = mService.getUserIcon(userHandle);
             if (fd != null) {
@@ -1611,7 +1612,7 @@ public class UserManager {
      * @return a serial number associated with that user, or -1 if the userHandle is not valid.
      * @hide
      */
-    public int getUserSerialNumber(int userHandle) {
+    public int getUserSerialNumber(@UserIdInt int userHandle) {
         try {
             return mService.getUserSerialNumber(userHandle);
         } catch (RemoteException re) {
@@ -1629,7 +1630,7 @@ public class UserManager {
      * is not valid.
      * @hide
      */
-    public int getUserHandle(int userSerialNumber) {
+    public @UserIdInt int getUserHandle(int userSerialNumber) {
         try {
             return mService.getUserHandle(userSerialNumber);
         } catch (RemoteException re) {

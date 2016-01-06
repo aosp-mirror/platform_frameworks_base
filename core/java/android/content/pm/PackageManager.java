@@ -27,6 +27,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.annotation.TestApi;
 import android.annotation.XmlRes;
 import android.app.PackageDeleteObserver;
@@ -2228,9 +2229,6 @@ public abstract class PackageManager {
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
-     * <p>
-     * Throws {@link NameNotFoundException} if a package with the given name can
-     * not be found on the system.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
@@ -2248,6 +2246,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      * @see #GET_ACTIVITIES
      * @see #GET_GIDS
      * @see #GET_CONFIGURATIONS
@@ -2266,9 +2266,6 @@ public abstract class PackageManager {
      * @hide
      * Retrieve overall information about an application package that is
      * installed on the system.
-     * <p>
-     * Throws {@link NameNotFoundException} if a package with the given name can
-     * not be found on the system.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
@@ -2287,6 +2284,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      * @see #GET_ACTIVITIES
      * @see #GET_GIDS
      * @see #GET_CONFIGURATIONS
@@ -2300,7 +2299,7 @@ public abstract class PackageManager {
      */
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     public abstract PackageInfo getPackageInfoAsUser(String packageName,
-            @PackageInfoFlags int flags, int userId) throws NameNotFoundException;
+            @PackageInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
 
     /**
      * Map from the current package names in use on the device to whatever
@@ -2342,9 +2341,6 @@ public abstract class PackageManager {
      * through packages. The current implementation will look for a main
      * activity in the category {@link Intent#CATEGORY_LEANBACK_LAUNCHER}, or
      * return null if no main leanback activities are found.
-     * <p>
-     * Throws {@link NameNotFoundException} if a package with the given name
-     * cannot be found on the system.
      *
      * @param packageName The name of the package to inspect.
      * @return Returns either a fully-qualified Intent that can be used to launch
@@ -2356,39 +2352,73 @@ public abstract class PackageManager {
     /**
      * Return an array of all of the secondary group-ids that have been assigned
      * to a package.
-     * <p>
-     * Throws {@link NameNotFoundException} if a package with the given name
-     * cannot be found on the system.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an int array of the assigned gids, or null if there are
      *         none.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
     public abstract int[] getPackageGids(String packageName)
             throws NameNotFoundException;
 
     /**
-     * @hide Return the uid associated with the given package name for the
-     * given user.
-     *
-     * <p>Throws {@link NameNotFoundException} if a package with the given
-     * name can not be found on the system.
+     * Return an array of all of the secondary group-ids that have been assigned
+     * to a package.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
-     *                    desired package.
-     * @param userHandle The user handle identifier to look up the package under.
-     *
-     * @return Returns an integer uid who owns the given package name.
+     *            desired package.
+     * @return Returns an int array of the assigned gids, or null if there are
+     *         none.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
-    public abstract int getPackageUidAsUser(String packageName, int userId)
+    public abstract int[] getPackageGids(String packageName, @PackageInfoFlags int flags)
             throws NameNotFoundException;
 
     /**
-     * Retrieve all of the information we know about a particular permission.
+     * Return the UID associated with the given package name.
      *
-     * <p>Throws {@link NameNotFoundException} if a permission with the given
-     * name cannot be found on the system.
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @return Returns an integer UID who owns the given package name.
+     * @throws NameNotFoundException if a package with the given name can not be
+     *             found on the system.
+     */
+    public abstract int getPackageUid(String packageName, @PackageInfoFlags int flags)
+            throws NameNotFoundException;
+
+    /**
+     * Return the UID associated with the given package name.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @param userId The user handle identifier to look up the package under.
+     * @return Returns an integer UID who owns the given package name.
+     * @throws NameNotFoundException if a package with the given name can not be
+     *             found on the system.
+     * @hide
+     */
+    public abstract int getPackageUidAsUser(String packageName, @UserIdInt int userId)
+            throws NameNotFoundException;
+
+    /**
+     * Return the UID associated with the given package name.
+     *
+     * @param packageName The full name (i.e. com.google.apps.contacts) of the
+     *            desired package.
+     * @param userId The user handle identifier to look up the package under.
+     * @return Returns an integer UID who owns the given package name.
+     * @throws NameNotFoundException if a package with the given name can not be
+     *             found on the system.
+     * @hide
+     */
+    public abstract int getPackageUidAsUser(String packageName, @PackageInfoFlags int flags,
+            @UserIdInt int userId) throws NameNotFoundException;
+
+    /**
+     * Retrieve all of the information we know about a particular permission.
      *
      * @param name The fully qualified name (i.e. com.google.permission.LOGIN)
      *             of the permission you are interested in.
@@ -2397,15 +2427,14 @@ public abstract class PackageManager {
      *
      * @return Returns a {@link PermissionInfo} containing information about the
      *         permission.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
     public abstract PermissionInfo getPermissionInfo(String name, @PermissionInfoFlags int flags)
             throws NameNotFoundException;
 
     /**
      * Query for all of the permissions associated with a particular group.
-     *
-     * <p>Throws {@link NameNotFoundException} if the given group does not
-     * exist.
      *
      * @param group The fully qualified name (i.e. com.google.permission.LOGIN)
      *             of the permission group you are interested in.  Use null to
@@ -2415,6 +2444,8 @@ public abstract class PackageManager {
      *
      * @return Returns a list of {@link PermissionInfo} containing information
      * about all of the permissions in the given group.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
     public abstract List<PermissionInfo> queryPermissionsByGroup(String group,
             @PermissionInfoFlags int flags) throws NameNotFoundException;
@@ -2423,9 +2454,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular group of
      * permissions.
      *
-     * <p>Throws {@link NameNotFoundException} if a permission group with the given
-     * name cannot be found on the system.
-     *
      * @param name The fully qualified name (i.e. com.google.permission_group.APPS)
      *             of the permission you are interested in.
      * @param flags Additional option flags.  Use {@link #GET_META_DATA} to
@@ -2433,6 +2461,8 @@ public abstract class PackageManager {
      *
      * @return Returns a {@link PermissionGroupInfo} containing information
      * about the permission.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
     public abstract PermissionGroupInfo getPermissionGroupInfo(String name,
             @PermissionGroupInfoFlags int flags) throws NameNotFoundException;
@@ -2453,9 +2483,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular
      * package/application.
      *
-     * <p>Throws {@link NameNotFoundException} if an application with the given
-     * package name cannot be found on the system.
-     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of an
      *                    application.
      * @param flags Additional option flags. Use any combination of
@@ -2471,6 +2498,8 @@ public abstract class PackageManager {
      *         installed applications as well as applications
      *         with data directory ie applications which had been
      *         deleted with {@code DONT_DELETE_DATA} flag set).
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
@@ -2483,9 +2512,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular activity
      * class.
      *
-     * <p>Throws {@link NameNotFoundException} if an activity with the given
-     * class name cannot be found on the system.
-     *
      * @param component The full component name (i.e.
      * com.google.apps.contacts/com.google.apps.contacts.ContactsList) of an Activity
      * class.
@@ -2494,6 +2520,8 @@ public abstract class PackageManager {
      * to modify the data (in ApplicationInfo) returned.
      *
      * @return {@link ActivityInfo} containing information about the activity.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      *
      * @see #GET_INTENT_FILTERS
      * @see #GET_META_DATA
@@ -2506,9 +2534,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular receiver
      * class.
      *
-     * <p>Throws {@link NameNotFoundException} if a receiver with the given
-     * class name cannot be found on the system.
-     *
      * @param component The full component name (i.e.
      * com.google.apps.calendar/com.google.apps.calendar.CalendarAlarm) of a Receiver
      * class.
@@ -2517,6 +2542,8 @@ public abstract class PackageManager {
      * to modify the data returned.
      *
      * @return {@link ActivityInfo} containing information about the receiver.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      *
      * @see #GET_INTENT_FILTERS
      * @see #GET_META_DATA
@@ -2529,9 +2556,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular service
      * class.
      *
-     * <p>Throws {@link NameNotFoundException} if a service with the given
-     * class name cannot be found on the system.
-     *
      * @param component The full component name (i.e.
      * com.google.apps.media/com.google.apps.media.BackgroundPlayback) of a Service
      * class.
@@ -2540,6 +2564,8 @@ public abstract class PackageManager {
      * to modify the data returned.
      *
      * @return ServiceInfo containing information about the service.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
@@ -2551,9 +2577,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular content
      * provider class.
      *
-     * <p>Throws {@link NameNotFoundException} if a provider with the given
-     * class name cannot be found on the system.
-     *
      * @param component The full component name (i.e.
      * com.google.providers.media/com.google.providers.media.MediaProvider) of a
      * ContentProvider class.
@@ -2562,6 +2585,8 @@ public abstract class PackageManager {
      * to modify the data returned.
      *
      * @return ProviderInfo containing information about the service.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      *
      * @see #GET_META_DATA
      * @see #GET_SHARED_LIBRARY_FILES
@@ -2676,7 +2701,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
-            int userId);
+            @UserIdInt int userId);
 
     /**
      * Check whether a particular package has been granted a particular
@@ -2988,8 +3013,9 @@ public abstract class PackageManager {
      * shared user.
      *
      * @param sharedUserName The shared user name whose uid is to be retrieved.
-     * @return Returns the uid associated with the shared user, or  NameNotFoundException
-     * if the shared user name is not being used by any installed packages
+     * @return Returns the UID associated with the shared user.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      * @hide
      */
     public abstract int getUidForSharedUser(String sharedUserName)
@@ -3185,7 +3211,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract ResolveInfo resolveActivityAsUser(Intent intent, @ResolveInfoFlags int flags,
-            int userId);
+            @UserIdInt int userId);
 
     /**
      * Retrieve all activities that can be performed for the given intent.
@@ -3232,7 +3258,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentActivitiesAsUser(Intent intent,
-            @ResolveInfoFlags int flags, int userId);
+            @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /**
      * Retrieve a set of activities that should be presented to the user as
@@ -3301,7 +3327,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
-            @ResolveInfoFlags int flags, int userId);
+            @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /**
      * Determine the best service to handle for a given Intent.
@@ -3356,11 +3382,11 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract List<ResolveInfo> queryIntentServicesAsUser(Intent intent,
-            @ResolveInfoFlags int flags, int userId);
+            @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /** {@hide} */
     public abstract List<ResolveInfo> queryIntentContentProvidersAsUser(
-            Intent intent, @ResolveInfoFlags int flags, int userId);
+            Intent intent, @ResolveInfoFlags int flags, @UserIdInt int userId);
 
     /**
      * Retrieve all providers that can match the given intent.
@@ -3401,7 +3427,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract ProviderInfo resolveContentProviderAsUser(String name,
-            @ComponentInfoFlags int flags, int userId);
+            @ComponentInfoFlags int flags, @UserIdInt int userId);
 
     /**
      * Retrieve content provider information.
@@ -3428,9 +3454,6 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular
      * instrumentation class.
      *
-     * <p>Throws {@link NameNotFoundException} if instrumentation with the
-     * given class name cannot be found on the system.
-     *
      * @param className The full name (i.e.
      *                  com.google.apps.contacts.InstrumentList) of an
      *                  Instrumentation class.
@@ -3438,6 +3461,8 @@ public abstract class PackageManager {
      *
      * @return InstrumentationInfo containing information about the
      *         instrumentation.
+     * @throws NameNotFoundException if a package with the given name cannot be
+     *             found on the system.
      */
     public abstract InstrumentationInfo getInstrumentationInfo(ComponentName className,
             @InstrumentationInfoFlags int flags) throws NameNotFoundException;
@@ -3860,8 +3885,8 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /** @hide */
-    public abstract Resources getResourcesForApplicationAsUser(String appPackageName, int userId)
-            throws NameNotFoundException;
+    public abstract Resources getResourcesForApplicationAsUser(String appPackageName,
+            @UserIdInt int userId) throws NameNotFoundException;
 
     /**
      * Retrieve overall information about an application package defined
@@ -4061,7 +4086,7 @@ public abstract class PackageManager {
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     public abstract void installPackageAsUser(
             Uri packageURI, PackageInstallObserver observer, int flags,
-            String installerPackageName, int userId);
+            String installerPackageName, @UserIdInt int userId);
 
     /**
      * Similar to
@@ -4134,7 +4159,7 @@ public abstract class PackageManager {
      @RequiresPermission(anyOf = {
             Manifest.permission.INSTALL_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public abstract int installExistingPackageAsUser(String packageName, int userId)
+    public abstract int installExistingPackageAsUser(String packageName, @UserIdInt int userId)
             throws NameNotFoundException;
 
     /**
@@ -4232,7 +4257,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract int getIntentVerificationStatusAsUser(String packageName, int userId);
+    public abstract int getIntentVerificationStatusAsUser(String packageName, @UserIdInt int userId);
 
     /**
      * Allow to change the status of a Intent Verification status for all IntentFilter of an App.
@@ -4255,7 +4280,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract boolean updateIntentVerificationStatusAsUser(String packageName, int status,
-            int userId);
+            @UserIdInt int userId);
 
     /**
      * Get the list of IntentFilterVerificationInfo for a specific package and User.
@@ -4296,7 +4321,7 @@ public abstract class PackageManager {
      * @hide
      */
     @TestApi
-    public abstract String getDefaultBrowserPackageNameAsUser(int userId);
+    public abstract String getDefaultBrowserPackageNameAsUser(@UserIdInt int userId);
 
     /**
      * Set the default Browser package name for a specific user.
@@ -4310,7 +4335,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId);
+    public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName,
+            @UserIdInt int userId);
 
     /**
      * Change the installer associated with a given package.  There are limitations
@@ -4369,7 +4395,7 @@ public abstract class PackageManager {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     public abstract void deletePackageAsUser(
-            String packageName, IPackageDeleteObserver observer, int flags, int userId);
+            String packageName, IPackageDeleteObserver observer, int flags, @UserIdInt int userId);
 
     /**
      * Retrieve the package name of the application that installed a package. This identifies
@@ -4493,7 +4519,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract void getPackageSizeInfoAsUser(String packageName, int userId,
+    public abstract void getPackageSizeInfoAsUser(String packageName, @UserIdInt int userId,
             IPackageStatsObserver observer);
 
     /**
@@ -4583,7 +4609,7 @@ public abstract class PackageManager {
      * @hide
      */
     public void addPreferredActivityAsUser(IntentFilter filter, int match,
-            ComponentName[] set, ComponentName activity, int userId) {
+            ComponentName[] set, ComponentName activity, @UserIdInt int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -4617,7 +4643,7 @@ public abstract class PackageManager {
      */
     @Deprecated
     public void replacePreferredActivityAsUser(IntentFilter filter, int match,
-           ComponentName[] set, ComponentName activity, int userId) {
+           ComponentName[] set, ComponentName activity, @UserIdInt int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -4845,7 +4871,7 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract boolean setPackageSuspendedAsUser(
-            String packageName, boolean suspended, int userId);
+            String packageName, boolean suspended, @UserIdInt int userId);
 
     /** {@hide} */
     public static boolean isMoveStatusFinished(int status) {

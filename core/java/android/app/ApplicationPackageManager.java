@@ -213,10 +213,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public int[] getPackageGids(String packageName)
+    public int[] getPackageGids(String packageName) throws NameNotFoundException {
+        return getPackageGids(packageName, 0);
+    }
+
+    @Override
+    public int[] getPackageGids(String packageName, int flags)
             throws NameNotFoundException {
         try {
-            int[] gids = mPM.getPackageGids(packageName, mContext.getUserId());
+            int[] gids = mPM.getPackageGidsEtc(packageName, flags, mContext.getUserId());
             if (gids != null) {
                 return gids;
             }
@@ -228,10 +233,20 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public int getPackageUidAsUser(String packageName, int userHandle)
+    public int getPackageUid(String packageName, int flags) throws NameNotFoundException {
+        return getPackageUidAsUser(packageName, flags, mContext.getUserId());
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, int userId) throws NameNotFoundException {
+        return getPackageUidAsUser(packageName, 0, userId);
+    }
+
+    @Override
+    public int getPackageUidAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
         try {
-            int uid = mPM.getPackageUid(packageName, userHandle);
+            int uid = mPM.getPackageUidEtc(packageName, flags, userId);
             if (uid >= 0) {
                 return uid;
             }

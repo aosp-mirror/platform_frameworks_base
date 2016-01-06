@@ -96,8 +96,24 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
-
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int[] getPackageGids(String packageName, int flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getPackageUid(String packageName, int flags) throws NameNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public int getPackageUidAsUser(String packageName, int flags, int userHandle)
+            throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
 
