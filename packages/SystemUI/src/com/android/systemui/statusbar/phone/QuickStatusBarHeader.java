@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -135,7 +134,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         mNextAlarm = nextAlarm;
-        Log.d(TAG, "Got alarm update " + (nextAlarm != null));
         if (nextAlarm != null) {
             mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
         }
@@ -179,10 +177,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private void updateListeners() {
         if (mListening) {
-            Log.d(TAG, "Listening for Alarms");
             mNextAlarmController.addStateChangedCallback(this);
         } else {
-            Log.d(TAG, "Not listening for Alarms");
             mNextAlarmController.removeStateChangedCallback(this);
         }
     }

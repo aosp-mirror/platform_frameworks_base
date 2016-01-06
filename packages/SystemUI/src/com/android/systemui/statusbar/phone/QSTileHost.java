@@ -332,7 +332,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);
-        else throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
+        else {
+            Log.w(TAG, "Bad tile spec: " + tileSpec);
+            return null;
+        }
     }
 
     public static List<String> loadTileSpecs(Context context, String tileList) {
