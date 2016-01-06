@@ -22464,6 +22464,41 @@ package android.mtp {
     field public static final int FORMAT_WMV = 47489; // 0xb981
     field public static final int FORMAT_WPL_PLAYLIST = 47632; // 0xba10
     field public static final int FORMAT_XML_DOCUMENT = 47746; // 0xba82
+    field public static final int OPERATION_CLOSE_SESSION = 4099; // 0x1003
+    field public static final int OPERATION_COPY_OBJECT = 4122; // 0x101a
+    field public static final int OPERATION_DELETE_OBJECT = 4107; // 0x100b
+    field public static final int OPERATION_FORMAT_STORE = 4111; // 0x100f
+    field public static final int OPERATION_GET_DEVICE_INFO = 4097; // 0x1001
+    field public static final int OPERATION_GET_DEVICE_PROP_DESC = 4116; // 0x1014
+    field public static final int OPERATION_GET_DEVICE_PROP_VALUE = 4117; // 0x1015
+    field public static final int OPERATION_GET_NUM_OBJECTS = 4102; // 0x1006
+    field public static final int OPERATION_GET_OBJECT = 4105; // 0x1009
+    field public static final int OPERATION_GET_OBJECT_HANDLES = 4103; // 0x1007
+    field public static final int OPERATION_GET_OBJECT_INFO = 4104; // 0x1008
+    field public static final int OPERATION_GET_OBJECT_PROPS_SUPPORTED = 38913; // 0x9801
+    field public static final int OPERATION_GET_OBJECT_PROP_DESC = 38914; // 0x9802
+    field public static final int OPERATION_GET_OBJECT_PROP_VALUE = 38915; // 0x9803
+    field public static final int OPERATION_GET_OBJECT_REFERENCES = 38928; // 0x9810
+    field public static final int OPERATION_GET_PARTIAL_OBJECT = 4123; // 0x101b
+    field public static final int OPERATION_GET_STORAGE_INFO = 4101; // 0x1005
+    field public static final int OPERATION_GET_STORAGE_I_DS = 4100; // 0x1004
+    field public static final int OPERATION_GET_THUMB = 4106; // 0x100a
+    field public static final int OPERATION_INITIATE_CAPTURE = 4110; // 0x100e
+    field public static final int OPERATION_INITIATE_OPEN_CAPTURE = 4124; // 0x101c
+    field public static final int OPERATION_MOVE_OBJECT = 4121; // 0x1019
+    field public static final int OPERATION_OPEN_SESSION = 4098; // 0x1002
+    field public static final int OPERATION_POWER_DOWN = 4115; // 0x1013
+    field public static final int OPERATION_RESET_DEVICE = 4112; // 0x1010
+    field public static final int OPERATION_RESET_DEVICE_PROP_VALUE = 4119; // 0x1017
+    field public static final int OPERATION_SELF_TEST = 4113; // 0x1011
+    field public static final int OPERATION_SEND_OBJECT = 4109; // 0x100d
+    field public static final int OPERATION_SEND_OBJECT_INFO = 4108; // 0x100c
+    field public static final int OPERATION_SET_DEVICE_PROP_VALUE = 4118; // 0x1016
+    field public static final int OPERATION_SET_OBJECT_PROP_VALUE = 38916; // 0x9804
+    field public static final int OPERATION_SET_OBJECT_PROTECTION = 4114; // 0x1012
+    field public static final int OPERATION_SET_OBJECT_REFERENCES = 38929; // 0x9811
+    field public static final int OPERATION_SKIP = 38944; // 0x9820
+    field public static final int OPERATION_TERMINATE_OPEN_CAPTURE = 4120; // 0x1018
     field public static final int PROTECTION_STATUS_NONE = 0; // 0x0
     field public static final int PROTECTION_STATUS_NON_TRANSFERABLE_DATA = 32771; // 0x8003
     field public static final int PROTECTION_STATUS_READ_ONLY = 32769; // 0x8001
@@ -22497,6 +22532,7 @@ package android.mtp {
   public class MtpDeviceInfo {
     method public final java.lang.String getManufacturer();
     method public final java.lang.String getModel();
+    method public final int[] getOperationsSupported();
     method public final java.lang.String getSerialNumber();
     method public final java.lang.String getVersion();
   }

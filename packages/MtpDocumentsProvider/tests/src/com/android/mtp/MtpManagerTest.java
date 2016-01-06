@@ -21,9 +21,11 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
+import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -71,9 +73,16 @@ public class MtpManagerTest extends InstrumentationTestCase {
                 });
         final Thread thread = new Thread(future);
         thread.start();
-        Thread.sleep(TIMEOUT_MS);
+        SystemClock.sleep(TIMEOUT_MS);
         signal.cancel();
         assertTrue(future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
+    public void testOperationsSupported() {
+        final MtpDeviceRecord[] records = mManager.getDevices();
+        assertEquals(1, records.length);
+        assertNotNull(records[0].operationsSupported);
+        getInstrumentation().show(Arrays.toString(records[0].operationsSupported));
     }
 
     private Context getContext() {

@@ -24,6 +24,7 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpConstants;
 import android.mtp.MtpDevice;
+import android.mtp.MtpDeviceInfo;
 import android.mtp.MtpEvent;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
@@ -123,9 +124,11 @@ class MtpManager {
             if (!isMtpDevice(device)) {
                 continue;
             }
-            final boolean opened = mDevices.get(device.getDeviceId()) != null;
+            final MtpDevice mtpDevice = mDevices.get(device.getDeviceId());
+            final boolean opened = mtpDevice != null;
             final String name = device.getProductName();
             MtpRoot[] roots;
+            int[] operationsSupported = null;
             if (opened) {
                 try {
                     roots = getRoots(device.getDeviceId());
@@ -136,10 +139,19 @@ class MtpManager {
                     // the device is physically connected.
                     roots = new MtpRoot[0];
                 }
+                final MtpDeviceInfo info = mtpDevice.getDeviceInfo();
+                if (info != null) {
+                    operationsSupported = mtpDevice.getDeviceInfo().getOperationsSupported();
+                }
+                if (operationsSupported == null) {
+                    operationsSupported = new int[0];
+                }
             } else {
                 roots = new MtpRoot[0];
+                operationsSupported = new int[0];
             }
-            devices.add(new MtpDeviceRecord(device.getDeviceId(), name, opened, roots));
+            devices.add(new MtpDeviceRecord(
+                    device.getDeviceId(), name, opened, roots, operationsSupported));
         }
         return devices.toArray(new MtpDeviceRecord[devices.size()]);
     }

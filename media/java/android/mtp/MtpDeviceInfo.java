@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import android.annotation.Nullable;
+
 /**
  * This class encapsulates information about an MTP device.
  * This corresponds to the DeviceInfo Dataset described in
@@ -27,6 +29,7 @@ public class MtpDeviceInfo {
     private String mModel;
     private String mVersion;
     private String mSerialNumber;
+    private int[] mOperationsSupported;
 
     // only instantiated via JNI
     private MtpDeviceInfo() {
@@ -66,5 +69,14 @@ public class MtpDeviceInfo {
      */
     public final String getSerialNumber() {
         return mSerialNumber;
+    }
+
+    /**
+     * Returns operation code supported by the device.
+     *
+     * @return supported operation code
+     */
+    public final @Nullable int[] getOperationsSupported() {
+        return mOperationsSupported;
     }
 }

@@ -21,11 +21,14 @@ class MtpDeviceRecord {
     public final String name;
     public final boolean opened;
     public final MtpRoot[] roots;
+    public final int[] operationsSupported;
 
-    MtpDeviceRecord(int deviceId, String name, boolean opened, MtpRoot[] roots) {
+    MtpDeviceRecord(
+            int deviceId, String name, boolean opened, MtpRoot[] roots, int[] operationsSupported) {
         this.deviceId = deviceId;
         this.name = name;
         this.opened = opened;
         this.roots = roots;
+        this.operationsSupported = operationsSupported;
     }
 }

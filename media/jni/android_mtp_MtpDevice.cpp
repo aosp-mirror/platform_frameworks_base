@@ -27,6 +27,8 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "ScopedPrimitiveArray.h"
+
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 #include "nativehelper/ScopedLocalRef.h"
@@ -63,6 +65,7 @@ static jfieldID field_deviceInfo_manufacturer;
 static jfieldID field_deviceInfo_model;
 static jfieldID field_deviceInfo_version;
 static jfieldID field_deviceInfo_serialNumber;
+static jfieldID field_deviceInfo_operationsSupported;
 
 // MtpStorageInfo fields
 static jfieldID field_storageInfo_storageId;
@@ -234,6 +237,17 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
     if (deviceInfo->mSerial)
         env->SetObjectField(info, field_deviceInfo_serialNumber,
             env->NewStringUTF(deviceInfo->mSerial));
+    if (deviceInfo->mOperations) {
+        const size_t size = deviceInfo->mOperations->size();
+        const jintArray operations = env->NewIntArray(size);
+        {
+            ScopedIntArrayRW elements(env, operations);
+            for (size_t i = 0; i < size; ++i) {
+                elements[i] = deviceInfo->mOperations->itemAt(i);
+            }
+        }
+        env->SetObjectField(info, field_deviceInfo_operationsSupported, operations);
+    }
 
     delete deviceInfo;
     return info;
@@ -645,6 +659,11 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
     field_deviceInfo_serialNumber = env->GetFieldID(clazz, "mSerialNumber", "Ljava/lang/String;");
     if (field_deviceInfo_serialNumber == NULL) {
         ALOGE("Can't find MtpDeviceInfo.mSerialNumber");
+        return -1;
+    }
+    field_deviceInfo_operationsSupported = env->GetFieldID(clazz, "mOperationsSupported", "[I");
+    if (field_deviceInfo_operationsSupported == NULL) {
+        ALOGE("Can't find MtpDeviceInfo.mOperationsSupported");
         return -1;
     }
     clazz_deviceInfo = (jclass)env->NewGlobalRef(clazz);

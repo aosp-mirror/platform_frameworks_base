@@ -610,4 +610,75 @@ public final class MtpConstants {
     public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 0xC802;
     /** Event code for OBJECT_REFERENCES_CHANGED event */
     public static final int EVENT_OBJECT_REFERENCES_CHANGED = 0xC803;
+
+    /** Operation code for GetDeviceInfo */
+    public static final int OPERATION_GET_DEVICE_INFO = 0x1001;
+    /** Operation code for OpenSession */
+    public static final int OPERATION_OPEN_SESSION = 0x1002;
+    /** Operation code for CloseSession */
+    public static final int OPERATION_CLOSE_SESSION = 0x1003;
+    /** Operation code for GetStorageIDs */
+    public static final int OPERATION_GET_STORAGE_I_DS = 0x1004;
+    /** Operation code for GetStorageInfo */
+    public static final int OPERATION_GET_STORAGE_INFO = 0x1005;
+    /** Operation code for GetNumObjects */
+    public static final int OPERATION_GET_NUM_OBJECTS = 0x1006;
+    /** Operation code for GetObjectHandles */
+    public static final int OPERATION_GET_OBJECT_HANDLES = 0x1007;
+    /** Operation code for GetObjectInfo */
+    public static final int OPERATION_GET_OBJECT_INFO = 0x1008;
+    /** Operation code for GetObject */
+    public static final int OPERATION_GET_OBJECT = 0x1009;
+    /** Operation code for GetThumb */
+    public static final int OPERATION_GET_THUMB = 0x100A;
+    /** Operation code for DeleteObject */
+    public static final int OPERATION_DELETE_OBJECT = 0x100B;
+    /** Operation code for SendObjectInfo */
+    public static final int OPERATION_SEND_OBJECT_INFO = 0x100C;
+    /** Operation code for SendObject */
+    public static final int OPERATION_SEND_OBJECT = 0x100D;
+    /** Operation code for InitiateCapture */
+    public static final int OPERATION_INITIATE_CAPTURE = 0x100E;
+    /** Operation code for FormatStore */
+    public static final int OPERATION_FORMAT_STORE = 0x100F;
+    /** Operation code for ResetDevice */
+    public static final int OPERATION_RESET_DEVICE = 0x1010;
+    /** Operation code for SelfTest */
+    public static final int OPERATION_SELF_TEST = 0x1011;
+    /** Operation code for SetObjectProtection */
+    public static final int OPERATION_SET_OBJECT_PROTECTION = 0x1012;
+    /** Operation code for PowerDown */
+    public static final int OPERATION_POWER_DOWN = 0x1013;
+    /** Operation code for GetDevicePropDesc */
+    public static final int OPERATION_GET_DEVICE_PROP_DESC = 0x1014;
+    /** Operation code for GetDevicePropValue */
+    public static final int OPERATION_GET_DEVICE_PROP_VALUE = 0x1015;
+    /** Operation code for SetDevicePropValue */
+    public static final int OPERATION_SET_DEVICE_PROP_VALUE = 0x1016;
+    /** Operation code for ResetDevicePropValue */
+    public static final int OPERATION_RESET_DEVICE_PROP_VALUE = 0x1017;
+    /** Operation code for TerminateOpenCapture */
+    public static final int OPERATION_TERMINATE_OPEN_CAPTURE = 0x1018;
+    /** Operation code for MoveObject */
+    public static final int OPERATION_MOVE_OBJECT = 0x1019;
+    /** Operation code for CopyObject */
+    public static final int OPERATION_COPY_OBJECT = 0x101A;
+    /** Operation code for GetPartialObject */
+    public static final int OPERATION_GET_PARTIAL_OBJECT = 0x101B;
+    /** Operation code for InitiateOpenCapture */
+    public static final int OPERATION_INITIATE_OPEN_CAPTURE = 0x101C;
+    /** Operation code for GetObjectPropsSupported */
+    public static final int OPERATION_GET_OBJECT_PROPS_SUPPORTED = 0x9801;
+    /** Operation code for GetObjectPropDesc */
+    public static final int OPERATION_GET_OBJECT_PROP_DESC = 0x9802;
+    /** Operation code for GetObjectPropValue */
+    public static final int OPERATION_GET_OBJECT_PROP_VALUE = 0x9803;
+    /** Operation code for SetObjectPropValue */
+    public static final int OPERATION_SET_OBJECT_PROP_VALUE = 0x9804;
+    /** Operation code for GetObjectReferences */
+    public static final int OPERATION_GET_OBJECT_REFERENCES = 0x9810;
+    /** Operation code for SetObjectReferences */
+    public static final int OPERATION_SET_OBJECT_REFERENCES = 0x9811;
+    /** Operation code for Skip */
+    public static final int OPERATION_SKIP = 0x9820;
 }

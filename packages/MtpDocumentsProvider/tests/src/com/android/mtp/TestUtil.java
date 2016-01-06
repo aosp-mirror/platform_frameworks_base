@@ -19,9 +19,12 @@ package com.android.mtp;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.SystemClock;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Objects;
+
 import junit.framework.Assert;
 
 /**
@@ -37,31 +40,33 @@ final class TestUtil {
     static UsbDevice setupMtpDevice(
             TestResultInstrumentation instrumentation,
             UsbManager usbManager,
-            MtpManager manager) throws InterruptedException, IOException {
-        for (int i = 0; i < 2; i++) {
+            MtpManager manager) {
+        while (true) {
             final UsbDevice device = findMtpDevice(instrumentation, usbManager, manager);
             try {
+                manager.openDevice(device.getDeviceId());
                 waitForStorages(instrumentation, manager, device.getDeviceId());
                 return device;
             } catch (IOException exp) {
+                instrumentation.show(Objects.toString(exp.getMessage()));
+                SystemClock.sleep(1000);
                 // When the MTP device is Android, and it changes the USB device type from
                 // "Charging" to "MTP", the device ID will be updated. We need to find a device
                 // again.
                 continue;
             }
         }
-        throw new IOException("Failed to obtain MTP devices");
     }
 
     private static UsbDevice findMtpDevice(
             TestResultInstrumentation instrumentation,
             UsbManager usbManager,
-            MtpManager manager) throws InterruptedException {
+            MtpManager manager) {
         while (true) {
             final HashMap<String,UsbDevice> devices = usbManager.getDeviceList();
             if (devices.size() == 0) {
                 instrumentation.show("Wait for devices.");
-                Thread.sleep(1000);
+                SystemClock.sleep(1000);
                 continue;
             }
             final UsbDevice device = devices.values().iterator().next();
@@ -84,7 +89,7 @@ final class TestUtil {
                     connection.releaseInterface(device.getInterface(i));
                 }
                 connection.close();
-                Thread.sleep(1000);
+                SystemClock.sleep(1000);
                 continue;
             }
             return device;
@@ -94,7 +99,7 @@ final class TestUtil {
     private static void waitForStorages(
             TestResultInstrumentation instrumentation,
             MtpManager manager,
-            int deviceId) throws InterruptedException, IOException {
+            int deviceId) throws IOException {
         while (true) {
             MtpDeviceRecord device = null;
             for (final MtpDeviceRecord deviceCandidate : manager.getDevices()) {
@@ -108,7 +113,7 @@ final class TestUtil {
             }
             if (device.roots.length == 0) {
                 instrumentation.show("Wait for storages.");
-                Thread.sleep(1000);
+                SystemClock.sleep(1000);
                 continue;
             }
             return;
