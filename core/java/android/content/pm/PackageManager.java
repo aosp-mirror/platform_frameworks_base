@@ -1947,7 +1947,6 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: This device supports ethernet.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
