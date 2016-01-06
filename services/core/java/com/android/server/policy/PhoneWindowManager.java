@@ -4062,7 +4062,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             cf.top = vf.top = mStableTop;
             cf.right = vf.right = mStableRight;
             vf.bottom = mStableBottom;
-            cf.bottom = mContentBottom;
+
+            if (adjust == SOFT_INPUT_ADJUST_RESIZE) {
+                cf.bottom = mContentBottom;
+            } else {
+                cf.bottom = mDockBottom;
+                vf.bottom = mContentBottom;
+            }
         } else {
 
             // Default policy decor for the default display

@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -174,8 +175,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public void focus() {
-        mEditText.setInnerFocusable(true);
         mController.addRemoteInput(mEntry);
+        mEditText.setInnerFocusable(true);
         mEditText.mShowImeOnInputConnection = true;
         mEditText.setText(mEntry.remoteInputText);
         mEditText.setSelection(mEditText.getText().length());
@@ -254,6 +255,20 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         protected void onFocusLost() {
             super.onFocusLost();
             defocusIfNeeded();
+        }
+
+        @Override
+        public boolean requestRectangleOnScreen(Rect r) {
+            r.top = mScrollY;
+            r.bottom = mScrollY + (mBottom - mTop);
+            return super.requestRectangleOnScreen(r);
+        }
+
+        @Override
+        public void getFocusedRect(Rect r) {
+            super.getFocusedRect(r);
+            r.top = mScrollY;
+            r.bottom = mScrollY + (mBottom - mTop);
         }
 
         @Override
