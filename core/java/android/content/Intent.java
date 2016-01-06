@@ -3604,6 +3604,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_USER_ID = "android.intent.extra.USER_ID";
 
     /**
+     * An int representing the task id to be retrieved. This is used when a launch from recents is
+     * intercepted by another action such as credentials confirmation to remember which task should
+     * be resumed when complete.
+     *
+     * @hide
+     */
+    public static final String EXTRA_TASK_ID = "android.intent.extra.TASK_ID";
+
+    /**
      * An Intent[] describing additional, alternate choices you would like shown with
      * {@link #ACTION_CHOOSER}.
      *

@@ -22,6 +22,7 @@ import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
+import static android.content.Context.KEYGUARD_SERVICE;
 import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -43,6 +44,7 @@ import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -73,6 +75,7 @@ import android.util.SparseIntArray;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.pm.UserManagerService;
 
 import java.io.PrintWriter;
@@ -1284,6 +1287,20 @@ final class UserController {
 
     int[] getCurrentProfileIdsLocked() {
         return mCurrentProfileIds;
+    }
+
+    /**
+     * Returns whether the given user requires credential entry at this time. This is used to
+     * intercept activity launches for work apps when the Work Challenge is present.
+     */
+    boolean shouldConfirmCredentials(int userId) {
+        final UserInfo user = getUserInfo(userId);
+        if (!user.isManagedProfile() || !LockPatternUtils.isSeparateWorkChallengeEnabled()) {
+            return false;
+        }
+        final KeyguardManager km = (KeyguardManager) mService.mContext
+                .getSystemService(KEYGUARD_SERVICE);
+        return km.isDeviceLocked(user.id);
     }
 
     void dump(PrintWriter pw, boolean dumpAll) {
