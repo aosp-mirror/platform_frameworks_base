@@ -60,6 +60,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -103,6 +104,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String NAME = "BUG, Y U NO REPORT?";
     private static final String NEW_NAME = "Bug_Forrest_Bug";
     private static final String TITLE = "Wimbugdom Champion 2015";
+
+    private static final String NO_DESCRIPTION = null;
+    private static final String NO_NAME = null;
+    private static final String NO_SCREENSHOT = null;
+    private static final String NO_TITLE = null;
+
     private String mDescription;
 
     private String mPlainTextPath;
@@ -157,8 +164,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
-                null, 1, true);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, ZIP_FILE,
+                NAME, NO_TITLE, NO_DESCRIPTION, 1, true);
 
         assertServiceNotRunning();
     }
@@ -174,13 +181,14 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
-                null, 2, true);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, ZIP_FILE,
+                NAME, NO_TITLE, NO_DESCRIPTION, 2, true);
 
         assertServiceNotRunning();
     }
 
-    public void testProgress_changeDetails() throws Exception {
+    public void testProgress_changeDetailsInvalidInput() throws Exception {
+
         resetProperties();
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
@@ -219,8 +227,47 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
                 mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NEW_NAME, TITLE,
-                mDescription, 1, true);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
+                NEW_NAME, TITLE, mDescription, 1, true);
+
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_changeDetailsPlainBugreport() throws Exception {
+        changeDetailsTest(true);
+    }
+
+    public void testProgress_changeDetailsZippedBugreport() throws Exception {
+        changeDetailsTest(false);
+    }
+
+    public void changeDetailsTest(boolean plainText) throws Exception {
+
+        resetProperties();
+        sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot);
+
+        // Check initial name.
+        String actualName = detailsUi.nameField.getText().toString();
+        assertEquals("Wrong value on field 'name'", NAME, actualName);
+
+        // Change fields.
+        detailsUi.reOpen();
+        detailsUi.nameField.setText(NEW_NAME);
+        detailsUi.titleField.setText(TITLE);
+        detailsUi.descField.setText(mDescription);
+
+        detailsUi.clickOk();
+
+        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
+        assertProgressNotification(NEW_NAME, "0.00%");
+
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID,
+                plainText? mPlainTextPath : mZipPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
+                NEW_NAME, TITLE, mDescription, 1, true);
 
         assertServiceNotRunning();
     }
@@ -270,8 +317,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent();
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, TITLE,
-                mDescription, 1, waitScreenshot);
+        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
+                NAME, TITLE, mDescription, 1, waitScreenshot);
 
         assertServiceNotRunning();
     }
@@ -296,7 +343,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Share the bugreport.
         mUiBot.chooseActivity(UI_NAME);
         Bundle extras = mListener.getExtras();
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
 
         // Make sure it's hidden now.
         int newState = BugreportPrefs.getWarningState(mContext, BugreportPrefs.STATE_UNKNOWN);
@@ -314,13 +361,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testBugreportFinished_plainBugreportAndNoScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, null);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, NO_SCREENSHOT);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
     public void testBugreportFinished_zippedBugreportAndNoScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, null);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, null);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, NO_SCREENSHOT);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
     private void cancelExistingNotifications() {
@@ -426,8 +473,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
-        assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, null, ZIP_FILE,
-                null, 0, false);
+        assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, ZIP_FILE,
+                NO_NAME, NO_TITLE, NO_DESCRIPTION, 0, false);
     }
 
     /**
@@ -437,14 +484,16 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * @param bugreportContent expected content in the bugreport file
      * @param screenshotContent expected content in the screenshot file (sent by dumpstate), if any
      * @param pid emulated dumpstate pid
-     * @param name bugreport name as provided by the user
-     * @param title bugreport name as provided by the user (or received by dumpstate)
+     * @param name expected subject
+     * @param name bugreport name as provided by the user (or received by dumpstate)
+     * @param title bugreport name as provided by the user
      * @param description bugreport description as provided by the user
      * @param numberScreenshots expected number of screenshots taken by Shell.
      * @param renamedScreenshots whether the screenshots are expected to be renamed
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
-            String screenshotContent, int pid, String name, String title, String description,
+            String screenshotContent, int pid, String subject,
+            String name, String title, String description,
             int numberScreenshots, boolean renamedScreenshots) throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
         assertContainsRegex("missing build info",
@@ -455,7 +504,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             assertContainsRegex("missing description", description, body);
         }
 
-        assertEquals("wrong subject", title, extras.getString(Intent.EXTRA_SUBJECT));
+        assertEquals("wrong subject", subject, extras.getString(Intent.EXTRA_SUBJECT));
 
         List<Uri> attachments = extras.getParcelableArrayList(Intent.EXTRA_STREAM);
         int expectedNumberScreenshots = numberScreenshots;
@@ -478,6 +527,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
         assertNotNull("did not get .zip attachment", zipUri);
         assertZipContent(zipUri, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        if (!TextUtils.isEmpty(title)) {
+            assertZipContent(zipUri, "title.txt", title);
+        }
+        if (!TextUtils.isEmpty(description)) {
+            assertZipContent(zipUri, "description.txt", description);
+        }
 
         // URI of the screenshot taken by dumpstate.
         Uri externalScreenshotUri = null;
