@@ -575,4 +575,14 @@ TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol)
     EXPECT_EQ(SymbolState::kUndefined, entry->symbolStatus.state);
 }
 
+TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
+    std::string input = R"EOF(<item name="foo" type="integer" format="float">0.3</item>)EOF";
+    ASSERT_TRUE(testParse(input));
+
+    BinaryPrimitive* val = test::getValue<BinaryPrimitive>(&mTable, u"@integer/foo");
+    ASSERT_NE(nullptr, val);
+
+    EXPECT_EQ(uint32_t(android::Res_value::TYPE_FLOAT), val->value.dataType);
+}
+
 } // namespace aapt
