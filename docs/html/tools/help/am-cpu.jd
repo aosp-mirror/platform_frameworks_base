@@ -1,7 +1,12 @@
 page.title=CPU Monitor
 parent.title=Android Monitor
 parent.link=android-monitor.html
-page.tags=monitor
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the CPU Monitor to display CPU usage in real time and the percentage of total CPU time (including all cores) used in user and kernel mode.
+page.image=tools/help/thumbnails/am-cpumon.png
+page.article=true
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -9,62 +14,8 @@ page.tags=monitor
   <h2>In this document</h2>
 <ol>
   <li><a href="#running">Displaying a Running App in the CPU Monitor</a></li>
-  <li><a href="#trace">Performing a Method Trace in the CPU Monitor</a></li>
-  <li><a href="#viewtrace">Viewing a Saved Method Trace</a></li>
-  <li><a href="#sorttrace">Sorting Method Trace Data</a></li>
-  <li><a href="#renametrace">Renaming a Method Trace File</a></li>
-  <li><a href="#locatetrace">Locating a Method Trace File on Disk</a></li>
-  <li><a href="#deletetrace">Deleting a Method Trace File</a></li>
+  <li><a href="#snapshot">Recording Call Stack Changes</a></li>
 </ol>
-
- <h2>See also</h2>
-  <ol>
-    <li>
-        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
-      </li>
-    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
-  </ol>
-
-
-<h2>
-  Dependencies and Prerequisites
-</h2>
-
-<ul>
-  <li>Make sure your development computer detects your hardware device, which often happens
-  automatically when you connect it to a USB port.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
-    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
-    <strong>Developer Options</strong> on the device or emulator.
-  </li>
-
-  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
-  <code>build.gradle</code> file (it’s initially set by default).
-  </li>
-
-<li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-  <strong>Enable ADB Integration</strong>.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-
-</ul>
 
 </div>
 </div>
@@ -73,253 +24,66 @@ page.tags=monitor
 <p>
   The CPU Monitor lets you easily monitor the central processing unit (CPU) usage of your app. It
   displays CPU usage in real time and displays the percentage of total CPU time (including all cores)
-  used by user and kernel mode. In user mode, the code must use system APIs to access hardware or
-  memory, and crashes are usually recoverable. In kernel mode, the code can directly access
-  hardware, including memory addresses; crashes halt the device.
+  used in user and kernel mode. In user mode, the code must use system APIs to access hardware or
+  memory, has access to virtual memory addresses only, and crashes are usually
+  recoverable. In kernel mode, the code can directly access
+  hardware, including physical memory addresses; crashes halt the device.
 </p>
+
 
 <h2 id="running">
   Displaying a Running App in the CPU Monitor
 </h2>
 
 <p>
-  Follow these steps:
+  To display an app running on a particular device or emulator in the CPU Monitor:
 </p>
 
 <ol>
-  <li>Optionally connect a hardware device.
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
   </li>
-
-  <li>
-    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+ <li>Open an app project.
   </li>
-
-  <li>Click the <strong>CPU</strong> tab.
-  </li>
-
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on a hardware device or
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on a hardware device or
   emulator.
   </li>
+  <li>
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
+  </li>
+  <li>Click the <strong>Monitors</strong> tab and <a href=
+  "{@docRoot}tools/help/am-basics.html#rearranging">display the CPU Monitor</a>.
+  </li>
+
 
   <li>Enable the CPU Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect
-  it.
+    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect it.
   </li>
+
 
 <p>
   The CPU Monitor starts to display any CPU usage.
   In the graph, the y-axis displays the percentage of CPU used. The x-axis records the time elapsed
   and starts with seconds, and then minutes and seconds, and so on.
 </p>
-<img src="{@docRoot}images/tools/am-cpumon.png" style="vertical-align:sub;margin:0;width:450px" />
+<img src="{@docRoot}images/tools/am-cpumon2.png" style="vertical-align:sub;margin:0" />
   <li>To stop the CPU Monitor, click Pause <img src="{@docRoot}images/tools/am-ipause.png"
     style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> again to select
   it.
   </li>
 </ol>
 
-
-<h2 id="trace">
-  Performing a Method Trace in the CPU Monitor
+<h2 id="snapshot">
+  Recording Call Stack Changes
 </h2>
 
 <p>
-  Follow these steps:
-</p>
-
-<ol>
-  <li>
-    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display a running app in the CPU
-    Monitor</a>.
-  </li>
-
-  <li>Start a trace by clicking Start Method Tracing <img src="{@docRoot}images/tools/am-imethodtrace.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Start Method Tracing icon" /> to
-  select it.
-  </li>
-
-  <li>To stop the trace, click Stop Method Tracing <img src="{@docRoot}images/tools/am-imethodtrace.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Stop Method Tracing icon" /> to
-  deselect it.
-  </li>
-
-<p>
-  The method trace appears in the Code Editor area:
-</p>
-<img src="{@docRoot}images/tools/am-methodtrace.png" alt="Method Trace" />
-<p>
-  Android Studio creates the method trace file
-  with the filename <code>Trace_<em>yyyy.mm.dd_hh.mm.ss</em>.trace</code>
-  using the year, month, day, hour, minute, and second of the capture, for example,
-  <code>Trace_2015.11.17_14.58.48.trace</code>.
-</p>
-  <li>Specify display options:
-    <ul>
-      <li>Select a <strong>Thread</strong>.
-      </li>
-
-      <li>Select an <strong>x-axis</strong> time for the graphic and the method list:
-      </li>
-
-        <ul>
-          <li>
-            <strong>Wall Clock Time</strong> - Total CPU time elapsed between the method call and
-            return.
-          </li>
-
-          <li>
-            <strong>Thread Time</strong> - Total time during which the JRE scheduled the
-            thread during call processing. It’s less than or equal to the Wall Clock Time: less if
-            the JRE interrupted the thread, and equal if it didn’t.
-            The thread might not run continuously; when it’s not executing, that time is excluded.
-            If threads are interrupted often and it’s not by design, the interruptions affect app
-            performance. However, an example of a by-design use is synchronous operations that take
-            a long time, such as file transfers and reads from disk, where the method could be the
-            asynchronous wrapper for the synchronous reader.
-          </li>
-       </ul>
-
-        <li>
-          Optionally select <strong>Color by inclusive time</strong>.
-        </li>
-        </ul>
-
-        <p>
-          The display shows the following information:
-        </p>
-<table>
-  <tr>
-    <th scope="col">Field</th>
-    <th scope="col">Description</th>
-  </tr>
-
-  <tr>
-    <td><strong>Name</strong></td>
-    <td>The name of the method.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Invocation Count</strong></td>
-    <td>How many times the method was called.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Inclusive Time (microseconds)</strong></td>
-    <td>Time spent in the method and all of its children, either wall clock or thread time,
-          depending on your selection in the <strong>x-axis</strong> menu.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Exclusive Time (microseconds)</strong></td>
-    <td>Time spent just in the method (excluding time spent in its children), either wall clock
-          or thread time, depending on your selection in the <strong>x-axis</strong> menu.</td>
-  </tr>
-</table>
-<p class="note"><strong>Note:</strong> Running the method trace significantly affects CPU timings.
-  Use the method trace to understand the flow of the program, but not for performance timings.</p>
-        <p>
-          The graphic represents the wall clock or thread time for each method. Hover the cursor
-          over the display to receive information about the method. This information also appears
-          in the table.
-        </p>
-</ol>
-        <h2 id="viewtrace">
-          Viewing a Saved Method Trace
-        </h2>
-
-        <p>
-          After you do a method trace, Android Studio automatically stores it so you can view it
-          again. To examine the trace, follow these steps:
-        </p>
-
-        <ol>
-          <li>Click <strong>Captures</strong> in the main window.
-          </li>
-
-        <p>
-          The <em>Captures</em> window appears.
-        </p>
-
-      <li>Open the <strong>Methods Tracing</strong> folder.
-      </li>
-
-      <li>Double-click the file to view it.
-      </li>
-</ol>
-
-<h2 id="sorttrace">
-  Sorting Method Trace Data
-</h2>
-
-<p>
-  You can sort the data by method name, count, inclusive time, and exclusive time. Follow this step:
-</p>
-
-
-<ul>
-  <li>Click a column heading to sort the table by ascending or descending order.
-  </li>
-</ul>
-
-<h2 id="renametrace">
-  Renaming a Method Trace File
-</h2>
-
-<p>
-  Rename a method trace file from within Android Studio so it
-  continues to appear in the <em>Captures</em> window. Follow these steps:
-</p>
-
-<ol>
-  <li>In the <em>Captures</em> window, right-click the file and select <strong>Rename</strong>.
-  </li>
-
-  <li>In the dialog, specify the name of the file and click <strong>OK</strong>.
-  </li>
-</ol>
-
-<h2 id="locatetrace">
-  Locating a Method Trace File on Disk
-</h2>
-
-<p>
-  You can quickly discover where Android Studio stored method trace files on disk. Follow this step:
+  You can capture a record of the changes on the call stack during a particular
+  time period while the CPU Monitor is running. For more information, see
+  <a href="{@docRoot}tools/help/am-methodtrace.html">Method Trace</a>.
 </p>
 
 
 
-<ul>
-  <li>In the <em>Captures</em> window, right-click a method trace file and select <strong>Show in
-  files</strong>.
-  </li>
 
-<p>
-  Android Studio opens an operating system file browser displaying the location where the file
-  resides.
-</p>
-</ul>
-<p class="note">
-  <strong>Note:</strong> If you move a method trace file, Android Studio no longer displays the file
-  in the <em>Captures</em> window. To display it, use <strong>File</strong> &gt;
-  <strong>Open</strong>. Also, rename a file from the <em>Captures</em>
-  window and not in the operating system file browser.
-</p>
-
-<h2 id="deletetrace">
-  Deleting a Method Trace File
-</h2>
-
-<p>
-  Follow this step in Android Studio:
-</p>
-
-<ul>
-  <li>In the <em>Captures</em> window, right-click a method trace file and select
-  <strong>Delete</strong>.
-  </li>
-</ul>
-
-<p>
-  Android Studio deletes the file from the <em>Captures</em> dialog and from disk.
-</p>
