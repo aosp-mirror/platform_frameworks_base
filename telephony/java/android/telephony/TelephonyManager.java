@@ -24,6 +24,7 @@ import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.telecom.PhoneAccount;
+import android.telecom.PhoneAccountHandle;
 import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
@@ -4864,5 +4866,44 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
         }
         return null;
+    }
+
+    /**
+     * Returns the URI for the per-account voicemail ringtone set in Phone settings.
+     *
+     * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
+     * voicemail ringtone.
+     * @return The URI for the ringtone to play when receiving a voicemail from a specific
+     * PhoneAccount.
+     */
+    public Uri getVoicemailRingtoneUri(PhoneAccountHandle accountHandle) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getVoicemailRingtoneUri(accountHandle);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getVoicemailRingtoneUri", e);
+        }
+        return null;
+    }
+
+    /**
+     * Returns whether vibration is set for voicemail notification in Phone settings.
+     *
+     * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
+     * voicemail vibration setting.
+     * @return {@code true} if the vibration is set for this PhoneAccount, {@code false} otherwise.
+     */
+    public boolean isVoicemailVibrationEnabled(PhoneAccountHandle accountHandle) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isVoicemailVibrationEnabled(accountHandle);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isVoicemailVibrationEnabled", e);
+        }
+        return false;
     }
 }
