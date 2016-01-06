@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.Shared;
@@ -43,9 +44,11 @@ final class GridDocumentHolder extends DocumentHolder {
     final TextView mTitle;
     final TextView mDate;
     final TextView mSize;
-    final ImageView mIconMime;
+    final ImageView mIconMimeLg;
+    final ImageView mIconMimeSm;
     final ImageView mIconThumb;
     final IconHelper mIconHelper;
+
 
     public GridDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
         super(context, parent, R.layout.item_doc_grid);
@@ -53,8 +56,9 @@ final class GridDocumentHolder extends DocumentHolder {
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
         mDate = (TextView) itemView.findViewById(R.id.date);
         mSize = (TextView) itemView.findViewById(R.id.size);
-        mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
+        mIconMimeLg = (ImageView) itemView.findViewById(R.id.icon_mime);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
+        mIconMimeSm = (ImageView) itemView.findViewById(android.R.id.icon1);
         mIconHelper = iconHelper;
     }
 
@@ -80,13 +84,15 @@ final class GridDocumentHolder extends DocumentHolder {
 
         mIconHelper.stopLoading(mIconThumb);
 
-        mIconMime.animate().cancel();
-        mIconMime.setAlpha(1f);
+        mIconMimeLg.animate().cancel();
+        mIconMimeLg.setAlpha(1f);
         mIconThumb.animate().cancel();
         mIconThumb.setAlpha(0f);
 
+        mIconMimeSm.setImageDrawable(IconUtils.loadMimeIcon(mContext, docMimeType));
+
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
-        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime);
+        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMimeLg);
 
         if (mHideTitles) {
             mTitle.setVisibility(View.GONE);
