@@ -570,13 +570,13 @@ public class ZenModeHelper {
             ZenLog.traceConfig(reason, mConfig, config);
             final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                     getNotificationPolicy(config));
-            mConfig = config;
-            if (config.equals(mConfig)) {
+            if (!config.equals(mConfig)) {
                 dispatchOnConfigChanged();
             }
             if (policyChanged) {
                 dispatchOnPolicyChanged();
             }
+            mConfig = config;
             final String val = Integer.toString(config.hashCode());
             Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
             if (!evaluateZenMode(reason, setRingerMode)) {
