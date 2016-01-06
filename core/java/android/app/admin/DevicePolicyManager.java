@@ -4802,4 +4802,129 @@ public class DevicePolicyManager {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
         }
     }
+
+    /**
+     * Called by a device admin to set the short support message. This will
+     * be displayed to the user in settings screens where funtionality has
+     * been disabled by the admin.
+     *
+     * The message should be limited to a short statement such as
+     * "This setting is disabled by your administrator. Contact someone@example.com
+     *  for support."
+     * If the message is longer than 200 characters it may be truncated.
+     *
+     * @see #setLongSupportMessage
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param message Short message to be displayed to the user in settings or null to
+     *        clear the existing message.
+     */
+    public void setShortSupportMessage(@NonNull ComponentName admin,
+            @Nullable String message) {
+        if (mService != null) {
+            try {
+                mService.setShortSupportMessage(admin, message);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Called by a device admin to get the short support message.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)}
+     *         or null if no message has been set.
+     */
+    public String getShortSupportMessage(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getShortSupportMessage(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Called by a device admin to set the long support message. This will
+     * be displayed to the user in the device administators settings screen.
+     *
+     * @see #setShortSupportMessage
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param message Long message to be displayed to the user in settings or null to
+     *        clear the existing message.
+     */
+    public void setLongSupportMessage(@NonNull ComponentName admin,
+            @Nullable String message) {
+        if (mService != null) {
+            try {
+                mService.setLongSupportMessage(admin, message);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Called by a device admin to get the long support message.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)}
+     *         or null if no message has been set.
+     */
+    public String getLongSupportMessage(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getLongSupportMessage(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Called by the system to get the short support message.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle user id the admin is running as.
+     * @return The message set by {@link #setShortSupportMessage(ComponentName, String)}
+     *
+     * @hide
+     */
+    public String getShortSupportMessageForUser(@NonNull ComponentName admin, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getShortSupportMessageForUser(admin, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Called by the system to get the long support message.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle user id the admin is running as.
+     * @return The message set by {@link #setLongSupportMessage(ComponentName, String)}
+     *
+     * @hide
+     */
+    public String getLongSupportMessageForUser(@NonNull ComponentName admin, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getLongSupportMessageForUser(admin, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return null;
+    }
 }
