@@ -410,7 +410,7 @@ public final class PrinterInfo implements Parcelable {
          * @see PrinterInfo#STATUS_BUSY
          * @see PrinterInfo#STATUS_UNAVAILABLE
          */
-        public @Nullable Builder setStatus(@Status int status) {
+        public @NonNull Builder setStatus(@Status int status) {
             mPrototype.mStatus = status;
             return this;
         }
