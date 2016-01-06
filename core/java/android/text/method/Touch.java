@@ -150,6 +150,7 @@ public class Touch {
                     ds[0].mX = event.getX();
                     ds[0].mY = event.getY();
 
+                    int nx = widget.getScrollX() + (int) dx;
                     int ny = widget.getScrollY() + (int) dy;
 
                     int padding = widget.getTotalPaddingTop() + widget.getTotalPaddingBottom();
@@ -160,6 +161,8 @@ public class Touch {
 
                     int oldX = widget.getScrollX();
                     int oldY = widget.getScrollY();
+
+                    scrollTo(widget, layout, nx, ny);
 
                     // If we actually scrolled, then cancel the up action.
                     if (oldX != widget.getScrollX() || oldY != widget.getScrollY()) {
