@@ -16,6 +16,11 @@
 
 package android.content.res;
 
+import android.annotation.AnyRes;
+import android.annotation.ArrayRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.SparseArray;
@@ -142,80 +147,95 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /**
-     * Retrieve the string value associated with a particular resource
-     * identifier for the current configuration / skin.
+     * Retrieves the string value associated with a particular resource
+     * identifier for the current configuration.
+     *
+     * @param resId the resource identifier to load
+     * @return the string value, or {@code null}
      */
-    /*package*/ final CharSequence getResourceText(int ident) {
+    @Nullable
+    final CharSequence getResourceText(@StringRes int resId) {
         synchronized (this) {
-            TypedValue tmpValue = mValue;
-            int block = loadResourceValue(ident, (short) 0, tmpValue, true);
-            if (block >= 0) {
-                if (tmpValue.type == TypedValue.TYPE_STRING) {
-                    return mStringBlocks[block].get(tmpValue.data);
-                }
-                return tmpValue.coerceToString();
+            final TypedValue outValue = mValue;
+            if (getResourceValue(resId, 0, outValue, true)) {
+                return outValue.coerceToString();
             }
+            return null;
         }
-        return null;
     }
 
     /**
-     * Retrieve the string value associated with a particular resource
-     * identifier for the current configuration / skin.
+     * Retrieves the string value associated with a particular resource
+     * identifier for the current configuration.
+     *
+     * @param resId the resource identifier to load
+     * @param bagEntryId
+     * @return the string value, or {@code null}
      */
-    /*package*/ final CharSequence getResourceBagText(int ident, int bagEntryId) {
+    @Nullable
+    final CharSequence getResourceBagText(@StringRes int resId, int bagEntryId) {
         synchronized (this) {
-            TypedValue tmpValue = mValue;
-            int block = loadResourceBagValue(ident, bagEntryId, tmpValue, true);
-            if (block >= 0) {
-                if (tmpValue.type == TypedValue.TYPE_STRING) {
-                    return mStringBlocks[block].get(tmpValue.data);
-                }
-                return tmpValue.coerceToString();
+            final TypedValue outValue = mValue;
+            final int block = loadResourceBagValue(resId, bagEntryId, outValue, true);
+            if (block < 0) {
+                return null;
             }
+            if (outValue.type == TypedValue.TYPE_STRING) {
+                return mStringBlocks[block].get(outValue.data);
+            }
+            return outValue.coerceToString();
         }
-        return null;
     }
 
     /**
-     * Retrieve the string array associated with a particular resource
-     * identifier.
-     * @param id Resource id of the string array
+     * Retrieves the string array associated with a particular resource
+     * identifier for the current configuration.
+     *
+     * @param resId the resource identifier of the string array
+     * @return the string array, or {@code null}
      */
-    /*package*/ final String[] getResourceStringArray(final int id) {
-        String[] retArray = getArrayStringResource(id);
-        return retArray;
+    @Nullable
+    final String[] getResourceStringArray(@ArrayRes int resId) {
+        return getArrayStringResource(resId);
     }
 
-
-    /*package*/ final boolean getResourceValue(int ident,
-                                               int density,
-                                               TypedValue outValue,
-                                               boolean resolveRefs)
-    {
-        int block = loadResourceValue(ident, (short) density, outValue, resolveRefs);
-        if (block >= 0) {
-            if (outValue.type != TypedValue.TYPE_STRING) {
-                return true;
-            }
+    /**
+     * Populates {@code outValue} with the data associated a particular
+     * resource identifier for the current configuration.
+     *
+     * @param resId the resource identifier to load
+     * @param densityDpi the density bucket for which to load the resource
+     * @param outValue the typed value in which to put the data
+     * @param resolveRefs {@code true} to resolve references, {@code false}
+     *                    to leave them unresolved
+     * @return {@code true} if the data was loaded into {@code outValue},
+     *         {@code false} otherwise
+     */
+    final boolean getResourceValue(@AnyRes int resId, int densityDpi, @NonNull TypedValue outValue,
+            boolean resolveRefs) {
+        final int block = loadResourceValue(resId, (short) densityDpi, outValue, resolveRefs);
+        if (block < 0) {
+            return false;
+        }
+        if (outValue.type == TypedValue.TYPE_STRING) {
             outValue.string = mStringBlocks[block].get(outValue.data);
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
      * Retrieve the text array associated with a particular resource
      * identifier.
-     * @param id Resource id of the string array
+     *
+     * @param resId the resource id of the string array
      */
-    /*package*/ final CharSequence[] getResourceTextArray(final int id) {
-        int[] rawInfoArray = getArrayStringInfo(id);
-        int rawInfoArrayLen = rawInfoArray.length;
+    final CharSequence[] getResourceTextArray(@ArrayRes int resId) {
+        final int[] rawInfoArray = getArrayStringInfo(resId);
+        final int rawInfoArrayLen = rawInfoArray.length;
         final int infoArrayLen = rawInfoArrayLen / 2;
         int block;
         int index;
-        CharSequence[] retArray = new CharSequence[infoArrayLen];
+        final CharSequence[] retArray = new CharSequence[infoArrayLen];
         for (int i = 0, j = 0; i < rawInfoArrayLen; i = i + 2, j++) {
             block = rawInfoArray[i];
             index = rawInfoArray[i + 1];
@@ -223,32 +243,45 @@ public final class AssetManager implements AutoCloseable {
         }
         return retArray;
     }
-    
-    /*package*/ final boolean getThemeValue(long theme, int ident,
-            TypedValue outValue, boolean resolveRefs) {
-        int block = loadThemeAttributeValue(theme, ident, outValue, resolveRefs);
-        if (block >= 0) {
-            if (outValue.type != TypedValue.TYPE_STRING) {
-                return true;
-            }
-            StringBlock[] blocks = mStringBlocks;
-            if (blocks == null) {
-                ensureStringBlocks();
-                blocks = mStringBlocks;
-            }
-            outValue.string = blocks[block].get(outValue.data);
-            return true;
+
+    /**
+     * Populates {@code outValue} with the data associated with a particular
+     * resource identifier for the current configuration. Resolves theme
+     * attributes against the specified theme.
+     *
+     * @param theme the native pointer of the theme
+     * @param resId the resource identifier to load
+     * @param outValue the typed value in which to put the data
+     * @param resolveRefs {@code true} to resolve references, {@code false}
+     *                    to leave them unresolved
+     * @return {@code true} if the data was loaded into {@code outValue},
+     *         {@code false} otherwise
+     */
+    final boolean getThemeValue(long theme, @AnyRes int resId, @NonNull TypedValue outValue,
+            boolean resolveRefs) {
+        final int block = loadThemeAttributeValue(theme, resId, outValue, resolveRefs);
+        if (block < 0) {
+            return false;
         }
-        return false;
+        if (outValue.type == TypedValue.TYPE_STRING) {
+            final StringBlock[] blocks = ensureStringBlocks();
+            outValue.string = blocks[block].get(outValue.data);
+        }
+        return true;
     }
 
-    /*package*/ final void ensureStringBlocks() {
-        if (mStringBlocks == null) {
-            synchronized (this) {
-                if (mStringBlocks == null) {
-                    makeStringBlocks(sSystem.mStringBlocks);
-                }
+    /**
+     * Ensures the string blocks are loaded.
+     *
+     * @return the string blocks
+     */
+    @NonNull
+    final StringBlock[] ensureStringBlocks() {
+        synchronized (this) {
+            if (mStringBlocks == null) {
+                makeStringBlocks(sSystem.mStringBlocks);
             }
+            return mStringBlocks;
         }
     }
 
