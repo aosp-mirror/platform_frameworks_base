@@ -573,4 +573,41 @@ public final class MtpConstants {
      * Association type for objects representing file system directories.
      */
     public static final int ASSOCIATION_TYPE_GENERIC_FOLDER = 0x0001;
+
+    /** Event code for UNDEFINED event */
+    public static final int EVENT_UNDEFINED = 0x4000;
+    /** Event code for CANCEL_TRANSACTION event */
+    public static final int EVENT_CANCEL_TRANSACTION = 0x4001;
+    /** Event code for OBJECT_ADDED event */
+    public static final int EVENT_OBJECT_ADDED = 0x4002;
+    /** Event code for OBJECT_REMOVED event */
+    public static final int EVENT_OBJECT_REMOVED = 0x4003;
+    /** Event code for STORE_ADDED event */
+    public static final int EVENT_STORE_ADDED = 0x4004;
+    /** Event code for STORE_REMOVED event */
+    public static final int EVENT_STORE_REMOVED = 0x4005;
+    /** Event code for DEVICE_PROP_CHANGED event */
+    public static final int EVENT_DEVICE_PROP_CHANGED = 0x4006;
+    /** Event code for OBJECT_INFO_CHANGED event */
+    public static final int EVENT_OBJECT_INFO_CHANGED = 0x4007;
+    /** Event code for DEVICE_INFO_CHANGED event */
+    public static final int EVENT_DEVICE_INFO_CHANGED = 0x4008;
+    /** Event code for REQUEST_OBJECT_TRANSFER event */
+    public static final int EVENT_REQUEST_OBJECT_TRANSFER = 0x4009;
+    /** Event code for STORE_FULL event */
+    public static final int EVENT_STORE_FULL = 0x400A;
+    /** Event code for DEVICE_RESET event */
+    public static final int EVENT_DEVICE_RESET = 0x400B;
+    /** Event code for STORAGE_INFO_CHANGED event */
+    public static final int EVENT_STORAGE_INFO_CHANGED = 0x400C;
+    /** Event code for CAPTURE_COMPLETE event */
+    public static final int EVENT_CAPTURE_COMPLETE = 0x400D;
+    /** Event code for UNREPORTED_STATUS event */
+    public static final int EVENT_UNREPORTED_STATUS = 0x400E;
+    /** Event code for OBJECT_PROP_CHANGED event */
+    public static final int EVENT_OBJECT_PROP_CHANGED = 0xC801;
+    /** Event code for OBJECT_PROP_DESC_CHANGED event */
+    public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 0xC802;
+    /** Event code for OBJECT_REFERENCES_CHANGED event */
+    public static final int EVENT_OBJECT_REFERENCES_CHANGED = 0xC803;
 }
