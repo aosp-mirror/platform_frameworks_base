@@ -1958,10 +1958,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 || tempOtherTaskInsetBounds != null);
     }
 
-    void resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
+    boolean resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
         if (!task.mResizeable) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
-            return;
+            return true;
         }
 
         adjustForMinimalTaskDimensions(task, bounds);
@@ -1971,7 +1971,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
         if (task.mBounds != null && task.mBounds.equals(bounds) && !forced) {
             // Nothing to do here...
-            return;
+            return true;
         }
 
         if (!mWindowManager.isValidTaskId(task.taskId)) {
@@ -1983,7 +1983,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // re-restore the task so it can have the proper stack association.
                 restoreRecentTaskLocked(task, FREEFORM_WORKSPACE_STACK_ID);
             }
-            return;
+            return true;
         }
 
         // Do not move the task to another stack here.
@@ -2012,6 +2012,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept, forced);
 
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        return kept;
     }
 
     private void adjustForMinimalTaskDimensions(TaskRecord task, Rect bounds) {
@@ -2169,13 +2170,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord topActivity = task.getTopActivity();
-        if (StackId.preserveWindowOnTaskMove(stackId) && topActivity != null) {
+        final boolean mightReplaceWindow =
+                StackId.preserveWindowOnTaskMove(stackId) && topActivity != null;
+        if (mightReplaceWindow) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
             // and then add a new one. This call will tell window manager about this, so it can
             // preserve the old window until the new one is drawn. This prevents having a gap
             // between the removal and addition, in which no window is visible. We also want the
             // entrance of the new window to be properly animated.
+            // Note here we always set the replacing window first, as the flags might be needed
+            // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
             mWindowManager.setReplacingWindow(topActivity.appToken, animate);
         }
         final ActivityStack stack = moveTaskToStackUncheckedLocked(
@@ -2185,15 +2190,23 @@ public final class ActivityStackSupervisor implements DisplayListener {
             stack.mNoAnimActivities.add(topActivity);
         }
 
+        boolean kept = true;
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-            resizeTaskLocked(task, task.mLastNonFullscreenBounds,
+            kept = resizeTaskLocked(task, task.mLastNonFullscreenBounds,
                     RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
         } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-            resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+        }
+
+        if (mightReplaceWindow) {
+            // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
+            // window), we need to clear the replace window settings. Otherwise, we schedule a
+            // timeout to remove the old window if the replacing window is not coming in time.
+            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken, !kept);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with

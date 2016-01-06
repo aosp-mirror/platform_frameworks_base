@@ -25,6 +25,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.WINDOW_REPLACEMENT_TIMEOUT_DURATION;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
@@ -403,12 +404,28 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void resetReplacingWindows() {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Resetting app token " + appWindowToken
+                + " of replacing window marks.");
+
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            w.resetReplacing();
+        }
+    }
+
     void addWindow(WindowState w) {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState candidate = allAppWindows.get(i);
             if (candidate.mWillReplaceWindow && candidate.mReplacingWindow == null &&
                     candidate.getWindowTag().equals(w.getWindowTag().toString())) {
                 candidate.mReplacingWindow = w;
+
+                // if we got a replacement window, reset the timeout to give drawing more time
+                service.mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
+                service.mH.sendMessageDelayed(
+                        service.mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, this),
+                            WINDOW_REPLACEMENT_TIMEOUT_DURATION);
             }
         }
         allAppWindows.add(w);
@@ -424,7 +441,7 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
-    void clearTimedoutReplaceesLocked() {
+    void clearTimedoutReplacesLocked() {
         for (int i = allAppWindows.size() - 1; i >= 0;
              // removeWindowLocked at bottom of loop may remove multiple entries from
              // allAppWindows if the window to be removed has child windows. It also may
@@ -437,7 +454,11 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
             candidate.mWillReplaceWindow = false;
-            service.removeWindowLocked(candidate);
+            // Since the window already timed out, remove it immediately now.
+            // Use removeWindowInnerLocked() instead of removeWindowLocked(), as the latter
+            // delays removal on certain conditions, which will leave the stale window in the
+            // stack and marked mWillReplaceWindow=false, so the window will never be removed.
+            service.removeWindowInnerLocked(candidate);
         }
     }
 

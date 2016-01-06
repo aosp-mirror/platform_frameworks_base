@@ -8106,7 +8106,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 case WINDOW_REPLACEMENT_TIMEOUT: {
                     final AppWindowToken token = (AppWindowToken) msg.obj;
                     synchronized (mWindowMap) {
-                        token.clearTimedoutReplaceesLocked();
+                        token.clearTimedoutReplacesLocked();
                     }
                 }
                 break;
@@ -10192,11 +10192,34 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             appWindowToken.setReplacingWindows(animate);
         }
+    }
 
-        if (appWindowToken != null) {
-            mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
-            mH.sendMessageDelayed(mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, appWindowToken),
-                    WINDOW_REPLACEMENT_TIMEOUT_DURATION);
+    /**
+     * If we're replacing the window, schedule a timer to clear the replaced window
+     * after a timeout, in case the replacing window is not coming.
+     *
+     * If we're not replacing the window, clear the replace window settings of the app.
+     *
+     * @param token Application token for the activity whose window might be replaced.
+     * @param replacing Whether the window is being replaced or not.
+     */
+    public void scheduleClearReplacingWindowIfNeeded(IBinder token, boolean replacing) {
+        AppWindowToken appWindowToken = null;
+        synchronized (mWindowMap) {
+            appWindowToken = findAppWindowToken(token);
+            if (appWindowToken == null) {
+                Slog.w(TAG_WM, "Attempted to reset replacing window on non-existing app token "
+                        + token);
+                return;
+            }
+            if (replacing) {
+                mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
+                mH.sendMessageDelayed(
+                        mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, appWindowToken),
+                        WINDOW_REPLACEMENT_TIMEOUT_DURATION);
+            } else {
+                appWindowToken.resetReplacingWindows();
+            }
         }
     }
 

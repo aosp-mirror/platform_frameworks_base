@@ -2363,4 +2363,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mReplacingWindow = null;
         mAnimateReplacingWindow = animate;
     }
+
+    void resetReplacing() {
+        mWillReplaceWindow = false;
+        mReplacingWindow = null;
+        mAnimateReplacingWindow = false;
+    }
 }
