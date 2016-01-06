@@ -185,7 +185,6 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
      * remove the task from the TaskStack since the TaskStackView will also receive this event.
      */
     public void removeTasks(String packageName, int userId) {
-        boolean packagesRemoved = false;
         for (int i = mRows.size() - 1; i >= 0; i--) {
             Row row = mRows.get(i);
             if (row.getViewType() == TASK_ROW_VIEW_TYPE) {

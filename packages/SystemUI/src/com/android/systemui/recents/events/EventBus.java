@@ -27,7 +27,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.MutableBoolean;
-
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 import java.lang.ref.WeakReference;
@@ -663,8 +662,6 @@ public class EventBus extends BroadcastReceiver {
 
     /**
      * Registers a new subscriber.
-     *
-     * @return return whether or not this
      */
     private void registerSubscriber(Object subscriber, int priority,
             MutableBoolean hasInterprocessEventsChangedOut) {

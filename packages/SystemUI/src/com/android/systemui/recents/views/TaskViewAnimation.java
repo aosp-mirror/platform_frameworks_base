@@ -24,7 +24,7 @@ import android.view.animation.LinearInterpolator;
 import java.util.List;
 
 /**
- * The animation properties to animate a {@link TaskView} to a given {@TaskViewTransform}.
+ * The animation properties to animate a {@link TaskView} to a given {@link TaskViewTransform}.
  */
 public class TaskViewAnimation {
 

@@ -35,7 +35,6 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.TaskStack;
 
 /**

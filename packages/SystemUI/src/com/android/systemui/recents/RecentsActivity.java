@@ -68,7 +68,6 @@ import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.history.RecentsHistoryView;
 import com.android.systemui.recents.misc.DozeTrigger;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;

@@ -68,7 +68,6 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.RecentsImpl;
-import com.android.systemui.statusbar.BaseStatusBar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,7 +78,6 @@ import java.util.Random;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 /**

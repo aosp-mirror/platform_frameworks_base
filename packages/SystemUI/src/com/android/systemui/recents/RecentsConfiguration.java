@@ -19,7 +19,6 @@ package com.android.systemui.recents;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.provider.Settings;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 

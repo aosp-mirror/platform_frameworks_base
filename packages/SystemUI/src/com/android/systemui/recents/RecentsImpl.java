@@ -338,7 +338,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
-                RecentsDebugFlags flags = Recents.getDebugFlags();
                 if (!launchState.launchedWithAltTab) {
                     // Notify recents to move onto the next task
                     EventBus.getDefault().post(new IterateRecentsEvent());

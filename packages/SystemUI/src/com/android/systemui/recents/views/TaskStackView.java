@@ -29,7 +29,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.IntProperty;
-import android.util.Log;
 import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -91,9 +90,6 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, TaskStackViewScroller.TaskStackViewScrollerCallbacks,
         ViewPool.ViewPoolConsumer<TaskView, Task> {
-
-    private final static String TAG = "TaskStackView";
-    private final static boolean DEBUG = false;
 
     private final static String KEY_SAVED_STATE_SUPER = "saved_instance_state_super";
     private final static String KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE =

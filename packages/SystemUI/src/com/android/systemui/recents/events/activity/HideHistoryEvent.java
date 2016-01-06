@@ -17,7 +17,6 @@
 package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 /**
  * This is sent when the history view will be closed.

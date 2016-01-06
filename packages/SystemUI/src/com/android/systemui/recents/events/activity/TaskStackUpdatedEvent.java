@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.events.activity;
 
-import com.android.systemui.recents.RecentsAppWidgetHost;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.model.TaskStack;
 
