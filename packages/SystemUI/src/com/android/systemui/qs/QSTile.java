@@ -28,6 +28,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.systemui.qs.QSTile.State;
+import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -349,7 +350,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
         UserSwitcherController getUserSwitcherController();
         UserInfoController getUserInfoController();
         BatteryController getBatteryController();
+        TileServices getTileServices();
         void removeTile(String tileSpec);
+
 
         public interface Callback {
             void onTilesChanged();

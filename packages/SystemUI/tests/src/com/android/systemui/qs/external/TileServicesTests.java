@@ -35,7 +35,7 @@ public class TileServicesTests extends SysuiTestCase {
         super.setUp();
         mManagers = new ArrayList<>();
         QSTileHost host = new QSTileHost(mContext, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
         mTileService = new TestTileServices(host, Looper.myLooper());
     }
 

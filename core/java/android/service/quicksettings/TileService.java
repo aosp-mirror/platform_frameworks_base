@@ -16,11 +16,13 @@
 package android.service.quicksettings;
 
 import android.Manifest;
+import android.annotation.SystemApi;
 import android.app.Dialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -169,6 +171,26 @@ public class TileService extends Service {
      * Called when the user clicks on this tile.
      */
     public void onClick() {
+    }
+
+    /**
+     * Sets an icon to be shown in the status bar.
+     * <p>
+     * The icon will be displayed before all other icons.  Can only be called between
+     * {@link #onStartListening} and {@link #onStopListening}.  Can only be called by system apps.
+     *
+     * @param icon The icon to be displayed, null to hide
+     * @param contentDescription Content description of the icon to be displayed
+     * @hide
+     */
+    @SystemApi
+    public final void setStatusIcon(Icon icon, String contentDescription) {
+        if (mService != null) {
+            try {
+                mService.updateStatusIcon(mTile, icon, contentDescription);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     /**

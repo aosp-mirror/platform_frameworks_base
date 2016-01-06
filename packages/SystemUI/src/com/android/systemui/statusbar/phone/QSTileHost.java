@@ -95,17 +95,19 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     private final KeyguardMonitor mKeyguard;
     private final SecurityController mSecurity;
     private final BatteryController mBattery;
+    private final StatusBarIconController mIconController;
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
-            BluetoothController bluetooth, LocationController location,
-            RotationLockController rotation, NetworkController network,
-            ZenModeController zen, HotspotController hotspot,
-            CastController cast, FlashlightController flashlight,
-            UserSwitcherController userSwitcher, UserInfoController userInfo, KeyguardMonitor keyguard,
-            SecurityController security, BatteryController battery) {
+                      BluetoothController bluetooth, LocationController location,
+                      RotationLockController rotation, NetworkController network,
+                      ZenModeController zen, HotspotController hotspot,
+                      CastController cast, FlashlightController flashlight,
+                      UserSwitcherController userSwitcher, UserInfoController userInfo,
+                      KeyguardMonitor keyguard, SecurityController security,
+                      BatteryController battery, StatusBarIconController iconController) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -121,6 +123,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         mKeyguard = keyguard;
         mSecurity = security;
         mBattery = battery;
+        mIconController = iconController;
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -256,6 +259,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
 
     public TileServices getTileServices() {
         return mServices;
+    }
+
+    public StatusBarIconController getIconController() {
+        return mIconController;
     }
 
     @Override

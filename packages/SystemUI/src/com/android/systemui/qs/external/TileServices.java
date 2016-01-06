@@ -20,17 +20,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.ArrayMap;
 import android.util.Log;
+import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +52,7 @@ public class TileServices extends IQSService.Stub {
     private final ArrayMap<ComponentName, CustomTile> mTiles = new ArrayMap<>();
     private final Context mContext;
     private final Handler mHandler;
+    private final Handler mMainHandler;
     private final QSTileHost mHost;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
@@ -57,6 +63,7 @@ public class TileServices extends IQSService.Stub {
         mContext.registerReceiver(mRequestListeningReceiver,
                 new IntentFilter(TileService.ACTION_REQUEST_LISTENING));
         mHandler = new Handler(looper);
+        mMainHandler = new Handler(Looper.getMainLooper());
     }
 
     public Context getContext() {
@@ -82,6 +89,13 @@ public class TileServices extends IQSService.Stub {
             service.setBindAllowed(false);
             mServices.remove(tile);
             mTiles.remove(tile.getComponent());
+            final String slot = tile.getComponent().getClassName();
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mHost.getIconController().removeIcon(slot);
+                }
+            });
         }
     }
 
@@ -161,8 +175,9 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public void updateQsTile(Tile tile) {
-        verifyCaller(tile.getComponentName().getPackageName());
-        CustomTile customTile = getTileForComponent(tile.getComponentName());
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
         if (customTile != null) {
             synchronized (mServices) {
                 mServices.get(customTile).setLastUpdate(System.currentTimeMillis());
@@ -174,11 +189,42 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public void onShowDialog(Tile tile) {
-        verifyCaller(tile.getComponentName().getPackageName());
-        CustomTile customTile = getTileForComponent(tile.getComponentName());
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
         if (customTile != null) {
             customTile.onDialogShown();
             mHost.collapsePanels();
+        }
+    }
+
+    @Override
+    public void updateStatusIcon(Tile tile, Icon icon, String contentDescription) {
+        final ComponentName componentName = tile.getComponentName();
+        String packageName = componentName.getPackageName();
+        verifyCaller(packageName);
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            try {
+                UserHandle userHandle = getCallingUserHandle();
+                PackageInfo info = mContext.getPackageManager().getPackageInfoAsUser(packageName, 0,
+                        userHandle.getIdentifier());
+                if (info.applicationInfo.isSystemApp()) {
+                    final StatusBarIcon statusIcon = icon != null
+                            ? new StatusBarIcon(userHandle, packageName, icon, 0, 0,
+                                    contentDescription)
+                            : null;
+                    mMainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            StatusBarIconController iconController = mHost.getIconController();
+                            iconController.setIcon(componentName.getClassName(), statusIcon);
+                            iconController.setExternalIcon(componentName.getClassName());
+                        }
+                    });
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+            }
         }
     }
 

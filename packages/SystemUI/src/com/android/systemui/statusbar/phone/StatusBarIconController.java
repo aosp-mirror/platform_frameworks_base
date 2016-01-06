@@ -194,19 +194,23 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         }
     }
 
+    public void setExternalIcon(String slot) {
+        int viewIndex = getViewIndex(getSlotIndex(slot));
+        ImageView imageView = (ImageView) mStatusIcons.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+        imageView = (ImageView) mStatusIconsKeyguard.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+    }
+
     public void setIcon(String slot, StatusBarIcon icon) {
         setIcon(getSlotIndex(slot), icon);
     }
 
     public void removeIcon(String slot) {
         int index = getSlotIndex(slot);
-        if (getIcon(index) == null) {
-            return;
-        }
-        super.removeIcon(index);
-        int viewIndex = getViewIndex(index);
-        mStatusIcons.removeViewAt(viewIndex);
-        mStatusIconsKeyguard.removeViewAt(viewIndex);
+        removeIcon(index);
     }
 
     public void setIconVisibility(String slot, boolean visibility) {
@@ -220,12 +224,24 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     }
 
     @Override
-    public void setIcon(int index, StatusBarIcon icon) {
-        boolean isNew = getIcon(index) == null;
-        super.setIcon(index, icon);
-        if (icon == null) {
+    public void removeIcon(int index) {
+        if (getIcon(index) == null) {
             return;
         }
+        super.removeIcon(index);
+        int viewIndex = getViewIndex(index);
+        mStatusIcons.removeViewAt(viewIndex);
+        mStatusIconsKeyguard.removeViewAt(viewIndex);
+    }
+
+    @Override
+    public void setIcon(int index, StatusBarIcon icon) {
+        if (icon == null) {
+            removeIcon(index);
+            return;
+        }
+        boolean isNew = getIcon(index) == null;
+        super.setIcon(index, icon);
         if (isNew) {
             addSystemIcon(index, icon);
         } else {

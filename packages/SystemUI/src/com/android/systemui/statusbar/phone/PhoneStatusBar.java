@@ -891,7 +891,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
                     mUserSwitcherController, mUserInfoController, mKeyguardMonitor,
-                    mSecurityController, mBatteryController);
+                    mSecurityController, mBatteryController, mIconController);
             mQSPanel.setHost(qsh);
             mQSPanel.setTiles(qsh.getTiles());
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
