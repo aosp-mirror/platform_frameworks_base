@@ -28,7 +28,6 @@ public class PanelHolder extends FrameLayout {
     public static final boolean DEBUG_GESTURES = true;
 
     private int mSelectedPanelIndex = -1;
-    private PanelBar mBar;
 
     public PanelHolder(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,9 +77,5 @@ public class PanelHolder extends FrameLayout {
             }
         }
         return false;
-    }
-
-    public void setBar(PanelBar panelBar) {
-        mBar = panelBar;
     }
 }

@@ -58,7 +58,6 @@ public abstract class PanelView extends FrameLayout {
 
     private float mPeekHeight;
     private float mHintDistance;
-    private int mEdgeTapAreaWidth;
     private float mInitialOffsetOnTouch;
     private boolean mCollapsedAndHeadsUpOnDown;
     private float mExpandedFraction = 0;
@@ -202,7 +201,6 @@ public abstract class PanelView extends FrameLayout {
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mHintDistance = res.getDimension(R.dimen.hint_move_distance);
-        mEdgeTapAreaWidth = res.getDimensionPixelSize(R.dimen.edge_tap_area_width);
         mUnlockFalsingThreshold = res.getDimensionPixelSize(R.dimen.unlock_falsing_threshold);
     }
 

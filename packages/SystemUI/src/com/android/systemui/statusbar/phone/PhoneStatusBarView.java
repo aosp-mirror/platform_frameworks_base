@@ -51,7 +51,6 @@ public class PhoneStatusBarView extends PanelBar {
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        Resources res = getContext().getResources();
         mBarTransitions = new PhoneStatusBarTransitions(this);
     }
 
@@ -102,7 +101,6 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public PanelView selectPanelForTouch(MotionEvent touch) {
-        // No double swiping. If either panel is open, nothing else can be pulled down.
         return mNotificationPanel.getExpandedHeight() > 0
                 ? null
                 : mNotificationPanel;
