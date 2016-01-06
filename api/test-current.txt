@@ -34901,6 +34901,7 @@ package android.telecom {
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
     field public static final int PROPERTY_HIGH_DEF_AUDIO = 16; // 0x10
     field public static final int PROPERTY_WIFI = 8; // 0x8
+    field public static final int PROPERTY_WORK_CALL = 32; // 0x20
   }
 
   public final class CallAudioState implements android.os.Parcelable {

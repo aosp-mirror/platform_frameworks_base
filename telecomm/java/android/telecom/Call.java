@@ -242,8 +242,13 @@ public final class Call {
          */
         public static final int PROPERTY_HIGH_DEF_AUDIO = 0x00000010;
 
+        /**
+         * Whether the call is associated with the work profile.
+         */
+        public static final int PROPERTY_WORK_CALL = 0x00000020;
+
         //******************************************************************************************
-        // Next PROPERTY value: 0x00000020
+        // Next PROPERTY value: 0x00000040
         //******************************************************************************************
 
         private final Uri mHandle;
