@@ -81,7 +81,9 @@ extends CharSequence
      * immediately after a \n character, and if the \n
      * that anchors it is deleted, the endpoint is pulled to the
      * next \n that follows in the buffer (or to the end of
-     * the buffer).
+     * the buffer). If a span with SPAN_PARAGRAPH flag is pasted
+     * into another text and the paragraph boundary constraint
+     * is not satisfied, the span is discarded.
      */
     public static final int SPAN_PARAGRAPH =   0x33;
 
