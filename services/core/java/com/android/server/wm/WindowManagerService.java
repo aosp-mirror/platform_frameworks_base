@@ -3888,7 +3888,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return false;
         }
         WindowState startingWindow = ttoken.startingWindow;
-        if (startingWindow != null) {
+        if (startingWindow != null && ttoken.startingView != null) {
             // In this case, the starting icon has already been displayed, so start
             // letting windows get shown immediately without any more transitions.
             mSkipAppTransitionAnimation = true;
