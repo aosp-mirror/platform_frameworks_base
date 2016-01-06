@@ -22,6 +22,7 @@ import android.service.quicksettings.IQSService;
  * @hide
  */
 oneway interface IQSTileService {
+    void setQSService(in IQSService service);
     void setQSTile(in Tile tile);
     void onTileAdded();
     void onTileRemoved();

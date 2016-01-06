@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
+import android.service.quicksettings.TileService;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager;
@@ -59,7 +60,7 @@ public class CustomTile extends QSTile<QSTile.State> {
         mComponent = ComponentName.unflattenFromString(action);
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
-        mTile = new Tile(mComponent, host.getTileServices());
+        mTile = new Tile(mComponent);
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent, 0);
@@ -67,6 +68,11 @@ public class CustomTile extends QSTile<QSTile.State> {
                     .createWithResource(mComponent.getPackageName(), info.icon));
             mTile.setLabel(info.loadLabel(pm));
         } catch (Exception e) {
+        }
+        try {
+            mService.setQSTile(mTile);
+        } catch (RemoteException e) {
+            // Called through wrapper, won't happen here.
         }
     }
 
@@ -94,9 +100,10 @@ public class CustomTile extends QSTile<QSTile.State> {
         mListening = listening;
         try {
             if (listening) {
-                mServiceManager.setBindRequested(true);
-                mService.setQSTile(mTile);
-                mService.onStartListening();
+                if (mServiceManager.getType() == TileService.TILE_MODE_PASSIVE) {
+                    mServiceManager.setBindRequested(true);
+                    mService.onStartListening();
+                }
             } else {
                 mService.onStopListening();
                 if (mIsTokenGranted && !mIsShowingDialog) {
@@ -139,20 +146,20 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
-        if (mService != null) {
-            try {
-                if (DEBUG) Log.d(TAG, "Adding token");
-                mWindowManager.addWindowToken(mToken, WindowManager.LayoutParams.TYPE_QS_DIALOG);
-                mIsTokenGranted = true;
-            } catch (RemoteException e) {
+        try {
+            if (DEBUG) Log.d(TAG, "Adding token");
+            mWindowManager.addWindowToken(mToken, WindowManager.LayoutParams.TYPE_QS_DIALOG);
+            mIsTokenGranted = true;
+        } catch (RemoteException e) {
+        }
+        try {
+            if (mServiceManager.getType() == TileService.TILE_MODE_ACTIVE) {
+                mServiceManager.setBindRequested(true);
+                mService.onStartListening();
             }
-            try {
-                mService.onClick(mToken);
-            } catch (RemoteException e) {
-                // Called through wrapper, won't happen here.
-            }
-        } else {
-            Log.e(TAG, "Click with no service " + getTileSpec());
+            mService.onClick(mToken);
+        } catch (RemoteException e) {
+            // Called through wrapper, won't happen here.
         }
         MetricsLogger.action(mContext, getMetricsCategory(), mComponent.getPackageName());
     }

@@ -15,8 +15,10 @@
  */
 package com.android.systemui.qs.external;
 
+import android.content.ComponentName;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.service.quicksettings.TileService;
 import com.android.systemui.SysuiTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -36,7 +38,13 @@ public class TileServiceManagerTests extends SysuiTestCase {
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
         mTileServices = Mockito.mock(TileServices.class);
+        Mockito.when(mTileServices.getContext()).thenReturn(mContext);
         mTileLifecycle = Mockito.mock(TileLifecycleManager.class);
+        ComponentName componentName = new ComponentName(mContext,
+                TileServiceManagerTests.class);
+        Mockito.when(mTileLifecycle.getComponent()).thenReturn(componentName);
+        mContext.getSharedPreferences(TileServiceManager.PREFS_FILE, 0).edit()
+                .putInt(componentName.flattenToString(), TileService.TILE_MODE_PASSIVE).commit();
         mTileServiceManager = new TileServiceManager(mTileServices, mHandler, mTileLifecycle);
     }
 

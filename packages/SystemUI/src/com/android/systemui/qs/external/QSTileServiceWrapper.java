@@ -16,6 +16,7 @@
 package com.android.systemui.qs.external;
 
 import android.os.IBinder;
+import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -87,6 +88,16 @@ public class QSTileServiceWrapper {
     public boolean onClick(IBinder token) {
         try {
             mService.onClick(token);
+            return true;
+        } catch (Exception e) {
+            Log.d(TAG, "Caught exception from TileService", e);
+            return false;
+        }
+    }
+
+    public boolean setQSService(IQSService service) {
+        try {
+            mService.setQSService(service);
             return true;
         } catch (Exception e) {
             Log.d(TAG, "Caught exception from TileService", e);

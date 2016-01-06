@@ -33634,10 +33634,13 @@ package android.service.quicksettings {
     method public void onClick();
     method public void onStartListening();
     method public void onStopListening();
-    method public void onTileAdded();
+    method public int onTileAdded();
     method public void onTileRemoved();
+    method public static final void requestListeningState(android.content.Context, android.content.ComponentName);
     method public final void showDialog(android.app.Dialog);
     field public static final java.lang.String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
+    field public static final int TILE_MODE_ACTIVE = 2; // 0x2
+    field public static final int TILE_MODE_PASSIVE = 1; // 0x1
   }
 
 }
