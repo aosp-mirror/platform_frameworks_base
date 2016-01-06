@@ -49,6 +49,11 @@ public class QuickQSPanel extends QSPanel {
         mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
     }
 
+    @Override
+    protected void createCustomizePanel() {
+        // No customizing from the header.
+    }
+
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
         mHeader = header;

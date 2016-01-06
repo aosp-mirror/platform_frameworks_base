@@ -32,7 +32,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
-
+import android.util.ArraySet;
 import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
@@ -41,9 +41,8 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 
 public class TunerService extends SystemUI {
@@ -54,7 +53,7 @@ public class TunerService extends SystemUI {
     // Map of Uris we listen on to their settings keys.
     private final ArrayMap<Uri, String> mListeningUris = new ArrayMap<>();
     // Map of settings keys to the listener.
-    private final HashMap<String, List<Tunable>> mTunableLookup = new HashMap<>();
+    private final HashMap<String, Set<Tunable>> mTunableLookup = new HashMap<>();
 
     private ContentResolver mContentResolver;
     private int mCurrentUser;
@@ -85,7 +84,7 @@ public class TunerService extends SystemUI {
 
     private void addTunable(Tunable tunable, String key) {
         if (!mTunableLookup.containsKey(key)) {
-            mTunableLookup.put(key, new ArrayList<Tunable>());
+            mTunableLookup.put(key, new ArraySet<Tunable>());
         }
         mTunableLookup.get(key).add(tunable);
         Uri uri = Settings.Secure.getUriFor(key);
@@ -99,7 +98,7 @@ public class TunerService extends SystemUI {
     }
 
     public void removeTunable(Tunable tunable) {
-        for (List<Tunable> list : mTunableLookup.values()) {
+        for (Set<Tunable> list : mTunableLookup.values()) {
             list.remove(tunable);
         }
     }
@@ -116,7 +115,7 @@ public class TunerService extends SystemUI {
 
     public void reloadSetting(Uri uri) {
         String key = mListeningUris.get(uri);
-        List<Tunable> tunables = mTunableLookup.get(key);
+        Set<Tunable> tunables = mTunableLookup.get(key);
         if (tunables == null) {
             return;
         }

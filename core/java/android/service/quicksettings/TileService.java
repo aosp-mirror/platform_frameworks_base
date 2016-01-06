@@ -279,6 +279,10 @@ public class TileService extends Service {
                     }
                     break;
                 case MSG_TILE_REMOVED:
+                    if (mListening) {
+                        mListening = false;
+                        TileService.this.onStopListening();
+                    }
                     TileService.this.onTileRemoved();
                     break;
                 case MSG_STOP_LISTENING:

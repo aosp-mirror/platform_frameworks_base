@@ -16,32 +16,28 @@
 package com.android.systemui.qs.customize;
 
 import android.app.ActivityManager;
-import android.app.Service;
 import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
-import android.service.quicksettings.IQSTileService;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.external.QSTileServiceWrapper;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,8 +48,9 @@ import java.util.List;
 public class CustomQSPanel extends QSPanel {
     
     private static final String TAG = "CustomQSPanel";
+    private static final boolean DEBUG = false;
 
-    private List<String> mSavedTiles;
+    private List<String> mSavedTiles = Collections.emptyList();
     private ArrayList<String> mStash;
     private List<String> mTiles = new ArrayList<>();
 
@@ -67,7 +64,13 @@ public class CustomQSPanel extends QSPanel {
         ((NonPagedTileLayout) mTileLayout).setCustomQsPanel(this);
         removeView(mFooter.getView());
 
+        if (DEBUG) Log.d(TAG, "new CustomQSPanel", new Throwable());
         TunerService.get(mContext).addTunable(this, QSTileHost.TILES_SETTING);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        // Don't allow the super to unregister the tunable.
     }
 
     @Override
@@ -77,7 +80,9 @@ public class CustomQSPanel extends QSPanel {
             super.onTuningChanged(key, "0");
         }
         if (QSTileHost.TILES_SETTING.equals(key)) {
-            mSavedTiles = QSTileHost.loadTileSpecs(mContext, newValue);
+            mSavedTiles = Collections.unmodifiableList(
+                    QSTileHost.loadTileSpecs(mContext, newValue));
+            if (DEBUG) Log.d(TAG, "New saved tiles " + TextUtils.join(",", mSavedTiles));
         }
     }
 
@@ -106,6 +111,7 @@ public class CustomQSPanel extends QSPanel {
     }
 
     public void setSavedTiles() {
+        if (DEBUG) Log.d(TAG, "setSavedTiles " + TextUtils.join(",", mSavedTiles));
         setTiles(mSavedTiles);
     }
 
@@ -114,47 +120,26 @@ public class CustomQSPanel extends QSPanel {
             String tileSpec = mSavedTiles.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!mTiles.contains(tileSpec)) {
-                mContext.bindServiceAsUser(
-                        new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec)),
-                        new ServiceConnection() {
-                            @Override
-                            public void onServiceDisconnected(ComponentName name) {
-                            }
-
-                            @Override
-                            public void onServiceConnected(ComponentName name, IBinder service) {
-                                QSTileServiceWrapper wrapper = new QSTileServiceWrapper(
-                                        IQSTileService.Stub.asInterface(service));
-                                wrapper.onStopListening();
-                                wrapper.onTileRemoved();
-                                mContext.unbindService(this);
-                            }
-                        }, Service.BIND_AUTO_CREATE,
-                        new UserHandle(ActivityManager.getCurrentUser()));
+                Intent intent = new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec));
+                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
+                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                lifecycleManager.onStopListening();
+                lifecycleManager.onTileRemoved();
+                lifecycleManager.flushMessagesAndUnbind();
             }
         }
         for (int i = 0; i < mTiles.size(); i++) {
             String tileSpec = mTiles.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!mSavedTiles.contains(tileSpec)) {
-                mContext.bindServiceAsUser(
-                        new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec)),
-                        new ServiceConnection() {
-                            @Override
-                            public void onServiceDisconnected(ComponentName name) {
-                            }
-
-                            @Override
-                            public void onServiceConnected(ComponentName name, IBinder service) {
-                                QSTileServiceWrapper wrapper = new QSTileServiceWrapper(
-                                        IQSTileService.Stub.asInterface(service));
-                                wrapper.onTileAdded();
-                                mContext.unbindService(this);
-                            }
-                        }, Service.BIND_AUTO_CREATE,
-                        new UserHandle(ActivityManager.getCurrentUser()));
+                Intent intent = new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec));
+                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
+                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                lifecycleManager.onTileAdded();
+                lifecycleManager.flushMessagesAndUnbind();
             }
         }
+        if (DEBUG) Log.d(TAG, "saveCurrentTiles " + mTiles);
         Secure.putStringForUser(getContext().getContentResolver(), QSTileHost.TILES_SETTING,
                 TextUtils.join(",", mTiles), ActivityManager.getCurrentUser());
     }
@@ -173,6 +158,7 @@ public class CustomQSPanel extends QSPanel {
     }
 
     private void setTilesInternal() {
+        if (DEBUG) Log.d(TAG, "Set tiles internal");
         for (int i = 0; i < mCurrentTiles.size(); i++) {
             mCurrentTiles.get(i).destroy();
         }
@@ -187,6 +173,8 @@ public class CustomQSPanel extends QSPanel {
                 if (tile != null) {
                     tile.setTileSpec(mTiles.get(i));
                     mCurrentTiles.add(tile);
+                } else {
+                    if (DEBUG) Log.d(TAG, "Skipping " + mTiles.get(i));
                 }
             }
         }
@@ -194,11 +182,13 @@ public class CustomQSPanel extends QSPanel {
     }
 
     public void addTile(String spec) {
+        if (DEBUG) Log.d(TAG, "addTile " + spec);
         mTiles.add(spec);
         setTilesInternal();
     }
 
     public void moveTo(String from, String to) {
+        if (DEBUG) Log.d(TAG, "moveTo " + from + " " + to);
         int fromIndex = mTiles.indexOf(from);
         if (fromIndex < 0) {
             Log.e(TAG, "Unknown from tile " + from);
@@ -222,6 +212,7 @@ public class CustomQSPanel extends QSPanel {
     }
 
     public void setTiles(List<String> tiles) {
+        if (DEBUG) Log.d(TAG, "Set tiles " + TextUtils.join(",", tiles));
         mTiles = new ArrayList<>(tiles);
         setTilesInternal();
     }
