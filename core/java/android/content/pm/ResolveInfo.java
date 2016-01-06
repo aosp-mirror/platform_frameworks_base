@@ -172,7 +172,8 @@ public class ResolveInfo implements Parcelable {
      */
     public boolean handleAllWebDataURI;
 
-    private ComponentInfo getComponentInfo() {
+    /** {@hide} */
+    public ComponentInfo getComponentInfo() {
         if (activityInfo != null) return activityInfo;
         if (serviceInfo != null) return serviceInfo;
         if (providerInfo != null) return providerInfo;
