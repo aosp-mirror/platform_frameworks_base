@@ -355,8 +355,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Dozvoljava aplikaciji da snima slike i video snimke kamerom. Ova dozvola omogućava aplikaciji da u bilo kom trenutku koristi kameru bez vaše potvrde."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Dozvoljava aplikaciji da kontroliše vibraciju."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrola osvetljenja"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Dozvoljava aplikaciji da kontroliše blic."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktno pozivanje brojeva telefona"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Dozvoljava aplikaciji da poziva brojeve telefona bez vaše dozvole. Ovo može da dovede do neočekivanih troškova ili poziva. Imajte na umu da ovo ne dozvoljava aplikaciji da poziva brojeve za hitne slučajeve. Zlonamerne aplikacije mogu da pozivaju bez vaše potvrde, što može da dovede do troškova."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"pristup usluzi poziva pomoću razmene trenutnih poruka"</string>

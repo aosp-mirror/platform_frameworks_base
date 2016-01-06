@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Leyfir forriti að taka myndir og myndskeið með myndavélinni. Þessi heimild leyfir forritinu að nota myndavélina hvenær sem er án þinnar heimildar."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leyfir forriti að stjórna titraranum."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"stjórna vasaljósi"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Leyfir forriti að stjórna vasaljósinu."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"hringja beint í símanúmer"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leyfir forriti að hringja í símanúmer án íhlutunar notanda. Þetta getur haft í för með sér óumbeðin gjöld og símtöl. Athugaðu að þetta leyfir forritinu ekki að hringja í neyðarnúmer. Spilliforrit geta stofnað til kostnaðar fyrir þig með því að hringja símtöl án þinnar heimildar."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"fá aðgang að IMS-símtalsþjónustu"</string>

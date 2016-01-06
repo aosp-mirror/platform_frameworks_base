@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que a aplicação tire fotografias e grave vídeos com a câmara. Esta autorização permite que a aplicação utilize a câmara sem a sua confirmação em qualquer altura."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite à aplicação controlar o vibrador."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"controlar lanterna"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite à aplicação controlar a lanterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone diretamente"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que a aplicação ligue para números de telefone sem a intervenção do utilizador. Esta ação pode resultar em cobranças ou chamadas inesperadas. Tenha em atenção que isto não permite que a aplicação ligue para números de emergência. As aplicações maliciosas podem fazer com que incorra em custos, fazendo chamadas sem a sua confirmação."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"aceder ao serviço de chamadas IMS"</string>
@@ -1478,7 +1476,7 @@
       <item quantity="one">Durante 1 h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Até que o utilizador desative"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Até desativar Não incomodar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>

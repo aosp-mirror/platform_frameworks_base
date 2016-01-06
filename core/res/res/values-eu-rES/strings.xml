@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Kamerarekin argazkiak ateratzeko eta bideoak grabatzeko baimena ematen die aplikazioei. Baimen horrekin, aplikazioak kamera edonoiz erabil dezake zure baimenik gabe."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"bibrazioa kontrolatzea"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Bibragailua kontrolatzea baimentzen die aplikazioei."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrolatu linterna"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Linterna kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Atzitu IMS dei-zerbitzua"</string>

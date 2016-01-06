@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permite que la aplicación saque fotos o grabe videos con la cámara. Este permiso autoriza a la aplicación a utilizar la cámara en cualquier momento sin tu confirmación."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite que la aplicación controle la vibración."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"controlar linterna"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Permite que la aplicación controle la función de linterna."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"llamar directamente a números de teléfono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite que la aplicación haga llamadas a números de teléfono sin intervención del usuario, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que las aplicaciones no pueden usar este servicio para realizar llamadas a números de emergencia, pero las aplicaciones malintencionadas pueden causarte gastos imprevistos al realizar llamadas sin tu confirmación."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"acceder al servicio IMS para realizar llamadas"</string>

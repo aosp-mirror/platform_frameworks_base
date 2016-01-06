@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Võimaldab rakendusel teha kaameraga pilte ja videoid. See luba võimaldab rakendusel kasutada kaamerat mis tahes ajal teie kinnituseta."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"juhtige vibreerimist"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Võimaldab rakendusel juhtida vibreerimist."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"juhi taskulampi"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Võimaldab rakendusel juhtida taskulampi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"helista otse telefoninumbritele"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Võimaldab rakendusel teie sekkumiseta telefoninumbritele helistada. See võib põhjustada ootamatuid tasusid või telefonikõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlikud rakendused võivad teile kulusid tekitada, tehes telefonikõnesid teie kinnituseta."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"juurdepääs IMS-kõneteenusele"</string>

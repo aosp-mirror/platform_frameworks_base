@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Ilovaga kameradan foydalanib rasm va videoga olishga ruxsat beradi. Bu ruxsat ilovaga sizdan tasdiqlashni so‘ramasdan kameradan foydalanishga imkon beradi."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"chiroq chaqnashini boshqarish"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Ilova chaqnoqni boshqarishi mumkin."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ilovaga sizning yordamingizsiz telefonga qo‘ng‘iroq qilish imkonini beradi. Bu kutilmagan qo‘ng‘iroqlarni amalga oshirishi yoki ortiqcha to‘lovlarni yuzaga keltirishi mumkin. Shunga e’tibor qilinki, u favqulodda telefon raqamlariga qo‘ng‘iroqlar qilishga ruxsat bermaydi. Zararli ilovalar sizdan so‘ramasdan qo‘ng‘iroqlarni amalga oshirib, pulingizni sarflashi mumkin."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS qo‘ng‘iroq xizmatiga kirish"</string>
