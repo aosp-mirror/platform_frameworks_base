@@ -16,23 +16,42 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-import static android.os.Process.SYSTEM_UID;
+import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.Process.PACKAGE_INFO_GID;
+import static android.os.Process.SYSTEM_UID;
+
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
+import android.content.pm.PackageCleanItem;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
+import android.content.pm.UserInfo;
+import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -47,11 +66,18 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.util.AtomicFile;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.AtomicFile;
+import android.util.Log;
 import android.util.LogPrinter;
+import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.SparseLongArray;
+import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
@@ -65,58 +91,37 @@ import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
 import com.android.server.pm.PermissionsState.PermissionState;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.util.Collection;
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.ComponentInfo;
-import android.content.pm.PackageCleanItem;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
-import android.content.pm.PermissionInfo;
-import android.content.pm.Signature;
-import android.content.pm.UserInfo;
-import android.content.pm.PackageUserState;
-import android.content.pm.VerifierDeviceIdentity;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.Log;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
-import android.util.Xml;
-
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map.Entry;
-
-import libcore.io.IoUtils;
 
 /**
  * Holds information about dynamic settings.
@@ -2857,7 +2862,7 @@ final class Settings {
         for (int i=0; i<tmpPa.countCategories(); i++) {
             String cat = tmpPa.getCategory(i);
             if (cat.equals(Intent.CATEGORY_DEFAULT)) {
-                flags |= PackageManager.MATCH_DEFAULT_ONLY;
+                flags |= MATCH_DEFAULT_ONLY;
             } else {
                 intent.addCategory(cat);
             }
@@ -3007,7 +3012,7 @@ final class Settings {
                         filter.addCategory(cat);
                     }
                 }
-                if ((flags&PackageManager.MATCH_DEFAULT_ONLY) != 0) {
+                if ((flags & MATCH_DEFAULT_ONLY) != 0) {
                     filter.addCategory(Intent.CATEGORY_DEFAULT);
                 }
                 if (scheme != null) {
@@ -3799,7 +3804,7 @@ final class Settings {
     }
 
     private boolean isEnabledLPr(ComponentInfo componentInfo, int flags, int userId) {
-        if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
+        if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
             return true;
         }
         final PackageSetting packageSettings = mPackages.get(componentInfo.packageName);
@@ -3815,7 +3820,7 @@ final class Settings {
             return false;
         }
         PackageUserState ustate = packageSettings.readUserState(userId);
-        if ((flags&PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) != 0) {
+        if ((flags & MATCH_DISABLED_UNTIL_USED_COMPONENTS) != 0) {
             if (ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
                 return true;
             }
@@ -3839,16 +3844,16 @@ final class Settings {
     }
 
     private boolean isMatchLPr(ComponentInfo componentInfo, int flags) {
-        if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+        if ((flags & MATCH_SYSTEM_ONLY) != 0) {
             final PackageSetting ps = mPackages.get(componentInfo.packageName);
             if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                 return false;
             }
         }
 
-        final boolean matchesUnaware = ((flags & PackageManager.MATCH_ENCRYPTION_UNAWARE) != 0)
+        final boolean matchesUnaware = ((flags & MATCH_ENCRYPTION_UNAWARE) != 0)
                 && !componentInfo.encryptionAware;
-        final boolean matchesAware = ((flags & PackageManager.MATCH_ENCRYPTION_AWARE) != 0)
+        final boolean matchesAware = ((flags & MATCH_ENCRYPTION_AWARE) != 0)
                 && componentInfo.encryptionAware;
         return matchesUnaware || matchesAware;
     }

@@ -59,6 +59,10 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
 import static android.content.pm.PackageManager.MOVE_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.MOVE_FAILED_OPERATION_PENDING;
@@ -88,6 +92,8 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCES
 import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
@@ -2426,113 +2432,60 @@ public class PackageManagerService extends IPackageManager.Stub {
         return mIsUpgrade;
     }
 
-    private String getRequiredVerifierLPr() {
-        final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
-        // We only care about verifier that's installed under system user.
-        final List<ResolveInfo> receivers = queryIntentReceivers(verification, PACKAGE_MIME_TYPE,
-                PackageManager.GET_DISABLED_COMPONENTS, UserHandle.USER_SYSTEM);
+    private @NonNull String getRequiredVerifierLPr() {
+        final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
-        String requiredVerifier = null;
-
-        final int N = receivers.size();
-        for (int i = 0; i < N; i++) {
-            final ResolveInfo info = receivers.get(i);
-
-            if (info.activityInfo == null) {
-                continue;
-            }
-
-            final String packageName = info.activityInfo.packageName;
-
-            if (checkPermission(android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
-                    packageName, UserHandle.USER_SYSTEM) != PackageManager.PERMISSION_GRANTED) {
-                continue;
-            }
-
-            if (requiredVerifier != null) {
-                throw new RuntimeException("There can be only one required verifier");
-            }
-
-            requiredVerifier = packageName;
+        final List<ResolveInfo> matches = queryIntentReceivers(intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There must be exactly one verifier; found " + matches);
         }
-
-        return requiredVerifier;
     }
 
-    private String getRequiredInstallerLPr() {
-        Intent installerIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-        installerIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        installerIntent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
+    private @NonNull String getRequiredInstallerLPr() {
+        final Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
-        final List<ResolveInfo> installers = queryIntentActivities(installerIntent,
-                PACKAGE_MIME_TYPE, 0, UserHandle.USER_SYSTEM);
-
-        String requiredInstaller = null;
-
-        final int N = installers.size();
-        for (int i = 0; i < N; i++) {
-            final ResolveInfo info = installers.get(i);
-            final String packageName = info.activityInfo.packageName;
-
-            if (!info.activityInfo.applicationInfo.isSystemApp()) {
-                continue;
-            }
-
-            if (requiredInstaller != null) {
-                throw new RuntimeException("There must be one required installer");
-            }
-
-            requiredInstaller = packageName;
+        final List<ResolveInfo> matches = queryIntentActivities(intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There must be exactly one installer; found " + matches);
         }
-
-        if (requiredInstaller == null) {
-            throw new RuntimeException("There must be one required installer");
-        }
-
-        return requiredInstaller;
     }
 
-    private ComponentName getIntentFilterVerifierComponentNameLPr() {
-        final Intent verification = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
-        final List<ResolveInfo> receivers = queryIntentReceivers(verification, PACKAGE_MIME_TYPE,
-                PackageManager.GET_DISABLED_COMPONENTS, UserHandle.USER_SYSTEM);
+    private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
+        final Intent intent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
 
-        ComponentName verifierComponentName = null;
-
-        int priority = -1000;
-        final int N = receivers.size();
+        final List<ResolveInfo> matches = queryIntentReceivers(intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+        ResolveInfo best = null;
+        final int N = matches.size();
         for (int i = 0; i < N; i++) {
-            final ResolveInfo info = receivers.get(i);
-
-            if (info.activityInfo == null) {
-                continue;
-            }
-
-            final String packageName = info.activityInfo.packageName;
-
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null) {
-                continue;
-            }
-
+            final ResolveInfo cur = matches.get(i);
+            final String packageName = cur.getComponentInfo().packageName;
             if (checkPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT,
                     packageName, UserHandle.USER_SYSTEM) != PackageManager.PERMISSION_GRANTED) {
                 continue;
             }
 
-            // Select the IntentFilterVerifier with the highest priority
-            if (priority < info.priority) {
-                priority = info.priority;
-                verifierComponentName = new ComponentName(packageName, info.activityInfo.name);
-                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Selecting IntentFilterVerifier: "
-                        + verifierComponentName + " with priority: " + info.priority);
+            if (best == null || cur.priority > best.priority) {
+                best = cur;
             }
         }
 
-        return verifierComponentName;
+        if (best != null) {
+            return best.getComponentInfo().getComponentName();
+        } else {
+            throw new RuntimeException("There must be at least one intent filter verifier");
+        }
     }
 
-    private ComponentName getEphemeralResolverLPr() {
+    private @Nullable ComponentName getEphemeralResolverLPr() {
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
         if (packageArray.length == 0) {
@@ -2542,9 +2495,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return null;
         }
 
-        Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
-        final List<ResolveInfo> resolvers = queryIntentServices(resolverIntent,
-                null /*resolvedType*/, 0 /*flags*/, UserHandle.USER_SYSTEM);
+        final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
+        final List<ResolveInfo> resolvers = queryIntentServices(resolverIntent, null,
+                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
 
         final int N = resolvers.size();
         if (N == 0) {
@@ -2583,36 +2536,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    private ComponentName getEphemeralInstallerLPr() {
-        Intent installerIntent = new Intent(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
-        installerIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        installerIntent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
-        final List<ResolveInfo> installers = queryIntentActivities(installerIntent,
-                PACKAGE_MIME_TYPE, 0 /*flags*/, 0 /*userId*/);
+    private @Nullable ComponentName getEphemeralInstallerLPr() {
+        final Intent intent = new Intent(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
-        ComponentName ephemeralInstaller = null;
-
-        final int N = installers.size();
-        for (int i = 0; i < N; i++) {
-            final ResolveInfo info = installers.get(i);
-            final String packageName = info.activityInfo.packageName;
-
-            if (!info.activityInfo.applicationInfo.isSystemApp()) {
-                if (DEBUG_EPHEMERAL) {
-                    Slog.d(TAG, "Ephemeral installer is not system app;"
-                            + " pkg: " + packageName + ", info:" + info);
-                }
-                continue;
-            }
-
-            if (ephemeralInstaller != null) {
-                throw new RuntimeException("There must only be one ephemeral installer");
-            }
-
-            ephemeralInstaller = new ComponentName(packageName, info.activityInfo.name);
+        final List<ResolveInfo> matches = queryIntentActivities(intent, PACKAGE_MIME_TYPE,
+                MATCH_SYSTEM_ONLY | MATCH_ENCRYPTION_AWARE_AND_UNAWARE, UserHandle.USER_SYSTEM);
+        if (matches.size() == 0) {
+            return null;
+        } else if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().getComponentName();
+        } else {
+            throw new RuntimeException(
+                    "There must be at most one ephemeral installer; found " + matches);
         }
-
-        return ephemeralInstaller;
     }
 
     private void primeDomainVerificationsLPw(int userId) {
@@ -2857,7 +2795,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 return generatePackageInfo(p, flags, userId);
             }
-            if((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 return generatePackageInfoFromSettingsLPw(packageName, flags, userId);
             }
         }
@@ -2907,7 +2845,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (p != null) {
                 return UserHandle.getUid(userId, p.applicationInfo.uid);
             }
-            if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
                     return UserHandle.getUid(userId, ps.appId);
@@ -2937,7 +2875,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PackageSetting ps = (PackageSetting) p.mExtras;
                 return ps.getPermissionsState().computeGids(userId);
             }
-            if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
                     return ps.getPermissionsState().computeGids(userId);
@@ -3045,7 +2983,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (ps != null) {
             PackageParser.Package pkg = ps.pkg;
             if (pkg == null) {
-                if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) == 0) {
+                if ((flags & MATCH_UNINSTALLED_PACKAGES) == 0) {
                     return null;
                 }
                 // Only data remains, so we aren't worried about code paths
@@ -3084,7 +3022,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ("android".equals(packageName)||"system".equals(packageName)) {
                 return mAndroidApplication;
             }
-            if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+            if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 return generateApplicationInfoFromSettingsLPw(packageName, flags, userId);
             }
         }
@@ -4688,7 +4626,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     ppa.dump(new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM), "  ");
                 }
                 final ActivityInfo ai = getActivityInfo(ppa.mComponent,
-                        flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                        flags | MATCH_DISABLED_COMPONENTS, userId);
                 if (DEBUG_PREFERRED || debug) {
                     Slog.v(TAG, "Found persistent preferred activity:");
                     if (ai != null) {
@@ -4797,7 +4735,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             continue;
                         }
                         final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
-                                flags | PackageManager.GET_DISABLED_COMPONENTS, userId);
+                                flags | MATCH_DISABLED_COMPONENTS, userId);
                         if (DEBUG_PREFERRED || debug) {
                             Slog.v(TAG, "Found preferred activity:");
                             if (ai != null) {
@@ -5713,7 +5651,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, null);
-        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, false, "get installed packages");
 
         // writer
@@ -5794,7 +5732,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             String[] permissions, int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForPackage(flags, userId, permissions);
-        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
 
         // writer
         synchronized (mPackages) {
@@ -5822,7 +5760,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForApplication(flags, userId, null);
-        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+        final boolean listUninstalled = (flags & MATCH_UNINSTALLED_PACKAGES) != 0;
 
         // writer
         synchronized (mPackages) {
@@ -11263,9 +11201,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                             PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+                    // Query all live verifiers based on current user state
                     final List<ResolveInfo> receivers = queryIntentReceivers(verification,
-                            PACKAGE_MIME_TYPE, PackageManager.GET_DISABLED_COMPONENTS,
-                            verifierUser.getIdentifier());
+                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
 
                     if (DEBUG_VERIFY) {
                         Slog.d(TAG, "Found " + receivers.size() + " verifiers for intent "
