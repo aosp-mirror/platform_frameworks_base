@@ -866,6 +866,11 @@ public class Resources {
         try {
             getValueForDensity(id, density, value, true);
 
+            // If the drawable's XML lives in our current density qualifier,
+            // it's okay to use a scaled version from the cache. Otherwise, we
+            // need to actually load the drawable from XML.
+            final boolean useCache = value.density == mMetrics.densityDpi;
+
             /*
              * Pretend the requested density is actually the display density. If
              * the drawable returned is not the requested density, then force it
@@ -881,7 +886,7 @@ public class Resources {
                 }
             }
 
-            return loadDrawable(value, id, theme);
+            return loadDrawable(value, id, theme, useCache);
         } finally {
             releaseTempTypedValue(value);
         }
@@ -2437,6 +2442,12 @@ public class Resources {
 
     @Nullable
     Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
+        return loadDrawable(value, id, theme, true);
+    }
+
+    @Nullable
+    Drawable loadDrawable(TypedValue value, int id, Theme theme, boolean useCache)
+            throws NotFoundException {
         try {
             if (TRACE_FOR_PRELOAD) {
                 // Log only framework resources
@@ -2463,16 +2474,17 @@ public class Resources {
             }
 
             // First, check whether we have a cached version of this drawable
-            // that was inflated against the specified theme.
-            if (!mPreloading) {
+            // that was inflated against the specified theme. Skip the cache if
+            // we're currently preloading or we're not using the cache.
+            if (!mPreloading && useCache) {
                 final Drawable cachedDrawable = caches.getInstance(key, theme);
                 if (cachedDrawable != null) {
                     return cachedDrawable;
                 }
             }
 
-            // Next, check preloaded drawables. These may contain unresolved theme
-            // attributes.
+            // Next, check preloaded drawables. Preloaded drawables may contain
+            // unresolved theme attributes.
             final ConstantState cs;
             if (isColorDrawable) {
                 cs = sPreloadedColorDrawables.get(key);
@@ -2500,8 +2512,9 @@ public class Resources {
             }
 
             // If we were able to obtain a drawable, store it in the appropriate
-            // cache: preload, not themed, null theme, or theme-specific.
-            if (dr != null) {
+            // cache: preload, not themed, null theme, or theme-specific. Don't
+            // pollute the cache with drawables loaded from a foreign density.
+            if (dr != null && useCache) {
                 dr.setChangingConfigurations(value.changingConfigurations);
                 cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
             }
