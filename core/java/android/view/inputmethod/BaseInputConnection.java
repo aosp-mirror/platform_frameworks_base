@@ -201,10 +201,17 @@ public class BaseInputConnection implements InputConnection {
     }
 
     /**
-     * The default implementation performs the deletion around the current
-     * selection position of the editable text.
-     * @param beforeLength
-     * @param afterLength
+     * The default implementation performs the deletion around the current selection position of the
+     * editable text.
+     *
+     * @param beforeLength The number of characters before the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         if (DEBUG) Log.v(TAG, "deleteSurroundingText " + beforeLength
@@ -213,7 +220,7 @@ public class BaseInputConnection implements InputConnection {
         if (content == null) return false;
 
         beginBatchEdit();
-        
+
         int a = Selection.getSelectionStart(content);
         int b = Selection.getSelectionEnd(content);
 
@@ -253,9 +260,9 @@ public class BaseInputConnection implements InputConnection {
 
             content.delete(b, end);
         }
-        
+
         endBatchEdit();
-        
+
         return true;
     }
 
