@@ -8,63 +8,16 @@ page.tags=monitor
 <div id="qv">
   <h2>In this document</h2>
 <ol>
-  <li><a href="#displaying">Displaying Android Monitor</a></li>
-  <li><a href="#profiling">Profiling a Running App in Android Monitor</a></li>
-  <li><a href="#switching">Switching between Devices and Apps</a></li>
-  <li><a href="#screencapture">Taking a Screen Capture of the Device</a></li>
-  <li><a href="#video">Recording a Video from the Screen</a></li>
-  <li><a href="#sysinfo">Examining System Information</a></li>
-  <li><a href="#terminating">Terminating the App</a></li>
-  <li><a href="#rearranging">Rearranging Android Monitor Windows</a></li>
-  <li><a href="#removing">Removing an App from a Device</a></li>
+  <li><a href="#logcat">Log Messages</a></li>
+  <li><a href="#monitors">Performance Monitors</a></li>
+  <li><a href="#data">Data Analysis</a></li>
+  <li><a href="#shots">Screen and Video Captures</a></li>
+  <li><a href="#getstarted">Get Started</a></li>
 </ol>
 
- <h2>See also</h2>
-  <ol>
-    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
-  </ol>
 
 
-<h2>
-  Dependencies and Prerequisites
-</h2>
 
-<ul>
-  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
-  <code>build.gradle</code> file (it’s initially set by default).
-  </li>
-
-    <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-  <strong>Enable ADB Integration</strong>.
-    </li>
-
-  <li>Make sure your development computer detects your hardware device, which often happens
-  automatically when you connect it to a USB port.
-  </li>
- <li>
-    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
-    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
-    <strong>Developer Options</strong> on the device or emulator.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-</ul>
 
 </div>
 </div>
@@ -72,7 +25,7 @@ page.tags=monitor
 <p>
   Android Monitor helps you to profile the performance of your apps so you can optimize, debug, and
   improve them. It lets you monitor the following aspects of your apps from a hardware device or
-  the Android Studio emulator:
+  the <a href="{@docRoot}tools/devices/emulator.html">Android Emulator</a>:
 </p>
 
 <ul>
@@ -88,375 +41,66 @@ page.tags=monitor
   </li>
 </ul>
 
-<p>
-  Android Monitor contains the logcat, Memory, CPU, GPU, and Network Monitors that you can use
-  separately to examine these aspects of your apps.
-</p>
 
-
-<h2 id="displaying">
-  Displaying Android Monitor
-</h2>
-
-<p>
-  Android Monitor is integrated into the Android Studio main window:
-</p>
-
-<ul>
-  <li>To display Android Monitor, click <img src="{@docRoot}images/tools/am-icon.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Android Monitor icon" />, which by default
-  is at the bottom of the main window.
-  </li>
-
-  <li>To hide Android Monitor, click <img src="{@docRoot}images/tools/am-icon.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Android Monitor icon" /> again.
-  </li>
-</ul>
-<img src="{@docRoot}images/tools/am-androidmon.png" style="vertical-align:sub;margin:0;width:480px" />
-
-<h2 id="profiling">
-  Profiling a Running App in Android Monitor
-</h2>
-
-<p>
-  Follow these steps:
-</p>
-
-<ol>
-  <li>Optionally connect a hardware device.
-  </li>
-
-  <li>
-    <a href="#displaying">Display Android Monitor</a>.
-  </li>
-
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run the app</a> on a device or
-  emulator.
-  </li>
-
-  <li>Click the tab for the monitor you want to view and start the monitor, if needed:
-    <ul>
-      <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
-    </ul>
-</ol>
-    <h2 id="switching">
-      Switching between Devices and Apps
-    </h2>
-
-    <p>
-      By default, Android Monitor displays data for your most recently run app. You can switch to
-      another device and app as needed. In addition to currently running apps, you can view
-      information about apps that are no longer running so you can continue to view any information
-      about them that you gathered previously.
-    </p>
-
-    <p>
-      At the top of the Android Monitor main window are two menus listing devices and processes. To
-      switch to another device, process, or both, follow these steps:
-    </p>
-
-    <ol>
-      <li>Select the device or emulator.
-      </li>
-
-    <p>
-      The Device menu lists the devices and emulators that are running or have run during your
-      current session. There are various status messages that can appear in the Device menu:
-    </p>
-
-    <ul>
-      <li>
-        <strong>DISCONNECTED</strong> - You closed an emulator or unplugged a device from the
-        computer.
-      </li>
-
-      <li>
-        <strong>UNAUTHORIZED</strong> - A device needs you to accept the incoming computer
-        connection. For example, if the connected device displays an <em>Allow USB Debugging</em>
-        dialog, click <strong>OK</strong> to allow the connection.
-      </li>
-
-      <li>
-        <strong>OFFLINE</strong> - Android Monitor can’t communicate with a device, even though it
-        has detected that device.
-      </li>
-    </ul>
-
-  <li>Select the process.
-  </li>
-</ol>
-
-<p>
-  The Process menu lists the processes that are running or have run during your current session. If
-  a process is no longer running, the menu displays a status of <strong>DEAD</strong>.
-</p>
-
-<h2 id="screencapture">
-  Taking a Screen Capture of the Device
-</h2>
-
-<p>
-  You can take a PNG screenshot of the display on a connected device or the emulator. You can use
-  the images for your marketing materials as well as for debugging, for example.
-</p>
-<p>
-  Follow these steps:
-</p>
-<ol>
-  <li>
-    <a href="{@docRoot}training/basics/firstapp/running-app.html">Run your
-    app</a> from within Android Studio.
-  </li>
-
-  <li>
-    <a href="#switching">Select the device and the process</a> in the Android Monitor
-    menus, if needed.
-  </li>
-
-  <li>Interact with the display on the device or emulator to stage the image you want.
-  </li>
-
-  <li>Click Screen Capture <img src="{@docRoot}images/tools/am-iscreencapture.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Screen Capture icon" /> in the
-    Android Monitor toolbar.
-  </li>
-  <p>The screenshot appears in a <em>Screenshot Editor</em> window.</p>
-
-  <li>Optionally change the image:
-    <ul>
-      <li>
-        <strong>Reload</strong> - Click to take a new screenshot.
-      </li>
-
-      <li>
-        <strong>Rotate</strong> - Click to rotate the image 90 degrees clockwise.
-      </li>
-
-      <li>
-        <strong>Frame Screenshot</strong> - Select this option and choose a device to add an image
-        of the device to the outside of the screenshot. Select <strong>Drop Shadow</strong>,
-        <strong>Screen Glare</strong>, or both to add these effects to your image.
-      </li>
-
-      <li>
-        <strong>Chessboard</strong> and <strong>Grid</strong> - Select an option to display these
-        behind your image.
-      </li>
-
-      <li>
-        <strong>Zoom In</strong>, <strong>Zoom Out</strong>, or <strong>Actual Size</strong> -
-        Click these options to get different perspectives of your image without changing the image
-        itself.
-      </li>
-    </ul>
-    </li>
-      <li>Click <strong>Save</strong> to save the image.
-      </li>
-</ol>
-
-<h2 id="video">
-  Recording a Video from the Screen
-</h2>
-
-<p>
-  Android Studio lets you record an MP4 video from your hardware device for a maximum of three
-  minutes. You can use the video for your marketing materials as well as for debugging, for
-  example.
-</p>
-<p>
-  Follow these steps:
-</p>
-<ol>
-  <li>
-    <a href="{@docRoot}training/basics/firstapp/running-app.html">Run your
-    app</a> from within Android Studio.
-  </li>
-
-  <li>
-    <a href="#switching">Select the device and the process</a> in the Android Monitor
-    menus, if needed.
-  </li>
-
-  <li>Interact with the display on the device or emulator to stage the start of the video.
-  </li>
-
-  <li>Click Screen Record <img src="{@docRoot}images/tools/am-ivideo.png" style="vertical-align:sub;margin:0;height:17px" alt="Screen Record icon" /> in the Android Monitor toolbar.
-  </li>
-  <p>The screenshot appears in a Screenshot Editor window.</p>
-
-  <li>In the <em>Screen Recorder Options</em> dialog, optionally change the recording options:
-  </li>
-<ul>
-  <li>
-    <strong>Bit Rate</strong> - Type a bit rate. The default is 4 Mbps.
-  </li>
-
-  <li>
-    <strong>Resolution</strong> - Type a width and height value in pixels. The value must be a
-    multiple of 16. The default is the resolution of the device.
-  </li>
-</ul>
-  <li>Click <strong>Start Recording</strong> to start the recording.
-  </li>
-
-  <li>Click <strong>Stop Recording</strong> to stop the recording.
-  </li>
-
-  <li>In the <em>Save As</em> dialog, save the MP4 file.
-  </li>
-
-  <li>In the <em>Screen Recorder</em> dialog, click one of the buttons to show the file location,
-  open the recording in a player, or to dismiss the dialog.
-  </li>
-</ol>
-
-<h2 id="sysinfo">
-  Examining System Information
-</h2>
-<p>
-  You can view <code>dumpsys</code> output from within Android Monitor. Follow these steps:
-</p>
-
-<ol>
-  <li>
-    <a href="{@docRoot}training/basics/firstapp/running-app.html">Run your
-    app</a> from within Android Studio.
-  </li>
-
-  <li>
-    <a href="#switching">Select the device and the process</a> in the Android Monitor
-    menus, if needed.
-  </li>
-
-  <li>Click System Information <img src="{@docRoot}images/tools/am-isysteminfo.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="System Information icon" /> and then a
-    menu item in the Android Monitor
-  toolbar.
-  </li>
-
-<p>
-  The menu items display different types of <code><a href=
-  "https://source.android.com/devices/tech/debug/dumpsys.html">dumpsys</a></code> output:
-</p>
-
-<ul>
-  <li>
-    <strong>Activity Manager State</strong> - <code>dumpsys activity</code>
-  </li>
-
-  <li>
-    <strong>Package Information</strong> - <code>dumpsys package</code>
-  </li>
-
-  <li>
-    <strong>Memory Usage</strong> - <code><a href=
-    "{@docRoot}tools/debugging/debugging-memory.html#ViewingAllocations">dumpsys
-    meminfo</a></code>
-  </li>
-
-  <li>
-    <strong>Memory Use Over Time</strong> - <code><a href=
-    "http://android-developers.blogspot.com/2014/01/process-stats-understanding-how-your.html">dumpsys
-    procstats</a></code>
-  </li>
-
-  <li>
-    <strong>Graphics State</strong> - <code><a href=
-    "{@docRoot}training/testing/performance.html">dumpsys gfxinfo</a></code>
-  </li>
-</ul>
-
-<p>
-  The information appears in an editable text file in the Code Editor.
-</p>
-</ol>
-
-<h2 id="terminating">
-  Terminating the App
-</h2>
-
-<p>
-  If you want to stop an app you’ve run from Android Studio, follow these steps:
-</p>
-
-<ol>
-  <li>
-    <a href="#switching">Select the device and the process</a> in the Android Monitor
-    menus, if needed.
-  </li>
-
-  <li>Click Terminate Application <img src="{@docRoot}images/tools/am-iterminate.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Terminate App icon" />.
-  </li>
-
-
-<p>
-  The process status changes to <strong>DEAD</strong> in the Processes menu. The emulator or device
-  continues to run, but the app closes. Any running monitors in Android Monitor stop.
-</p>
-</ol>
-
-<h2 id="rearranging">
-  Rearranging Android Monitor Windows
-</h2>
-
-<p>
-  You can rearrange the Android Monitor windows for optimal viewing during your tests:
-</p>
-
-<ul>
-  <li>To reorder the monitors, move the tabs back and forth.
-  </li>
-
-  <li>To move a monitor to a standalone window, grab a tab and move it to a different location on
-  the screen. Or, select <img src="{@docRoot}images/tools/am-igear.png" style="vertical-align:sub;margin:0;height:17px" alt="Gear menu icon" /> &gt; <strong>Floating Mode</strong>.
-  </li>
-
-
-  <li>To dock a standalone window, grab it and move it to the Android Monitor area. Or, select
-  <img src="{@docRoot}images/tools/am-igear.png" style="vertical-align:sub;margin:0;height:17px"
-  alt="Gear menu icon"> &gt; <strong>Floating Mode</strong> to deselect it.
-  </li>
-
-
-  <li>To combine two monitor displays together, grab a tab and move it onto another monitor.
-  </li>
-
-  <li>To hide a monitor, click the <img src="{@docRoot}images/tools/am-ihide.png" style="vertical-align:sub;margin:0;height:17px" alt="Hide icon" /> icon. To make it reappear, click the icon of
-  the monitor on the far right of the row of tabs.
-  </li>
-</ul>
-
-<h2 id="removing">
-  Removing an App from a Device
-</h2>
-
-<p>
-  To remove an app from a device you use for development, use the normal uninstall procedure on the
-  device.
-</p>
-
-<p>
-  If you run a new version of an app from Android Studio that’s been already installed on a
-  hardware device, the device displays an <em>Application Installation Failed</em> dialog. Click
-  <strong>OK</strong> to install the new version of the app.
-</p>
-
-
+<p>Android Monitor provides various tools that provide real-time information about your app. It
+  lets you capture data as your app runs and stores it in a file that you can analyze in various
+  viewers. You can also capture screen shots and videos of your app as it runs.</p>
+
+<h2 id="logcat">Log Messages</h2>
+
+<p>View log messages — in real time and historically — which is useful for debugging.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/help/log"
+    data-cardSizes="12x6"
+    data-maxResults="6">
+  </div>
+</div>
+
+
+<h2 id="monitors">Performance Monitors</h2>
+
+<p>Visualize the behavior and performance of your app.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/help/monitor"
+    data-cardSizes="9x6"
+    data-maxResults="6">
+  </div>
+</div>
+
+<h2 id="data">Data Analysis</h2>
+
+<p>Android Monitor lets you capture various types of data about your app while it's running and
+  stores it in a file, which you can access whenever is convenient.
+  It lists these files in the <em>Captures</em> window.</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/help/data"
+    data-cardSizes="9x6"
+    data-maxResults="6">
+  </div>
+</div>
+
+<h2 id="shots">Screen and Video Captures</h2>
+
+<p>Create screen captures and videos of your app to help with marketing and debugging.
+  </p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:tools/help/shot"
+    data-cardSizes="9x3"
+    data-maxResults="2">
+  </div>
+</div>
+
+<h2 id="getstarted">Get Started</h2>
+<p>To begin using Android Monitor, start with <a href=
+  "{@docRoot}tools/help/am-basics.html">Android Monitor Basics</a>.
+  </p>
 
 
