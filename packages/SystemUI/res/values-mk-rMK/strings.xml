@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Тивко прикажувај ги известувањава"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Прикажувај ги на врвот на списокот со известувања и дај звучен сигнал"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Појави се на екранот и дај звучен сигнал"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Повеќе поставки"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Нормални бои"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Ноќни бои"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Приспособени бои"</string>

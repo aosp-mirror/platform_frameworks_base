@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"顯示這些通知且不發出任何音效"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"顯示在通知清單頂端並發出音效"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"短暫顯示在螢幕上並發出音效"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
+    <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"一般顏色"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"夜間顏色"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自訂顏色"</string>

@@ -425,7 +425,7 @@
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo de avião"</string>
     <string name="add_tile" msgid="2995389510240786221">"Adicionar mosaico"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico de transmissão"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Só vai ouvir o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g> se desativar esta funcionalidade antes dessa hora"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Só vai ouvir o próximo alarme (<xliff:g id="WHEN">%1$s</xliff:g>) se desativar esta funcionalidade antes dessa hora"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Não vai ouvir o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"em <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Mostrar estas notificações sem som"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Mostrar na parte superior da lista de notificações e emitir som"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Mostrar no ecrã e emitir som"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Mais definições"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Concluído"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Cores normais"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Cores noturnas"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Cores personalizadas"</string>

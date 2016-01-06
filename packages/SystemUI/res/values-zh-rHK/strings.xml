@@ -454,12 +454,14 @@
     <string name="low_importance" msgid="4109929986107147930">"低重要性"</string>
     <string name="default_importance" msgid="8192107689995742653">"一般重要性"</string>
     <string name="high_importance" msgid="1527066195614050263">"高重要性"</string>
-    <string name="max_importance" msgid="5089005872719563894">"緊急"</string>
+    <string name="max_importance" msgid="5089005872719563894">"緊急重要性"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"永不顯示這些通知"</string>
     <string name="notification_importance_low" msgid="4383563267370859725">"顯示在通知清單底部但不發出音效"</string>
     <string name="notification_importance_default" msgid="4926529615920610817">"顯示這些通知但不發出音效"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"顯示在通知清單頂部並發出音效"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"不時於螢幕出現並發出音效"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
+    <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"一般色系"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"深沉色系"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自訂顏色"</string>

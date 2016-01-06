@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"নিঃশব্দে এই বিজ্ঞপ্তিগুলি দেখানো হয়"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"বিজ্ঞপ্তি তালিকার শীর্ষে দেখানো হয় এবং শব্দ করে"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"স্ক্রীনের উপরে দেখানো হয় এবং শব্দ করে"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
+    <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"স্বাভাবিক রঙ"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"রাতের রঙ"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"কাস্টম রঙ"</string>

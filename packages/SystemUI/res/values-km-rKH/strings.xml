@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"បង្ហាញការជូនដំណឹងទាំងនេះស្ងាត់ៗ"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"បង្ហាញនៅផ្នែកខាងលើបញ្ជីនៃការជូនដំណឹង និងបន្លឺសំឡេង"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"លោតបង្ហាញនៅលើអេក្រង់ និងបន្លឺសំឡេង"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
+    <string name="notification_done" msgid="5279426047273930175">"រួចរាល់"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"ពណ៌ធម្មតា"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"ពណ៌ពេលយប់"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"ពណ៌ផ្ទាល់ខ្លួន"</string>
