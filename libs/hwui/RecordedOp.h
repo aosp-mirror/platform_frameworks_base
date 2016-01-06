@@ -39,57 +39,84 @@ class RenderNode;
 struct Vertex;
 
 /**
- * On of the provided macros is executed for each op type in order. The first will be used for ops
- * that cannot merge, and the second for those that can.
+ * Authoritative op list, used for generating the op ID enum, ID based LUTS, and
+ * the functions to which they dispatch. Parameter macros are executed for each op,
+ * in order, based on the op's type.
  *
- * This serves as the authoritative list of ops, used for generating ID enum, and ID based LUTs.
+ * There are 4 types of op:
+ *
+ * Pre render - not directly consumed by renderer, reorder stage resolves this into renderable type
+ * Render only - generated renderable ops - never passed to a reorderer
+ * Unmergeable - reorderable, renderable (but not mergeable)
+ * Mergeable - reorderable, renderable (and mergeable)
  */
-#define MAP_OPS_BASED_ON_MERGEABILITY(U_OP_FN, M_OP_FN) \
-        U_OP_FN(ArcOp) \
-        M_OP_FN(BitmapOp) \
-        U_OP_FN(BitmapMeshOp) \
-        U_OP_FN(BitmapRectOp) \
-        U_OP_FN(CirclePropsOp) \
-        U_OP_FN(FunctorOp) \
-        U_OP_FN(LinesOp) \
-        U_OP_FN(OvalOp) \
-        M_OP_FN(PatchOp) \
-        U_OP_FN(PathOp) \
-        U_OP_FN(PointsOp) \
-        U_OP_FN(RectOp) \
-        U_OP_FN(RenderNodeOp) \
-        U_OP_FN(RoundRectOp) \
-        U_OP_FN(RoundRectPropsOp) \
-        U_OP_FN(ShadowOp) \
-        U_OP_FN(SimpleRectsOp) \
-        M_OP_FN(TextOp) \
-        U_OP_FN(TextOnPathOp) \
-        U_OP_FN(TextureLayerOp) \
-        U_OP_FN(BeginLayerOp) \
-        U_OP_FN(EndLayerOp) \
-        U_OP_FN(LayerOp)
+#define MAP_OPS_BASED_ON_TYPE(PRE_RENDER_OP_FN, RENDER_ONLY_OP_FN, UNMERGEABLE_OP_FN, MERGEABLE_OP_FN) \
+        PRE_RENDER_OP_FN(RenderNodeOp) \
+        PRE_RENDER_OP_FN(CirclePropsOp) \
+        PRE_RENDER_OP_FN(RoundRectPropsOp) \
+        PRE_RENDER_OP_FN(BeginLayerOp) \
+        PRE_RENDER_OP_FN(EndLayerOp) \
+        \
+        RENDER_ONLY_OP_FN(ShadowOp) \
+        RENDER_ONLY_OP_FN(LayerOp) \
+        \
+        UNMERGEABLE_OP_FN(ArcOp) \
+        UNMERGEABLE_OP_FN(BitmapMeshOp) \
+        UNMERGEABLE_OP_FN(BitmapRectOp) \
+        UNMERGEABLE_OP_FN(FunctorOp) \
+        UNMERGEABLE_OP_FN(LinesOp) \
+        UNMERGEABLE_OP_FN(OvalOp) \
+        UNMERGEABLE_OP_FN(PathOp) \
+        UNMERGEABLE_OP_FN(PointsOp) \
+        UNMERGEABLE_OP_FN(RectOp) \
+        UNMERGEABLE_OP_FN(RoundRectOp) \
+        UNMERGEABLE_OP_FN(SimpleRectsOp) \
+        UNMERGEABLE_OP_FN(TextOnPathOp) \
+        UNMERGEABLE_OP_FN(TextureLayerOp) \
+        \
+        MERGEABLE_OP_FN(BitmapOp) \
+        MERGEABLE_OP_FN(PatchOp) \
+        MERGEABLE_OP_FN(TextOp)
 
 /**
- * The provided macro is executed for each op type in order. This is used in cases where
- * merge-ability of ops doesn't matter.
+ * LUT generators, which will insert nullptr for unsupported ops
  */
-#define MAP_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_MERGEABILITY(OP_FN, OP_FN)
+#define NULLPTR_OP_FN(Type) nullptr,
 
+#define BUILD_DEFERRABLE_OP_LUT(OP_FN) \
+        { MAP_OPS_BASED_ON_TYPE(OP_FN, NULLPTR_OP_FN, OP_FN, OP_FN) }
+
+#define BUILD_MERGEABLE_OP_LUT(OP_FN) \
+        { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, NULLPTR_OP_FN, NULLPTR_OP_FN, OP_FN) }
+
+#define BUILD_RENDERABLE_OP_LUT(OP_FN) \
+        { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, OP_FN, OP_FN, OP_FN) }
+
+/**
+ * Op mapping functions, which skip unsupported ops.
+ *
+ * Note: Do not use for LUTS, since these do not preserve ID order.
+ */
 #define NULL_OP_FN(Type)
 
-#define MAP_MERGED_OPS(OP_FN) \
-        MAP_OPS_BASED_ON_MERGEABILITY(NULL_OP_FN, OP_FN)
+#define MAP_MERGEABLE_OPS(OP_FN) \
+        MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, NULL_OP_FN, NULL_OP_FN, OP_FN)
+
+#define MAP_RENDERABLE_OPS(OP_FN) \
+        MAP_OPS_BASED_ON_TYPE(NULL_OP_FN, OP_FN, OP_FN, OP_FN)
+
+#define MAP_DEFERRABLE_OPS(OP_FN) \
+        MAP_OPS_BASED_ON_TYPE(OP_FN, NULL_OP_FN, OP_FN, OP_FN)
 
 // Generate OpId enum
 #define IDENTITY_FN(Type) Type,
 namespace RecordedOpId {
     enum {
-        MAP_OPS(IDENTITY_FN)
+        MAP_OPS_BASED_ON_TYPE(IDENTITY_FN, IDENTITY_FN, IDENTITY_FN, IDENTITY_FN)
         Count,
     };
 }
-static_assert(RecordedOpId::ArcOp == 0,
+static_assert(RecordedOpId::RenderNodeOp == 0,
         "First index must be zero for LUTs to work");
 
 #define BASE_PARAMS const Rect& unmappedBounds, const Matrix4& localMatrix, const ClipBase* localClip, const SkPaint* paint

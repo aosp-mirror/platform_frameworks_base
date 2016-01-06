@@ -36,13 +36,13 @@ public:
     // Declares all "onMergedBitmapOps(...)" style methods for mergeable op types
 #define X(Type) \
         static void onMerged##Type##s(BakedOpRenderer& renderer, const MergedBakedOpList& opList);
-    MAP_MERGED_OPS(X)
+    MAP_MERGEABLE_OPS(X)
 #undef X
 
     // Declares all "onBitmapOp(...)" style methods for every op type
 #define X(Type) \
         static void on##Type(BakedOpRenderer& renderer, const Type& op, const BakedOpState& state);
-    MAP_OPS(X)
+    MAP_RENDERABLE_OPS(X)
 #undef X
 
 };
