@@ -1744,7 +1744,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceCrossUserPermission(userHandle);
         Intent resolveIntent = new Intent();
         resolveIntent.setComponent(adminName);
-        List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceivers(
+        List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceiversAsUser(
                 resolveIntent,
                 PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                 userHandle);
@@ -3572,7 +3572,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             try {
-                int uid = mContext.getPackageManager().getPackageUid(
+                int uid = mContext.getPackageManager().getPackageUidAsUser(
                         policy.mDelegatedCertInstallerPackage, userHandle);
                 return uid == callingUid;
             } catch (NameNotFoundException e) {
@@ -4732,7 +4732,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(packageName, "packageName is null");
         final int callingUid = mInjector.binderGetCallingUid();
         try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
+            int uid = mContext.getPackageManager().getPackageUidAsUser(packageName, 0);
             if (uid != callingUid) {
                 throw new SecurityException("Invalid packageName");
             }
@@ -5241,7 +5241,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             try {
-                int uid = mContext.getPackageManager().getPackageUid(
+                int uid = mContext.getPackageManager().getPackageUidAsUser(
                         policy.mApplicationRestrictionsManagingPackage, userHandle);
                 return uid == callingUid;
             } catch (NameNotFoundException e) {

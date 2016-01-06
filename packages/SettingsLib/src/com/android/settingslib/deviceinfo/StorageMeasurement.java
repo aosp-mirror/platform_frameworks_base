@@ -422,7 +422,7 @@ public class StorageMeasurement {
                     ActivityManager.getCurrentUser(), currentProfiles, finished, count);
             for (UserInfo user : users) {
                 for (ApplicationInfo app : volumeApps) {
-                    packageManager.getPackageSizeInfo(app.packageName, user.id, observer);
+                    packageManager.getPackageSizeInfoAsUser(app.packageName, user.id, observer);
                 }
             }
 

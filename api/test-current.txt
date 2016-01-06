@@ -36746,7 +36746,6 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getApplicationLogo(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getComponentEnabledSetting(android.content.ComponentName);
     method public android.graphics.drawable.Drawable getDefaultActivityIcon();
-    method public java.lang.String getDefaultBrowserPackageName(int);
     method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public byte[] getEphemeralCookie();
     method public int getEphemeralCookieMaxSizeBytes();
@@ -36798,7 +36797,6 @@ package android.test.mock {
     method public android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
     method public void setApplicationEnabledSetting(java.lang.String, int, int);
     method public void setComponentEnabledSetting(android.content.ComponentName, int, int);
-    method public boolean setDefaultBrowserPackageName(java.lang.String, int);
     method public boolean setEphemeralCookie(byte[]);
     method public void setInstallerPackageName(java.lang.String, java.lang.String);
     method public void verifyPendingInstall(int, int);

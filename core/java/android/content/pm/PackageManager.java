@@ -2380,7 +2380,7 @@ public abstract class PackageManager {
      *
      * @return Returns an integer uid who owns the given package name.
      */
-    public abstract int getPackageUid(String packageName, int userHandle)
+    public abstract int getPackageUidAsUser(String packageName, int userId)
             throws NameNotFoundException;
 
     /**
@@ -2674,7 +2674,8 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract List<PackageInfo> getInstalledPackages(@PackageInfoFlags int flags, int userId);
+    public abstract List<PackageInfo> getInstalledPackagesAsUser(@PackageInfoFlags int flags,
+            int userId);
 
     /**
      * Check whether a particular package has been granted a particular
@@ -3298,7 +3299,7 @@ public abstract class PackageManager {
      * @see #GET_RESOLVED_FILTER
      * @hide
      */
-    public abstract List<ResolveInfo> queryBroadcastReceivers(Intent intent,
+    public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
             @ResolveInfoFlags int flags, int userId);
 
     /**
@@ -4230,7 +4231,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract int getIntentVerificationStatus(String packageName, int userId);
+    public abstract int getIntentVerificationStatusAsUser(String packageName, int userId);
 
     /**
      * Allow to change the status of a Intent Verification status for all IntentFilter of an App.
@@ -4252,7 +4253,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract boolean updateIntentVerificationStatus(String packageName, int status,
+    public abstract boolean updateIntentVerificationStatusAsUser(String packageName, int status,
             int userId);
 
     /**
@@ -4293,7 +4294,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract String getDefaultBrowserPackageName(int userId);
+    public abstract String getDefaultBrowserPackageNameAsUser(int userId);
 
     /**
      * Set the default Browser package name for a specific user.
@@ -4307,7 +4308,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract boolean setDefaultBrowserPackageName(String packageName, int userId);
+    public abstract boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId);
 
     /**
      * Change the installer associated with a given package.  There are limitations
@@ -4479,7 +4480,7 @@ public abstract class PackageManager {
      * should have the {@link android.Manifest.permission#GET_PACKAGE_SIZE} permission.
      *
      * @param packageName The name of the package whose size information is to be retrieved
-     * @param userHandle The user whose size information should be retrieved.
+     * @param userId The user whose size information should be retrieved.
      * @param observer An observer callback to get notified when the operation
      * is complete.
      * {@link android.content.pm.IPackageStatsObserver#onGetStatsCompleted(PackageStats, boolean)}
@@ -4490,17 +4491,17 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public abstract void getPackageSizeInfo(String packageName, int userHandle,
+    public abstract void getPackageSizeInfoAsUser(String packageName, int userId,
             IPackageStatsObserver observer);
 
     /**
-     * Like {@link #getPackageSizeInfo(String, int, IPackageStatsObserver)}, but
+     * Like {@link #getPackageSizeInfoAsUser(String, int, IPackageStatsObserver)}, but
      * returns the size for the calling user.
      *
      * @hide
      */
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
-        getPackageSizeInfo(packageName, UserHandle.myUserId(), observer);
+        getPackageSizeInfoAsUser(packageName, UserHandle.myUserId(), observer);
     }
 
     /**
@@ -4579,7 +4580,7 @@ public abstract class PackageManager {
             to.
      * @hide
      */
-    public void addPreferredActivity(IntentFilter filter, int match,
+    public void addPreferredActivityAsUser(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }

@@ -228,7 +228,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public int getPackageUid(String packageName, int userHandle)
+    public int getPackageUidAsUser(String packageName, int userHandle)
             throws NameNotFoundException {
         try {
             int uid = mPM.getPackageUid(packageName, userHandle);
@@ -590,12 +590,12 @@ public class ApplicationPackageManager extends PackageManager {
     @SuppressWarnings("unchecked")
     @Override
     public List<PackageInfo> getInstalledPackages(int flags) {
-        return getInstalledPackages(flags, mContext.getUserId());
+        return getInstalledPackagesAsUser(flags, mContext.getUserId());
     }
 
     /** @hide */
     @Override
-    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
+    public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         try {
             ParceledListSlice<PackageInfo> slice = mPM.getInstalledPackages(flags, userId);
             return slice.getList();
@@ -779,7 +779,7 @@ public class ApplicationPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
         try {
             return mPM.queryIntentReceivers(
                 intent,
@@ -793,7 +793,7 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags) {
-        return queryBroadcastReceivers(intent, flags, mContext.getUserId());
+        return queryBroadcastReceiversAsUser(intent, flags, mContext.getUserId());
     }
 
     @Override
@@ -1546,7 +1546,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public int getIntentVerificationStatus(String packageName, int userId) {
+    public int getIntentVerificationStatusAsUser(String packageName, int userId) {
         try {
             return mPM.getIntentVerificationStatus(packageName, userId);
         } catch (RemoteException e) {
@@ -1556,7 +1556,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+    public boolean updateIntentVerificationStatusAsUser(String packageName, int status, int userId) {
         try {
             return mPM.updateIntentVerificationStatus(packageName, status, userId);
         } catch (RemoteException e) {
@@ -1586,7 +1586,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getDefaultBrowserPackageName(int userId) {
+    public String getDefaultBrowserPackageNameAsUser(int userId) {
         try {
             return mPM.getDefaultBrowserPackageName(userId);
         } catch (RemoteException e) {
@@ -1596,7 +1596,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+    public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         try {
             return mPM.setDefaultBrowserPackageName(packageName, userId);
         } catch (RemoteException e) {
@@ -1867,7 +1867,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void getPackageSizeInfo(String packageName, int userHandle,
+    public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
         try {
             mPM.getPackageSizeInfo(packageName, userHandle, observer);
@@ -1914,7 +1914,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void addPreferredActivity(IntentFilter filter, int match,
+    public void addPreferredActivityAsUser(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
         try {
             mPM.addPreferredActivity(filter, match, set, activity, userId);

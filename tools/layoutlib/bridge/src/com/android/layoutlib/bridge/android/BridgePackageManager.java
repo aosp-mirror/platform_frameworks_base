@@ -97,7 +97,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public int getPackageUid(String packageName, int userHandle) throws NameNotFoundException {
+    public int getPackageUidAsUser(String packageName, int userHandle) throws NameNotFoundException {
         return 0;
     }
 
@@ -164,7 +164,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<PackageInfo> getInstalledPackages(int flags, int userId) {
+    public List<PackageInfo> getInstalledPackagesAsUser(int flags, int userId) {
         return null;
     }
 
@@ -328,7 +328,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public List<ResolveInfo> queryBroadcastReceivers(Intent intent, int flags, int userId) {
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent, int flags, int userId) {
         return null;
     }
 
@@ -578,12 +578,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public int getIntentVerificationStatus(String packageName, int userId) {
+    public int getIntentVerificationStatusAsUser(String packageName, int userId) {
         return 0;
     }
 
     @Override
-    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+    public boolean updateIntentVerificationStatusAsUser(String packageName, int status, int userId) {
         return false;
     }
 
@@ -598,12 +598,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public String getDefaultBrowserPackageName(int userId) {
+    public String getDefaultBrowserPackageNameAsUser(int userId) {
         return null;
     }
 
     @Override
-    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+    public boolean setDefaultBrowserPackageNameAsUser(String packageName, int userId) {
         return false;
     }
 
@@ -643,7 +643,7 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public void getPackageSizeInfo(String packageName, int userHandle,
+    public void getPackageSizeInfoAsUser(String packageName, int userHandle,
             IPackageStatsObserver observer) {
     }
 

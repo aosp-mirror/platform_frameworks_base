@@ -96,7 +96,7 @@ public final class NetworkScorerAppManager {
         // Only apps installed under the primary user of the device can be scorers.
         // TODO: http://b/23422763
         List<ResolveInfo> receivers =
-                pm.queryBroadcastReceivers(SCORE_INTENT, 0 /* flags */, UserHandle.USER_SYSTEM);
+                pm.queryBroadcastReceiversAsUser(SCORE_INTENT, 0 /* flags */, UserHandle.USER_SYSTEM);
         for (ResolveInfo receiver : receivers) {
             // This field is a misnomer, see android.content.pm.ResolveInfo#activityInfo
             final ActivityInfo receiverInfo = receiver.activityInfo;

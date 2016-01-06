@@ -718,9 +718,9 @@ public class ResolverActivity extends Activity {
 
                     if (ri.handleAllWebDataURI) {
                         // Set default Browser if needed
-                        final String packageName = pm.getDefaultBrowserPackageName(userId);
+                        final String packageName = pm.getDefaultBrowserPackageNameAsUser(userId);
                         if (TextUtils.isEmpty(packageName)) {
-                            pm.setDefaultBrowserPackageName(ri.activityInfo.packageName, userId);
+                            pm.setDefaultBrowserPackageNameAsUser(ri.activityInfo.packageName, userId);
                         }
                     } else {
                         // Update Domain Verification status
@@ -737,7 +737,7 @@ public class ResolverActivity extends Activity {
                                 categories.contains(Intent.CATEGORY_BROWSABLE);
 
                         if (isHttpOrHttps && isViewAction && hasCategoryBrowsable) {
-                            pm.updateIntentVerificationStatus(packageName,
+                            pm.updateIntentVerificationStatusAsUser(packageName,
                                     PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS,
                                     userId);
                         }

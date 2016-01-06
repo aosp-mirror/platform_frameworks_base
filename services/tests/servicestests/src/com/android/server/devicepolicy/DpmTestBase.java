@@ -117,7 +117,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         // We need to rewrite the UID in the activity info.
         realResolveInfo.get(0).activityInfo.applicationInfo = ai;
 
-        doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceivers(
+        doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceiversAsUser(
                 MockUtils.checkIntentComponent(admin),
                 eq(PackageManager.GET_META_DATA
                         | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),

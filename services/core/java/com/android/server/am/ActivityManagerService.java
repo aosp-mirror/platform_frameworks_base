@@ -14868,7 +14868,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int dumpUid = -2;
             if (dumpPackage != null) {
                 try {
-                    dumpUid = mContext.getPackageManager().getPackageUid(dumpPackage, 0);
+                    dumpUid = mContext.getPackageManager().getPackageUidAsUser(dumpPackage, 0);
                 } catch (NameNotFoundException e) {
                     dumpUid = -1;
                 }

@@ -309,7 +309,7 @@ public class Vpn {
         PackageManager pm = mContext.getPackageManager();
         int result;
         try {
-            result = pm.getPackageUid(app, userHandle);
+            result = pm.getPackageUidAsUser(app, userHandle);
         } catch (NameNotFoundException e) {
             result = -1;
         }

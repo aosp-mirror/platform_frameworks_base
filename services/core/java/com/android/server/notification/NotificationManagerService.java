@@ -2106,12 +2106,12 @@ public class NotificationManagerService extends SystemService {
         for (UserInfo user : UserManager.get(getContext()).getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();
             final PackageManager packageManager = getContext().getPackageManager();
-            List<PackageInfo> packages = packageManager.getInstalledPackages(0, userId);
+            List<PackageInfo> packages = packageManager.getInstalledPackagesAsUser(0, userId);
             final int packageCount = packages.size();
             for (int p = 0; p < packageCount; p++) {
                 final String packageName = packages.get(p).packageName;
                 if (filter == null || filter.matches(packageName)) {
-                    final int uid = packageManager.getPackageUid(packageName, userId);
+                    final int uid = packageManager.getPackageUidAsUser(packageName, userId);
                     if (!checkNotificationOp(packageName, uid)) {
                         packageNames.add(packageName);
                     }

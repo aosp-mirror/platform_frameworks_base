@@ -38,7 +38,7 @@ public class AppUtils {
         String packageName = appEntry.info.packageName;
         boolean hasPreferred = hasPreferredActivities(pm, packageName)
                 || hasUsbDefaults(usbManager, packageName);
-        int status = pm.getIntentVerificationStatus(packageName, UserHandle.myUserId());
+        int status = pm.getIntentVerificationStatusAsUser(packageName, UserHandle.myUserId());
         // consider a visible current link-handling state to be any explicitly designated behavior
         boolean hasDomainURLsPreference =
                 status != PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;

@@ -148,7 +148,7 @@ public class RankingHelper implements RankingConfig {
                         if (forRestore) {
                             try {
                                 //TODO: http://b/22388012
-                                uid = pm.getPackageUid(name, UserHandle.USER_SYSTEM);
+                                uid = pm.getPackageUidAsUser(name, UserHandle.USER_SYSTEM);
                             } catch (NameNotFoundException e) {
                                 // noop
                             }
@@ -537,7 +537,7 @@ public class RankingHelper implements RankingConfig {
             if (r != null) {
                 try {
                     //TODO: http://b/22388012
-                    r.uid = pm.getPackageUid(r.pkg, UserHandle.USER_SYSTEM);
+                    r.uid = pm.getPackageUidAsUser(r.pkg, UserHandle.USER_SYSTEM);
                     mRestoredWithoutUids.remove(pkg);
                     mRecords.put(recordKey(r.pkg, r.uid), r);
                     updated = true;

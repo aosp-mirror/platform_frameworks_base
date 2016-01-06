@@ -119,7 +119,7 @@ public class TileServices extends IQSService.Stub {
 
     private void verifyCaller(String packageName) {
         try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName,
+            int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
                     Binder.getCallingUserHandle().getIdentifier());
             if (Binder.getCallingUid() != uid) {
                 throw new SecurityException("Component outside caller's uid");
