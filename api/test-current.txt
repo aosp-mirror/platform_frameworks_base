@@ -40564,7 +40564,6 @@ package android.view {
     field public static final int AXIS_RX = 12; // 0xc
     field public static final int AXIS_RY = 13; // 0xd
     field public static final int AXIS_RZ = 14; // 0xe
-    field public static final int AXIS_SCROLL = 26; // 0x1a
     field public static final int AXIS_SIZE = 3; // 0x3
     field public static final int AXIS_THROTTLE = 19; // 0x13
     field public static final int AXIS_TILT = 25; // 0x19
