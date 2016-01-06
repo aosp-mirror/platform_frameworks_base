@@ -18247,6 +18247,7 @@ package android.icu.util {
     method public static java.lang.String getCanonicalID(java.lang.String, boolean[]);
     method public int getDSTSavings();
     method public static android.icu.util.TimeZone getDefault();
+    method public static int getDefaultTimeZoneType();
     method public final java.lang.String getDisplayName();
     method public final java.lang.String getDisplayName(java.util.Locale);
     method public final java.lang.String getDisplayName(android.icu.util.ULocale);
@@ -18270,6 +18271,8 @@ package android.icu.util {
     method public abstract boolean inDaylightTime(java.util.Date);
     method public boolean isFrozen();
     method public boolean observesDaylightTime();
+    method public static synchronized void setDefault(android.icu.util.TimeZone);
+    method public static synchronized void setDefaultTimeZoneType(int);
     method public void setID(java.lang.String);
     method public abstract void setRawOffset(int);
     method public abstract boolean useDaylightTime();
@@ -18282,6 +18285,8 @@ package android.icu.util {
     field public static final int SHORT_COMMONLY_USED = 6; // 0x6
     field public static final int SHORT_GENERIC = 2; // 0x2
     field public static final int SHORT_GMT = 4; // 0x4
+    field public static final int TIMEZONE_ICU = 0; // 0x0
+    field public static final int TIMEZONE_JDK = 1; // 0x1
     field public static final android.icu.util.TimeZone UNKNOWN_ZONE;
     field public static final java.lang.String UNKNOWN_ZONE_ID = "Etc/Unknown";
   }
@@ -18377,6 +18382,8 @@ package android.icu.util {
     method public static java.lang.String getVariant(java.lang.String);
     method public boolean isRightToLeft();
     method public static android.icu.util.ULocale minimizeSubtags(android.icu.util.ULocale);
+    method public static synchronized void setDefault(android.icu.util.ULocale);
+    method public static synchronized void setDefault(android.icu.util.ULocale.Category, android.icu.util.ULocale);
     method public android.icu.util.ULocale setKeywordValue(java.lang.String, java.lang.String);
     method public static java.lang.String setKeywordValue(java.lang.String, java.lang.String, java.lang.String);
     method public java.lang.String toLanguageTag();
