@@ -247,6 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Hierdoor komt een app in aanmerking om te worden geschreven naar externe opslag, ongeacht de manifestwaarden"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Formaat activiteiten geforceerd aanpasbaar maken"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Hiermee wordt het formaat van alle activiteiten aanpasbaar gemaakt, ongeacht de manifestwaarden."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Vensters met vrije vorm inschakelen"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Schakelt ondersteuning in voor vensters met experimentele vrije vorm."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Wachtwoord desktopback-up"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Raak dit aan om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>

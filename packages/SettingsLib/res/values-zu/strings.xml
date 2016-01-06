@@ -247,6 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Yenza noma uluphi uhlelo lokusebenza lifaneleke ukuthi libhalwe kusitoreji sangaphandle, ngaphandle kwamavelu we-manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Imisebenzi yamandla izonikezwa usayizi omusha"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Yenza yonke imisebenzi ibe nosayizi abasha kuwindi lokuningi, ngokunganaki amanani we-manifest."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Nika amandla amawindi e-freeform"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Inika amandla usekelo lwamawindi okuhlola e-freeform."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Iphasiwedi yokusekela ngokulondoloza ye-Desktop"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Ukusekela ngokulondoloza okugcwele kwe-Desktop akuvikelekile okwamanje."</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Khetha ukushintsha noma ukususa iphasiwedi yokwenziwa kwezipele ngokugcwele kwideskithophu"</string>

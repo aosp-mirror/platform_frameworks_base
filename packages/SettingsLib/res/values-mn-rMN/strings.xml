@@ -247,6 +247,10 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Манифест утгыг нь үл хамааран дурын апп-ыг гадаад санах ойд бичих боломжтой болгодог"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Үйл ажиллагааны хэмжээг өөрчилж болохуйц болгох"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Тодорхойлогч файлын утгыг үл хамааран, бүх үйл ажиллагааг олон цонхонд хэмжээг нь өөрчилж болохуйц болгох."</string>
+    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
+    <skip />
+    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
+    <skip />
     <string name="local_backup_password_title" msgid="3860471654439418822">"Десктоп нөөшлөлтийн нууц үг"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Десктоп бүрэн нөөцлөлт одоогоор хамгаалалтгүй байна"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Десктоп дээрх бүрэн нөөшлөлтийн нууц үгийг өөрчлөх буюу арилгахын тулд хүрнэ үү"</string>

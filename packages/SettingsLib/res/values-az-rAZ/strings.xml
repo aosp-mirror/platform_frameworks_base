@@ -247,6 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Seçilmiş hər hansı tətbiqi bəyannamə dəyərlərindən aslı olmayaraq xarici yaddaşa yazılabilən edir."</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ölçü dəyişdirmək üçün məcburi fəaliyyətlər"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Bəyannamə dəyərlərindən aslı olmayaraq bütün fəaliyyətləri çoxsaylı pəncərə üçün dəyişkən ölçülü edir."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Freeform windows aktiv edin"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Sınaq üçün freeform windows aktiv edir"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Masaüstü rezerv parolu"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Masaüstü tam rezervlər hazırda qorunmayıblar."</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Masaüstünün tam rezevr kopyalanması üçün parolu dəyişmək və ya silmək üçün toxunun"</string>
