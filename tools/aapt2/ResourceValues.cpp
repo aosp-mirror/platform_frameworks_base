@@ -457,6 +457,9 @@ Style* Style::clone(StringPool* newPool) const {
 void Style::print(std::ostream* out) const {
     *out << "(style) ";
     if (parent && parent.value().name) {
+        if (parent.value().privateReference) {
+            *out << "*";
+        }
         *out << parent.value().name.value();
     }
     *out << " ["

@@ -585,6 +585,13 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
                 source.path = path.toString();
             }
             source.line = util::deviceToHost32(sourceBlock->line);
+
+            if (Style* style = valueCast<Style>(resourceValue.get())) {
+                // The parent's source is the same as the resource itself, set it here.
+                if (style->parent) {
+                    style->parent.value().setSource(source);
+                }
+            }
         }
 
         StringPiece16 comment = util::getString(mSourcePool,

@@ -176,10 +176,10 @@ bool isAttributeReference(const StringPiece16& str) {
 /*
  * Style parent's are a bit different. We accept the following formats:
  *
- * @[package:]style/<entry>
- * ?[package:]style/<entry>
- * <package>:[style/]<entry>
- * [package:style/]<entry>
+ * @[[*]package:]style/<entry>
+ * ?[[*]package:]style/<entry>
+ * <[*]package>:[style/]<entry>
+ * [[*]package:style/]<entry>
  */
 Maybe<Reference> parseStyleParentReference(const StringPiece16& str, std::string* outError) {
     if (str.empty()) {
@@ -195,10 +195,11 @@ Maybe<Reference> parseStyleParentReference(const StringPiece16& str, std::string
     if (name.data()[0] == u'@' || name.data()[0] == u'?') {
         hasLeadingIdentifiers = true;
         name = name.substr(1, name.size() - 1);
-        if (name.data()[0] == u'*') {
-            privateRef = true;
-            name = name.substr(1, name.size() - 1);
-        }
+    }
+
+    if (name.data()[0] == u'*') {
+        privateRef = true;
+        name = name.substr(1, name.size() - 1);
     }
 
     ResourceNameRef ref;

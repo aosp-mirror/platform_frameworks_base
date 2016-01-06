@@ -227,14 +227,14 @@ bool collectProguardRules(const Source& source, xml::XmlResource* res, KeepSet* 
 bool writeKeepSet(std::ostream* out, const KeepSet& keepSet) {
     for (const auto& entry : keepSet.mKeepSet) {
         for (const Source& source : entry.second) {
-            *out << "// Referenced at " << source << "\n";
+            *out << "# Referenced at " << source << "\n";
         }
         *out << "-keep class " << entry.first << " { <init>(...); }\n" << std::endl;
     }
 
     for (const auto& entry : keepSet.mKeepMethodSet) {
         for (const Source& source : entry.second) {
-            *out << "// Referenced at " << source << "\n";
+            *out << "# Referenced at " << source << "\n";
         }
         *out << "-keepclassmembers class * { *** " << entry.first << "(...); }\n" << std::endl;
     }
