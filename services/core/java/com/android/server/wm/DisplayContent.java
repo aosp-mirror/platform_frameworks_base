@@ -570,38 +570,19 @@ class DisplayContent {
             pw.print("x"); pw.println(mDisplayInfo.largestNominalAppHeight);
             pw.print(subPrefix); pw.print("deferred="); pw.print(mDeferredRemoval);
                 pw.print(" layoutNeeded="); pw.println(layoutNeeded);
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final TaskStack stack = mStacks.get(stackNdx);
-            pw.print(prefix); pw.print("mStacks[" + stackNdx + "]"); pw.println(stack.mStackId);
-            stack.dump(prefix + "  ", pw);
-        }
+
         pw.println();
         pw.println("  Application tokens in top down Z order:");
-        int ndx = 0;
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mStacks.get(stackNdx);
-            pw.print("  mStackId="); pw.println(stack.mStackId);
-            ArrayList<Task> tasks = stack.getTasks();
-            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = tasks.get(taskNdx);
-                pw.print("    mTaskId="); pw.println(task.mTaskId);
-                AppTokenList tokens = task.mAppTokens;
-                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx, ++ndx) {
-                    final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    pw.print("    Activity #"); pw.print(tokenNdx);
-                            pw.print(' '); pw.print(wtoken); pw.println(":");
-                    wtoken.dump(pw, "      ");
-                }
-            }
+            stack.dump(prefix + "  ", pw);
         }
-        if (ndx == 0) {
-            pw.println("    None");
-        }
+
         pw.println();
         if (!mExitingTokens.isEmpty()) {
             pw.println();
             pw.println("  Exiting tokens:");
-            for (int i=mExitingTokens.size()-1; i>=0; i--) {
+            for (int i = mExitingTokens.size() - 1; i >= 0; i--) {
                 WindowToken token = mExitingTokens.get(i);
                 pw.print("  Exiting #"); pw.print(i);
                 pw.print(' '); pw.print(token);

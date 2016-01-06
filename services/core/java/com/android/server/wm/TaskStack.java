@@ -619,16 +619,15 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("mStackId="); pw.println(mStackId);
-        pw.print(prefix); pw.print("mDeferDetach="); pw.println(mDeferDetach);
-        pw.print(prefix); pw.print("mFullscreen="); pw.println(mFullscreen);
-        pw.print(prefix); pw.print("mBounds="); pw.println(mBounds.toShortString());
-        for (int taskNdx = 0; taskNdx < mTasks.size(); ++taskNdx) {
-            pw.print(prefix);
-            mTasks.get(taskNdx).printTo(prefix + " ", pw);
+        pw.println(prefix + "mStackId=" + mStackId);
+        pw.println(prefix + "mDeferDetach=" + mDeferDetach);
+        pw.println(prefix + "mFullscreen=" + mFullscreen);
+        pw.println(prefix + "mBounds=" + mBounds.toShortString());
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; taskNdx--) {
+            mTasks.get(taskNdx).dump(prefix + "  ", pw);
         }
         if (mAnimationBackgroundSurface.isDimming()) {
-            pw.print(prefix); pw.println("mWindowAnimationBackgroundSurface:");
+            pw.println(prefix + "mWindowAnimationBackgroundSurface:");
             mAnimationBackgroundSurface.printTo(prefix + "  ", pw);
         }
         if (!mExitingAppTokens.isEmpty()) {

@@ -9783,6 +9783,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if ("visible".equals(name) || "visible-apps".equals(name)) {
             final boolean appsOnly = "visible-apps".equals(name);
             synchronized(mWindowMap) {
+                if (appsOnly) {
+                    dumpDisplayContentsLocked(pw, true);
+                }
+
                 final int numDisplays = mDisplayContents.size();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                     final WindowList windowList =
