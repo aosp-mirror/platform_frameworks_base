@@ -41,13 +41,13 @@ import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
  */
 public class KeyguardBouncer {
 
-    private Context mContext;
-    private ViewMediatorCallback mCallback;
-    private LockPatternUtils mLockPatternUtils;
-    private ViewGroup mContainer;
+    protected Context mContext;
+    protected ViewMediatorCallback mCallback;
+    protected LockPatternUtils mLockPatternUtils;
+    protected ViewGroup mContainer;
     private StatusBarWindowManager mWindowManager;
-    private KeyguardHostView mKeyguardView;
-    private ViewGroup mRoot;
+    protected KeyguardHostView mKeyguardView;
+    protected ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
     private FalsingManager mFalsingManager;
@@ -134,7 +134,7 @@ public class KeyguardBouncer {
     public void hide(boolean destroyView) {
         mFalsingManager.onBouncerHidden();
         cancelShowRunnable();
-         if (mKeyguardView != null) {
+        if (mKeyguardView != null) {
             mKeyguardView.cancelDismissAction();
             mKeyguardView.cleanUp();
         }
@@ -184,13 +184,13 @@ public class KeyguardBouncer {
         mBouncerPromptReason = mCallback.getBouncerPromptReason();
     }
 
-    private void ensureView() {
+    protected void ensureView() {
         if (mRoot == null) {
             inflateView();
         }
     }
 
-    private void inflateView() {
+    protected void inflateView() {
         removeView();
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
         mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
@@ -201,7 +201,7 @@ public class KeyguardBouncer {
         mRoot.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME);
     }
 
-    private void removeView() {
+    protected void removeView() {
         if (mRoot != null && mRoot.getParent() == mContainer) {
             mContainer.removeView(mRoot);
             mRoot = null;

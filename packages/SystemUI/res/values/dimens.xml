@@ -298,7 +298,7 @@
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
 
     <dimen name="notifications_top_padding">4dp</dimen>
-    
+
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 
@@ -509,7 +509,7 @@
 
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
-    
+
     <!-- Inset shadow for FakeShadowDrawable. It is used to avoid gaps between the card
          and the shadow. -->
     <dimen name="fake_shadow_inset">1dp</dimen>

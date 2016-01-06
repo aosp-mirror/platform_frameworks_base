@@ -80,6 +80,8 @@ public class SystemUIApplication extends Application {
         // the theme set there.
         setTheme(R.style.systemui_theme);
 
+        SystemUIFactory.createFromConfig(this);
+
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
             filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);

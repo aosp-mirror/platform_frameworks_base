@@ -69,6 +69,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -591,8 +592,9 @@ public class KeyguardViewMediator extends SystemUI {
         updateInputRestrictedLocked();
         mTrustManager.reportKeyguardShowingChanged();
 
-        mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
-                mViewMediatorCallback, mLockPatternUtils);
+        mStatusBarKeyguardViewManager =
+                SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
+                        mViewMediatorCallback, mLockPatternUtils);
         final ContentResolver cr = mContext.getContentResolver();
 
         mDeviceInteractive = mPM.isInteractive();
@@ -1736,8 +1738,13 @@ public class KeyguardViewMediator extends SystemUI {
     public void onActivityDrawn() {
         mHandler.sendEmptyMessage(ON_ACTIVITY_DRAWN);
     }
+
     public ViewMediatorCallback getViewMediatorCallback() {
         return mViewMediatorCallback;
+    }
+
+    public LockPatternUtils getLockPatternUtils() {
+        return mLockPatternUtils;
     }
 
     @Override

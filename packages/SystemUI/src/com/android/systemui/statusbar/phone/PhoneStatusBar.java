@@ -82,6 +82,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -279,9 +280,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     VolumeComponent mVolumeComponent;
     KeyguardUserSwitcher mKeyguardUserSwitcher;
     FlashlightController mFlashlightController;
-    UserSwitcherController mUserSwitcherController;
+    protected UserSwitcherController mUserSwitcherController;
     NextAlarmController mNextAlarmController;
-    KeyguardMonitor mKeyguardMonitor;
+    protected KeyguardMonitor mKeyguardMonitor;
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
     FullscreenUserSwitcher mFullscreenUserSwitcher;
@@ -295,7 +296,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
-    private StatusBarWindowManager mStatusBarWindowManager;
+    protected StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
@@ -422,8 +423,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mMaxKeyguardNotifications;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
-    private ScrimController mScrimController;
-    private DozeScrimController mDozeScrimController;
+    protected ScrimController mScrimController;
+    protected DozeScrimController mDozeScrimController;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -437,7 +438,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mWaitingForKeyguardExit;
     private boolean mDozing;
     private boolean mDozingRequested;
-    private boolean mScrimSrcModeEnabled;
+    protected boolean mScrimSrcModeEnabled;
 
     private Interpolator mLinearInterpolator = new LinearInterpolator();
     private Interpolator mBackdropInterpolator = new AccelerateDecelerateInterpolator();
@@ -1072,13 +1073,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private void startKeyguard() {
+    protected void startKeyguard() {
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mFingerprintUnlockController = new FingerprintUnlockController(mContext,
                 mStatusBarWindowManager, mDozeScrimController, keyguardViewMediator,
                 mScrimController, this);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
-                mStatusBarWindow, mStatusBarWindowManager, mScrimController,
+                getBouncerContainer(), mStatusBarWindowManager, mScrimController,
                 mFingerprintUnlockController);
         mKeyguardIndicationController.setStatusBarKeyguardViewManager(
                 mStatusBarKeyguardViewManager);
@@ -1093,6 +1094,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public StatusBarWindowView getStatusBarWindow() {
+        return mStatusBarWindow;
+    }
+
+    protected ViewGroup getBouncerContainer() {
         return mStatusBarWindow;
     }
 

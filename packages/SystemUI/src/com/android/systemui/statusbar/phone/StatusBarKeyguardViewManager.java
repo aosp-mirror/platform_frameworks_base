@@ -30,6 +30,7 @@ import android.view.WindowManagerGlobal;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.RemoteInputController;
 
@@ -54,11 +55,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private static String TAG = "StatusBarKeyguardViewManager";
 
-    private final Context mContext;
+    protected final Context mContext;
 
-    private LockPatternUtils mLockPatternUtils;
-    private ViewMediatorCallback mViewMediatorCallback;
-    private PhoneStatusBar mPhoneStatusBar;
+    protected LockPatternUtils mLockPatternUtils;
+    protected ViewMediatorCallback mViewMediatorCallback;
+    protected PhoneStatusBar mPhoneStatusBar;
     private ScrimController mScrimController;
     private FingerprintUnlockController mFingerprintUnlockController;
 
@@ -67,17 +68,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     private boolean mDeviceInteractive = false;
     private boolean mScreenTurnedOn;
-    private KeyguardBouncer mBouncer;
-    private boolean mShowing;
-    private boolean mOccluded;
-    private boolean mRemoteInputActive;
+    protected KeyguardBouncer mBouncer;
+    protected boolean mShowing;
+    protected boolean mOccluded;
+    protected boolean mRemoteInputActive;
 
-    private boolean mFirstUpdate = true;
-    private boolean mLastShowing;
-    private boolean mLastOccluded;
+    protected boolean mFirstUpdate = true;
+    protected boolean mLastShowing;
+    protected boolean mLastOccluded;
     private boolean mLastBouncerShowing;
     private boolean mLastBouncerDismissible;
-    private boolean mLastRemoteInputActive;
+    protected boolean mLastRemoteInputActive;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private boolean mDeviceWillWakeUp;
@@ -99,8 +100,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarWindowManager = statusBarWindowManager;
         mScrimController = scrimController;
         mFingerprintUnlockController = fingerprintUnlockController;
-        mBouncer = new KeyguardBouncer(mContext, mViewMediatorCallback, mLockPatternUtils,
-                mStatusBarWindowManager, container);
+        mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
+                mViewMediatorCallback, mLockPatternUtils, mStatusBarWindowManager, container);
     }
 
     /**
@@ -118,7 +119,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * Shows the notification keyguard or the bouncer depending on
      * {@link KeyguardBouncer#needsFullscreenBouncer()}.
      */
-    private void showBouncerOrKeyguard() {
+    protected void showBouncerOrKeyguard() {
         if (mBouncer.needsFullscreenBouncer()) {
 
             // The keyguard might be showing (already). So we need to hide it.
@@ -433,7 +434,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     };
 
-    private void updateStates() {
+    protected void updateStates() {
         int vis = mContainer.getSystemUiVisibility();
         boolean showing = mShowing;
         boolean occluded = mOccluded;
@@ -451,9 +452,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             }
         }
 
-        boolean navBarVisible = (!(showing && !occluded) || bouncerShowing || remoteInputActive);
-        boolean lastNavBarVisible = (!(mLastShowing && !mLastOccluded) || mLastBouncerShowing
-                || mLastRemoteInputActive);
+        boolean navBarVisible = isNavBarVisible();
+        boolean lastNavBarVisible = getLastNavBarVisible();
         if (navBarVisible != lastNavBarVisible || mFirstUpdate) {
             if (mPhoneStatusBar.getNavigationBarView() != null) {
                 if (navBarVisible) {
@@ -493,6 +493,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastRemoteInputActive = remoteInputActive;
 
         mPhoneStatusBar.onKeyguardViewManagerStatesUpdated();
+    }
+
+    /**
+     * @return Whether the navigation bar should be made visible based on the current state.
+     */
+    protected boolean isNavBarVisible() {
+        return !(mShowing && !mOccluded) || mBouncer.isShowing() || mRemoteInputActive;
+    }
+
+    /**
+     * @return Whether the navigation bar was made visible based on the last known state.
+     */
+    protected boolean getLastNavBarVisible() {
+        return !(mLastShowing && !mLastOccluded) || mLastBouncerShowing || mLastRemoteInputActive;
     }
 
     public boolean onMenuPressed() {
