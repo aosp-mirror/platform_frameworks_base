@@ -415,7 +415,9 @@ LOCAL_SRC_FILES += \
 	packages/services/Proxy/com/android/net/IProxyPortListener.aidl \
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
-LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
+LOCAL_AIDL_INCLUDES += \
+      $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
+      frameworks/native/aidl/binder
 
 LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/android/R.java \
@@ -513,7 +515,6 @@ aidl_files := \
 	frameworks/base/core/java/android/os/ParcelUuid.aidl \
 	frameworks/base/core/java/android/os/ParcelFileDescriptor.aidl \
 	frameworks/base/core/java/android/os/ResultReceiver.aidl \
-	frameworks/base/core/java/android/os/PersistableBundle.aidl \
 	frameworks/base/core/java/android/os/WorkSource.aidl \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
@@ -620,6 +621,7 @@ aidl_files := \
 	frameworks/base/core/java/android/bluetooth/le/ScanResult.aidl \
 	frameworks/base/core/java/android/bluetooth/BluetoothDevice.aidl \
 	frameworks/base/core/java/android/database/CursorWindow.aidl \
+	frameworks/native/aidl/binder/android/os/PersistableBundle.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
