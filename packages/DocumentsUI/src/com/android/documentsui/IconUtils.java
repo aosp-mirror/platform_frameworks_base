@@ -159,8 +159,8 @@ public class IconUtils {
         add("application/vnd.sun.xml.calc.template", icon);
         add("application/x-kspread", icon);
 
-        // Text
-        icon = R.drawable.ic_doc_text;
+        // Document
+        icon = R.drawable.ic_doc_document;
         add("application/vnd.oasis.opendocument.text", icon);
         add("application/vnd.oasis.opendocument.text-master", icon);
         add("application/vnd.oasis.opendocument.text-template", icon);
