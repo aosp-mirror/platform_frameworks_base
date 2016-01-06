@@ -1419,8 +1419,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         case DragEvent.ACTION_DRAG_ENDED: {
             // Release the bookkeeping now that the drag lifecycle has ended
-            if (mChildrenInterestedInDrag != null) {
-                for (View child : mChildrenInterestedInDrag) {
+            final HashSet<View> childrenInterestedInDrag = mChildrenInterestedInDrag;
+            if (childrenInterestedInDrag != null) {
+                for (View child : childrenInterestedInDrag) {
                     // If a child was interested in the ongoing drag, it's told that it's over
                     if (child.dispatchDragEvent(event)) {
                         retval = true;
@@ -1428,12 +1429,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     child.mPrivateFlags2 &= ~View.DRAG_MASK;
                     child.refreshDrawableState();
                 }
-
-                mChildrenInterestedInDrag.clear();
-                if (mCurrentDragStartEvent != null) {
-                    mCurrentDragStartEvent.recycle();
-                    mCurrentDragStartEvent = null;
-                }
+                childrenInterestedInDrag.clear();
+            }
+            if (mCurrentDragStartEvent != null) {
+                mCurrentDragStartEvent.recycle();
+                mCurrentDragStartEvent = null;
             }
 
             if (mIsInterestedInDrag) {
