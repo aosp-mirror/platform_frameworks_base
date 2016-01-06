@@ -652,9 +652,7 @@ void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
         [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.defer##Type(static_cast<const Type&>(op)); },
 void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
     typedef void (*OpDispatcher) (OpReorderer& reorderer, const RecordedOp& op);
-    static OpDispatcher receivers[] = {
-        MAP_OPS(OP_RECEIVER)
-    };
+    static OpDispatcher receivers[] = BUILD_DEFERRABLE_OP_LUT(OP_RECEIVER);
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
     const DisplayList& displayList = *(renderNode.getDisplayList());
@@ -966,14 +964,6 @@ void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
         mLayerReorderers[finishedLayerIndex].clear();
         return;
     }
-}
-
-void OpReorderer::deferLayerOp(const LayerOp& op) {
-    LOG_ALWAYS_FATAL("unsupported");
-}
-
-void OpReorderer::deferShadowOp(const ShadowOp& op) {
-    LOG_ALWAYS_FATAL("unsupported");
 }
 
 } // namespace uirenderer

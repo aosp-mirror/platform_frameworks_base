@@ -138,7 +138,7 @@ public:
     template <typename StaticDispatcher, typename Renderer>
     void replayBakedOps(Renderer& renderer) {
         /**
-         * defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
+         * Defines a LUT of lambdas which allow a recorded BakedOpState to use state->op->opId to
          * dispatch the op via a method on a static dispatcher when the op is replayed.
          *
          * For example a BitmapOp would resolve, via the lambda lookup, to calling:
@@ -149,29 +149,19 @@ public:
                 [](void* renderer, const BakedOpState& state) { \
                     StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)), static_cast<const Type&>(*(state.op)), state); \
                 },
-        static BakedOpReceiver unmergedReceivers[] = {
-            MAP_OPS(X)
-        };
+        static BakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
         #undef X
 
         /**
-         * defines a LUT of lambdas which allow merged arrays of BakedOpState* to be passed to a
-         * static dispatcher when the group of merged ops is replayed. Unmergeable ops trigger
-         * a LOG_ALWAYS_FATAL().
+         * Defines a LUT of lambdas which allow merged arrays of BakedOpState* to be passed to a
+         * static dispatcher when the group of merged ops is replayed.
          */
         #define X(Type) \
                 [](void* renderer, const MergedBakedOpList& opList) { \
-                    LOG_ALWAYS_FATAL("op type %d does not support merging", opList.states[0]->op->opId); \
-                },
-        #define Y(Type) \
-                [](void* renderer, const MergedBakedOpList& opList) { \
                     StaticDispatcher::onMerged##Type##s(*(static_cast<Renderer*>(renderer)), opList); \
                 },
-        static MergedOpReceiver mergedReceivers[] = {
-            MAP_OPS_BASED_ON_MERGEABILITY(X, Y)
-        };
+        static MergedOpReceiver mergedReceivers[] = BUILD_MERGEABLE_OP_LUT(X);
         #undef X
-        #undef Y
 
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
@@ -256,9 +246,9 @@ private:
      * These private methods are called from within deferImpl to defer each individual op
      * type differently.
      */
-#define INTERNAL_OP_HANDLER(Type) \
-    void defer##Type(const Type& op);
-    MAP_OPS(INTERNAL_OP_HANDLER)
+#define X(Type) void defer##Type(const Type& op);
+    MAP_DEFERRABLE_OPS(X)
+#undef X
 
     std::vector<std::unique_ptr<SkPath> > mFrameAllocatedPaths;
 

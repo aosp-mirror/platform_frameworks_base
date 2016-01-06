@@ -71,7 +71,7 @@ public:
     virtual void on##Type(const Type&, const BakedOpState&) { \
         ADD_FAILURE() << #Type " not expected in this test"; \
     }
-    MAP_OPS(X)
+    MAP_RENDERABLE_OPS(X)
 #undef X
 
     // define virtual defaults for merged draw methods
@@ -79,7 +79,7 @@ public:
     virtual void onMerged##Type##s(const MergedBakedOpList& opList) { \
         ADD_FAILURE() << "Merged " #Type "s not expected in this test"; \
     }
-    MAP_MERGED_OPS(X)
+    MAP_MERGEABLE_OPS(X)
 #undef X
 
     int getIndex() { return mIndex; }
@@ -99,7 +99,7 @@ public:
     static void on##Type(TestRendererBase& renderer, const Type& op, const BakedOpState& state) { \
         renderer.on##Type(op, state); \
     }
-    MAP_OPS(X);
+    MAP_RENDERABLE_OPS(X);
 #undef X
 
     // define merged op methods, which redirect to TestRendererBase
@@ -107,7 +107,7 @@ public:
     static void onMerged##Type##s(TestRendererBase& renderer, const MergedBakedOpList& opList) { \
         renderer.onMerged##Type##s(opList); \
     }
-    MAP_MERGED_OPS(X);
+    MAP_MERGEABLE_OPS(X);
 #undef X
 };
 

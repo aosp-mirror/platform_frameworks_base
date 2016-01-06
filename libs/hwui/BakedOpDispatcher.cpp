@@ -302,26 +302,6 @@ void BakedOpDispatcher::onMergedTextOps(BakedOpRenderer& renderer,
     }
 }
 
-void BakedOpDispatcher::onRenderNodeOp(BakedOpRenderer&, const RenderNodeOp&, const BakedOpState&) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
-void BakedOpDispatcher::onBeginLayerOp(BakedOpRenderer&, const BeginLayerOp&, const BakedOpState&) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
-void BakedOpDispatcher::onEndLayerOp(BakedOpRenderer&, const EndLayerOp&, const BakedOpState&) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
-void BakedOpDispatcher::onCirclePropsOp(BakedOpRenderer&, const CirclePropsOp&, const BakedOpState&) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
-void BakedOpDispatcher::onRoundRectPropsOp(BakedOpRenderer&, const RoundRectPropsOp&, const BakedOpState&) {
-    LOG_ALWAYS_FATAL("unsupported operation");
-}
-
 namespace VertexBufferRenderFlags {
     enum {
         Offset = 0x1,
