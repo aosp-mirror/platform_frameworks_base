@@ -271,18 +271,25 @@ public final class WebViewFactory {
 
     private static Class<WebViewFactoryProvider> getProviderClass() {
         try {
-            // First fetch the package info so we can log the webview package version.
-            int res = waitForProviderAndSetPackageInfo();
-            if (res != LIBLOAD_SUCCESS) {
-                throw new MissingWebViewPackageException(
-                        "Failed to load WebView provider, error: "
-                        + getWebViewPreparationErrorReason(res));
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                    "WebViewFactory.waitForProviderAndSetPackageInfo()");
+            try {
+                // First fetch the package info so we can log the webview package version.
+                int res = waitForProviderAndSetPackageInfo();
+                if (res != LIBLOAD_SUCCESS) {
+                    throw new MissingWebViewPackageException(
+                            "Failed to load WebView provider, error: "
+                            + getWebViewPreparationErrorReason(res));
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
             Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
                 sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
 
             Application initialApplication = AppGlobals.getInitialApplication();
             Context webViewContext = null;
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "initialApplication.createPackageContext()");
             try {
                 // Construct a package context to load the Java code into the current app.
                 // This is done as early as possible since by constructing a package context we
@@ -293,6 +300,8 @@ public final class WebViewFactory {
                         Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
             } catch (PackageManager.NameNotFoundException e) {
                 throw new MissingWebViewPackageException(e);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
