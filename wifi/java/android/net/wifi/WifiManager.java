@@ -1435,8 +1435,9 @@ public class WifiManager {
      *        part of WifiConfiguration
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      *
-     * @hide Dont open up yet
+     * @hide
      */
+    @SystemApi
     public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         try {
             mService.setWifiApEnabled(wifiConfig, enabled);
@@ -1453,8 +1454,9 @@ public class WifiManager {
      *         {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
      * @see #isWifiApEnabled()
      *
-     * @hide Dont open yet
+     * @hide
      */
+    @SystemApi
     public int getWifiApState() {
         try {
             return mService.getWifiApEnabledState();
@@ -1468,8 +1470,9 @@ public class WifiManager {
      * @return {@code true} if Wi-Fi AP is enabled
      * @see #getWifiApState()
      *
-     * @hide Dont open yet
+     * @hide
      */
+    @SystemApi
     public boolean isWifiApEnabled() {
         return getWifiApState() == WIFI_AP_STATE_ENABLED;
     }
@@ -1478,8 +1481,9 @@ public class WifiManager {
      * Gets the Wi-Fi AP Configuration.
      * @return AP details in WifiConfiguration
      *
-     * @hide Dont open yet
+     * @hide
      */
+    @SystemApi
     public WifiConfiguration getWifiApConfiguration() {
         try {
             return mService.getWifiApConfiguration();
@@ -1507,8 +1511,9 @@ public class WifiManager {
      * Sets the Wi-Fi AP Configuration.
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
-     * @hide Dont open yet
+     * @hide
      */
+    @SystemApi
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
         try {
             mService.setWifiApConfiguration(wifiConfig);
