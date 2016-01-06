@@ -460,6 +460,10 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"显示这些通知，但不发出提示音"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"在通知列表顶部显示，并发出提示音"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"在屏幕上持续显示，并发出提示音"</string>
+    <!-- no translation found for notification_more_settings (816306283396553571) -->
+    <skip />
+    <!-- no translation found for notification_done (5279426047273930175) -->
+    <skip />
     <string name="color_matrix_none" msgid="2121957926040543148">"常规颜色"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"夜间颜色"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自定义颜色"</string>

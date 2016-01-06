@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Bonisa ngokuthulile lezi zaziso"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Bonisa ngaphezulu kohlu lwezaziso uphinde wenze umsindo"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Bheka kusikrini uphinde wenze umsindo"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Izilungiselelo eziningi"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Kwenziwe"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Imibala ejwayelekile"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Imibala yasebusuku"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Imibala yangokwezifiso"</string>

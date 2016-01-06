@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Mostrar essas notificações de forma silenciosa"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Mostrar na parte superior da lista de notificações e emitir som"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Mostrar parcialmente na tela e emitir som"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Mais configurações"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Concluído"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Cores normais"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Cores noturnas"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Cores personalizadas"</string>

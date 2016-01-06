@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Deze meldingen zonder geluid weergeven"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Boven aan de lijst met meldingen weergeven en geluid laten horen"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Op het scherm weergeven en geluid laten horen"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Meer instellingen"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Gereed"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Normale kleuren"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Nachtkleuren"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Aangepaste kleuren"</string>

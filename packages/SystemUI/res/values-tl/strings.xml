@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Tahimik na ipakita ang mga notification na ito"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Ipakita sa itaas ng listahan ng mga notification at mag-play ng tunog"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Ipasilip sa screen at mag-play ng tunog"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Higit pang mga setting"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Tapos Na"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Mga karaniwang kulay"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Madidilim na kulay"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Mga custom na kulay"</string>

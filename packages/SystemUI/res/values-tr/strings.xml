@@ -460,6 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"Bu bildirimleri sessizce göster"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Bildirim listesinin en üstünde göster ve ses çıkar"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Ekrana getir ve ses çıkar"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Diğer ayarlar"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Bitti"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Normal renkler"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Gece renkleri"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Özel renkler"</string>

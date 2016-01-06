@@ -455,12 +455,14 @@
     <string name="low_importance" msgid="4109929986107147930">"Мала важност"</string>
     <string name="default_importance" msgid="8192107689995742653">"Уобичајена важност"</string>
     <string name="high_importance" msgid="1527066195614050263">"Велика важност"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Највећа важност"</string>
+    <string name="max_importance" msgid="5089005872719563894">"Важност: хитно"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Ова обавештења се никада не приказују"</string>
     <string name="notification_importance_low" msgid="4383563267370859725">"Приказују се у дну листе обавештења без звука"</string>
     <string name="notification_importance_default" msgid="4926529615920610817">"Ова обавештења се приказују без звука"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"Приказују се у врху листе обавештења и емитује се звук"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"Накратко се приказују на екрану и емитује се звук"</string>
+    <string name="notification_more_settings" msgid="816306283396553571">"Још подешавања"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"Нормалне боје"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Ноћне боје"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Прилагођене боје"</string>
