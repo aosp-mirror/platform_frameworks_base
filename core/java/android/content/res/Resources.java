@@ -151,8 +151,9 @@ public class Resources {
 
     private boolean mPreloading;
 
+    // Cyclical cache used for recently-accessed XML files.
     private int mLastCachedXmlBlockIndex = -1;
-    private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
+    private final String[] mCachedXmlBlockFiles = new String[4];
     private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
 
     final AssetManager mAssets;
@@ -2351,16 +2352,17 @@ public class Resources {
      * tools.
      */
     public final void flushLayoutCache() {
-        synchronized (mCachedXmlBlockIds) {
-            // First see if this block is in our cache.
-            final int num = mCachedXmlBlockIds.length;
-            for (int i=0; i<num; i++) {
-                mCachedXmlBlockIds[i] = -0;
-                XmlBlock oldBlock = mCachedXmlBlocks[i];
+        final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
+        final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
+        synchronized (cachedXmlBlockFiles) {
+            final int num = cachedXmlBlockFiles.length;
+            for (int i = 0; i < num; i++) {
+                final XmlBlock oldBlock = cachedXmlBlocks[i];
                 if (oldBlock != null) {
                     oldBlock.close();
                 }
-                mCachedXmlBlocks[i] = null;
+                cachedXmlBlockFiles[i] = null;
+                cachedXmlBlocks[i] = null;
             }
         }
     }
@@ -2730,7 +2732,16 @@ public class Resources {
         return csl;
     }
 
-    /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
+    /**
+     * Loads an XML parser for the specified file.
+     *
+     * @param id the resource identifier for the file
+     * @param type the type of resource (used for logging)
+     * @return a parser for the specified XML file
+     * @throws NotFoundException if the file could not be loaded
+     */
+    @NonNull
+    XmlResourceParser loadXmlResourceParser(@AnyRes int id, @NonNull String type)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue(id);
         try {
@@ -2744,53 +2755,58 @@ public class Resources {
             releaseTempTypedValue(value);
         }
     }
-    
-    /*package*/ XmlResourceParser loadXmlResourceParser(String file, int id,
-            int assetCookie, String type) throws NotFoundException {
+
+    /**
+     * Loads an XML parser for the specified file.
+     *
+     * @param file the path for the XML file to parse
+     * @param id the resource identifier for the file
+     * @param assetCookie the asset cookie for the file
+     * @param type the type of resource (used for logging)
+     * @return a parser for the specified XML file
+     * @throws NotFoundException if the file could not be loaded
+     */
+    @NonNull
+    XmlResourceParser loadXmlResourceParser(@NonNull String file, @AnyRes int id,
+            int assetCookie, @NonNull String type) throws NotFoundException {
         if (id != 0) {
             try {
-                // These may be compiled...
-                synchronized (mCachedXmlBlockIds) {
+                final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
+                final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
+                synchronized (cachedXmlBlockFiles) {
                     // First see if this block is in our cache.
-                    final int num = mCachedXmlBlockIds.length;
-                    for (int i=0; i<num; i++) {
-                        if (mCachedXmlBlockIds[i] == id) {
-                            //System.out.println("**** REUSING XML BLOCK!  id="
-                            //                   + id + ", index=" + i);
-                            return mCachedXmlBlocks[i].newParser();
+                    final int num = cachedXmlBlockFiles.length;
+                    for (int i = 0; i < num; i++) {
+                        if (cachedXmlBlockFiles[i] != null
+                                && cachedXmlBlockFiles[i].equals(file)) {
+                            return cachedXmlBlocks[i].newParser();
                         }
                     }
 
                     // Not in the cache, create a new block and put it at
                     // the next slot in the cache.
-                    XmlBlock block = mAssets.openXmlBlockAsset(
-                            assetCookie, file);
+                    final XmlBlock block = mAssets.openXmlBlockAsset(assetCookie, file);
                     if (block != null) {
-                        int pos = mLastCachedXmlBlockIndex+1;
-                        if (pos >= num) pos = 0;
+                        final int pos = (mLastCachedXmlBlockIndex + 1) % num;
                         mLastCachedXmlBlockIndex = pos;
-                        XmlBlock oldBlock = mCachedXmlBlocks[pos];
+                        final XmlBlock oldBlock = cachedXmlBlocks[pos];
                         if (oldBlock != null) {
                             oldBlock.close();
                         }
-                        mCachedXmlBlockIds[pos] = id;
-                        mCachedXmlBlocks[pos] = block;
-                        //System.out.println("**** CACHING NEW XML BLOCK!  id="
-                        //                   + id + ", index=" + pos);
+                        cachedXmlBlockFiles[pos] = file;
+                        cachedXmlBlocks[pos] = block;
                         return block.newParser();
                     }
                 }
             } catch (Exception e) {
-                NotFoundException rnf = new NotFoundException(
-                        "File " + file + " from xml type " + type + " resource ID #0x"
-                        + Integer.toHexString(id));
+                final NotFoundException rnf = new NotFoundException("File " + file
+                        + " from xml type " + type + " resource ID #0x" + Integer.toHexString(id));
                 rnf.initCause(e);
                 throw rnf;
             }
         }
 
-        throw new NotFoundException(
-                "File " + file + " from xml type " + type + " resource ID #0x"
+        throw new NotFoundException("File " + file + " from xml type " + type + " resource ID #0x"
                 + Integer.toHexString(id));
     }
 
