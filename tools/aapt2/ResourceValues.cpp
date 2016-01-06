@@ -36,10 +36,6 @@ void BaseItem<Derived>::accept(RawValueVisitor* visitor) {
     visitor->visit(static_cast<Derived*>(this));
 }
 
-bool Value::isWeak() const {
-    return false;
-}
-
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {
 }
 
@@ -101,10 +97,6 @@ void Reference::print(std::ostream* out) const {
     }
 }
 
-bool Id::isWeak() const {
-    return true;
-}
-
 bool Id::flatten(android::Res_value* out) const {
     out->dataType = android::Res_value::TYPE_INT_BOOLEAN;
     out->data = util::hostToDevice32(0);
@@ -119,7 +111,15 @@ void Id::print(std::ostream* out) const {
     *out << "(id)";
 }
 
-String::String(const StringPool::Ref& ref) : value(ref) {
+String::String(const StringPool::Ref& ref) : value(ref), mTranslateable(true) {
+}
+
+void String::setTranslateable(bool val) {
+    mTranslateable = val;
+}
+
+bool String::isTranslateable() const {
+    return mTranslateable;
 }
 
 bool String::flatten(android::Res_value* outValue) const {
@@ -144,7 +144,15 @@ void String::print(std::ostream* out) const {
     *out << "(string) \"" << *value << "\"";
 }
 
-StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {
+StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref), mTranslateable(true) {
+}
+
+void StyledString::setTranslateable(bool val) {
+    mTranslateable = val;
+}
+
+bool StyledString::isTranslateable() const {
+    return mTranslateable;
 }
 
 bool StyledString::flatten(android::Res_value* outValue) const {
@@ -238,13 +246,10 @@ void BinaryPrimitive::print(std::ostream* out) const {
 }
 
 Attribute::Attribute(bool w, uint32_t t) :
-        weak(w), typeMask(t),
+        typeMask(t),
         minInt(std::numeric_limits<int32_t>::min()),
         maxInt(std::numeric_limits<int32_t>::max()) {
-}
-
-bool Attribute::isWeak() const {
-    return weak;
+    mWeak = w;
 }
 
 Attribute* Attribute::clone(StringPool* /*newPool*/) const {
@@ -359,7 +364,7 @@ void Attribute::print(std::ostream* out) const {
             << "]";
     }
 
-    if (weak) {
+    if (isWeak()) {
         *out << " [weak]";
     }
 }

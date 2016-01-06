@@ -68,6 +68,12 @@ public:
         return addValue(name, id, util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
 
+    ResourceTableBuilder& addString(const StringPiece16& name, const ResourceId id,
+                                    const ConfigDescription& config, const StringPiece16& str) {
+        return addValue(name, id, config,
+                        util::make_unique<String>(mTable->stringPool.makeRef(str)));
+    }
+
     ResourceTableBuilder& addFileReference(const StringPiece16& name, const StringPiece16& path) {
         return addFileReference(name, {}, path);
     }

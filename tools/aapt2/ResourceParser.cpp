@@ -564,8 +564,10 @@ bool ResourceParser::parseString(xml::XmlPullParser* parser, ParsedResource* out
         return false;
     }
 
-    if (formatted && translateable) {
-        if (String* stringValue = valueCast<String>(outResource->value.get())) {
+    if (String* stringValue = valueCast<String>(outResource->value.get())) {
+        stringValue->setTranslateable(translateable);
+
+        if (formatted && translateable) {
             if (!util::verifyJavaStringFormat(*stringValue->value)) {
                 mDiag->error(DiagMessage(outResource->source)
                              << "multiple substitutions specified in non-positional format; "
@@ -573,6 +575,9 @@ bool ResourceParser::parseString(xml::XmlPullParser* parser, ParsedResource* out
                 return false;
             }
         }
+
+    } else if (StyledString* stringValue = valueCast<StyledString>(outResource->value.get())) {
+        stringValue->setTranslateable(translateable);
     }
     return true;
 }

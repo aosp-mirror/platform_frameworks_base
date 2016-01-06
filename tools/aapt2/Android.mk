@@ -27,6 +27,8 @@ main := Main.cpp
 sources := \
 	compile/IdAssigner.cpp \
 	compile/Png.cpp \
+	compile/PseudolocaleGenerator.cpp \
+	compile/Pseudolocalizer.cpp \
 	compile/XmlIdCollector.cpp \
 	flatten/Archive.cpp \
 	flatten/TableFlattener.cpp \
@@ -66,6 +68,8 @@ sources := \
 
 testSources := \
 	compile/IdAssigner_test.cpp \
+	compile/PseudolocaleGenerator_test.cpp \
+	compile/Pseudolocalizer_test.cpp \
 	compile/XmlIdCollector_test.cpp \
 	flatten/FileExportWriter_test.cpp \
 	flatten/TableFlattener_test.cpp \

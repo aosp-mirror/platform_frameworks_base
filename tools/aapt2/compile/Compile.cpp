@@ -21,6 +21,7 @@
 #include "ResourceTable.h"
 #include "compile/IdAssigner.h"
 #include "compile/Png.h"
+#include "compile/PseudolocaleGenerator.h"
 #include "compile/XmlIdCollector.h"
 #include "flatten/Archive.h"
 #include "flatten/FileExportWriter.h"
@@ -105,6 +106,7 @@ struct CompileOptions {
     std::string outputPath;
     Maybe<std::string> resDir;
     Maybe<std::u16string> product;
+    bool pseudolocalize = false;
     bool verbose = false;
 };
 
@@ -201,6 +203,16 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         }
 
         fin.close();
+    }
+
+    if (options.pseudolocalize) {
+        // Generate pseudo-localized strings (en-XA and ar-XB).
+        // These are created as weak symbols, and are only generated from default configuration
+        // strings and plurals.
+        PseudolocaleGenerator pseudolocaleGenerator;
+        if (!pseudolocaleGenerator.consume(context, &table)) {
+            return false;
+        }
     }
 
     // Ensure we have the compilation package at least.
@@ -423,6 +435,8 @@ int compile(const std::vector<StringPiece>& args) {
             .requiredFlag("-o", "Output path", &options.outputPath)
             .optionalFlag("--product", "Product type to compile", &product)
             .optionalFlag("--dir", "Directory to scan for resources", &options.resDir)
+            .optionalSwitch("--pseudo-localize", "Generate resources for pseudo-locales "
+                            "(en-XA and ar-XB)", &options.pseudolocalize)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
     if (!flags.parse("aapt2 compile", args, &std::cerr)) {
         return 1;
