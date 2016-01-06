@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"允许该应用使用相机拍摄照片和视频。此权限可让该应用随时使用相机，而无需您的确认。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允许应用控制振动器。"</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"控制闪光灯"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"允许应用控制闪光灯。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接拨打电话号码"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允许该应用在您未执行操作的情况下拨打电话号码。此权限可能会导致意外收费或呼叫。请注意，此权限不允许该应用拨打紧急电话号码。恶意应用可通过拨打电话产生相关费用，而无需您的确认。"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"使用即时通讯通话服务"</string>

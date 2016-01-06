@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Cho phép ứng dụng chụp ảnh và quay video bằng máy ảnh. Quyền này cho phép ứng dụng sử dụng máy ảnh bất kỳ lúc nào mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Cho phép ứng dụng kiểm soát bộ rung."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kiểm soát đèn nháy"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Cho phép ứng dụng kiểm soát đèn nháy."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"gọi trực tiếp số điện thoại"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Cho phép ứng dụng gọi các số điện thoại mà không cần sự can thiệp của bạn. Việc này có thể dẫn đến các khoản phí hoặc cuộc gọi không mong muốn. Lưu ý rằng quyền này không cho phép ứng dụng gọi các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn tốn tiền do thực hiện cuộc gọi mà không cần sự xác nhận của bạn."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"truy cập dịch vụ gọi điện qua IMS"</string>

@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"መተግበሪያው በካሜራው ፎቶዎችንና ቪዲዮዎችን እንዲያነሳ ይፈቅድለታል። ይህ ፈቃድ መተግበሪያው ካሜራውን በማንኛውም ጊዜ ያላንተ ማረጋገጫ እንዲጠቀም ይፈቅድለታል።"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"የብርሃንብልጭታ ተቆጣጠር"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"የብልጭታ ብርሃኑን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"መተግበሪያው ያላንተ ጣልቃ ገብነት የስልክ ቁጥሮች ላይ እንዲደውል ይፈቅድለታል። ይህ ያልተጠበቁ ክፍያዎችን ወይም ጥሪዎችን ሊያስከትል ይችላል። ይህ መተግበሪያው የድንገተኛ ስልክ ቁጥሮችን እንዲደውል እንደማይፈቅድለት ልብ በል። ተንኮል አዘል መተግበሪያዎች ያላንተ ማረጋገጫ ጥሪዎችን በማድረግ ገንዘብ ሊያስወጡህ ይችላሉ።"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"የአይኤምኤስ ጥሪ አገልግሎትን ይደርሳል"</string>

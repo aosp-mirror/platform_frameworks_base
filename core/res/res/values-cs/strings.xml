@@ -356,8 +356,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Umožňuje aplikaci pořizovat fotografie a videa pomocí fotoaparátu. Toto oprávnění umožňuje aplikaci používat fotoaparát kdykoliv i bez vašeho svolení."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikaci ovládat vibrace."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"ovládání kontrolky"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikaci ovládat svítilnu."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"přímé volání na telefonní čísla"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikaci volat na telefonní čísla bez vašeho přičinění. Může mít za následek neočekávané poplatky nebo hovory. Toto oprávnění neumožňuje aplikaci volat na tísňová čísla. Škodlivé aplikace vás mohou připravit o peníze uskutečňováním hovorů bez vašeho svolení."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"přístup ke službě zasílání rychlých zpráv pro účely hovorů"</string>

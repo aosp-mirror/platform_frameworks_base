@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Lejon aplikacion të krijojë fotografi dhe video me kamerën. Kjo leje mundëson përdorimin e kamerës në çdo kohë pa konfirmimin tënd."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lejon aplikacionin të kontrollojë dridhësin."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrollo elektrikun"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Lejon aplikacionin të kontrollojë elektrikun."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefono drejtpërdrejt numrat e telefonit"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lejon aplikacionin të telefonojë numra pa ndërhyrjen tënde. Kjo mund të rezultojë në tarifa ose telefonata të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numra urgjence. Aplikacione keqdashëse mund të të kushtojnë para duke kryer telefonata pa konfirmimin tënd."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"qasje në shërbimin e telefonatave IMS"</string>

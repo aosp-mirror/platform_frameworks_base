@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Permet à l\'application de prendre des photos et de filmer des vidéos avec l\'appareil photo. Cette autorisation lui permet d\'utiliser l\'appareil photo à tout moment sans votre consentement."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"gérer le vibreur"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permet à l\'application de gérer le vibreur de l\'appareil."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"gérer la lampe de poche"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Permet à l\'application de gérer la lampe de poche."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"appeler directement des numéros de téléphone"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Permet à l\'application d\'appeler des numéros de téléphone sans votre intervention. Cette autorisation peut entraîner des frais ou des appels imprévus et ne permet pas à l\'application d\'appeler des numéros d\'urgence. Des applications malveillantes peuvent générer des frais en passant des appels sans votre consentement."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"accéder au service d\'appel IMS"</string>

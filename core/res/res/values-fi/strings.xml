@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"hallitse värinää"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Antaa sovelluksen hallita värinää."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"hallitse taskulamppua"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Antaa sovelluksen hallita taskulamppua."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"soittaa puhelinnumeroihin suoraan"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Antaa sovelluksen soittaa puhelinnumeroihin kysymättä sinulta. Tämä voi aiheuttaa odottamattomia kuluja tai puheluita. Huomaa, että tämä ei anna sovellukselle lupaa soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa sinulle kuluja soittamalla puheluita ilman lupaa."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"pikaviestipalvelun puhelukäyttöoikeus"</string>

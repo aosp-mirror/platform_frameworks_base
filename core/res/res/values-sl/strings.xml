@@ -356,8 +356,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Aplikaciji omogoča fotografiranje in snemanje videoposnetkov s kamero. S tem dovoljenjem lahko aplikacija kadar koli uporablja kamero brez vaše potrditve."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"nadzor vibriranja"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Aplikaciji omogoča nadzor vibriranja."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"nadzor svetilke"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Aplikaciji omogoča nadzor svetilke."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"neposredno klicanje telefonskih številk"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Aplikaciji omogoča klicanje telefonskih številk brez vašega posredovanja. Zaradi tega lahko pride do nepričakovanih stroškov ali klicev. Aplikaciji to ne dovoljuje opravljanja klicev v sili. Zlonamerne aplikacije lahko kličejo brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"dostop do storitve za klicanje IMS"</string>

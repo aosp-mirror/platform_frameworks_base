@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"カメラでの写真と動画の撮影をアプリに許可します。これにより、アプリが確認なしでいつでもカメラを使用できるようになります。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"バイブレーションの制御をアプリに許可します。"</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"ライトのコントロール"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"ライトの制御をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"電話番号発信"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS通話サービスへのアクセス"</string>

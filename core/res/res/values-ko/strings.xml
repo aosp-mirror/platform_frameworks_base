@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"앱이 카메라로 사진과 동영상을 찍을 수 있도록 허용합니다. 이 권한을 사용하면 앱이 언제든지 사용자의 확인 없이 카메라를 사용할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"카메라 플래시 제어"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"앱이 카메라 플래시를 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"전화번호 자동 연결"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS 통화 서비스에 액세스"</string>

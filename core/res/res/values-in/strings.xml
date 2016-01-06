@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Memungkinkan aplikasi mengambil gambar dan video dengan kamera. Izin ini memungkinkan aplikasi menggunakan kamera kapan saja tanpa konfirmasi Anda."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrol getaran"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"mengontrol lampu senter"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Mengizinkan apl mengontrol lampu kilat."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"panggil nomor telepon secara langsung"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Memungkinkan aplikasi menghubungi nomor telepon tanpa campur tangan Anda. Izin ini dapat mengakibatkan biaya atau panggilan tak terduga. Perhatikan bahwa izin ini tidak memungkinkan aplikasi menghubungi nomor darurat. Aplikasi berbahaya dapat menyebabkan Anda dikenakan biaya dengan melakukan panggilan tanpa konfirmasi Anda."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"akses layanan panggilan IMS"</string>

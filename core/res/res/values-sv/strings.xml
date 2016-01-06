@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Tillåter att appen tar bilder och spelar in videor med kameran. Med den här behörigheten tillåts appen att använda kameran när som helst utan ditt godkännande."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Tillåter att appen styr vibrationen."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"styra lampa"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Tillåter att appen styr lampan."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ringa telefonnummer direkt"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tillåter att appen ringer telefonnummer utan någon aktiv åtgärd från dig. Detta kan leda till oväntade avgifter och samtal. Observera att appen inte tillåts ringa nödsamtal. Skadliga appar kan ringa utan ditt godkännande och detta kan kosta pengar."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"tillgång till tjänsten för snabbmeddelanden vid samtal"</string>

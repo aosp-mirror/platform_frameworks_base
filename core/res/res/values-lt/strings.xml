@@ -356,8 +356,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Leidžiama programai fotografuoti ir filmuoti kamera. Šis leidimas suteikia teisę programai naudoti kamerą bet kada be jūsų patvirtinimo."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"valdyti vibraciją"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Leidžiama programai valdyti vibravimą."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"valdyti šviesos signalą"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Leidžiama programai valdyti šviesos signalą."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"skambinti tiesiogiai telefono numeriais"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Dėl to gali atsirasti nenumatytų apmokestinimų ar skambučių. Atminkite, kad programai neleidžiama skambinti pagalbos telefonų numeriais. Kenkėjiškos programos gali skambinti be jūsų patvirtinimo, o dėl to jums gali būti taikomi mokesčiai."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"pasiekti IMS skambučių paslaugą"</string>

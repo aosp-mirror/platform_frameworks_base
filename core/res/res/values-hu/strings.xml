@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Lehetővé teszi az alkalmazás számára, hogy a fényképezőgéppel fotókat és videókat készítsen. Az engedéllyel rendelkező alkalmazás bármikor, az Ön jóváhagyása nélkül használhatja a fényképezőgépet."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"vaku vezérlése"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Lehetővé teszi az alkalmazás számára a vaku vezérlését."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefonszámok közvetlen hívása"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Lehetővé teszi az alkalmazás számára, hogy az Ön jóváhagyása nélkül hívjon fel telefonszámokat. Ennek eredményeként váratlan terhelésekkel vagy telefonhívásokkal találkozhat. Vegye figyelembe, hogy ez nem teszi lehetővé segélyhívó számok hívását az alkalmazás számára. A rosszindulatú alkalmazások az Ön jóváhagyása nélkül kezdeményezhetnek hívásokat, így költségek merülhetnek fel."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"hozzáférés az IMS-hívásszolgáltatáshoz"</string>

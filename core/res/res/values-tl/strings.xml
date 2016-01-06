@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Pinapayagan ang app na kumuha ng mga larawan at video gamit ang camera. Pinapayagan ng pahintulot na ito ang app na gamitin ang camera anumang oras nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolin ang pag-vibrate"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Pinapayagan ang app na kontrolin ang vibrator."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrolin ang flashlight"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Pinapayagan ang app na kontrolin ang flashlight."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"direktang tawagan ang mga numero ng telepono"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Pinapayagan ang app na tumawag sa mga numero ng telepono nang wala ng iyong panghihimasok. Maaari itong magresulta sa mga hindi inaasahang pagsingil o tawag. Tandaan na hindi nito pinapayagan ang app na tumawag sa mga numerong pang-emergency. Maaaring magpagastos sa iyo ng pera ang nakakahamak na apps sa pamamagitan ng pagtawag nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"i-access ang serbisyo sa tawag ng IMS"</string>

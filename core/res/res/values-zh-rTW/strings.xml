@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"允許應用程式使用相機拍照和錄影。這項權限可讓應用程式隨時使用相機，而不需請求您進行確認。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"允許應用程式控制震動。"</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"控制閃光燈"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"允許應用程式控制閃光燈。"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"直接撥打電話號碼"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"允許應用程式自行撥打電話，但可能產生非預期的費用或撥打非預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能利用此功能擅自撥打電話，增加您不必要的額外支出。"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"存取 IMS 撥號服務"</string>

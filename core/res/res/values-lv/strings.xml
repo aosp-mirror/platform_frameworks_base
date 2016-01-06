@@ -355,8 +355,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Ļauj lietotnei uzņemt attēlus un videoklipus ar kameru. Ar šo atļauju lietotne var jebkurā brīdī izmantot kameru bez jūsu apstiprinājuma."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolēt vibrosignālu"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"kontrolēt uzliesmojumu"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Ļauj lietotnei kontrolēt zibspuldzi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"tieši zvanīt uz tālruņa numuriem"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ļauj lietotnei zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Tas var radīt neparedzētas izmaksas vai zvanus. Ņemiet vērā, ka lietotnei nav atļauts zvanīt uz tālruņa numuriem ārkārtas situācijām. Ļaunprātīgas lietotnes var radīt jums izmaksas, veicot zvanus bez jūsu apstiprinājuma."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"piekļūt tūlītējās ziņojumapmaiņas pakalpojumam, lai veiktu zvanus"</string>

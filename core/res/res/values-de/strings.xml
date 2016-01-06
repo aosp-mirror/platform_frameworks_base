@@ -354,8 +354,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Ermöglicht der App, Bilder und Videos mit der Kamera aufzunehmen. Die Berechtigung erlaubt der App, die Kamera jederzeit und ohne Ihre Bestätigung zu nutzen."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"Vibrationsalarm steuern"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"Lichtanzeige steuern"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Ermöglicht der App, die Lichtanzeige zu steuern"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"Telefonnummern direkt anrufen"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Ermöglicht der App, ohne Ihr Eingreifen Telefonnummern zu wählen. Dies kann zu unerwarteten Kosten und Anrufen führen. Beachten Sie, dass die App keine Notrufnummern wählen kann. Schädliche Apps verursachen möglicherweise Kosten, indem sie Anrufe ohne Ihre Bestätigung tätigen."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"Zugriff auf IMS-Anrufdienst"</string>

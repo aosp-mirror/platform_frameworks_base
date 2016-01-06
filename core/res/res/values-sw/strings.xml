@@ -356,8 +356,6 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Inaruhusu programu kupiga picha na video kwa kamera. Kibali hiki kinaruhusu programu kutumia kamera kwa wakati wowote bila uthibitisho wako."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"Kudhibiti mtetemo"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Inaruhusu programu kudhibiti kitingishi."</string>
-    <string name="permlab_flashlight" msgid="2155920810121984215">"dhibiti tochi"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Inaruhusu programu kudhibiti tochi."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"piga simu moja kwa moja kwa nambari za simu"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Inaruhusu programu kupiga nambari za simu bila ya wewe kuingilia kati. Hii inaweza kusababisha gharama zisizotarajiwa au simu. Kumbuka kuwa hii hairuhusu programu kupiga nambari za dharura. Programu hasidi zinaweza kukugharimu pesa kwa kupiga simu bila uthibitisho wako."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"fikia huduma ya simu ya IMS"</string>
@@ -795,7 +793,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"Kumbuka"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Katu"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Hauna idhini ya kufungua ukurasa huu."</string>
-    <string name="text_copied" msgid="4985729524670131385">"Maandishi yamenakiliwa kwenye ubao klipu."</string>
+    <string name="text_copied" msgid="4985729524670131385">"Maandishi yamenakiliwa kwenye ubao wa kunakili."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Zaidi"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menyu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"mwanya"</string>
