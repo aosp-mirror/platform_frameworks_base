@@ -945,16 +945,27 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (vh != null) {
                 vh.itemView.requestFocus();
             } else {
-                // Don't smooth scroll; that taxes the system unnecessarily and makes the scroll
-                // handling logic below more complicated.  See b/24865658.
-                mView.scrollToPosition(pos);
+                mView.smoothScrollToPosition(pos);
                 // Set a one-time listener to request focus when the scroll has completed.
                 mView.addOnScrollListener(
                     new RecyclerView.OnScrollListener() {
                         @Override
-                        public void onScrolled(RecyclerView view, int dx, int dy) {
-                            view.findViewHolderForAdapterPosition(pos).itemView.requestFocus();
-                            view.removeOnScrollListener(this);
+                        public void onScrollStateChanged (RecyclerView view, int newState) {
+                            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                                // When scrolling stops, find the item and focus it.
+                                RecyclerView.ViewHolder vh =
+                                        view.findViewHolderForAdapterPosition(pos);
+                                if (vh != null) {
+                                    vh.itemView.requestFocus();
+                                } else {
+                                    // This might happen in weird corner cases, e.g. if the user is
+                                    // scrolling while a delete operation is in progress.  In that
+                                    // case, just don't attempt to focus the missing item.
+                                    Log.w(
+                                        TAG, "Unable to focus position " + pos + " after a scroll");
+                                }
+                                view.removeOnScrollListener(this);
+                            }
                         }
                     });
             }
