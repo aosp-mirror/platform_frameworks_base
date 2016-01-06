@@ -16,6 +16,7 @@
 
 package com.android.mediaframeworktest.unit;
 
+import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.content.IContentProvider;
 import android.media.MediaInserter;
@@ -81,8 +82,9 @@ public class MediaInserterTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mMockProvider = EasyMock.createMock(IContentProvider.class);
-        mMediaInserter = new MediaInserter(mMockProvider,
-        mPackageName, TEST_BUFFER_SIZE);
+        final ContentProviderClient client = new ContentProviderClient(
+                getInstrumentation().getContext().getContentResolver(), mMockProvider, true);
+        mMediaInserter = new MediaInserter(client, TEST_BUFFER_SIZE);
         mPackageName = getInstrumentation().getContext().getPackageName();
         mFilesCounter = 0;
         mAudioCounter = 0;

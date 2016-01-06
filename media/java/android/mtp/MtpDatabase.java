@@ -17,9 +17,9 @@
 package android.mtp;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.ContentProviderClient;
 import android.content.ContentValues;
-import android.content.IContentProvider;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -37,23 +37,30 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import dalvik.system.CloseGuard;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@hide}
  */
-public class MtpDatabase {
-
+public class MtpDatabase implements AutoCloseable {
     private static final String TAG = "MtpDatabase";
 
     private final Context mContext;
     private final String mPackageName;
-    private final IContentProvider mMediaProvider;
+    private final ContentProviderClient mMediaProvider;
     private final String mVolumeName;
     private final Uri mObjectsUri;
+    private final MediaScanner mMediaScanner;
+
+    private final AtomicBoolean mClosed = new AtomicBoolean();
+    private final CloseGuard mCloseGuard = CloseGuard.get();
+
     // path to primary storage
     private final String mMediaStoragePath;
     // if not null, restrict all queries to these subdirectories
@@ -120,7 +127,6 @@ public class MtpDatabase {
     private static final String STORAGE_FORMAT_PARENT_WHERE = STORAGE_FORMAT_WHERE + " AND "
                                             + Files.FileColumns.PARENT + "=?";
 
-    private final MediaScanner mMediaScanner;
     private MtpServer mServer;
 
     // read from native code
@@ -156,11 +162,12 @@ public class MtpDatabase {
 
         mContext = context;
         mPackageName = context.getPackageName();
-        mMediaProvider = context.getContentResolver().acquireProvider("media");
+        mMediaProvider = context.getContentResolver()
+                .acquireContentProviderClient(MediaStore.AUTHORITY);
         mVolumeName = volumeName;
         mMediaStoragePath = storagePath;
         mObjectsUri = Files.getMtpObjectsUri(volumeName);
-        mMediaScanner = new MediaScanner(context);
+        mMediaScanner = new MediaScanner(context, mVolumeName);
 
         mSubDirectories = subDirectories;
         if (subDirectories != null) {
@@ -187,20 +194,9 @@ public class MtpDatabase {
             }
         }
 
-        // Set locale to MediaScanner.
-        Locale locale = context.getResources().getConfiguration().locale;
-        if (locale != null) {
-            String language = locale.getLanguage();
-            String country = locale.getCountry();
-            if (language != null) {
-                if (country != null) {
-                    mMediaScanner.setLocale(language + "_" + country);
-                } else {
-                    mMediaScanner.setLocale(language);
-                }
-            }
-        }
         initDeviceProperties(context);
+
+        mCloseGuard.open("close");
     }
 
     public void setServer(MtpServer server) {
@@ -221,9 +217,20 @@ public class MtpDatabase {
     }
 
     @Override
+    public void close() {
+        mCloseGuard.close();
+        if (mClosed.compareAndSet(false, true)) {
+            mMediaScanner.close();
+            mMediaProvider.close();
+            native_finalize();
+        }
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
-            native_finalize();
+            mCloseGuard.warnIfOpen();
+            close();
         } finally {
             super.finalize();
         }
@@ -334,7 +341,7 @@ public class MtpDatabase {
         if (path != null) {
             Cursor c = null;
             try {
-                c = mMediaProvider.query(mPackageName, mObjectsUri, ID_PROJECTION, PATH_WHERE,
+                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION, PATH_WHERE,
                         new String[] { path }, null, null);
                 if (c != null && c.getCount() > 0) {
                     Log.w(TAG, "file already exists in beginSendObject: " + path);
@@ -359,7 +366,7 @@ public class MtpDatabase {
         values.put(Files.FileColumns.DATE_MODIFIED, modified);
 
         try {
-            Uri uri = mMediaProvider.insert(mPackageName, mObjectsUri, values);
+            Uri uri = mMediaProvider.insert(mObjectsUri, values);
             if (uri != null) {
                 return Integer.parseInt(uri.getPathSegments().get(2));
             } else {
@@ -394,13 +401,13 @@ public class MtpDatabase {
                 values.put(Files.FileColumns.DATE_MODIFIED, System.currentTimeMillis() / 1000);
                 values.put(MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, handle);
                 try {
-                    Uri uri = mMediaProvider.insert(mPackageName,
+                    Uri uri = mMediaProvider.insert(
                             Audio.Playlists.EXTERNAL_CONTENT_URI, values);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException in endSendObject", e);
                 }
             } else {
-                mMediaScanner.scanMtpFile(path, mVolumeName, handle, format);
+                mMediaScanner.scanMtpFile(path, handle, format);
             }
         } else {
             deleteFile(handle);
@@ -503,7 +510,7 @@ public class MtpDatabase {
             }
         }
 
-        return mMediaProvider.query(mPackageName, mObjectsUri, ID_PROJECTION, where,
+        return mMediaProvider.query(mObjectsUri, ID_PROJECTION, where,
                 whereArgs, null, null);
     }
 
@@ -721,7 +728,7 @@ public class MtpDatabase {
              propertyGroup = mPropertyGroupsByFormat.get(format);
              if (propertyGroup == null) {
                 int[] propertyList = getSupportedObjectProperties(format);
-                propertyGroup = new MtpPropertyGroup(this, mMediaProvider, mPackageName,
+                propertyGroup = new MtpPropertyGroup(this, mMediaProvider,
                         mVolumeName, propertyList);
                 mPropertyGroupsByFormat.put(new Integer(format), propertyGroup);
             }
@@ -729,7 +736,7 @@ public class MtpDatabase {
               propertyGroup = mPropertyGroupsByProperty.get(property);
              if (propertyGroup == null) {
                 int[] propertyList = new int[] { (int)property };
-                propertyGroup = new MtpPropertyGroup(this, mMediaProvider, mPackageName,
+                propertyGroup = new MtpPropertyGroup(this, mMediaProvider,
                         mVolumeName, propertyList);
                 mPropertyGroupsByProperty.put(new Integer((int)property), propertyGroup);
             }
@@ -745,7 +752,7 @@ public class MtpDatabase {
         String path = null;
         String[] whereArgs = new String[] {  Integer.toString(handle) };
         try {
-            c = mMediaProvider.query(mPackageName, mObjectsUri, PATH_PROJECTION, ID_WHERE,
+            c = mMediaProvider.query(mObjectsUri, PATH_PROJECTION, ID_WHERE,
                     whereArgs, null, null);
             if (c != null && c.moveToNext()) {
                 path = c.getString(1);
@@ -788,7 +795,7 @@ public class MtpDatabase {
         try {
             // note - we are relying on a special case in MediaProvider.update() to update
             // the paths for all children in the case where this is a directory.
-            updated = mMediaProvider.update(mPackageName, mObjectsUri, values, ID_WHERE, whereArgs);
+            updated = mMediaProvider.update(mObjectsUri, values, ID_WHERE, whereArgs);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in mMediaProvider.update", e);
         }
@@ -805,7 +812,7 @@ public class MtpDatabase {
             if (oldFile.getName().startsWith(".") && !newPath.startsWith(".")) {
                 // directory was unhidden
                 try {
-                    mMediaProvider.call(mPackageName, MediaStore.UNHIDE_CALL, newPath, null);
+                    mMediaProvider.call(MediaStore.UNHIDE_CALL, newPath, null);
                 } catch (RemoteException e) {
                     Log.e(TAG, "failed to unhide/rescan for " + newPath);
                 }
@@ -815,7 +822,7 @@ public class MtpDatabase {
             if (oldFile.getName().toLowerCase(Locale.US).equals(".nomedia")
                     && !newPath.toLowerCase(Locale.US).equals(".nomedia")) {
                 try {
-                    mMediaProvider.call(mPackageName, MediaStore.UNHIDE_CALL, oldFile.getParent(), null);
+                    mMediaProvider.call(MediaStore.UNHIDE_CALL, oldFile.getParent(), null);
                 } catch (RemoteException e) {
                     Log.e(TAG, "failed to unhide/rescan for " + newPath);
                 }
@@ -886,7 +893,7 @@ public class MtpDatabase {
                         char[] outName, long[] outCreatedModified) {
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mPackageName, mObjectsUri, OBJECT_INFO_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 outStorageFormatParent[0] = c.getInt(1);
@@ -933,7 +940,7 @@ public class MtpDatabase {
         }
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, PATH_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 String path = c.getString(1);
@@ -960,7 +967,7 @@ public class MtpDatabase {
     private int getObjectFormat(int handle) {
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mPackageName, mObjectsUri, FORMAT_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 return c.getInt(1);
@@ -984,7 +991,7 @@ public class MtpDatabase {
 
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mPackageName, mObjectsUri, PATH_FORMAT_PROJECTION,
+            c = mMediaProvider.query(mObjectsUri, PATH_FORMAT_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 // don't convert to media path here, since we will be matching
@@ -1007,7 +1014,7 @@ public class MtpDatabase {
             if (format == MtpConstants.FORMAT_ASSOCIATION) {
                 // recursive case - delete all children first
                 Uri uri = Files.getMtpObjectsUri(mVolumeName);
-                int count = mMediaProvider.delete(mPackageName, uri,
+                int count = mMediaProvider.delete(uri,
                     // the 'like' makes it use the index, the 'lower()' makes it correct
                     // when the path contains sqlite wildcard characters
                     "_data LIKE ?1 AND lower(substr(_data,1,?2))=lower(?3)",
@@ -1015,12 +1022,12 @@ public class MtpDatabase {
             }
 
             Uri uri = Files.getMtpObjectsUri(mVolumeName, handle);
-            if (mMediaProvider.delete(mPackageName, uri, null, null) > 0) {
+            if (mMediaProvider.delete(uri, null, null) > 0) {
                 if (format != MtpConstants.FORMAT_ASSOCIATION
                         && path.toLowerCase(Locale.US).endsWith("/.nomedia")) {
                     try {
                         String parentPath = path.substring(0, path.lastIndexOf("/"));
-                        mMediaProvider.call(mPackageName, MediaStore.UNHIDE_CALL, parentPath, null);
+                        mMediaProvider.call(MediaStore.UNHIDE_CALL, parentPath, null);
                     } catch (RemoteException e) {
                         Log.e(TAG, "failed to unhide/rescan for " + path);
                     }
@@ -1043,7 +1050,7 @@ public class MtpDatabase {
         Uri uri = Files.getMtpReferencesUri(mVolumeName, handle);
         Cursor c = null;
         try {
-            c = mMediaProvider.query(mPackageName, uri, ID_PROJECTION, null, null, null, null);
+            c = mMediaProvider.query(uri, ID_PROJECTION, null, null, null, null);
             if (c == null) {
                 return null;
             }
@@ -1077,7 +1084,7 @@ public class MtpDatabase {
             valuesList[i] = values;
         }
         try {
-            if (mMediaProvider.bulkInsert(mPackageName, uri, valuesList) > 0) {
+            if (mMediaProvider.bulkInsert(uri, valuesList) > 0) {
                 return MtpConstants.RESPONSE_OK;
             }
         } catch (RemoteException e) {
