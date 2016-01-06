@@ -247,6 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til at kunne tilpasses"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Sørger for, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivér vinduer i frit format"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Aktiverer understøttelse af eksperimentelle vinduer i frit format."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Kode til lokal sikkerhedskopi"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Lokale fuldstændige sikkerhedskopieringer er i øjeblikket ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal sikkerhedskopiering"</string>

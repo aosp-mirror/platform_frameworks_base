@@ -247,6 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ਇੱਕ ਐਪ ਨੂੰ ਬਾਹਰਲੀ ਸਟੋਰੇਜ ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਮੈਨੀਫੈਸਟ ਵੈਲਯੂਜ ਤੇ ਵਿਚਾਰ ਕੀਤੇ ਬਿਨਾਂ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਮੁੜ-ਆਕਾਰ ਵਿੱਚ ਲਿਆਉਂਦੀ ਹੈ, ਚਾਹੇ ਮੈਨੀਫੈਸਟ ਵੈਲਯੂਜ਼ ਕੁਝ ਵੀ ਹੋਣ।"</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"freeform windows ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ਪ੍ਰਯੋਗਾਤਮਕ freeform windows ਲਈ ਸਮਰਥਨ ਨੂੰ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ।"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ਡੈਸਕਟੌਪ ਬੈਕਅਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ਡੈਸਕਟੌਪ ਪੂਰੇ ਬੈਕਅਪਸ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ਡੈਸਕਟੌਪ ਪੂਰੇ ਬੈਕਅਪਸ ਲਈ ਪਾਸਵਰਡ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਛੋਹਵੋ"</string>

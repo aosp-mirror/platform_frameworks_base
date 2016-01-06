@@ -247,6 +247,10 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"アクティビティをサイズ変更可能にする"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようになります。"</string>
+    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
+    <skip />
+    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
+    <skip />
     <string name="local_backup_password_title" msgid="3860471654439418822">"PCバックアップパスワード"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"デスクトップのフルバックアップは現在保護されていません"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"デスクトップのフルバックアップ用のパスワードを変更または削除する場合にタップします"</string>
@@ -263,9 +267,9 @@
     <item msgid="8280754435979370728">"目に自然な色"</item>
     <item msgid="5363960654009010371">"デジタルコンテンツに最適な色"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"無効なアプリ"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"無効。タップすると切り替わります。"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"有効。タップすると切り替わります。"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"休止中のアプリ"</string>
+    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"休止中。タップすると切り替わります。"</string>
+    <string name="inactive_app_active_summary" msgid="4512911571954375968">"実行中。タップすると切り替わります。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"現在実行中のサービスを表示して制御する"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"夜間モード"</string>
