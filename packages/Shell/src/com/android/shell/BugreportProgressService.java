@@ -449,6 +449,11 @@ public class BugreportProgressService extends Service {
                 .addAction(cancelAction)
                 .build();
 
+        if (info.finished) {
+            Log.w(TAG, "Not sending progress notification because bugreport has finished already ("
+                    + info + ")");
+            return;
+        }
         NotificationManager.from(mContext).notify(TAG, info.pid, notification);
     }
 
@@ -628,7 +633,12 @@ public class BugreportProgressService extends Service {
         synchronized (BugreportProgressService.this) {
             mTakingScreenshot = flag;
             for (int i = 0; i < mProcesses.size(); i++) {
-                updateProgress(mProcesses.valueAt(i));
+                final BugreportInfo info = mProcesses.valueAt(i);
+                if (info.finished) {
+                    Log.d(TAG, "Not updating progress because share notification was already sent");
+                    continue;
+                }
+                updateProgress(info);
             }
         }
     }

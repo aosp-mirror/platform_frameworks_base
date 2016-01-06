@@ -142,6 +142,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     public void testProgress() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
 
         assertProgressNotification(NAME, "0.00%");
 
@@ -157,7 +158,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
-                null, 1);
+                null, 1, true);
 
         assertServiceNotRunning();
     }
@@ -174,7 +175,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, ZIP_FILE,
-                null, 2);
+                null, 2, true);
 
         assertServiceNotRunning();
     }
@@ -182,6 +183,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     public void testProgress_changeDetails() throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
 
         DetailsUi detailsUi = new DetailsUi(mUiBot);
 
@@ -218,14 +220,33 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
                 mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NEW_NAME, TITLE,
-                mDescription, 1);
+                mDescription, 1, true);
 
         assertServiceNotRunning();
     }
 
+    /**
+     * Tests the scenario where the initial screenshot and dumpstate are finished while the user
+     * is changing the info in the details screen.
+     */
+    public void testProgress_bugreportAndScreenshotFinishedWhileChangingDetails() throws Exception {
+        bugreportFinishedWhileChangingDetailsTest(false);
+    }
+
+    /**
+     * Tests the scenario where dumpstate is finished while the user is changing the info in the
+     * details screen, but the initial screenshot finishes afterwards.
+     */
     public void testProgress_bugreportFinishedWhileChangingDetails() throws Exception {
+        bugreportFinishedWhileChangingDetailsTest(true);
+    }
+
+    private void bugreportFinishedWhileChangingDetailsTest(boolean waitScreenshot) throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
+        if (waitScreenshot) {
+            waitForScreenshotButtonEnabled(true);
+        }
 
         DetailsUi detailsUi = new DetailsUi(mUiBot);
 
@@ -233,7 +254,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.nameField.setText(NEW_NAME);
         sendBugreportFinished(PID, mPlainTextPath, mScreenshotPath);
 
-        // Wait until the share notifcation is received...
+        // Wait until the share notification is received...
         mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title));
         // ...then close notification bar.
         mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
@@ -250,7 +271,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent();
         assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, NAME, TITLE,
-                mDescription, 1);
+                mDescription, 1, waitScreenshot);
 
         assertServiceNotRunning();
     }
@@ -406,7 +427,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
         assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, null, ZIP_FILE,
-                null, 0);
+                null, 0, false);
     }
 
     /**
@@ -420,10 +441,11 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * @param title bugreport name as provided by the user (or received by dumpstate)
      * @param description bugreport description as provided by the user
      * @param numberScreenshots expected number of screenshots taken by Shell.
+     * @param renamedScreenshots whether the screenshots are expected to be renamed
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent, int pid, String name, String title, String description,
-            int numberScreenshots) throws IOException {
+            int numberScreenshots, boolean renamedScreenshots) throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
         assertContainsRegex("missing build info",
                 SystemProperties.get("ro.build.description"), body);
@@ -480,7 +502,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Check internal screenshots.
         SortedSet<String> expectedNames = new TreeSet<>();
         for (int i = 1 ; i <= numberScreenshots; i++) {
-            String prefix = name != null ? name : Integer.toString(pid);
+            String prefix = renamedScreenshots  ? name : Integer.toString(pid);
             String expectedName = "screenshot-" + prefix + "-" + i + ".png";
             expectedNames.add(expectedName);
         }
@@ -592,7 +614,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private UiObject waitForScreenshotButtonEnabled(boolean expectedEnabled) throws Exception {
         UiObject screenshotButton = getScreenshotButton();
-        int maxAttempts = SCREENSHOT_DELAY_SECONDS + 2;
+        int maxAttempts = SCREENSHOT_DELAY_SECONDS + 5;
         int i = 0;
         do {
             boolean enabled = screenshotButton.isEnabled();
