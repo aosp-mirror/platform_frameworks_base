@@ -80,7 +80,7 @@
             android:summary="@string/overview_initial_state_paging_desc" />
 
         <com.android.systemui.tuner.TunerSwitch
-            android:key="overview_fast_toggle"
+            android:key="overview_fast_toggle_via_button"
             android:title="@string/overview_fast_toggle_via_button"
             android:summary="@string/overview_fast_toggle_via_button_desc" />
 
