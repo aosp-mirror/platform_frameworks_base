@@ -97,10 +97,6 @@ static jfieldID field_objectInfo_keywords;
 static jfieldID field_event_eventCode;
 
 class JavaArrayWriter {
-    JNIEnv* mEnv;
-    jbyteArray mArray;
-    jsize mSize;
-
 public:
     JavaArrayWriter(JNIEnv* env, jbyteArray array) :
         mEnv(env), mArray(array), mSize(mEnv->GetArrayLength(mArray)) {}
@@ -114,6 +110,11 @@ public:
     static bool writeTo(void* data, uint32_t offset, uint32_t length, void* clientData) {
         return static_cast<JavaArrayWriter*>(clientData)->write(data, offset, length);
     }
+
+private:
+    JNIEnv* mEnv;
+    jbyteArray mArray;
+    jsize mSize;
 };
 
 }
@@ -362,7 +363,7 @@ android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
                                          jint size,
                                          jbyteArray array)
 {
-    if (array == nullptr) {
+    if (!array) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Array must not be null.");
         return -1;
     }
@@ -591,7 +592,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_object_info",  "(I)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_get_object_info},
     {"native_get_object",       "(II)[B",(void *)android_mtp_MtpDevice_get_object},
-    {"native_get_partial_object", "(III[B)I", (void *) android_mtp_MtpDevice_get_partial_object},
+    {"native_get_partial_object", "(III[B)I", (void *)android_mtp_MtpDevice_get_partial_object},
     {"native_get_thumbnail",    "(I)[B",(void *)android_mtp_MtpDevice_get_thumbnail},
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
     {"native_get_parent",       "(I)J", (void *)android_mtp_MtpDevice_get_parent},
