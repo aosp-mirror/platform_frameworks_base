@@ -178,6 +178,8 @@ public:
             const uint16_t* indices, int indexCount, const SkPaint& paint) override
         { /* RecordingCanvas does not support drawVertices(); ignore */ }
 
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
+
     // Bitmap-based
     virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,

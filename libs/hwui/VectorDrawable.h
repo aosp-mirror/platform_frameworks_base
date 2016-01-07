@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_VPATH_H
 
 #include "Canvas.h"
+
 #include <SkBitmap.h>
 #include <SkColor.h>
 #include <SkCanvas.h>
@@ -104,6 +105,21 @@ protected:
 
 class ANDROID_API FullPath: public Path {
 public:
+
+struct Properties {
+    float strokeWidth = 0;
+    SkColor strokeColor = SK_ColorTRANSPARENT;
+    float strokeAlpha = 1;
+    SkColor fillColor = SK_ColorTRANSPARENT;
+    float fillAlpha = 1;
+    float trimPathStart = 0;
+    float trimPathEnd = 1;
+    float trimPathOffset = 0;
+    int32_t strokeLineCap = SkPaint::Cap::kButt_Cap;
+    int32_t strokeLineJoin = SkPaint::Join::kMiter_Join;
+    float strokeMiterLimit = 4;
+};
+
     FullPath(const FullPath& path); // for cloning
     FullPath(const char* path, size_t strLength) : Path(path, strLength) {}
     FullPath() : Path() {}
@@ -118,55 +134,58 @@ public:
             float strokeAlpha, SkColor fillColor, float fillAlpha,
             float trimPathStart, float trimPathEnd, float trimPathOffset,
             float strokeMiterLimit, int strokeLineCap, int strokeLineJoin);
+    // TODO: Cleanup: Remove the setter and getters below, and their counterparts in java and JNI
     float getStrokeWidth() {
-        return mStrokeWidth;
+        return mProperties.strokeWidth;
     }
     void setStrokeWidth(float strokeWidth) {
-        mStrokeWidth = strokeWidth;
+        mProperties.strokeWidth = strokeWidth;
     }
     SkColor getStrokeColor() {
-        return mStrokeColor;
+        return mProperties.strokeColor;
     }
     void setStrokeColor(SkColor strokeColor) {
-        mStrokeColor = strokeColor;
+        mProperties.strokeColor = strokeColor;
     }
     float getStrokeAlpha() {
-        return mStrokeAlpha;
+        return mProperties.strokeAlpha;
     }
     void setStrokeAlpha(float strokeAlpha) {
-        mStrokeAlpha = strokeAlpha;
+        mProperties.strokeAlpha = strokeAlpha;
     }
     SkColor getFillColor() {
-        return mFillColor;
+        return mProperties.fillColor;
     }
     void setFillColor(SkColor fillColor) {
-        mFillColor = fillColor;
+        mProperties.fillColor = fillColor;
     }
     float getFillAlpha() {
-        return mFillAlpha;
+        return mProperties.fillAlpha;
     }
     void setFillAlpha(float fillAlpha) {
-        mFillAlpha = fillAlpha;
+        mProperties.fillAlpha = fillAlpha;
     }
     float getTrimPathStart() {
-        return mTrimPathStart;
+        return mProperties.trimPathStart;
     }
     void setTrimPathStart(float trimPathStart) {
-        VD_SET_PROP_WITH_FLAG(mTrimPathStart, trimPathStart, mTrimDirty);
+        VD_SET_PROP_WITH_FLAG(mProperties.trimPathStart, trimPathStart, mTrimDirty);
     }
     float getTrimPathEnd() {
-        return mTrimPathEnd;
+        return mProperties.trimPathEnd;
     }
     void setTrimPathEnd(float trimPathEnd) {
-        VD_SET_PROP_WITH_FLAG(mTrimPathEnd, trimPathEnd, mTrimDirty);
+        VD_SET_PROP_WITH_FLAG(mProperties.trimPathEnd, trimPathEnd, mTrimDirty);
     }
     float getTrimPathOffset() {
-        return mTrimPathOffset;
+        return mProperties.trimPathOffset;
     }
     void setTrimPathOffset(float trimPathOffset) {
-        VD_SET_PROP_WITH_FLAG(mTrimPathOffset, trimPathOffset, mTrimDirty);
+        VD_SET_PROP_WITH_FLAG(mProperties.trimPathOffset, trimPathOffset, mTrimDirty);
     }
     bool getProperties(int8_t* outProperties, int length);
+    void setColorPropertyValue(int propertyId, int32_t value);
+    void setPropertyValue(int propertyId, float value);
 
     void setFillGradient(SkShader* fillGradient) {
         SkRefCnt_SafeAssign(mFillGradient, fillGradient);
@@ -182,24 +201,28 @@ protected:
             float strokeScale, const SkMatrix& matrix) override;
 
 private:
+    enum class Property {
+        StrokeWidth = 0,
+        StrokeColor,
+        StrokeAlpha,
+        FillColor,
+        FillAlpha,
+        TrimPathStart,
+        TrimPathEnd,
+        TrimPathOffset,
+        StrokeLineCap,
+        StrokeLineJoin,
+        StrokeMiterLimit,
+        Count,
+    };
     // Applies trimming to the specified path.
     void applyTrim();
-    float mStrokeWidth = 0;
-    SkColor mStrokeColor = SK_ColorTRANSPARENT;
-    float mStrokeAlpha = 1;
-    SkColor mFillColor = SK_ColorTRANSPARENT;
-    SkShader* mStrokeGradient = nullptr;
-    SkShader* mFillGradient = nullptr;
-    float mFillAlpha = 1;
-    float mTrimPathStart = 0;
-    float mTrimPathEnd = 1;
-    float mTrimPathOffset = 0;
+    Properties mProperties;
     bool mTrimDirty = true;
-    SkPaint::Cap mStrokeLineCap = SkPaint::Cap::kButt_Cap;
-    SkPaint::Join mStrokeLineJoin = SkPaint::Join::kMiter_Join;
-    float mStrokeMiterLimit = 4;
     SkPath mTrimmedSkPath;
     SkPaint mPaint;
+    SkShader* mStrokeGradient = nullptr;
+    SkShader* mFillGradient = nullptr;
 };
 
 class ANDROID_API ClipPath: public Path {
@@ -216,49 +239,58 @@ protected:
 
 class ANDROID_API Group: public Node {
 public:
+    struct Properties {
+        float rotate = 0;
+        float pivotX = 0;
+        float pivotY = 0;
+        float scaleX = 1;
+        float scaleY = 1;
+        float translateX = 0;
+        float translateY = 0;
+    };
     Group(const Group& group);
     Group() {}
     float getRotation() {
-        return mRotate;
+        return mProperties.rotate;
     }
     void setRotation(float rotation) {
-        mRotate = rotation;
+        mProperties.rotate = rotation;
     }
     float getPivotX() {
-        return mPivotX;
+        return mProperties.pivotX;
     }
     void setPivotX(float pivotX) {
-        mPivotX = pivotX;
+        mProperties.pivotX = pivotX;
     }
     float getPivotY() {
-        return mPivotY;
+        return mProperties.pivotY;
     }
     void setPivotY(float pivotY) {
-        mPivotY = pivotY;
+        mProperties.pivotY = pivotY;
     }
     float getScaleX() {
-        return mScaleX;
+        return mProperties.scaleX;
     }
     void setScaleX(float scaleX) {
-        mScaleX = scaleX;
+        mProperties.scaleX = scaleX;
     }
     float getScaleY() {
-        return mScaleY;
+        return mProperties.scaleY;
     }
     void setScaleY(float scaleY) {
-        mScaleY = scaleY;
+        mProperties.scaleY = scaleY;
     }
     float getTranslateX() {
-        return mTranslateX;
+        return mProperties.translateX;
     }
     void setTranslateX(float translateX) {
-        mTranslateX = translateX;
+        mProperties.translateX = translateX;
     }
     float getTranslateY() {
-        return mTranslateY;
+        return mProperties.translateY;
     }
     void setTranslateY(float translateY) {
-        mTranslateY = translateY;
+        mProperties.translateY = translateY;
     }
     virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
             float scaleX, float scaleY) override;
@@ -268,38 +300,33 @@ public:
     void addChild(Node* child);
     void dump() override;
     bool getProperties(float* outProperties, int length);
+    float getPropertyValue(int propertyId) const;
+    void setPropertyValue(int propertyId, float value);
+    static bool isValidProperty(int propertyId);
 
 private:
     enum class Property {
-        Rotate_Property = 0,
-        PivotX_Property,
-        PivotY_Property,
-        ScaleX_Property,
-        ScaleY_Property,
-        TranslateX_Property,
-        TranslateY_Property,
+        Rotate = 0,
+        PivotX,
+        PivotY,
+        ScaleX,
+        ScaleY,
+        TranslateX,
+        TranslateY,
         // Count of the properties, must be at the end.
         Count,
     };
-    float mRotate = 0;
-    float mPivotX = 0;
-    float mPivotY = 0;
-    float mScaleX = 1;
-    float mScaleY = 1;
-    float mTranslateX = 0;
-    float mTranslateY = 0;
     std::vector<Node*> mChildren;
+    Properties mProperties;
 };
 
-class ANDROID_API Tree {
+class ANDROID_API Tree : public VirtualLightRefBase {
 public:
     Tree(Group* rootNode) : mRootNode(rootNode) {}
     void draw(Canvas* outCanvas, SkColorFilter* colorFilter,
             const SkRect& bounds, bool needsMirroring, bool canReuseCache);
-    void drawCachedBitmapWithRootAlpha(Canvas* outCanvas, SkColorFilter* filter,
-            const SkRect& originalBounds);
 
-    void updateCachedBitmap(int width, int height);
+    const SkBitmap& getBitmapUpdateIfDirty();
     void createCachedBitmapIfNeeded(int width, int height);
     bool canReuseBitmap(int width, int height);
     void setAllowCaching(bool allowCaching) {
@@ -315,6 +342,10 @@ public:
     void setViewportSize(float viewportWidth, float viewportHeight) {
         mViewportWidth = viewportWidth;
         mViewportHeight = viewportHeight;
+    }
+    SkPaint* getPaint();
+    const SkRect& getBounds() const {
+        return mBounds;
     }
 
 private:

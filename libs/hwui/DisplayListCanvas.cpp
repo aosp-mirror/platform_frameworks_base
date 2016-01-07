@@ -16,11 +16,12 @@
 
 #include "DisplayListCanvas.h"
 
-#include "ResourceCache.h"
 #include "DeferredDisplayList.h"
 #include "DeferredLayerUpdater.h"
 #include "DisplayListOp.h"
+#include "ResourceCache.h"
 #include "RenderNode.h"
+#include "VectorDrawable.h"
 #include "utils/PaintUtils.h"
 
 #include <SkCamera.h>
@@ -410,6 +411,16 @@ void DisplayListCanvas::drawPoints(const float* points, int count, const SkPaint
     points = refBuffer<float>(points, count);
 
     addDrawOp(new (alloc()) DrawPointsOp(points, count, refPaint(&paint)));
+}
+
+void DisplayListCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
+    mDisplayList->ref(tree);
+    const SkBitmap& bitmap = tree->getBitmapUpdateIfDirty();
+    SkPaint* paint = tree->getPaint();
+    const SkRect bounds = tree->getBounds();
+    addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(bitmap),
+            0, 0, bitmap.width(), bitmap.height(),
+            bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), refPaint(paint)));
 }
 
 void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,

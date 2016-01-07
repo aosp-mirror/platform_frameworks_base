@@ -19,6 +19,7 @@
 #include "Canvas.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
+#include "VectorDrawable.h"
 #include "renderstate/OffscreenBufferPool.h"
 #include "utils/FatVector.h"
 #include "utils/PaintUtils.h"
@@ -532,6 +533,18 @@ void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+}
+
+void FrameBuilder::deferVectorDrawableOp(const VectorDrawableOp& op) {
+    const SkBitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
+    SkPaint* paint = op.vectorDrawable->getPaint();
+    const BitmapRectOp* resolvedOp = new (mAllocator) BitmapRectOp(op.unmappedBounds,
+            op.localMatrix,
+            op.localClip,
+            paint,
+            &bitmap,
+            Rect(bitmap.width(), bitmap.height()));
+    deferBitmapRectOp(*resolvedOp);
 }
 
 void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {

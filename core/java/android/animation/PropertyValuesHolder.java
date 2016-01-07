@@ -21,6 +21,7 @@ import android.graphics.PointF;
 import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Log;
+import android.util.PathParser;
 import android.util.Property;
 
 import java.lang.reflect.InvocationTargetException;
@@ -1046,6 +1047,43 @@ public class PropertyValuesHolder implements Cloneable {
         return mAnimatedValue;
     }
 
+    /**
+     * PropertyValuesHolder is Animators use to hold internal animation related data.
+     * Therefore, in order to replicate the animation behavior, we need to get data out of
+     * PropertyValuesHolder.
+     * @hide
+     */
+    public void getPropertyValues(PropertyValues values) {
+        init();
+        values.propertyName = mPropertyName;
+        values.type = mValueType;
+        values.startValue = mKeyframes.getValue(0);
+        if (values.startValue instanceof PathParser.PathData) {
+            // PathData evaluator returns the same mutable PathData object when query fraction,
+            // so we have to make a copy here.
+            values.startValue = new PathParser.PathData((PathParser.PathData) values.startValue);
+        }
+        values.endValue = mKeyframes.getValue(1);
+        if (values.endValue instanceof PathParser.PathData) {
+            // PathData evaluator returns the same mutable PathData object when query fraction,
+            // so we have to make a copy here.
+            values.endValue = new PathParser.PathData((PathParser.PathData) values.endValue);
+        }
+        // TODO: We need a better way to get data out of keyframes.
+        if (mKeyframes instanceof PathKeyframes.FloatKeyframesBase
+                || mKeyframes instanceof PathKeyframes.IntKeyframesBase) {
+            // property values will animate based on external data source (e.g. Path)
+            values.dataSource = new PropertyValues.DataSource() {
+                @Override
+                public Object getValueAtFraction(float fraction) {
+                    return mKeyframes.getValue(fraction);
+                }
+            };
+        } else {
+            values.dataSource = null;
+        }
+    }
+
     @Override
     public String toString() {
         return mPropertyName + ": " + mKeyframes.toString();
@@ -1600,6 +1638,24 @@ public class PropertyValuesHolder implements Cloneable {
             return mCoordinates;
         }
     };
+
+    /**
+     * @hide
+     */
+    public static class PropertyValues {
+        public String propertyName;
+        public Class type;
+        public Object startValue;
+        public Object endValue;
+        public DataSource dataSource = null;
+        public interface DataSource {
+            Object getValueAtFraction(float fraction);
+        }
+        public String toString() {
+            return ("property name: " + propertyName + ", type: " + type + ", startValue: "
+                    + startValue.toString() + ", endValue: " + endValue.toString());
+        }
+    }
 
     native static private long nGetIntMethod(Class targetClass, String methodName);
     native static private long nGetFloatMethod(Class targetClass, String methodName);

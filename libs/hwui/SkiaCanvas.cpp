@@ -27,6 +27,8 @@
 #include <SkTLazy.h>
 #include <SkTemplates.h>
 
+#include "VectorDrawable.h"
+
 #include <memory>
 
 namespace android {
@@ -136,6 +138,7 @@ public:
             float hOffset, float vOffset, const SkPaint& paint) override;
 
     virtual bool drawTextAbsolutePos() const  override { return true; }
+    virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
 private:
     struct SaveRec {
@@ -711,6 +714,14 @@ void SkiaCanvas::drawNinePatch(const SkBitmap& bitmap, const Res_png_9patch& chu
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
     SkRect bounds = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     NinePatch::Draw(mCanvas, bounds, bitmap, chunk, paint, nullptr);
+}
+
+void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {
+    const SkBitmap& bitmap = vectorDrawable->getBitmapUpdateIfDirty();
+    SkRect bounds = vectorDrawable->getBounds();
+    drawBitmap(bitmap, 0, 0, bitmap.width(), bitmap.height(),
+            bounds.fLeft, bounds.fTop, bounds.fRight, bounds.fBottom,
+            vectorDrawable->getPaint());
 }
 
 // ----------------------------------------------------------------------------
