@@ -728,32 +728,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             boolean showNav = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
             if (showNav) {
-                // Optionally show app shortcuts in the nav bar "shelf" area.
-                if (shouldShowAppShelf()) {
-                    mNavigationBarView = (NavigationBarView) View.inflate(
-                            context, R.layout.navigation_bar_with_apps, null);
-                } else {
-                    mNavigationBarView = (NavigationBarView) View.inflate(
-                            context, R.layout.navigation_bar, null);
-                }
-                mNavigationBarView.setDisabledFlags(mDisabled1);
-                mNavigationBarView.setComponents(mRecents, getComponent(Divider.class));
-                mNavigationBarView.setOnVerticalChangedListener(
-                        new NavigationBarView.OnVerticalChangedListener() {
-                    @Override
-                    public void onVerticalChanged(boolean isVertical) {
-                        if (mAssistManager != null) {
-                            mAssistManager.onConfigurationChanged();
-                        }
-                        mNotificationPanel.setQsScrimEnabled(!isVertical);
-                    }
-                });
-                mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        checkUserAutohide(v, event);
-                        return false;
-                    }});
+                createNavigationBarView(context);
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -979,6 +954,35 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mStatusBarView;
     }
 
+    protected void createNavigationBarView(Context context) {
+    // Optionally show app shortcuts in the nav bar "shelf" area.
+        if (shouldShowAppShelf()) {
+            mNavigationBarView = (NavigationBarView) View.inflate(
+                    context, R.layout.navigation_bar_with_apps, null);
+        } else {
+            mNavigationBarView = (NavigationBarView) View.inflate(
+                    context, R.layout.navigation_bar, null);
+        }
+        mNavigationBarView.setDisabledFlags(mDisabled1);
+        mNavigationBarView.setComponents(mRecents, getComponent(Divider.class));
+        mNavigationBarView.setOnVerticalChangedListener(
+                new NavigationBarView.OnVerticalChangedListener() {
+            @Override
+            public void onVerticalChanged(boolean isVertical) {
+                if (mAssistManager != null) {
+                    mAssistManager.onConfigurationChanged();
+                }
+                mNotificationPanel.setQsScrimEnabled(!isVertical);
+            }
+        });
+        mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                checkUserAutohide(v, event);
+                return false;
+            }});
+    }
+
     /** Returns true if the app shelf should be shown in the nav bar. */
     private boolean shouldShowAppShelf() {
         // Allow adb to override the default shelf behavior:
@@ -1192,7 +1196,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
-    private void addNavigationBar() {
+    protected void addNavigationBar() {
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + mNavigationBarView);
         if (mNavigationBarView == null) return;
 

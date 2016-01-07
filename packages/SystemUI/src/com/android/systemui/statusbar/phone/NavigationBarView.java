@@ -157,8 +157,8 @@ public class NavigationBarView extends LinearLayout {
                     final String how = "" + m.obj;
                     final int w = getWidth();
                     final int h = getHeight();
-                    final int vw = mCurrentView.getWidth();
-                    final int vh = mCurrentView.getHeight();
+                    final int vw = getCurrentView().getWidth();
+                    final int vh = getCurrentView().getHeight();
 
                     if (h != vh || w != vw) {
                         Log.w(TAG, String.format(
@@ -230,27 +230,27 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public KeyButtonView getRecentsButton() {
-        return (KeyButtonView) mCurrentView.findViewById(R.id.recent_apps);
+        return (KeyButtonView) getCurrentView().findViewById(R.id.recent_apps);
     }
 
     public View getMenuButton() {
-        return mCurrentView.findViewById(R.id.menu);
+        return getCurrentView().findViewById(R.id.menu);
     }
 
     public View getBackButton() {
-        return mCurrentView.findViewById(R.id.back);
+        return getCurrentView().findViewById(R.id.back);
     }
 
     public KeyButtonView getHomeButton() {
-        return (KeyButtonView) mCurrentView.findViewById(R.id.home);
+        return (KeyButtonView) getCurrentView().findViewById(R.id.home);
     }
 
     public View getImeSwitchButton() {
-        return mCurrentView.findViewById(R.id.ime_switcher);
+        return getCurrentView().findViewById(R.id.ime_switcher);
     }
 
     public View getAppShelf() {
-        return mCurrentView.findViewById(R.id.app_shelf);
+        return getCurrentView().findViewById(R.id.app_shelf);
     }
 
     private void getIcons(Resources res) {
@@ -326,7 +326,7 @@ public class NavigationBarView extends LinearLayout {
             setSlippery(disableHome && disableRecent && disableBack && disableSearch);
         }
 
-        ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
+        ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
             LayoutTransition lt = navButtons.getLayoutTransition();
             if (lt != null) {
@@ -379,7 +379,7 @@ public class NavigationBarView extends LinearLayout {
 
     private void updateLayoutTransitionsEnabled() {
         boolean enabled = !mWakeAndUnlocking && mLayoutTransitionsEnabled;
-        ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
+        ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
         LayoutTransition lt = navButtons.getLayoutTransition();
         if (lt != null) {
             if (enabled) {
