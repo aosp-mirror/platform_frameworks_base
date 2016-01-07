@@ -517,12 +517,13 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            provider.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @see Document#FLAG_SUPPORTS_TYPED_DOCUMENT
      */
     @SuppressWarnings("unused")
     public AssetFileDescriptor openTypedDocument(
             String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
-        throw new FileNotFoundException("The requested MIME type is not supported.");
+        throw new UnsupportedOperationException("Typed documents not supported");
     }
 
     /**

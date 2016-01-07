@@ -255,6 +255,10 @@ public class DocumentInfo implements Durable, Parcelable {
         return (flags & Document.FLAG_VIRTUAL_DOCUMENT) != 0;
     }
 
+    public boolean isTypedDocument() {
+        return (flags & Document.FLAG_SUPPORTS_TYPED_DOCUMENT) != 0;
+    }
+
     public int hashCode() {
         return derivedUri.hashCode() + mimeType.hashCode();
     }
