@@ -1288,6 +1288,9 @@ package android {
     field public static final int thumbTint = 16843889; // 0x1010471
     field public static final int thumbTintMode = 16843890; // 0x1010472
     field public static final int thumbnail = 16843429; // 0x10102a5
+    field public static final int tickMark = 16844043; // 0x101050b
+    field public static final int tickMarkTint = 16844044; // 0x101050c
+    field public static final int tickMarkTintMode = 16844045; // 0x101050d
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int tileModeX = 16843895; // 0x1010477
     field public static final int tileModeY = 16843896; // 0x1010478
@@ -2547,6 +2550,7 @@ package android {
     field public static final int Widget_Material_ScrollView = 16974462; // 0x103027e
     field public static final int Widget_Material_SearchView = 16974463; // 0x103027f
     field public static final int Widget_Material_SeekBar = 16974464; // 0x1030280
+    field public static final int Widget_Material_SeekBar_Discrete = 16974553; // 0x10302d9
     field public static final int Widget_Material_SegmentedButton = 16974465; // 0x1030281
     field public static final int Widget_Material_Spinner = 16974467; // 0x1030283
     field public static final int Widget_Material_Spinner_Underlined = 16974468; // 0x1030284
@@ -44489,12 +44493,18 @@ package android.widget {
     method public int getThumbOffset();
     method public android.content.res.ColorStateList getThumbTintList();
     method public android.graphics.PorterDuff.Mode getThumbTintMode();
+    method public android.graphics.drawable.Drawable getTickMark();
+    method public android.content.res.ColorStateList getTickMarkTintList();
+    method public android.graphics.PorterDuff.Mode getTickMarkTintMode();
     method public void setKeyProgressIncrement(int);
     method public void setSplitTrack(boolean);
     method public void setThumb(android.graphics.drawable.Drawable);
     method public void setThumbOffset(int);
     method public void setThumbTintList(android.content.res.ColorStateList);
     method public void setThumbTintMode(android.graphics.PorterDuff.Mode);
+    method public void setTickMark(android.graphics.drawable.Drawable);
+    method public void setTickMarkTintList(android.content.res.ColorStateList);
+    method public void setTickMarkTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public abstract class AbsSpinner extends android.widget.AdapterView {

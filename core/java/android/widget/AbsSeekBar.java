@@ -44,6 +44,12 @@ public abstract class AbsSeekBar extends ProgressBar {
     private boolean mHasThumbTint = false;
     private boolean mHasThumbTintMode = false;
 
+    private Drawable mTickMark;
+    private ColorStateList mTickMarkTintList = null;
+    private PorterDuff.Mode mTickMarkTintMode = null;
+    private boolean mHasTickMarkTint = false;
+    private boolean mHasTickMarkTintMode = false;
+
     private int mThumbOffset;
     private boolean mSplitTrack;
 
@@ -103,10 +109,25 @@ public abstract class AbsSeekBar extends ProgressBar {
             mHasThumbTint = true;
         }
 
+        final Drawable tickMark = a.getDrawable(R.styleable.SeekBar_tickMark);
+        setTickMark(tickMark);
+
+        if (a.hasValue(R.styleable.SeekBar_tickMarkTintMode)) {
+            mTickMarkTintMode = Drawable.parseTintMode(a.getInt(
+                    R.styleable.SeekBar_tickMarkTintMode, -1), mTickMarkTintMode);
+            mHasTickMarkTintMode = true;
+        }
+
+        if (a.hasValue(R.styleable.SeekBar_tickMarkTint)) {
+            mTickMarkTintList = a.getColorStateList(R.styleable.SeekBar_tickMarkTint);
+            mHasTickMarkTint = true;
+        }
+
         mSplitTrack = a.getBoolean(R.styleable.SeekBar_splitTrack, false);
 
         // Guess thumb offset if thumb != null, but allow layout to override.
-        final int thumbOffset = a.getDimensionPixelOffset(R.styleable.SeekBar_thumbOffset, getThumbOffset());
+        final int thumbOffset = a.getDimensionPixelOffset(
+                R.styleable.SeekBar_thumbOffset, getThumbOffset());
         setThumbOffset(thumbOffset);
 
         final boolean useDisabledAlpha = a.getBoolean(R.styleable.SeekBar_useDisabledAlpha, true);
@@ -313,6 +334,123 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     /**
+     * Sets the drawable displayed at each progress position, e.g. at each
+     * possible thumb position.
+     *
+     * @param tickMark the drawable to display at each progress position
+     */
+    public void setTickMark(Drawable tickMark) {
+        if (mTickMark != null) {
+            mTickMark.setCallback(null);
+        }
+
+        mTickMark = tickMark;
+
+        if (tickMark != null) {
+            tickMark.setCallback(this);
+            tickMark.setLayoutDirection(getLayoutDirection());
+            if (tickMark.isStateful()) {
+                tickMark.setState(getDrawableState());
+            }
+            applyTickMarkTint();
+        }
+
+        invalidate();
+    }
+
+    /**
+     * @return the drawable displayed at each progress position
+     */
+    public Drawable getTickMark() {
+        return mTickMark;
+    }
+
+    /**
+     * Applies a tint to the tick mark drawable. Does not modify the current tint
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setTickMark(Drawable)} will automatically
+     * mutate the drawable and apply the specified tint and tint mode using
+     * {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#SeekBar_tickMarkTint
+     * @see #getTickMarkTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setTickMarkTintList(@Nullable ColorStateList tint) {
+        mTickMarkTintList = tint;
+        mHasTickMarkTint = true;
+
+        applyTickMarkTint();
+    }
+
+    /**
+     * Returns the tint applied to the tick mark drawable, if specified.
+     *
+     * @return the tint applied to the tick mark drawable
+     * @attr ref android.R.styleable#SeekBar_tickMarkTint
+     * @see #setTickMarkTintList(ColorStateList)
+     */
+    @Nullable
+    public ColorStateList getTickMarkTintList() {
+        return mTickMarkTintList;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setTickMarkTintList(ColorStateList)}} to the tick mark drawable. The
+     * default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#SeekBar_tickMarkTintMode
+     * @see #getTickMarkTintMode()
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setTickMarkTintMode(@Nullable PorterDuff.Mode tintMode) {
+        mTickMarkTintMode = tintMode;
+        mHasTickMarkTintMode = true;
+
+        applyTickMarkTint();
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the tick mark drawable,
+     * if specified.
+     *
+     * @return the blending mode used to apply the tint to the tick mark drawable
+     * @attr ref android.R.styleable#SeekBar_tickMarkTintMode
+     * @see #setTickMarkTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public PorterDuff.Mode getTickMarkTintMode() {
+        return mTickMarkTintMode;
+    }
+
+    private void applyTickMarkTint() {
+        if (mTickMark != null && (mHasTickMarkTint || mHasTickMarkTintMode)) {
+            mTickMark = mTickMark.mutate();
+
+            if (mHasTickMarkTint) {
+                mTickMark.setTintList(mTickMarkTintList);
+            }
+
+            if (mHasTickMarkTintMode) {
+                mTickMark.setTintMode(mTickMarkTintMode);
+            }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mTickMark.isStateful()) {
+                mTickMark.setState(getDrawableState());
+            }
+        }
+    }
+
+    /**
      * Sets the amount of progress changed via the arrow keys.
      *
      * @param increment The amount to increment or decrement when the user
@@ -347,7 +485,7 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     @Override
     protected boolean verifyDrawable(Drawable who) {
-        return who == mThumb || super.verifyDrawable(who);
+        return who == mThumb || who == mTickMark || super.verifyDrawable(who);
     }
 
     @Override
@@ -356,6 +494,10 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         if (mThumb != null) {
             mThumb.jumpToCurrentState();
+        }
+
+        if (mTickMark != null) {
+            mTickMark.jumpToCurrentState();
         }
     }
 
@@ -372,6 +514,12 @@ public abstract class AbsSeekBar extends ProgressBar {
         if (thumb != null && thumb.isStateful()
                 && thumb.setState(getDrawableState())) {
             invalidateDrawable(thumb);
+        }
+
+        final Drawable tickMark = mTickMark;
+        if (tickMark != null && tickMark.isStateful()
+                && tickMark.setState(getDrawableState())) {
+            invalidateDrawable(tickMark);
         }
     }
 
@@ -524,9 +672,36 @@ public abstract class AbsSeekBar extends ProgressBar {
             final int saveCount = canvas.save();
             canvas.clipRect(tempRect, Op.DIFFERENCE);
             super.drawTrack(canvas);
+            drawTickMarks(canvas);
             canvas.restoreToCount(saveCount);
         } else {
             super.drawTrack(canvas);
+            drawTickMarks(canvas);
+        }
+    }
+
+    /**
+     * Draw the tick marks.
+     */
+    void drawTickMarks(Canvas canvas) {
+        if (mTickMark != null) {
+            final int count = getMax();
+            if (count > 1) {
+                final int w = mTickMark.getIntrinsicWidth();
+                final int h = mTickMark.getIntrinsicHeight();
+                final int halfW = w >= 0 ? w / 2 : 1;
+                final int halfH = h >= 0 ? h / 2 : 1;
+                mTickMark.setBounds(-halfW, -halfH, halfW, halfH);
+
+                final int spacing = (getWidth() - mPaddingLeft - mPaddingRight) / count;
+                final int saveCount = canvas.save();
+                canvas.translate(mPaddingLeft, getHeight() / 2);
+                for (int i = 0; i <= count; i++) {
+                    mTickMark.draw(canvas);
+                    canvas.translate(spacing, 0);
+                }
+                canvas.restoreToCount(saveCount);
+            }
         }
     }
 
@@ -535,12 +710,12 @@ public abstract class AbsSeekBar extends ProgressBar {
      */
     void drawThumb(Canvas canvas) {
         if (mThumb != null) {
-            canvas.save();
+            final int saveCount = canvas.save();
             // Translate the padding. For the x, we need to allow the thumb to
             // draw in its extra space
             canvas.translate(mPaddingLeft - mThumbOffset, mPaddingTop);
             mThumb.draw(canvas);
-            canvas.restore();
+            canvas.restoreToCount(saveCount);
         }
     }
 
