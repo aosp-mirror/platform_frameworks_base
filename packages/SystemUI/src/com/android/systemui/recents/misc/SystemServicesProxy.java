@@ -468,7 +468,7 @@ public class SystemServicesProxy {
 
         try {
             mIam.positionTaskInStack(taskId, stackId, 0);
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
