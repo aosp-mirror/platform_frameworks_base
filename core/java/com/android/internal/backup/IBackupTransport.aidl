@@ -239,6 +239,16 @@ interface IBackupTransport {
     int sendBackupData(int numBytes);
     void cancelFullBackup();
 
+    /**
+     * Ask the transport whether this app is eligible for backup.
+     *
+     * @param targetPackage The identity of the application.
+     * @param isFullBackup If set, transport should check if app is eligible for full data backup,
+     *   otherwise to check if eligible for key-value backup.
+     * @return Whether this app is eligible for backup.
+     */
+    boolean isAppEligibleForBackup(in PackageInfo targetPackage, boolean isFullBackup);
+
     // full restore stuff
 
     /**
@@ -286,5 +296,4 @@ interface IBackupTransport {
      *    operation will immediately be finished with no further attempts to restore app data.
      */
     int abortFullRestore();
-
 }

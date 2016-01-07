@@ -676,8 +676,13 @@ public class BackupManagerService {
         return true;
     }
 
+    // Checks if the app is in a stopped state, that means it won't receive broadcasts.
+    private static boolean appIsStopped(ApplicationInfo app) {
+        return ((app.flags & ApplicationInfo.FLAG_STOPPED) != 0);
+    }
+
     /* does *not* check overall backup eligibility policy! */
-    public static boolean appGetsFullBackup(PackageInfo pkg) {
+    private static boolean appGetsFullBackup(PackageInfo pkg) {
         if (pkg.applicationInfo.backupAgentName != null) {
             // If it has an agent, it gets full backups only if it says so
             return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0;
@@ -2758,7 +2763,7 @@ public class BackupManagerService {
                     return;
                 }
 
-                if ((mCurrentPackage.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+                if (appIsStopped(mCurrentPackage.applicationInfo)) {
                     // The app has been force-stopped or cleared or just installed,
                     // and not yet launched out of that state, so just as it won't
                     // receive broadcasts, we won't run it for backup.
@@ -4179,28 +4184,18 @@ public class BackupManagerService {
                 try {
                     PackageInfo info = mPackageManager.getPackageInfo(pkg,
                             PackageManager.GET_SIGNATURES);
-                    if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0
-                            || pkg.equals(SHARED_BACKUP_AGENT_PACKAGE)) {
+                    if (!appIsEligibleForBackup(info.applicationInfo)) {
                         // Cull any packages that have indicated that backups are not permitted,
+                        // that run as system-domain uids but do not define their own backup agents,
                         // as well as any explicit mention of the 'special' shared-storage agent
                         // package (we handle that one at the end).
                         if (MORE_DEBUG) {
-                            Slog.d(TAG, "Ignoring opted-out package " + pkg);
+                            Slog.d(TAG, "Ignoring not eligible package " + pkg);
                         }
                         sendBackupOnResult(mBackupObserver, pkg,
-                                BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                            BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                         continue;
-                    } else if ((info.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
-                            && (info.applicationInfo.backupAgentName == null)) {
-                        // Cull any packages that run as system-domain uids but do not define their
-                        // own backup agents
-                        if (MORE_DEBUG) {
-                            Slog.d(TAG, "Ignoring non-agent system package " + pkg);
-                        }
-                        sendBackupOnResult(mBackupObserver, pkg,
-                                BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-                        continue;
-                    } else if ((info.applicationInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+                    } else if (appIsStopped(info.applicationInfo)) {
                         // Cull any packages in the 'stopped' state: they've either just been
                         // installed or have explicitly been force-stopped by the user.  In both
                         // cases we do not want to launch them for backup.
@@ -9535,6 +9530,32 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // NB: this cannot distinguish between results > 2 gig
             msg.arg1 = (result > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) result;
             mBackupHandler.sendMessage(msg);
+        }
+    }
+
+    public boolean isAppEligibleForBackup(String packageName) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "isAppEligibleForBackup");
+        try {
+            PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNATURES);
+            if (!appIsEligibleForBackup(packageInfo.applicationInfo) ||
+                    appIsStopped(packageInfo.applicationInfo)) {
+                return false;
+            }
+            IBackupTransport transport = getTransport(mCurrentTransport);
+            if (transport != null) {
+                try {
+                    return transport.isAppEligibleForBackup(packageInfo,
+                        appGetsFullBackup(packageInfo));
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to contact transport");
+                }
+            }
+            // If transport is not present we couldn't tell that the package is not eligible.
+            return true;
+        } catch (NameNotFoundException e) {
+            return false;
         }
     }
 

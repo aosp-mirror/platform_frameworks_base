@@ -482,6 +482,18 @@ public class BackupTransport {
                 "Transport cancelFullBackup() not implemented");
     }
 
+    /**
+     * Ask the transport whether this app is eligible for backup.
+     *
+     * @param targetPackage The identity of the application.
+     * @param isFullBackup If set, transport should check if app is eligible for full data backup,
+     *   otherwise to check if eligible for key-value backup.
+     * @return Whether this app is eligible for backup.
+     */
+    public boolean isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup) {
+        return true;
+    }
+
     // ------------------------------------------------------------------------------------
     // Full restore interfaces
 
@@ -656,6 +668,12 @@ public class BackupTransport {
         @Override
         public void cancelFullBackup() throws RemoteException {
             BackupTransport.this.cancelFullBackup();
+        }
+
+        @Override
+        public boolean isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup)
+                throws RemoteException {
+            return BackupTransport.this.isAppEligibleForBackup(targetPackage, isFullBackup);
         }
 
         @Override
