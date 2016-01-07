@@ -151,6 +151,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".RemoteBugreportReceiver"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="android.intent.action.REMOTE_BUGREPORT_FINISHED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".BugreportProgressService"
             android:exported="false"/>
