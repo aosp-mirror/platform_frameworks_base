@@ -907,7 +907,7 @@ public final class MediaCodecInfo {
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
                 sampleRateRange = Range.create(1, 96000);
                 bitRates = Range.create(1, 10000000);
-                maxChannels = 8;
+                maxChannels = AudioTrack.CHANNEL_COUNT_MAX;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
                 sampleRateRange = Range.create(1, 655350);
                 // lossless codec, so bitrate is ignored

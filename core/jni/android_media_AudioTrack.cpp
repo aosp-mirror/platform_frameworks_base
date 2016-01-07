@@ -1049,6 +1049,10 @@ static void android_media_AudioTrack_disableDeviceCallback(
     pJniStorage->mDeviceCallback.clear();
 }
 
+static jint android_media_AudioTrack_get_FCC_8(JNIEnv *env, jobject thiz) {
+    return FCC_8;
+}
+
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -1106,6 +1110,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioTrack_getRoutedDeviceId},
     {"native_enableDeviceCallback", "()V", (void *)android_media_AudioTrack_enableDeviceCallback},
     {"native_disableDeviceCallback", "()V", (void *)android_media_AudioTrack_disableDeviceCallback},
+    {"native_get_FCC_8",     "()I",      (void *)android_media_AudioTrack_get_FCC_8},
 };
 
 

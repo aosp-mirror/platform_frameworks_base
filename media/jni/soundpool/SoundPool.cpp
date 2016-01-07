@@ -655,7 +655,7 @@ status_t Sample::doLoad()
        goto error;
     }
 
-    if ((numChannels < 1) || (numChannels > 8)) {
+    if ((numChannels < 1) || (numChannels > FCC_8)) {
         ALOGE("Sample channel count (%d) out of range", numChannels);
         status = BAD_VALUE;
         goto error;
