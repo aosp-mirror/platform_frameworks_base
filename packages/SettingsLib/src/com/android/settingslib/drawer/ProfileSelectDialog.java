@@ -30,9 +30,9 @@ public class ProfileSelectDialog extends DialogFragment implements OnClickListen
 
     private static final String ARG_SELECTED_TILE = "selectedTile";
 
-    private DashboardTile mSelectedTile;
+    private Tile mSelectedTile;
 
-    public static void show(FragmentManager manager, DashboardTile tile) {
+    public static void show(FragmentManager manager, Tile tile) {
         ProfileSelectDialog dialog = new ProfileSelectDialog();
         Bundle args = new Bundle();
         args.putParcelable(ARG_SELECTED_TILE, tile);

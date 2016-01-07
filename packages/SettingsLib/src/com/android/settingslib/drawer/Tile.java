@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /**
  * Description of a single dashboard tile that the user can select.
  */
-public class DashboardTile implements Parcelable {
+public class Tile implements Parcelable {
 
     /**
      * Title of the tile that is shown to the user.
@@ -79,7 +79,7 @@ public class DashboardTile implements Parcelable {
      */
     public Bundle metaData;
 
-    public DashboardTile() {
+    public Tile() {
         // Empty
     }
 
@@ -134,16 +134,16 @@ public class DashboardTile implements Parcelable {
         metaData = in.readBundle();
     }
 
-    DashboardTile(Parcel in) {
+    Tile(Parcel in) {
         readFromParcel(in);
     }
 
-    public static final Creator<DashboardTile> CREATOR = new Creator<DashboardTile>() {
-        public DashboardTile createFromParcel(Parcel source) {
-            return new DashboardTile(source);
+    public static final Creator<Tile> CREATOR = new Creator<Tile>() {
+        public Tile createFromParcel(Parcel source) {
+            return new Tile(source);
         }
-        public DashboardTile[] newArray(int size) {
-            return new DashboardTile[size];
+        public Tile[] newArray(int size) {
+            return new Tile[size];
         }
     };
 }
