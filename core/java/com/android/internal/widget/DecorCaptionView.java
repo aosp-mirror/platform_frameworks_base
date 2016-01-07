@@ -16,8 +16,6 @@
 
 package com.android.internal.widget;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -351,7 +349,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
             try {
-                callback.changeWindowStack(FULLSCREEN_WORKSPACE_STACK_ID);
+                callback.exitFreeformMode();
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
             }

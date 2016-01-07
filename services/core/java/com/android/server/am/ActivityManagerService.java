@@ -9462,23 +9462,23 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
-        if (stackId == HOME_STACK_ID) {
-            throw new IllegalArgumentException(
-                    "moveActivityToStack: Attempt to move token " + token + " to home stack");
-        }
+    public void exitFreeformMode(IBinder token) throws RemoteException {
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
             try {
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
                 if (r == null) {
                     throw new IllegalArgumentException(
-                            "moveActivityToStack: No activity record matching token=" + token);
+                            "exitFreeformMode: No activity record matching token=" + token);
                 }
-                if (DEBUG_STACK) Slog.d(TAG_STACK, "moveActivityToStack: moving r=" + r
-                        + " to stackId=" + stackId);
-                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, stackId, ON_TOP, !FORCE_FOCUS,
-                        "moveActivityToStack", ANIMATE);
+                final ActivityStack stack = r.getStackLocked(token);
+                if (stack == null || stack.mStackId != FREEFORM_WORKSPACE_STACK_ID) {
+                    throw new IllegalStateException(
+                            "exitFreeformMode: You can only go fullscreen from freeform.");
+                }
+                if (DEBUG_STACK) Slog.d(TAG_STACK, "exitFreeformMode: " + r);
+                mStackSupervisor.moveTaskToStackLocked(r.task.taskId, FULLSCREEN_WORKSPACE_STACK_ID,
+                        ON_TOP, !FORCE_FOCUS, "exitFreeformMode", ANIMATE);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

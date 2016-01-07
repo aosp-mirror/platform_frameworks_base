@@ -62,7 +62,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -2807,17 +2806,15 @@ public class Activity extends ContextThemeWrapper
 
 
     /**
-     * Called to move the window and its activity/task to a different stack container.
-     * For example, a window can move between
-     * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack and
-     * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} stack.
+     * Moves the activity from
+     * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} to
+     * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack.
      *
-     * @param stackId stack Id to change to.
      * @hide
      */
     @Override
-    public void changeWindowStack(int stackId) throws RemoteException {
-        ActivityManagerNative.getDefault().moveActivityToStack(mToken, stackId);
+    public void exitFreeformMode() throws RemoteException {
+        ActivityManagerNative.getDefault().exitFreeformMode(mToken);
     }
 
     /** Returns the current stack Id for the window.

@@ -564,7 +564,7 @@ public interface IActivityManager extends IInterface {
     public boolean stopBinderTrackingAndDump(ParcelFileDescriptor fd) throws RemoteException;
 
     public int getActivityStackId(IBinder token) throws RemoteException;
-    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException;
+    public void exitFreeformMode(IBinder token) throws RemoteException;
 
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
 
@@ -933,7 +933,7 @@ public interface IActivityManager extends IInterface {
     int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 341;
     int POSITION_TASK_IN_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 342;
     int GET_ACTIVITY_STACK_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 343;
-    int MOVE_ACTIVITY_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
+    int EXIT_FREEFORM_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 344;
     int REPORT_SIZE_CONFIGURATIONS = IBinder.FIRST_CALL_TRANSACTION + 345;
     int MOVE_TASK_TO_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 346;
     int SUPPRESS_RESIZE_CONFIG_CHANGES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 347;
