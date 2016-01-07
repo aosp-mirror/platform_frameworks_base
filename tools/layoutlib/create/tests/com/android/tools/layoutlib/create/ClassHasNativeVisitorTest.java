@@ -60,7 +60,7 @@ public class ClassHasNativeVisitorTest {
      * Overrides {@link ClassHasNativeVisitor} to collec the name of the native methods found.
      */
     private static class MockClassHasNativeVisitor extends ClassHasNativeVisitor {
-        private ArrayList<String> mMethodsFound = new ArrayList<String>();
+        private ArrayList<String> mMethodsFound = new ArrayList<>();
 
         public String[] getMethodsFound() {
             return mMethodsFound.toArray(new String[mMethodsFound.size()]);

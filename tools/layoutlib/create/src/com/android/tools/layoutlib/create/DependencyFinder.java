@@ -26,7 +26,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
@@ -82,7 +81,7 @@ public class DependencyFinder {
 
         Map<String, Set<String>> missing = findMissingClasses(deps, zipClasses.keySet());
 
-        List<Map<String, Set<String>>> result = new ArrayList<Map<String,Set<String>>>(2);
+        List<Map<String, Set<String>>> result = new ArrayList<>(2);
         result.add(deps);
         result.add(missing);
         return result;
@@ -151,7 +150,7 @@ public class DependencyFinder {
      * class name => ASM ClassReader. Class names are in the form "android.view.View".
      */
     Map<String,ClassReader> parseZip(List<String> jarPathList) throws IOException {
-        TreeMap<String, ClassReader> classes = new TreeMap<String, ClassReader>();
+        TreeMap<String, ClassReader> classes = new TreeMap<>();
 
         for (String jarPath : jarPathList) {
             ZipFile zip = new ZipFile(jarPath);
@@ -202,7 +201,7 @@ public class DependencyFinder {
 
         // The dependencies that we'll collect.
         // It's a map Class name => uses class names.
-        Map<String, Set<String>> dependencyMap = new TreeMap<String, Set<String>>();
+        Map<String, Set<String>> dependencyMap = new TreeMap<>();
 
         DependencyVisitor visitor = getVisitor();
 
@@ -211,7 +210,7 @@ public class DependencyFinder {
             for (Entry<String, ClassReader> entry : zipClasses.entrySet()) {
                 String name = entry.getKey();
 
-                TreeSet<String> set = new TreeSet<String>();
+                TreeSet<String> set = new TreeSet<>();
                 dependencyMap.put(name, set);
                 visitor.setDependencySet(set);
 
@@ -240,7 +239,7 @@ public class DependencyFinder {
     private Map<String, Set<String>> findMissingClasses(
             Map<String, Set<String>> deps,
             Set<String> zipClasses) {
-        Map<String, Set<String>> missing = new TreeMap<String, Set<String>>();
+        Map<String, Set<String>> missing = new TreeMap<>();
 
         for (Entry<String, Set<String>> entry : deps.entrySet()) {
             String name = entry.getKey();
@@ -250,7 +249,7 @@ public class DependencyFinder {
                     // This dependency doesn't exist in the zip classes.
                     Set<String> set = missing.get(dep);
                     if (set == null) {
-                        set = new TreeSet<String>();
+                        set = new TreeSet<>();
                         missing.put(dep, set);
                     }
                     set.add(name);
@@ -284,7 +283,7 @@ public class DependencyFinder {
          * Creates a new visitor that will find all the dependencies for the visited class.
          */
         public DependencyVisitor() {
-            super(Opcodes.ASM4);
+            super(Main.ASM_VERSION);
         }
 
         /**
@@ -435,7 +434,7 @@ public class DependencyFinder {
         private class MyFieldVisitor extends FieldVisitor {
 
             public MyFieldVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             @Override
@@ -510,7 +509,7 @@ public class DependencyFinder {
         private class MyMethodVisitor extends MethodVisitor {
 
             public MyMethodVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
 
@@ -598,7 +597,8 @@ public class DependencyFinder {
 
             // instruction that invokes a method
             @Override
-            public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+            public void visitMethodInsn(int opcode, String owner, String name, String desc,
+                    boolean itf) {
 
                 // owner is the internal name of the method's owner class
                 if (!considerDesc(owner) && owner.indexOf('/') != -1) {
@@ -654,7 +654,7 @@ public class DependencyFinder {
         private class MySignatureVisitor extends SignatureVisitor {
 
             public MySignatureVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             // ---------------------------------------------------
@@ -753,7 +753,7 @@ public class DependencyFinder {
         private class MyAnnotationVisitor extends AnnotationVisitor {
 
             public MyAnnotationVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             // Visits a primitive value of an annotation

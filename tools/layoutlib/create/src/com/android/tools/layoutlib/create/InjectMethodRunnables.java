@@ -42,9 +42,9 @@ public class InjectMethodRunnables {
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass",
-                    "()Ljava/lang/Class;");
+                    "()Ljava/lang/Class;", false);
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getClassLoader",
-                    "()Ljava/lang/ClassLoader;");
+                    "()Ljava/lang/ClassLoader;", false);
             mv.visitInsn(ARETURN);
             mv.visitMaxs(1, 1);
             mv.visitEnd();

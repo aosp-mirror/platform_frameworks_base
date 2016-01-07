@@ -24,7 +24,6 @@ import java.util.Set;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ASM4;
 
 /**
  * Promotes given fields to public visibility.
@@ -35,7 +34,7 @@ public class PromoteFieldClassAdapter extends ClassVisitor {
     private static final int ACC_NOT_PUBLIC = ~(ACC_PRIVATE | ACC_PROTECTED);
 
     public PromoteFieldClassAdapter(ClassVisitor cv, Set<String> fieldNames) {
-        super(ASM4, cv);
+        super(Main.ASM_VERSION, cv);
         mFieldNames = fieldNames;
     }
 

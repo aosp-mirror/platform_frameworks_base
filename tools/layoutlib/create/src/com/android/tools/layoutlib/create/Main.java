@@ -16,6 +16,8 @@
 
 package com.android.tools.layoutlib.create;
 
+import org.objectweb.asm.Opcodes;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,13 +54,15 @@ public class Main {
         public boolean listOnlyMissingDeps = false;
     }
 
+    public static final int ASM_VERSION = Opcodes.ASM5;
+
     public static final Options sOptions = new Options();
 
     public static void main(String[] args) {
 
         Log log = new Log();
 
-        ArrayList<String> osJarPath = new ArrayList<String>();
+        ArrayList<String> osJarPath = new ArrayList<>();
         String[] osDestJar = { null };
 
         if (!processArgs(log, args, osJarPath, osDestJar)) {
