@@ -779,7 +779,7 @@ public class StateMachine {
         @Override
         public final void handleMessage(Message msg) {
             if (!mHasQuit) {
-                if (mSm != null) {
+                if (mSm != null && msg.what != SM_INIT_CMD && msg.what != SM_QUIT_CMD) {
                     mSm.onPreHandleMessage(msg);
                 }
 
@@ -807,7 +807,7 @@ public class StateMachine {
                 // We need to check if mSm == null here as we could be quitting.
                 if (mDbg && mSm != null) mSm.log("handleMessage: X");
 
-                if (mSm != null) {
+                if (mSm != null && msg.what != SM_INIT_CMD && msg.what != SM_QUIT_CMD) {
                     mSm.onPostHandleMessage(msg);
                 }
             }
