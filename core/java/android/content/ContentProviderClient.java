@@ -144,7 +144,12 @@ public class ContentProviderClient implements AutoCloseable {
             }
             final Cursor cursor = mContentProvider.query(mPackageName, url, projection, selection,
                     selectionArgs, sortOrder, remoteCancellationSignal);
-            return new CursorWrapperInner(cursor);
+            if ("com.google.android.gms".equals(mPackageName)) {
+                // They're casting to a concrete subclass, sigh
+                return cursor;
+            } else {
+                return new CursorWrapperInner(cursor);
+            }
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
