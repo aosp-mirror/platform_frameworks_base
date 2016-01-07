@@ -920,9 +920,9 @@ public class DownloadManager {
 
     private final ContentResolver mResolver;
     private final String mPackageName;
-    private final int mTargetSdkVersion;
 
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
+    private boolean mAccessFilename;
 
     /**
      * @hide
@@ -930,7 +930,10 @@ public class DownloadManager {
     public DownloadManager(Context context) {
         mResolver = context.getContentResolver();
         mPackageName = context.getPackageName();
-        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+
+        // Callers can access filename columns when targeting old platform
+        // versions; otherwise we throw telling them it's deprecated.
+        mAccessFilename = context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N;
     }
 
     /**
@@ -944,6 +947,11 @@ public class DownloadManager {
         } else {
             mBaseUri = Downloads.Impl.CONTENT_URI;
         }
+    }
+
+    /** {@hide} */
+    public void setAccessFilename(boolean accessFilename) {
+        mAccessFilename = accessFilename;
     }
 
     /**
@@ -1010,7 +1018,7 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, mBaseUri, mTargetSdkVersion);
+        return new CursorTranslator(underlyingCursor, mBaseUri, mAccessFilename);
     }
 
     /**
@@ -1279,12 +1287,12 @@ public class DownloadManager {
      */
     private static class CursorTranslator extends CursorWrapper {
         private final Uri mBaseUri;
-        private final int mTargetSdkVersion;
+        private final boolean mAccessFilename;
 
-        public CursorTranslator(Cursor cursor, Uri baseUri, int targetSdkVersion) {
+        public CursorTranslator(Cursor cursor, Uri baseUri, boolean accessFilename) {
             super(cursor);
             mBaseUri = baseUri;
-            mTargetSdkVersion = targetSdkVersion;
+            mAccessFilename = accessFilename;
         }
 
         @Override
@@ -1310,7 +1318,7 @@ public class DownloadManager {
                 case COLUMN_LOCAL_URI:
                     return getLocalUri();
                 case COLUMN_LOCAL_FILENAME:
-                    if (mTargetSdkVersion >= Build.VERSION_CODES.N) {
+                    if (!mAccessFilename) {
                         throw new IllegalArgumentException(
                                 "COLUMN_LOCAL_FILENAME is deprecated;"
                                         + " use ContentResolver.openFileDescriptor() instead");
