@@ -2070,7 +2070,7 @@ public class Toolbar extends ViewGroup {
         MenuItemImpl mCurrentExpandedItem;
 
         @Override
-        public void initForMenu(Context context, MenuBuilder menu) {
+        public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu) {
             // Clear the expanded action view when menus change.
             if (mMenu != null && mCurrentExpandedItem != null) {
                 mMenu.collapseItemActionView(mCurrentExpandedItem);

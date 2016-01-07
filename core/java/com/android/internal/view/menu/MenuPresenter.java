@@ -16,6 +16,8 @@
 
 package com.android.internal.view.menu;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Parcelable;
 import android.view.ViewGroup;
@@ -49,14 +51,16 @@ public interface MenuPresenter {
     }
 
     /**
-     * Initialize this presenter for the given context and menu.
-     * This method is called by MenuBuilder when a presenter is
-     * added. See {@link MenuBuilder#addMenuPresenter(MenuPresenter)}
+     * Initializes this presenter for the given context and menu.
+     * <p>
+     * This method is called by MenuBuilder when a presenter is added. See
+     * {@link MenuBuilder#addMenuPresenter(MenuPresenter)}.
      *
-     * @param context Context for this presenter; used for view creation and resource management
-     * @param menu Menu to host
+     * @param context the context for this presenter; used for view creation
+     *                and resource management, must be non-{@code null}
+     * @param menu the menu to host, or {@code null} to clear the hosted menu
      */
-    public void initForMenu(Context context, MenuBuilder menu);
+    public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu);
 
     /**
      * Retrieve a MenuView to display the menu specified in

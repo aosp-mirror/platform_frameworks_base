@@ -20,6 +20,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -134,7 +136,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    public void initForMenu(Context context, MenuBuilder menu) {
+    public void initForMenu(@NonNull Context context, @Nullable MenuBuilder menu) {
         super.initForMenu(context, menu);
 
         final Resources res = context.getResources();
@@ -629,8 +631,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     public boolean flagActionItems() {
-        final ArrayList<MenuItemImpl> visibleItems = mMenu.getVisibleItems();
-        final int itemsSize = visibleItems.size();
+        final ArrayList<MenuItemImpl> visibleItems;
+        final int itemsSize;
+        if (mMenu != null) {
+            visibleItems = mMenu.getVisibleItems();
+            itemsSize = visibleItems.size();
+        } else {
+            visibleItems = null;
+            itemsSize = 0;
+        }
+
         int maxActions = mMaxItems;
         int widthLimit = mActionItemWidthLimit;
         final int querySpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
@@ -786,7 +796,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (isVisible) {
             // Not a submenu, but treat it like one.
             super.onSubMenuSelected(null);
-        } else {
+        } else if (mMenu != null) {
             mMenu.close(false /* closeAllMenus */);
         }
     }
@@ -938,7 +948,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
         @Override
         protected void onDismiss() {
-            mMenu.close();
+            if (mMenu != null) {
+                mMenu.close();
+            }
             mOverflowPopup = null;
 
             super.onDismiss();
@@ -999,7 +1011,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         public void run() {
-            mMenu.changeMenuMode();
+            if (mMenu != null) {
+                mMenu.changeMenuMode();
+            }
             final View menuView = (View) mMenuView;
             if (menuView != null && menuView.getWindowToken() != null && mPopup.tryShow()) {
                 mOverflowPopup = mPopup;
