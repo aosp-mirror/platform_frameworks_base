@@ -355,6 +355,9 @@ public class BitmapFactory {
         public byte[] inTempStorage;
 
         /**
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#N}, see
+         * comments on {@link #requestCancelDecode()}.
+         *
          * Flag to indicate that cancel has been called on this object.  This
          * is useful if there's an intermediary that wants to first decode the
          * bounds and then decode the image.  In that case the intermediary
