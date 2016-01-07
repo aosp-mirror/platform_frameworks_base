@@ -63,6 +63,7 @@ public class RootsCache {
 
     private final Context mContext;
     private final ContentObserver mObserver;
+    private OnCacheUpdateListener mCacheUpdateListener;
 
     private final RootInfo mRecentsRoot = new RootInfo();
 
@@ -92,6 +93,10 @@ public class RootsCache {
             if (DEBUG) Log.d(TAG, "Updating roots due to change at " + uri);
             updateAuthorityAsync(uri.getAuthority());
         }
+    }
+
+    static interface OnCacheUpdateListener {
+        void onCacheUpdate();
     }
 
     /**
@@ -207,6 +212,13 @@ public class RootsCache {
             mFirstLoad.countDown();
             resolver.notifyChange(sNotificationUri, null, false);
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (mCacheUpdateListener != null) {
+                mCacheUpdateListener.onCacheUpdate();
+            }
         }
 
         private void handleDocumentsProvider(ProviderInfo info) {
@@ -346,6 +358,10 @@ public class RootsCache {
         synchronized (mLock) {
             return getMatchingRoots(mRoots.values(), state);
         }
+    }
+
+    public void setOnCacheUpdateListener(OnCacheUpdateListener cacheUpdateListener) {
+        mCacheUpdateListener = cacheUpdateListener;
     }
 
     @VisibleForTesting
