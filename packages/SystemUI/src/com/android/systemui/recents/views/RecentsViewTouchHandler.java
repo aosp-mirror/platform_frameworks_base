@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
@@ -64,13 +65,16 @@ public class RecentsViewTouchHandler {
 
     private Point mTaskViewOffset = new Point();
     private Point mDownPos = new Point();
-    private boolean mDragging;
+    private boolean mDragRequested;
+    private boolean mIsDragging;
+    private float mDragSlop;
 
     private DropTarget mLastDropTarget;
     private ArrayList<DropTarget> mDropTargets = new ArrayList<>();
 
     public RecentsViewTouchHandler(RecentsView rv) {
         mRv = rv;
+        mDragSlop = ViewConfiguration.get(rv.getContext()).getScaledTouchSlop();
     }
 
     /**
@@ -96,13 +100,13 @@ public class RecentsViewTouchHandler {
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         handleTouchEvent(ev);
-        return mDragging;
+        return mDragRequested;
     }
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
         handleTouchEvent(ev);
-        return mDragging;
+        return mDragRequested;
     }
 
     /**** Events ****/
@@ -110,7 +114,9 @@ public class RecentsViewTouchHandler {
     public final void onBusEvent(DragStartEvent event) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mRv.getParent().requestDisallowInterceptTouchEvent(true);
-        mDragging = true;
+        mDragRequested = true;
+        // We defer starting the actual drag handling until the user moves past the drag slop
+        mIsDragging = false;
         mDragTask = event.task;
         mTaskView = event.taskView;
         mDropTargets.clear();
@@ -137,7 +143,7 @@ public class RecentsViewTouchHandler {
     }
 
     public final void onBusEvent(DragEndEvent event) {
-        mDragging = false;
+        mDragRequested = false;
         mDragTask = null;
         mTaskView = null;
         mLastDropTarget = null;
@@ -153,25 +159,45 @@ public class RecentsViewTouchHandler {
                 mDownPos.set((int) ev.getX(), (int) ev.getY());
                 break;
             case MotionEvent.ACTION_MOVE: {
-                if (mDragging) {
-                    int width = mRv.getMeasuredWidth();
-                    int height = mRv.getMeasuredHeight();
-                    float evX = ev.getX();
-                    float evY = ev.getY();
-                    float x = evX - mTaskViewOffset.x;
-                    float y = evY - mTaskViewOffset.y;
+                float evX = ev.getX();
+                float evY = ev.getY();
+                float x = evX - mTaskViewOffset.x;
+                float y = evY - mTaskViewOffset.y;
 
-                    DropTarget currentDropTarget = null;
-                    for (DropTarget target : mDropTargets) {
-                        if (target.acceptsDrop((int) evX, (int) evY, width, height)) {
-                            currentDropTarget = target;
-                            break;
-                        }
+                if (mDragRequested) {
+                    if (!mIsDragging) {
+                        mIsDragging = Math.hypot(evX - mDownPos.x, evY - mDownPos.y) > mDragSlop;
                     }
-                    if (mLastDropTarget != currentDropTarget) {
-                        mLastDropTarget = currentDropTarget;
-                        EventBus.getDefault().send(new DragDropTargetChangedEvent(mDragTask,
-                                currentDropTarget));
+                    if (mIsDragging) {
+                        int width = mRv.getMeasuredWidth();
+                        int height = mRv.getMeasuredHeight();
+
+                        DropTarget currentDropTarget = null;
+
+                        // Give priority to the current drop target to retain the touch handling
+                        if (mLastDropTarget != null) {
+                            if (mLastDropTarget.acceptsDrop((int) evX, (int) evY, width, height,
+                                    true /* isCurrentTarget */)) {
+                                currentDropTarget = mLastDropTarget;
+                            }
+                        }
+
+                        // Otherwise, find the next target to handle this event
+                        if (currentDropTarget == null) {
+                            for (DropTarget target : mDropTargets) {
+                                if (target.acceptsDrop((int) evX, (int) evY, width, height,
+                                        false /* isCurrentTarget */)) {
+                                    currentDropTarget = target;
+                                    break;
+                                }
+                            }
+                        }
+                        if (mLastDropTarget != currentDropTarget) {
+                            mLastDropTarget = currentDropTarget;
+                            EventBus.getDefault().send(new DragDropTargetChangedEvent(mDragTask,
+                                    currentDropTarget));
+                        }
+
                     }
 
                     mTaskView.setTranslationX(x);
@@ -181,7 +207,7 @@ public class RecentsViewTouchHandler {
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
-                if (mDragging) {
+                if (mDragRequested) {
                     EventBus.getDefault().send(new DragEndEvent(mDragTask, mTaskView,
                             mLastDropTarget));
                     break;

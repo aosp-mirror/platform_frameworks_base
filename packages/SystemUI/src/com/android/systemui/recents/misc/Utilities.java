@@ -18,12 +18,42 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import android.util.IntProperty;
+import android.util.Property;
 import android.view.View;
 import android.view.ViewParent;
 
 /* Common code */
 public class Utilities {
+
+    public static final Property<Drawable, Integer> DRAWABLE_ALPHA =
+            new IntProperty<Drawable>("drawableAlpha") {
+                @Override
+                public void setValue(Drawable object, int alpha) {
+                    object.setAlpha(alpha);
+                }
+
+                @Override
+                public Integer get(Drawable object) {
+                    return object.getAlpha();
+                }
+            };
+
+    public static final Property<Drawable, Rect> DRAWABLE_RECT =
+            new Property<Drawable, Rect>(Rect.class, "drawableBounds") {
+                @Override
+                public void set(Drawable object, Rect bounds) {
+                    object.setBounds(bounds);
+                }
+
+                @Override
+                public Rect get(Drawable object) {
+                    return object.getBounds();
+                }
+            };
 
     /**
      * @return the first parent walking up the view hierarchy that has the given class type.

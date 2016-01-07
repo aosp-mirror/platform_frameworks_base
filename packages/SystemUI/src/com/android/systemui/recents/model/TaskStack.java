@@ -16,16 +16,25 @@
 
 package com.android.systemui.recents.model;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
+import android.animation.RectEvaluator;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.util.SparseArray;
+import android.view.animation.Interpolator;
+import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -44,6 +53,11 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
 
 
 /**
@@ -229,30 +243,36 @@ public class TaskStack {
     public static class DockState implements DropTarget {
 
         private static final int DOCK_AREA_ALPHA = 192;
-        public static final DockState NONE = new DockState(-1, 96, null, null);
-        public static final DockState LEFT = new DockState(
+        public static final DockState NONE = new DockState(DOCKED_INVALID, -1, 80, null, null, null);
+        public static final DockState LEFT = new DockState(DOCKED_LEFT,
                 DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
-                new RectF(0, 0, 0.15f, 1), new RectF(0, 0, 0.15f, 1));
-        public static final DockState TOP = new DockState(
+                new RectF(0, 0, 0.125f, 1), new RectF(0, 0, 0.125f, 1),
+                new RectF(0, 0, 0.5f, 1));
+        public static final DockState TOP = new DockState(DOCKED_TOP,
                 DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, DOCK_AREA_ALPHA,
-                new RectF(0, 0, 1, 0.15f), new RectF(0, 0, 1, 0.15f));
-        public static final DockState RIGHT = new DockState(
+                new RectF(0, 0, 1, 0.125f), new RectF(0, 0, 1, 0.125f),
+                new RectF(0, 0, 1, 0.5f));
+        public static final DockState RIGHT = new DockState(DOCKED_RIGHT,
                 DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
-                new RectF(0.85f, 0, 1, 1), new RectF(0.85f, 0, 1, 1));
-        public static final DockState BOTTOM = new DockState(
+                new RectF(0.875f, 0, 1, 1), new RectF(0.875f, 0, 1, 1),
+                new RectF(0.5f, 0, 1, 1));
+        public static final DockState BOTTOM = new DockState(DOCKED_BOTTOM,
                 DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT, DOCK_AREA_ALPHA,
-                new RectF(0, 0.85f, 1, 1), new RectF(0, 0.85f, 1, 1));
+                new RectF(0, 0.875f, 1, 1), new RectF(0, 0.875f, 1, 1),
+                new RectF(0, 0.5f, 1, 1));
 
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height) {
-            return touchAreaContainsPoint(width, height, x, y);
+        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+            return isCurrentTarget
+                    ? areaContainsPoint(expandedTouchDockArea, width, height, x, y)
+                    : areaContainsPoint(touchArea, width, height, x, y);
         }
 
         // Represents the view state of this dock state
         public class ViewState {
             public final int dockAreaAlpha;
             public final ColorDrawable dockAreaOverlay;
-            private ObjectAnimator dockAreaOverlayAnimator;
+            private AnimatorSet dockAreaOverlayAnimator;
 
             private ViewState(int alpha) {
                 dockAreaAlpha = alpha;
@@ -261,55 +281,129 @@ public class TaskStack {
             }
 
             /**
-             * Creates a new alpha animation.
+             * Creates a new bounds and alpha animation.
              */
-            public void startAlphaAnimation(int alpha, int duration) {
+            public void startAnimation(Rect bounds, int alpha, int duration,
+                    Interpolator interpolator, boolean animateAlpha, boolean animateBounds) {
+                if (dockAreaOverlayAnimator != null) {
+                    dockAreaOverlayAnimator.cancel();
+                }
+
+                ArrayList<Animator> animators = new ArrayList<>();
                 if (dockAreaOverlay.getAlpha() != alpha) {
-                    if (dockAreaOverlayAnimator != null) {
-                        dockAreaOverlayAnimator.cancel();
+                    if (animateAlpha) {
+                        animators.add(ObjectAnimator.ofInt(dockAreaOverlay,
+                                Utilities.DRAWABLE_ALPHA, dockAreaOverlay.getAlpha(), alpha));
+                    } else {
+                        dockAreaOverlay.setAlpha(alpha);
                     }
-                    dockAreaOverlayAnimator = ObjectAnimator.ofInt(dockAreaOverlay, "alpha", alpha);
+                }
+                if (bounds != null && !dockAreaOverlay.getBounds().equals(bounds)) {
+                    if (animateBounds) {
+                        PropertyValuesHolder prop = PropertyValuesHolder.ofObject(
+                                Utilities.DRAWABLE_RECT, new RectEvaluator(new Rect()),
+                                dockAreaOverlay.getBounds(), bounds);
+                        animators.add(ObjectAnimator.ofPropertyValuesHolder(dockAreaOverlay, prop));
+                    } else {
+                        dockAreaOverlay.setBounds(bounds);
+                    }
+                }
+                if (!animators.isEmpty()) {
+                    dockAreaOverlayAnimator = new AnimatorSet();
+                    dockAreaOverlayAnimator.playTogether(animators);
                     dockAreaOverlayAnimator.setDuration(duration);
+                    dockAreaOverlayAnimator.setInterpolator(interpolator);
                     dockAreaOverlayAnimator.start();
                 }
             }
         }
 
+        public final int dockSide;
         public final int createMode;
         public final ViewState viewState;
-        private final RectF dockArea;
         private final RectF touchArea;
+        private final RectF dockArea;
+        private final RectF expandedTouchDockArea;
 
         /**
          * @param createMode used to pass to ActivityManager to dock the task
          * @param touchArea the area in which touch will initiate this dock state
          * @param dockArea the visible dock area
+         * @param expandedTouchDockArea the areain which touch will continue to dock after entering
+         *                              the initial touch area.  This is also the new dock area to
+         *                              draw.
          */
-        DockState(int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea) {
+        DockState(int dockSide, int createMode, int dockAreaAlpha, RectF touchArea, RectF dockArea,
+                  RectF expandedTouchDockArea) {
+            this.dockSide = dockSide;
             this.createMode = createMode;
             this.viewState = new ViewState(dockAreaAlpha);
             this.dockArea = dockArea;
             this.touchArea = touchArea;
+            this.expandedTouchDockArea = expandedTouchDockArea;
         }
 
         /**
-         * Returns whether {@param x} and {@param y} are contained in the touch area scaled to the
+         * Returns whether {@param x} and {@param y} are contained in the area scaled to the
          * given {@param width} and {@param height}.
          */
-        public boolean touchAreaContainsPoint(int width, int height, float x, float y) {
-            int left = (int) (touchArea.left * width);
-            int top = (int) (touchArea.top * height);
-            int right = (int) (touchArea.right * width);
-            int bottom = (int) (touchArea.bottom * height);
+        public boolean areaContainsPoint(RectF area, int width, int height, float x, float y) {
+            int left = (int) (area.left * width);
+            int top = (int) (area.top * height);
+            int right = (int) (area.right * width);
+            int bottom = (int) (area.bottom * height);
             return x >= left && y >= top && x <= right && y <= bottom;
         }
 
         /**
          * Returns the docked task bounds with the given {@param width} and {@param height}.
          */
-        public Rect getDockedBounds(int width, int height) {
+        public Rect getPreDockedBounds(int width, int height) {
             return new Rect((int) (dockArea.left * width), (int) (dockArea.top * height),
                     (int) (dockArea.right * width), (int) (dockArea.bottom * height));
+        }
+
+        /**
+         * Returns the expanded docked task bounds with the given {@param width} and
+         * {@param height}.
+         */
+        public Rect getDockedBounds(int width, int height, int dividerSize, Rect insets,
+                Resources res) {
+            // Calculate the docked task bounds
+            boolean isHorizontalDivision =
+                    res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+            int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
+                    insets, width, height, dividerSize);
+            Rect newWindowBounds = new Rect();
+            DockedDividerUtils.calculateBoundsForPosition(position, dockSide, newWindowBounds,
+                    width, height, dividerSize);
+            return newWindowBounds;
+        }
+
+        /**
+         * Returns the task stack bounds with the given {@param width} and
+         * {@param height}.
+         */
+        public Rect getDockedTaskStackBounds(int width, int height, int dividerSize, Rect insets,
+                Resources res) {
+            RecentsConfiguration config = Recents.getConfiguration();
+
+            // Calculate the inverse docked task bounds
+            boolean isHorizontalDivision =
+                    res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+            int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
+                    insets, width, height, dividerSize);
+            Rect newWindowBounds = new Rect();
+            DockedDividerUtils.calculateBoundsForPosition(position,
+                    DockedDividerUtils.invertDockSide(dockSide), newWindowBounds, width, height,
+                    dividerSize);
+
+            // Calculate the task stack bounds from the new window bounds
+            Rect searchBarSpaceBounds = new Rect();
+            Rect taskStackBounds = new Rect();
+            config.getTaskStackBounds(newWindowBounds, insets.top, insets.right,
+                    searchBarSpaceBounds, taskStackBounds);
+            return taskStackBounds;
         }
     }
 
@@ -446,6 +540,7 @@ public class TaskStack {
                 mCb.onHistoryTaskRemoved(this, t);
             }
         }
+        mRawTaskList.remove(t);
     }
 
     /**

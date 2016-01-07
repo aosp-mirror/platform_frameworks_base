@@ -363,21 +363,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mStartPosition + touchY - mStartY;
     }
 
-    private int invertDockSide(int dockSide) {
-        switch (dockSide) {
-            case WindowManager.DOCKED_LEFT:
-                return WindowManager.DOCKED_RIGHT;
-            case WindowManager.DOCKED_TOP:
-                return WindowManager.DOCKED_BOTTOM;
-            case WindowManager.DOCKED_RIGHT:
-                return WindowManager.DOCKED_LEFT;
-            case WindowManager.DOCKED_BOTTOM:
-                return WindowManager.DOCKED_TOP;
-            default:
-                return WindowManager.DOCKED_INVALID;
-        }
-    }
-
     private void alignTopLeft(Rect containingRect, Rect rect) {
         int width = rect.width();
         int height = rect.height();
@@ -409,8 +394,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
         mLastResizeRect.set(mDockedRect);
         if (taskPosition != TASK_POSITION_SAME) {
-            calculateBoundsForPosition(position, invertDockSide(mDockSide), mOtherRect);
-            int dockSideInverted = invertDockSide(mDockSide);
+            calculateBoundsForPosition(position, DockedDividerUtils.invertDockSide(mDockSide),
+                    mOtherRect);
+            int dockSideInverted = DockedDividerUtils.invertDockSide(mDockSide);
             int taskPositionDocked =
                     restrictDismissingTaskPosition(taskPosition, mDockSide, taskSnapTarget);
             int taskPositionOther =

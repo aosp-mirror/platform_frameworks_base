@@ -136,6 +136,10 @@ public class TaskViewHeader extends FrameLayout
     float mDimAlpha;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
+    Drawable mLightFreeformIcon;
+    Drawable mDarkFreeformIcon;
+    Drawable mLightFullscreenIcon;
+    Drawable mDarkFullscreenIcon;
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
     String mDismissContentDescription;
@@ -179,6 +183,11 @@ public class TaskViewHeader extends FrameLayout
         mHighlightHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         mTaskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
         mTaskBarViewDarkTextColor = context.getColor(R.color.recents_task_bar_dark_text_color);
+        mLightFreeformIcon = context.getDrawable(R.drawable.recents_move_task_freeform_light);
+        mDarkFreeformIcon = context.getDrawable(R.drawable.recents_move_task_freeform_dark);
+        mLightFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_light);
+        mDarkFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_dark);
+
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -223,7 +232,9 @@ public class TaskViewHeader extends FrameLayout
         mTaskViewRect.set(0, 0, width, height);
         boolean updateMoveTaskButton = mMoveTaskButton.getVisibility() != View.GONE;
         int appIconWidth = mIconView.getMeasuredWidth();
-        int activityDescWidth = mTitleView.getMeasuredWidth();
+        int activityDescWidth = (mTask != null)
+                ? (int) mTitleView.getPaint().measureText(mTask.title)
+                : mTitleView.getMeasuredWidth();
         int dismissIconWidth = mDismissButton.getMeasuredWidth();
         int moveTaskIconWidth = mMoveTaskButton.getVisibility() == View.VISIBLE
                 ? mMoveTaskButton.getMeasuredWidth()
@@ -360,14 +371,14 @@ public class TaskViewHeader extends FrameLayout
         if (ssp.hasFreeformWorkspaceSupport()) {
             if (t.isFreeformTask()) {
                 mMoveTaskTargetStackId = FULLSCREEN_WORKSPACE_STACK_ID;
-                mMoveTaskButton.setImageResource(t.useLightOnPrimaryColor
-                        ? R.drawable.recents_move_task_fullscreen_light
-                        : R.drawable.recents_move_task_fullscreen_dark);
+                mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
+                        ? mLightFullscreenIcon
+                        : mDarkFullscreenIcon);
             } else {
                 mMoveTaskTargetStackId = FREEFORM_WORKSPACE_STACK_ID;
-                mMoveTaskButton.setImageResource(t.useLightOnPrimaryColor
-                        ? R.drawable.recents_move_task_freeform_light
-                        : R.drawable.recents_move_task_freeform_dark);
+                mMoveTaskButton.setImageDrawable(t.useLightOnPrimaryColor
+                        ? mLightFreeformIcon
+                        : mDarkFreeformIcon);
             }
             if (mMoveTaskButton.getVisibility() != View.VISIBLE) {
                 mMoveTaskButton.setVisibility(View.VISIBLE);

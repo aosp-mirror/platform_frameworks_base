@@ -28,8 +28,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.Settings;
-import android.util.IntProperty;
-import android.util.Property;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -77,6 +75,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -105,19 +104,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final int DRAG_SCALE_DURATION = 175;
     private static final float DRAG_SCALE_FACTOR = 1.05f;
 
-    public static final Property<Drawable, Integer> DRAWABLE_ALPHA =
-            new IntProperty<Drawable>("drawableAlpha") {
-                @Override
-                public void setValue(Drawable object, int alpha) {
-                    object.setAlpha(alpha);
-                }
-
-                @Override
-                public Integer get(Drawable object) {
-                    return object.getAlpha();
-                }
-            };
-
     TaskStack mStack;
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScroller mStackScroller;
@@ -136,6 +122,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Task mFocusedTask;
 
     int mTaskCornerRadiusPx;
+    private int mDividerSize;
 
     boolean mTaskViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
@@ -143,10 +130,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mTouchExplorationEnabled;
     boolean mScreenPinningEnabled;
 
-    Rect mTaskStackBounds = new Rect();
+    // The stable stack bounds are the full bounds that we were measured with from RecentsView
+    Rect mStableStackBounds = new Rect();
+    // The current stack bounds are dynamic and may change as the user drags and drops
+    Rect mStackBounds = new Rect();
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
     HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<>();
+    HashSet<Task> mTmpTaskSet = new HashSet<>();
     List<TaskView> mTmpTaskViews = new ArrayList<>();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     LayoutInflater mInflater;
@@ -166,15 +157,25 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     // The drop targets for a task drag
     private DropTarget mFreeformWorkspaceDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height) {
-            return mLayoutAlgorithm.mFreeformRect.contains(x, y);
+        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+            // This drop target has a fixed bounds and should be checked last, so just fall through
+            // if it is the current target
+            if (!isCurrentTarget) {
+                return mLayoutAlgorithm.mFreeformRect.contains(x, y);
+            }
+            return false;
         }
     };
 
     private DropTarget mStackDropTarget = new DropTarget() {
         @Override
-        public boolean acceptsDrop(int x, int y, int width, int height) {
-            return mLayoutAlgorithm.mStackRect.contains(x, y);
+        public boolean acceptsDrop(int x, int y, int width, int height, boolean isCurrentTarget) {
+            // This drop target has a fixed bounds and should be checked last, so just fall through
+            // if it is the current target
+            if (!isCurrentTarget) {
+                return mLayoutAlgorithm.mStackRect.contains(x, y);
+            }
+            return false;
         }
     };
 
@@ -196,6 +197,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mTaskCornerRadiusPx = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
+        mDividerSize = ssp.getDockedDividerSize(context);
 
         int taskBarDismissDozeDelaySeconds = getResources().getInteger(
                 R.integer.recents_task_bar_dismiss_delay_seconds);
@@ -347,9 +349,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * This call ignores freeform tasks.
      */
     private boolean updateStackTransforms(ArrayList<TaskViewTransform> taskTransforms,
-                                       ArrayList<Task> tasks,
-                                       float stackScroll,
-                                       int[] visibleRangeOut) {
+            ArrayList<Task> tasks, float stackScroll,
+            int[] visibleRangeOut, HashSet<Task> ignoreTasksSet) {
         int taskTransformCount = taskTransforms.size();
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
@@ -370,6 +371,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         TaskViewTransform frontTransform = null;
         for (int i = taskCount - 1; i >= 0; i--) {
             Task task = tasks.get(i);
+            if (ignoreTasksSet.contains(task)) {
+                continue;
+            }
+
             TaskViewTransform transform = mLayoutAlgorithm.getStackTransform(task, stackScroll,
                     taskTransforms.get(i), frontTransform);
 
@@ -410,14 +415,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * they are initially picked up from the pool, when they will be placed in a suitable initial
      * position.
      */
-    private void bindTaskViewsWithStack() {
+    private void bindTaskViewsWithStack(HashSet<Task> ignoreTasksSet) {
         final float stackScroll = mStackScroller.getStackScroll();
         final int[] visibleStackRange = mTmpVisibleRange;
 
         // Get all the task transforms
         final ArrayList<Task> tasks = mStack.getStackTasks();
-        final boolean isValidVisibleStackRange = updateStackTransforms(mCurrentTaskTransforms, tasks,
-                stackScroll, visibleStackRange);
+        final boolean isValidVisibleStackRange = updateStackTransforms(mCurrentTaskTransforms,
+                tasks, stackScroll, visibleStackRange, ignoreTasksSet);
 
         // Return all the invisible children to the pool
         mTmpTaskViewMap.clear();
@@ -428,6 +433,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             final TaskView tv = taskViews.get(i);
             final Task task = tv.getTask();
             final int taskIndex = mStack.indexOfStackTask(task);
+
+            // Skip ignored tasks
+            if (ignoreTasksSet.contains(task)) {
+                continue;
+            }
 
             if (task.isFreeformTask() ||
                     visibleStackRange[1] <= taskIndex && taskIndex <= visibleStackRange[0]) {
@@ -446,6 +456,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         for (int i = mStack.getStackTaskCount() - 1; i >= lastVisStackIndex; i--) {
             final Task task = tasks.get(i);
             final TaskViewTransform transform = mCurrentTaskTransforms.get(i);
+
+            // Skip ignored tasks
+            if (ignoreTasksSet.contains(task)) {
+                continue;
+            }
 
             // Skip the invisible non-freeform stack tasks
             if (i > visibleStackRange[0] && !task.isFreeformTask()) {
@@ -496,8 +511,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Cancels any existing {@link TaskView} animations, and updates each {@link TaskView} to its
      * current position as defined by the {@link TaskStackLayoutAlgorithm}.
+     *
+     * @param ignoreTasks the set of tasks to ignore in the relayout
      */
-    private void updateTaskViewsToLayout(TaskViewAnimation animation) {
+    private void updateTaskViewsToLayout(TaskViewAnimation animation, Task... ignoreTasks) {
+        // Keep track of the ignore tasks
+        HashSet<Task> ignoreTasksSet = mTmpTaskSet;
+        ignoreTasksSet.clear();
+        Collections.addAll(ignoreTasksSet, ignoreTasks);
+
         // If we had a deferred animation, cancel that
         mDeferredTaskViewUpdateAnimation = null;
 
@@ -505,7 +527,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         cancelAllTaskViewAnimations();
 
         // Fetch the current set of TaskViews
-        bindTaskViewsWithStack();
+        bindTaskViewsWithStack(ignoreTasksSet);
 
         // Animate them to their final transforms with the given animation
         List<TaskView> taskViews = getTaskViews();
@@ -514,6 +536,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             final TaskView tv = taskViews.get(i);
             final int taskIndex = mStack.indexOfStackTask(tv.getTask());
             final TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
+
+            if (ignoreTasksSet.contains(tv.getTask())) {
+                continue;
+            }
 
             updateTaskViewToTransform(tv, transform, animation);
         }
@@ -542,8 +568,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private void cancelAllTaskViewAnimations() {
         List<TaskView> taskViews = getTaskViews();
-        int taskViewCount = taskViews.size();
-        for (int i = 0; i < taskViewCount; i++) {
+        for (int i = taskViews.size() - 1; i >= 0; i--) {
             final TaskView tv = taskViews.get(i);
             tv.cancelTransformAnimation();
         }
@@ -594,10 +619,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTaskViewsClipDirty = false;
     }
 
-    /** Updates the min and max virtual scroll bounds */
-    void updateLayout(boolean boundScrollToNewMinMax) {
+    /**
+     * Updates the min and max virtual scroll bounds.
+     *
+     * @param ignoreTasks the set of tasks to ignore in the relayout
+     */
+    void updateLayout(boolean boundScrollToNewMinMax, Task... ignoreTasks) {
+        // Keep track of the ingore tasks
+        HashSet<Task> ignoreTasksSet = mTmpTaskSet;
+        ignoreTasksSet.clear();
+        Collections.addAll(ignoreTasksSet, ignoreTasks);
+
         // Compute the min and max scroll values
-        mLayoutAlgorithm.update(mStack);
+        mLayoutAlgorithm.update(mStack, ignoreTasksSet);
 
         // Update the freeform workspace
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -918,14 +952,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    /** Computes the stack and task rects */
-    public void computeRects(Rect taskStackBounds) {
+    /**
+     * Computes the stack and task rects.
+     *
+     * @param ignoreTasks the set of tasks to ignore in the relayout
+     */
+    public void computeRects(Rect taskStackBounds, boolean boundScroll, Task... ignoreTasks) {
         // Compute the rects in the stack algorithm
         mLayoutAlgorithm.initialize(taskStackBounds,
                 TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
 
         // Update the scroll bounds
-        updateLayout(false);
+        updateLayout(boundScroll, ignoreTasks);
     }
 
     /**
@@ -945,9 +983,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mLayoutAlgorithm.computeStackVisibilityReport(mStack.getStackTasks());
     }
 
+    /**
+     * Updates the expected task stack bounds for this stack view.
+     */
     public void setTaskStackBounds(Rect taskStackBounds, Rect systemInsets) {
-        mTaskStackBounds.set(taskStackBounds);
+        // We can get spurious measure passes with the old bounds when docking, and since we are
+        // using the current stack bounds during drag and drop, don't overwrite them until we
+        // actually get new bounds
+        if (!taskStackBounds.equals(mStableStackBounds)) {
+            mStableStackBounds.set(taskStackBounds);
+            mStackBounds.set(taskStackBounds);
+        }
         mLayoutAlgorithm.setSystemInsets(systemInsets);
+        requestLayout();
     }
 
     /**
@@ -960,14 +1008,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         // Compute our stack/task rects
-        computeRects(mTaskStackBounds);
+        computeRects(mStackBounds, false);
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
         if (mAwaitingFirstLayout) {
             mStackScroller.setStackScrollToInitialState();
         }
-        bindTaskViewsWithStack();
+        mTmpTaskSet.clear();
+        bindTaskViewsWithStack(mTmpTaskSet);
 
         // Measure each of the TaskViews
         mTmpTaskViews.clear();
@@ -1407,6 +1456,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.getStackTransform(event.task, getScroller().getStackScroll(),
                 mTmpTransform, null);
         mTmpTransform.scale = finalScale;
+        mTmpTransform.translationZ = mLayoutAlgorithm.mMaxTranslationZ + 1;
         updateTaskViewToTransform(event.taskView, mTmpTransform,
                 new TaskViewAnimation(DRAG_SCALE_DURATION, mFastOutSlowInInterpolator));
     }
@@ -1420,7 +1470,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
-        // TODO: Animate the freeform workspace background etc.
+        if (event.dropTarget instanceof TaskStack.DockState) {
+            // Calculate the new task stack bounds that matches the window size that Recents will
+            // have after the drop
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
+                    getMeasuredHeight(), mDividerSize, mLayoutAlgorithm.mSystemInsets,
+                    getResources()));
+            computeRects(mStackBounds, true /* boundScroll */, event.task /* ignoreTask */);
+            updateTaskViewsToLayout(new TaskViewAnimation(250, mFastOutSlowInInterpolator),
+                    event.task /* ignoreTask */);
+        } else {
+            // Restore the pre-drag task stack bounds
+            mStackBounds.set(mStableStackBounds);
+            computeRects(mStackBounds, true /* boundScroll */);
+            updateTaskViewsToLayout(new TaskViewAnimation(250, mFastOutSlowInInterpolator),
+                    event.task /* ignoreTask */);
+        }
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -1564,7 +1630,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         Utilities.cancelAnimationWithoutCallbacks(mFreeformWorkspaceBackgroundAnimator);
         mFreeformWorkspaceBackgroundAnimator = ObjectAnimator.ofInt(mFreeformWorkspaceBackground,
-                DRAWABLE_ALPHA, mFreeformWorkspaceBackground.getAlpha(), targetAlpha);
+                Utilities.DRAWABLE_ALPHA, mFreeformWorkspaceBackground.getAlpha(), targetAlpha);
         mFreeformWorkspaceBackgroundAnimator.setDuration(duration);
         mFreeformWorkspaceBackgroundAnimator.setInterpolator(interpolator);
         mFreeformWorkspaceBackgroundAnimator.start();

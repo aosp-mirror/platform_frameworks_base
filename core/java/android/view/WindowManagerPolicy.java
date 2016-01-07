@@ -1333,9 +1333,9 @@ public interface WindowManagerPolicy {
      * Calculates the stable insets without running a layout.
      *
      * @param displayRotation the current display rotation
-     * @param outInsets the insets to return
      * @param displayWidth the current display width
      * @param displayHeight the current display height
+     * @param outInsets the insets to return
      */
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             Rect outInsets);

@@ -307,11 +307,12 @@ public class SystemServicesProxy {
     }
 
     /** Docks a task to the side of the screen and starts it. */
-    public void startTaskInDockedMode(int taskId, int createMode) {
+    public void startTaskInDockedMode(Context context, int taskId, int createMode) {
         if (mIam == null) return;
 
         try {
-            final ActivityOptions options = ActivityOptions.makeBasic();
+            // TODO: Determine what animation we want for the incoming task
+            final ActivityOptions options = ActivityOptions.makeCustomAnimation(context, 0, 0);
             options.setDockCreateMode(createMode);
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());
@@ -915,6 +916,18 @@ public class SystemServicesProxy {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Calculates the size of the dock divider in the current orientation.
+     */
+    public int getDockedDividerSize(Context context) {
+        Resources res = context.getResources();
+        int dividerWindowWidth = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_thickness);
+        int dividerInsets = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_divider_insets);
+        return dividerWindowWidth - 2 * dividerInsets;
     }
 
     public void requestKeyboardShortcuts(Context context, KeyboardShortcutsReceiver receiver) {

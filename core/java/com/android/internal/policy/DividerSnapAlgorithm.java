@@ -209,12 +209,8 @@ public class DividerSnapAlgorithm {
     }
 
     private void addMiddleTarget(boolean isHorizontalDivision) {
-        int start = isHorizontalDivision ? mInsets.top : mInsets.left;
-        int end = isHorizontalDivision
-                ? mDisplayHeight - mInsets.bottom
-                : mDisplayWidth - mInsets.right;
-        mTargets.add(new SnapTarget(start + (end - start) / 2 - mDividerSize / 2,
-                SnapTarget.FLAG_NONE));
+        mTargets.add(new SnapTarget(DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
+                mInsets, mDisplayWidth, mDisplayHeight, mDividerSize), SnapTarget.FLAG_NONE));
     }
 
     public SnapTarget getMiddleTarget() {

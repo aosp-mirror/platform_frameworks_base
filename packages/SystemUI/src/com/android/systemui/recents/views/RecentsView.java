@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -63,6 +64,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,8 +78,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
  */
 public class RecentsView extends FrameLayout {
 
-    private static final String TAG = "RecentsView";
-    private static final boolean DEBUG = false;
+    private static final int DOCK_AREA_OVERLAY_TRANSITION_DURATION = 135;
 
     private final Handler mHandler;
 
@@ -89,6 +90,7 @@ public class RecentsView extends FrameLayout {
     private boolean mAwaitingFirstLayout = true;
     private boolean mLastTaskLaunchedWasFreeform;
     private Rect mSystemInsets = new Rect();
+    private int mDividerSize;
 
     private RecentsTransitionHelper mTransitionHelper;
     private RecentsViewTouchHandler mTouchHandler;
@@ -118,12 +120,15 @@ public class RecentsView extends FrameLayout {
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         setWillNotDraw(false);
+
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mHandler = new Handler();
         mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_linear_in);
+        mDividerSize = ssp.getDockedDividerSize(context);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
@@ -470,52 +475,77 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DragStartEvent event) {
         updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
-                TaskStack.DockState.NONE.viewState.dockAreaAlpha);
+                true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                true /* animateAlpha */, false /* animateBounds */);
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
         if (event.dropTarget == null || !(event.dropTarget instanceof TaskStack.DockState)) {
             updateVisibleDockRegions(mTouchHandler.getDockStatesForCurrentOrientation(),
-                    TaskStack.DockState.NONE.viewState.dockAreaAlpha);
+                    true /* isDefaultDockState */, TaskStack.DockState.NONE.viewState.dockAreaAlpha,
+                    true /* animateAlpha */, true /* animateBounds */);
         } else {
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
-            updateVisibleDockRegions(new TaskStack.DockState[] {dockState}, -1);
+            updateVisibleDockRegions(new TaskStack.DockState[] {dockState},
+                    false /* isDefaultDockState */, -1, true /* animateAlpha */,
+                    true /* animateBounds */);
         }
     }
 
     public final void onBusEvent(final DragEndEvent event) {
-        // Animate the overlay alpha back to 0
-        updateVisibleDockRegions(null, -1);
-
         // Handle the case where we drop onto a dock region
         if (event.dropTarget instanceof TaskStack.DockState) {
-            TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+
+            // Hide the dock region
+            updateVisibleDockRegions(null, false /* isDefaultDockState */, -1,
+                    false /* animateAlpha */, false /* animateBounds */);
+
             TaskStackLayoutAlgorithm stackLayout = mTaskStackView.getStackAlgorithm();
             TaskStackViewScroller stackScroller = mTaskStackView.getScroller();
             TaskViewTransform tmpTransform = new TaskViewTransform();
 
+            // We translated the view but we need to animate it back from the current layout-space
+            // rect to its final layout-space rect
+            int x = (int) event.taskView.getTranslationX();
+            int y = (int) event.taskView.getTranslationY();
+            Rect taskViewRect = new Rect(event.taskView.getLeft(), event.taskView.getTop(),
+                    event.taskView.getRight(), event.taskView.getBottom());
+            taskViewRect.offset(x, y);
+            event.taskView.setTranslationX(0);
+            event.taskView.setTranslationY(0);
+            event.taskView.setLeftTopRightBottom(taskViewRect.left, taskViewRect.top,
+                    taskViewRect.right, taskViewRect.bottom);
+
             // Remove the task view after it is docked
+            mTaskStackView.updateLayout(false /* boundScroll */);
             stackLayout.getStackTransform(event.task, stackScroller.getStackScroll(), tmpTransform,
                     null);
-            tmpTransform.scale = event.taskView.getScaleX();
-            tmpTransform.rect.offset(event.taskView.getTranslationX(),
-                    event.taskView.getTranslationY());
+            tmpTransform.alpha = 0;
+            tmpTransform.scale = 1f;
+            tmpTransform.rect.set(taskViewRect);
             mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
-                    new TaskViewAnimation(150, mFastOutLinearInInterpolator,
+                    new TaskViewAnimation(125, PhoneStatusBar.ALPHA_OUT,
                             new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
+                                    // Dock the task and launch it
+                                    SystemServicesProxy ssp = Recents.getSystemServices();
+                                    ssp.startTaskInDockedMode(getContext(), event.task.key.id,
+                                            dockState.createMode);
+                                    launchTask(event.task, null, INVALID_STACK_ID);
+
                                     mTaskStackView.getStack().removeTask(event.task);
                                 }
                             }));
 
-            // Dock the task and launch it
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
-            launchTask(event.task, null, INVALID_STACK_ID);
 
             MetricsLogger.action(mContext,
                     MetricsLogger.ACTION_WINDOW_DOCK_DRAG_DROP);
+        } else {
+            // Animate the overlay alpha back to 0
+            updateVisibleDockRegions(null, true /* isDefaultDockState */, -1,
+                    true /* animateAlpha */, false /* animateBounds */);
         }
     }
 
@@ -638,7 +668,9 @@ public class RecentsView extends FrameLayout {
     /**
      * Updates the dock region to match the specified dock state.
      */
-    private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates, int overrideAlpha) {
+    private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
+            boolean isDefaultDockState, int overrideAlpha, boolean animateAlpha,
+            boolean animateBounds) {
         ArraySet<TaskStack.DockState> newDockStatesSet = new ArraySet<>();
         if (newDockStates != null) {
             Collections.addAll(newDockStatesSet, newDockStates);
@@ -647,14 +679,21 @@ public class RecentsView extends FrameLayout {
             TaskStack.DockState.ViewState viewState = dockState.viewState;
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it
-                viewState.startAlphaAnimation(0, 150);
+                viewState.startAnimation(null, 0, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
+                        PhoneStatusBar.ALPHA_OUT, animateAlpha, animateBounds);
             } else {
                 // This state is now visible, update the bounds and show it
                 int alpha = (overrideAlpha != -1 ? overrideAlpha : viewState.dockAreaAlpha);
-                viewState.dockAreaOverlay.setBounds(
-                        dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight()));
-                viewState.dockAreaOverlay.setCallback(this);
-                viewState.startAlphaAnimation(alpha, 150);
+                Rect bounds = isDefaultDockState
+                        ? dockState.getPreDockedBounds(getMeasuredWidth(), getMeasuredHeight())
+                        : dockState.getDockedBounds(getMeasuredWidth(), getMeasuredHeight(),
+                        mDividerSize, mSystemInsets, getResources());
+                if (viewState.dockAreaOverlay.getCallback() != this) {
+                    viewState.dockAreaOverlay.setCallback(this);
+                    viewState.dockAreaOverlay.setBounds(bounds);
+                }
+                viewState.startAnimation(bounds, alpha, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
+                        PhoneStatusBar.ALPHA_IN, animateAlpha, animateBounds);
             }
         }
     }

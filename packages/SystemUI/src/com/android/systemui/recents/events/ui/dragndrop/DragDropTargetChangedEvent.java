@@ -25,6 +25,7 @@ import com.android.systemui.recents.views.DropTarget;
  */
 public class DragDropTargetChangedEvent extends EventBus.Event {
 
+    // The task that is currently being dragged
     public final Task task;
     public final DropTarget dropTarget;
 

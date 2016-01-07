@@ -37,7 +37,9 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Used to describe a visible range that can be normalized to [0, 1].
@@ -373,7 +375,7 @@ public class TaskStackLayoutAlgorithm {
      * Computes the minimum and maximum scroll progress values and the progress values for each task
      * in the stack.
      */
-    void update(TaskStack stack) {
+    void update(TaskStack stack, HashSet<Task> ignoreTasksSet) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Clear the progress map
@@ -393,6 +395,9 @@ public class TaskStackLayoutAlgorithm {
         ArrayList<Task> stackTasks = new ArrayList<>();
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
+            if (ignoreTasksSet.contains(task)) {
+                continue;
+            }
             if (task.isFreeformTask()) {
                 freeformTasks.add(task);
             } else {

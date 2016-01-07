@@ -19,6 +19,11 @@ package com.android.internal.policy;
 import android.graphics.Rect;
 import android.view.WindowManager;
 
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.DOCKED_TOP;
+
 /**
  * Utility functions for docked stack divider used by both window manager and System UI.
  *
@@ -69,6 +74,47 @@ public class DockedDividerUtils {
                 return bounds.top - dividerSize;
             default:
                 return 0;
+        }
+    }
+
+    public static int calculateMiddlePosition(boolean isHorizontalDivision, Rect insets,
+            int displayWidth, int displayHeight, int dividerSize) {
+        int start = isHorizontalDivision ? insets.top : insets.left;
+        int end = isHorizontalDivision
+                ? displayHeight - insets.bottom
+                : displayWidth - insets.right;
+        return start + (end - start) / 2 - dividerSize / 2;
+    }
+
+    public static int getDockSideFromCreatedMode(boolean dockOnTopOrLeft,
+            boolean isHorizontalDivision) {
+        if (dockOnTopOrLeft) {
+            if (isHorizontalDivision) {
+                return DOCKED_TOP;
+            } else {
+                return DOCKED_LEFT;
+            }
+        } else {
+            if (isHorizontalDivision) {
+                return DOCKED_BOTTOM;
+            } else {
+                return DOCKED_RIGHT;
+            }
+        }
+    }
+
+    public static int invertDockSide(int dockSide) {
+        switch (dockSide) {
+            case WindowManager.DOCKED_LEFT:
+                return WindowManager.DOCKED_RIGHT;
+            case WindowManager.DOCKED_TOP:
+                return WindowManager.DOCKED_BOTTOM;
+            case WindowManager.DOCKED_RIGHT:
+                return WindowManager.DOCKED_LEFT;
+            case WindowManager.DOCKED_BOTTOM:
+                return WindowManager.DOCKED_TOP;
+            default:
+                return WindowManager.DOCKED_INVALID;
         }
     }
 }
