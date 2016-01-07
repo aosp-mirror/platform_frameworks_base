@@ -980,6 +980,14 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_MODE_CHANGED";
 
     /**
+     * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
+     * @hide
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL
+            = "android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL";
+
+    /**
      * Intent that is broadcast when the state of {@link #isDeviceIdleMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
