@@ -973,6 +973,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * </p>
      *
      * @see #getAxisValue(int, int)
+     * {@hide}
      */
     public static final int AXIS_SCROLL = 26;
 
