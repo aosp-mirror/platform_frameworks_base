@@ -260,6 +260,15 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         return nullObjectReturn("SkAndroidCodec::NewFromStream returned null");
     }
 
+    // Do not allow ninepatch decodes to 565.  In the past, decodes to 565
+    // would dither, and we do not want to pre-dither ninepatches, since we
+    // know that they will be stretched.  We no longer dither 565 decodes,
+    // but we continue to prevent ninepatches from decoding to 565, in order
+    // to maintain the old behavior.
+    if (peeker.mPatch && kRGB_565_SkColorType == prefColorType) {
+        prefColorType = kN32_SkColorType;
+    }
+
     // Determine the output size and return if the client only wants the size.
     SkISize size = codec->getSampledDimensions(sampleSize);
     if (options != NULL) {
@@ -369,15 +378,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         case SkCodec::kIncompleteInput:
             break;
         default:
-            return nullObjectReturn("codec->getAndoridPixels() failed.");
-    }
-
-    // Some images may initially report that they have alpha due to the format
-    // of the encoded data, but then never use any colors which have alpha
-    // less than 100%.  Here we check if the image really had alpha, and
-    // mark it as opaque if it is actually opaque.
-    if (kOpaque_SkAlphaType != alphaType && !codec->reallyHasAlpha()) {
-        decodingBitmap.setAlphaType(kOpaque_SkAlphaType);
+            return nullObjectReturn("codec->getAndroidPixels() failed.");
     }
 
     int scaledWidth = size.width();
