@@ -50,18 +50,15 @@ public abstract class JobScheduler {
      */
     public static final int RESULT_FAILURE = 0;
     /**
-     * Returned from {@link #schedule(JobInfo)} if this application has made too many requests for
-     * work over too short a time.
+     * Returned from {@link #schedule(JobInfo)} if this job has been successfully scheduled.
      */
-    // TODO: Determine if this is necessary.
     public static final int RESULT_SUCCESS = 1;
 
     /**
      * @param job The job you wish scheduled. See
      * {@link android.app.job.JobInfo.Builder JobInfo.Builder} for more detail on the sorts of jobs
      * you can schedule.
-     * @return If >0, this int returns the jobId of the successfully scheduled job.
-     * Otherwise you have to compare the return value to the error codes defined in this class.
+     * @return An int representing ({@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}).
      */
     public abstract int schedule(JobInfo job);
 
