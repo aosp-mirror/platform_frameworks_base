@@ -230,6 +230,9 @@ interface IDevicePolicyManager {
     void setAutoTimeRequired(in ComponentName who, boolean required);
     boolean getAutoTimeRequired();
 
+    void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
+    boolean getForceEphemeralUsers(in ComponentName who);
+
     boolean isRemovingAdmin(in ComponentName adminReceiver, int userHandle);
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);

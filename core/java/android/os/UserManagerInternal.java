@@ -91,4 +91,19 @@ public abstract class UserManagerInternal {
      * the icon is in this method.
      */
     public abstract void setUserIcon(int userId, Bitmap bitmap);
+
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to inform the
+     * user manager whether all users should be created ephemeral.
+     */
+    public abstract void setForceEphemeralUsers(boolean forceEphemeralUsers);
+
+    /**
+     * Switches to the system user and deletes all other users.
+     *
+     * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
+     * the force-ephemeral-users policy is toggled on to make sure there are no pre-existing
+     * non-ephemeral users left.
+     */
+    public abstract void removeAllUsers();
 }

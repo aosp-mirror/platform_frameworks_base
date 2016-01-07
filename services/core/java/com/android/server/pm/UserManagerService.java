@@ -25,9 +25,11 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -301,6 +303,12 @@ public class UserManagerService extends IUserManager.Stub {
             new ArrayList<>();
 
     private final LockPatternUtils mLockPatternUtils;
+
+    /**
+     * Whether all users should be created ephemeral.
+     */
+    @GuardedBy("mUsersLock")
+    private boolean mForceEphemeralUsers;
 
     private static UserManagerService sInstance;
 
@@ -1836,23 +1844,25 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                 }
 
-                // Add ephemeral flag to guests if required. Also inherit it from parent.
+                userId = getNextAvailableId();
+                Environment.getUserSystemDirectory(userId).mkdirs();
                 boolean ephemeralGuests = Resources.getSystem()
                         .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
-                if ((isGuest && ephemeralGuests)
-                        || (parent != null && parent.info.isEphemeral())) {
-                    flags |= UserInfo.FLAG_EPHEMERAL;
-                }
-                userId = getNextAvailableId();
-                userInfo = new UserInfo(userId, name, null, flags);
-                userInfo.serialNumber = mNextSerialNumber++;
-                long now = System.currentTimeMillis();
-                userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
-                userInfo.partial = true;
-                userData = new UserData();
-                userData.info = userInfo;
-                Environment.getUserSystemDirectory(userInfo.id).mkdirs();
+
                 synchronized (mUsersLock) {
+                    // Add ephemeral flag to guests/users if required. Also inherit it from parent.
+                    if ((isGuest && ephemeralGuests) || mForceEphemeralUsers
+                            || (parent != null && parent.info.isEphemeral())) {
+                        flags |= UserInfo.FLAG_EPHEMERAL;
+                    }
+
+                    userInfo = new UserInfo(userId, name, null, flags);
+                    userInfo.serialNumber = mNextSerialNumber++;
+                    long now = System.currentTimeMillis();
+                    userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
+                    userInfo.partial = true;
+                    userData = new UserData();
+                    userData.info = userInfo;
                     mUsers.put(userId, userData);
                 }
                 writeUserListLP();
@@ -2913,6 +2923,61 @@ public class UserManagerService extends IUserManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public void setForceEphemeralUsers(boolean forceEphemeralUsers) {
+            synchronized (mUsersLock) {
+                mForceEphemeralUsers = forceEphemeralUsers;
+            }
+        }
+
+        @Override
+        public void removeAllUsers() {
+            if (UserHandle.USER_SYSTEM == ActivityManager.getCurrentUser()) {
+                // Remove the non-system users straight away.
+                removeNonSystemUsers();
+            } else {
+                // Switch to the system user first and then remove the other users.
+                BroadcastReceiver userSwitchedReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        int userId =
+                                intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                        if (userId != UserHandle.USER_SYSTEM) {
+                            return;
+                        }
+                        mContext.unregisterReceiver(this);
+                        removeNonSystemUsers();
+                    }
+                };
+                IntentFilter userSwitchedFilter = new IntentFilter();
+                userSwitchedFilter.addAction(Intent.ACTION_USER_SWITCHED);
+                mContext.registerReceiver(
+                        userSwitchedReceiver, userSwitchedFilter, null, mHandler);
+
+                // Switch to the system user.
+                ActivityManager am =
+                        (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                am.switchUser(UserHandle.USER_SYSTEM);
+            }
+        }
+    }
+
+    /* Remove all the users except of the system one. */
+    private void removeNonSystemUsers() {
+        ArrayList<UserInfo> usersToRemove = new ArrayList<>();
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                UserInfo ui = mUsers.valueAt(i).info;
+                if (ui.id != UserHandle.USER_SYSTEM) {
+                    usersToRemove.add(ui);
+                }
+            }
+        }
+        for (UserInfo ui: usersToRemove) {
+            removeUser(ui.id);
         }
     }
 
