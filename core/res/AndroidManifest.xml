@@ -383,6 +383,12 @@
     <protected-broadcast android:name="com.android.server.Wifi.action.TOGGLE_PNO" />
     <protected-broadcast android:name="intent.action.ACTION_RF_BAND_INFO" />
 
+    <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
+    <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL" />
+    <protected-broadcast android:name="android.app.action.NOTIFICATION_POLICY_CHANGED" />
+    <protected-broadcast android:name="android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED" />
+    <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
