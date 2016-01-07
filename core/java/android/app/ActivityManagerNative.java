@@ -1408,6 +1408,26 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_GRANTED_URI_PERMISSIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final String packageName = data.readString();
+            final int userId = data.readInt();
+            final ParceledListSlice<UriPermission> perms = getGrantedUriPermissions(packageName,
+                    userId);
+            reply.writeNoException();
+            perms.writeToParcel(reply, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+            return true;
+        }
+
+        case CLEAR_GRANTED_URI_PERMISSIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final String packageName = data.readString();
+            final int userId = data.readInt();
+            clearGrantedUriPermissions(packageName, userId);
+            reply.writeNoException();
+            return true;
+        }
+
         case SHOW_WAITING_FOR_DEBUGGER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder b = data.readStrongBinder();
@@ -4612,11 +4632,43 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(incoming ? 1 : 0);
         mRemote.transact(GET_PERSISTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
         reply.readException();
+        @SuppressWarnings("unchecked")
         final ParceledListSlice<UriPermission> perms = ParceledListSlice.CREATOR.createFromParcel(
                 reply);
         data.recycle();
         reply.recycle();
         return perms;
+    }
+
+    @Override
+    public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName, int userId)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeInt(userId);
+        mRemote.transact(GET_GRANTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        @SuppressWarnings("unchecked")
+        final ParceledListSlice<UriPermission> perms = ParceledListSlice.CREATOR.createFromParcel(
+                reply);
+        data.recycle();
+        reply.recycle();
+        return perms;
+    }
+
+    @Override
+    public void clearGrantedUriPermissions(String packageName, int userId) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeInt(userId);
+        mRemote.transact(CLEAR_GRANTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)

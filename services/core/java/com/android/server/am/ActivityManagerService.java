@@ -8638,6 +8638,35 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public ParceledListSlice<android.content.UriPermission> getGrantedUriPermissions(
+            String packageName, int userId) {
+        enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
+                "getGrantedUriPermissions");
+
+        final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
+        synchronized (this) {
+            final int size = mGrantedUriPermissions.size();
+            for (int i = 0; i < size; i++) {
+                final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
+                for (UriPermission perm : perms.values()) {
+                    if (packageName.equals(perm.targetPkg) && perm.targetUserId == userId
+                            && perm.persistedModeFlags != 0) {
+                        result.add(perm.buildPersistedPublicApiObject());
+                    }
+                }
+            }
+        }
+        return new ParceledListSlice<android.content.UriPermission>(result);
+    }
+
+    @Override
+    public void clearGrantedUriPermissions(String packageName, int userId) {
+        enforceCallingPermission(android.Manifest.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS,
+                "clearGrantedUriPermissions");
+        removeUriPermissionsForPackageLocked(packageName, userId, true);
+    }
+
+    @Override
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting) {
         synchronized (this) {
             ProcessRecord app =
