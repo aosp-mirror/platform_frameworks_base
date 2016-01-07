@@ -18,7 +18,9 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.net.Uri;
 import android.telecom.PhoneAccount;
+import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ModemActivityInfo;
@@ -966,7 +968,7 @@ interface ITelephony {
      * Returns the Status of Wi-Fi Calling
      */
     boolean isWifiCallingAvailable();
-    
+
     /**
      * Returns the Status of Volte
      */
@@ -1014,4 +1016,23 @@ interface ITelephony {
      * @return Service state on specified subscription.
      */
     ServiceState getServiceStateForSubscriber(int subId, String callingPackage);
+
+    /**
+     * Returns the URI for the per-account voicemail ringtone set in Phone settings.
+     *
+     * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
+     * voicemail ringtone.
+     * @return The URI for the ringtone to play when receiving a voicemail from a specific
+     * PhoneAccount.
+     */
+    Uri getVoicemailRingtoneUri(in PhoneAccountHandle accountHandle);
+
+    /**
+     * Returns whether vibration is set for voicemail notification in Phone settings.
+     *
+     * @param accountHandle The handle for the {@link PhoneAccount} for which to retrieve the
+     * voicemail vibration setting.
+     * @return {@code true} if the vibration is set for this PhoneAccount, {@code false} otherwise.
+     */
+    boolean isVoicemailVibrationEnabled(in PhoneAccountHandle accountHandle);
 }
