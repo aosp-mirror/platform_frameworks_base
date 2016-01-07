@@ -21,6 +21,7 @@ import static com.android.shell.BugreportPrefs.STATE_SHOW;
 import static com.android.shell.BugreportPrefs.getWarningState;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -28,10 +29,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
@@ -813,6 +817,9 @@ public class BugreportProgressService extends Service {
             Log.e(TAG, "INTERNAL ERROR: no info for PID " + pid + ": " + mProcesses);
             return;
         }
+
+        addDetailsToZipFile(info);
+
         final Intent sendIntent = buildSendIntent(mContext, info);
         final Intent notifIntent;
 
@@ -868,7 +875,7 @@ public class BugreportProgressService extends Service {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                info.bugreportFile = zipBugreport(info.bugreportFile);
+                zipBugreport(info);
                 sendBugreportNotification(context, info);
                 return null;
             }
@@ -879,32 +886,89 @@ public class BugreportProgressService extends Service {
      * Zips a bugreport file, returning the path to the new file (or to the
      * original in case of failure).
      */
-    private static File zipBugreport(File bugreportFile) {
-        String bugreportPath = bugreportFile.getAbsolutePath();
-        String zippedPath = bugreportPath.replace(".txt", ".zip");
+    private static void zipBugreport(BugreportInfo info) {
+        final String bugreportPath = info.bugreportFile.getAbsolutePath();
+        final String zippedPath = bugreportPath.replace(".txt", ".zip");
         Log.v(TAG, "zipping " + bugreportPath + " as " + zippedPath);
-        File bugreportZippedFile = new File(zippedPath);
-        try (InputStream is = new FileInputStream(bugreportFile);
+        final File bugreportZippedFile = new File(zippedPath);
+        try (InputStream is = new FileInputStream(info.bugreportFile);
                 ZipOutputStream zos = new ZipOutputStream(
                         new BufferedOutputStream(new FileOutputStream(bugreportZippedFile)))) {
-            ZipEntry entry = new ZipEntry(bugreportFile.getName());
-            entry.setTime(bugreportFile.lastModified());
-            zos.putNextEntry(entry);
-            int totalBytes = Streams.copy(is, zos);
-            Log.v(TAG, "size of original bugreport: " + totalBytes + " bytes");
-            zos.closeEntry();
-            // Delete old file;
-            boolean deleted = bugreportFile.delete();
+            addEntry(zos, info.bugreportFile.getName(), is);
+            // Delete old file
+            final boolean deleted = info.bugreportFile.delete();
             if (deleted) {
                 Log.v(TAG, "deleted original bugreport (" + bugreportPath + ")");
             } else {
                 Log.e(TAG, "could not delete original bugreport (" + bugreportPath + ")");
             }
-            return bugreportZippedFile;
+            info.bugreportFile = bugreportZippedFile;
         } catch (IOException e) {
             Log.e(TAG, "exception zipping file " + zippedPath, e);
-            return bugreportFile; // Return original.
         }
+    }
+
+    /**
+     * Adds the user-provided info into the bugreport zip file.
+     * <p>
+     * If user provided a title, it will be saved into a {@code title.txt} entry; similarly, the
+     * description will be saved on {@code description.txt}.
+     */
+    private void addDetailsToZipFile(BugreportInfo info) {
+        // It's not possible to add a new entry into an existing file, so we need to create a new
+        // zip, copy all entries, then rename it.
+        final File dir = info.bugreportFile.getParentFile();
+        final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
+        Log.d(TAG, "Writing temporary zip file (" + tmpZip + ")");
+        try (ZipFile oldZip = new ZipFile(info.bugreportFile);
+                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tmpZip))) {
+
+            // First copy contents from original zip.
+            Enumeration<? extends ZipEntry> entries = oldZip.entries();
+            while (entries.hasMoreElements()) {
+                final ZipEntry entry = entries.nextElement();
+                final String entryName = entry.getName();
+                if (!entry.isDirectory()) {
+                    addEntry(zos, entryName, entry.getTime(), oldZip.getInputStream(entry));
+                } else {
+                    Log.w(TAG, "skipping directory entry: " + entryName);
+                }
+            }
+
+            // Then add the user-provided info.
+            addEntry(zos, "title.txt", info.title);
+            addEntry(zos, "description.txt", info.description);
+        } catch (IOException e) {
+            Log.e(TAG, "exception zipping file " + tmpZip, e);
+            return;
+        }
+
+        if (!tmpZip.renameTo(info.bugreportFile)) {
+            Log.e(TAG, "Could not rename " + tmpZip + " to " + info.bugreportFile);
+        }
+    }
+
+    private static void addEntry(ZipOutputStream zos, String entry, String text)
+            throws IOException {
+        if (DEBUG) Log.v(TAG, "adding entry '" + entry + "': " + text);
+        if (!TextUtils.isEmpty(text)) {
+            addEntry(zos, entry, new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    private static void addEntry(ZipOutputStream zos, String entryName, InputStream is)
+            throws IOException {
+        addEntry(zos, entryName, System.currentTimeMillis(), is);
+    }
+
+    private static void addEntry(ZipOutputStream zos, String entryName, long timestamp,
+            InputStream is) throws IOException {
+        final ZipEntry entry = new ZipEntry(entryName);
+        entry.setTime(timestamp);
+        zos.putNextEntry(entry);
+        final int totalBytes = Streams.copy(is, zos);
+        if (DEBUG) Log.v(TAG, "size of '" + entryName + "' entry: " + totalBytes + " bytes");
+        zos.closeEntry();
     }
 
     /**
