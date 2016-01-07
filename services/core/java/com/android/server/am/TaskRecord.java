@@ -1298,6 +1298,9 @@ final class TaskRecord {
                     (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
                             ? Configuration.ORIENTATION_PORTRAIT
                             : Configuration.ORIENTATION_LANDSCAPE;
+            final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
+            mOverrideConfig.screenLayout = Configuration.reduceScreenLayout(
+                    sl, mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
         }
 
         if (mFullscreen != oldFullscreen) {
