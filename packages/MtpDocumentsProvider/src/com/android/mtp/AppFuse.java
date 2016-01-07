@@ -17,15 +17,13 @@
 package com.android.mtp;
 
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.storage.StorageManager;
 import android.util.Log;
-
 import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import android.os.Process;
 
 /**
  * TODO: Remove VisibleForTesting class.
@@ -37,12 +35,14 @@ public class AppFuse {
     }
 
     private final String mName;
+    private final Callback mCallback;
     private final Thread mMessageThread;
     private ParcelFileDescriptor mDeviceFd;
 
     @VisibleForTesting
-    AppFuse(String name) {
+    AppFuse(String name, Callback callback) {
         mName = name;
+        mCallback = callback;
         mMessageThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -72,9 +72,44 @@ public class AppFuse {
         }
     }
 
+    /**
+     * @param i
+     * @throws FileNotFoundException
+     */
+    @VisibleForTesting
+    public ParcelFileDescriptor openFile(int i) throws FileNotFoundException {
+        return ParcelFileDescriptor.open(new File(
+                getMountPoint(),
+                Integer.toString(i)),
+                ParcelFileDescriptor.MODE_READ_ONLY);
+    }
+
     @VisibleForTesting
     File getMountPoint() {
         return new File("/mnt/appfuse/" + Process.myUid() + "_" + mName);
+    }
+
+    static interface Callback {
+        long getFileSize(int inode) throws FileNotFoundException;
+        byte[] getObjectBytes(int inode, long offset, int size) throws IOException;
+    }
+
+    @VisibleForTesting
+    private long getFileSize(int inode) {
+        try {
+            return mCallback.getFileSize(inode);
+        } catch (IOException e) {
+            return -1;
+        }
+    }
+
+    @VisibleForTesting
+    private byte[] getObjectBytes(int inode, long offset, int size) {
+        try {
+            return mCallback.getObjectBytes(inode, offset, size);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private native boolean native_start_app_fuse_loop(int fd);

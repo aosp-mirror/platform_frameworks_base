@@ -203,4 +203,9 @@ public class TestMtpManager extends MtpManager {
         }
         return Arrays.copyOf(result, count);
     }
+
+    @Override
+    byte[] getObject(int deviceId, int objectHandle, int expectedSize) throws IOException {
+        return mImportFileBytes.get(pack(deviceId, objectHandle));
+    }
 }
