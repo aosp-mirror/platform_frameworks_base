@@ -30,8 +30,8 @@ import java.util.ArrayList;
 public class ReferenceCountedTrigger {
 
     int mCount;
-    ArrayList<Runnable> mFirstIncRunnables = new ArrayList<Runnable>();
-    ArrayList<Runnable> mLastDecRunnables = new ArrayList<Runnable>();
+    ArrayList<Runnable> mFirstIncRunnables = new ArrayList<>();
+    ArrayList<Runnable> mLastDecRunnables = new ArrayList<>();
     Runnable mErrorRunnable;
 
     // Convenience runnables

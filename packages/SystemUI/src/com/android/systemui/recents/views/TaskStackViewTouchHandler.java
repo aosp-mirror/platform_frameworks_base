@@ -33,7 +33,7 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
-import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -367,7 +367,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
         // Remove the task view from the stack
-        EventBus.getDefault().send(new DismissTaskViewEvent(tv.getTask(), tv));
+        EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
         // Keep track of deletions by keyboard
         MetricsLogger.histogram(tv.getContext(), "overview_task_dismissed_source",
                 Constants.Metrics.DismissSourceSwipeGesture);

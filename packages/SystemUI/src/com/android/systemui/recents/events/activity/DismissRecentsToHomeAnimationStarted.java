@@ -21,6 +21,12 @@ import com.android.systemui.recents.events.EventBus;
 /**
  * This is sent when the task animation when dismissing Recents starts.
  */
-public class DismissRecentsToHomeAnimationStarted extends EventBus.Event {
-    // Simple event
+public class DismissRecentsToHomeAnimationStarted extends EventBus.AnimatedEvent {
+
+    public final boolean animated;
+
+    public DismissRecentsToHomeAnimationStarted(boolean animated) {
+        this.animated = animated;
+    }
+
 }

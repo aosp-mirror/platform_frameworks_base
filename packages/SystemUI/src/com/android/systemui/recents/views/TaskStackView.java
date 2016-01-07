@@ -47,19 +47,22 @@ import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
+import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
+import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
+import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -136,8 +139,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     boolean mStackViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
     boolean mEnterAnimationComplete = false;
-    boolean mStartEnterAnimationRequestedAfterLayout;
-    ViewAnimation.TaskViewEnterContext mStartEnterAnimationContext;
 
     Rect mTaskStackBounds = new Rect();
     int[] mTmpVisibleRange = new int[2];
@@ -586,6 +587,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // Find the next view to clip against
                 for (int j = i + 1; j < taskViewCount; j++) {
                     tmpTv = taskViews.get(j);
+
                     if (tmpTv.shouldClipViewInStack()) {
                         frontTv = tmpTv;
                         break;
@@ -1031,14 +1033,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             tv.prepareEnterRecentsAnimation(hideTask, occludesLaunchTarget, offscreenY);
         }
 
-        // If the enter animation started already and we haven't completed a layout yet, do the
-        // enter animation now
-        if (mStartEnterAnimationRequestedAfterLayout) {
-            startEnterRecentsAnimation(mStartEnterAnimationContext);
-            mStartEnterAnimationRequestedAfterLayout = false;
-            mStartEnterAnimationContext = null;
-        }
-
         // Animate in the freeform workspace
         animateFreeformWorkspaceBackgroundAlpha(
                 mLayoutAlgorithm.getStackState().freeformBackgroundAlpha, 150,
@@ -1061,20 +1055,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             EventBus.getDefault().send(new HideHistoryButtonEvent());
         }
-
-        // Start dozing
-        mUIDozeTrigger.startDozing();
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
     public void startEnterRecentsAnimation(ViewAnimation.TaskViewEnterContext ctx) {
-        // If we are still waiting to layout, then just defer until then
-        if (mAwaitingFirstLayout) {
-            mStartEnterAnimationRequestedAfterLayout = true;
-            mStartEnterAnimationContext = ctx;
-            return;
-        }
-
         if (mStack.getStackTaskCount() > 0) {
             // Find the launch target task
             Task launchTargetTask = mStack.getLaunchTarget();
@@ -1435,17 +1419,27 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
     }
 
-    public final void onBusEvent(DismissTaskViewEvent event) {
-        removeTaskViewFromStack(event.taskView);
-        EventBus.getDefault().send(new DismissTaskEvent(event.task));
+    public final void onBusEvent(LaunchTaskStartedEvent event) {
+        event.getAnimationTrigger().increment();
+        startLaunchTaskAnimation(event.taskView, event.getAnimationTrigger().decrementAsRunnable(),
+                event.screenPinningRequested);
     }
 
-    public final void onBusEvent(FocusNextTaskViewEvent event) {
-        setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */);
-    }
+    public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
+        // Stop any scrolling
+        mStackScroller.stopScroller();
+        mStackScroller.stopBoundScrollAnimation();
 
-    public final void onBusEvent(FocusPreviousTaskViewEvent event) {
-        setRelativeFocusedTask(false, false /* stackTasksOnly */, true /* animated */);
+        // Start the task animations
+        ViewAnimation.TaskViewExitContext context = new ViewAnimation.TaskViewExitContext(
+                event.getAnimationTrigger());
+        startExitToHomeAnimation(context);
+
+        // Dismiss the freeform workspace background
+        int taskViewExitToHomeDuration = getResources().getInteger(
+                R.integer.recents_task_exit_to_home_duration);
+        animateFreeformWorkspaceBackgroundAlpha(0, taskViewExitToHomeDuration,
+                mFastOutSlowInInterpolator);
     }
 
     public final void onBusEvent(DismissFocusedTaskViewEvent event) {
@@ -1456,6 +1450,26 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
             resetFocusedTask(mFocusedTask);
         }
+    }
+
+    public final void onBusEvent(final DismissTaskViewEvent event) {
+        // For visible children, defer removing the task until after the animation
+        event.getAnimationTrigger().increment();
+        event.taskView.startDeleteTaskAnimation(
+                event.getAnimationTrigger().decrementAsRunnable(), 0);
+    }
+
+    public final void onBusEvent(TaskViewDismissedEvent event) {
+        removeTaskViewFromStack(event.taskView);
+        EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
+    }
+
+    public final void onBusEvent(FocusNextTaskViewEvent event) {
+        setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */);
+    }
+
+    public final void onBusEvent(FocusPreviousTaskViewEvent event) {
+        setRelativeFocusedTask(false, false /* stackTasksOnly */, true /* animated */);
     }
 
     public final void onBusEvent(UserInteractionEvent event) {
@@ -1553,6 +1567,33 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         mEnterAnimationComplete = true;
+
+        if (mStack.getStackTaskCount() > 0) {
+            // Start the task enter animations
+            ViewAnimation.TaskViewEnterContext context = new ViewAnimation.TaskViewEnterContext(
+                    event.getAnimationTrigger());
+            startEnterRecentsAnimation(context);
+
+            // Add a runnable to the post animation ref counter to clear all the views
+            event.addPostAnimationCallback(new Runnable() {
+                @Override
+                public void run() {
+                    // Start the dozer to trigger to trigger any UI that shows after a timeout
+                    mUIDozeTrigger.startDozing();
+
+                    // Update the focused state here -- since we only set the focused task without
+                    // requesting view focus in onFirstLayout(), actually request view focus and
+                    // animate the focused state if we are alt-tabbing now, after the window enter
+                    // animation is completed
+                    if (mFocusedTask != null) {
+                        RecentsConfiguration config = Recents.getConfiguration();
+                        RecentsActivityLaunchState launchState = config.getLaunchState();
+                        setFocusedTask(mStack.indexOfStackTask(mFocusedTask),
+                                false /* scrollToTask */, launchState.launchedWithAltTab);
+                    }
+                }
+            });
+        }
     }
 
     public final void onBusEvent(UpdateFreeformTaskViewVisibilityEvent event) {

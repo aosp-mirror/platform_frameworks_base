@@ -22,7 +22,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.ui.DismissTaskEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 
 
 /**
@@ -65,7 +65,7 @@ public class RecentsHistoryItemTouchCallbacks extends ItemTouchHelper.SimpleCall
             RecentsHistoryAdapter.TaskRow taskRow = (RecentsHistoryAdapter.TaskRow) row;
 
             // Remove the task from the system
-            EventBus.getDefault().send(new DismissTaskEvent(taskRow.task));
+            EventBus.getDefault().send(new DeleteTaskDataEvent(taskRow.task));
             mAdapter.onTaskRemoved(taskRow.task, position);
 
             // Keep track of deletions by swiping within history

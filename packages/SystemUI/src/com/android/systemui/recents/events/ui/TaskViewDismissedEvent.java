@@ -21,13 +21,15 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**
- * This is sent when a {@link Task} has been dismissed.
+ * This event is sent when a {@link TaskView} has been dismissed and is no longer visible.
  */
-public class DismissTaskEvent extends EventBus.Event {
+public class TaskViewDismissedEvent extends EventBus.Event {
 
     public final Task task;
+    public final TaskView taskView;
 
-    public DismissTaskEvent(Task task) {
+    public TaskViewDismissedEvent(Task task, TaskView taskView) {
         this.task = task;
+        this.taskView = taskView;
     }
 }

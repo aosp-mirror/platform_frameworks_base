@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.ui;
+package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.views.TaskView;
 
 /**
- * This event is sent to request that the given {@link TaskView} is dismissed.
+ * Event sent when the exit animation is started.
+ *
+ * This is sent so parts of UI can synchronize on this event and adjust their appearance. An example
+ * of that is hiding the tasks when the launched application window becomes visible.
  */
-public class DismissTaskViewEvent extends EventBus.AnimatedEvent {
-
-    public final TaskView taskView;
-    public final Task task;
-
-    public DismissTaskViewEvent(TaskView taskView, Task task) {
-        this.taskView = taskView;
-        this.task = task;
-    }
+public class ExitRecentsWindowFirstAnimationFrameEvent extends EventBus.Event {
 }

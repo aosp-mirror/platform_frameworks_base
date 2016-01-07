@@ -22,7 +22,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskView;
 
 /**
- * This is sent to launch a task from Recents.
+ * This event is sent to request that a particular task is launched.
  */
 public class LaunchTaskEvent extends EventBus.Event {
 
