@@ -46,7 +46,7 @@ oneway interface IStatusBar
     void cancelPreloadRecentApps();
     void showScreenPinningRequest();
 
-    void showKeyboardShortcutsMenu();
+    void toggleKeyboardShortcutsMenu();
 
     /**
      * Notifies the status bar that an app transition is pending to delay applying some flags with

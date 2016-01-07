@@ -137,7 +137,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_SHOW_NEXT_AFFILIATED_TASK = 1024;
     protected static final int MSG_SHOW_PREV_AFFILIATED_TASK = 1025;
-    protected static final int MSG_SHOW_KEYBOARD_SHORTCUTS_MENU = 1026;
+    protected static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU = 1026;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -1116,8 +1116,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
-    public void showKeyboardShortcutsMenu() {
-        int msg = MSG_SHOW_KEYBOARD_SHORTCUTS_MENU;
+    public void toggleKeyboardShortcutsMenu() {
+        int msg = MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
@@ -1198,8 +1198,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    // TODO: this (and maybe a few layers above) should be called toggle instead of show.
-    protected void showKeyboardShortcuts() {
+    protected void toggleKeyboardShortcuts() {
         getKeyboardShortcuts().toggleKeyboardShortcuts(mContext);
     }
 
@@ -1323,8 +1322,8 @@ public abstract class BaseStatusBar extends SystemUI implements
              case MSG_SHOW_PREV_AFFILIATED_TASK:
                   showRecentsPreviousAffiliatedTask();
                   break;
-             case MSG_SHOW_KEYBOARD_SHORTCUTS_MENU:
-                  showKeyboardShortcuts();
+             case MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU:
+                  toggleKeyboardShortcuts();
                   break;
             }
         }
