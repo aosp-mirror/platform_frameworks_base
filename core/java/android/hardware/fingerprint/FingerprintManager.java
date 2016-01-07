@@ -496,7 +496,10 @@ public class FingerprintManager {
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] token, CancellationSignal cancel, int flags,
-            EnrollmentCallback callback) {
+            EnrollmentCallback callback, int userId) {
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = getCurrentUserId();
+        }
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -512,7 +515,7 @@ public class FingerprintManager {
 
         if (mService != null) try {
             mEnrollmentCallback = callback;
-            mService.enroll(mToken, token, getCurrentUserId(), mServiceReceiver, flags);
+            mService.enroll(mToken, token, userId, mServiceReceiver, flags);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception in enroll: ", e);
             if (callback != null) {
@@ -553,6 +556,21 @@ public class FingerprintManager {
             Log.w(TAG, "Remote exception in post enroll: ", e);
         }
         return result;
+    }
+
+    /**
+     * Sets the active user. This is meant to be used to select the current profile for enrollment
+     * to allow separate enrolled fingers for a work profile
+     * @param userId
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void setActiveUser(int userId) {
+        if (mService != null) try {
+            mService.setActiveUser(userId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Remote exception in setActiveUser: ", e);
+        }
     }
 
     /**
