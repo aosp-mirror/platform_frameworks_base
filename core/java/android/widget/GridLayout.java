@@ -1752,7 +1752,8 @@ public class GridLayout extends ViewGroup {
             boolean validSolution = true;
             // do a binary search to find the max delta that won't conflict with constraints
             while(deltaMin < deltaMax) {
-                final int delta = (deltaMin + deltaMax) / 2;
+                // cast to long to prevent overflow.
+                final int delta = (int) (((long) deltaMin + deltaMax) / 2);
                 invalidateValues();
                 shareOutDelta(delta, totalWeight);
                 validSolution = solve(getArcs(), a, false);
