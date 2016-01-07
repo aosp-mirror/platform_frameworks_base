@@ -971,6 +971,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         row.findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                guts.saveImportance(sbn);
                 dismissPopups();
             }
         });
