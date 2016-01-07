@@ -1244,7 +1244,7 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, sInfo.packageName, callingPid);
                         if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                             Slog.w(TAG, "Background execution not allowed: service "
-                                    + r.intent + " to " + name.flattenToShortString()
+                                    + service + " to " + name.flattenToShortString()
                                     + " from pid=" + callingPid + " uid=" + callingUid
                                     + " pkg=" + callingPackage);
                             return null;
