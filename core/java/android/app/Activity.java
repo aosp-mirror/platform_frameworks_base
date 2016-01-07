@@ -2846,16 +2846,15 @@ public class Activity extends ContextThemeWrapper
         if (keyCode == KeyEvent.KEYCODE_MENU &&
                 mActionBar != null && mActionBar.onMenuKeyEvent(event)) {
             return true;
-        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
-            // Capture the Alt-up and send focus to the ActionBar
+        } else if (event.isCtrlPressed() &&
+                event.getUnicodeChar(event.getMetaState() & ~KeyEvent.META_CTRL_MASK) == '<') {
+            // Capture the Control-< and send focus to the ActionBar
             final int action = event.getAction();
             if (action == KeyEvent.ACTION_DOWN) {
-                if (event.hasModifiers(KeyEvent.META_ALT_ON)) {
-                    final ActionBar actionBar = getActionBar();
-                    if (actionBar != null && actionBar.isShowing() && actionBar.requestFocus()) {
-                        mEatKeyUpEvent = true;
-                        return true;
-                    }
+                final ActionBar actionBar = getActionBar();
+                if (actionBar != null && actionBar.isShowing() && actionBar.requestFocus()) {
+                    mEatKeyUpEvent = true;
+                    return true;
                 }
             } else if (action == KeyEvent.ACTION_UP && mEatKeyUpEvent) {
                 mEatKeyUpEvent = false;
