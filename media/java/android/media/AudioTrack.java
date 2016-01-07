@@ -100,7 +100,7 @@ public class AudioTrack
     /** Maximum value for AudioTrack channel count
      * @hide public for MediaCode only, do not un-hide or change to a numeric literal
      */
-    public static final int CHANNEL_COUNT_MAX = native_get_FCC_8();
+    public static final int CHANNEL_COUNT_MAX = 8; // FIXME was native_get_FCC_8(), unregistered!
 
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
@@ -2584,7 +2584,7 @@ public class AudioTrack
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
-    static private native int native_get_FCC_8();
+    // FIXME static private native int native_get_FCC_8();
 
     //---------------------------------------------------------
     // Utility methods
