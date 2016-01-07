@@ -81,9 +81,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
-import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -152,7 +150,6 @@ import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
-import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -345,7 +342,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // Tracking finger for opening/closing.
     boolean mTracking;
-    VelocityTracker mVelocityTracker;
 
     int[] mAbsPos = new int[2];
     ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
@@ -695,15 +691,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         });
 
-        mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
-        mStatusBarView.setBar(this);
-
-        PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
-        mStatusBarView.setPanelHolder(holder);
-
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
                 R.id.notification_panel);
         mNotificationPanel.setStatusBar(this);
+
+        mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
+        mStatusBarView.setBar(this);
+        mStatusBarView.setPanel(mNotificationPanel);
 
         if (!ActivityManager.isHighEndGfx()) {
             mStatusBarWindow.setBackground(null);
@@ -2281,7 +2275,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowManager.setStatusBarFocusable(false);
 
             mStatusBarWindow.cancelExpandHelper();
-            mStatusBarView.collapseAllPanels(true /* animate */, delayed, speedUpFactor);
+            mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
         }
     }
 
@@ -2330,7 +2324,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void animateCollapseQuickSettings() {
         if (mState == StatusBarState.SHADE) {
-            mStatusBarView.collapseAllPanels(true, false /* delayed */, 1.0f /* speedUpFactor */);
+            mStatusBarView.collapsePanel(true, false /* delayed */, 1.0f /* speedUpFactor */);
         }
     }
 
@@ -2343,7 +2337,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
-        mStatusBarView.collapseAllPanels(/*animate=*/ false, false /* delayed*/,
+        mStatusBarView.collapsePanel(/*animate=*/ false, false /* delayed*/,
                 1.0f /* speedUpFactor */);
 
         mNotificationPanel.closeQs();
@@ -2435,7 +2429,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
             if (!showing && mState == StatusBarState.SHADE) {
-                mStatusBarView.collapseAllPanels(false /* animate */, false /* delayed */,
+                mStatusBarView.collapsePanel(false /* animate */, false /* delayed */,
                         1.0f /* speedUpFactor */);
             }
         }
