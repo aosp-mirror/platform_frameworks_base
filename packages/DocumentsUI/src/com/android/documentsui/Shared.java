@@ -20,6 +20,9 @@ import android.content.Context;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** @hide */
 public final class Shared {
     /** Intent action name to pick a copy destination. */
@@ -64,4 +67,13 @@ public final class Shared {
         return DateUtils.formatDateTime(context, when, flags);
     }
 
+    /**
+     * A convenient way to transform any list into a (parcelable) ArrayList.
+     * Uses cast if possible, else creates a new list with entries from {@code list}.
+     */
+    public static <T> ArrayList<T> asArrayList(List<T> list) {
+        return list instanceof ArrayList
+            ? (ArrayList<T>) list
+            : new ArrayList<T>(list);
+    }
 }

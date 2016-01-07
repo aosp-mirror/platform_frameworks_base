@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -27,6 +29,8 @@ import android.text.Html;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.services.FileOperationService;
+import com.android.documentsui.services.FileOperations;
 
 import java.util.ArrayList;
 
@@ -37,20 +41,20 @@ public class FailureDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
     private static final String TAG = "FailureDialogFragment";
 
-    private int mTransferMode;
+    private int mOperationType;
     private ArrayList<DocumentInfo> mFailedSrcList;
 
     public static void show(FragmentManager fm, int failure,
-            ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack, int transferMode) {
+            ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack, int operationType) {
         // TODO: Add support for other failures than copy.
-        if (failure != CopyService.FAILURE_COPY) {
+        if (failure != FileOperationService.FAILURE_COPY) {
             return;
         }
 
         final Bundle args = new Bundle();
-        args.putInt(CopyService.EXTRA_FAILURE, failure);
-        args.putInt(CopyService.EXTRA_TRANSFER_MODE, transferMode);
-        args.putParcelableArrayList(CopyService.EXTRA_SRC_LIST, failedSrcList);
+        args.putInt(FileOperationService.EXTRA_FAILURE, failure);
+        args.putInt(FileOperationService.EXTRA_OPERATION, operationType);
+        args.putParcelableArrayList(FileOperationService.EXTRA_SRC_LIST, failedSrcList);
 
         final FragmentTransaction ft = fm.beginTransaction();
         final FailureDialogFragment fragment = new FailureDialogFragment();
@@ -63,10 +67,12 @@ public class FailureDialogFragment extends DialogFragment
     @Override
     public void onClick(DialogInterface dialog, int whichButton) {
         if (whichButton == DialogInterface.BUTTON_POSITIVE) {
-            CopyService.start(getActivity(), mFailedSrcList,
+            FileOperations.start(
+                    getActivity(),
+                    mFailedSrcList,
                     (DocumentStack) getActivity().getIntent().getParcelableExtra(
                             Shared.EXTRA_STACK),
-                            mTransferMode);
+                    mOperationType);
         }
     }
 
@@ -74,16 +80,27 @@ public class FailureDialogFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle inState) {
         super.onCreate(inState);
 
-        mTransferMode = getArguments().getInt(CopyService.EXTRA_TRANSFER_MODE);
-        mFailedSrcList = getArguments().getParcelableArrayList(CopyService.EXTRA_SRC_LIST);
+        mOperationType = getArguments().getInt(FileOperationService.EXTRA_OPERATION);
+        mFailedSrcList = getArguments().getParcelableArrayList(FileOperationService.EXTRA_SRC_LIST);
 
         final StringBuilder list = new StringBuilder("<p>");
         for (DocumentInfo documentInfo : mFailedSrcList) {
             list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
         }
         list.append("</p>");
-        final String messageFormat = getString(mTransferMode == CopyService.TRANSFER_MODE_COPY ?
-                R.string.copy_failure_alert_content : R.string.move_failure_alert_content);
+
+        // TODO: Add support for other file operations.
+        checkArgument(
+                mOperationType == FileOperationService.OPERATION_COPY
+                || mOperationType == FileOperationService.OPERATION_MOVE);
+
+        int messageId = mOperationType == FileOperationService.OPERATION_COPY
+                ? R.string.copy_failure_alert_content
+                : R.string.move_failure_alert_content;
+
+        final String messageFormat = getString(
+                messageId);
+
         final String message = String.format(messageFormat, list.toString());
 
         return new AlertDialog.Builder(getActivity())

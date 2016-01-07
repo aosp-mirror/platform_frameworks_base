@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui;
+package com.android.documentsui.services;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -34,6 +34,9 @@ import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
+import com.android.documentsui.DocumentsProviderHelper;
+import com.android.documentsui.Shared;
+import com.android.documentsui.StubProvider;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
@@ -54,10 +57,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @MediumTest
-public class CopyServiceTest extends ServiceTestCase<CopyService> {
+public class FileOperationServiceTest extends ServiceTestCase<FileOperationService> {
 
-    public CopyServiceTest() {
-        super(CopyService.class);
+    public FileOperationServiceTest() {
+        super(FileOperationService.class);
     }
 
     private static String AUTHORITY = "com.android.documentsui.stubprovider";
@@ -139,7 +142,9 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
                 testContent.getBytes());
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testFile));
-        moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
+        moveIntent.putExtra(
+                FileOperationService.EXTRA_OPERATION,
+                FileOperationService.OPERATION_MOVE);
         startService(moveIntent);
 
         // 3 operations: file creation, writing data, deleting original.
@@ -235,7 +240,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         Uri testDir = createTestDirectory(srcPath);
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testDir));
-        moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
+        moveIntent.putExtra(FileOperationService.EXTRA_OPERATION, FileOperationService.OPERATION_MOVE);
         startService(moveIntent);
 
         // 2 operations: Directory creation, and removal of the original.
@@ -270,7 +275,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         mStorage.createRegularFile(SRC_ROOT, srcFiles[2], "text/plain", testContent[2].getBytes());
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testDir));
-        moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
+        moveIntent.putExtra(FileOperationService.EXTRA_OPERATION, FileOperationService.OPERATION_MOVE);
         startService(moveIntent);
 
         // dir creation, then creation and writing of 3 files, then removal of src dir and 3 src
@@ -332,7 +337,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         mStorage.simulateReadErrorsForFile(testFile);
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testFile));
-        moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
+        moveIntent.putExtra(FileOperationService.EXTRA_OPERATION, FileOperationService.OPERATION_MOVE);
         startService(moveIntent);
 
         try {
@@ -374,7 +379,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         mStorage.simulateReadErrorsForFile(errFile);
 
         Intent moveIntent = createCopyIntent(Lists.newArrayList(testDir));
-        moveIntent.putExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_MOVE);
+        moveIntent.putExtra(FileOperationService.EXTRA_OPERATION, FileOperationService.OPERATION_MOVE);
         startService(moveIntent);
 
         // - dst dir creation,
@@ -422,8 +427,14 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
         DocumentStack stack = new DocumentStack();
         stack.push(DocumentInfo.fromUri(mResolver, dst));
-        final Intent copyIntent = new Intent(mContext, CopyService.class);
-        copyIntent.putParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST, srcDocs);
+        final Intent copyIntent = new Intent(mContext, FileOperationService.class);
+        copyIntent.putExtra(
+                FileOperationService.EXTRA_OPERATION,
+                FileOperationService.OPERATION_COPY);
+        copyIntent.putExtra(
+                FileOperationService.EXTRA_JOB_ID,
+                FileOperationService.createJobId());
+        copyIntent.putParcelableArrayListExtra(FileOperationService.EXTRA_SRC_LIST, srcDocs);
         copyIntent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
 
         return copyIntent;
@@ -509,7 +520,7 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
         mResolver.addProvider(AUTHORITY, mStorage);
     }
 
-    private final class CopyJobListener implements CopyService.TestOnlyListener {
+    private final class CopyJobListener implements FileOperationService.TestOnlyListener {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final List<DocumentInfo> failedDocs = new ArrayList<>();
