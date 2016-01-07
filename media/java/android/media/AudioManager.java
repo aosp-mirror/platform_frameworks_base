@@ -2115,36 +2115,52 @@ public class AudioManager {
     }
 
     /**
-     * Handler for audio focus events coming from the audio service.
+     * Handler for events (audio focus change, recording config change) coming from the
+     * audio service.
      */
-    private final FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
-            new FocusEventHandlerDelegate();
+    private final ServiceEventHandlerDelegate mServiceEventHandlerDelegate =
+            new ServiceEventHandlerDelegate();
 
     /**
-     * Helper class to handle the forwarding of audio focus events to the appropriate listener
+     * Event types
      */
-    private class FocusEventHandlerDelegate {
+    private final static int MSSG_FOCUS_CHANGE = 0;
+    private final static int MSSG_RECORDING_CONFIG_CHANGE = 1;
+
+    /**
+     * Helper class to handle the forwarding of audio service events to the appropriate listener
+     */
+    private class ServiceEventHandlerDelegate {
         private final Handler mHandler;
 
-        FocusEventHandlerDelegate() {
+        ServiceEventHandlerDelegate() {
             Looper looper;
             if ((looper = Looper.myLooper()) == null) {
                 looper = Looper.getMainLooper();
             }
 
             if (looper != null) {
-                // implement the event handler delegate to receive audio focus events
+                // implement the event handler delegate to receive events from audio service
                 mHandler = new Handler(looper) {
                     @Override
                     public void handleMessage(Message msg) {
-                        OnAudioFocusChangeListener listener = null;
-                        synchronized(mFocusListenerLock) {
-                            listener = findFocusListener((String)msg.obj);
-                        }
-                        if (listener != null) {
-                            Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
-                                    + msg.what + ") for " + msg.obj);
-                            listener.onAudioFocusChange(msg.what);
+                        switch (msg.what) {
+                            case MSSG_FOCUS_CHANGE:
+                                OnAudioFocusChangeListener listener = null;
+                                synchronized(mFocusListenerLock) {
+                                    listener = findFocusListener((String)msg.obj);
+                                }
+                                if (listener != null) {
+                                    Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
+                                            + msg.what + ") for " + msg.obj);
+                                    listener.onAudioFocusChange(msg.arg1);
+                                }
+                                break;
+                            case MSSG_RECORDING_CONFIG_CHANGE:
+                                // cool stuff happening here in a bit, patience
+                                break;
+                            default:
+                                Log.e(TAG, "Unknown event " + msg.what);
                         }
                     }
                 };
@@ -2161,8 +2177,9 @@ public class AudioManager {
     private final IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
 
         public void dispatchAudioFocusChange(int focusChange, String id) {
-            Message m = mAudioFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
-            mAudioFocusEventHandlerDelegate.getHandler().sendMessage(m);
+            Message m = mServiceEventHandlerDelegate.getHandler().obtainMessage(
+                    MSSG_FOCUS_CHANGE/*what*/, focusChange/*arg1*/, 0/*arg2 ignored*/, id/*obj*/);
+            mServiceEventHandlerDelegate.getHandler().sendMessage(m);
         }
 
     };
