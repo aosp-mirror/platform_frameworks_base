@@ -578,31 +578,23 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mTmpWindows = new ArrayList<>();
 
     boolean mHardKeyboardAvailable;
-    boolean mShowImeWithHardKeyboard;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
 
     private final class SettingsObserver extends ContentObserver {
-        private final Uri mShowImeWithHardKeyboardUri =
-                Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
-
         private final Uri mDisplayInversionEnabledUri =
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
 
         public SettingsObserver() {
             super(new Handler());
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(mShowImeWithHardKeyboardUri, false, this,
-                    UserHandle.USER_ALL);
             resolver.registerContentObserver(mDisplayInversionEnabledUri, false, this,
                     UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            if (mShowImeWithHardKeyboardUri.equals(uri)) {
-                updateShowImeWithHardKeyboard();
-            } else if (mDisplayInversionEnabledUri.equals(uri)) {
+            if (mDisplayInversionEnabledUri.equals(uri)) {
                 updateCircularDisplayMaskIfNeeded();
             }
         }
@@ -946,7 +938,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mSettingsObserver = new SettingsObserver();
-        updateShowImeWithHardKeyboard();
 
         mHoldingScreenWakeLock = mPowerManager.newWakeLock(
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG_WM);
@@ -7111,27 +7102,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
             mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
         }
-        if (mShowImeWithHardKeyboard) {
-            config.keyboard = Configuration.KEYBOARD_NOKEYS;
-        }
 
         // Let the policy update hidden states.
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
         config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
         mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
-    }
-
-    public void updateShowImeWithHardKeyboard() {
-        synchronized (mWindowMap) {
-            final boolean showImeWithHardKeyboard = Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(), Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0,
-                    mCurrentUserId) == 1;
-            if (mShowImeWithHardKeyboard != showImeWithHardKeyboard) {
-                mShowImeWithHardKeyboard = showImeWithHardKeyboard;
-                mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-            }
-        }
     }
 
     void notifyHardKeyboardStatusChange() {
