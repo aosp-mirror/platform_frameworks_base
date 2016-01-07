@@ -31,6 +31,7 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -3969,7 +3970,7 @@ public abstract class Context {
      * @hide
      */
     @TestApi
-    public abstract int getUserId();
+    public abstract @UserIdInt int getUserId();
 
     /**
      * Return a new Context object for the current Context but whose resources

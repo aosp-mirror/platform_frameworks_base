@@ -9455,8 +9455,10 @@ package android.content.pm {
     method public abstract java.lang.String getNameForUid(int);
     method public android.content.pm.PackageInfo getPackageArchiveInfo(java.lang.String, int);
     method public abstract int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract int[] getPackageGids(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.content.pm.PackageInstaller getPackageInstaller();
+    method public abstract int getPackageUid(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.lang.String[] getPackagesForUid(int);
     method public abstract java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public abstract android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -36768,8 +36770,10 @@ package android.test.mock {
     method public android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public java.lang.String getNameForUid(int);
     method public int[] getPackageGids(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public int[] getPackageGids(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PackageInfo getPackageInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.pm.PackageInstaller getPackageInstaller();
+    method public int getPackageUid(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.lang.String[] getPackagesForUid(int);
     method public java.util.List<android.content.pm.PackageInfo> getPackagesHoldingPermissions(java.lang.String[], int);
     method public android.content.pm.PermissionGroupInfo getPermissionGroupInfo(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;

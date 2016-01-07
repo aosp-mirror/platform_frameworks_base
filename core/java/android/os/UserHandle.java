@@ -16,8 +16,10 @@
 
 package android.os;
 
+import android.annotation.AppIdInt;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 
 import java.io.PrintWriter;
 
@@ -128,7 +130,7 @@ public final class UserHandle implements Parcelable {
      * Returns the user id for a given uid.
      * @hide
      */
-    public static int getUserId(int uid) {
+    public static @UserIdInt int getUserId(int uid) {
         if (MU_ENABLED) {
             return uid / PER_USER_RANGE;
         } else {
@@ -137,12 +139,12 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int getCallingUserId() {
+    public static @UserIdInt int getCallingUserId() {
         return getUserId(Binder.getCallingUid());
     }
 
     /** @hide */
-    public static UserHandle of(int userId) {
+    public static UserHandle of(@UserIdInt int userId) {
         return userId == USER_SYSTEM ? SYSTEM : new UserHandle(userId);
     }
 
@@ -150,7 +152,7 @@ public final class UserHandle implements Parcelable {
      * Returns the uid that is composed from the userId and the appId.
      * @hide
      */
-    public static int getUid(int userId, int appId) {
+    public static int getUid(@UserIdInt int userId, @AppIdInt int appId) {
         if (MU_ENABLED) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
         } else {
@@ -163,7 +165,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @TestApi
-    public static int getAppId(int uid) {
+    public static @AppIdInt int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }
 
@@ -171,7 +173,7 @@ public final class UserHandle implements Parcelable {
      * Returns the gid shared between all apps with this userId.
      * @hide
      */
-    public static int getUserGid(int userId) {
+    public static int getUserGid(@UserIdInt int userId) {
         return getUid(userId, Process.SHARED_USER_GID);
     }
 
@@ -188,7 +190,7 @@ public final class UserHandle implements Parcelable {
      * Returns the app id for a given shared app gid. Returns -1 if the ID is invalid.
      * @hide
      */
-    public static int getAppIdFromSharedAppGid(int gid) {
+    public static @AppIdInt int getAppIdFromSharedAppGid(int gid) {
         final int appId = getAppId(gid) + Process.FIRST_APPLICATION_UID
                 - Process.FIRST_SHARED_APPLICATION_GID;
         if (appId < 0 || appId >= Process.FIRST_SHARED_APPLICATION_GID) {
@@ -259,7 +261,7 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
-    public static int parseUserArg(String arg) {
+    public static @UserIdInt int parseUserArg(String arg) {
         int userId;
         if ("all".equals(arg)) {
             userId = UserHandle.USER_ALL;
@@ -281,7 +283,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
-    public static int myUserId() {
+    public static @UserIdInt int myUserId() {
         return getUserId(Process.myUid());
     }
 
@@ -317,7 +319,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
-    public int getIdentifier() {
+    public @UserIdInt int getIdentifier() {
         return mHandle;
     }
 
