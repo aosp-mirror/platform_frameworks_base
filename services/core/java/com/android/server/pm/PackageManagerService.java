@@ -602,7 +602,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     boolean mResolverReplaced = false;
 
-    private final ComponentName mIntentFilterVerifierComponent;
+    private final @Nullable ComponentName mIntentFilterVerifierComponent;
+    private final @Nullable IntentFilterVerifier<ActivityIntentInfo> mIntentFilterVerifier;
+
     private int mIntentFilterVerificationToken = 0;
 
     /** Component that knows whether or not an ephemeral application exists */
@@ -838,8 +840,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         filter.hasDataScheme(IntentFilter.SCHEME_HTTPS));
     }
 
-    private IntentFilterVerifier mIntentFilterVerifier;
-
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
@@ -974,8 +974,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String TAG_DEFAULT_APPS = "da";
     private static final String TAG_INTENT_FILTER_VERIFICATION = "iv";
 
-    final String mRequiredVerifierPackage;
-    final String mRequiredInstallerPackage;
+    final @Nullable String mRequiredVerifierPackage;
+    final @Nullable String mRequiredInstallerPackage;
 
     private final PackageUsage mPackageUsage = new PackageUsage();
 
@@ -2362,14 +2362,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
 
-            mRequiredVerifierPackage = getRequiredVerifierLPr();
-            mRequiredInstallerPackage = getRequiredInstallerLPr();
+            if (!mOnlyCore) {
+                mRequiredVerifierPackage = getRequiredVerifierLPr();
+                mRequiredInstallerPackage = getRequiredInstallerLPr();
+                mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
+                mIntentFilterVerifier = new IntentVerifierProxy(mContext,
+                        mIntentFilterVerifierComponent);
+            } else {
+                mRequiredVerifierPackage = null;
+                mRequiredInstallerPackage = null;
+                mIntentFilterVerifierComponent = null;
+                mIntentFilterVerifier = null;
+            }
 
             mInstallerService = new PackageInstallerService(context, this);
-
-            mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
-            mIntentFilterVerifier = new IntentVerifierProxy(mContext,
-                    mIntentFilterVerifierComponent);
 
             final ComponentName ephemeralResolverComponent = getEphemeralResolverLPr();
             final ComponentName ephemeralInstallerComponent = getEphemeralInstallerLPr();
