@@ -146,6 +146,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     // This is the view in which the window contents are placed. It is either
     // mDecor itself, or a child of mDecor where the contents go.
     ViewGroup mContentParent;
+    // Whether the client has explicitly set the content view. If false and mContentParent is not
+    // null, then the content parent was set due to window preservation.
+    private boolean mContentParentExplicitlySet = false;
 
     Callback2 mTakeSurfaceCallback;
 
@@ -315,7 +318,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public boolean requestFeature(int featureId) {
-        if (mContentParent != null) {
+        if (mContentParentExplicitlySet) {
             throw new AndroidRuntimeException("requestFeature() must be called before adding content");
         }
         final int features = getFeatures();
@@ -399,6 +402,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
+        mContentParentExplicitlySet = true;
     }
 
     @Override
@@ -429,6 +433,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (cb != null && !isDestroyed()) {
             cb.onContentChanged();
         }
+        mContentParentExplicitlySet = true;
     }
 
     @Override
