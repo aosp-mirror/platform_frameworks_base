@@ -12252,6 +12252,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.dimen.thumbnail_height);
             mDefaultPinnedStackBounds = Rect.unflattenFromString(res.getString(
                     com.android.internal.R.string.config_defaultPictureInPictureBounds));
+            final String appsNotReportingCrashes = res.getString(
+                    com.android.internal.R.string.config_appsNotReportingCrashes);
+            if (appsNotReportingCrashes != null) {
+                final String[] split = appsNotReportingCrashes.split(",");
+                if (split.length > 0) {
+                    mAppsNotReportingCrashes = new ArraySet<>();
+                    for (int i = 0; i < split.length; i++) {
+                        mAppsNotReportingCrashes.add(split[i]);
+                    }
+                }
+            }
         }
     }
 
