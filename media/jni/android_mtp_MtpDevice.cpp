@@ -29,6 +29,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "nativehelper/ScopedLocalRef.h"
 #include "private/android_filesystem_config.h"
 
 #include "MtpTypes.h"
@@ -40,6 +41,8 @@
 using namespace android;
 
 // ----------------------------------------------------------------------------
+
+namespace {
 
 static jfieldID field_context;
 
@@ -92,6 +95,28 @@ static jfieldID field_objectInfo_keywords;
 
 // MtpEvent fields
 static jfieldID field_event_eventCode;
+
+class JavaArrayWriter {
+    JNIEnv* mEnv;
+    jbyteArray mArray;
+    jsize mSize;
+
+public:
+    JavaArrayWriter(JNIEnv* env, jbyteArray array) :
+        mEnv(env), mArray(array), mSize(mEnv->GetArrayLength(mArray)) {}
+    bool write(void* data, uint32_t offset, uint32_t length) {
+        if (static_cast<uint32_t>(mSize) < offset + length) {
+            return false;
+        }
+        mEnv->SetByteArrayRegion(mArray, offset, length, static_cast<jbyte*>(data));
+        return true;
+    }
+    static bool writeTo(void* data, uint32_t offset, uint32_t length, void* clientData) {
+        return static_cast<JavaArrayWriter*>(clientData)->write(data, offset, length);
+    }
+};
+
+}
 
 MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
 {
@@ -307,38 +332,57 @@ android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
     return info;
 }
 
-struct get_object_callback_data {
-    JNIEnv *env;
-    jbyteArray array;
-};
-
-static bool get_object_callback(void* data, int offset, int length, void* clientData)
-{
-    get_object_callback_data* cbData = (get_object_callback_data *)clientData;
-    cbData->env->SetByteArrayRegion(cbData->array, offset, length, (jbyte *)data);
-    return true;
-}
-
 static jbyteArray
 android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jint objectSize)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
-    if (!device)
-        return NULL;
-
-    jbyteArray array = env->NewByteArray(objectSize);
-    if (!array) {
-        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
-        return NULL;
+    if (!device) {
+        return nullptr;
     }
 
-    get_object_callback_data data;
-    data.env = env;
-    data.array = array;
+    ScopedLocalRef<jbyteArray> array(env, env->NewByteArray(objectSize));
+    if (!array.get()) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return nullptr;
+    }
 
-    if (device->readObject(objectID, get_object_callback, objectSize, &data))
-        return array;
-    return NULL;
+    JavaArrayWriter writer(env, array.get());
+
+    if (device->readObject(objectID, JavaArrayWriter::writeTo, objectSize, &writer)) {
+        return array.release();
+    }
+    return nullptr;
+}
+
+static jint
+android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
+                                         jobject thiz,
+                                         jint objectID,
+                                         jint offset,
+                                         jint size,
+                                         jbyteArray array)
+{
+    if (array == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Array must not be null.");
+        return -1;
+    }
+
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        jniThrowException(env, "java/io/IOException", "Failed to obtain MtpDevice.");
+        return -1;
+    }
+
+    JavaArrayWriter writer(env, array);
+    const int64_t result = device->readPartialObject(
+            objectID, offset, size, JavaArrayWriter::writeTo, &writer);
+
+    if (result >= 0) {
+        return static_cast<jint>(result);
+    } else {
+        jniThrowException(env, "java/io/IOException", "Failed to read data.");
+        return -1;
+    }
 }
 
 static jbyteArray
@@ -547,6 +591,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_object_info",  "(I)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_get_object_info},
     {"native_get_object",       "(II)[B",(void *)android_mtp_MtpDevice_get_object},
+    {"native_get_partial_object", "(III[B)I", (void *) android_mtp_MtpDevice_get_partial_object},
     {"native_get_thumbnail",    "(I)[B",(void *)android_mtp_MtpDevice_get_thumbnail},
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
     {"native_get_parent",       "(I)J", (void *)android_mtp_MtpDevice_get_parent},
