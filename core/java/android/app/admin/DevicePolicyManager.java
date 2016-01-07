@@ -3065,6 +3065,8 @@ public class DevicePolicyManager {
      *
      * <p>If the device owner information is {@code null} or empty then the device owner info is
      * cleared and the user owner info is shown on the lock screen if it is set.
+     * <p>If the device owner information contains only whitespaces then the message on the lock
+     * screen will be blank and the user will not be allowed to change it.
      *
      * @param admin The name of the admin component to check.
      * @param info Device owner information which will be displayed instead of the user
