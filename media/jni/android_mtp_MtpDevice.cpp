@@ -375,15 +375,17 @@ android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
     }
 
     JavaArrayWriter writer(env, array);
-    const int64_t result = device->readPartialObject(
-            objectID, offset, size, JavaArrayWriter::writeTo, &writer);
-
-    if (result >= 0) {
-        return static_cast<jint>(result);
-    } else {
+    uint32_t written_size;
+    bool success = device->readPartialObject(
+            objectID, offset, size, &written_size, JavaArrayWriter::writeTo, &writer);
+    if (!success) {
         jniThrowException(env, "java/io/IOException", "Failed to read data.");
         return -1;
     }
+    // Note: assumption here is that a negative value will be treated as unsigned on the Java
+    //       level.
+    // TODO: Make sure that actually holds.
+    return static_cast<jint>(written_size);
 }
 
 static jbyteArray
