@@ -316,11 +316,8 @@ public class StubProvider extends DocumentsProvider {
             String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
         final StubDocument document = mStorage.get(documentId);
-        if (document == null || !document.file.isFile()) {
+        if (document == null || !document.file.isFile() || document.streamTypes == null) {
             throw new FileNotFoundException();
-        }
-        if ((document.flags & Document.FLAG_SUPPORTS_TYPED_DOCUMENT) == 0) {
-            throw new IllegalStateException("Tried to open a non-typed document as typed.");
         }
         for (final String mimeType : document.streamTypes) {
             // Strict compare won't accept wildcards, but that's OK for tests, as DocumentsUI
@@ -349,12 +346,12 @@ public class StubProvider extends DocumentsProvider {
             throw new IllegalArgumentException(
                     "The provided Uri is incorrect, or the file is gone.");
         }
-        if ((document.flags & Document.FLAG_SUPPORTS_TYPED_DOCUMENT) == 0) {
-            return null;
-        }
         if (!"*/*".equals(mimeTypeFilter)) {
             // Not used by DocumentsUI, so don't bother implementing it.
             throw new UnsupportedOperationException();
+        }
+        if (document.streamTypes == null) {
+            return null;
         }
         return document.streamTypes.toArray(new String[document.streamTypes.size()]);
     }
@@ -628,9 +625,6 @@ public class StubProvider extends DocumentsProvider {
                 File file, String mimeType, List<String> streamTypes, StubDocument parent) {
             int flags = Document.FLAG_SUPPORTS_DELETE | Document.FLAG_SUPPORTS_WRITE
                     | Document.FLAG_VIRTUAL_DOCUMENT;
-            if (streamTypes.size() > 0) {
-                flags |= Document.FLAG_SUPPORTS_TYPED_DOCUMENT;
-            }
             return new StubDocument(file, mimeType, streamTypes, flags, parent);
         }
 

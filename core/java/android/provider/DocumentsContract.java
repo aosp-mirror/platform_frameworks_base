@@ -230,7 +230,6 @@ public final class DocumentsContract {
          * @see #FLAG_SUPPORTS_WRITE
          * @see #FLAG_SUPPORTS_DELETE
          * @see #FLAG_SUPPORTS_THUMBNAIL
-         * @see #FLAG_SUPPORTS_TYPED_DOCUMENT
          * @see #FLAG_DIR_PREFERS_GRID
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          * @see #FLAG_VIRTUAL_DOCUMENT
@@ -349,15 +348,6 @@ public final class DocumentsContract {
         public static final int FLAG_SUPPORTS_MOVE = 1 << 8;
 
         /**
-         * Flag indicating that a document can be converted to alternative types.
-         *
-         * @see #COLUMN_FLAGS
-         * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
-         *      android.os.CancellationSignal)
-         */
-        public static final int FLAG_SUPPORTS_TYPED_DOCUMENT = 1 << 9;
-
-        /**
          * Flag indicating that a document is virtual, and doesn't have byte
          * representation in the MIME type specified as {@link #COLUMN_MIME_TYPE}.
          *
@@ -366,7 +356,7 @@ public final class DocumentsContract {
          * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
          *      android.os.CancellationSignal)
          */
-        public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 10;
+        public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 9;
 
         /**
          * Flag indicating that a document is an archive, and it's contents can be
@@ -378,7 +368,7 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          * @see DocumentsProvider#queryChildDocuments(String, String[], String)
          */
-        public static final int FLAG_ARCHIVE = 1 << 11;
+        public static final int FLAG_ARCHIVE = 1 << 10;
 
         /**
          * Flag indicating that document titles should be hidden when viewing
