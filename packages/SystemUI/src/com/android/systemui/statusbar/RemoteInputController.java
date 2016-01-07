@@ -30,11 +30,11 @@ import java.util.ArrayList;
 public class RemoteInputController {
 
     private final ArrayList<WeakReference<NotificationData.Entry>> mRemoteInputs = new ArrayList<>();
-    private final StatusBarWindowManager mStatusBarWindowManager;
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>(3);
     private final HeadsUpManager mHeadsUpManager;
 
     public RemoteInputController(StatusBarWindowManager sbwm, HeadsUpManager headsUpManager) {
-        mStatusBarWindowManager = sbwm;
+        addCallback(sbwm);
         mHeadsUpManager = headsUpManager;
     }
 
@@ -59,8 +59,12 @@ public class RemoteInputController {
     }
 
     private void apply(NotificationData.Entry entry) {
-        mStatusBarWindowManager.setRemoteInputActive(isRemoteInputActive());
         mHeadsUpManager.setRemoteInputActive(entry, isRemoteInputActive(entry));
+        boolean remoteInputActive = isRemoteInputActive();
+        int N = mCallbacks.size();
+        for (int i = 0; i < N; i++) {
+            mCallbacks.get(i).onRemoteInputActive(remoteInputActive);
+        }
     }
 
     /**
@@ -99,4 +103,12 @@ public class RemoteInputController {
     }
 
 
+    public void addCallback(Callback callback) {
+        Preconditions.checkNotNull(callback);
+        mCallbacks.add(callback);
+    }
+
+    public interface Callback {
+        void onRemoteInputActive(boolean active);
+    }
 }

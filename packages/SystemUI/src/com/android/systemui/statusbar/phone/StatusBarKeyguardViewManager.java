@@ -31,6 +31,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.RemoteInputController;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
@@ -40,7 +41,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
  * which is in turn, reported to this class by the current
  * {@link com.android.keyguard.KeyguardViewBase}.
  */
-public class StatusBarKeyguardViewManager {
+public class StatusBarKeyguardViewManager implements RemoteInputController.Callback {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = -3 * 16;
@@ -69,12 +70,15 @@ public class StatusBarKeyguardViewManager {
     private KeyguardBouncer mBouncer;
     private boolean mShowing;
     private boolean mOccluded;
+    private boolean mRemoteInputActive;
 
     private boolean mFirstUpdate = true;
     private boolean mLastShowing;
     private boolean mLastOccluded;
     private boolean mLastBouncerShowing;
     private boolean mLastBouncerDismissible;
+    private boolean mLastRemoteInputActive;
+
     private OnDismissAction mAfterKeyguardGoneAction;
     private boolean mDeviceWillWakeUp;
     private boolean mDeferScrimFadeOut;
@@ -197,6 +201,12 @@ public class StatusBarKeyguardViewManager {
             updateStates();
         }
         mPhoneStatusBar.onScreenTurnedOn();
+    }
+
+    @Override
+    public void onRemoteInputActive(boolean active) {
+        mRemoteInputActive = active;
+        updateStates();
     }
 
     public void onScreenTurnedOff() {
@@ -429,18 +439,21 @@ public class StatusBarKeyguardViewManager {
         boolean occluded = mOccluded;
         boolean bouncerShowing = mBouncer.isShowing();
         boolean bouncerDismissible = !mBouncer.isFullscreenBouncer();
+        boolean remoteInputActive = mRemoteInputActive;
 
-        if ((bouncerDismissible || !showing) != (mLastBouncerDismissible || !mLastShowing)
+        if ((bouncerDismissible || !showing || remoteInputActive) !=
+                (mLastBouncerDismissible || !mLastShowing || mLastRemoteInputActive)
                 || mFirstUpdate) {
-            if (bouncerDismissible || !showing) {
+            if (bouncerDismissible || !showing || remoteInputActive) {
                 mContainer.setSystemUiVisibility(vis & ~View.STATUS_BAR_DISABLE_BACK);
             } else {
                 mContainer.setSystemUiVisibility(vis | View.STATUS_BAR_DISABLE_BACK);
             }
         }
 
-        boolean navBarVisible = (!(showing && !occluded) || bouncerShowing);
-        boolean lastNavBarVisible = (!(mLastShowing && !mLastOccluded) || mLastBouncerShowing);
+        boolean navBarVisible = (!(showing && !occluded) || bouncerShowing || remoteInputActive);
+        boolean lastNavBarVisible = (!(mLastShowing && !mLastOccluded) || mLastBouncerShowing
+                || mLastRemoteInputActive);
         if (navBarVisible != lastNavBarVisible || mFirstUpdate) {
             if (mPhoneStatusBar.getNavigationBarView() != null) {
                 if (navBarVisible) {
@@ -477,6 +490,7 @@ public class StatusBarKeyguardViewManager {
         mLastOccluded = occluded;
         mLastBouncerShowing = bouncerShowing;
         mLastBouncerDismissible = bouncerDismissible;
+        mLastRemoteInputActive = remoteInputActive;
 
         mPhoneStatusBar.onKeyguardViewManagerStatesUpdated();
     }
