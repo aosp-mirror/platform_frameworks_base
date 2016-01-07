@@ -679,6 +679,8 @@
     <string name="select_webview_provider_title">WebView implementation</string>
     <!-- Developer settings: select WebView provider dialog title -->
     <string name="select_webview_provider_dialog_title">Set WebView implementation</string>
+    <!-- Developer settings: confirmation dialog text for the WebView provider selection dialog -->
+    <string name="select_webview_provider_confirmation_text">The chosen WebView implementation is disabled, and must be enabled to be used, do you wish to enable it?</string>
 
     <!-- Developer settings screen, convert userdata to file encryption option name -->
     <string name="convert_to_file_encryption">Convert to file encryption</string>
