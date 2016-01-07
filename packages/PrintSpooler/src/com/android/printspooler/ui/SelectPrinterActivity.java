@@ -66,6 +66,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.printspooler.R;
 
 import java.util.ArrayList;
@@ -101,7 +102,8 @@ public final class SelectPrinterActivity extends Activity {
     private AnnounceFilterResult mAnnounceFilterResult;
 
     /** Monitor if new print services get enabled or disabled */
-    private ContentObserver mPrintServicesObserver;
+    private ContentObserver mPrintServicesDisabledObserver;
+    private PackageMonitor mPackageObserver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -245,28 +247,45 @@ public final class SelectPrinterActivity extends Activity {
      * Register listener for changes to the enabled print services.
      */
     private void registerServiceMonitor() {
-        mPrintServicesObserver = new ContentObserver(new Handler()) {
+        // Listen for services getting disabled
+        mPrintServicesDisabledObserver = new ContentObserver(new Handler()) {
             @Override
             public void onChange(boolean selfChange) {
                 onPrintServicesUpdate();
             }
         };
 
+        // Listen for services getting installed or uninstalled
+        mPackageObserver = new PackageMonitor() {
+            @Override
+            public void onPackageModified(String packageName) {
+                onPrintServicesUpdate();
+            }
+
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                onPrintServicesUpdate();
+            }
+
+            @Override
+            public void onPackageAdded(String packageName, int uid) {
+                onPrintServicesUpdate();
+            }
+        };
+
         getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ENABLED_PRINT_SERVICES), false,
-                mPrintServicesObserver);
+                Settings.Secure.getUriFor(Settings.Secure.DISABLED_PRINT_SERVICES), false,
+                mPrintServicesDisabledObserver);
+
+        mPackageObserver.register(this, getMainLooper(), false);
     }
 
     /**
-     * Unregister {@link #mPrintServicesObserver listener for changes to the enabled print services}
-     * or nothing if the listener is not registered.
+     * Unregister the listeners for changes to the enabled print services.
      */
     private void unregisterServiceMonitorIfNeeded() {
-        if (mPrintServicesObserver != null) {
-            getContentResolver().unregisterContentObserver(mPrintServicesObserver);
-
-            mPrintServicesObserver = null;
-        }
+        getContentResolver().unregisterContentObserver(mPrintServicesDisabledObserver);
+        mPackageObserver.unregister();
     }
 
     @Override

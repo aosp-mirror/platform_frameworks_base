@@ -37,16 +37,17 @@ import android.print.IPrintSpoolerClient;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
+import android.printservice.PrintService;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
+
+import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-
-import libcore.io.IoUtils;
 
 /**
  * This represents the remote print spooler as a local object to the
@@ -439,26 +440,24 @@ final class RemotePrintSpooler {
     }
 
     /**
-     * Connect to the print spooler service and remove an approved print service.
+     * Remove all approved {@link PrintService print services} that are not in the given set.
      *
-     * @param serviceToRemove The {@link ComponentName} of the service to be removed.
+     * @param servicesToKeep The {@link ComponentName names } of the services to keep
      */
-    public final void removeApprovedPrintService(ComponentName serviceToRemove) {
+    public final void pruneApprovedPrintServices(List<ComponentName> servicesToKeep) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
         try {
-            getRemoteInstanceLazy().removeApprovedPrintService(serviceToRemove);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error removing approved print service.", re);
-        } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error removing approved print service.", te);
+            getRemoteInstanceLazy().pruneApprovedPrintServices(servicesToKeep);
+        } catch (RemoteException|TimeoutException re) {
+            Slog.e(LOG_TAG, "Error pruning approved print services.", re);
         } finally {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                        + "] removing approved print service()");
+                        + "] pruneApprovedPrintServices()");
             }
             synchronized (mLock) {
                 mCanUnbind = true;

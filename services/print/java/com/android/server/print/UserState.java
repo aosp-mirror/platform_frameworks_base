@@ -21,11 +21,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -98,7 +96,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     private final List<PrintServiceInfo> mInstalledServices =
             new ArrayList<PrintServiceInfo>();
 
-    private final Set<ComponentName> mEnabledServices =
+    private final Set<ComponentName> mDisabledServices =
             new ArraySet<ComponentName>();
 
     private final PrintJobForAppCache mPrintJobForAppCache =
@@ -126,8 +124,15 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mLock = lock;
         mSpooler = new RemotePrintSpooler(context, userId, this);
         mHandler = new UserStateHandler(context.getMainLooper());
+
         synchronized (mLock) {
-            enableSystemPrintServicesLocked();
+            readInstalledPrintServicesLocked();
+            upgradePersistentStateIfNeeded();
+            readDisabledPrintServicesLocked();
+
+            // Some print services might have gotten installed before the User State came up
+            prunePrintServices();
+
             onConfigurationChangedLocked();
         }
     }
@@ -318,15 +323,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             // from the print service.
             mSpooler.setPrintJobState(printJobId, PrintJobInfo.STATE_CANCELED, null);
         }
-    }
-
-    /**
-     * Remove an approved print service.
-     *
-     * @param serviceToRemove The {@link ComponentName} of the service to be removed.
-     */
-    public void removeApprovedPrintService(ComponentName serviceToRemove) {
-        mSpooler.removeApprovedPrintService(serviceToRemove);
     }
 
     public void restartPrintJob(PrintJobId printJobId, int appId) {
@@ -597,13 +593,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public Set<ComponentName> getEnabledServices() {
-        synchronized(mLock) {
-            throwIfDestroyedLocked();
-            return mEnabledServices;
-        }
-    }
-
     public void destroyLocked() {
         throwIfDestroyedLocked();
         mSpooler.destroy();
@@ -612,7 +601,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
         mActiveServices.clear();
         mInstalledServices.clear();
-        mEnabledServices.clear();
+        mDisabledServices.clear();
         if (mPrinterDiscoverySession != null) {
             mPrinterDiscoverySession.destroyLocked();
             mPrinterDiscoverySession = null;
@@ -646,12 +635,12 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                    .append(installedService.getAdvancedOptionsActivityName()).println();
         }
 
-        pw.append(prefix).append(tab).append("enabled services:").println();
-        for (ComponentName enabledService : mEnabledServices) {
-            String enabledServicePrefix = prefix + tab + tab;
-            pw.append(enabledServicePrefix).append("service:").println();
-            pw.append(enabledServicePrefix).append(tab).append("componentName=")
-                    .append(enabledService.flattenToString());
+        pw.append(prefix).append(tab).append("disabled services:").println();
+        for (ComponentName disabledService : mDisabledServices) {
+            String disabledServicePrefix = prefix + tab + tab;
+            pw.append(disabledServicePrefix).append("service:").println();
+            pw.append(disabledServicePrefix).append(tab).append("componentName=")
+                    .append(disabledService.flattenToString());
             pw.println();
         }
 
@@ -679,7 +668,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     private boolean readConfigurationLocked() {
         boolean somethingChanged = false;
         somethingChanged |= readInstalledPrintServicesLocked();
-        somethingChanged |= readEnabledPrintServicesLocked();
+        somethingChanged |= readDisabledPrintServicesLocked();
         return somethingChanged;
     }
 
@@ -742,13 +731,50 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         return false;
     }
 
-    private boolean readEnabledPrintServicesLocked() {
-        Set<ComponentName> tempEnabledServiceNameSet = new HashSet<ComponentName>();
-        readPrintServicesFromSettingLocked(Settings.Secure.ENABLED_PRINT_SERVICES,
-                tempEnabledServiceNameSet);
-        if (!tempEnabledServiceNameSet.equals(mEnabledServices)) {
-            mEnabledServices.clear();
-            mEnabledServices.addAll(tempEnabledServiceNameSet);
+    /**
+     * Update persistent state from a previous version of Android.
+     */
+    private void upgradePersistentStateIfNeeded() {
+        String enabledSettingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_PRINT_SERVICES, mUserId);
+
+        // Pre N we store the enabled services, in N and later we store the disabled services.
+        // Hence if enabledSettingValue is still set, we need to upgrade.
+        if (enabledSettingValue != null) {
+            Set<ComponentName> enabledServiceNameSet = new HashSet<ComponentName>();
+            readPrintServicesFromSettingLocked(Settings.Secure.ENABLED_PRINT_SERVICES,
+                    enabledServiceNameSet);
+
+            ArraySet<ComponentName> disabledServices = new ArraySet<>();
+            final int numInstalledServices = mInstalledServices.size();
+            for (int i = 0; i < numInstalledServices; i++) {
+                ComponentName serviceName = mInstalledServices.get(i).getComponentName();
+                if (!enabledServiceNameSet.contains(serviceName)) {
+                    disabledServices.add(serviceName);
+                }
+            }
+
+            writeDisabledPrintServicesLocked(disabledServices);
+
+            // We won't needed ENABLED_PRINT_SERVICES anymore, set to null to prevent upgrade to run
+            // again.
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_PRINT_SERVICES, null, mUserId);
+        }
+    }
+
+    /**
+     * Read the set of disabled print services from the secure settings.
+     *
+     * @return true if the state changed.
+     */
+    private boolean readDisabledPrintServicesLocked() {
+        Set<ComponentName> tempDisabledServiceNameSet = new HashSet<ComponentName>();
+        readPrintServicesFromSettingLocked(Settings.Secure.DISABLED_PRINT_SERVICES,
+                tempDisabledServiceNameSet);
+        if (!tempDisabledServiceNameSet.equals(mDisabledServices)) {
+            mDisabledServices.clear();
+            mDisabledServices.addAll(tempDisabledServiceNameSet);
             return true;
         }
         return false;
@@ -774,70 +800,28 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    private void enableSystemPrintServicesLocked() {
-        // Load enabled and installed services.
-        readEnabledPrintServicesLocked();
-        readInstalledPrintServicesLocked();
-
-        // Load the system services once enabled on first boot.
-        Set<ComponentName> enabledOnFirstBoot = new HashSet<ComponentName>();
-        readPrintServicesFromSettingLocked(
-                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES,
-                enabledOnFirstBoot);
-
+    /**
+     * Persist the disabled print services to the secure settings.
+     */
+    private void writeDisabledPrintServicesLocked(Set<ComponentName> disabledServices) {
         StringBuilder builder = new StringBuilder();
-
-        final int serviceCount = mInstalledServices.size();
-        for (int i = 0; i < serviceCount; i++) {
-            ServiceInfo serviceInfo = mInstalledServices.get(i).getResolveInfo().serviceInfo;
-            // Enable system print services if we never did that and are not enabled.
-            if ((serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                ComponentName serviceName = new ComponentName(
-                        serviceInfo.packageName, serviceInfo.name);
-                if (!mEnabledServices.contains(serviceName)
-                        && !enabledOnFirstBoot.contains(serviceName)) {
-                    if (builder.length() > 0) {
-                        builder.append(":");
-                    }
-                    builder.append(serviceName.flattenToString());
-                }
+        for (ComponentName componentName : disabledServices) {
+            if (builder.length() > 0) {
+                builder.append(COMPONENT_NAME_SEPARATOR);
             }
-        }
-
-        // Nothing to be enabled - done.
-        if (builder.length() <= 0) {
-            return;
-        }
-
-        String servicesToEnable = builder.toString();
-
-        // Update the enabled services setting.
-        String enabledServices = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.ENABLED_PRINT_SERVICES, mUserId);
-        if (TextUtils.isEmpty(enabledServices)) {
-            enabledServices = servicesToEnable;
-        } else {
-            enabledServices = enabledServices + ":" + servicesToEnable;
+            builder.append(componentName.flattenToShortString());
         }
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_PRINT_SERVICES, enabledServices, mUserId);
-
-        // Update the enabled on first boot services setting.
-        String enabledOnFirstBootServices = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES, mUserId);
-        if (TextUtils.isEmpty(enabledOnFirstBootServices)) {
-            enabledOnFirstBootServices = servicesToEnable;
-        } else {
-            enabledOnFirstBootServices = enabledOnFirstBootServices + ":" + enabledServices;
-        }
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES,
-                enabledOnFirstBootServices, mUserId);
+                Settings.Secure.DISABLED_PRINT_SERVICES, builder.toString(), mUserId);
     }
 
-    private void onConfigurationChangedLocked() {
-        Set<ComponentName> installedComponents = new ArraySet<ComponentName>();
+    /**
+     * Get the {@link ComponentName names} of the installed print services
+     *
+     * @return The names of the installed print services
+     */
+    private ArrayList<ComponentName> getInstalledComponents() {
+        ArrayList<ComponentName> installedComponents = new ArrayList<ComponentName>();
 
         final int installedCount = mInstalledServices.size();
         for (int i = 0; i < installedCount; i++) {
@@ -846,8 +830,37 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     resolveInfo.serviceInfo.name);
 
             installedComponents.add(serviceName);
+        }
 
-            if (mEnabledServices.contains(serviceName)) {
+        return installedComponents;
+    }
+
+    /**
+     * Prune persistent state if a print service was uninstalled
+     */
+    public void prunePrintServices() {
+        synchronized (mLock) {
+            ArrayList<ComponentName> installedComponents = getInstalledComponents();
+
+            // Remove unnecessary entries from persistent state "disabled services"
+            boolean disabledServicesUninstalled = mDisabledServices.retainAll(installedComponents);
+            if (disabledServicesUninstalled) {
+                writeDisabledPrintServicesLocked(mDisabledServices);
+            }
+
+            // Remove unnecessary entries from persistent state "approved services"
+            mSpooler.pruneApprovedPrintServices(installedComponents);
+        }
+    }
+
+    private void onConfigurationChangedLocked() {
+        ArrayList<ComponentName> installedComponents = getInstalledComponents();
+
+        final int installedCount = installedComponents.size();
+        for (int i = 0; i < installedCount; i++) {
+            ComponentName serviceName = installedComponents.get(i);
+
+            if (!mDisabledServices.contains(serviceName)) {
                 if (!mActiveServices.containsKey(serviceName)) {
                     RemotePrintService service = new RemotePrintService(
                             mContext, serviceName, mUserId, mSpooler, this);

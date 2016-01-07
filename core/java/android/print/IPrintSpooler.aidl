@@ -98,5 +98,11 @@ oneway interface IPrintSpooler {
     void writePrintJobData(in ParcelFileDescriptor fd, in PrintJobId printJobId);
     void setClient(IPrintSpoolerClient client);
     void setPrintJobCancelling(in PrintJobId printJobId, boolean cancelling);
-    void removeApprovedPrintService(in ComponentName serviceToRemove);
+
+    /**
+     * Remove all approved print services that are not in the given set.
+     *
+     * @param servicesToKeep The names of the services to keep
+     */
+    void pruneApprovedPrintServices(in List<ComponentName> servicesToKeep);
 }

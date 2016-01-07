@@ -23,6 +23,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.printservice.PrintService;
 import android.util.ArraySet;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -126,29 +127,27 @@ public class ApprovedPrintServices {
     }
 
     /**
-     * If a {@link PrintService} is approved, remove it from the list of approved services.
+     * Remove all approved {@link PrintService print services} that are not in the given set.
      *
-     * @param serviceToRemove The {@link ComponentName} of the {@link PrintService} to be removed
+     * @param serviceNamesToKeep The {@link ComponentName names } of the services to keep
      */
-    public void removeApprovedService(ComponentName serviceToRemove) {
+    public void pruneApprovedServices(List<ComponentName> serviceNamesToKeep) {
         synchronized (sLock) {
-            if (isApprovedService(serviceToRemove)) {
-                // Copy approved services.
-                ArraySet<String> approvedServices = new ArraySet<String>(
-                        mPreferences.getStringSet(APPROVED_SERVICES_PREFERENCE, null));
+            Set<String> approvedServices = getApprovedServices();
+            Set<String> newApprovedServices = new ArraySet<>(approvedServices.size());
 
+            final int numServiceNamesToKeep = serviceNamesToKeep.size();
+            for(int i = 0; i < numServiceNamesToKeep; i++) {
+                String serviceToKeep = serviceNamesToKeep.get(i).flattenToShortString();
+                if (approvedServices.contains(serviceToKeep)) {
+                    newApprovedServices.add(serviceToKeep);
+                }
+            }
+
+            if (approvedServices.size() != newApprovedServices.size()) {
                 SharedPreferences.Editor editor = mPreferences.edit();
 
-                final int numApprovedServices = approvedServices.size();
-                for (int i = 0; i < numApprovedServices; i++) {
-                    if (approvedServices.valueAt(i)
-                            .equals(serviceToRemove.flattenToShortString())) {
-                        approvedServices.removeAt(i);
-                        break;
-                    }
-                }
-
-                editor.putStringSet(APPROVED_SERVICES_PREFERENCE, approvedServices);
+                editor.putStringSet(APPROVED_SERVICES_PREFERENCE, newApprovedServices);
                 editor.apply();
             }
         }

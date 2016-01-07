@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -91,6 +92,16 @@ public final class PrintServiceInfo implements Parcelable {
         mSettingsActivityName = settingsActivityName;
         mAddPrintersActivityName = addPrintersActivityName;
         mAdvancedPrintOptionsActivityName = advancedPrintOptionsActivityName;
+    }
+
+    /**
+     * Return the component name for this print service.
+     *
+     * @return The component name for this print service.
+     */
+    public @NonNull ComponentName getComponentName() {
+        return new ComponentName(mResolveInfo.serviceInfo.packageName,
+                mResolveInfo.serviceInfo.name);
     }
 
     /**
