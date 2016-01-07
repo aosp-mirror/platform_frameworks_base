@@ -540,7 +540,8 @@ public class RippleDrawable extends LayerDrawable {
      */
     private void tryBackgroundEnter(boolean focused) {
         if (mBackground == null) {
-            mBackground = new RippleBackground(this, mHotspotBounds, mForceSoftware);
+            final boolean isBounded = isBounded();
+            mBackground = new RippleBackground(this, mHotspotBounds, isBounded, mForceSoftware);
         }
 
         mBackground.setup(mState.mMaxRadius, mDensity);
