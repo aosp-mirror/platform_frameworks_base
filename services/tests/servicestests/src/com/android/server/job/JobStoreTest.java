@@ -179,7 +179,21 @@ public class JobStoreTest extends AndroidTestCase {
                 loaded.getEarliestRunTime() <= newNowElapsed + TEN_SECONDS);
         // Assert late runtime was clamped to be now + period*2.
         assertTrue("Early runtime wasn't correctly clamped.",
-                loaded.getEarliestRunTime() <= newNowElapsed + TEN_SECONDS*2);
+                loaded.getEarliestRunTime() <= newNowElapsed + TEN_SECONDS * 2);
+    }
+
+    public void testPriorityPersisted() throws Exception {
+        JobInfo.Builder b = new Builder(92, mComponent)
+                .setOverrideDeadline(5000)
+                .setPriority(42)
+                .setPersisted(true);
+        final JobStatus js = new JobStatus(b.build(), SOME_UID);
+        mTaskStoreUnderTest.add(js);
+        Thread.sleep(IO_WAIT);
+        final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet);
+        JobStatus loaded = jobStatusSet.iterator().next();
+        assertEquals("Priority not correctly persisted.", 42, loaded.getPriority());
     }
 
     /**

@@ -312,7 +312,7 @@ public class JobStore {
                         Slog.d(TAG, "Saving job " + jobStatus.getJobId());
                     }
                     out.startTag(null, "job");
-                    addIdentifierAttributesToJobTag(out, jobStatus);
+                    addAttributesToJobTag(out, jobStatus);
                     writeConstraintsToXml(out, jobStatus);
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getExtras(), out);
@@ -337,13 +337,16 @@ public class JobStore {
             }
         }
 
-        /** Write out a tag with data comprising the required fields of this job and its client. */
-        private void addIdentifierAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
+        /** Write out a tag with data comprising the required fields and priority of this job and
+         * its client.
+         */
+        private void addAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
                 throws IOException {
             out.attribute(null, "jobid", Integer.toString(jobStatus.getJobId()));
             out.attribute(null, "package", jobStatus.getServiceComponent().getPackageName());
             out.attribute(null, "class", jobStatus.getServiceComponent().getClassName());
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
+            out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -361,9 +364,9 @@ public class JobStore {
             PersistableBundle copy = (PersistableBundle) bundle.clone();
             Set<String> keySet = bundle.keySet();
             for (String key: keySet) {
-                PersistableBundle b = copy.getPersistableBundle(key);
-                if (b != null) {
-                    PersistableBundle bCopy = deepCopyBundle(b, maxDepth-1);
+                Object o = copy.get(key);
+                if (o instanceof PersistableBundle) {
+                    PersistableBundle bCopy = deepCopyBundle((PersistableBundle) o, maxDepth-1);
                     copy.putPersistableBundle(key, bCopy);
                 }
             }
@@ -540,11 +543,16 @@ public class JobStore {
             JobInfo.Builder jobBuilder;
             int uid;
 
-            // Read out job identifier attributes.
+            // Read out job identifier attributes and priority.
             try {
                 jobBuilder = buildBuilderFromXml(parser);
                 jobBuilder.setPersisted(true);
                 uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
+
+                String priority = parser.getAttributeValue(null, "priority");
+                if (priority != null) {
+                    jobBuilder.setPriority(Integer.valueOf(priority));
+                }
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;

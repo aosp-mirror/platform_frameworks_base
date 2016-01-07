@@ -28,10 +28,22 @@ import android.os.PersistableBundle;
  */
 public class JobParameters implements Parcelable {
 
+    /** @hide */
+    public static final int REASON_CANCELED = 0;
+    /** @hide */
+    public static final int REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+    /** @hide */
+    public static final int REASON_PREEMPT = 2;
+    /** @hide */
+    public static final int REASON_TIMEOUT = 3;
+    /** @hide */
+    public static final int REASON_DEVICE_IDLE = 4;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
+    private int stopReason; // Default value of stopReason is REASON_CANCELED
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
@@ -47,6 +59,14 @@ public class JobParameters implements Parcelable {
      */
     public int getJobId() {
         return jobId;
+    }
+
+    /**
+     * Reason onStopJob() was called on this job.
+     * @hide
+     */
+    public int getStopReason() {
+        return stopReason;
     }
 
     /**
@@ -78,6 +98,12 @@ public class JobParameters implements Parcelable {
         extras = in.readPersistableBundle();
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
+        stopReason = in.readInt();
+    }
+
+    /** @hide */
+    public void setStopReason(int reason) {
+        stopReason = reason;
     }
 
     @Override
@@ -91,6 +117,7 @@ public class JobParameters implements Parcelable {
         dest.writePersistableBundle(extras);
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
+        dest.writeInt(stopReason);
     }
 
     public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {
