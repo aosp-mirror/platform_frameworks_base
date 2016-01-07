@@ -71,7 +71,6 @@ public abstract class PanelBar extends FrameLayout {
             Log.e(TAG, "setPanelHolder: null PanelHolder", new Throwable());
             return;
         }
-        ph.setBar(this);
         mPanelHolder = ph;
         final int N = ph.getChildCount();
         for (int i=0; i<N; i++) {

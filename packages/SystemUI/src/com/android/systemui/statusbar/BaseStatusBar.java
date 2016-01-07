@@ -122,9 +122,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
 
-    // STOPSHIP disable once we resolve b/18102199
-    private static final boolean NOTIFICATION_CLICK_DEBUG = true;
-
     public static final boolean ENABLE_REMOTE_INPUT =
             SystemProperties.getBoolean("debug.enable_remote_input", true);
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -140,8 +137,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS_MENU = 1026;
 
     protected static final boolean ENABLE_HEADS_UP = true;
-    // scores above this threshold should be displayed in heads up mode.
-    protected static final int INTERRUPTION_THRESHOLD = 10;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
     // Should match the values in PhoneWindowManager
@@ -196,14 +191,10 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IDreamManager mDreamManager;
     PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    protected int mRowMinHeightLegacy;
-    protected int mRowMinHeight;
-    protected int mRowMaxHeight;
 
     // public mode, private notifications, etc
     private boolean mLockscreenPublicMode = false;
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
-    private NotificationColorUtil mNotificationColorUtil;
 
     private UserManager mUserManager;
 
@@ -354,9 +345,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent != null && parent instanceof ViewGroup) {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 index = actionGroup.indexOfChild(view);
-            }
-            if (NOTIFICATION_CLICK_DEBUG) {
-                Log.d(TAG, "Clicked on button " + index + " for " + key);
             }
             try {
                 mBarService.onNotificationActionClick(key, index);
@@ -614,8 +602,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mDisplay = mWindowManager.getDefaultDisplay();
         mDevicePolicyManager = (DevicePolicyManager)mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-
-        mNotificationColorUtil = NotificationColorUtil.getInstance(mContext);
 
         mNotificationData = new NotificationData(this);
 
@@ -1619,9 +1605,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             });
 
-            if (NOTIFICATION_CLICK_DEBUG) {
-                Log.d(TAG, "Clicked on content of " + notificationKey);
-            }
             final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
             final boolean afterKeyguardGone = intent.isActivity()
                     && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
