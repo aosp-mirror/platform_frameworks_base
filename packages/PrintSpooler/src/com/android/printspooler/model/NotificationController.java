@@ -119,8 +119,6 @@ final class NotificationController {
             removedPrintJobs.remove(printJobId);
             mNotifications.add(printJobId);
 
-            Log.i("TEST", "Adding notification for " + printJobId.flattenToString());
-
             createSimpleNotification(printJob);
         }
 
@@ -128,8 +126,6 @@ final class NotificationController {
         final int numRemovedPrintJobs = removedPrintJobs.size();
         for (int i = 0; i < numRemovedPrintJobs; i++) {
             PrintJobId removedPrintJob = removedPrintJobs.valueAt(i);
-
-            Log.i("TEST", "Removing notification for " + removedPrintJob.flattenToString());
 
             mNotificationManager.cancel(removedPrintJob.flattenToString(), 0);
             mNotifications.remove(removedPrintJob);
