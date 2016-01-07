@@ -9787,8 +9787,9 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean dumpWindows(PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
         WindowList windows = new WindowList();
-        if ("visible".equals(name) || "visible-apps".equals(name)) {
-            final boolean appsOnly = "visible-apps".equals(name);
+        if ("apps".equals(name) || "visible".equals(name) || "visible-apps".equals(name)) {
+            final boolean appsOnly = name.contains("apps");
+            final boolean visibleOnly = name.contains("visible");
             synchronized(mWindowMap) {
                 final int numDisplays = mDisplayContents.size();
                 for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
@@ -9796,8 +9797,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             mDisplayContents.valueAt(displayNdx).getWindowList();
                     for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
                         final WindowState w = windowList.get(winNdx);
-                        if (w.mWinAnimator.getShown()
-                                && (!appsOnly || (appsOnly && w.mAppToken != null))) {
+                        if ((!visibleOnly || w.mWinAnimator.getShown())
+                                && (!appsOnly || w.mAppToken != null)) {
                             windows.add(w);
                         }
                     }

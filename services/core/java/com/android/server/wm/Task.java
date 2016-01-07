@@ -157,8 +157,17 @@ class Task implements DimLayer.DimLayerUser {
         mDeferRemoval = false;
     }
 
+    private boolean hasAppTokensAlive() {
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            if (!mAppTokens.get(i).appDied) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void removeLocked() {
-        if (!mAppTokens.isEmpty() && mStack.isAnimating()) {
+        if (hasAppTokensAlive() && mStack.isAnimating()) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
