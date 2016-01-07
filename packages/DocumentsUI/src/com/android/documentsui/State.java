@@ -24,6 +24,7 @@ import android.util.SparseArray;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
+import com.android.documentsui.model.RootInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +50,6 @@ public class State implements android.os.Parcelable {
     public boolean localOnly;
     public boolean forceAdvanced;
     public boolean showAdvanced;
-    public boolean stackTouched;
     public boolean restored;
     public boolean directoryCopy;
     public boolean openableOnly;
@@ -87,6 +87,8 @@ public class State implements android.os.Parcelable {
     public static final int SORT_ORDER_LAST_MODIFIED = 2;
     public static final int SORT_ORDER_SIZE = 3;
 
+    private boolean mStackTouched;
+
     public void initAcceptMimes(Intent intent) {
         if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
             acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
@@ -94,6 +96,31 @@ public class State implements android.os.Parcelable {
             String glob = intent.getType();
             acceptMimes = new String[] { glob != null ? glob : "*/*" };
         }
+    }
+
+    public void onRootChanged(RootInfo root) {
+        stack.root = root;
+        stack.clear();
+        mStackTouched = true;
+    }
+
+    public void pushDocument(DocumentInfo info) {
+        stack.add(info);
+        mStackTouched = true;
+    }
+
+    public void popDocument() {
+        stack.pop();
+        mStackTouched = true;
+    }
+
+    public void setStack(DocumentStack stack) {
+        this.stack = stack;
+        mStackTouched = true;
+    }
+
+    public boolean hasLocationChanged() {
+        return mStackTouched;
     }
 
     @Override
@@ -113,7 +140,6 @@ public class State implements android.os.Parcelable {
         out.writeInt(localOnly ? 1 : 0);
         out.writeInt(forceAdvanced ? 1 : 0);
         out.writeInt(showAdvanced ? 1 : 0);
-        out.writeInt(stackTouched ? 1 : 0);
         out.writeInt(restored ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
         out.writeString(currentSearch);
@@ -121,6 +147,7 @@ public class State implements android.os.Parcelable {
         out.writeList(selectedDocumentsForCopy);
         out.writeList(excludedAuthorities);
         out.writeInt(openableOnly ? 1 : 0);
+        out.writeInt(mStackTouched ? 1 : 0);
     }
 
     public static final Creator<State> CREATOR = new Creator<State>() {
@@ -137,7 +164,6 @@ public class State implements android.os.Parcelable {
             state.localOnly = in.readInt() != 0;
             state.forceAdvanced = in.readInt() != 0;
             state.showAdvanced = in.readInt() != 0;
-            state.stackTouched = in.readInt() != 0;
             state.restored = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             state.currentSearch = in.readString();
@@ -145,6 +171,7 @@ public class State implements android.os.Parcelable {
             in.readList(state.selectedDocumentsForCopy, null);
             in.readList(state.excludedAuthorities, null);
             state.openableOnly = in.readInt() != 0;
+            state.mStackTouched = in.readInt() != 0;
             return state;
         }
 

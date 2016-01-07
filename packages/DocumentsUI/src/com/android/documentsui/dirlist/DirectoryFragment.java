@@ -411,7 +411,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 updateDisplayState();
 
                 // When launched into empty recents, show drawer
-                if (mType == TYPE_RECENT_OPEN && mModel.isEmpty() && !state.stackTouched &&
+                if (mType == TYPE_RECENT_OPEN && mModel.isEmpty() && !state.hasLocationChanged() &&
                         context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }

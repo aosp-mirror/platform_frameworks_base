@@ -107,7 +107,7 @@ public class RecentsCreateFragment extends Fragment {
                 mAdapter.update(data);
 
                 // When launched into empty recents, show drawer
-                if (mAdapter.isEmpty() && !state.stackTouched &&
+                if (mAdapter.isEmpty() && !state.hasLocationChanged() &&
                         context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
