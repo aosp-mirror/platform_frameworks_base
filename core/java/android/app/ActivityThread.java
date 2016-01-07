@@ -4362,6 +4362,9 @@ public final class ActivityThread {
         if (!tmp.onlyLocalRequest) {
             try {
                 ActivityManagerNative.getDefault().activityRelaunched(r.token);
+                if (r.window != null) {
+                    r.window.reportActivityRelaunched();
+                }
             } catch (RemoteException e) {
                 // If the system process has died, it's game over for everyone.
             }

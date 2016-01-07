@@ -30,6 +30,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -70,16 +71,23 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
 
     /**
+     * The window is being resized by dragging on the docked divider. The client should render
+     * at (0, 0) and extend its background to the background frame passed into
+     * {@link IWindow#resized}.
+     */
+    public static final int RELAYOUT_RES_DRAG_RESIZING_DOCKED = 0x8;
+
+    /**
      * The window is being resized by dragging one of the window corners,
      * in this case the surface would be fullscreen-sized. The client should
      * render to the actual frame location (instead of (0,curScrollY)).
      */
-    public static final int RELAYOUT_RES_DRAG_RESIZING = 0x8;
+    public static final int RELAYOUT_RES_DRAG_RESIZING_FREEFORM = 0x10;
 
     /**
      * The window manager has changed the size of the surface from the last call.
      */
-    public static final int RELAYOUT_RES_SURFACE_RESIZED = 0x10;
+    public static final int RELAYOUT_RES_SURFACE_RESIZED = 0x20;
 
     /**
      * Flag for relayout: the client will be later giving

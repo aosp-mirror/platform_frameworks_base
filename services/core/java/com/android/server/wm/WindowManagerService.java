@@ -2869,7 +2869,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 result |= WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
             }
         }
-        result |= win.isDragResizing() ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING : 0;
+        final boolean freeformResizing = win.isDragResizing()
+                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_FREEFORM;
+        final boolean dockedResizing = win.isDragResizing()
+                && win.getResizeMode() == WindowState.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
+        result |= freeformResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM : 0;
+        result |= dockedResizing ? WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED : 0;
         if (win.isAnimatingWithSavedSurface()) {
             // If we're animating with a saved surface now, request client to report draw.
             // We still need to know when the real thing is drawn.
@@ -4858,7 +4863,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (stack.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
                     && stack.isVisibleLocked()) {
-                stack.resizeWindows();
                 stack.getDisplayContent().layoutNeeded = true;
                 mWindowPlacerLocked.performSurfacePlacement();
             }

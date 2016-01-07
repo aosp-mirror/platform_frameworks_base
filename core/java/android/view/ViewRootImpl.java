@@ -144,6 +144,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     static final int MAX_TRACKBALL_DELAY = 250;
 
+    private static final int RESIZE_MODE_FREEFORM = 0;
+    private static final int RESIZE_MODE_DOCKED_DIVIDER = 1;
+
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList();
@@ -228,8 +231,10 @@ public final class ViewRootImpl implements ViewParent,
     boolean mIsAnimating;
 
     private boolean mDragResizing;
+    private int mResizeMode;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
+    private boolean mActivityRelaunched;
 
     CompatibilityInfo.Translator mTranslator;
 
@@ -1592,11 +1597,16 @@ public final class ViewRootImpl implements ViewParent,
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
-        windowShouldResize |= mDragResizing;
+        windowShouldResize |= mDragResizing && mResizeMode == RESIZE_MODE_FREEFORM;
 
         // If the backdrop frame doesn't equal to a frame, we are starting a resize operation, so
         // force it to be resized.
         windowShouldResize |= !mPendingBackDropFrame.equals(mWinFrame);
+
+        // If the activity was just relaunched, it might have unfrozen the task bounds (while
+        // relaunching), so we need to force a call into window manager to pick up the latest
+        // bounds.
+        windowShouldResize |= mActivityRelaunched;
 
         // Determine whether to compute insets.
         // If there are no inset listeners remaining then we may still need to compute
@@ -1786,11 +1796,17 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                final boolean dragResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING) != 0;
+                final boolean freeformResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
+                final boolean dockedResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
+                final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
                         startDragResizing(mPendingBackDropFrame);
+                        mResizeMode = freeformResizing
+                                ? RESIZE_MODE_FREEFORM
+                                : RESIZE_MODE_DOCKED_DIVIDER;
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -2074,6 +2090,7 @@ public final class ViewRootImpl implements ViewParent,
         mFirst = false;
         mWillDrawSoon = false;
         mNewSurfaceNeeded = false;
+        mActivityRelaunched = false;
         mViewVisibility = viewVisibility;
         mHadWindowFocus = hasWindowFocus;
 
@@ -7023,6 +7040,15 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
             }
         }
+    }
+
+    /**
+     * Tells this instance that its corresponding activity has just relaunched. In this case, we
+     * need to force a relayout of the window to make sure we get the correct bounds from window
+     * manager.
+     */
+    public void reportActivityRelaunched() {
+        mActivityRelaunched = true;
     }
 
     /**
