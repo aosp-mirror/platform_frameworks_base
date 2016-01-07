@@ -575,6 +575,7 @@
   <java-symbol type="string" name="config_ntpServer" />
   <java-symbol type="string" name="config_useragentprofile_url" />
   <java-symbol type="string" name="config_wifi_p2p_device_type" />
+  <java-symbol type="string" name="config_appsNotReportingCrashes" />
   <java-symbol type="string" name="contentServiceSync" />
   <java-symbol type="string" name="contentServiceSyncNotificationTitle" />
   <java-symbol type="string" name="contentServiceTooManyDeletesNotificationDesc" />
