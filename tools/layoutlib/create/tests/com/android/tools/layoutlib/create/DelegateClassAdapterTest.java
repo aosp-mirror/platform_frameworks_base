@@ -85,7 +85,7 @@ public class DelegateClassAdapterTest {
         // Now process it but tell the delegate to not modify any method
         ClassWriter cw = new ClassWriter(0 /*flags*/);
 
-        HashSet<String> delegateMethods = new HashSet<String>();
+        HashSet<String> delegateMethods = new HashSet<>();
         String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
@@ -149,7 +149,7 @@ public class DelegateClassAdapterTest {
 
         String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
 
-        HashSet<String> delegateMethods = new HashSet<String>();
+        HashSet<String> delegateMethods = new HashSet<>();
         delegateMethods.add("<init>");
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
@@ -163,7 +163,7 @@ public class DelegateClassAdapterTest {
         ClassWriter cw = new ClassWriter(0 /*flags*/);
         String internalClassName = NATIVE_CLASS_NAME.replace('.', '/');
 
-        HashSet<String> delegateMethods = new HashSet<String>();
+        HashSet<String> delegateMethods = new HashSet<>();
         delegateMethods.add(DelegateClassAdapter.ALL_NATIVES);
         DelegateClassAdapter cv = new DelegateClassAdapter(
                 mLog, cw, internalClassName, delegateMethods);
@@ -214,7 +214,7 @@ public class DelegateClassAdapterTest {
     @Test
     public void testDelegateInner() throws Throwable {
         // We'll delegate the "get" method of both the inner and outer class.
-        HashSet<String> delegateMethods = new HashSet<String>();
+        HashSet<String> delegateMethods = new HashSet<>();
         delegateMethods.add("get");
         delegateMethods.add("privateMethod");
 
@@ -309,7 +309,7 @@ public class DelegateClassAdapterTest {
      */
     private abstract class ClassLoader2 extends ClassLoader {
 
-        private final Map<String, byte[]> mClassDefs = new HashMap<String, byte[]>();
+        private final Map<String, byte[]> mClassDefs = new HashMap<>();
 
         public ClassLoader2() {
             super(null);

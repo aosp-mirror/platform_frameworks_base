@@ -121,7 +121,7 @@ class DelegateMethodAdapter extends MethodVisitor {
             String methodName,
             String desc,
             boolean isStatic) {
-        super(Opcodes.ASM4);
+        super(Main.ASM_VERSION);
         mLog = log;
         mOrgWriter = mvOriginal;
         mDelWriter = mvDelegate;
@@ -184,7 +184,7 @@ class DelegateMethodAdapter extends MethodVisitor {
             mDelWriter.visitLineNumber((Integer) p[0], (Label) p[1]);
         }
 
-        ArrayList<Type> paramTypes = new ArrayList<Type>();
+        ArrayList<Type> paramTypes = new ArrayList<>();
         String delegateClassName = mClassName + DELEGATE_SUFFIX;
         boolean pushedArg0 = false;
         int maxStack = 0;
@@ -249,7 +249,8 @@ class DelegateMethodAdapter extends MethodVisitor {
         mDelWriter.visitMethodInsn(Opcodes.INVOKESTATIC,
                 delegateClassName,
                 mMethodName,
-                desc);
+                desc,
+                false);
 
         Type returnType = Type.getReturnType(mDesc);
         mDelWriter.visitInsn(returnType.getOpcode(Opcodes.IRETURN));
@@ -367,9 +368,9 @@ class DelegateMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         if (mOrgWriter != null) {
-            mOrgWriter.visitMethodInsn(opcode, owner, name, desc);
+            mOrgWriter.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 
