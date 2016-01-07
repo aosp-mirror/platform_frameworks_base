@@ -46,6 +46,10 @@ public class NotificationGuts extends LinearLayout {
     private int mClipTopAmount;
     private int mActualHeight;
     private boolean mExposed;
+    private RadioButton mApplyToTopic;
+    private SeekBar mSeekBar;
+    private Notification.Topic mTopic;
+    private INotificationManager mINotificationManager;
 
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -98,66 +102,38 @@ public class NotificationGuts extends LinearLayout {
 
     void bindImportance(final StatusBarNotification sbn, final ExpandableNotificationRow row,
             final int importance) {
-        final INotificationManager sINM = INotificationManager.Stub.asInterface(
+        mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        final Notification.Topic topic = sbn.getNotification().getTopic() == null
+        mTopic = sbn.getNotification().getTopic() == null
                 ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
                 com.android.internal.R.string.default_notification_topic_label))
                 : sbn.getNotification().getTopic();
         boolean doesAppUseTopics = false;
         try {
-            doesAppUseTopics = sINM.doesAppUseTopics(sbn.getPackageName(), sbn.getUid());
+            doesAppUseTopics =
+                    mINotificationManager.doesAppUseTopics(sbn.getPackageName(), sbn.getUid());
         } catch (RemoteException e) {}
         final boolean appUsesTopics = doesAppUseTopics;
 
-        final RadioButton applyToTopic = (RadioButton) row.findViewById(R.id.apply_to_topic);
-        applyToTopic.setChecked(true);
+        mApplyToTopic = (RadioButton) row.findViewById(R.id.apply_to_topic);
+        if (appUsesTopics) {
+            mApplyToTopic.setChecked(true);
+        }
         final View applyToApp = row.findViewById(R.id.apply_to_app);
         final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
         final TextView topicTitle = ((TextView) row.findViewById(R.id.title));
-        final SeekBar seekBar = (SeekBar) row.findViewById(R.id.seekbar);
-        final RadioGroup applyTo = (RadioGroup) row.findViewById(R.id.apply_to);
-        applyTo.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-                try {
-                    switch (checkedId) {
-                        case R.id.apply_to_topic:
-                            sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,
-                                    seekBar.getProgress());
-                            break;
-                        default:
-                            sINM.setAppImportance(sbn.getPackageName(), sbn.getUid(),
-                                    seekBar.getProgress());
-                    }
-                } catch (RemoteException e) {
-                    // :(
-                }
-            }
-        });
-
-        seekBar.setMax(4);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mSeekBar = (SeekBar) row.findViewById(R.id.seekbar);
+        mSeekBar.setMax(4);
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 updateTitleAndSummary(progress);
                 if (fromUser) {
                     if (appUsesTopics) {
-                        applyToTopic.setVisibility(View.VISIBLE);
-
-                        applyToTopic.setText(
-                                mContext.getString(R.string.apply_to_topic, topic.getLabel()));
+                        mApplyToTopic.setVisibility(View.VISIBLE);
+                        mApplyToTopic.setText(
+                                mContext.getString(R.string.apply_to_topic, mTopic.getLabel()));
                         applyToApp.setVisibility(View.VISIBLE);
-                    }
-                    try {
-                        if (applyToTopic.isChecked()) {
-                            sINM.setTopicImportance(sbn.getPackageName(), sbn.getUid(), topic,
-                                    progress);
-                        } else {
-                            sINM.setAppImportance(sbn.getPackageName(), sbn.getUid(), progress);
-                        }
-                    } catch (RemoteException e) {
-                        // :(
                     }
                 }
             }
@@ -202,7 +178,22 @@ public class NotificationGuts extends LinearLayout {
                 }
             }
         });
-        seekBar.setProgress(importance);
+        mSeekBar.setProgress(importance);
+    }
+
+    void saveImportance(final StatusBarNotification sbn) {
+        int progress = mSeekBar.getProgress();
+        try {
+            if (mApplyToTopic.isChecked()) {
+                mINotificationManager.setTopicImportance(sbn.getPackageName(), sbn.getUid(), mTopic,
+                        progress);
+            } else {
+                mINotificationManager.setAppImportance(
+                        sbn.getPackageName(), sbn.getUid(), progress);
+            }
+        } catch (RemoteException e) {
+            // :(
+        }
     }
 
     public void setActualHeight(int actualHeight) {
