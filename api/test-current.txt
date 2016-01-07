@@ -44068,7 +44068,7 @@ package android.webkit {
     method public abstract deprecated void setEnableSmoothTransition(boolean);
     method public abstract void setFantasyFontFamily(java.lang.String);
     method public abstract void setFixedFontFamily(java.lang.String);
-    method public abstract void setGeolocationDatabasePath(java.lang.String);
+    method public abstract deprecated void setGeolocationDatabasePath(java.lang.String);
     method public abstract void setGeolocationEnabled(boolean);
     method public abstract void setJavaScriptCanOpenWindowsAutomatically(boolean);
     method public abstract void setJavaScriptEnabled(boolean);

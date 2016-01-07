@@ -987,9 +987,6 @@ public abstract class WebSettings {
      * @deprecated Database paths are managed by the implementation and calling this method
      *             will have no effect.
      */
-    // This will update WebCore when the Sync runs in the C++ side.
-    // Note that the WebCore Database Tracker only allows the path to be set
-    // once.
     @Deprecated
     public abstract void setDatabasePath(String databasePath);
 
@@ -1000,8 +997,10 @@ public abstract class WebSettings {
      *
      * @param databasePath a path to the directory where databases should be
      *                     saved.
+     * @deprecated Geolocation database are managed by the implementation and calling this method
+     *             will have no effect.
      */
-    // This will update WebCore when the Sync runs in the C++ side.
+    @Deprecated
     public abstract void setGeolocationDatabasePath(String databasePath);
 
     /**
@@ -1102,8 +1101,6 @@ public abstract class WebSettings {
      *   via the JavaScript Geolocation API.
      * </ul>
      * <p>
-     * As an option, it is possible to store previous locations and web origin
-     * permissions in a database. See {@link #setGeolocationDatabasePath}.
      *
      * @param flag whether Geolocation should be enabled
      */
