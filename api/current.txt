@@ -30788,7 +30788,6 @@ package android.provider {
     field public static final int FLAG_SUPPORTS_MOVE = 256; // 0x100
     field public static final int FLAG_SUPPORTS_RENAME = 64; // 0x40
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 1; // 0x1
-    field public static final int FLAG_SUPPORTS_TYPED_DOCUMENT = 512; // 0x200
     field public static final int FLAG_SUPPORTS_WRITE = 2; // 0x2
     field public static final int FLAG_VIRTUAL_DOCUMENT = 1024; // 0x400
     field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.document/directory";
