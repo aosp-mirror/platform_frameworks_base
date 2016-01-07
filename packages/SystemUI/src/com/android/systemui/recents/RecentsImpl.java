@@ -31,7 +31,6 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
@@ -77,8 +76,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
-    private final static boolean DEBUG = false;
-
     // The minimum amount of time between each recents button press that we will handle
     private final static int MIN_TOGGLE_DELAY_MS = 350;
     // The duration within which the user releasing the alt tab (from when they pressed alt tab)
@@ -187,8 +184,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         mContext = context;
         mHandler = new Handler();
         mAppWidgetHost = new RecentsAppWidgetHost(mContext, RecentsAppWidgetHost.HOST_ID);
-        Resources res = mContext.getResources();
-        LayoutInflater inflater = LayoutInflater.from(mContext);
 
         // Initialize the static foreground thread
         ForegroundThread.get();
@@ -199,14 +194,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         ssp.registerTaskStackListener(mTaskStackListener);
 
         // Initialize the static configuration resources
-        mStatusBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mNavBarHeight = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
-        mNavBarWidth = res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
-        mTaskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        mDummyStackView = new TaskStackView(mContext, new TaskStack());
-        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
-                null, false);
-        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
+        reloadHeaderBarLayout();
+        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
 
         // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
@@ -222,11 +211,12 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
     public void onBootCompleted() {
         mBootCompleted = true;
-        reloadHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
+        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
     }
 
-    @Override
     public void onConfigurationChanged() {
+        reloadHeaderBarLayout();
+        updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
         // Don't reuse task stack views if the configuration changes
         mCanReuseTaskStackViews = false;
         Recents.getConfiguration().updateOnConfigurationChange();
@@ -565,6 +555,26 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     }
 
     /**
+     * Reloads all the layouts for the header bar transition.
+     */
+    private void reloadHeaderBarLayout() {
+        Resources res = mContext.getResources();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mNavBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height);
+        mNavBarWidth = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_width);
+        mTaskBarHeight = res.getDimensionPixelSize(
+                R.dimen.recents_task_bar_height);
+        mDummyStackView = new TaskStackView(mContext, new TaskStack());
+        mHeaderBar = (TaskViewHeader) inflater.inflate(R.layout.recents_task_view_header,
+                null, false);
+    }
+
+    /**
      * Prepares the header bar layout for the next transition, if the task view bounds has changed
      * since the last call, it will attempt to re-measure and layout the header bar to the new size.
      *
@@ -572,7 +582,8 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
      *                               is not already bound (can be expensive)
      * @param stack the stack to initialize the stack layout with
      */
-    private void reloadHeaderBarLayout(boolean tryAndBindSearchWidget, TaskStack stack) {
+    private void updateHeaderBarLayout(boolean tryAndBindSearchWidget,
+            TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect windowRect = ssp.getWindowRect();
@@ -637,7 +648,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         preloadIcon(topTask);
 
         // Update the header bar if necessary
-        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
+        updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Update the destination rect
         mDummyStackView.updateLayoutForStack(stack);
@@ -823,7 +834,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
         // Update the header bar if necessary
-        reloadHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
+        updateHeaderBarLayout(false /* tryAndBindSearchWidget */, stack);
 
         // Prepare the dummy stack for the transition
         mDummyStackView.updateLayoutForStack(stack);
