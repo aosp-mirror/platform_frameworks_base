@@ -280,6 +280,23 @@ import java.util.Map;
  * instead.
  * </p>
  *
+ * <h3>Metrics</h3>
+ *
+ * <p>
+ * WebView may upload anonymous diagnostic data to Google when the user has consented. This data
+ * helps Google improve WebView. Data is collected on a per-app basis for each app which has
+ * instantiated a WebView. An individual app can opt out of this feature by putting the following
+ * tag in its manifest:
+ * </p>
+ * <pre>
+ * <meta-data android:name="android.webkit.WebView.MetricsOptOut"
+ *            android:value="true" />
+ * </pre>
+ * <p>
+ * Data will only be uploaded for a given app if the user has consented AND the app has not opted
+ * out.
+ * </p>
+ *
  */
 // Implementation notes.
 // The WebView is a thin API class that delegates its public API to a backend WebViewProvider
