@@ -246,6 +246,10 @@ public class SyncRequest implements Parcelable {
          * this sync is bound to a provider), otherwise null.
          */
         private String mAuthority;
+        /**
+         * Whether the sync requires the phone to be plugged in.
+         */
+        private boolean mRequiresCharging;
 
         public Builder() {
         }
@@ -335,9 +339,18 @@ public class SyncRequest implements Parcelable {
         public Builder setDisallowMetered(boolean disallow) {
             if (mIgnoreSettings && disallow) {
                 throw new IllegalArgumentException("setDisallowMetered(true) after having"
-                        + "specified that settings are ignored.");
+                        + " specified that settings are ignored.");
             }
             mDisallowMetered = disallow;
+            return this;
+        }
+
+        /**
+         * Specify whether the sync requires the phone to be plugged in.
+         * @param requiresCharging true if sync requires the phone to be plugged in. Default false.
+         */
+        public Builder setRequiresCharging(boolean requiresCharging) {
+            mRequiresCharging = true;
             return this;
         }
 
@@ -498,6 +511,9 @@ public class SyncRequest implements Parcelable {
             }
             if (mDisallowMetered) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, true);
+            }
+            if (mRequiresCharging) {
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_REQUIRE_CHARGING, true);
             }
             if (mIgnoreSettings) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);

@@ -126,7 +126,7 @@ public final class ContentService extends IContentService.Stub {
                 for (int i=0; i<sorted.size(); i++) {
                     int pid = sorted.get(i);
                     pw.print("  pid "); pw.print(pid); pw.print(": ");
-                            pw.print(pidCounts.get(pid)); pw.println(" observers");
+                    pw.print(pidCounts.get(pid)); pw.println(" observers");
                 }
                 pw.println();
                 pw.print(" Total number of nodes: "); pw.println(counts[0]);
@@ -162,11 +162,11 @@ public final class ContentService extends IContentService.Stub {
                 PackageManagerInternal.class);
         packageManagerInternal.setSyncAdapterPackagesprovider(
                 new PackageManagerInternal.SyncAdapterPackagesProvider() {
-            @Override
-            public String[] getPackages(String authority, int userId) {
-                return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
-            }
-        });
+                    @Override
+                    public String[] getPackages(String authority, int userId) {
+                        return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
+                    }
+                });
     }
 
     public void systemReady() {
@@ -183,7 +183,7 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public void registerContentObserver(Uri uri, boolean notifyForDescendants,
-            IContentObserver observer, int userHandle) {
+                                        IContentObserver observer, int userHandle) {
         if (observer == null || uri == null) {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
@@ -218,7 +218,7 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public void registerContentObserver(Uri uri, boolean notifyForDescendants,
-            IContentObserver observer) {
+                                        IContentObserver observer) {
         registerContentObserver(uri, notifyForDescendants, observer,
                 UserHandle.getCallingUserId());
     }
@@ -243,8 +243,8 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public void notifyChange(Uri uri, IContentObserver observer,
-            boolean observerWantsSelfNotifications, boolean syncToNetwork,
-            int userHandle) {
+                             boolean observerWantsSelfNotifications, boolean syncToNetwork,
+                             int userHandle) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "Notifying update of " + uri + " for user " + userHandle
                     + " from observer " + observer + ", syncToNetwork " + syncToNetwork);
@@ -318,7 +318,7 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public void notifyChange(Uri uri, IContentObserver observer,
-            boolean observerWantsSelfNotifications, boolean syncToNetwork) {
+                             boolean observerWantsSelfNotifications, boolean syncToNetwork) {
         notifyChange(uri, observer, observerWantsSelfNotifications, syncToNetwork,
                 UserHandle.getCallingUserId());
     }
@@ -406,8 +406,8 @@ public final class ContentService extends IContentService.Stub {
                     runAtTime = 60;
                 }
                 // Schedule periodic sync.
-                getSyncManager().getSyncStorageEngine()
-                    .updateOrAddPeriodicSync(info, runAtTime, flextime, extras);
+                getSyncManager().updateOrAddPeriodicSync(info, runAtTime,
+                        flextime, extras);
             } else {
                 long beforeRuntimeMillis = (flextime) * 1000;
                 long runtimeMillis = runAtTime * 1000;
@@ -450,7 +450,7 @@ public final class ContentService extends IContentService.Stub {
      */
     @Override
     public void cancelSyncAsUser(Account account, String authority, ComponentName cname,
-            int userId) {
+                                 int userId) {
         if (authority != null && authority.length() == 0) {
             throw new IllegalArgumentException("Authority must be non-empty");
         }
@@ -459,15 +459,15 @@ public final class ContentService extends IContentService.Stub {
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
+        if (cname != null) {
+            Slog.e(TAG, "cname not null.");
+            return;
+        }
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 SyncStorageEngine.EndPoint info;
-                if (cname == null) {
-                    info = new SyncStorageEngine.EndPoint(account, authority, userId);
-                } else {
-                    info = new SyncStorageEngine.EndPoint(cname, userId, -1);
-                }
+                info = new SyncStorageEngine.EndPoint(account, authority, userId);
                 syncManager.clearScheduledSyncOperations(info);
                 syncManager.cancelActiveSync(info, null /* all syncs for this adapter */);
             }
@@ -492,7 +492,7 @@ public final class ContentService extends IContentService.Stub {
                 // Remove periodic sync.
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                         "no permission to write the sync settings");
-                getSyncManager().getSyncStorageEngine().removePeriodicSync(info, extras);
+                getSyncManager().removePeriodicSync(info, extras);
             }
             // Cancel active syncs and clear pending syncs from the queue.
             syncManager.cancelScheduledSyncOperation(info, extras);
@@ -585,7 +585,7 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void setSyncAutomaticallyAsUser(Account account, String providerName, boolean sync,
-            int userId) {
+                                           int userId) {
         if (TextUtils.isEmpty(providerName)) {
             throw new IllegalArgumentException("Authority must be non-empty");
         }
@@ -606,10 +606,10 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
-    /** Old API. Schedule periodic sync with default flex time. */
+    /** Old API. Schedule periodic sync with default flexMillis time. */
     @Override
     public void addPeriodicSync(Account account, String authority, Bundle extras,
-            long pollFrequency) {
+                                long pollFrequency) {
         if (account == null) {
             throw new IllegalArgumentException("Account must not be null");
         }
@@ -631,11 +631,8 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncStorageEngine.EndPoint info =
                     new SyncStorageEngine.EndPoint(account, authority, userId);
-            getSyncManager().getSyncStorageEngine()
-                .updateOrAddPeriodicSync(info,
-                        pollFrequency,
-                        defaultFlex,
-                        extras);
+            getSyncManager().updateOrAddPeriodicSync(info, pollFrequency,
+                    defaultFlex, extras);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -654,10 +651,10 @@ public final class ContentService extends IContentService.Stub {
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
-            getSyncManager().getSyncStorageEngine()
-                .removePeriodicSync(
-                        new SyncStorageEngine.EndPoint(account, authority, userId),
-                        extras);
+            getSyncManager()
+                    .removePeriodicSync(
+                            new SyncStorageEngine.EndPoint(account, authority, userId),
+                            extras);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -665,7 +662,7 @@ public final class ContentService extends IContentService.Stub {
 
 
     public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName,
-            ComponentName cname) {
+                                               ComponentName cname) {
         if (account == null) {
             throw new IllegalArgumentException("Account must not be null");
         }
@@ -678,7 +675,7 @@ public final class ContentService extends IContentService.Stub {
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {
-            return getSyncManager().getSyncStorageEngine().getPeriodicSyncs(
+            return getSyncManager().getPeriodicSyncs(
                     new SyncStorageEngine.EndPoint(account, providerName, userId));
         } finally {
             restoreCallingIdentity(identityToken);
@@ -836,7 +833,7 @@ public final class ContentService extends IContentService.Stub {
      * INTERACT_ACROSS_USERS_FULL permission.
      */
     public SyncStatusInfo getSyncStatusAsUser(Account account, String authority,
-            ComponentName cname, int userId) {
+                                              ComponentName cname, int userId) {
         if (TextUtils.isEmpty(authority)) {
             throw new IllegalArgumentException("Authority must not be empty");
         }
@@ -871,7 +868,7 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public boolean isSyncPendingAsUser(Account account, String authority, ComponentName cname,
-            int userId) {
+                                       int userId) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
         enforceCrossUserPermission(userId,
@@ -954,7 +951,7 @@ public final class ContentService extends IContentService.Stub {
             private final Object observersLock;
 
             public ObserverEntry(IContentObserver o, boolean n, Object observersLock,
-                    int _uid, int _pid, int _userHandle) {
+                                 int _uid, int _pid, int _userHandle) {
                 this.observersLock = observersLock;
                 observer = o;
                 uid = _uid;
@@ -975,14 +972,14 @@ public final class ContentService extends IContentService.Stub {
             }
 
             public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-                    String name, String prefix, SparseIntArray pidCounts) {
+                                   String name, String prefix, SparseIntArray pidCounts) {
                 pidCounts.put(pid, pidCounts.get(pid)+1);
                 pw.print(prefix); pw.print(name); pw.print(": pid=");
-                        pw.print(pid); pw.print(" uid=");
-                        pw.print(uid); pw.print(" user=");
-                        pw.print(userHandle); pw.print(" target=");
-                        pw.println(Integer.toHexString(System.identityHashCode(
-                                observer != null ? observer.asBinder() : null)));
+                pw.print(pid); pw.print(" uid=");
+                pw.print(uid); pw.print(" user=");
+                pw.print(userHandle); pw.print(" target=");
+                pw.println(Integer.toHexString(System.identityHashCode(
+                        observer != null ? observer.asBinder() : null)));
             }
         }
 
@@ -999,7 +996,7 @@ public final class ContentService extends IContentService.Stub {
         }
 
         public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-                String name, String prefix, int[] counts, SparseIntArray pidCounts) {
+                               String name, String prefix, int[] counts, SparseIntArray pidCounts) {
             String innerName = null;
             if (mObservers.size() > 0) {
                 if ("".equals(name)) {
@@ -1050,15 +1047,15 @@ public final class ContentService extends IContentService.Stub {
 
         // Invariant:  userHandle is either a hard user number or is USER_ALL
         public void addObserverLocked(Uri uri, IContentObserver observer,
-                boolean notifyForDescendants, Object observersLock,
-                int uid, int pid, int userHandle) {
+                                      boolean notifyForDescendants, Object observersLock,
+                                      int uid, int pid, int userHandle) {
             addObserverLocked(uri, 0, observer, notifyForDescendants, observersLock,
                     uid, pid, userHandle);
         }
 
         private void addObserverLocked(Uri uri, int index, IContentObserver observer,
-                boolean notifyForDescendants, Object observersLock,
-                int uid, int pid, int userHandle) {
+                                       boolean notifyForDescendants, Object observersLock,
+                                       int uid, int pid, int userHandle) {
             // If this is the leaf node add the observer
             if (index == countUriSegments(uri)) {
                 mObservers.add(new ObserverEntry(observer, notifyForDescendants, observersLock,
@@ -1118,8 +1115,8 @@ public final class ContentService extends IContentService.Stub {
         }
 
         private void collectMyObserversLocked(boolean leaf, IContentObserver observer,
-                boolean observerWantsSelfNotifications, int targetUserHandle,
-                ArrayList<ObserverCall> calls) {
+                                              boolean observerWantsSelfNotifications, int targetUserHandle,
+                                              ArrayList<ObserverCall> calls) {
             int N = mObservers.size();
             IBinder observerBinder = observer == null ? null : observer.asBinder();
             for (int i = 0; i < N; i++) {
@@ -1148,8 +1145,8 @@ public final class ContentService extends IContentService.Stub {
          * targetUserHandle is either a hard user handle or is USER_ALL
          */
         public void collectObserversLocked(Uri uri, int index, IContentObserver observer,
-                boolean observerWantsSelfNotifications, int targetUserHandle,
-                ArrayList<ObserverCall> calls) {
+                                           boolean observerWantsSelfNotifications, int targetUserHandle,
+                                           ArrayList<ObserverCall> calls) {
             String segment = null;
             int segmentCount = countUriSegments(uri);
             if (index >= segmentCount) {

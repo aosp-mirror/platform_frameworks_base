@@ -7852,6 +7852,7 @@ package android.content {
     field public static final java.lang.String SYNC_EXTRAS_INITIALIZE = "initialize";
     field public static final java.lang.String SYNC_EXTRAS_MANUAL = "force";
     field public static final java.lang.String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
+    field public static final java.lang.String SYNC_EXTRAS_REQUIRE_CHARGING = "require_charging";
     field public static final java.lang.String SYNC_EXTRAS_UPLOAD = "upload";
     field public static final int SYNC_OBSERVER_TYPE_ACTIVE = 4; // 0x4
     field public static final int SYNC_OBSERVER_TYPE_PENDING = 2; // 0x2
@@ -9036,6 +9037,7 @@ package android.content {
     method public android.content.SyncRequest.Builder setIgnoreSettings(boolean);
     method public android.content.SyncRequest.Builder setManual(boolean);
     method public android.content.SyncRequest.Builder setNoRetry(boolean);
+    method public android.content.SyncRequest.Builder setRequiresCharging(boolean);
     method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, java.lang.String);
     method public android.content.SyncRequest.Builder syncOnce();
     method public android.content.SyncRequest.Builder syncPeriodic(long, long);

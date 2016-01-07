@@ -89,6 +89,13 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
 
     /**
+     * If this extra is set to true, the sync request will be scheduled
+     * only when the device is plugged in. This is equivalent to calling
+     * setRequiresCharging(true) on {@link SyncRequest}.
+     */
+    public static final String SYNC_EXTRAS_REQUIRE_CHARGING = "require_charging";
+
+    /**
      * @deprecated instead use
      * {@link #SYNC_EXTRAS_MANUAL}
      */
