@@ -69,7 +69,6 @@ public class NavigationBarView extends LinearLayout {
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
 
-    int mBarSize;
     boolean mVertical;
     boolean mScreenOn;
 
@@ -78,6 +77,9 @@ public class NavigationBarView extends LinearLayout {
     int mNavigationIconHints = 0;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
+    private Drawable mBackCarModeIcon, mBackLandCarModeIcon;
+    private Drawable mBackAltCarModeIcon, mBackAltLandCarModeIcon;
+    private Drawable mHomeDefaultIcon, mHomeCarModeIcon;
     private Drawable mRecentIcon;
     private Drawable mRecentLandIcon;
 
@@ -96,6 +98,7 @@ public class NavigationBarView extends LinearLayout {
     private boolean mIsLayoutRtl;
     private boolean mLayoutTransitionsEnabled = true;
     private boolean mWakeAndUnlocking;
+    private boolean mCarMode = false;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -176,16 +179,15 @@ public class NavigationBarView extends LinearLayout {
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mDisplay = ((WindowManager)context.getSystemService(
+        mDisplay = ((WindowManager) context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
 
         final Resources res = getContext().getResources();
-        mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
         mGestureHelper = new NavigationBarGestureHelper(context);
 
-        getIcons(res);
+        getIcons(context);
 
         mBarTransitions = new NavigationBarTransitions(this);
     }
@@ -253,18 +255,30 @@ public class NavigationBarView extends LinearLayout {
         return getCurrentView().findViewById(R.id.app_shelf);
     }
 
-    private void getIcons(Resources res) {
-        mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
+    private void getCarModeIcons(Context ctx) {
+        mBackCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_carmode);
+        mBackLandCarModeIcon = mBackCarModeIcon;
+        mBackAltCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime_carmode);
+        mBackAltLandCarModeIcon = mBackAltCarModeIcon;
+        mHomeCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_home_carmode);
+    }
+
+    private void getIcons(Context ctx) {
+        mBackIcon = ctx.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = mBackIcon;
-        mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mBackAltIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_ime);
         mBackAltLandIcon = mBackAltIcon;
-        mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
+
+        mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
+
+        mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
         mRecentLandIcon = mRecentIcon;
+        getCarModeIcons(ctx);
     }
 
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        getIcons(getContext().getResources());
+        getIcons(getContext());
 
         super.setLayoutDirection(layoutDirection);
     }
@@ -276,6 +290,18 @@ public class NavigationBarView extends LinearLayout {
 
     public void setNavigationIconHints(int hints) {
         setNavigationIconHints(hints, false);
+    }
+
+    private Drawable getBackIconWithAlt(boolean carMode, boolean landscape) {
+        return landscape
+                ? carMode ? mBackAltLandCarModeIcon : mBackAltLandIcon
+                : carMode ? mBackAltCarModeIcon : mBackAltIcon;
+    }
+
+    private Drawable getBackIcon(boolean carMode, boolean landscape) {
+        return landscape
+                ? carMode ? mBackLandCarModeIcon : mBackLandIcon
+                : carMode ? mBackCarModeIcon : mBackIcon;
     }
 
     public void setNavigationIconHints(int hints, boolean force) {
@@ -292,11 +318,23 @@ public class NavigationBarView extends LinearLayout {
 
         mNavigationIconHints = hints;
 
-        ((ImageView)getBackButton()).setImageDrawable(backAlt
-                ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
-                : (mVertical ? mBackLandIcon : mBackIcon));
+        // We have to replace or restore the back and home button icons when exiting or entering
+        // carmode, respectively. Recents are not available in CarMode in nav bar so change
+        // to recent icon is not required.
+        Drawable backIcon = (backAlt)
+                ? getBackIconWithAlt(mCarMode, mVertical)
+                : getBackIcon(mCarMode, mVertical);
 
-        ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
+        ((ImageView) getBackButton()).setImageDrawable(backIcon);
+
+        ((ImageView) getRecentsButton()).setImageDrawable(
+                mVertical ? mRecentLandIcon : mRecentIcon);
+
+        if (mCarMode) {
+            ((ImageView) getHomeButton()).setImageDrawable(mHomeCarModeIcon);
+        } else {
+            ((ImageView) getHomeButton()).setImageDrawable(mHomeDefaultIcon);
+        }
 
         final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
@@ -546,8 +584,33 @@ public class NavigationBarView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        boolean uiCarModeChanged = updateCarMode(newConfig);
         updateRTLOrder();
         updateTaskSwitchHelper();
+        if (uiCarModeChanged) {
+            // uiMode changed either from carmode or to carmode.
+            // replace the nav bar button icons based on which mode
+            // we are switching to.
+            setNavigationIconHints(mNavigationIconHints, true);
+        }
+    }
+
+    /**
+     * If the configuration changed, update the carmode and return that it was updated.
+     */
+    private boolean updateCarMode(Configuration newConfig) {
+        boolean uiCarModeChanged = false;
+        if (newConfig != null) {
+            int uiMode = newConfig.uiMode & Configuration.UI_MODE_TYPE_MASK;
+            if (mCarMode && uiMode != Configuration.UI_MODE_TYPE_CAR) {
+                mCarMode = false;
+                uiCarModeChanged = true;
+            } else if (uiMode == Configuration.UI_MODE_TYPE_CAR) {
+                mCarMode = true;
+                uiCarModeChanged = true;
+            }
+        }
+        return uiCarModeChanged;
     }
 
     /**

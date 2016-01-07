@@ -859,7 +859,8 @@ class WindowSurfacePlacer {
                     + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
         }
 
-        mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation);
+        mService.mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mService.mRotation,
+                mService.mCurConfiguration.uiMode);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
             mService.mSystemDecorLayer = mService.mPolicy.getSystemDecorLayerLw();
