@@ -17839,6 +17839,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         "Unable to find instrumentation target package: " + ii.targetPackage);
                 return false;
             }
+            if (!ai.hasCode()) {
+                reportStartInstrumentationFailure(watcher, className,
+                        "Instrumentation target has no code: " + ii.targetPackage);
+                return false;
+            }
 
             int match = mContext.getPackageManager().checkSignatures(
                     ii.targetPackage, ii.packageName);
