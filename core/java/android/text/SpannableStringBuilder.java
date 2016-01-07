@@ -421,8 +421,17 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
 
                 // Add span only if this object is not yet used as a span in this string
                 if (getSpanStart(spans[i]) < 0) {
-                    setSpan(false, spans[i], st - csStart + start, en - csStart + start,
-                            sp.getSpanFlags(spans[i]) | SPAN_ADDED);
+                    int copySpanStart = st - csStart + start;
+                    int copySpanEnd = en - csStart + start;
+                    int copySpanFlags = sp.getSpanFlags(spans[i]) | SPAN_ADDED;
+
+                    int flagsStart = (copySpanFlags & START_MASK) >> START_SHIFT;
+                    int flagsEnd = copySpanFlags & END_MASK;
+
+                    if(!isInvalidParagraphStart(copySpanStart, flagsStart) &&
+                            !isInvalidParagraphEnd(copySpanEnd, flagsEnd)) {
+                        setSpan(false, spans[i], copySpanStart, copySpanEnd, copySpanFlags);
+                    }
                 }
             }
             restoreInvariants();
@@ -666,23 +675,13 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         checkRange("setSpan", start, end);
 
         int flagsStart = (flags & START_MASK) >> START_SHIFT;
-        if (flagsStart == PARAGRAPH) {
-            if (start != 0 && start != length()) {
-                char c = charAt(start - 1);
-
-                if (c != '\n')
-                    throw new RuntimeException("PARAGRAPH span must start at paragraph boundary");
-            }
+        if(isInvalidParagraphStart(start, flagsStart)) {
+            throw new RuntimeException("PARAGRAPH span must start at paragraph boundary");
         }
 
         int flagsEnd = flags & END_MASK;
-        if (flagsEnd == PARAGRAPH) {
-            if (end != 0 && end != length()) {
-                char c = charAt(end - 1);
-
-                if (c != '\n')
-                    throw new RuntimeException("PARAGRAPH span must end at paragraph boundary");
-            }
+        if(isInvalidParagraphEnd(end, flagsEnd)) {
+            throw new RuntimeException("PARAGRAPH span must end at paragraph boundary");
         }
 
         // 0-length Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -759,6 +758,28 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
             restoreInvariants();
             sendSpanAdded(what, nstart, nend);
         }
+    }
+
+    private final boolean isInvalidParagraphStart(int start, int flagsStart) {
+        if (flagsStart == PARAGRAPH) {
+            if (start != 0 && start != length()) {
+                char c = charAt(start - 1);
+
+                if (c != '\n') return true;
+            }
+        }
+        return false;
+    }
+
+    private final boolean isInvalidParagraphEnd(int end, int flagsEnd) {
+        if (flagsEnd == PARAGRAPH) {
+            if (end != 0 && end != length()) {
+                char c = charAt(end - 1);
+
+                if (c != '\n') return true;
+            }
+        }
+        return false;
     }
 
     /**
