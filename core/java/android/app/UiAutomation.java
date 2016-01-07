@@ -22,6 +22,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -856,6 +857,7 @@ public final class UiAutomation {
      *
      * @hide
      */
+    @TestApi
     public boolean grantRuntimePermission(String packageName, String permission,
             UserHandle userHandle) {
         synchronized (mLock) {
@@ -884,6 +886,7 @@ public final class UiAutomation {
      *
      * @hide
      */
+    @TestApi
     public boolean revokeRuntimePermission(String packageName, String permission,
             UserHandle userHandle) {
         synchronized (mLock) {

@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.TestApi;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -1069,6 +1070,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public boolean isSystemApp() {
         return (flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
@@ -1076,6 +1078,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    @TestApi
     public boolean isPrivilegedApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }

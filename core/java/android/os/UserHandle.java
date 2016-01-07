@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 
 import java.io.PrintWriter;
 
@@ -161,6 +162,7 @@ public final class UserHandle implements Parcelable {
      * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
      * @hide
      */
+    @TestApi
     public static int getAppId(int uid) {
         return uid % PER_USER_RANGE;
     }

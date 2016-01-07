@@ -5501,8 +5501,10 @@ package android.app {
     method public android.view.WindowAnimationFrameStats getWindowAnimationFrameStats();
     method public android.view.WindowContentFrameStats getWindowContentFrameStats(int);
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
+    method public boolean grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public boolean injectInputEvent(android.view.InputEvent, boolean);
     method public final boolean performGlobalAction(int);
+    method public boolean revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public void setOnAccessibilityEventListener(android.app.UiAutomation.OnAccessibilityEventListener);
     method public boolean setRotation(int);
     method public void setRunAsMonkey(boolean);
@@ -7673,6 +7675,7 @@ package android.content {
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
     method public java.util.List<android.content.UriPermission> getPersistedUriPermissions();
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String);
+    method public static java.lang.String[] getSyncAdapterPackagesForAuthorityAsUser(java.lang.String, int);
     method public static android.content.SyncAdapterType[] getSyncAdapterTypes();
     method public static boolean getSyncAutomatically(android.accounts.Account, java.lang.String);
     method public final java.lang.String getType(android.net.Uri);
@@ -7839,6 +7842,7 @@ package android.content {
     method public abstract java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public final java.lang.CharSequence getText(int);
     method public abstract android.content.res.Resources.Theme getTheme();
+    method public abstract int getUserId();
     method public abstract deprecated android.graphics.drawable.Drawable getWallpaper();
     method public abstract deprecated int getWallpaperDesiredMinimumHeight();
     method public abstract deprecated int getWallpaperDesiredMinimumWidth();
@@ -8021,6 +8025,7 @@ package android.content {
     method public java.lang.Object getSystemService(java.lang.String);
     method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();
+    method public int getUserId();
     method public deprecated android.graphics.drawable.Drawable getWallpaper();
     method public deprecated int getWallpaperDesiredMinimumHeight();
     method public deprecated int getWallpaperDesiredMinimumWidth();
@@ -9073,6 +9078,8 @@ package android.content.pm {
     ctor public ApplicationInfo(android.content.pm.ApplicationInfo);
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
+    method public boolean isPrivilegedApp();
+    method public boolean isSystemApp();
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
     field public static final android.os.Parcelable.Creator<android.content.pm.ApplicationInfo> CREATOR;
     field public static final int FLAG_ALLOW_BACKUP = 32768; // 0x8000
@@ -9434,6 +9441,7 @@ package android.content.pm {
     method public abstract android.graphics.drawable.Drawable getApplicationLogo(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int getComponentEnabledSetting(android.content.ComponentName);
     method public abstract android.graphics.drawable.Drawable getDefaultActivityIcon();
+    method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract byte[] getEphemeralCookie();
     method public abstract int getEphemeralCookieMaxSizeBytes();
@@ -28366,6 +28374,7 @@ package android.os {
   public final class UserHandle implements android.os.Parcelable {
     ctor public UserHandle(android.os.Parcel);
     method public int describeContents();
+    method public static int getAppId(int);
     method public static android.os.UserHandle readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     method public static void writeToParcel(android.os.UserHandle, android.os.Parcel);
@@ -31390,6 +31399,7 @@ package android.provider {
     field public static final deprecated java.lang.String TTS_USE_DEFAULTS = "tts_use_defaults";
     field public static final deprecated java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
     field public static final deprecated java.lang.String USE_GOOGLE_MAIL = "use_google_mail";
+    field public static final java.lang.String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
     field public static final deprecated java.lang.String WIFI_MAX_DHCP_RETRY_COUNT = "wifi_max_dhcp_retry_count";
     field public static final deprecated java.lang.String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS = "wifi_mobile_data_transition_wakelock_timeout_ms";
     field public static final deprecated java.lang.String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON = "wifi_networks_available_notification_on";
@@ -31773,6 +31783,7 @@ package android.provider {
     field public static final int RESULT_SMS_OUT_OF_MEMORY = 3; // 0x3
     field public static final int RESULT_SMS_UNSUPPORTED = 4; // 0x4
     field public static final java.lang.String SIM_FULL_ACTION = "android.provider.Telephony.SIM_FULL";
+    field public static final java.lang.String SMS_CARRIER_PROVISION_ACTION = "android.provider.Telephony.SMS_CARRIER_PROVISION";
     field public static final java.lang.String SMS_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_CB_RECEIVED";
     field public static final java.lang.String SMS_DELIVER_ACTION = "android.provider.Telephony.SMS_DELIVER";
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
@@ -36617,6 +36628,7 @@ package android.test.mock {
     method public java.lang.Object getSystemService(java.lang.String);
     method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();
+    method public int getUserId();
     method public android.graphics.drawable.Drawable getWallpaper();
     method public int getWallpaperDesiredMinimumHeight();
     method public int getWallpaperDesiredMinimumWidth();
@@ -36743,6 +36755,7 @@ package android.test.mock {
     method public android.graphics.drawable.Drawable getApplicationLogo(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public int getComponentEnabledSetting(android.content.ComponentName);
     method public android.graphics.drawable.Drawable getDefaultActivityIcon();
+    method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public android.graphics.drawable.Drawable getDrawable(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public byte[] getEphemeralCookie();
     method public int getEphemeralCookieMaxSizeBytes();
