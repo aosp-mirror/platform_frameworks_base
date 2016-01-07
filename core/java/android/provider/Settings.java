@@ -19,6 +19,7 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
@@ -4349,6 +4350,7 @@ public final class Settings {
          * The currently selected voice interaction service flattened ComponentName.
          * @hide
          */
+        @TestApi
         public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
 
         /**

@@ -20,6 +20,7 @@ import android.accounts.Account;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -1957,6 +1958,7 @@ public abstract class ContentResolver {
      * @hide
      * Returns the package names of syncadapters that match a given user and authority.
      */
+    @TestApi
     public static String[] getSyncAdapterPackagesForAuthorityAsUser(String authority,
             int userId) {
         try {

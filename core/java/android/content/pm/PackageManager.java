@@ -27,6 +27,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.XmlRes;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
@@ -4294,6 +4295,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract String getDefaultBrowserPackageNameAsUser(int userId);
 
     /**

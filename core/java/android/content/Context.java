@@ -30,6 +30,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -3967,6 +3968,7 @@ public abstract class Context {
      *
      * @hide
      */
+    @TestApi
     public abstract int getUserId();
 
     /**
