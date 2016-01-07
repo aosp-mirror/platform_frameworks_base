@@ -2233,9 +2233,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // trigger its removal.
             final boolean lastWinStartingNotAnimating = startingWindow && appToken!= null
                     && appToken.allAppWindows.size() == 1 && !isAnimating;
-            if (!lastWinStartingNotAnimating && (win.mExiting || isAnimating)) {
+            if (!lastWinStartingNotAnimating && win.mExiting) {
                 // The exit animation is running... wait for it!
-                win.mExiting = true;
                 win.mRemoveOnExit = true;
                 win.setDisplayLayoutNeeded();
                 final boolean focusChanged = updateFocusedWindowLocked(
