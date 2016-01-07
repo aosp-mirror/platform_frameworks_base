@@ -19,6 +19,7 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "util/Comparators.h"
 #include "util/ImmutableMap.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
@@ -64,26 +65,6 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
     return mask;
 }
 
-static bool shouldStripResource(const xml::XmlPullParser* parser,
-                                const Maybe<std::u16string> productToMatch) {
-    assert(parser->getEvent() == xml::XmlPullParser::Event::kStartElement);
-
-    if (Maybe<StringPiece16> maybeProduct = xml::findNonEmptyAttribute(parser, u"product")) {
-        if (!productToMatch) {
-            if (maybeProduct.value() != u"default" && maybeProduct.value() != u"phone") {
-                // We didn't specify a product and this is not a default product, so skip.
-                return true;
-            }
-        } else {
-            if (productToMatch && maybeProduct.value() != productToMatch.value()) {
-                // We specified a product, but they don't match.
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 /**
  * A parsed resource ready to be added to the ResourceTable.
  */
@@ -96,6 +77,35 @@ struct ParsedResource {
     std::unique_ptr<Value> value;
     std::list<ParsedResource> childResources;
 };
+
+bool ResourceParser::shouldStripResource(const ResourceNameRef& name,
+                                         const Maybe<std::u16string>& product) const {
+    if (product) {
+        for (const std::u16string& productToMatch : mOptions.products) {
+            if (product.value() == productToMatch) {
+                // We specified a product, and it is in the list, so don't strip.
+                return false;
+            }
+        }
+    }
+
+    // Nothing matched, try 'default'. Default only matches if we didn't already use another
+    // product variant.
+    if (!product || product.value() == u"default") {
+        if (Maybe<ResourceTable::SearchResult> result = mTable->findResource(name)) {
+            const ResourceEntry* entry = result.value().entry;
+            auto iter = std::lower_bound(entry->values.begin(), entry->values.end(), mConfig,
+                                         cmp::lessThanConfig);
+            if (iter != entry->values.end() && iter->config == mConfig && !iter->value->isWeak()) {
+                // We have a value for this config already, and it is not weak,
+                // so filter out this default.
+                return true;
+            }
+        }
+        return false;
+    }
+    return true;
+}
 
 // Recursively adds resources to the ResourceTable.
 static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& config,
@@ -283,17 +293,20 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
         parsedResource.source = mSource.withLine(parser->getLineNumber());
         parsedResource.comment = std::move(comment);
 
-        // Check if we should skip this product. We still need to parse it for correctness.
-        const bool stripResource = shouldStripResource(parser, mOptions.product);
+        // Extract the product name if it exists.
+        Maybe<std::u16string> product;
+        if (Maybe<StringPiece16> maybeProduct = xml::findNonEmptyAttribute(parser, u"product")) {
+            product = maybeProduct.value().toString();
+        }
 
+        // Parse the resource regardless of product.
         if (!parseResource(parser, &parsedResource)) {
             error = true;
             continue;
         }
 
-        // We successfully parsed the resource.
-
-        if (stripResource) {
+        // We successfully parsed the resource. Check if we should include it or strip it.
+        if (shouldStripResource(parsedResource.name, product)) {
             // Record that we stripped out this resource name.
             // We will check that at least one variant of this resource was included.
             strippedResources.insert(parsedResource.name);
