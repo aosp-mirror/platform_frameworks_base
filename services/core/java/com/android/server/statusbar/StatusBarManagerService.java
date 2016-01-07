@@ -503,10 +503,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showKeyboardShortcutsMenu() {
+    public void toggleKeyboardShortcutsMenu() {
         if (mBar != null) {
             try {
-                mBar.showKeyboardShortcutsMenu();
+                mBar.toggleKeyboardShortcutsMenu();
             } catch (RemoteException ex) {}
         }
     }

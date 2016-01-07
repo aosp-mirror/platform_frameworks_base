@@ -65,7 +65,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_ASSIST_DISCLOSURE          = 22 << MSG_SHIFT;
     private static final int MSG_START_ASSIST               = 23 << MSG_SHIFT;
     private static final int MSG_CAMERA_LAUNCH_GESTURE      = 24 << MSG_SHIFT;
-    private static final int MSG_SHOW_KEYBOARD_SHORTCUTS    = 25 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS  = 25 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -100,7 +100,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
         public void toggleRecentApps();
         public void preloadRecentApps();
-        public void showKeyboardShortcutsMenu();
+        public void toggleKeyboardShortcutsMenu();
         public void cancelPreloadRecentApps();
         public void setWindowState(int window, int state);
         public void buzzBeepBlinked();
@@ -229,10 +229,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showKeyboardShortcutsMenu() {
+    public void toggleKeyboardShortcutsMenu() {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SHOW_KEYBOARD_SHORTCUTS);
-            mHandler.obtainMessage(MSG_SHOW_KEYBOARD_SHORTCUTS).sendToTarget();
+            mHandler.removeMessages(MSG_TOGGLE_KEYBOARD_SHORTCUTS);
+            mHandler.obtainMessage(MSG_TOGGLE_KEYBOARD_SHORTCUTS).sendToTarget();
         }
     }
 
@@ -380,8 +380,8 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_CANCEL_PRELOAD_RECENT_APPS:
                     mCallbacks.cancelPreloadRecentApps();
                     break;
-                case MSG_SHOW_KEYBOARD_SHORTCUTS:
-                    mCallbacks.showKeyboardShortcutsMenu();
+                case MSG_TOGGLE_KEYBOARD_SHORTCUTS:
+                    mCallbacks.toggleKeyboardShortcutsMenu();
                     break;
                 case MSG_SET_WINDOW_STATE:
                     mCallbacks.setWindowState(msg.arg1, msg.arg2);
