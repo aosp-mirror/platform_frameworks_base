@@ -6469,6 +6469,30 @@ package android.appwidget {
 
 }
 
+package android.auditing {
+
+  public class SecurityLog {
+    ctor public SecurityLog();
+    field public static final int TAG_ADB_SHELL_CMD = 210002; // 0x33452
+    field public static final int TAG_ADB_SHELL_INTERACTIVE = 210001; // 0x33451
+    field public static final int TAG_APP_PROCESS_START = 210005; // 0x33455
+    field public static final int TAG_DEVICE_LOCKED = 210007; // 0x33457
+    field public static final int TAG_DEVICE_UNLOCK_ATTEMPT = 210006; // 0x33456
+    field public static final int TAG_SYNC_RECV_FILE = 210003; // 0x33453
+    field public static final int TAG_SYNC_SEND_FILE = 210004; // 0x33454
+  }
+
+  public static class SecurityLog.SecurityEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.Object getData();
+    method public int getTag();
+    method public long getTimeNanos();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.auditing.SecurityLog.SecurityEvent> CREATOR;
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
