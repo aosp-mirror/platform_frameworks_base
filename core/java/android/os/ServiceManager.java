@@ -112,8 +112,10 @@ public final class ServiceManager {
 
     /**
      * Return a list of all currently running services.
+     * @return an array of all currently running services, or <code>null</code> in
+     * case of an exception
      */
-    public static String[] listServices() throws RemoteException {
+    public static String[] listServices() {
         try {
             return getIServiceManager().listServices();
         } catch (RemoteException e) {
