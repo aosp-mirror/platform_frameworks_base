@@ -311,8 +311,10 @@ public class CopyServiceTest extends ServiceTestCase<CopyService> {
 
     public void testCopyVirtualNonTypedFile() throws Exception {
         String srcPath = "/non-typed.sth";
+        // Empty stream types causes the FLAG_SUPPORTS_TYPED_DOCUMENT to be not set.
+        ArrayList<String> streamTypes = new ArrayList<>();
         Uri testFile = mStorage.createVirtualFile(SRC_ROOT, srcPath, "virtual/mime-type",
-                null /* streamTypes */, "I love Tokyo!".getBytes());
+                streamTypes, "I love Tokyo!".getBytes());
 
         Intent intent = createCopyIntent(Lists.newArrayList(testFile));
         startService(intent);
