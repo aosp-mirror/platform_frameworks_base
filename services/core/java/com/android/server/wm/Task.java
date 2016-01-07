@@ -603,12 +603,23 @@ class Task implements DimLayer.DimLayerUser {
         return "Task=" + mTaskId;
     }
 
-    public void printTo(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("taskId="); pw.println(mTaskId);
-            pw.print(prefix + prefix); pw.print("mFullscreen="); pw.println(mFullscreen);
-            pw.print(prefix + prefix); pw.print("mBounds="); pw.println(mBounds.toShortString());
-            pw.print(prefix + prefix); pw.print("mdr="); pw.println(mDeferRemoval);
-            pw.print(prefix + prefix); pw.print("appTokens="); pw.println(mAppTokens);
-            pw.print(prefix + prefix); pw.print("mTempInsetBounds="); pw.println(mTempInsetBounds);
+    public void dump(String prefix, PrintWriter pw) {
+        final String doublePrefix = prefix + "  ";
+
+        pw.println(prefix + "taskId=" + mTaskId);
+        pw.println(doublePrefix + "mFullscreen=" + mFullscreen);
+        pw.println(doublePrefix + "mBounds=" + mBounds.toShortString());
+        pw.println(doublePrefix + "mdr=" + mDeferRemoval);
+        pw.println(doublePrefix + "appTokens=" + mAppTokens);
+        pw.println(doublePrefix + "mTempInsetBounds=" + mTempInsetBounds.toShortString());
+
+        final String triplePrefix = doublePrefix + "  ";
+
+        for (int i = mAppTokens.size() - 1; i >= 0; i--) {
+            final AppWindowToken wtoken = mAppTokens.get(i);
+            pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
+            wtoken.dump(pw, triplePrefix);
+        }
+
     }
 }
