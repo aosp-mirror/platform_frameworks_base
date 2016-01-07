@@ -25,7 +25,6 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
-import android.util.Log;
 import com.android.systemui.Prefs;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -115,8 +114,6 @@ public class RecentsTaskLoadPlan {
      * - least-recent to most-recent freeform tasks
      */
     public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        SystemServicesProxy ssp = Recents.getSystemServices();
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {

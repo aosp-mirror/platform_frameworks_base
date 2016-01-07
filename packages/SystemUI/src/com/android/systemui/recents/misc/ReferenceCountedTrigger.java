@@ -18,8 +18,6 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -107,16 +105,20 @@ public class ReferenceCountedTrigger {
         mLastDecRunnables.clear();
     }
 
-    /** Convenience method to decrement this trigger as a runnable. */
-    public Runnable decrementAsRunnable() {
-        return mDecrementRunnable;
-    }
-    /** Convenience method to decrement this trigger as a animator listener. */
+    /**
+     * Convenience method to decrement this trigger as a animator listener.  This listener is
+     * guarded to prevent being called back multiple times, and will trigger a decrement once and
+     * only once.
+     */
     public Animator.AnimatorListener decrementOnAnimationEnd() {
         return new AnimatorListenerAdapter() {
+            private boolean hasEnded;
+
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (hasEnded) return;
                 decrement();
+                hasEnded = true;
             }
         };
     }

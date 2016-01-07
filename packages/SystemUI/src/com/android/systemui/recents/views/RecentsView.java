@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -59,6 +61,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -116,7 +119,6 @@ public class RecentsView extends FrameLayout {
 
     public RecentsView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        Resources res = context.getResources();
         setWillNotDraw(false);
         mHandler = new Handler();
         mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
@@ -491,23 +493,25 @@ public class RecentsView extends FrameLayout {
 
         // Handle the case where we drop onto a dock region
         if (event.dropTarget instanceof TaskStack.DockState) {
-            final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
+            TaskStackLayoutAlgorithm stackLayout = mTaskStackView.getStackAlgorithm();
+            TaskStackViewScroller stackScroller = mTaskStackView.getScroller();
+            TaskViewTransform tmpTransform = new TaskViewTransform();
 
-            // Remove the task after it is docked
-            event.taskView.animate()
-                    .alpha(0f)
-                    .setDuration(150)
-                    .setInterpolator(mFastOutLinearInInterpolator)
-                    .setUpdateListener(null)
-                    .setListener(null)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mTaskStackView.getStack().removeTask(event.task);
-                        }
-                    })
-                    .withLayer()
-                    .start();
+            // Remove the task view after it is docked
+            stackLayout.getStackTransform(event.task, stackScroller.getStackScroll(), tmpTransform,
+                    null);
+            tmpTransform.scale = event.taskView.getScaleX();
+            tmpTransform.rect.offset(event.taskView.getTranslationX(),
+                    event.taskView.getTranslationY());
+            mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
+                    new TaskViewAnimation(150, mFastOutLinearInInterpolator,
+                            new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    mTaskStackView.getStack().removeTask(event.task);
+                                }
+                            }));
 
             // Dock the task and launch it
             SystemServicesProxy ssp = Recents.getSystemServices();
@@ -587,21 +591,23 @@ public class RecentsView extends FrameLayout {
 
     private void showHistoryButton(final int duration,
             final ReferenceCountedTrigger postHideHistoryAnimationTrigger) {
-        mHistoryButton.setVisibility(View.VISIBLE);
-        mHistoryButton.setAlpha(0f);
         mHistoryButton.setText(getContext().getString(R.string.recents_history_label_format,
                 mStack.getHistoricalTasks().size()));
-        postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                mHistoryButton.animate()
-                        .alpha(1f)
-                        .setDuration(duration)
-                        .setInterpolator(mFastOutSlowInInterpolator)
-                        .withLayer()
-                        .start();
-            }
-        });
+        if (mHistoryButton.getVisibility() == View.INVISIBLE) {
+            mHistoryButton.setVisibility(View.VISIBLE);
+            mHistoryButton.setAlpha(0f);
+            postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    mHistoryButton.animate()
+                            .alpha(1f)
+                            .setDuration(duration)
+                            .setInterpolator(mFastOutSlowInInterpolator)
+                            .withLayer()
+                            .start();
+                }
+            });
+        }
     }
 
     /**
@@ -615,20 +621,22 @@ public class RecentsView extends FrameLayout {
 
     private void hideHistoryButton(int duration,
             final ReferenceCountedTrigger postHideStackAnimationTrigger) {
-        mHistoryButton.animate()
-                .alpha(0f)
-                .setDuration(duration)
-                .setInterpolator(mFastOutLinearInInterpolator)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        mHistoryButton.setVisibility(View.INVISIBLE);
-                        postHideStackAnimationTrigger.decrement();
-                    }
-                })
-                .withLayer()
-                .start();
-        postHideStackAnimationTrigger.increment();
+        if (mHistoryButton.getVisibility() == View.VISIBLE) {
+            mHistoryButton.animate()
+                    .alpha(0f)
+                    .setDuration(duration)
+                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHistoryButton.setVisibility(View.INVISIBLE);
+                            postHideStackAnimationTrigger.decrement();
+                        }
+                    })
+                    .withLayer()
+                    .start();
+            postHideStackAnimationTrigger.increment();
+        }
     }
 
     /**

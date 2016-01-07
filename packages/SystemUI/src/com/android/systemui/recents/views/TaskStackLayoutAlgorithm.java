@@ -22,7 +22,6 @@ import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.FloatProperty;
-import android.util.Log;
 import android.util.Property;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -209,7 +208,6 @@ public class TaskStackLayoutAlgorithm {
     }
 
     Context mContext;
-    private TaskStackView mStackView;
     private Interpolator mLinearOutSlowInInterpolator;
     private StackState mState = StackState.SPLIT;
 
@@ -277,9 +275,12 @@ public class TaskStackLayoutAlgorithm {
     // The freeform workspace layout
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
 
-    public TaskStackLayoutAlgorithm(Context context, TaskStackView stackView) {
+    // The transform to place TaskViews at the front and back of the stack respectively
+    TaskViewTransform mBackOfStackTransform = new TaskViewTransform();
+    TaskViewTransform mFrontOfStackTransform = new TaskViewTransform();
+
+    public TaskStackLayoutAlgorithm(Context context) {
         Resources res = context.getResources();
-        mStackView = stackView;
 
         mFocusedRange = new Range(res.getFloat(R.integer.recents_layout_focused_range_min),
                 res.getFloat(R.integer.recents_layout_focused_range_max));
@@ -315,7 +316,7 @@ public class TaskStackLayoutAlgorithm {
      */
     public void setFocusState(float focusState) {
         mFocusState = focusState;
-        mStackView.requestSynchronizeStackViewsWithModel();
+        updateFrontBackTransforms();
     }
 
     /**
@@ -365,6 +366,7 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedCurveInterpolator = new FreePathInterpolator(mUnfocusedCurve);
         mFocusedCurve = constructFocusedCurve();
         mFocusedCurveInterpolator = new FreePathInterpolator(mFocusedCurve);
+        updateFrontBackTransforms();
     }
 
     /**
@@ -453,7 +455,7 @@ public class TaskStackLayoutAlgorithm {
         Utilities.cancelAnimationWithoutCallbacks(mFocusStateAnimator);
         if (mFocusState > STATE_UNFOCUSED) {
             float delta = (float) yMovement / (UNFOCUS_MULTIPLIER * mStackRect.height());
-            mFocusState -= Math.min(mFocusState, Math.abs(delta));
+            setFocusState(mFocusState - Math.min(mFocusState, Math.abs(delta)));
         }
     }
 
@@ -479,27 +481,23 @@ public class TaskStackLayoutAlgorithm {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         if (launchState.launchedWithAltTab || debugFlags.isInitialStatePaging()) {
-            return 1f;
+            return STATE_FOCUSED;
         }
-        return 0f;
+        return STATE_UNFOCUSED;
     }
 
     /**
-     * Returns the task progress that would put the task just off the back of the stack.
+     * Returns the TaskViewTransform that would put the task just off the back of the stack.
      */
-    public float getStackBackTaskProgress(float stackScroll) {
-        float min = mUnfocusedRange.relativeMin +
-                mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
-        return stackScroll + min;
+    public TaskViewTransform getBackOfStackTransform() {
+        return mBackOfStackTransform;
     }
 
     /**
-     * Returns the task progress that would put the task just off the front of the stack.
+     * Returns the TaskViewTransform that would put the task just off the front of the stack.
      */
-    public float getStackFrontTaskProgress(float stackScroll) {
-        float max = mUnfocusedRange.relativeMax +
-                mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
-        return stackScroll + max;
+    public TaskViewTransform getFrontOfStackTransform() {
+        return mFrontOfStackTransform;
     }
 
     /**
@@ -747,5 +745,19 @@ public class TaskStackLayoutAlgorithm {
         p.cubicTo(0f, 1f, cpoint1X, 1f, 0.5f, 1f - peekHeightPct);
         p.cubicTo(0.5f, 1f - peekHeightPct, cpoint2X, cpoint2Y, 1f, 0f);
         return p;
+    }
+
+    /**
+     * Updates the current transforms that would put a TaskView at the front and back of the stack.
+     */
+    private void updateFrontBackTransforms() {
+        float min = mUnfocusedRange.relativeMin +
+                mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
+        float max = mUnfocusedRange.relativeMax +
+                mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
+        getStackTransform(min, 0f, mBackOfStackTransform, null);
+        getStackTransform(max, 0f, mFrontOfStackTransform, null);
+        mBackOfStackTransform.visible = true;
+        mFrontOfStackTransform.visible = true;
     }
 }

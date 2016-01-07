@@ -18,8 +18,6 @@ package com.android.systemui.recents.views;
 
 import android.graphics.Outline;
 import android.graphics.Rect;
-import android.util.IntProperty;
-import android.util.Property;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
@@ -29,22 +27,10 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     View mSourceView;
     Rect mClipRect = new Rect();
     Rect mClipBounds = new Rect();
+    Rect mLastClipBounds = new Rect();
     int mCornerRadius;
     float mAlpha = 1f;
     final float mMinAlpha = 0.25f;
-
-    public static final Property<AnimateableViewBounds, Integer> CLIP_BOTTOM =
-            new IntProperty<AnimateableViewBounds>("clipBottom") {
-                @Override
-                public void setValue(AnimateableViewBounds object, int clip) {
-                    object.setClipBottom(clip, false /* force */);
-                }
-
-                @Override
-                public Integer get(AnimateableViewBounds object) {
-                    return object.getClipBottom();
-                }
-            };
 
     public AnimateableViewBounds(View source, int cornerRadius) {
         mSourceView = source;
@@ -77,11 +63,9 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     }
 
     /** Sets the bottom clip. */
-    public void setClipBottom(int bottom, boolean force) {
-        if (bottom != mClipRect.bottom || force) {
-            mClipRect.bottom = bottom;
-            updateClipBounds();
-        }
+    public void setClipBottom(int bottom) {
+        mClipRect.bottom = bottom;
+        updateClipBounds();
     }
 
     /** Returns the bottom clip. */
@@ -93,7 +77,10 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         mClipBounds.set(Math.max(0, mClipRect.left), Math.max(0, mClipRect.top),
                 mSourceView.getWidth() - Math.max(0, mClipRect.right),
                 mSourceView.getHeight() - Math.max(0, mClipRect.bottom));
-        mSourceView.setClipBounds(mClipBounds);
-        mSourceView.invalidateOutline();
+        if (!mLastClipBounds.equals(mClipBounds)) {
+            mSourceView.setClipBounds(mClipBounds);
+            mSourceView.invalidateOutline();
+            mLastClipBounds.set(mClipBounds);
+        }
     }
 }

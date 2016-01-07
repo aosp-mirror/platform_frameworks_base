@@ -295,6 +295,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             Rect freeformRect = mSv.mLayoutAlgorithm.mFreeformRect;
             if (freeformRect.top <= y && y <= freeformRect.bottom) {
                 if (mSv.launchFreeformTasks()) {
+                    // TODO: Animate Recents away as we launch the freeform tasks
                     return;
                 }
             }

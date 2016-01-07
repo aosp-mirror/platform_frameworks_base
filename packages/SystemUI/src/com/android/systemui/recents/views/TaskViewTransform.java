@@ -16,16 +16,19 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.ValueAnimator;
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.graphics.RectF;
 import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
-import android.view.animation.Interpolator;
 
+import java.util.ArrayList;
 
-/* The transform state for a task view */
+/**
+ * The visual properties for a {@link TaskView}.
+ */
 public class TaskViewTransform {
 
     public static final Property<View, Integer> LEFT =
@@ -80,9 +83,6 @@ public class TaskViewTransform {
                 }
             };
 
-    // TODO: Move this out of the transform
-    public int startDelay = 0;
-
     public float translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
@@ -94,15 +94,10 @@ public class TaskViewTransform {
     // This is a window-space rect used for positioning the task in the stack and freeform workspace
     public RectF rect = new RectF();
 
-    public TaskViewTransform() {
-        // Do nothing
-    }
-
     /**
      * Resets the current transform.
      */
     public void reset() {
-        startDelay = 0;
         translationZ = 0;
         scale = 1f;
         alpha = 1f;
@@ -116,50 +111,34 @@ public class TaskViewTransform {
     public boolean hasAlphaChangedFrom(float v) {
         return (Float.compare(alpha, v) != 0);
     }
+
     public boolean hasScaleChangedFrom(float v) {
         return (Float.compare(scale, v) != 0);
     }
+
     public boolean hasTranslationZChangedFrom(float v) {
         return (Float.compare(translationZ, v) != 0);
     }
 
-    /** Applies this transform to a view. */
-    public void applyToTaskView(TaskView v, int duration, Interpolator interp, boolean allowLayers,
-            boolean allowShadows, ValueAnimator.AnimatorUpdateListener updateCallback) {
-        // Check to see if any properties have changed, and update the task view
-        if (duration > 0) {
-            ViewPropertyAnimator anim = v.animate();
-            boolean requiresLayers = false;
+    public boolean hasRectChangedFrom(View v) {
+        return ((int) rect.left != v.getLeft()) || ((int) rect.right != v.getRight()) ||
+                ((int) rect.top != v.getTop()) || ((int) rect.bottom != v.getBottom());
+    }
 
-            // Animate to the final state
-            if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
-                anim.translationZ(translationZ);
-            }
-            if (hasScaleChangedFrom(v.getScaleX())) {
-                anim.scaleX(scale)
-                    .scaleY(scale);
-                requiresLayers = true;
-            }
-            if (hasAlphaChangedFrom(v.getAlpha())) {
-                // Use layers if we animate alpha
-                anim.alpha(alpha);
-                requiresLayers = true;
-            }
-            if (requiresLayers && allowLayers) {
-                anim.withLayer();
-            }
-            if (updateCallback != null) {
-                anim.setUpdateListener(updateCallback);
-            } else {
-                anim.setUpdateListener(null);
-            }
-            anim.setListener(null);
-            anim.setStartDelay(startDelay)
-                    .setDuration(duration)
-                    .setInterpolator(interp)
-                    .start();
-        } else {
-            // Set the changed properties
+    /**
+     * Applies this transform to a view.
+     *
+     * @return whether hardware layers are required for this animation.
+     */
+    public boolean applyToTaskView(TaskView v, ArrayList<Animator> animators,
+            TaskViewAnimation taskAnimation, boolean allowShadows) {
+        // Return early if not visible
+        boolean requiresHwLayers = false;
+        if (!visible) {
+            return requiresHwLayers;
+        }
+
+        if (taskAnimation.isImmediate()) {
             if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 v.setTranslationZ(translationZ);
             }
@@ -170,29 +149,45 @@ public class TaskViewTransform {
             if (hasAlphaChangedFrom(v.getAlpha())) {
                 v.setAlpha(alpha);
             }
+            if (hasRectChangedFrom(v)) {
+                v.setLeftTopRightBottom((int) rect.left, (int) rect.top, (int) rect.right,
+                        (int) rect.bottom);
+            }
+        } else {
+            if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
+                animators.add(ObjectAnimator.ofFloat(v, View.TRANSLATION_Z, v.getTranslationZ(),
+                        translationZ));
+            }
+            if (hasScaleChangedFrom(v.getScaleX())) {
+                animators.add(ObjectAnimator.ofPropertyValuesHolder(v,
+                        PropertyValuesHolder.ofFloat(View.SCALE_X, v.getScaleX(), scale),
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, v.getScaleX(), scale)));
+            }
+            if (hasAlphaChangedFrom(v.getAlpha())) {
+                animators.add(ObjectAnimator.ofFloat(v, View.ALPHA, v.getAlpha(), alpha));
+                requiresHwLayers = true;
+            }
+            if (hasRectChangedFrom(v)) {
+                animators.add(ObjectAnimator.ofPropertyValuesHolder(v,
+                        PropertyValuesHolder.ofInt(LEFT, v.getLeft(), (int) rect.left),
+                        PropertyValuesHolder.ofInt(TOP, v.getTop(), (int) rect.top),
+                        PropertyValuesHolder.ofInt(RIGHT, v.getRight(), (int) rect.right),
+                        PropertyValuesHolder.ofInt(BOTTOM, v.getBottom(), (int) rect.bottom)));
+            }
         }
+        return requiresHwLayers;
     }
 
     /** Reset the transform on a view. */
     public static void reset(TaskView v) {
-        // Cancel any running animations and reset the translation in case something else (like a
-        // dismiss animation) changes it
-        v.animate().cancel();
         v.setTranslationX(0f);
         v.setTranslationY(0f);
         v.setTranslationZ(0f);
         v.setScaleX(1f);
         v.setScaleY(1f);
         v.setAlpha(1f);
-        v.getViewBounds().setClipBottom(0, false /* forceUpdate */);
+        v.getViewBounds().setClipBottom(0);
         v.setLeftTopRightBottom(0, 0, 0, 0);
         v.mThumbnailView.setBitmapScale(1f);
-    }
-
-    @Override
-    public String toString() {
-        return "TaskViewTransform delay: " + startDelay + " z: " + translationZ +
-                " scale: " + scale + " alpha: " + alpha + " visible: " + visible +
-                " rect: " + rect + " p: " + p;
     }
 }
