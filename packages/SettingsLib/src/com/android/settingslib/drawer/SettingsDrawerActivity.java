@@ -49,7 +49,7 @@ public class SettingsDrawerActivity extends Activity {
     private static final String TAG = "SettingsDrawerActivity";
 
     private static List<DashboardCategory> sDashboardCategories;
-    private static HashMap<Pair<String, String>, DashboardTile> sTileCache;
+    private static HashMap<Pair<String, String>, Tile> sTileCache;
 
     private final PackageReceiver mPackageReceiver = new PackageReceiver();
     private final List<CategoryListener> mCategoryListeners = new ArrayList<>();
@@ -194,7 +194,7 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
-    public boolean openTile(DashboardTile tile) {
+    public boolean openTile(Tile tile) {
         closeDrawer();
         if (tile == null) {
             return false;
@@ -211,7 +211,7 @@ public class SettingsDrawerActivity extends Activity {
         return true;
     }
 
-    protected void onTileClicked(DashboardTile tile) {
+    protected void onTileClicked(Tile tile) {
         if (openTile(tile)) {
             finish();
         }

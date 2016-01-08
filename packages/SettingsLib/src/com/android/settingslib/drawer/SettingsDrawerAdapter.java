@@ -48,7 +48,7 @@ public class SettingsDrawerAdapter extends BaseAdapter {
             mItems.add(category);
             for (int j = 0; j < dashboardCategory.tiles.size(); j++) {
                 Item tile = new Item();
-                DashboardTile dashboardTile = dashboardCategory.tiles.get(j);
+                Tile dashboardTile = dashboardCategory.tiles.get(j);
                 tile.label = dashboardTile.title;
                 tile.icon = dashboardTile.icon;
                 tile.tile = dashboardTile;
@@ -58,7 +58,7 @@ public class SettingsDrawerAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public DashboardTile getTile(int position) {
+    public Tile getTile(int position) {
         return mItems.get(position).tile;
     }
 
@@ -101,6 +101,6 @@ public class SettingsDrawerAdapter extends BaseAdapter {
     private static class Item {
         public Icon icon;
         public CharSequence label;
-        public DashboardTile tile;
+        public Tile tile;
     }
 }

@@ -43,22 +43,22 @@ public class DashboardCategory implements Parcelable {
     /**
      * List of the category's children
      */
-    public List<DashboardTile> tiles = new ArrayList<DashboardTile>();
+    public List<Tile> tiles = new ArrayList<Tile>();
 
 
     public DashboardCategory() {
         // Empty
     }
 
-    public void addTile(DashboardTile tile) {
+    public void addTile(Tile tile) {
         tiles.add(tile);
     }
 
-    public void addTile(int n, DashboardTile tile) {
+    public void addTile(int n, Tile tile) {
         tiles.add(n, tile);
     }
 
-    public void removeTile(DashboardTile tile) {
+    public void removeTile(Tile tile) {
         tiles.remove(tile);
     }
 
@@ -70,7 +70,7 @@ public class DashboardCategory implements Parcelable {
         return tiles.size();
     }
 
-    public DashboardTile getTile(int n) {
+    public Tile getTile(int n) {
         return tiles.get(n);
     }
 
@@ -89,7 +89,7 @@ public class DashboardCategory implements Parcelable {
         dest.writeInt(count);
 
         for (int n = 0; n < count; n++) {
-            DashboardTile tile = tiles.get(n);
+            Tile tile = tiles.get(n);
             tile.writeToParcel(dest, flags);
         }
     }
@@ -102,7 +102,7 @@ public class DashboardCategory implements Parcelable {
         final int count = in.readInt();
 
         for (int n = 0; n < count; n++) {
-            DashboardTile tile = DashboardTile.CREATOR.createFromParcel(in);
+            Tile tile = Tile.CREATOR.createFromParcel(in);
             tiles.add(tile);
         }
     }

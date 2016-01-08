@@ -1,13 +1,18 @@
 /*
  * Copyright (C) 2015 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
  */
-
 package com.android.settingslib.drawer;
 
 import android.app.ActivityManager;
@@ -108,9 +113,9 @@ public class TileUtils {
     private static final String SETTING_PKG = "com.android.settings";
 
     public static List<DashboardCategory> getCategories(Context context,
-            HashMap<Pair<String, String>, DashboardTile> cache) {
+            HashMap<Pair<String, String>, Tile> cache) {
         final long startTime = System.currentTimeMillis();
-        ArrayList<DashboardTile> tiles = new ArrayList<>();
+        ArrayList<Tile> tiles = new ArrayList<>();
         UserManager userManager = UserManager.get(context);
         for (UserHandle user : userManager.getUserProfiles()) {
             // TODO: Needs much optimization, too many PM queries going on here.
@@ -125,7 +130,7 @@ public class TileUtils {
             getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
         }
         HashMap<String, DashboardCategory> categoryMap = new HashMap<>();
-        for (DashboardTile tile : tiles) {
+        for (Tile tile : tiles) {
             DashboardCategory category = categoryMap.get(tile.category);
             if (category == null) {
                 category = createCategory(context, tile.category);
@@ -170,30 +175,34 @@ public class TileUtils {
     }
 
     private static void getTilesForAction(Context context,
-            UserHandle user, String action, Map<Pair<String, String>, DashboardTile> addedCache,
-            String defaultCategory, ArrayList<DashboardTile> outTiles, boolean requireSettings) {
-        PackageManager pm = context.getPackageManager();
+            UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
+            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
         Intent intent = new Intent(action);
+        if (requireSettings) {
+            intent.setPackage(SETTING_PKG);
+        }
+        getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
+                requireSettings, true);
+    }
+
+    public static void getTilesForIntent(Context context, UserHandle user, Intent intent,
+            Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
+            boolean usePriority, boolean checkCategory) {
+        PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
         for (ResolveInfo resolved : results) {
-            if (requireSettings) {
-                if (!SETTING_PKG.equals(resolved.activityInfo.applicationInfo.packageName)) {
-                    continue;
-                }
-            } else {
-                if (!resolved.system) {
-                    // Do not allow any app to add to settings, only system ones.
-                    continue;
-                }
+            if (!resolved.system) {
+                // Do not allow any app to add to settings, only system ones.
+                continue;
             }
             ActivityInfo activityInfo = resolved.activityInfo;
             Bundle metaData = activityInfo.metaData;
             String categoryKey = defaultCategory;
-            if (((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
+            if (checkCategory && ((metaData == null) || !metaData.containsKey(EXTRA_CATEGORY_KEY))
                     && categoryKey == null) {
-                Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for action "
-                        + action + " missing metadata "
+                Log.w(LOG_TAG, "Found " + resolved.activityInfo.name + " for intent "
+                        + intent + " missing metadata "
                         + (metaData == null ? "" : EXTRA_CATEGORY_KEY));
                 continue;
             } else {
@@ -201,13 +210,13 @@ public class TileUtils {
             }
             Pair<String, String> key = new Pair<String, String>(activityInfo.packageName,
                     activityInfo.name);
-            DashboardTile tile = addedCache.get(key);
+            Tile tile = addedCache.get(key);
             if (tile == null) {
-                tile = new DashboardTile();
+                tile = new Tile();
                 tile.intent = new Intent().setClassName(
                         activityInfo.packageName, activityInfo.name);
                 tile.category = categoryKey;
-                tile.priority = requireSettings ? resolved.priority : 0;
+                tile.priority = usePriority ? resolved.priority : 0;
                 tile.metaData = activityInfo.metaData;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
                         pm);
@@ -234,7 +243,7 @@ public class TileUtils {
         return null;
     }
 
-    private static boolean updateTileData(Context context, DashboardTile tile,
+    private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm) {
         if (applicationInfo.isSystemApp()) {
             int icon = 0;
@@ -252,10 +261,18 @@ public class TileUtils {
                         icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
                     }
                     if (metaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
-                        title = metaData.getString(META_DATA_PREFERENCE_TITLE);
+                        if (metaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
+                            title = res.getString(metaData.getInt(META_DATA_PREFERENCE_TITLE));
+                        } else {
+                            title = metaData.getString(META_DATA_PREFERENCE_TITLE);
+                        }
                     }
                     if (metaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
-                        summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
+                        if (metaData.get(META_DATA_PREFERENCE_SUMMARY) instanceof Integer) {
+                            summary = res.getString(metaData.getInt(META_DATA_PREFERENCE_SUMMARY));
+                        } else {
+                            summary = metaData.getString(META_DATA_PREFERENCE_SUMMARY);
+                        }
                     }
                 }
             } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
@@ -285,10 +302,10 @@ public class TileUtils {
         return false;
     }
 
-    private static final Comparator<DashboardTile> TILE_COMPARATOR =
-            new Comparator<DashboardTile>() {
+    private static final Comparator<Tile> TILE_COMPARATOR =
+            new Comparator<Tile>() {
         @Override
-        public int compare(DashboardTile lhs, DashboardTile rhs) {
+        public int compare(Tile lhs, Tile rhs) {
             return rhs.priority - lhs.priority;
         }
     };
