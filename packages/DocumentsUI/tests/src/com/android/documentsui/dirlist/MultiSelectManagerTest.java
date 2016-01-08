@@ -166,6 +166,12 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         assertRangeSelection(0, 7);
     }
 
+    public void testKeyboardSelection() {
+        // This simulates shift-navigation.
+        keyToPosition(5, 10, true);
+        assertRangeSelection(5, 10);
+    }
+
     public void testSingleSelectMode() {
         mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
@@ -186,7 +192,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
         mManager.addCallback(mCallback);
         longPress(20);
-        keyToPosition(22, true);
+        keyToPosition(20, 22, true);
         assertSelection(items.get(22));
     }
 
@@ -250,8 +256,8 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         mManager.onSingleTapUp(TestInputEvent.shiftClick(position));
     }
 
-    private void keyToPosition(int position, boolean shift) {
-        mManager.attemptChangeFocus(position, shift);
+    private void keyToPosition(int startPos, int endPos, boolean shift) {
+        mManager.changeFocus(startPos, endPos, shift);
     }
 
     private void assertSelected(String... expected) {
