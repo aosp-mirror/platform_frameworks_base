@@ -72,6 +72,9 @@ public final class SELinuxMMAC {
     // Append ephemeral to existing seinfo label
     private static final String EPHEMERAL_APP_STR = ":ephemeralapp";
 
+    // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
+    private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
+
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
      * label apps. The loaded mac_permissions.xml file is determined by the
@@ -295,6 +298,8 @@ public final class SELinuxMMAC {
 
         if (pkg.applicationInfo.isPrivilegedApp())
             pkg.applicationInfo.seinfo += PRIVILEGED_APP_STR;
+
+        pkg.applicationInfo.seinfo += TARGETSDKVERSION_STR + pkg.applicationInfo.targetSdkVersion;
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
