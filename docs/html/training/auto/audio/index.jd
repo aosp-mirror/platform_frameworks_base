@@ -210,6 +210,34 @@ href="https://www.youtube.com/watch?v=Q96Sw6v4ULg">
 <p class="note"><strong>Note:</strong> The icon you provide should have transparency enabled, so the
 icon's background gets filled in with the app's primary color.</p>
 
+<h2 id=isconnected">Determine if Your App is Connected</h2>
+<p>
+It is possible to determine if your app is selected as the current media app.</p>
+<p>
+Android Auto broadcasts an intent with <code>com.google.android.gms.car.media.
+STATUS</code> action when a user connects or disconnects from a media app. The broadcast intent is
+scoped to the package name of the media app selected. You can register a broadcast receiver in your
+app, preferably in your <a href="{@docRoot}reference/android/service/media/MediaBrowserService.html">
+MediaBrowserService</a> implementation and listen for this intent
+and adjust advertisements, metadata, and UI buttons in your app to operate safely in a vehicle.</p>
+
+<p>The broadcasted intent has a String extra <code>media_connection_status</code>, that
+contains either <code>media_connected</code> or <code>media_disconnected</code> string that represents
+ the current connection status. </p>
+
+<pre>
+IntentFilter filter = new IntentFilter("com.google.android.gms.car.media.STATUS");
+BroadcastReceiver receiver = new BroadcastReceiver() {
+    ...
+    public void onReceive(Context context, Intent intent) {
+        String status = intent.getStringExtra("media_connection_status");
+        boolean isConnectedToCar = "media_connected".equals(status);
+        // adjust settings based on the connection status
+    }
+};
+registerReceiver(receiver, filter);
+</pre>
+
 
 <h2 id="implement_browser">Build a Browser Service</h2>
 
