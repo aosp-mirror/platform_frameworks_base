@@ -26,17 +26,15 @@ public class NotificationRankingUpdate implements Parcelable {
     // TODO: Support incremental updates.
     private final String[] mKeys;
     private final String[] mInterceptedKeys;
-    private final int mFirstAmbientIndex;
     private final Bundle mVisibilityOverrides;
     private final Bundle mSuppressedVisualEffects;
     private final int[] mImportance;
     private final Bundle mImportanceExplanation;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
-            Bundle visibilityOverrides, int firstAmbientIndex, Bundle suppressedVisualEffects,
+            Bundle visibilityOverrides, Bundle suppressedVisualEffects,
             int[] importance, Bundle explanation) {
         mKeys = keys;
-        mFirstAmbientIndex = firstAmbientIndex;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
         mSuppressedVisualEffects = suppressedVisualEffects;
@@ -46,7 +44,6 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public NotificationRankingUpdate(Parcel in) {
         mKeys = in.readStringArray();
-        mFirstAmbientIndex = in.readInt();
         mInterceptedKeys = in.readStringArray();
         mVisibilityOverrides = in.readBundle();
         mSuppressedVisualEffects = in.readBundle();
@@ -63,7 +60,6 @@ public class NotificationRankingUpdate implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeStringArray(mKeys);
-        out.writeInt(mFirstAmbientIndex);
         out.writeStringArray(mInterceptedKeys);
         out.writeBundle(mVisibilityOverrides);
         out.writeBundle(mSuppressedVisualEffects);
@@ -84,10 +80,6 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public String[] getOrderedKeys() {
         return mKeys;
-    }
-
-    public int getFirstAmbientIndex() {
-        return mFirstAmbientIndex;
     }
 
     public String[] getInterceptedKeys() {
