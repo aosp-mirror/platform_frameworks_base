@@ -53,6 +53,8 @@ namespace OpBatchType {
         Shadow,
         TextureLayer,
         Functor,
+        CopyToLayer,
+        CopyFromLayer,
 
         Count // must be last
     };
@@ -91,6 +93,8 @@ class OpReorderer : public CanvasStateClient {
 
         void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers, MergedOpReceiver*) const;
 
+        void deferLayerClear(const Rect& dstRect);
+
         bool empty() const {
             return mBatches.empty();
         }
@@ -107,7 +111,12 @@ class OpReorderer : public CanvasStateClient {
         OffscreenBuffer* offscreenBuffer;
         const BeginLayerOp* beginLayerOp;
         const RenderNode* renderNode;
+
+        // list of deferred CopyFromLayer ops, to be deferred upon encountering EndUnclippedLayerOps
+        std::vector<BakedOpState*> activeUnclippedSaveLayers;
     private:
+        void flushLayerClears(LinearAllocator& allocator);
+
         std::vector<BatchBase*> mBatches;
 
         /**
@@ -119,6 +128,8 @@ class OpReorderer : public CanvasStateClient {
 
         // Maps batch ids to the most recent *non-merging* batch of that id
         OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
+
+        std::vector<Rect> mClearRects;
     };
 
 public:
@@ -147,7 +158,8 @@ public:
          */
         #define X(Type) \
                 [](void* renderer, const BakedOpState& state) { \
-                    StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)), static_cast<const Type&>(*(state.op)), state); \
+                    StaticDispatcher::on##Type(*(static_cast<Renderer*>(renderer)), \
+                            static_cast<const Type&>(*(state.op)), state); \
                 },
         static BakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
         #undef X
@@ -233,8 +245,7 @@ private:
     void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers);
 
     SkPath* createFrameAllocatedPath() {
-        mFrameAllocatedPaths.emplace_back(new SkPath);
-        return mFrameAllocatedPaths.back().get();
+        return mAllocator.create<SkPath>();
     }
 
     void deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
@@ -249,8 +260,6 @@ private:
 #define X(Type) void defer##Type(const Type& op);
     MAP_DEFERRABLE_OPS(X)
 #undef X
-
-    std::vector<std::unique_ptr<SkPath> > mFrameAllocatedPaths;
 
     // List of every deferred layer's render state. Replayed in reverse order to render a frame.
     std::vector<LayerReorderer> mLayerReorderers;

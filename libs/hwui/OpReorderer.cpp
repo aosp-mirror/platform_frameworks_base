@@ -240,8 +240,50 @@ void OpReorderer::LayerReorderer::locateInsertIndex(int batchId, const Rect& cli
     }
 }
 
+void OpReorderer::LayerReorderer::deferLayerClear(const Rect& rect) {
+    mClearRects.push_back(rect);
+}
+
+void OpReorderer::LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
+    if (CC_UNLIKELY(!mClearRects.empty())) {
+        const int vertCount = mClearRects.size() * 4;
+        // put the verts in the frame allocator, since
+        //     1) SimpleRectsOps needs verts, not rects
+        //     2) even if mClearRects stored verts, std::vectors will move their contents
+        Vertex* const verts = (Vertex*) allocator.alloc(vertCount * sizeof(Vertex));
+
+        Vertex* currentVert = verts;
+        Rect bounds = mClearRects[0];
+        for (auto&& rect : mClearRects) {
+            bounds.unionWith(rect);
+            Vertex::set(currentVert++, rect.left, rect.top);
+            Vertex::set(currentVert++, rect.right, rect.top);
+            Vertex::set(currentVert++, rect.left, rect.bottom);
+            Vertex::set(currentVert++, rect.right, rect.bottom);
+        }
+        mClearRects.clear(); // discard rects before drawing so this method isn't reentrant
+
+        // One or more unclipped saveLayers have been enqueued, with deferred clears.
+        // Flush all of these clears with a single draw
+        SkPaint* paint = allocator.create<SkPaint>();
+        paint->setXfermodeMode(SkXfermode::kClear_Mode);
+        SimpleRectsOp* op = new (allocator) SimpleRectsOp(bounds,
+                Matrix4::identity(), nullptr, paint,
+                verts, vertCount);
+        BakedOpState* bakedState = BakedOpState::directConstruct(allocator, bounds, *op);
+
+
+        deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
+    }
+}
+
 void OpReorderer::LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId) {
+    if (batchId != OpBatchType::CopyToLayer) {
+        // if first op after one or more unclipped saveLayers, flush the layer clears
+        flushLayerClears(allocator);
+    }
+
     OpBatch* targetBatch = mBatchLookup[batchId];
 
     size_t insertBatchIndex = mBatches.size();
@@ -260,10 +302,12 @@ void OpReorderer::LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
     }
 }
 
-// insertion point of a new batch, will hopefully be immediately after similar batch
-// (generally, should be similar shader)
 void OpReorderer::LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
+    if (batchId != OpBatchType::CopyToLayer) {
+        // if first op after one or more unclipped saveLayers, flush the layer clears
+        flushLayerClears(allocator);
+    }
     MergingOpBatch* targetBatch = nullptr;
 
     // Try to merge with any existing batch with same mergeId
@@ -726,6 +770,11 @@ void OpReorderer::deferArcOp(const ArcOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
+static bool hasMergeableClip(const BakedOpState& state) {
+    return state.computedState.clipState
+            || state.computedState.clipState->mode == ClipMode::Rectangle;
+}
+
 void OpReorderer::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
@@ -736,7 +785,8 @@ void OpReorderer::deferBitmapOp(const BitmapOp& op) {
     if (bakedState->computedState.transform.isSimple()
             && bakedState->computedState.transform.positiveScale()
             && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
-            && op.bitmap->colorType() != kAlpha_8_SkColorType) {
+            && op.bitmap->colorType() != kAlpha_8_SkColorType
+            && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
         // TODO: AssetAtlas in mergeId
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::Bitmap, mergeId);
@@ -792,7 +842,8 @@ void OpReorderer::deferPatchOp(const PatchOp& op) {
     if (!bakedState) return; // quick rejected
 
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode) {
+            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = (mergeid_t) op.bitmap->getGenerationID();
         // TODO: AssetAtlas in mergeId
 
@@ -849,7 +900,8 @@ void OpReorderer::deferTextOp(const TextOp& op) {
 
     batchid_t batchId = textBatchId(*(op.paint));
     if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode) {
+            && PaintUtils::getXfermodeDirect(op.paint) == SkXfermode::kSrcOver_Mode
+            && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
         currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
     } else {
@@ -894,7 +946,8 @@ void OpReorderer::restoreForLayer() {
     mLayerStack.pop_back();
 }
 
-// TODO: test rejection at defer time, where the bounds become empty
+// TODO: defer time rejection (when bounds become empty) + tests
+// Option - just skip layers with no bounds at playback + defer?
 void OpReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
     uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
     uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
@@ -904,7 +957,7 @@ void OpReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
 
     // Combine all transforms used to present saveLayer content:
     // parent content transform * canvas transform * bounds offset
-    Matrix4 contentTransform(*previous->transform);
+    Matrix4 contentTransform(*(previous->transform));
     contentTransform.multiply(op.localMatrix);
     contentTransform.translate(op.unmappedBounds.left, op.unmappedBounds.top);
 
@@ -961,9 +1014,52 @@ void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
         currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Bitmap);
     } else {
         // Layer won't be drawn - delete its drawing batches to prevent it from doing any work
+        // TODO: need to prevent any render work from being done
+        // - create layerop earlier for reject purposes?
         mLayerReorderers[finishedLayerIndex].clear();
         return;
     }
+}
+
+void OpReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
+    Matrix4 boundsTransform(*(mCanvasState.currentSnapshot()->transform));
+    boundsTransform.multiply(op.localMatrix);
+
+    Rect dstRect(op.unmappedBounds);
+    boundsTransform.mapRect(dstRect);
+    dstRect.doIntersect(mCanvasState.currentSnapshot()->getRenderTargetClip());
+
+    // Allocate a holding position for the layer object (copyTo will produce, copyFrom will consume)
+    OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>();
+
+    /**
+     * First, defer an operation to copy out the content from the rendertarget into a layer.
+     */
+    auto copyToOp = new (mAllocator) CopyToLayerOp(op, layerHandle);
+    BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator, dstRect, *copyToOp);
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
+
+    /**
+     * Defer a clear rect, so that clears from multiple unclipped layers can be drawn
+     * both 1) simultaneously, and 2) as long after the copyToLayer executes as possible
+     */
+    currentLayer().deferLayerClear(dstRect);
+
+    /**
+     * And stash an operation to copy that layer back under the rendertarget until
+     * a balanced EndUnclippedLayerOp is seen
+     */
+    auto copyFromOp = new (mAllocator) CopyFromLayerOp(op, layerHandle);
+    bakedState = BakedOpState::directConstruct(mAllocator, dstRect, *copyFromOp);
+    currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
+}
+
+void OpReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& op) {
+    LOG_ALWAYS_FATAL_IF(currentLayer().activeUnclippedSaveLayers.empty(), "no layer to end!");
+
+    BakedOpState* copyFromLayerOp = currentLayer().activeUnclippedSaveLayers.back();
+    currentLayer().deferUnmergeableOp(mAllocator, copyFromLayerOp, OpBatchType::CopyFromLayer);
+    currentLayer().activeUnclippedSaveLayers.pop_back();
 }
 
 } // namespace uirenderer

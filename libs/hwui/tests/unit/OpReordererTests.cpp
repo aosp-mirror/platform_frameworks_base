@@ -423,7 +423,7 @@ TEST(OpReorderer, clipped) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, saveLayerSimple) {
+TEST(OpReorderer, saveLayer_simple) {
     class SaveLayerSimpleTestRenderer : public TestRendererBase {
     public:
         OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
@@ -466,7 +466,7 @@ TEST(OpReorderer, saveLayerSimple) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-TEST(OpReorderer, saveLayerNested) {
+TEST(OpReorderer, saveLayer_nested) {
     /* saveLayer1 { rect1, saveLayer2 { rect2 } } will play back as:
      * - startTemporaryLayer2, rect2 endLayer2
      * - startTemporaryLayer1, rect1, drawLayer2, endLayer1
@@ -538,7 +538,7 @@ TEST(OpReorderer, saveLayerNested) {
     EXPECT_EQ(10, renderer.getIndex());
 }
 
-TEST(OpReorderer, saveLayerContentRejection) {
+TEST(OpReorderer, saveLayer_contentRejection) {
         auto node = TestUtils::createNode(0, 0, 200, 200,
                 [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -559,7 +559,165 @@ TEST(OpReorderer, saveLayerContentRejection) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
+TEST(OpReorderer, saveLayerUnclipped_simple) {
+    class SaveLayerUnclippedSimpleTestRenderer : public TestRendererBase {
+    public:
+        void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
+            EXPECT_EQ(nullptr, state.computedState.clipState);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+        void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            ASSERT_NE(nullptr, op.paint);
+            ASSERT_EQ(SkXfermode::kClear_Mode, PaintUtils::getXfermodeDirect(op.paint));
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(2, mIndex++);
+            EXPECT_EQ(Rect(200, 200), op.unmappedBounds);
+            EXPECT_EQ(Rect(200, 200), state.computedState.clippedBounds);
+            EXPECT_EQ(Rect(200, 200), state.computedState.clipRect());
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+        void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
+            EXPECT_EQ(nullptr, state.computedState.clipState);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.restore();
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
+    SaveLayerUnclippedSimpleTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+TEST(OpReorderer, saveLayerUnclipped_mergedClears) {
+    class SaveLayerUnclippedMergedClearsTestRenderer : public TestRendererBase {
+    public:
+        void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_GT(4, index);
+            EXPECT_EQ(5, op.unmappedBounds.getWidth());
+            EXPECT_EQ(5, op.unmappedBounds.getHeight());
+            if (index == 0) {
+                EXPECT_EQ(Rect(10, 10), state.computedState.clippedBounds);
+            } else if (index == 1) {
+                EXPECT_EQ(Rect(190, 0, 200, 10), state.computedState.clippedBounds);
+            } else if (index == 2) {
+                EXPECT_EQ(Rect(0, 190, 10, 200), state.computedState.clippedBounds);
+            } else if (index == 3) {
+                EXPECT_EQ(Rect(190, 190, 200, 200), state.computedState.clippedBounds);
+            }
+        }
+        void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(4, mIndex++);
+            ASSERT_EQ(op.vertexCount, 16u);
+            for (size_t i = 0; i < op.vertexCount; i++) {
+                auto v = op.vertices[i];
+                EXPECT_TRUE(v.x == 0 || v.x == 10 || v.x == 190 || v.x == 200);
+                EXPECT_TRUE(v.y == 0 || v.y == 10 || v.y == 190 || v.y == 200);
+            }
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(5, mIndex++);
+        }
+        void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
+            EXPECT_LT(5, mIndex++);
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+
+        int restoreTo = canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.scale(2, 2);
+        canvas.saveLayerAlpha(0, 0, 5, 5, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.saveLayerAlpha(95, 0, 100, 5, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.saveLayerAlpha(0, 95, 5, 100, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.saveLayerAlpha(95, 95, 100, 100, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.drawRect(0, 0, 100, 100, SkPaint());
+        canvas.restoreToCount(restoreTo);
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+            createSyncedNodeList(node), sLightCenter);
+    SaveLayerUnclippedMergedClearsTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(10, renderer.getIndex())
+            << "Expect 4 copyTos, 4 copyFroms, 1 clear SimpleRects, and 1 rect.";
+}
+
+/* saveLayerUnclipped { saveLayer { saveLayerUnclipped { rect } } } will play back as:
+ * - startTemporaryLayer, onCopyToLayer, onSimpleRects, onRect, onCopyFromLayer, endLayer
+ * - startFrame, onCopyToLayer, onSimpleRects, drawLayer, onCopyFromLayer, endframe
+ */
+TEST(OpReorderer, saveLayerUnclipped_complex) {
+    class SaveLayerUnclippedComplexTestRenderer : public TestRendererBase {
+    public:
+        OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) {
+            EXPECT_EQ(0, mIndex++); // savelayer first
+            return (OffscreenBuffer*)0xabcd;
+        }
+        void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 1 || index == 7);
+        }
+        void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 2 || index == 8);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+            Matrix4 expected;
+            expected.loadTranslate(-100, -100, 0);
+            EXPECT_EQ(Rect(100, 100, 200, 200), state.computedState.clippedBounds);
+            EXPECT_MATRIX_APPROX_EQ(expected, state.computedState.transform);
+        }
+        void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
+            int index = mIndex++;
+            EXPECT_TRUE(index == 4 || index == 10);
+        }
+        void endLayer() override {
+            EXPECT_EQ(5, mIndex++);
+        }
+        void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
+            EXPECT_EQ(6, mIndex++);
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(9, mIndex++);
+        }
+        void endFrame(const Rect& repaintRect) override {
+            EXPECT_EQ(11, mIndex++);
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 600, 600, // 500x500 triggers clipping
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(0, 0, 500, 500, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.saveLayerAlpha(100, 100, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag); // clipped
+        canvas.saveLayerAlpha(200, 200, 300, 300, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.drawRect(200, 200, 300, 300, SkPaint());
+        canvas.restore();
+        canvas.restore();
+        canvas.restore();
+    });
+    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(600, 600), 600, 600,
+            createSyncedNodeList(node), sLightCenter);
+    SaveLayerUnclippedComplexTestRenderer renderer;
+    reorderer.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(12, renderer.getIndex());
+}
+
+RENDERTHREAD_TEST(OpReorderer, hwLayer_simple) {
     class HwLayerSimpleTestRenderer : public TestRendererBase {
     public:
         void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
@@ -620,7 +778,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayerSimple) {
     *layerHandle = nullptr;
 }
 
-RENDERTHREAD_TEST(OpReorderer, hwLayerComplex) {
+RENDERTHREAD_TEST(OpReorderer, hwLayer_complex) {
     /* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
      * - startRepaintLayer(child), rect(grey), endLayer
      * - startTemporaryLayer, drawLayer(child), endLayer

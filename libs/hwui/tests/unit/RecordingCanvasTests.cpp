@@ -232,7 +232,7 @@ TEST(RecordingCanvas, backgroundAndImage) {
 
 TEST(RecordingCanvas, saveLayer_simple) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 20, 190, 180, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(10, 20, 190, 180, SkPaint());
         canvas.restore();
     });
@@ -264,12 +264,78 @@ TEST(RecordingCanvas, saveLayer_simple) {
     EXPECT_EQ(3, count);
 }
 
+TEST(RecordingCanvas, saveLayer_missingRestore) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(0, 0, 200, 200, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        // Note: restore omitted, shouldn't result in unmatched save
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        if (count++ == 2) {
+            EXPECT_EQ(RecordedOpId::EndLayerOp, op.opId);
+        }
+    });
+    EXPECT_EQ(3, count) << "Missing a restore shouldn't result in an unmatched saveLayer";
+}
+
+TEST(RecordingCanvas, saveLayer_simpleUnclipped) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.drawRect(10, 20, 190, 180, SkPaint());
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        switch(count++) {
+        case 0:
+            EXPECT_EQ(RecordedOpId::BeginUnclippedLayerOp, op.opId);
+            EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
+            EXPECT_EQ(nullptr, op.localClip);
+            EXPECT_TRUE(op.localMatrix.isIdentity());
+            break;
+        case 1:
+            EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+            EXPECT_EQ(nullptr, op.localClip);
+            EXPECT_EQ(Rect(10, 20, 190, 180), op.unmappedBounds);
+            EXPECT_TRUE(op.localMatrix.isIdentity());
+            break;
+        case 2:
+            EXPECT_EQ(RecordedOpId::EndUnclippedLayerOp, op.opId);
+            // Don't bother asserting recording state data - it's not used
+            break;
+        default:
+            ADD_FAILURE();
+        }
+    });
+    EXPECT_EQ(3, count);
+}
+
+TEST(RecordingCanvas, saveLayer_addClipFlag) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.clipRect(10, 20, 190, 180, SkRegion::kIntersect_Op);
+        canvas.saveLayerAlpha(10, 20, 190, 180, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.drawRect(10, 20, 190, 180, SkPaint());
+        canvas.restore();
+        canvas.restore();
+    });
+    int count = 0;
+    playbackOps(*dl, [&count](const RecordedOp& op) {
+        if (count++ == 0) {
+            EXPECT_EQ(RecordedOpId::BeginLayerOp, op.opId)
+                    << "Clip + unclipped saveLayer should result in a clipped layer";
+        }
+    });
+    EXPECT_EQ(3, count);
+}
+
 TEST(RecordingCanvas, saveLayer_viewportCrop) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         // shouldn't matter, since saveLayer will clip to its bounds
         canvas.clipRect(-1000, -1000, 1000, 1000, SkRegion::kReplace_Op);
 
-        canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.saveLayerAlpha(100, 100, 300, 300, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
@@ -295,7 +361,7 @@ TEST(RecordingCanvas, saveLayer_rotateUnclipped) {
         canvas.rotate(45);
         canvas.translate(-50, -50);
 
-        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 100, 100, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(0, 0, 100, 100, SkPaint());
         canvas.restore();
 
@@ -322,7 +388,7 @@ TEST(RecordingCanvas, saveLayer_rotateClipped) {
         canvas.translate(-200, -200);
 
         // area of saveLayer will be clipped to parent viewport, so we ask for 400x400...
-        canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kARGB_ClipLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
 

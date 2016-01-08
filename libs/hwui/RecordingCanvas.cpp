@@ -43,10 +43,10 @@ void RecordingCanvas::reset(int width, int height) {
 
     mDeferredBarrierType = DeferredBarrierType::InOrder;
     mState.setDirtyClip(false);
-    mRestoreSaveCount = -1;
 }
 
 DisplayList* RecordingCanvas::finishRecording() {
+    restoreToCount(1);
     mPaintMap.clear();
     mRegionMap.clear();
     mPathMap.clear();
@@ -83,6 +83,8 @@ void RecordingCanvas::onViewportInitialized() {
 void RecordingCanvas::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
     if (removed.flags & Snapshot::kFlagIsFboLayer) {
         addOp(new (alloc()) EndLayerOp());
+    } else if (removed.flags & Snapshot::kFlagIsLayer) {
+        addOp(new (alloc()) EndUnclippedLayerOp());
     }
 }
 
@@ -95,28 +97,18 @@ int RecordingCanvas::save(SkCanvas::SaveFlags flags) {
 }
 
 void RecordingCanvas::RecordingCanvas::restore() {
-    if (mRestoreSaveCount < 0) {
-        restoreToCount(getSaveCount() - 1);
-        return;
-    }
-
-    mRestoreSaveCount--;
     mState.restore();
 }
 
 void RecordingCanvas::restoreToCount(int saveCount) {
-    mRestoreSaveCount = saveCount;
     mState.restoreToCount(saveCount);
 }
 
-int RecordingCanvas::saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-        SkCanvas::SaveFlags flags) {
-    if (!(flags & SkCanvas::kClipToLayer_SaveFlag)) {
-        LOG_ALWAYS_FATAL("unclipped layers not supported");
-    }
+int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
+        const SkPaint* paint, SkCanvas::SaveFlags flags) {
     // force matrix/clip isolation for layer
     flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
-
+    bool clippedLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
     const Snapshot& previous = *mState.currentSnapshot();
 
@@ -124,53 +116,70 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
     // operations will be able to store and restore the current clip and transform info, and
     // quick rejection will be correct (for display lists)
 
-    const Rect untransformedBounds(left, top, right, bottom);
+    const Rect unmappedBounds(left, top, right, bottom);
 
     // determine clipped bounds relative to previous viewport.
-    Rect visibleBounds = untransformedBounds;
+    Rect visibleBounds = unmappedBounds;
     previous.transform->mapRect(visibleBounds);
 
+    if (CC_UNLIKELY(!clippedLayer
+            && previous.transform->rectToRect()
+            && visibleBounds.contains(previous.getRenderTargetClip()))) {
+        // unlikely case where an unclipped savelayer is recorded with a clip it can use,
+        // as none of its unaffected/unclipped area is visible
+        clippedLayer = true;
+        flags |= SkCanvas::kClipToLayer_SaveFlag;
+    }
 
     visibleBounds.doIntersect(previous.getRenderTargetClip());
     visibleBounds.snapToPixelBoundaries();
-
-    Rect previousViewport(0, 0, previous.getViewportWidth(), previous.getViewportHeight());
-    visibleBounds.doIntersect(previousViewport);
+    visibleBounds.doIntersect(Rect(previous.getViewportWidth(), previous.getViewportHeight()));
 
     // Map visible bounds back to layer space, and intersect with parameter bounds
     Rect layerBounds = visibleBounds;
     Matrix4 inverse;
     inverse.loadInverse(*previous.transform);
     inverse.mapRect(layerBounds);
-    layerBounds.doIntersect(untransformedBounds);
+    layerBounds.doIntersect(unmappedBounds);
 
     int saveValue = mState.save((int) flags);
     Snapshot& snapshot = *mState.writableSnapshot();
 
-    // layerBounds is now original bounds, but with clipped to clip
-    // and viewport to ensure it's minimal size.
-    if (layerBounds.isEmpty() || untransformedBounds.isEmpty()) {
+    // layerBounds is in original bounds space, but clipped by current recording clip
+    if (layerBounds.isEmpty() || unmappedBounds.isEmpty()) {
         // Don't bother recording layer, since it's been rejected
-        snapshot.resetClip(0, 0, 0, 0);
+        if (CC_LIKELY(clippedLayer)) {
+            snapshot.resetClip(0, 0, 0, 0);
+        }
         return saveValue;
     }
 
-    auto previousClip = getRecordedClip(); // note: done while snapshot == previous
+    if (CC_LIKELY(clippedLayer)) {
+        auto previousClip = getRecordedClip(); // note: done before new snapshot's clip has changed
 
-    snapshot.flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
-    snapshot.initializeViewport(untransformedBounds.getWidth(), untransformedBounds.getHeight());
-    snapshot.transform->loadTranslate(-untransformedBounds.left, -untransformedBounds.top, 0.0f);
+        snapshot.flags |= Snapshot::kFlagIsLayer | Snapshot::kFlagIsFboLayer;
+        snapshot.initializeViewport(unmappedBounds.getWidth(), unmappedBounds.getHeight());
+        snapshot.transform->loadTranslate(-unmappedBounds.left, -unmappedBounds.top, 0.0f);
 
-    Rect clip = layerBounds;
-    clip.translate(-untransformedBounds.left, -untransformedBounds.top);
-    snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
-    snapshot.roundRectClipState = nullptr;
+        Rect clip = layerBounds;
+        clip.translate(-unmappedBounds.left, -unmappedBounds.top);
+        snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
+        snapshot.roundRectClipState = nullptr;
 
-    addOp(new (alloc()) BeginLayerOp(
-            Rect(left, top, right, bottom),
-            *previous.transform, // transform to *draw* with
-            previousClip, // clip to *draw* with
-            refPaint(paint)));
+        addOp(new (alloc()) BeginLayerOp(
+                unmappedBounds,
+                *previous.transform, // transform to *draw* with
+                previousClip, // clip to *draw* with
+                refPaint(paint)));
+    } else {
+        snapshot.flags |= Snapshot::kFlagIsLayer;
+
+        addOp(new (alloc()) BeginUnclippedLayerOp(
+                unmappedBounds,
+                *mState.currentSnapshot()->transform,
+                getRecordedClip(),
+                refPaint(paint)));
+    }
 
     return saveValue;
 }
