@@ -1131,24 +1131,30 @@ public abstract class Layout {
     public int getOffsetForHorizontal(int line, float horiz) {
         // TODO: use Paint.getOffsetForAdvance to avoid binary search
         final int lineEndOffset = getLineEnd(line);
+        final int lineStartOffset = getLineStart(line);
+
+        Directions dirs = getLineDirections(line);
+
+        TextLine tl = TextLine.obtain();
+        // XXX: we don't care about tabs as we just use TextLine#getOffsetToLeftRightOf here.
+        tl.set(mPaint, mText, lineStartOffset, lineEndOffset, getParagraphDirection(line), dirs,
+                false, null);
+
         final int max;
         if (line == getLineCount() - 1) {
             max = lineEndOffset;
         } else {
-            max = mPaint.getTextRunCursor(mText, 0, mText.length(),
-                    isRtlCharAt(lineEndOffset) ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR,
-                    lineEndOffset, Paint.CURSOR_BEFORE);
+            max = tl.getOffsetToLeftRightOf(lineEndOffset - lineStartOffset,
+                    !isRtlCharAt(lineEndOffset - 1)) + lineStartOffset;
         }
-        final int min = getLineStart(line);
-        Directions dirs = getLineDirections(line);
-
-        int best = min;
+        int best = lineStartOffset;
         float bestdist = Math.abs(getPrimaryHorizontal(best) - horiz);
 
         for (int i = 0; i < dirs.mDirections.length; i += 2) {
-            int here = min + dirs.mDirections[i];
+            int here = lineStartOffset + dirs.mDirections[i];
             int there = here + (dirs.mDirections[i+1] & RUN_LENGTH_MASK);
-            int swap = (dirs.mDirections[i+1] & RUN_RTL_FLAG) != 0 ? -1 : 1;
+            boolean isRtl = (dirs.mDirections[i+1] & RUN_RTL_FLAG) != 0;
+            int swap = isRtl ? -1 : 1;
 
             if (there > max)
                 there = max;
@@ -1168,23 +1174,23 @@ public abstract class Layout {
                 low = here + 1;
 
             if (low < there) {
-                low = getOffsetAtStartOf(low);
+                int aft = tl.getOffsetToLeftRightOf(low - lineStartOffset, isRtl) + lineStartOffset;
+                low = tl.getOffsetToLeftRightOf(aft - lineStartOffset, !isRtl) + lineStartOffset;
+                if (low >= here && low < there) {
+                    float dist = Math.abs(getPrimaryHorizontal(low) - horiz);
+                    if (aft < there) {
+                        float other = Math.abs(getPrimaryHorizontal(aft) - horiz);
 
-                float dist = Math.abs(getPrimaryHorizontal(low) - horiz);
-
-                int aft = TextUtils.getOffsetAfter(mText, low);
-                if (aft < there) {
-                    float other = Math.abs(getPrimaryHorizontal(aft) - horiz);
-
-                    if (other < dist) {
-                        dist = other;
-                        low = aft;
+                        if (other < dist) {
+                            dist = other;
+                            low = aft;
+                        }
                     }
-                }
 
-                if (dist < bestdist) {
-                    bestdist = dist;
-                    best = low;
+                    if (dist < bestdist) {
+                        bestdist = dist;
+                        best = low;
+                    }
                 }
             }
 
@@ -1203,6 +1209,7 @@ public abstract class Layout {
             best = max;
         }
 
+        TextLine.recycle(tl);
         return best;
     }
 
