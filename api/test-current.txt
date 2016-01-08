@@ -18856,6 +18856,37 @@ package android.location {
     method public static boolean isPresent();
   }
 
+  public abstract interface GnssNmeaListener {
+    method public abstract void onNmeaReceived(long, java.lang.String);
+  }
+
+  public final class GnssStatus {
+    method public float getAzimuth(int);
+    method public int getConstellationType(int);
+    method public float getElevation(int);
+    method public int getNumSatellites();
+    method public int getPrn(int);
+    method public float getSnr(int);
+    method public boolean hasAlmanac(int);
+    method public boolean hasEphemeris(int);
+    method public boolean usedInFix(int);
+    field public static final int CONSTELLATION_BEIDOU = 5; // 0x5
+    field public static final int CONSTELLATION_GALILEO = 6; // 0x6
+    field public static final int CONSTELLATION_GLONASS = 3; // 0x3
+    field public static final int CONSTELLATION_GPS = 1; // 0x1
+    field public static final int CONSTELLATION_QZSS = 4; // 0x4
+    field public static final int CONSTELLATION_SBAS = 2; // 0x2
+    field public static final int CONSTELLATION_UNKNOWN = 0; // 0x0
+  }
+
+  public abstract class GnssStatusCallback {
+    ctor public GnssStatusCallback();
+    method public void onFirstFix(int);
+    method public void onSatelliteStatusChanged(android.location.GnssStatus);
+    method public void onStarted();
+    method public void onStopped();
+  }
+
   public final class GpsSatellite {
     method public float getAzimuth();
     method public float getElevation();
@@ -18940,8 +18971,10 @@ package android.location {
   }
 
   public class LocationManager {
-    method public boolean addGpsStatusListener(android.location.GpsStatus.Listener);
-    method public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
+    method public deprecated boolean addGpsStatusListener(android.location.GpsStatus.Listener);
+    method public deprecated boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
+    method public boolean addNmeaListener(android.location.GnssNmeaListener);
+    method public boolean addNmeaListener(android.location.GnssNmeaListener, android.os.Handler);
     method public void addProximityAlert(double, double, float, long, android.app.PendingIntent);
     method public void addTestProvider(java.lang.String, boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
     method public void clearTestProviderEnabled(java.lang.String);
@@ -18949,14 +18982,17 @@ package android.location {
     method public void clearTestProviderStatus(java.lang.String);
     method public java.util.List<java.lang.String> getAllProviders();
     method public java.lang.String getBestProvider(android.location.Criteria, boolean);
-    method public android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
+    method public deprecated android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
     method public android.location.Location getLastKnownLocation(java.lang.String);
     method public android.location.LocationProvider getProvider(java.lang.String);
     method public java.util.List<java.lang.String> getProviders(boolean);
     method public java.util.List<java.lang.String> getProviders(android.location.Criteria, boolean);
     method public boolean isProviderEnabled(java.lang.String);
-    method public void removeGpsStatusListener(android.location.GpsStatus.Listener);
-    method public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback);
+    method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback, android.os.Handler);
+    method public deprecated void removeGpsStatusListener(android.location.GpsStatus.Listener);
+    method public deprecated void removeNmeaListener(android.location.GpsStatus.NmeaListener);
+    method public void removeNmeaListener(android.location.GnssNmeaListener);
     method public void removeProximityAlert(android.app.PendingIntent);
     method public void removeTestProvider(java.lang.String);
     method public void removeUpdates(android.location.LocationListener);
@@ -18974,6 +19010,7 @@ package android.location {
     method public void setTestProviderEnabled(java.lang.String, boolean);
     method public void setTestProviderLocation(java.lang.String, android.location.Location);
     method public void setTestProviderStatus(java.lang.String, int, android.os.Bundle, long);
+    method public void unregisterGnssStatusCallback(android.location.GnssStatusCallback);
     field public static final java.lang.String GPS_PROVIDER = "gps";
     field public static final java.lang.String KEY_LOCATION_CHANGED = "location";
     field public static final java.lang.String KEY_PROVIDER_ENABLED = "providerEnabled";

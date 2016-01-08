@@ -34,17 +34,15 @@ public final class GpsStatus {
     private final SparseArray<GpsSatellite> mSatellites = new SparseArray<>();
 
     private final class SatelliteIterator implements Iterator<GpsSatellite> {
-
-        private final SparseArray<GpsSatellite> mSatellites;
         private final int mSatellitesCount;
 
         private int mIndex = 0;
 
-        SatelliteIterator(SparseArray<GpsSatellite> satellites) {
-            mSatellites = satellites;
-            mSatellitesCount = satellites.size();
+        SatelliteIterator() {
+            mSatellitesCount = mSatellites.size();
         }
 
+        @Override
         public boolean hasNext() {
             for (; mIndex < mSatellitesCount; ++mIndex) {
                 GpsSatellite satellite = mSatellites.valueAt(mIndex);
@@ -55,6 +53,7 @@ public final class GpsStatus {
             return false;
         }
 
+        @Override
         public GpsSatellite next() {
             while (mIndex < mSatellitesCount) {
                 GpsSatellite satellite = mSatellites.valueAt(mIndex);
@@ -66,14 +65,16 @@ public final class GpsStatus {
             throw new NoSuchElementException();
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
     }
 
     private Iterable<GpsSatellite> mSatelliteList = new Iterable<GpsSatellite>() {
+        @Override
         public Iterator<GpsSatellite> iterator() {
-            return new SatelliteIterator(mSatellites);
+            return new SatelliteIterator();
         }
     };
 
@@ -137,18 +138,15 @@ public final class GpsStatus {
     // For API-compat a public ctor() is not available
     GpsStatus() {}
 
-    /**
-     * Used internally within {@link LocationManager} to copy GPS status
-     * data from the Location Manager Service to its cached GpsStatus instance.
-     * Is synchronized to ensure that GPS status updates are atomic.
-     */
-    synchronized void setStatus(int svCount, int[] prns, float[] snrs,
-            float[] elevations, float[] azimuths, int ephemerisMask,
-            int almanacMask, int usedInFixMask) {
+    private void setStatus(int svCount, int[] prnWithFlags, float[] snrs, float[] elevations,
+            float[] azimuths, int[] constellationTypes) { 
         clearSatellites();
         for (int i = 0; i < svCount; i++) {
-            int prn = prns[i];
-            int prnShift = (1 << (prn - 1));
+            // Skip all non-GPS satellites.
+            if (constellationTypes[i] != GnssStatus.CONSTELLATION_GPS) {
+                continue;
+            }
+            int prn = prnWithFlags[i] >> GnssStatus.PRN_SHIFT_WIDTH;
             if (prn > 0 && prn <= NUM_SATELLITES) {
                 GpsSatellite satellite = mSatellites.get(prn);
                 if (satellite == null) {
@@ -160,53 +158,26 @@ public final class GpsStatus {
                 satellite.mSnr = snrs[i];
                 satellite.mElevation = elevations[i];
                 satellite.mAzimuth = azimuths[i];
-                satellite.mHasEphemeris = ((ephemerisMask & prnShift) != 0);
-                satellite.mHasAlmanac = ((almanacMask & prnShift) != 0);
-                satellite.mUsedInFix = ((usedInFixMask & prnShift) != 0);
+                satellite.mHasEphemeris =
+                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+                satellite.mHasAlmanac =
+                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
+                satellite.mUsedInFix =
+                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0;
             }
         }
     }
 
     /**
-     * Used by {@link LocationManager#getGpsStatus} to copy LocationManager's
-     * cached GpsStatus instance to the client's copy.
+     * Copies GPS satellites information from GnssStatus object.
      * Since this method is only used within {@link LocationManager#getGpsStatus},
      * it does not need to be synchronized.
+     * @hide
      */
-    void setStatus(GpsStatus status) {
-        mTimeToFirstFix = status.getTimeToFirstFix();
-        clearSatellites();
-
-        SparseArray<GpsSatellite> otherSatellites = status.mSatellites;
-        int otherSatellitesCount = otherSatellites.size();
-        int satelliteIndex = 0;
-        // merge both sparse arrays, note that we have already invalidated the elements in the
-        // receiver array
-        for (int i = 0; i < otherSatellitesCount; ++i) {
-            GpsSatellite otherSatellite = otherSatellites.valueAt(i);
-            int otherSatellitePrn = otherSatellite.getPrn();
-
-            int satellitesCount = mSatellites.size();
-            while (satelliteIndex < satellitesCount
-                    && mSatellites.valueAt(satelliteIndex).getPrn() < otherSatellitePrn) {
-                ++satelliteIndex;
-            }
-
-            if (satelliteIndex < mSatellites.size()) {
-                GpsSatellite satellite = mSatellites.valueAt(satelliteIndex);
-                if (satellite.getPrn() == otherSatellitePrn) {
-                    satellite.setStatus(otherSatellite);
-                } else {
-                    satellite = new GpsSatellite(otherSatellitePrn);
-                    satellite.setStatus(otherSatellite);
-                    mSatellites.put(otherSatellitePrn, satellite);
-                }
-            } else {
-                GpsSatellite satellite = new GpsSatellite(otherSatellitePrn);
-                satellite.setStatus(otherSatellite);
-                mSatellites.append(otherSatellitePrn, satellite);
-            }
-        }
+    void setStatus(GnssStatus status, int timeToFirstFix) {
+        mTimeToFirstFix = timeToFirstFix;
+        setStatus(status.mSvCount, status.mPrnWithFlags, status.mSnrs, status.mElevations,
+                status.mAzimuths, status.mConstellationTypes);
     }
 
     void setTimeToFirstFix(int ttff) {

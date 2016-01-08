@@ -65,11 +65,16 @@ public class LocationManager {
     private final ILocationManager mService;
     private final GpsMeasurementListenerTransport mGpsMeasurementListenerTransport;
     private final GpsNavigationMessageListenerTransport mGpsNavigationMessageListenerTransport;
-    private final HashMap<GpsStatus.Listener, GpsStatusListenerTransport> mGpsStatusListeners =
-            new HashMap<GpsStatus.Listener, GpsStatusListenerTransport>();
-    private final HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport> mNmeaListeners =
-            new HashMap<GpsStatus.NmeaListener, GpsStatusListenerTransport>();
-    private final GpsStatus mGpsStatus = new GpsStatus();
+    private final HashMap<GpsStatus.Listener, GnssStatusListenerTransport> mGpsStatusListeners =
+            new HashMap<>();
+    private final HashMap<GpsStatus.NmeaListener, GnssStatusListenerTransport> mGpsNmeaListeners =
+            new HashMap<>();
+    private final HashMap<GnssStatusCallback, GnssStatusListenerTransport> mGnssStatusListeners =
+            new HashMap<>();
+    private final HashMap<GnssNmeaListener, GnssStatusListenerTransport> mGnssNmeaListeners =
+            new HashMap<>();
+    private GnssStatus mGnssStatus;
+    private int mTimeToFirstFix;
 
     /**
      * Name of the network location provider.
@@ -1389,11 +1394,51 @@ public class LocationManager {
 
     // --- GPS-specific support ---
 
-    // This class is used to send GPS status events to the client's main thread.
-    private class GpsStatusListenerTransport extends IGpsStatusListener.Stub {
+    // This class is used to send Gnss status events to the client's specific thread.
+    private class GnssStatusListenerTransport extends IGnssStatusListener.Stub {
 
-        private final GpsStatus.Listener mListener;
-        private final GpsStatus.NmeaListener mNmeaListener;
+        private final GpsStatus.Listener mGpsListener;
+        private final GpsStatus.NmeaListener mGpsNmeaListener;
+        private final GnssStatusCallback mGnssCallback;
+        private final GnssNmeaListener mGnssNmeaListener;
+
+        private class GnssHandler extends Handler {
+            public GnssHandler(Handler handler) {
+                super(handler != null ? handler.getLooper() : Looper.myLooper());
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case NMEA_RECEIVED:
+                        synchronized (mNmeaBuffer) {
+                            int length = mNmeaBuffer.size();
+                            for (int i = 0; i < length; i++) {
+                                Nmea nmea = mNmeaBuffer.get(i);
+                                mGnssNmeaListener.onNmeaReceived(nmea.mTimestamp, nmea.mNmea);
+                            }
+                            mNmeaBuffer.clear();
+                        }
+                        break;
+                    case GpsStatus.GPS_EVENT_STARTED:
+                        mGnssCallback.onStarted();
+                        break;
+                    case GpsStatus.GPS_EVENT_STOPPED:
+                        mGnssCallback.onStopped();
+                        break;
+                    case GpsStatus.GPS_EVENT_FIRST_FIX:
+                        mGnssCallback.onFirstFix(mTimeToFirstFix);
+                        break;
+                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                        mGnssCallback.onSatelliteStatusChanged(mGnssStatus);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private final Handler mGnssHandler;
 
         // This must not equal any of the GpsStatus event IDs
         private static final int NMEA_RECEIVED = 1000;
@@ -1407,97 +1452,141 @@ public class LocationManager {
                 mNmea = nmea;
             }
         }
-        private ArrayList<Nmea> mNmeaBuffer;
+        private final ArrayList<Nmea> mNmeaBuffer;
 
-        GpsStatusListenerTransport(GpsStatus.Listener listener) {
-            mListener = listener;
-            mNmeaListener = null;
+        GnssStatusListenerTransport(GpsStatus.Listener listener) {
+            this(listener, null);
         }
 
-        GpsStatusListenerTransport(GpsStatus.NmeaListener listener) {
-            mNmeaListener = listener;
-            mListener = null;
+        GnssStatusListenerTransport(GpsStatus.Listener listener, Handler handler) {
+            mGpsListener = listener;
+            mGnssHandler = new GnssHandler(handler);
+            mGpsNmeaListener = null;
+            mNmeaBuffer = null;
+            mGnssCallback = new GnssStatusCallback() {
+                @Override
+                public void onStarted() {
+                    mGpsListener.onGpsStatusChanged(GpsStatus.GPS_EVENT_STARTED);
+                }
+
+                @Override
+                public void onStopped() {
+                    mGpsListener.onGpsStatusChanged(GpsStatus.GPS_EVENT_STOPPED);
+                }
+
+                @Override
+                public void onFirstFix(int ttff) {
+                    mGpsListener.onGpsStatusChanged(GpsStatus.GPS_EVENT_FIRST_FIX);
+                }
+
+                @Override
+                public void onSatelliteStatusChanged(GnssStatus status) {
+                    mGpsListener.onGpsStatusChanged(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
+                }
+            };
+            mGnssNmeaListener = null;
+        }
+
+        GnssStatusListenerTransport(GpsStatus.NmeaListener listener) {
+            this(listener, null);
+        }
+
+        GnssStatusListenerTransport(GpsStatus.NmeaListener listener, Handler handler) {
+            mGpsListener = null;
+            mGnssHandler = new GnssHandler(handler);
+            mGpsNmeaListener = listener;
+            mNmeaBuffer = new ArrayList<Nmea>();
+            mGnssCallback = null;
+            mGnssNmeaListener = new GnssNmeaListener() {
+                @Override
+                public void onNmeaReceived(long timestamp, String nmea) {
+                    mGpsNmeaListener.onNmeaReceived(timestamp, nmea);
+                }
+            };
+        }
+
+        GnssStatusListenerTransport(GnssStatusCallback callback) {
+            this(callback, null);
+        }
+
+        GnssStatusListenerTransport(GnssStatusCallback callback, Handler handler) {
+            mGnssCallback = callback;
+            mGnssHandler = new GnssHandler(handler);
+            mGnssNmeaListener = null;
+            mNmeaBuffer = null;
+            mGpsListener = null;
+            mGpsNmeaListener = null;
+        }
+
+        GnssStatusListenerTransport(GnssNmeaListener listener) {
+            this(listener, null);
+        }
+
+        GnssStatusListenerTransport(GnssNmeaListener listener, Handler handler) {
+            mGnssCallback = null;
+            mGnssHandler = new GnssHandler(handler);
+            mGnssNmeaListener = listener;
+            mGpsListener = null;
+            mGpsNmeaListener = null;
             mNmeaBuffer = new ArrayList<Nmea>();
         }
 
         @Override
-        public void onGpsStarted() {
-            if (mListener != null) {
+        public void onGnssStarted() {
+            if (mGpsListener != null) {
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_STARTED;
-                mGpsHandler.sendMessage(msg);
+                mGnssHandler.sendMessage(msg);
             }
         }
 
         @Override
-        public void onGpsStopped() {
-            if (mListener != null) {
+        public void onGnssStopped() {
+            if (mGpsListener != null) {
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_STOPPED;
-                mGpsHandler.sendMessage(msg);
+                mGnssHandler.sendMessage(msg);
             }
         }
 
         @Override
         public void onFirstFix(int ttff) {
-            if (mListener != null) {
-                mGpsStatus.setTimeToFirstFix(ttff);
+            if (mGpsListener != null) {
+                mTimeToFirstFix = ttff;
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_FIRST_FIX;
-                mGpsHandler.sendMessage(msg);
+                mGnssHandler.sendMessage(msg);
             }
         }
 
         @Override
-        public void onSvStatusChanged(int svCount, int[] prns, float[] snrs,
-                float[] elevations, float[] azimuths, int ephemerisMask,
-                int almanacMask, int usedInFixMask) {
-            if (mListener != null) {
-                mGpsStatus.setStatus(svCount, prns, snrs, elevations, azimuths,
-                        ephemerisMask, almanacMask, usedInFixMask);
+        public void onSvStatusChanged(int svCount, int[] prnWithFlags,
+                float[] snrs, float[] elevations, float[] azimuths, int[] constellationTypes) {
+            if (mGnssCallback != null) {
+                mGnssStatus = new GnssStatus(svCount, prnWithFlags, snrs, elevations, azimuths,
+                        constellationTypes);
 
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;
                 // remove any SV status messages already in the queue
-                mGpsHandler.removeMessages(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
-                mGpsHandler.sendMessage(msg);
+                mGnssHandler.removeMessages(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
+                mGnssHandler.sendMessage(msg);
             }
         }
 
         @Override
         public void onNmeaReceived(long timestamp, String nmea) {
-            if (mNmeaListener != null) {
+            if (mGnssNmeaListener != null) {
                 synchronized (mNmeaBuffer) {
                     mNmeaBuffer.add(new Nmea(timestamp, nmea));
                 }
                 Message msg = Message.obtain();
                 msg.what = NMEA_RECEIVED;
                 // remove any NMEA_RECEIVED messages already in the queue
-                mGpsHandler.removeMessages(NMEA_RECEIVED);
-                mGpsHandler.sendMessage(msg);
+                mGnssHandler.removeMessages(NMEA_RECEIVED);
+                mGnssHandler.sendMessage(msg);
             }
         }
-
-        private final Handler mGpsHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == NMEA_RECEIVED) {
-                    synchronized (mNmeaBuffer) {
-                        int length = mNmeaBuffer.size();
-                        for (int i = 0; i < length; i++) {
-                            Nmea nmea = mNmeaBuffer.get(i);
-                            mNmeaListener.onNmeaReceived(nmea.mTimestamp, nmea.mNmea);
-                        }
-                        mNmeaBuffer.clear();
-                    }
-                } else {
-                    // synchronize on mGpsStatus to ensure the data is copied atomically.
-                    synchronized(mGpsStatus) {
-                        mListener.onGpsStatusChanged(msg.what);
-                    }
-                }
-            }
-        };
     }
 
     /**
@@ -1508,7 +1597,9 @@ public class LocationManager {
      * @return true if the listener was successfully added
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     * @deprecated use {@link #registerGnssStatusCallback(GnssStatusCallback)} instead.
      */
+    @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
         boolean result;
@@ -1518,8 +1609,8 @@ public class LocationManager {
             return true;
         }
         try {
-            GpsStatusListenerTransport transport = new GpsStatusListenerTransport(listener);
-            result = mService.addGpsStatusListener(transport, mContext.getPackageName());
+            GnssStatusListenerTransport transport = new GnssStatusListenerTransport(listener);
+            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
             if (result) {
                 mGpsStatusListeners.put(listener, transport);
             }
@@ -1536,14 +1627,78 @@ public class LocationManager {
      *
      * @param listener GPS status listener object to remove
      */
+    @Deprecated
     public void removeGpsStatusListener(GpsStatus.Listener listener) {
         try {
-            GpsStatusListenerTransport transport = mGpsStatusListeners.remove(listener);
+            GnssStatusListenerTransport transport = mGpsStatusListeners.remove(listener);
             if (transport != null) {
-                mService.removeGpsStatusListener(transport);
+                mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
+        }
+    }
+
+
+    /**
+     * Registers a GNSS status listener.
+     *
+     * @param callback GNSS status listener object to register
+     *
+     * @return true if the listener was successfully added
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGnssStatusCallback(GnssStatusCallback callback) {
+        return registerGnssStatusCallback(callback, null);
+    }
+
+    /**
+     * Registers a GNSS status listener.
+     *
+     * @param callback GNSS status listener object to register
+     * @param handler the handler that the callback runs on.
+     *
+     * @return true if the listener was successfully added
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGnssStatusCallback(GnssStatusCallback callback, Handler handler) {
+        boolean result;
+        if (mGnssStatusListeners.get(callback) != null) {
+            // listener is already registered
+            return true;
+        }
+        try {
+            GnssStatusListenerTransport transport =
+                    new GnssStatusListenerTransport(callback, handler);
+            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
+            if (result) {
+                mGnssStatusListeners.put(callback, transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in registerGnssStatusCallback: ", e);
+            result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Removes a GNSS status listener.
+     *
+     * @param callback GNSS status listener object to remove
+     */
+    public void unregisterGnssStatusCallback(GnssStatusCallback callback) {
+        try {
+            GnssStatusListenerTransport transport = mGnssStatusListeners.remove(callback);
+            if (transport != null) {
+                mService.unregisterGnssStatusCallback(transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in unregisterGnssStatusCallback: ", e);
         }
     }
 
@@ -1555,20 +1710,22 @@ public class LocationManager {
      * @return true if the listener was successfully added
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     * @deprecated use {@link #addNmeaListener(GnssNmeaListener)} instead.
      */
+    @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
         boolean result;
 
-        if (mNmeaListeners.get(listener) != null) {
+        if (mGpsNmeaListeners.get(listener) != null) {
             // listener is already registered
             return true;
         }
         try {
-            GpsStatusListenerTransport transport = new GpsStatusListenerTransport(listener);
-            result = mService.addGpsStatusListener(transport, mContext.getPackageName());
+            GnssStatusListenerTransport transport = new GnssStatusListenerTransport(listener);
+            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
             if (result) {
-                mNmeaListeners.put(listener, transport);
+                mGpsNmeaListeners.put(listener, transport);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in registerGpsStatusListener: ", e);
@@ -1583,14 +1740,78 @@ public class LocationManager {
      *
      * @param listener a {@link GpsStatus.NmeaListener} object to remove
      */
+    @Deprecated
     public void removeNmeaListener(GpsStatus.NmeaListener listener) {
         try {
-            GpsStatusListenerTransport transport = mNmeaListeners.remove(listener);
+            GnssStatusListenerTransport transport = mGpsNmeaListeners.remove(listener);
             if (transport != null) {
-                mService.removeGpsStatusListener(transport);
+                mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
+        }
+    }
+
+    /**
+     * Adds an NMEA listener.
+     *
+     * @param listener a {@link GnssNmeaListener} object to register
+     *
+     * @return true if the listener was successfully added
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean addNmeaListener(GnssNmeaListener listener) {
+        return addNmeaListener(listener, null);
+    }
+
+    /**
+     * Adds an NMEA listener.
+     *
+     * @param listener a {@link GnssNmeaListener} object to register
+     * @param handler the handler that the listener runs on.
+     *
+     * @return true if the listener was successfully added
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean addNmeaListener(GnssNmeaListener listener, Handler handler) {
+        boolean result;
+
+        if (mGpsNmeaListeners.get(listener) != null) {
+            // listener is already registered
+            return true;
+        }
+        try {
+            GnssStatusListenerTransport transport =
+                    new GnssStatusListenerTransport(listener, handler);
+            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
+            if (result) {
+                mGnssNmeaListeners.put(listener, transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in registerGnssStatusCallback: ", e);
+            result = false;
+        }
+
+        return result;
+    }
+
+    /**
+     * Removes an NMEA listener.
+     *
+     * @param listener a {@link GnssNmeaListener} object to remove
+     */
+    public void removeNmeaListener(GnssNmeaListener listener) {
+        try {
+            GnssStatusListenerTransport transport = mGnssNmeaListeners.remove(listener);
+            if (transport != null) {
+                mService.unregisterGnssStatusCallback(transport);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in unregisterGnssStatusCallback: ", e);
         }
     }
 
@@ -1656,11 +1877,16 @@ public class LocationManager {
      * @param status object containing GPS status details, or null.
      * @return status object containing updated GPS status.
      */
+    @Deprecated
     public GpsStatus getGpsStatus(GpsStatus status) {
         if (status == null) {
             status = new GpsStatus();
         }
-        status.setStatus(mGpsStatus);
+        // When mGnssStatus is null, that means that this method is called outside
+        // onGpsStatusChanged().  Return an empty status  to maintain backwards compatibility.
+        if (mGnssStatus != null) {
+            status.setStatus(mGnssStatus, mTimeToFirstFix);
+        }
         return status;
     }
 
