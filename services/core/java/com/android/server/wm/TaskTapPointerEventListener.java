@@ -34,13 +34,7 @@ import static android.view.PointerIcon.STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
 
 public class TaskTapPointerEventListener implements PointerEventListener {
-    private static final int TAP_TIMEOUT_MSEC = 300;
-    private static final float TAP_MOTION_SLOP_INCHES = 0.125f;
 
-    private final int mMotionSlop;
-    private float mDownX;
-    private float mDownY;
-    private int mPointerId;
     final private Region mTouchExcludeRegion = new Region();
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -55,8 +49,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        DisplayInfo info = displayContent.getDisplayInfo();
-        mMotionSlop = (int)(info.logicalDensityDpi * TAP_MOTION_SLOP_INCHES);
     }
 
     // initialize the object, note this must be done outside WindowManagerService
@@ -74,31 +66,19 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         final int action = motionEvent.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                mPointerId = motionEvent.getPointerId(0);
-                mDownX = motionEvent.getX();
-                mDownY = motionEvent.getY();
+                final int x = (int) motionEvent.getX();
+                final int y = (int) motionEvent.getY();
 
-                final int x = (int) mDownX;
-                final int y = (int) mDownY;
                 synchronized (this) {
                     if (!mTouchExcludeRegion.contains(x, y)) {
-                        mService.mH.obtainMessage(H.TAP_DOWN_OUTSIDE_TASK, x, y,
-                                mDisplayContent).sendToTarget();
+                        mService.mH.obtainMessage(H.TAP_OUTSIDE_TASK,
+                                x, y, mDisplayContent).sendToTarget();
                     }
                 }
                 break;
             }
 
             case MotionEvent.ACTION_MOVE: {
-                if (mPointerId >= 0) {
-                    int index = motionEvent.findPointerIndex(mPointerId);
-                    if ((motionEvent.getEventTime() - motionEvent.getDownTime()) > TAP_TIMEOUT_MSEC
-                            || index < 0
-                            || Math.abs(motionEvent.getX(index) - mDownX) > mMotionSlop
-                            || Math.abs(motionEvent.getY(index) - mDownY) > mMotionSlop) {
-                        mPointerId = -1;
-                    }
-                }
                 if (motionEvent.getPointerCount() != 2) {
                     stopTwoFingerScroll();
                 }
@@ -149,24 +129,6 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
-                int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                        >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-                // Extract the index of the pointer that left the touch sensor
-                if (mPointerId == motionEvent.getPointerId(index)) {
-                    final int x = (int)motionEvent.getX(index);
-                    final int y = (int)motionEvent.getY(index);
-                    synchronized(this) {
-                        if ((motionEvent.getEventTime() - motionEvent.getDownTime())
-                                < TAP_TIMEOUT_MSEC
-                                && Math.abs(x - mDownX) < mMotionSlop
-                                && Math.abs(y - mDownY) < mMotionSlop
-                                && !mTouchExcludeRegion.contains(x, y)) {
-                            mService.mH.obtainMessage(H.TAP_OUTSIDE_TASK, x, y,
-                                    mDisplayContent).sendToTarget();
-                        }
-                    }
-                    mPointerId = -1;
-                }
                 stopTwoFingerScroll();
                 break;
             }

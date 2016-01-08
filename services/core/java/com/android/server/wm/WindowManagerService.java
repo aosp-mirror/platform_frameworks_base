@@ -7163,18 +7163,25 @@ public class WindowManagerService extends IWindowManager.Stub
         } catch(RemoteException e) {}
     }
 
-    private void startResizingTask(DisplayContent displayContent, int startX, int startY) {
-        Task task = null;
+    private void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
+        int taskId = -1;
         synchronized (mWindowMap) {
-            task = displayContent.findTaskForControlPoint(startX, startY);
-            if (task == null || !startPositioningLocked(
-                    task.getTopVisibleAppMainWindow(), true /*resize*/, startX, startY)) {
-                return;
+            final Task task = displayContent.findTaskForControlPoint(x, y);
+            if (task != null) {
+                if (!startPositioningLocked(
+                        task.getTopVisibleAppMainWindow(), true /*resize*/, x, y)) {
+                    return;
+                }
+                taskId = task.mTaskId;
+            } else {
+                taskId = displayContent.taskIdFromPoint(x, y);
             }
         }
-        try {
-            mActivityManager.setFocusedTask(task.mTaskId);
-        } catch(RemoteException e) {}
+        if (taskId >= 0) {
+            try {
+                mActivityManager.setFocusedTask(taskId);
+            } catch(RemoteException e) {}
+        }
     }
 
     private boolean startPositioningLocked(
@@ -7489,18 +7496,17 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RESET_ANR_MESSAGE = 38;
         public static final int WALLPAPER_DRAW_PENDING_TIMEOUT = 39;
 
-        public static final int TAP_DOWN_OUTSIDE_TASK = 40;
-        public static final int FINISH_TASK_POSITIONING = 41;
+        public static final int FINISH_TASK_POSITIONING = 40;
 
-        public static final int UPDATE_DOCKED_STACK_DIVIDER = 42;
+        public static final int UPDATE_DOCKED_STACK_DIVIDER = 41;
 
-        public static final int RESIZE_STACK = 43;
-        public static final int RESIZE_TASK = 44;
+        public static final int RESIZE_STACK = 42;
+        public static final int RESIZE_TASK = 43;
 
-        public static final int TWO_FINGER_SCROLL_START = 45;
-        public static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = 46;
+        public static final int TWO_FINGER_SCROLL_START = 44;
+        public static final int SHOW_NON_RESIZEABLE_DOCK_TOAST = 45;
 
-        public static final int WINDOW_REPLACEMENT_TIMEOUT = 47;
+        public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -7954,27 +7960,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
 
-                case TAP_OUTSIDE_TASK: {
-                    int taskId;
-                    synchronized (mWindowMap) {
-                        taskId = ((DisplayContent)msg.obj).taskIdFromPoint(msg.arg1, msg.arg2);
-                    }
-                    if (taskId >= 0) {
-                        try {
-                            mActivityManager.setFocusedTask(taskId);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                }
-                break;
-
                 case TWO_FINGER_SCROLL_START: {
                     startScrollingTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                 }
                 break;
 
-                case TAP_DOWN_OUTSIDE_TASK: {
-                    startResizingTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
+                case TAP_OUTSIDE_TASK: {
+                    handleTapOutsideTask((DisplayContent)msg.obj, msg.arg1, msg.arg2);
                 }
                 break;
 
