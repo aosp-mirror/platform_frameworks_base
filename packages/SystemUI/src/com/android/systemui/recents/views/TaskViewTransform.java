@@ -86,7 +86,6 @@ public class TaskViewTransform {
     public float translationZ = 0;
     public float scale = 1f;
     public float alpha = 1f;
-    public float thumbnailScale = 1f;
 
     public boolean visible = false;
     float p = 0f;
@@ -101,7 +100,6 @@ public class TaskViewTransform {
         translationZ = 0;
         scale = 1f;
         alpha = 1f;
-        thumbnailScale = 1f;
         visible = false;
         rect.setEmpty();
         p = 0f;
@@ -188,6 +186,5 @@ public class TaskViewTransform {
         v.setAlpha(1f);
         v.getViewBounds().setClipBottom(0);
         v.setLeftTopRightBottom(0, 0, 0, 0);
-        v.mThumbnailView.setBitmapScale(1f);
     }
 }

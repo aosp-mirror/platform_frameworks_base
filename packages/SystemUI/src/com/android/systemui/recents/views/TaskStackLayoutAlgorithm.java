@@ -592,12 +592,8 @@ public class TaskStackLayoutAlgorithm {
                 transformOut.reset();
                 return transformOut;
             }
-            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
+            return getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
                     frontTransform);
-            if (task.thumbnail != null) {
-                transformOut.thumbnailScale = (float) mTaskRect.width() / task.thumbnail.getWidth();
-            }
-            return transformOut;
         }
     }
 
@@ -661,7 +657,6 @@ public class TaskStackLayoutAlgorithm {
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
         transformOut.visible = (transformOut.rect.top < mStackRect.bottom) &&
                 (frontTransform == null || transformOut.rect.top != frontTransform.rect.top);
-        transformOut.thumbnailScale = 1f;
         transformOut.p = relP;
         return transformOut;
     }

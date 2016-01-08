@@ -251,17 +251,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         boolean requiresHwLayers = toTransform.applyToTaskView(this, mTmpAnimators, toAnimation,
                 !config.fakeShadows);
         if (toAnimation.isImmediate()) {
-            mThumbnailView.setBitmapScale(toTransform.thumbnailScale);
             setTaskProgress(toTransform.p);
             if (toAnimation.listener != null) {
                 toAnimation.listener.onAnimationEnd(null);
             }
         } else {
-            if (Float.compare(mThumbnailView.getBitmapScale(), toTransform.thumbnailScale) != 0) {
-                mTmpAnimators.add(ObjectAnimator.ofFloat(mThumbnailView,
-                        TaskViewThumbnail.BITMAP_SCALE, mThumbnailView.getBitmapScale(),
-                        toTransform.thumbnailScale));
-            }
             if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
                 mTmpAnimators.add(ObjectAnimator.ofFloat(this, TASK_PROGRESS, getTaskProgress(),
                         toTransform.p));

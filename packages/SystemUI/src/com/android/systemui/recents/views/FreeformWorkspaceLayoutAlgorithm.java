@@ -147,27 +147,11 @@ public class FreeformWorkspaceLayoutAlgorithm {
     public TaskViewTransform getTransform(Task task, TaskViewTransform transformOut,
             TaskStackLayoutAlgorithm stackLayout) {
         if (mTaskRectMap.containsKey(task.key)) {
-            final Rect taskRect = stackLayout.mTaskRect;
             final RectF ffRect = mTaskRectMap.get(task.key);
 
             transformOut.scale = 1f;
             transformOut.alpha = 1f;
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
-            if (task.thumbnail != null) {
-                if (task.bounds == null) {
-                    // This is a stack task that has no freeform thumbnail, so keep the same bitmap
-                    // scale as it had in the stack
-                    transformOut.thumbnailScale = (float) taskRect.width() /
-                            task.thumbnail.getWidth();
-                } else {
-                    // This is a freeform rect so fit the bitmap to the task bounds
-                    transformOut.thumbnailScale = Math.min(
-                            ffRect.width() / task.thumbnail.getWidth(),
-                            ffRect.height() / task.thumbnail.getHeight());
-                }
-            } else {
-                transformOut.thumbnailScale = 1f;
-            }
             transformOut.rect.set(ffRect);
             transformOut.rect.offset(stackLayout.mFreeformRect.left, stackLayout.mFreeformRect.top);
             transformOut.visible = true;

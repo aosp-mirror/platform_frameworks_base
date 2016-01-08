@@ -42,26 +42,15 @@ import com.android.systemui.recents.model.Task;
  */
 public class TaskViewThumbnail extends View {
 
-    public static final Property<TaskViewThumbnail, Float> BITMAP_SCALE =
-            new FloatProperty<TaskViewThumbnail>("bitmapScale") {
-                @Override
-                public void setValue(TaskViewThumbnail object, float scale) {
-                    object.setBitmapScale(scale);
-                }
-
-                @Override
-                public Float get(TaskViewThumbnail object) {
-                    return object.getBitmapScale();
-                }
-            };
+    private Task mTask;
 
     // Drawing
+    Rect mThumbnailRect = new Rect();
     Rect mTaskViewRect = new Rect();
     int mCornerRadius;
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
-    float mBitmapScale = 1f;
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
@@ -105,6 +94,7 @@ public class TaskViewThumbnail extends View {
      */
     public void onTaskViewSizeChanged(int width, int height) {
         mTaskViewRect.set(0, 0, width, height);
+        updateThumbnailScale();
         invalidate();
     }
 
@@ -125,9 +115,12 @@ public class TaskViewThumbnail extends View {
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
                     Shader.TileMode.CLAMP);
             mDrawPaint.setShader(mBitmapShader);
+            mThumbnailRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            updateThumbnailScale();
         } else {
             mBitmapShader = null;
             mDrawPaint.setShader(null);
+            mThumbnailRect.setEmpty();
         }
         invalidate();
     }
@@ -151,21 +144,28 @@ public class TaskViewThumbnail extends View {
     }
 
     /**
-     * Sets the scale of the bitmap relative to this view.
+     * Updates the scale of the bitmap relative to this view.
      */
-    public void setBitmapScale(float scale) {
+    public void updateThumbnailScale() {
         if (mBitmapShader != null) {
-            mBitmapScale = scale;
-            mScaleMatrix.setScale(mBitmapScale, mBitmapScale);
+            float thumbnailScale;
+            if (!mTask.isFreeformTask() || mTask.bounds == null) {
+                // If this is a stack task, or a stack task moved into the freeform workspace, then
+                // just scale this thumbnail to fit the width of the view
+                thumbnailScale = (float) mTaskViewRect.width() / mThumbnailRect.width();
+            } else {
+                // Otherwise, if this is a freeform task with task bounds, then scale the thumbnail
+                // to fit the entire bitmap into the task bounds
+                thumbnailScale = Math.min(
+                        (float) mTaskViewRect.width() / mThumbnailRect.width(),
+                        (float) mTaskViewRect.height() / mThumbnailRect.height());
+            }
+            mScaleMatrix.setScale(thumbnailScale, thumbnailScale);
             mBitmapShader.setLocalMatrix(mScaleMatrix);
         }
         if (!mInvisible) {
             invalidate();
         }
-    }
-
-    public float getBitmapScale() {
-        return mBitmapScale;
     }
 
     /** Updates the clip rect based on the given task bar. */
@@ -200,6 +200,7 @@ public class TaskViewThumbnail extends View {
 
     /** Binds the thumbnail view to the task */
     void rebindToTask(Task t) {
+        mTask = t;
         if (t.thumbnail != null) {
             setThumbnail(t.thumbnail);
         } else {
@@ -209,6 +210,7 @@ public class TaskViewThumbnail extends View {
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
+        mTask = null;
         setThumbnail(null);
     }
 }
