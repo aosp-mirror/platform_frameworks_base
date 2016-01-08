@@ -308,8 +308,10 @@ public class DocumentsActivity extends BaseActivity {
         mSearchManager.showMenu(!picking);
 
         // No display options in recent directories
-        grid.setVisible(!(picking && recents));
-        list.setVisible(!(picking && recents));
+        if (picking && recents) {
+            grid.setVisible(false);
+            list.setVisible(false);
+        }
 
         fileSize.setVisible(fileSize.isVisible() && !picking);
         settings.setVisible(false);
