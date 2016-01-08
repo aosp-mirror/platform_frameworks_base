@@ -150,6 +150,9 @@
     <!-- Description of printer info icon. [CHAR LIMIT=50] -->
     <string name="printer_info_desc">More information about this printer</string>
 
+    <!-- Notification that print services as disabled. [CHAR LIMIT=50] -->
+    <string name="print_services_disabled_toast">Some print services are disabled.</string>
+
     <!-- Add printer dialog  -->
 
     <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->

@@ -65,6 +65,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.printspooler.R;
@@ -147,6 +148,14 @@ public final class SelectPrinterActivity extends Activity {
         });
 
         registerForContextMenu(mListView);
+
+        // Display a notification about disabled services if there are disabled services
+        String disabledServicesSetting = Settings.Secure.getString(getContentResolver(),
+                Settings.Secure.DISABLED_PRINT_SERVICES);
+        if (!TextUtils.isEmpty(disabledServicesSetting)) {
+            Toast.makeText(this, getString(R.string.print_services_disabled_toast),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
