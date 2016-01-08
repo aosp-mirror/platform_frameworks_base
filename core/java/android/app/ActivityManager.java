@@ -36,10 +36,12 @@ import com.android.internal.util.FastPrintWriter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -59,6 +61,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Size;
 import android.util.Slog;
+
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.FileDescriptor;
@@ -2254,6 +2257,45 @@ public class ActivityManager {
      */
     public boolean clearApplicationUserData() {
         return clearApplicationUserData(mContext.getPackageName(), null);
+    }
+
+
+    /**
+     * Permits an application to get the persistent URI permissions granted to another.
+     *
+     * <p>Typically called by Settings.
+     *
+     * @param packageName application to look for the granted permissions
+     * @return list of granted URI permissions
+     *
+     * @hide
+     */
+    public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName) {
+        try {
+            return ActivityManagerNative.getDefault().getGrantedUriPermissions(packageName,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't get granted URI permissions for :" + packageName, e);
+            return ParceledListSlice.emptyList();
+        }
+    }
+
+    /**
+     * Permits an application to clear the persistent URI permissions granted to another.
+     *
+     * <p>Typically called by Settings.
+     *
+     * @param packageName application to clear its granted permissions
+     *
+     * @hide
+     */
+    public void clearGrantedUriPermissions(String packageName) {
+        try {
+            ActivityManagerNative.getDefault().clearGrantedUriPermissions(packageName,
+                    UserHandle.myUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Couldn't clear granted URI permissions for :" + packageName, e);
+        }
     }
 
     /**

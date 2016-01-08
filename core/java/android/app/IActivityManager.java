@@ -276,6 +276,15 @@ public interface IActivityManager extends IInterface {
     public ParceledListSlice<UriPermission> getPersistedUriPermissions(
             String packageName, boolean incoming) throws RemoteException;
 
+    // Gets the URI permissions granted to an arbitrary package.
+    // NOTE: this is different from getPersistedUriPermissions(), which returns the URIs the package
+    // granted to another packages (instead of those granted to it).
+    public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName, int userId)
+            throws RemoteException;
+
+    // Clears the URI permissions granted to an arbitrary package.
+    public void clearGrantedUriPermissions(String packageName, int userId) throws RemoteException;
+
     public void showWaitingForDebugger(IApplicationThread who, boolean waiting)
             throws RemoteException;
 
@@ -949,4 +958,6 @@ public interface IActivityManager extends IInterface {
     int GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 357;
     int RESIZE_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 358;
     int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 359;
+    int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 360;
+    int CLEAR_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 361;
 }
