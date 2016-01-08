@@ -70,7 +70,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.util.Log;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -97,9 +97,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import libcore.io.Streams;
 import libcore.util.Objects;
@@ -720,46 +722,113 @@ public class InputManagerService extends IInputManager.Stub
         mTempInputDevicesChangedListenersToNotify.clear();
 
         // Check for missing keyboard layouts.
-        if (mNotificationManager != null) {
-            final int numFullKeyboards = mTempFullKeyboards.size();
-            boolean missingLayoutForExternalKeyboard = false;
-            boolean missingLayoutForExternalKeyboardAdded = false;
-            boolean multipleMissingLayoutsForExternalKeyboardsAdded = false;
-            InputDevice keyboardMissingLayout = null;
-            synchronized (mDataStore) {
-                for (int i = 0; i < numFullKeyboards; i++) {
-                    final InputDevice inputDevice = mTempFullKeyboards.get(i);
-                    final String layout =
-                            getCurrentKeyboardLayoutForInputDevice(inputDevice.getIdentifier());
-                    if (layout == null) {
-                        missingLayoutForExternalKeyboard = true;
-                        if (i < numFullKeyboardsAdded) {
-                            missingLayoutForExternalKeyboardAdded = true;
-                            if (keyboardMissingLayout == null) {
-                                keyboardMissingLayout = inputDevice;
-                            } else {
-                                multipleMissingLayoutsForExternalKeyboardsAdded = true;
-                            }
-                        }
+        List<InputDevice> keyboardsMissingLayout = new ArrayList<>();
+        final int numFullKeyboards = mTempFullKeyboards.size();
+        synchronized (mDataStore) {
+            for (int i = 0; i < numFullKeyboards; i++) {
+                final InputDevice inputDevice = mTempFullKeyboards.get(i);
+                String layout =
+                    getCurrentKeyboardLayoutForInputDevice(inputDevice.getIdentifier());
+                if (layout == null) {
+                    layout = getDefaultKeyboardLayout(inputDevice);
+                    if (layout != null) {
+                        setCurrentKeyboardLayoutForInputDevice(
+                                inputDevice.getIdentifier(), layout);
                     }
                 }
+                if (layout == null) {
+                    keyboardsMissingLayout.add(inputDevice);
+                }
             }
-            if (missingLayoutForExternalKeyboard) {
-                if (missingLayoutForExternalKeyboardAdded) {
-                    if (multipleMissingLayoutsForExternalKeyboardsAdded) {
-                        // We have more than one keyboard missing a layout, so drop the
-                        // user at the generic input methods page so they can pick which
-                        // one to set.
-                        showMissingKeyboardLayoutNotification(null);
-                    } else {
-                        showMissingKeyboardLayoutNotification(keyboardMissingLayout);
-                    }
+        }
+
+        if (mNotificationManager != null) {
+            if (!keyboardsMissingLayout.isEmpty()) {
+                if (keyboardsMissingLayout.size() > 1) {
+                    // We have more than one keyboard missing a layout, so drop the
+                    // user at the generic input methods page so they can pick which
+                    // one to set.
+                    showMissingKeyboardLayoutNotification(null);
+                } else {
+                    showMissingKeyboardLayoutNotification(keyboardsMissingLayout.get(0));
                 }
             } else if (mKeyboardLayoutNotificationShown) {
                 hideMissingKeyboardLayoutNotification();
             }
         }
         mTempFullKeyboards.clear();
+    }
+
+    private String getDefaultKeyboardLayout(final InputDevice d) {
+        final Locale systemLocale = mContext.getResources().getConfiguration().locale;
+        // If our locale doesn't have a language for some reason, then we don't really have a
+        // reasonable default.
+        if (TextUtils.isEmpty(systemLocale.getLanguage())) {
+            return null;
+        }
+        final List<KeyboardLayout> layouts = new ArrayList<>();
+        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
+            @Override
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
+                // Only select a default when we know the layout is appropriate. For now, this
+                // means its a custom layout for a specific keyboard.
+                if (layout.getVendorId() != d.getVendorId()
+                        || layout.getProductId() != d.getProductId()) {
+                    return;
+                }
+                for (Locale l : layout.getLocales()) {
+                    if (isCompatibleLocale(systemLocale, l)) {
+                        layouts.add(layout);
+                        break;
+                    }
+                }
+            }
+        });
+
+        if (layouts.isEmpty()) {
+            return null;
+        }
+
+        // First sort so that ones with higher priority are listed at the top
+        Collections.sort(layouts);
+        // Next we want to try to find an exact match of language, country and variant.
+        final int N = layouts.size();
+        for (int i = 0; i < N; i++) {
+            KeyboardLayout layout = layouts.get(i);
+            for (Locale l : layout.getLocales()) {
+                if (l.getCountry().equals(systemLocale.getCountry())
+                        && l.getVariant().equals(systemLocale.getVariant())) {
+                    return layout.getDescriptor();
+                }
+            }
+        }
+        // Then try an exact match of language and country
+        for (int i = 0; i < N; i++) {
+            KeyboardLayout layout = layouts.get(i);
+            for (Locale l : layout.getLocales()) {
+                if (l.getCountry().equals(systemLocale.getCountry())) {
+                    return layout.getDescriptor();
+                }
+            }
+        }
+
+        // Give up and just use the highest priority layout with matching language
+        return layouts.get(0).getDescriptor();
+    }
+
+    private static boolean isCompatibleLocale(Locale systemLocale, Locale keyboardLocale) {
+        // Different languages are never compatible
+        if (!systemLocale.getLanguage().equals(keyboardLocale.getLanguage())) {
+            return false;
+        }
+        // If both the system and the keyboard layout have a country specifier, they must be equal.
+        if (!TextUtils.isEmpty(systemLocale.getCountry())
+                && !TextUtils.isEmpty(keyboardLocale.getCountry())
+                && !systemLocale.getCountry().equals(keyboardLocale.getCountry())) {
+            return false;
+        }
+        return true;
     }
 
     @Override // Binder call & native callback
@@ -911,9 +980,9 @@ public class InputManagerService extends IInputManager.Stub
         final HashSet<String> availableKeyboardLayouts = new HashSet<String>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
-                    String collection, int keyboardLayoutResId, int priority) {
-                availableKeyboardLayouts.add(descriptor);
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
+                availableKeyboardLayouts.add(layout.getDescriptor());
             }
         });
         synchronized (mDataStore) {
@@ -945,12 +1014,61 @@ public class InputManagerService extends IInputManager.Stub
         final ArrayList<KeyboardLayout> list = new ArrayList<KeyboardLayout>();
         visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
-                    String collection, int keyboardLayoutResId, int priority) {
-                list.add(new KeyboardLayout(descriptor, label, collection, priority));
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
+                list.add(layout);
             }
         });
         return list.toArray(new KeyboardLayout[list.size()]);
+    }
+
+    @Override // Binder call
+    public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
+            final InputDeviceIdentifier identifier) {
+        final String[] enabledLayoutDescriptors =
+            getEnabledKeyboardLayoutsForInputDevice(identifier);
+        final ArrayList<KeyboardLayout> enabledLayouts =
+            new ArrayList<KeyboardLayout>(enabledLayoutDescriptors.length);
+        final ArrayList<KeyboardLayout> potentialLayouts = new ArrayList<KeyboardLayout>();
+        visitAllKeyboardLayouts(new KeyboardLayoutVisitor() {
+            boolean mHasSeenDeviceSpecificLayout;
+
+            @Override
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
+                // First check if it's enabled. If the keyboard layout is enabled then we always
+                // want to return it as a possible layout for the device.
+                for (String s : enabledLayoutDescriptors) {
+                    if (s != null && s.equals(layout.getDescriptor())) {
+                        enabledLayouts.add(layout);
+                        return;
+                    }
+                }
+                // Next find any potential layouts that aren't yet enabled for the device. For
+                // devices that have special layouts we assume there's a reason that the generic
+                // layouts don't work for them so we don't want to return them since it's likely
+                // to result in a poor user experience.
+                if (layout.getVendorId() == identifier.getVendorId()
+                        && layout.getProductId() == identifier.getProductId()) {
+                    if (!mHasSeenDeviceSpecificLayout) {
+                        mHasSeenDeviceSpecificLayout = true;
+                        potentialLayouts.clear();
+                    }
+                    potentialLayouts.add(layout);
+                } else if (layout.getVendorId() == -1 && layout.getProductId() == -1
+                        && !mHasSeenDeviceSpecificLayout) {
+                    potentialLayouts.add(layout);
+                }
+            }
+        });
+        final int enabledLayoutSize = enabledLayouts.size();
+        final int potentialLayoutSize = potentialLayouts.size();
+        KeyboardLayout[] layouts = new KeyboardLayout[enabledLayoutSize + potentialLayoutSize];
+        enabledLayouts.toArray(layouts);
+        for (int i = 0; i < potentialLayoutSize; i++) {
+            layouts[enabledLayoutSize + i] = potentialLayouts.get(i);
+        }
+        return layouts;
     }
 
     @Override // Binder call
@@ -962,13 +1080,13 @@ public class InputManagerService extends IInputManager.Stub
         final KeyboardLayout[] result = new KeyboardLayout[1];
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources, String descriptor,
-                    String label, String collection, int keyboardLayoutResId, int priority) {
-                result[0] = new KeyboardLayout(descriptor, label, collection, priority);
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
+                result[0] = layout;
             }
         });
         if (result[0] == null) {
-            Log.w(TAG, "Could not get keyboard layout with descriptor '"
+            Slog.w(TAG, "Could not get keyboard layout with descriptor '"
                     + keyboardLayoutDescriptor + "'.");
         }
         return result[0];
@@ -1010,7 +1128,7 @@ public class InputManagerService extends IInputManager.Stub
 
         int configResId = metaData.getInt(InputManager.META_DATA_KEYBOARD_LAYOUTS);
         if (configResId == 0) {
-            Log.w(TAG, "Missing meta-data '" + InputManager.META_DATA_KEYBOARD_LAYOUTS
+            Slog.w(TAG, "Missing meta-data '" + InputManager.META_DATA_KEYBOARD_LAYOUTS
                     + "' on receiver " + receiver.packageName + "/" + receiver.name);
             return;
         }
@@ -1047,8 +1165,16 @@ public class InputManagerService extends IInputManager.Stub
                             int keyboardLayoutResId = a.getResourceId(
                                     com.android.internal.R.styleable.KeyboardLayout_keyboardLayout,
                                     0);
+                            String languageTags = a.getString(
+                                    com.android.internal.R.styleable.KeyboardLayout_locale);
+                            Locale[] locales = getLocalesFromLanguageTags(languageTags);
+                            int vid = a.getInt(
+                                    com.android.internal.R.styleable.KeyboardLayout_vendorId, -1);
+                            int pid = a.getInt(
+                                    com.android.internal.R.styleable.KeyboardLayout_productId, -1);
+
                             if (name == null || label == null || keyboardLayoutResId == 0) {
-                                Log.w(TAG, "Missing required 'name', 'label' or 'keyboardLayout' "
+                                Slog.w(TAG, "Missing required 'name', 'label' or 'keyboardLayout' "
                                         + "attributes in keyboard layout "
                                         + "resource from receiver "
                                         + receiver.packageName + "/" + receiver.name);
@@ -1056,15 +1182,18 @@ public class InputManagerService extends IInputManager.Stub
                                 String descriptor = KeyboardLayoutDescriptor.format(
                                         receiver.packageName, receiver.name, name);
                                 if (keyboardName == null || name.equals(keyboardName)) {
-                                    visitor.visitKeyboardLayout(resources, descriptor,
-                                            label, collection, keyboardLayoutResId, priority);
+                                    KeyboardLayout layout = new KeyboardLayout(
+                                            descriptor, label, collection, priority,
+                                            locales, vid, pid);
+                                    visitor.visitKeyboardLayout(
+                                            resources, keyboardLayoutResId, layout);
                                 }
                             }
                         } finally {
                             a.recycle();
                         }
                     } else {
-                        Log.w(TAG, "Skipping unrecognized element '" + element
+                        Slog.w(TAG, "Skipping unrecognized element '" + element
                                 + "' in keyboard layout resource from receiver "
                                 + receiver.packageName + "/" + receiver.name);
                     }
@@ -1073,9 +1202,21 @@ public class InputManagerService extends IInputManager.Stub
                 parser.close();
             }
         } catch (Exception ex) {
-            Log.w(TAG, "Could not parse keyboard layout resource from receiver "
+            Slog.w(TAG, "Could not parse keyboard layout resource from receiver "
                     + receiver.packageName + "/" + receiver.name, ex);
         }
+    }
+
+    private static Locale[] getLocalesFromLanguageTags(String languageTags) {
+        if (TextUtils.isEmpty(languageTags)) {
+            return new Locale[0];
+        }
+        String[] tags = languageTags.split("\\|");
+        Locale[] locales = new Locale[tags.length];
+        for (int i = 0; i < tags.length; i++) {
+            locales[i] = Locale.forLanguageTag(tags[i]);
+        }
+        return locales;
     }
 
     /**
@@ -1143,7 +1284,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     @Override // Binder call
-    public String[] getKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
+    public String[] getEnabledKeyboardLayoutsForInputDevice(InputDeviceIdentifier identifier) {
         String key = getLayoutDescriptor(identifier);
         synchronized (mDataStore) {
             String[] layouts = mDataStore.getKeyboardLayouts(key);
@@ -1718,10 +1859,10 @@ public class InputManagerService extends IInputManager.Stub
         final String[] result = new String[2];
         visitKeyboardLayout(keyboardLayoutDescriptor, new KeyboardLayoutVisitor() {
             @Override
-            public void visitKeyboardLayout(Resources resources, String descriptor, String label,
-                    String collection, int keyboardLayoutResId, int priority) {
+            public void visitKeyboardLayout(Resources resources,
+                    int keyboardLayoutResId, KeyboardLayout layout) {
                 try {
-                    result[0] = descriptor;
+                    result[0] = layout.getDescriptor();
                     result[1] = Streams.readFully(new InputStreamReader(
                             resources.openRawResource(keyboardLayoutResId)));
                 } catch (IOException ex) {
@@ -1730,7 +1871,7 @@ public class InputManagerService extends IInputManager.Stub
             }
         });
         if (result[0] == null) {
-            Log.w(TAG, "Could not get keyboard layout with descriptor '"
+            Slog.w(TAG, "Could not get keyboard layout with descriptor '"
                     + keyboardLayoutDescriptor + "'.");
             return null;
         }
@@ -1883,8 +2024,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private interface KeyboardLayoutVisitor {
-        void visitKeyboardLayout(Resources resources, String descriptor, String label,
-                String collection, int keyboardLayoutResId, int priority);
+        void visitKeyboardLayout(Resources resources,
+                int keyboardLayoutResId, KeyboardLayout layout);
     }
 
     private final class InputDevicesChangedListenerRecord implements DeathRecipient {
