@@ -24,10 +24,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.graphics.drawable.ScaleDrawable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -189,12 +192,24 @@ public class StatusBarIconView extends AnimatedImageView {
      * @return Drawable for this item, or null if the package or item could not
      *         be found
      */
-    public static Drawable getIcon(Context context, StatusBarIcon icon) {
-        int userId = icon.user.getIdentifier();
+    public static Drawable getIcon(Context context, StatusBarIcon statusBarIcon) {
+        int userId = statusBarIcon.user.getIdentifier();
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
         }
-        return icon.icon.loadDrawableAsUser(context, userId);
+
+        Drawable icon = statusBarIcon.icon.loadDrawableAsUser(context, userId);
+
+        TypedValue typedValue = new TypedValue();
+        context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        float scaleFactor = typedValue.getFloat();
+
+        // No need to scale the icon, so return it as is.
+        if (scaleFactor == 1.f) {
+            return icon;
+        }
+
+        return new ScalingDrawableWrapper(icon, scaleFactor);
     }
 
     public StatusBarIcon getStatusBarIcon() {
