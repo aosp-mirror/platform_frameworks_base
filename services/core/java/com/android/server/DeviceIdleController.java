@@ -1052,12 +1052,11 @@ public class DeviceIdleController extends SystemService
             for (int i=0; i<allowPowerExceptIdle.size(); i++) {
                 String pkg = allowPowerExceptIdle.valueAt(i);
                 try {
-                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                    if ((ai.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        int appid = UserHandle.getAppId(ai.uid);
-                        mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
-                        mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
-                    }
+                    ApplicationInfo ai = pm.getApplicationInfo(pkg,
+                            PackageManager.MATCH_SYSTEM_ONLY);
+                    int appid = UserHandle.getAppId(ai.uid);
+                    mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
+                    mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
                 } catch (PackageManager.NameNotFoundException e) {
                 }
             }
@@ -1065,16 +1064,15 @@ public class DeviceIdleController extends SystemService
             for (int i=0; i<allowPower.size(); i++) {
                 String pkg = allowPower.valueAt(i);
                 try {
-                    ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
-                    if ((ai.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        int appid = UserHandle.getAppId(ai.uid);
-                        // These apps are on both the whitelist-except-idle as well
-                        // as the full whitelist, so they apply in all cases.
-                        mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
-                        mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
-                        mPowerSaveWhitelistApps.put(ai.packageName, appid);
-                        mPowerSaveWhitelistSystemAppIds.put(appid, true);
-                    }
+                    ApplicationInfo ai = pm.getApplicationInfo(pkg,
+                            PackageManager.MATCH_SYSTEM_ONLY);
+                    int appid = UserHandle.getAppId(ai.uid);
+                    // These apps are on both the whitelist-except-idle as well
+                    // as the full whitelist, so they apply in all cases.
+                    mPowerSaveWhitelistAppsExceptIdle.put(ai.packageName, appid);
+                    mPowerSaveWhitelistSystemAppIdsExceptIdle.put(appid, true);
+                    mPowerSaveWhitelistApps.put(ai.packageName, appid);
+                    mPowerSaveWhitelistSystemAppIds.put(appid, true);
                 } catch (PackageManager.NameNotFoundException e) {
                 }
             }
@@ -1182,9 +1180,7 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             try {
                 ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
-                        PackageManager.GET_UNINSTALLED_PACKAGES
-                                | PackageManager.GET_DISABLED_COMPONENTS
-                                | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS);
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid)) == null) {
                     reportPowerSaveWhitelistChangedLocked();
                     updateWhitelistAppIdsLocked();
@@ -2010,9 +2006,7 @@ public class DeviceIdleController extends SystemService
                     if (name != null) {
                         try {
                             ApplicationInfo ai = pm.getApplicationInfo(name,
-                                    PackageManager.GET_UNINSTALLED_PACKAGES
-                                            | PackageManager.GET_DISABLED_COMPONENTS
-                                            | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS);
+                                    PackageManager.MATCH_UNINSTALLED_PACKAGES);
                             mPowerSaveWhitelistUserApps.put(ai.packageName,
                                     UserHandle.getAppId(ai.uid));
                         } catch (PackageManager.NameNotFoundException e) {

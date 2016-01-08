@@ -123,6 +123,7 @@ public abstract class PackageManager {
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_SYSTEM_ONLY,
             MATCH_DEBUG_TRIAGED_MISSING,
     })
     @Retention(RetentionPolicy.SOURCE)

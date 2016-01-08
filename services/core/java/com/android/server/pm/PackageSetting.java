@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 
 import java.io.File;
@@ -77,5 +78,12 @@ final class PackageSetting extends PackageSettingBase {
 
     public boolean isSharedUser() {
         return sharedUser != null;
+    }
+
+    public boolean isMatch(int flags) {
+        if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+            return isSystem();
+        }
+        return true;
     }
 }

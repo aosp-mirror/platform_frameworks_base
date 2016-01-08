@@ -614,9 +614,8 @@ public class UsageStatsService extends SystemService implements
             // the sync adapter is a system package.
             try {
                 PackageInfo pi = AppGlobals.getPackageManager().getPackageInfo(
-                        packageName, 0, userId);
-                if (pi == null || pi.applicationInfo == null
-                        || !pi.applicationInfo.isSystemApp()) {
+                        packageName, PackageManager.MATCH_SYSTEM_ONLY, userId);
+                if (pi == null || pi.applicationInfo == null) {
                     continue;
                 }
                 if (!packageName.equals(providerPkgName)) {
@@ -863,8 +862,8 @@ public class UsageStatsService extends SystemService implements
 
         List<ApplicationInfo> apps;
         try {
-            ParceledListSlice<ApplicationInfo> slice
-                    = AppGlobals.getPackageManager().getInstalledApplications(0, userId);
+            ParceledListSlice<ApplicationInfo> slice = AppGlobals.getPackageManager()
+                    .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             if (slice == null) {
                 return new int[0];
             }
@@ -1266,8 +1265,8 @@ public class UsageStatsService extends SystemService implements
                     "No permission to change app idle state");
             final long token = Binder.clearCallingIdentity();
             try {
-                PackageInfo pi = AppGlobals.getPackageManager()
-                        .getPackageInfo(packageName, 0, userId);
+                PackageInfo pi = AppGlobals.getPackageManager().getPackageInfo(packageName,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
                 if (pi == null) return;
                 UsageStatsService.this.setAppIdle(packageName, idle, userId);
             } catch (RemoteException re) {

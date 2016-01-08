@@ -2333,7 +2333,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
             try {
-                int uid = mContext.getPackageManager().getPackageUidAsUser(packageName, userId);
+                final int uid = mContext.getPackageManager().getPackageUidAsUser(packageName,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
                 synchronized (mRulesLock) {
                     updateRuleForAppIdleLocked(uid);
                 }
