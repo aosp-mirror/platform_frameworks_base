@@ -745,6 +745,11 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/control_background_32dp_material</item>
     </style>
 
+    <!-- A seek bar with tick marks at each progress value. -->
+    <style name="Widget.Material.SeekBar.Discrete">
+        <item name="tickMark">@drawable/seekbar_tick_mark_material</item>
+    </style>
+
     <style name="Widget.Material.RatingBar" parent="Widget.RatingBar">
         <item name="progressDrawable">@drawable/ratingbar_material</item>
         <item name="indeterminateDrawable">@drawable/ratingbar_material</item>

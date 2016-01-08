@@ -4039,10 +4039,34 @@ i
              should always be false for Material and  beyond.
              @hide Developers shouldn't need to change this. -->
         <attr name="useDisabledAlpha" format="boolean" />
-        <!-- Tint to apply to the button graphic. -->
+        <!-- Tint to apply to the thumb drawable. -->
         <attr name="thumbTint" format="color" />
-        <!-- Blending mode used to apply the button graphic tint. -->
+        <!-- Blending mode used to apply the thumb tint. -->
         <attr name="thumbTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+        <!-- Drawable displayed at each progress position on a seekbar. -->
+        <attr name="tickMark" format="reference" />
+        <!-- Tint to apply to the tick mark drawable. -->
+        <attr name="tickMarkTint" format="color" />
+        <!-- Blending mode used to apply the tick mark tint. -->
+        <attr name="tickMarkTintMode">
             <!-- The tint is drawn on top of the drawable.
                  [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
             <enum name="src_over" value="3" />

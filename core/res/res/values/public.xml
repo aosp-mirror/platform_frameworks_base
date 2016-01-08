@@ -2685,8 +2685,12 @@
     <public type="attr" name="canControlMagnification" />
     <public type="attr" name="languageTag" />
     <public type="attr" name="pointerShape" />
+    <public type="attr" name="tickMark" />
+    <public type="attr" name="tickMarkTint" />
+    <public type="attr" name="tickMarkTintMode" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
+    <public type="style" name="Widget.Material.SeekBar.Discrete" />
 
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="id" name="icon_frame" />
