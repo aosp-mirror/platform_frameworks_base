@@ -506,7 +506,7 @@ public class SystemServicesProxy {
     public void sendCloseSystemWindows(String reason) {
         if (ActivityManagerNative.isSystemReady()) {
             try {
-                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+                mIam.closeSystemDialogs(reason);
             } catch (RemoteException e) {
             }
         }
@@ -776,6 +776,19 @@ public class SystemServicesProxy {
         if (mAccm == null) return false;
 
         return mAccm.isEnabled() && mAccm.isTouchExplorationEnabled();
+    }
+
+    /**
+     * Returns whether the current task is in screen-pinning mode.
+     */
+    public boolean isScreenPinningActive() {
+        if (mIam == null) return false;
+
+        try {
+            return mIam.isInLockTaskMode();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**

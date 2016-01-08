@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -205,7 +206,7 @@ public class Recents extends SystemUI
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -242,7 +243,7 @@ public class Recents extends SystemUI
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -277,7 +278,7 @@ public class Recents extends SystemUI
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -312,7 +313,7 @@ public class Recents extends SystemUI
     public void preloadRecents() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -340,7 +341,7 @@ public class Recents extends SystemUI
     public void cancelPreloadingRecents() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -365,11 +366,20 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public void dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
-        mImpl.dockTopTask(draggingInRecents, stackCreateMode,initialBounds);
-        if (draggingInRecents) {
-            mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
+    public boolean dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isUserSetup()) {
+            return false;
         }
+
+        if (mImpl.dockTopTask(draggingInRecents, stackCreateMode,initialBounds)) {
+            if (draggingInRecents) {
+                mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -422,7 +432,7 @@ public class Recents extends SystemUI
     public void showNextAffiliatedTask() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -433,7 +443,7 @@ public class Recents extends SystemUI
     public void showPrevAffiliatedTask() {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
-        if (!isDeviceProvisioned()) {
+        if (!isUserSetup()) {
             return;
         }
 
@@ -559,11 +569,12 @@ public class Recents extends SystemUI
     }
 
     /**
-     * @return whether this device is provisioned.
+     * @return whether this device is provisioned and the current user is set up.
      */
-    private boolean isDeviceProvisioned() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+    private boolean isUserSetup() {
+        ContentResolver cr = mContext.getContentResolver();
+        return (Settings.Global.getInt(cr, Settings.Global.DEVICE_PROVISIONED, 0) != 0) &&
+                (Settings.Secure.getInt(cr, Settings.Secure.USER_SETUP_COMPLETE, 0) != 0);
     }
 
     /**

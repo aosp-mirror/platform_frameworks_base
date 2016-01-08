@@ -31,6 +31,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
@@ -257,7 +258,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
     }
 
-    @Override
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
             boolean animate, boolean reloadTasks) {
         mTriggeredFromAltTab = triggeredFromAltTab;
@@ -300,7 +300,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
     }
 
-    @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mBootCompleted) {
             if (triggeredFromAltTab && mFastAltTabTrigger.isDozing()) {
@@ -321,7 +320,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
     }
 
-    @Override
     public void toggleRecents() {
         // Skip this toggle if we are already waiting to trigger recents via alt-tab
         if (mFastAltTabTrigger.isDozing()) {
@@ -375,7 +373,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
     }
 
-    @Override
     public void preloadRecents() {
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity) only if there is a task to animate to.
@@ -396,17 +393,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         }
     }
 
-    @Override
     public void cancelPreloadingRecents() {
         // Do nothing
     }
 
-    @Override
     public void onDraggingInRecents(float distanceFromTop) {
         EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEvent(distanceFromTop));
     }
 
-    @Override
     public void onDraggingInRecentsEnded(float velocity) {
         EventBus.getDefault().sendOntoMainThread(new DraggingInRecentsEndedEvent(velocity));
     }
@@ -547,14 +541,18 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         showRelativeAffiliatedTask(false);
     }
 
-    public void dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
+    public boolean dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-        if (topTask != null && !SystemServicesProxy.isHomeStack(topTask.stackId)) {
+        boolean screenPinningActive = ssp.isScreenPinningActive();
+        boolean isTopTaskHome = SystemServicesProxy.isHomeStack(topTask.stackId);
+        if (topTask != null && !isTopTaskHome && !screenPinningActive) {
             ssp.moveTaskToDockedStack(topTask.id, stackCreateMode, initialBounds);
             showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */,
                     true /* reloadTasks*/);
+            return true;
         }
+        return false;
     }
 
     /**

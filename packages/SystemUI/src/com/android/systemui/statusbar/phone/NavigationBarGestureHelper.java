@@ -175,10 +175,10 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                     : xDiff > mScrollTouchSlop && xDiff > yDiff;
             if (touchSlopExceeded && mDivider.getView().getWindowManagerProxy().getDockSide()
                     == DOCKED_INVALID) {
-                mDragMode = calculateDragMode();
                 Rect initialBounds = null;
+                int dragMode = calculateDragMode();
                 int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-                if (mDragMode == DRAG_MODE_DIVIDER) {
+                if (dragMode == DRAG_MODE_DIVIDER) {
                     initialBounds = new Rect();
                     mDivider.getView().calculateBoundsForPosition(mIsVertical
                                     ? (int) event.getRawX()
@@ -187,19 +187,23 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                                     ? DOCKED_TOP
                                     : DOCKED_LEFT,
                             initialBounds);
-                } else if (mDragMode == DRAG_MODE_RECENTS && mTouchDownX
+                } else if (dragMode == DRAG_MODE_RECENTS && mTouchDownX
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
                     createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                mRecentsComponent.dockTopTask(mDragMode == DRAG_MODE_RECENTS, createMode,
-                        initialBounds);
-                if (mDragMode == DRAG_MODE_DIVIDER) {
-                    mDivider.getView().startDragging(false /* animate */);
+                boolean docked = mRecentsComponent.dockTopTask(dragMode == DRAG_MODE_RECENTS,
+                        createMode, initialBounds);
+                if (docked) {
+                    mDragMode = dragMode;
+                    if (mDragMode == DRAG_MODE_DIVIDER) {
+                        mDivider.getView().startDragging(false /* animate */);
+                    }
+                    mDockWindowTouchSlopExceeded = true;
+                    MetricsLogger.action(mContext,
+                            MetricsLogger.ACTION_WINDOW_DOCK_SWIPE);
+
+                    return true;
                 }
-                mDockWindowTouchSlopExceeded = true;
-                MetricsLogger.action(mContext,
-                        MetricsLogger.ACTION_WINDOW_DOCK_SWIPE);
-                return true;
             }
         } else {
             if (mDragMode == DRAG_MODE_DIVIDER) {
