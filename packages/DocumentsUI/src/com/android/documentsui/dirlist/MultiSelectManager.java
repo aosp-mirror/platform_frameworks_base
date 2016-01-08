@@ -1913,37 +1913,41 @@ public final class MultiSelectManager implements View.OnKeyListener {
         // Here we unpack information from the event and pass it to an more
         // easily tested method....basically eliminating the need to synthesize
         // events and views and so on in our tests.
-        int position = findTargetPosition(view, keyCode);
-        if (position == RecyclerView.NO_POSITION) {
+        int endPos = findTargetPosition(view, keyCode);
+        if (endPos == RecyclerView.NO_POSITION) {
             // If there is no valid navigation target, don't handle the keypress.
             return false;
         }
 
-        return attemptChangeFocus(position, event.isShiftPressed());
+        int startPos = mEnvironment.getAdapterPositionForChildView(view);
+
+        return changeFocus(startPos, endPos, event.isShiftPressed());
     }
 
     /**
+     * @param startPosition The current focus position.
      * @param targetPosition The adapter position to focus.
      * @param extendSelection
      */
     @VisibleForTesting
-    boolean attemptChangeFocus(int targetPosition, boolean extendSelection) {
+    boolean changeFocus(int startPosition, int targetPosition, boolean extendSelection) {
         // Focus the new file.
         mEnvironment.focusItem(targetPosition);
 
         if (extendSelection) {
-            if (!hasSelection()) {
-                // If there is no selection, start a selection when the user presses shift-arrow.
-                toggleSelection(targetPosition);
-                setSelectionRangeBegin(targetPosition);
-            } else if (!mSingleSelect) {
-                mRanger.snapSelection(targetPosition);
-                notifySelectionChanged();
-            } else {
+            if (mSingleSelect) {
                 // We're in single select and have an existing selection.
                 // Our best guess as to what the user would expect is to advance the selection.
                 clearSelection();
                 toggleSelection(targetPosition);
+            } else {
+                if (!hasSelection()) {
+                    // No selection - start a selection when the user presses shift-arrow.
+                    toggleSelection(startPosition);
+                    setSelectionRangeBegin(startPosition);
+                }
+                mRanger.snapSelection(targetPosition);
+                notifySelectionChanged();
             }
         }
 
