@@ -33,6 +33,8 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -40,10 +42,11 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Set;
 
 /**
- * Utility methods for uesr restrictions.
+ * Utility methods for user restrictions.
  *
  * <p>See {@link UserManagerService} for the method suffixes.
  */
@@ -88,7 +91,8 @@ public class UserRestrictionsUtils {
             UserManager.ALLOW_PARENT_PROFILE_APP_LINKING,
             UserManager.DISALLOW_RECORD_AUDIO,
             UserManager.DISALLOW_CAMERA,
-            UserManager.DISALLOW_RUN_IN_BACKGROUND
+            UserManager.DISALLOW_RUN_IN_BACKGROUND,
+            UserManager.DISALLOW_DATA_ROAMING
     );
 
     /**
@@ -113,7 +117,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SMS,
             UserManager.DISALLOW_FUN,
             UserManager.DISALLOW_SAFE_BOOT,
-            UserManager.DISALLOW_CREATE_WINDOWS
+            UserManager.DISALLOW_CREATE_WINDOWS,
+            UserManager.DISALLOW_DATA_ROAMING
     );
 
     /**
@@ -313,6 +318,27 @@ public class UserRestrictionsUtils {
                         android.provider.Settings.Secure.putIntForUser(cr,
                                 android.provider.Settings.Global
                                         .WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON, 0, userId);
+                    }
+                    break;
+                case UserManager.DISALLOW_DATA_ROAMING:
+                    if (newValue) {
+                        // DISALLOW_DATA_ROAMING user restriction is set.
+
+                        // Multi sim device.
+                        SubscriptionManager subscriptionManager = new SubscriptionManager(context);
+                        final List<SubscriptionInfo> subscriptionInfoList =
+                            subscriptionManager.getActiveSubscriptionInfoList();
+                        if (subscriptionInfoList != null) {
+                            for (SubscriptionInfo subInfo : subscriptionInfoList) {
+                                android.provider.Settings.Global.putStringForUser(cr,
+                                    android.provider.Settings.Global.DATA_ROAMING
+                                    + subInfo.getSubscriptionId(), "0", userId);
+                            }
+                        }
+
+                        // Single sim device.
+                        android.provider.Settings.Global.putStringForUser(cr,
+                            android.provider.Settings.Global.DATA_ROAMING, "0", userId);
                     }
                     break;
                 case UserManager.DISALLOW_SHARE_LOCATION:
