@@ -105,7 +105,7 @@ public class State implements android.os.Parcelable {
     }
 
     public void pushDocument(DocumentInfo info) {
-        stack.add(info);
+        stack.push(info);
         mStackTouched = true;
     }
 
