@@ -107,6 +107,7 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
     public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
+    public static final String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
 
     /**
      * MIME type for WebVTT subtitle data.

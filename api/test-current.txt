@@ -20328,6 +20328,7 @@ package android.media {
     field public static final java.lang.String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
     field public static final java.lang.String MIMETYPE_TEXT_VTT = "text/vtt";
     field public static final java.lang.String MIMETYPE_VIDEO_AVC = "video/avc";
+    field public static final java.lang.String MIMETYPE_VIDEO_DOLBY_VISION = "video/dolby-vision";
     field public static final java.lang.String MIMETYPE_VIDEO_H263 = "video/3gpp";
     field public static final java.lang.String MIMETYPE_VIDEO_HEVC = "video/hevc";
     field public static final java.lang.String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
