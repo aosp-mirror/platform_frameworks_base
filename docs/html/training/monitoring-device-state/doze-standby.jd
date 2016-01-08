@@ -32,7 +32,7 @@ Standby</a>
         <li><a href="#testing_your_app_with_app_standby">Testing your app with App Standby</a></li>
       </ol>
       </li>
-      <li><a href="#whitelisting-cases">Example Use Cases for Whitelisting</a></li>
+      <li><a href="#whitelisting-cases">Acceptable Use Cases for Whitelisting</a></li>
     </ol>
   </div>
 </div>
@@ -422,7 +422,7 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
 </ol>
 
 
-<h2 id="whitelisting-cases">Example Use Cases for Whitelisting</h2>
+<h2 id="whitelisting-cases">Acceptable Use Cases for Whitelisting</h2>
 
 <p>The table below highlights the acceptable use cases for requesting or being on
    the Battery Optimizations exceptions whitelist. In general, your app should not be on the
@@ -456,9 +456,18 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
 
  <tr>
     <td rowspan="1">Instant messaging, chat, or calling app;
-    enterprise VOIP apps</td>
+    enterprise VOIP apps.</td>
     <td>No, can not use GCM because of technical dependency on another messaging
     service or Doze and App Standby break the core function of the app.</td>
+    <td style="color:green">Acceptable</td>
+    <td></td>
+ </tr>
+
+  <tr>
+    <td rowspan="1">Task automation app</td>
+    <td>App's core function is scheduling automated actions, such as for instant
+    messaging, voice calling, new photo management, or location actions.</td>
+    <td>If applicable.</td>
     <td style="color:green">Acceptable</td>
     <td></td>
  </tr>
