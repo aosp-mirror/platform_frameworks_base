@@ -142,7 +142,7 @@ public final class NotificationRecord {
         }
         // maybe only do this for target API < N?
         if (isNoisy) {
-            if (importance == IMPORTANCE_HIGH) {
+            if (importance >= IMPORTANCE_HIGH) {
                 importance = IMPORTANCE_MAX;
             } else {
                 importance = IMPORTANCE_HIGH;

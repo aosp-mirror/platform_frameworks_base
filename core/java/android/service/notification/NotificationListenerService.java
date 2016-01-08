@@ -1002,13 +1002,12 @@ public abstract class NotificationListenerService extends Service {
             return mImportanceExplanation;
         }
 
-        private void populate(String key, int rank, boolean isAmbient,
-                boolean matchesInterruptionFilter, int visibilityOverride,
-                int suppressedVisualEffects, int importance,
+        private void populate(String key, int rank, boolean matchesInterruptionFilter,
+                int visibilityOverride, int suppressedVisualEffects, int importance,
                 CharSequence explanation) {
             mKey = key;
             mRank = rank;
-            mIsAmbient = isAmbient;
+            mIsAmbient = importance < IMPORTANCE_DEFAULT;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
             mSuppressedVisualEffects = suppressedVisualEffects;
@@ -1079,7 +1078,7 @@ public abstract class NotificationListenerService extends Service {
          */
         public boolean getRanking(String key, Ranking outRanking) {
             int rank = getRank(key);
-            outRanking.populate(key, rank, isAmbient(key), !isIntercepted(key),
+            outRanking.populate(key, rank, !isIntercepted(key),
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key));
             return rank >= 0;
@@ -1093,15 +1092,6 @@ public abstract class NotificationListenerService extends Service {
             }
             Integer rank = mRanks.get(key);
             return rank != null ? rank : -1;
-        }
-
-        private boolean isAmbient(String key) {
-            int firstAmbientIndex = mRankingUpdate.getFirstAmbientIndex();
-            if (firstAmbientIndex < 0) {
-                return false;
-            }
-            int rank = getRank(key);
-            return rank >= 0 && rank >= firstAmbientIndex;
         }
 
         private boolean isIntercepted(String key) {

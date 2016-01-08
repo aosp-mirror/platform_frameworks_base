@@ -18,25 +18,25 @@ package com.android.server.notification;
 import java.util.Comparator;
 
 /**
- * Sorts notifications individually into attention-relelvant order.
+ * Sorts notifications individually into attention-relevant order.
  */
 public class NotificationComparator
         implements Comparator<NotificationRecord> {
 
     @Override
     public int compare(NotificationRecord left, NotificationRecord right) {
-        final int leftPackagePriority = left.getPackagePriority();
-        final int rightPackagePriority = right.getPackagePriority();
-        if (leftPackagePriority != rightPackagePriority) {
-            // by priority, high to low
-            return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
-        }
-
         final int leftImportance = left.getImportance();
         final int rightImportance = right.getImportance();
         if (leftImportance != rightImportance) {
             // by priority, high to low
             return -1 * Integer.compare(leftImportance, rightImportance);
+        }
+
+        final int leftPackagePriority = left.getPackagePriority();
+        final int rightPackagePriority = right.getPackagePriority();
+        if (leftPackagePriority != rightPackagePriority) {
+            // by priority, high to low
+            return -1 * Integer.compare(leftPackagePriority, rightPackagePriority);
         }
 
         final float leftPeople = left.getContactAffinity();

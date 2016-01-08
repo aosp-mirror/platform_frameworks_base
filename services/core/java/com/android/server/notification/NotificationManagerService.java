@@ -3294,7 +3294,6 @@ public class NotificationManagerService extends SystemService {
      * <p>Caller must hold a lock on mNotificationList.</p>
      */
     private NotificationRankingUpdate makeRankingUpdateLocked(ManagedServiceInfo info) {
-        int speedBumpIndex = -1;
         final int N = mNotificationList.size();
         ArrayList<String> keys = new ArrayList<String>(N);
         ArrayList<String> interceptedKeys = new ArrayList<String>(N);
@@ -3322,18 +3321,6 @@ public class NotificationManagerService extends SystemService {
                     != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE) {
                 visibilityOverrides.putInt(key, record.getPackageVisibilityOverride());
             }
-            // Find first min-prio notification for speedbump placement.
-            if (speedBumpIndex == -1 &&
-                    // Intrusiveness trumps priority, hence ignore intrusives.
-                    !record.isRecentlyIntrusive() &&
-                    // Currently, package priority is either PRIORITY_DEFAULT or PRIORITY_MAX, so
-                    // scanning for PRIORITY_MIN within the package bucket PRIORITY_DEFAULT
-                    // (or lower as a safeguard) is sufficient to find the speedbump index.
-                    // We'll have to revisit this when more package priority buckets are introduced.
-                    record.getPackagePriority() <= Notification.PRIORITY_DEFAULT &&
-                    record.sbn.getNotification().priority == Notification.PRIORITY_MIN) {
-                speedBumpIndex = keys.size() - 1;
-            }
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -3343,7 +3330,7 @@ public class NotificationManagerService extends SystemService {
             importanceAr[i] = importance.get(i);
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
-                speedBumpIndex, suppressedVisualEffects, importanceAr, explanation);
+                suppressedVisualEffects, importanceAr, explanation);
     }
 
     private boolean isVisibleToListener(StatusBarNotification sbn, ManagedServiceInfo listener) {

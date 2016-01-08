@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.util.Slog;
 
@@ -44,11 +45,7 @@ public class NotificationIntrusivenessExtractor implements NotificationSignalExt
         }
 
         final Notification notification = record.getNotification();
-        if ((notification.defaults & Notification.DEFAULT_VIBRATE) != 0 ||
-                notification.vibrate != null ||
-                (notification.defaults & Notification.DEFAULT_SOUND) != 0 ||
-                notification.sound != null ||
-                notification.fullScreenIntent != null) {
+        if (record.getImportance() > NotificationListenerService.Ranking.IMPORTANCE_DEFAULT) {
             record.setRecentlyIntrusive(true);
         }
 
