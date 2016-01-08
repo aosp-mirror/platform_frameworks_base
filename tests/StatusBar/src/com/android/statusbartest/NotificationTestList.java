@@ -175,7 +175,7 @@ public class NotificationTestList extends TestActivity
                         .setTopic(new Notification.Topic("hello", "Hello"))
                         .build();
 
-                mNM.notify(999, n);
+                mNM.notify(70, n);
             }
         },
 
@@ -194,7 +194,7 @@ public class NotificationTestList extends TestActivity
                         .setStyle(picture)
                         .build();
 
-                mNM.notify(9999, n);
+                mNM.notify(71, n);
             }
         },
         new Test("with topic Bananas") {
@@ -211,9 +211,27 @@ public class NotificationTestList extends TestActivity
                         .setTopic(new Notification.Topic("bananas", "Bananas"))
                         .build();
 
-                mNM.notify(999, n);
+                mNM.notify(72, n);
             }
         },
+
+            new Test("with delete intent") {
+                public void run() {
+                    Notification.BigTextStyle bigText = new Notification.BigTextStyle();
+                    bigText.bigText("bananas are great\nso tasty\nyum\nyum\nyum\n");
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon1)
+                            .setStyle(bigText)
+                            .setWhen(mActivityCreateTime)
+                            .setContentTitle("bananananana")
+                            .setContentText("This is a banana!!!")
+                            .setTopic(new Notification.Topic("bananas", "Bananas"))
+                            .setDeleteIntent(makeIntent2())
+                            .build();
+
+                    mNM.notify(73, n);
+                }
+            },
 
         new Test("Whens") {
             public void run()
