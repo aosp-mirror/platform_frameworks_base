@@ -78,7 +78,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.documentsui.BaseActivity;
-import com.android.documentsui.CopyService;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.DocumentClipper;
@@ -100,6 +99,8 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
+import com.android.documentsui.services.FileOperations;
 
 import com.google.common.collect.Lists;
 
@@ -455,9 +456,15 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             return;
         }
 
-        CopyService.start(getActivity(), getDisplayState().selectedDocumentsForCopy,
+        int operationType = data.getIntExtra(
+                FileOperationService.EXTRA_OPERATION,
+                FileOperationService.OPERATION_COPY);
+
+        FileOperations.start(
+                getActivity(),
+                getDisplayState().selectedDocumentsForCopy,
                 (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
-                data.getIntExtra(CopyService.EXTRA_TRANSFER_MODE, CopyService.TRANSFER_MODE_COPY));
+                operationType);
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
@@ -739,14 +746,14 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     return true;
 
                 case R.id.menu_copy_to:
-                    transferDocuments(selection, CopyService.TRANSFER_MODE_COPY);
+                    transferDocuments(selection, FileOperationService.OPERATION_COPY);
                     mode.finish();
                     return true;
 
                 case R.id.menu_move_to:
                     // Exit selection mode first, so we avoid deselecting deleted documents.
                     mode.finish();
-                    transferDocuments(selection, CopyService.TRANSFER_MODE_MOVE);
+                    transferDocuments(selection, FileOperationService.OPERATION_MOVE);
                     return true;
 
                 case R.id.menu_copy_to_clipboard:
@@ -898,7 +905,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     }
                 }
                 intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, directoryCopy);
-                intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mode);
+                intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
                 startActivityForResult(intent, REQUEST_COPY_DESTINATION);
             }
         }.execute(selected);
@@ -1035,7 +1042,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             tmpStack = curStack;
         }
 
-        CopyService.start(getActivity(), docs, tmpStack, CopyService.TRANSFER_MODE_COPY);
+        FileOperations.copy(getActivity(), docs, tmpStack);
     }
 
     private ClipData getClipDataFromDocuments(List<DocumentInfo> docs) {

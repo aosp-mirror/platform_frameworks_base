@@ -49,6 +49,7 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,20 +121,22 @@ public class FilesActivity extends BaseActivity {
                     ProviderExecutor.forAuthority(homeUri.getAuthority()));
         }
 
-        final int failure = intent.getIntExtra(CopyService.EXTRA_FAILURE, 0);
-        final int transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
-                CopyService.TRANSFER_MODE_COPY);
+        final int failure = intent.getIntExtra(FileOperationService.EXTRA_FAILURE, 0);
+        final int opType = intent.getIntExtra(
+                FileOperationService.EXTRA_OPERATION,
+                FileOperationService.OPERATION_COPY);
+
         // DialogFragment takes care of restoring the dialog on configuration change.
         // Only show it manually for the first time (icicle is null).
         if (icicle == null && failure != 0) {
             final ArrayList<DocumentInfo> failedSrcList =
-                    intent.getParcelableArrayListExtra(CopyService.EXTRA_SRC_LIST);
+                    intent.getParcelableArrayListExtra(FileOperationService.EXTRA_SRC_LIST);
             FailureDialogFragment.show(
                     getFragmentManager(),
                     failure,
                     failedSrcList,
                     mState.stack,
-                    transferMode);
+                    opType);
         }
     }
 

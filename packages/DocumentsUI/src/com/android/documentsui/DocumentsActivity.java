@@ -54,6 +54,7 @@ import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -154,8 +155,8 @@ public class DocumentsActivity extends BaseActivity {
         if (state.action == ACTION_PICK_COPY_DESTINATION) {
             state.directoryCopy = intent.getBooleanExtra(
                     Shared.EXTRA_DIRECTORY_COPY, false);
-            state.transferMode = intent.getIntExtra(CopyService.EXTRA_TRANSFER_MODE,
-                    CopyService.TRANSFER_MODE_COPY);
+            state.transferMode = intent.getIntExtra(FileOperationService.EXTRA_OPERATION,
+                    FileOperationService.OPERATION_COPY);
         }
 
         return state;
@@ -481,7 +482,7 @@ public class DocumentsActivity extends BaseActivity {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
             intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
-            intent.putExtra(CopyService.EXTRA_TRANSFER_MODE, mState.transferMode);
+            intent.putExtra(FileOperationService.EXTRA_OPERATION, mState.transferMode);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

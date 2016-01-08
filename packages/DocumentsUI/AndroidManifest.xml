@@ -92,7 +92,7 @@
         </receiver>
 
         <service
-            android:name=".CopyService"
+            android:name=".services.FileOperationService"
             android:exported="false">
         </service>
     </application>
