@@ -11297,7 +11297,7 @@ package android.graphics {
     field public int inScreenDensity;
     field public int inTargetDensity;
     field public byte[] inTempStorage;
-    field public boolean mCancel;
+    field public deprecated boolean mCancel;
     field public int outHeight;
     field public java.lang.String outMimeType;
     field public int outWidth;
