@@ -23,6 +23,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.documentsui.R;
@@ -30,10 +31,24 @@ import com.android.documentsui.State;
 
 final class GridDirectoryHolder extends DocumentHolder {
     final TextView mTitle;
+    private ImageView mIconCheck;
+    private ImageView mIconMime;
+
     public GridDirectoryHolder(Context context, ViewGroup parent) {
         super(context, parent, R.layout.item_dir_grid);
 
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
+        mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime_sm);
+        mIconCheck = (ImageView) itemView.findViewById(R.id.icon_check);
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        float checkAlpha = selected ? 1f : 0f;
+
+        mIconCheck.animate().alpha(checkAlpha).start();
+        mIconMime.animate().alpha(1f - checkAlpha).start();
     }
 
     /**

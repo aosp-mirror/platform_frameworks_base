@@ -47,8 +47,8 @@ final class GridDocumentHolder extends DocumentHolder {
     final ImageView mIconMimeLg;
     final ImageView mIconMimeSm;
     final ImageView mIconThumb;
+    final ImageView mIconCheck;
     final IconHelper mIconHelper;
-
 
     public GridDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
         super(context, parent, R.layout.item_doc_grid);
@@ -56,10 +56,21 @@ final class GridDocumentHolder extends DocumentHolder {
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
         mDate = (TextView) itemView.findViewById(R.id.date);
         mSize = (TextView) itemView.findViewById(R.id.size);
-        mIconMimeLg = (ImageView) itemView.findViewById(R.id.icon_mime);
+        mIconMimeLg = (ImageView) itemView.findViewById(R.id.icon_mime_lg);
+        mIconMimeSm = (ImageView) itemView.findViewById(R.id.icon_mime_sm);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
-        mIconMimeSm = (ImageView) itemView.findViewById(android.R.id.icon1);
+        mIconCheck = (ImageView) itemView.findViewById(R.id.icon_check);
+
         mIconHelper = iconHelper;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        float checkAlpha = selected ? 1f : 0f;
+
+        mIconCheck.animate().alpha(checkAlpha).start();
+        mIconMimeSm.animate().alpha(1f - checkAlpha).start();
     }
 
     /**

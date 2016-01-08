@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The Android Open Source Project
+<!--
+     Copyright (C) 2013 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -20,31 +21,49 @@
     android:layout_margin="@dimen/grid_item_margin"
     android:background="@color/item_doc_background"
     android:elevation="5dp"
-    android:focusable="true">
+    android:focusable="true" >
 
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:orientation="horizontal"
-      android:paddingTop="16dp"
-      android:paddingBottom="16dp"
-      android:paddingLeft="12dp"
-      android:paddingRight="12dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingBottom="16dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="16dp"
+        android:gravity="center_vertical">
 
-        <ImageView
-            android:src="@drawable/ic_doc_folder"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="8dp"
-            android:scaleType="centerInside"
-            android:contentDescription="@null"/>
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp" >
+
+            <ImageView
+                android:id="@+id/icon_mime_sm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_doc_folder" />
+
+            <ImageView
+                android:id="@+id/icon_check"
+                android:layout_width="@dimen/check_icon_size"
+                android:layout_height="@dimen/check_icon_size"
+                android:alpha="0"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_check_circle" />
+
+        </FrameLayout>
 
         <TextView
             android:id="@android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
             android:ellipsize="middle"
+            android:singleLine="true"
             android:textAlignment="viewStart"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
             android:textColor="@*android:color/primary_text_default_material_light" />
@@ -52,11 +71,12 @@
     </LinearLayout>
 
     <!-- An overlay that draws the item border when it is focused. -->
+
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="@null"
         android:background="@drawable/item_doc_grid_border"
+        android:contentDescription="@null"
         android:duplicateParentState="true" />
 
 </FrameLayout>

@@ -18,6 +18,10 @@
     <dimen name="icon_size">40dp</dimen>
     <dimen name="root_icon_size">24dp</dimen>
     <dimen name="root_icon_margin">0dp</dimen>
+    <dimen name="check_icon_size">30dp</dimen>
+
+    <dimen name="list_item_thumbnail_size">40dp</dimen>
+    <dimen name="grid_item_icon_size">30dp</dimen>
 
     <dimen name="grid_width">152dp</dimen>
     <dimen name="grid_height">176dp</dimen>

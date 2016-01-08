@@ -44,7 +44,7 @@ final class ListDocumentHolder extends DocumentHolder {
     final TextView mSize;
     final ImageView mIconMime;
     final ImageView mIconThumb;
-    final ImageView mIcon1;
+    final ImageView mIconCheck;
     final IconHelper mIconHelper;
 
     public ListDocumentHolder(Context context, ViewGroup parent, IconHelper iconHelper) {
@@ -56,9 +56,19 @@ final class ListDocumentHolder extends DocumentHolder {
         mSize = (TextView) itemView.findViewById(R.id.size);
         mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
-        mIcon1 = (ImageView) itemView.findViewById(android.R.id.icon1);
+        mIconCheck = (ImageView) itemView.findViewById(R.id.icon_check);
 
         mIconHelper = iconHelper;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        super.setSelected(selected);
+        float checkAlpha = selected ? 1f : 0f;
+
+        mIconCheck.animate().alpha(checkAlpha).start();
+        mIconMime.animate().alpha(1f - checkAlpha).start();
+        mIconThumb.animate().alpha(1f - checkAlpha).start();
     }
 
     /**
@@ -86,7 +96,9 @@ final class ListDocumentHolder extends DocumentHolder {
         mIconHelper.stopLoading(mIconThumb);
 
         mIconMime.animate().cancel();
+        mIconMime.setAlpha(1f);
         mIconThumb.animate().cancel();
+        mIconThumb.setAlpha(0f);
 
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
         mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime);
@@ -121,6 +133,5 @@ final class ListDocumentHolder extends DocumentHolder {
         final float iconAlpha = enabled ? 1f : 0.5f;
         mIconMime.setAlpha(iconAlpha);
         mIconThumb.setAlpha(iconAlpha);
-        mIcon1.setAlpha(iconAlpha);
     }
 }
