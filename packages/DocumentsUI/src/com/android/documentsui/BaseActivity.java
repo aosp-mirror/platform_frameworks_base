@@ -198,10 +198,7 @@ public abstract class BaseActivity extends Activity {
 
     void onRootPicked(RootInfo root) {
         // Clear entire backstack and start in new root
-        mState.stack.root = root;
-        mState.stack.clear();
-        mState.stackTouched = true;
-
+        mState.onRootChanged(root);
         mSearchManager.update(root);
 
         // Recents is always in memory, so we just load it directly.
@@ -211,24 +208,6 @@ public abstract class BaseActivity extends Activity {
             onCurrentDirectoryChanged(ANIM_SIDE);
         } else {
             new PickRootTask(root, true).executeOnExecutor(getExecutorForCurrentDirectory());
-        }
-    }
-
-    void setRoot(RootInfo root) {
-        // Clear entire backstack and start in new root
-        mState.stack.root = root;
-        mState.stack.clear();
-        mState.stackTouched = false;
-
-        mSearchManager.update(root);
-
-        // Recents is always in memory, so we just load it directly.
-        // Otherwise we delegate loading data from disk to a task
-        // to ensure a responsive ui.
-        if (mRoots.isRecentsRoot(root)) {
-            onCurrentDirectoryChanged(ANIM_SIDE);
-        } else {
-            new PickRootTask(root, false).executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -330,8 +309,7 @@ public abstract class BaseActivity extends Activity {
 
     void openContainerDocument(DocumentInfo doc) {
         checkArgument(doc.isContainer());
-        mState.stack.push(doc);
-        mState.stackTouched = true;
+        mState.pushDocument(doc);
         onCurrentDirectoryChanged(ANIM_DOWN);
     }
 
@@ -475,7 +453,7 @@ public abstract class BaseActivity extends Activity {
             return;
         }
 
-        if (!mState.stackTouched) {
+        if (!mState.hasLocationChanged()) {
             super.onBackPressed();
             return;
         }
@@ -496,13 +474,22 @@ public abstract class BaseActivity extends Activity {
         try {
             // Update the restored stack to ensure we have freshest data
             stack.updateDocuments(getContentResolver());
-
-            mState.stack = stack;
-            mState.stackTouched = true;
+            mState.setStack(stack);
             onCurrentDirectoryChanged(ANIM_SIDE);
 
         } catch (FileNotFoundException e) {
             Log.w(mTag, "Failed to restore stack: " + e);
+        }
+    }
+
+    private DocumentInfo getRootDocumentBlocking(RootInfo root) {
+        try {
+            final Uri uri = DocumentsContract.buildDocumentUri(
+                    root.authority, root.documentId);
+            return DocumentInfo.fromUri(getContentResolver(), uri);
+        } catch (FileNotFoundException e) {
+            Log.w(mTag, "Failed to find root", e);
+            return null;
         }
     }
 
@@ -517,22 +504,13 @@ public abstract class BaseActivity extends Activity {
 
         @Override
         protected DocumentInfo doInBackground(Void... params) {
-            try {
-                final Uri uri = DocumentsContract.buildDocumentUri(
-                        mRoot.authority, mRoot.documentId);
-                return DocumentInfo.fromUri(getContentResolver(), uri);
-            } catch (FileNotFoundException e) {
-                Log.w(mTag, "Failed to find root", e);
-                return null;
-            }
+            return getRootDocumentBlocking(mRoot);
         }
 
         @Override
         protected void onPostExecute(DocumentInfo result) {
             if (result != null) {
-                mState.stack.push(result);
-                mState.stackTouched = mTouched;
-                onCurrentDirectoryChanged(ANIM_SIDE);
+                openContainerDocument(result);
             }
         }
     }
@@ -619,9 +597,11 @@ public abstract class BaseActivity extends Activity {
     }
 
     final class HandleRootsChangedTask extends AsyncTask<RootInfo, Void, RootInfo> {
+        DocumentInfo mHome;
+
         @Override
         protected RootInfo doInBackground(RootInfo... roots) {
-            Preconditions.checkArgument(roots.length == 1);
+            checkArgument(roots.length == 1);
             final RootInfo currentRoot = roots[0];
             final Collection<RootInfo> cachedRoots = mRoots.getRootsBlocking();
             RootInfo homeRoot = null;
@@ -635,13 +615,17 @@ public abstract class BaseActivity extends Activity {
                 }
             }
             Preconditions.checkNotNull(homeRoot);
+            mHome = getRootDocumentBlocking(homeRoot);
             return homeRoot;
         }
 
         @Override
-        protected void onPostExecute(RootInfo result) {
-            if (result != null) {
-                setRoot(result);
+        protected void onPostExecute(RootInfo homeRoot) {
+            if (homeRoot != null && mHome != null) {
+                // Clear entire backstack and start in new root
+                mState.onRootChanged(homeRoot);
+                mSearchManager.update(homeRoot);
+                openContainerDocument(mHome);
             }
         }
     }
@@ -658,8 +642,7 @@ public abstract class BaseActivity extends Activity {
             }
 
             while (mState.stack.size() > position + 1) {
-                mState.stackTouched = true;
-                mState.stack.pop();
+                mState.popDocument();
             }
             onCurrentDirectoryChanged(ANIM_UP);
         }
