@@ -1,3 +1,7 @@
+#########################################################################
+# Build FrameworksServicesTests package
+#########################################################################
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -21,5 +25,36 @@ LOCAL_PACKAGE_NAME := FrameworksServicesTests
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_JNI_SHARED_LIBRARIES := libapfjni
+
 include $(BUILD_PACKAGE)
 
+#########################################################################
+# Build JNI Shared Library
+#########################################################################
+
+LOCAL_PATH:= $(LOCAL_PATH)/jni
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := tests
+
+LOCAL_CFLAGS := -Wall -Werror
+
+LOCAL_C_INCLUDES := \
+  libpcap \
+  hardware/google/apf
+
+LOCAL_SRC_FILES := apf_jni.cpp
+
+LOCAL_SHARED_LIBRARIES := \
+  libnativehelper \
+  liblog
+
+LOCAL_STATIC_LIBRARIES := \
+  libpcap \
+  libapf
+
+LOCAL_MODULE := libapfjni
+
+include $(BUILD_SHARED_LIBRARY)
