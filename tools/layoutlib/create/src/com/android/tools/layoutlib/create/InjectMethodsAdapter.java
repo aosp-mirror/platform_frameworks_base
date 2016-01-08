@@ -19,7 +19,6 @@ package com.android.tools.layoutlib.create;
 import com.android.tools.layoutlib.create.ICreateInfo.InjectMethodRunnable;
 
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Opcodes;
 
 /**
  * Injects methods into some classes.
@@ -29,7 +28,7 @@ public class InjectMethodsAdapter extends ClassVisitor {
     private final ICreateInfo.InjectMethodRunnable mRunnable;
 
     public InjectMethodsAdapter(ClassVisitor cv, InjectMethodRunnable runnable) {
-        super(Opcodes.ASM4, cv);
+        super(Main.ASM_VERSION, cv);
         mRunnable = runnable;
     }
 

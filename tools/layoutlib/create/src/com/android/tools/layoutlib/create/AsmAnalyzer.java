@@ -23,7 +23,6 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
 import org.objectweb.asm.signature.SignatureVisitor;
@@ -65,7 +64,7 @@ public class AsmAnalyzer {
     /** Glob patterns of files to keep as is. */
     private final String[] mIncludeFileGlobs;
     /** Internal names of classes that contain method calls that need to be rewritten. */
-    private final Set<String> mReplaceMethodCallClasses = new HashSet<String>();
+    private final Set<String> mReplaceMethodCallClasses = new HashSet<>();
 
     /**
      * Creates a new analyzer.
@@ -97,8 +96,8 @@ public class AsmAnalyzer {
      */
     public void analyze() throws IOException, LogAbortException {
 
-        TreeMap<String, ClassReader> zipClasses = new TreeMap<String, ClassReader>();
-        Map<String, InputStream> filesFound = new TreeMap<String, InputStream>();
+        TreeMap<String, ClassReader> zipClasses = new TreeMap<>();
+        Map<String, InputStream> filesFound = new TreeMap<>();
 
         parseZip(mOsSourceJar, zipClasses, filesFound);
         mLog.info("Found %d classes in input JAR%s.", zipClasses.size(),
@@ -189,7 +188,7 @@ public class AsmAnalyzer {
      */
     Map<String, ClassReader> findIncludes(Map<String, ClassReader> zipClasses)
             throws LogAbortException {
-        TreeMap<String, ClassReader> found = new TreeMap<String, ClassReader>();
+        TreeMap<String, ClassReader> found = new TreeMap<>();
 
         mLog.debug("Find classes to include.");
 
@@ -318,10 +317,10 @@ public class AsmAnalyzer {
     Map<String, ClassReader> findDeps(Map<String, ClassReader> zipClasses,
             Map<String, ClassReader> inOutKeepClasses) {
 
-        TreeMap<String, ClassReader> deps = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> new_deps = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> new_keep = new TreeMap<String, ClassReader>();
-        TreeMap<String, ClassReader> temp = new TreeMap<String, ClassReader>();
+        TreeMap<String, ClassReader> deps = new TreeMap<>();
+        TreeMap<String, ClassReader> new_deps = new TreeMap<>();
+        TreeMap<String, ClassReader> new_keep = new TreeMap<>();
+        TreeMap<String, ClassReader> temp = new TreeMap<>();
 
         DependencyVisitor visitor = getVisitor(zipClasses,
                 inOutKeepClasses, new_keep,
@@ -399,7 +398,7 @@ public class AsmAnalyzer {
                 Map<String, ClassReader> outKeep,
                 Map<String,ClassReader> inDeps,
                 Map<String,ClassReader> outDeps) {
-            super(Opcodes.ASM4);
+            super(Main.ASM_VERSION);
             mZipClasses = zipClasses;
             mInKeep = inKeep;
             mOutKeep = outKeep;
@@ -557,7 +556,7 @@ public class AsmAnalyzer {
         private class MyFieldVisitor extends FieldVisitor {
 
             public MyFieldVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             @Override
@@ -630,7 +629,7 @@ public class AsmAnalyzer {
             private String mOwnerClass;
 
             public MyMethodVisitor(String ownerClass) {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
                 mOwnerClass = ownerClass;
             }
 
@@ -719,7 +718,8 @@ public class AsmAnalyzer {
 
             // instruction that invokes a method
             @Override
-            public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+            public void visitMethodInsn(int opcode, String owner, String name, String desc,
+                    boolean itf) {
 
                 // owner is the internal name of the method's owner class
                 considerName(owner);
@@ -779,7 +779,7 @@ public class AsmAnalyzer {
         private class MySignatureVisitor extends SignatureVisitor {
 
             public MySignatureVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             // ---------------------------------------------------
@@ -878,7 +878,7 @@ public class AsmAnalyzer {
         private class MyAnnotationVisitor extends AnnotationVisitor {
 
             public MyAnnotationVisitor() {
-                super(Opcodes.ASM4);
+                super(Main.ASM_VERSION);
             }
 
             // Visits a primitive value of an annotation

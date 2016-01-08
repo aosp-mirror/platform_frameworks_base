@@ -36,41 +36,40 @@ public interface MethodListener {
      * @param isNative True if the method was a native method.
      * @param caller The calling object. Null for static methods, "this" for instance methods.
      */
-    public void onInvokeV(String signature, boolean isNative, Object caller);
+    void onInvokeV(String signature, boolean isNative, Object caller);
 
     /**
      * Same as {@link #onInvokeV(String, boolean, Object)} but returns an integer or similar.
      * @see #onInvokeV(String, boolean, Object)
      * @return an integer, or a boolean, or a short or a byte.
      */
-    public int onInvokeI(String signature, boolean isNative, Object caller);
+    int onInvokeI(String signature, boolean isNative, Object caller);
 
     /**
      * Same as {@link #onInvokeV(String, boolean, Object)} but returns a long.
      * @see #onInvokeV(String, boolean, Object)
      * @return a long.
      */
-    public long onInvokeL(String signature, boolean isNative, Object caller);
+    long onInvokeL(String signature, boolean isNative, Object caller);
 
     /**
      * Same as {@link #onInvokeV(String, boolean, Object)} but returns a float.
      * @see #onInvokeV(String, boolean, Object)
      * @return a float.
      */
-    public float onInvokeF(String signature, boolean isNative, Object caller);
+    float onInvokeF(String signature, boolean isNative, Object caller);
 
     /**
      * Same as {@link #onInvokeV(String, boolean, Object)} but returns a double.
      * @see #onInvokeV(String, boolean, Object)
      * @return a double.
      */
-    public double onInvokeD(String signature, boolean isNative, Object caller);
+    double onInvokeD(String signature, boolean isNative, Object caller);
 
     /**
      * Same as {@link #onInvokeV(String, boolean, Object)} but returns an object.
      * @see #onInvokeV(String, boolean, Object)
      * @return an object.
      */
-    public Object onInvokeA(String signature, boolean isNative, Object caller);
+    Object onInvokeA(String signature, boolean isNative, Object caller);
 }
-    

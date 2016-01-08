@@ -91,7 +91,7 @@ public class AsmGenerator {
         mLog = log;
         mOsDestJar = osDestJar;
         ArrayList<Class<?>> injectedClasses =
-                new ArrayList<Class<?>>(Arrays.asList(createInfo.getInjectedClasses()));
+                new ArrayList<>(Arrays.asList(createInfo.getInjectedClasses()));
         // Search for and add anonymous inner classes also.
         ListIterator<Class<?>> iter = injectedClasses.listIterator();
         while (iter.hasNext()) {
@@ -107,25 +107,25 @@ public class AsmGenerator {
             }
         }
         mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
-        mStubMethods = new HashSet<String>(Arrays.asList(createInfo.getOverriddenMethods()));
+        mStubMethods = new HashSet<>(Arrays.asList(createInfo.getOverriddenMethods()));
 
         // Create the map/set of methods to change to delegates
-        mDelegateMethods = new HashMap<String, Set<String>>();
+        mDelegateMethods = new HashMap<>();
         addToMap(createInfo.getDelegateMethods(), mDelegateMethods);
 
         for (String className : createInfo.getDelegateClassNatives()) {
             className = binaryToInternalClassName(className);
             Set<String> methods = mDelegateMethods.get(className);
             if (methods == null) {
-                methods = new HashSet<String>();
+                methods = new HashSet<>();
                 mDelegateMethods.put(className, methods);
             }
             methods.add(DelegateClassAdapter.ALL_NATIVES);
         }
 
         // Create the map of classes to rename.
-        mRenameClasses = new HashMap<String, String>();
-        mClassesNotRenamed = new HashSet<String>();
+        mRenameClasses = new HashMap<>();
+        mClassesNotRenamed = new HashSet<>();
         String[] renameClasses = createInfo.getRenamedClasses();
         int n = renameClasses.length;
         for (int i = 0; i < n; i += 2) {
@@ -138,7 +138,7 @@ public class AsmGenerator {
         }
 
         // Create a map of classes to be refactored.
-        mRefactorClasses = new HashMap<String, String>();
+        mRefactorClasses = new HashMap<>();
         String[] refactorClasses = createInfo.getJavaPkgClasses();
         n = refactorClasses.length;
         for (int i = 0; i < n; i += 2) {
@@ -149,7 +149,7 @@ public class AsmGenerator {
         }
 
         // create the map of renamed class -> return type of method to delete.
-        mDeleteReturns = new HashMap<String, Set<String>>();
+        mDeleteReturns = new HashMap<>();
         String[] deleteReturns = createInfo.getDeleteReturns();
         Set<String> returnTypes = null;
         String renamedClass = null;
@@ -172,12 +172,12 @@ public class AsmGenerator {
 
             // just a standard return type, we add it to the list.
             if (returnTypes == null) {
-                returnTypes = new HashSet<String>();
+                returnTypes = new HashSet<>();
             }
             returnTypes.add(binaryToInternalClassName(className));
         }
 
-        mPromotedFields = new HashMap<String, Set<String>>();
+        mPromotedFields = new HashMap<>();
         addToMap(createInfo.getPromotedFields(), mPromotedFields);
 
         mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
@@ -197,7 +197,7 @@ public class AsmGenerator {
             String methodOrFieldName = entry.substring(pos + 1);
             Set<String> set = map.get(className);
             if (set == null) {
-                set = new HashSet<String>();
+                set = new HashSet<>();
                 map.put(className, set);
             }
             set.add(methodOrFieldName);
@@ -247,7 +247,7 @@ public class AsmGenerator {
 
     /** Generates the final JAR */
     public void generate() throws IOException {
-        TreeMap<String, byte[]> all = new TreeMap<String, byte[]>();
+        TreeMap<String, byte[]> all = new TreeMap<>();
 
         for (Class<?> clazz : mInjectClasses) {
             String name = classToEntryPath(clazz);
@@ -314,7 +314,7 @@ public class AsmGenerator {
      * e.g. for the input "android.view.View" it returns "android/view/View.class"
      */
     String classNameToEntryPath(String className) {
-        return className.replaceAll("\\.", "/").concat(".class");
+        return className.replace('.', '/').concat(".class");
     }
 
     /**

@@ -31,7 +31,7 @@ import org.objectweb.asm.Opcodes;
  */
 public class ClassHasNativeVisitor extends ClassVisitor {
     public ClassHasNativeVisitor() {
-        super(Opcodes.ASM4);
+        super(Main.ASM_VERSION);
     }
 
     private boolean mHasNativeMethods = false;

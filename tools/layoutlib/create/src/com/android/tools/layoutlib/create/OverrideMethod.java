@@ -28,7 +28,7 @@ import java.util.HashMap;
 public final class OverrideMethod {
 
     /** Map of method overridden. */
-    private static HashMap<String, MethodListener> sMethods = new HashMap<String, MethodListener>();
+    private static HashMap<String, MethodListener> sMethods = new HashMap<>();
     /** Default listener for all method not listed in sMethods. Nothing if null. */
     private static MethodListener sDefaultListener = null;
     
