@@ -57,4 +57,10 @@ public class CarStatusBar extends PhoneStatusBar {
         carNavBar.setActivityStarter(this);
         mNavigationBarView = carNavBar;
     }
+
+    @Override
+    protected void repositionNavigationBar() {
+        // The navigation bar for a vehicle will not need to be repositioned, as it is always
+        // set at the bottom.
+    }
 }

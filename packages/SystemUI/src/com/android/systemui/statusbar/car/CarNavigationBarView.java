@@ -149,4 +149,11 @@ class CarNavigationBarView extends NavigationBarView {
     public View getCurrentView() {
         return this;
     }
+
+    @Override
+    public void setNavigationIconHints(int hints, boolean force) {
+        // We do not need to set the navigation icon hints for a vehicle
+        // Calling setNavigationIconHints in the base class will result in a NPE as the car
+        // navigation bar does not have a back button.
+    }
 }

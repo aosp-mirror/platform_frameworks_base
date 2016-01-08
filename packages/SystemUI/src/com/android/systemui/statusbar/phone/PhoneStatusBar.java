@@ -1202,7 +1202,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mWindowManager.addView(mNavigationBarView, getNavigationBarLayoutParams());
     }
 
-    private void repositionNavigationBar() {
+    protected void repositionNavigationBar() {
         if (mNavigationBarView == null || !mNavigationBarView.isAttachedToWindow()) return;
 
         prepareNavigationBarView();
