@@ -2752,11 +2752,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(stackId);
             return true;
         }
-        case MOVE_ACTIVITY_TO_STACK_TRANSACTION: {
+        case EXIT_FREEFORM_MODE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            int stackId = data.readInt();
-            moveActivityToStack(token, stackId);
+            exitFreeformMode(token);
             reply.writeNoException();
             return true;
         }
@@ -6457,13 +6456,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void moveActivityToStack(IBinder token, int stackId) throws RemoteException {
+    public void exitFreeformMode(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(stackId);
-        mRemote.transact(MOVE_ACTIVITY_TO_STACK_TRANSACTION, data, reply, 0);
+        mRemote.transact(EXIT_FREEFORM_MODE_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

@@ -571,14 +571,11 @@ public abstract class Window {
     /** @hide */
     public interface WindowControllerCallback {
         /**
-         * Called to move the window and its activity/task to a different stack container.
-         * For example, a window can move between
-         * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack and
-         * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} stack.
-         *
-         * @param stackId stack Id to change to.
+         * Moves the activity from
+         * {@link android.app.ActivityManager.StackId#FREEFORM_WORKSPACE_STACK_ID} to
+         * {@link android.app.ActivityManager.StackId#FULLSCREEN_WORKSPACE_STACK_ID} stack.
          */
-        void changeWindowStack(int stackId) throws RemoteException;
+        void exitFreeformMode() throws RemoteException;
 
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
