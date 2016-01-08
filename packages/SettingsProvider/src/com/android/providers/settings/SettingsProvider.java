@@ -1010,7 +1010,7 @@ public class SettingsProvider extends ContentProvider {
                 break;
 
             default:
-                if (setting.startsWith(Settings.Global.DATA_ROAMING)) {
+                if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) return false;
                     restriction = UserManager.DISALLOW_DATA_ROAMING;
                     break;
