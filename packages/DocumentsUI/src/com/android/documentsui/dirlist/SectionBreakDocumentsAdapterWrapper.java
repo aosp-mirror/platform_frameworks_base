@@ -76,6 +76,8 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
     public void onBindViewHolder(DocumentHolder holder, int p, List<Object> payload) {
         if (holder.getItemViewType() != ITEM_TYPE_SECTION_BREAK) {
             mDelegate.onBindViewHolder(holder, toDelegatePosition(p), payload);
+        } else {
+            ((EmptyDocumentHolder)holder).bind(mEnv.getDisplayState());
         }
     }
 
@@ -83,6 +85,8 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
     public void onBindViewHolder(DocumentHolder holder, int p) {
         if (holder.getItemViewType() != ITEM_TYPE_SECTION_BREAK) {
             mDelegate.onBindViewHolder(holder, toDelegatePosition(p));
+        } else {
+            ((EmptyDocumentHolder)holder).bind(mEnv.getDisplayState());
         }
     }
 
