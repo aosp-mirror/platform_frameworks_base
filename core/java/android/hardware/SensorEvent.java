@@ -483,6 +483,20 @@ public class SensorEvent {
      * on it. In earlier versions, this used to be always 3 which has changed now. </p>
      *
      * @see GeomagneticField
+     *
+     * <h4> {@link android.hardware.Sensor#TYPE_DEVICE_ORIENTATION
+     * Sensor.TYPE_DEVICE_ORIENTATION}:</h4>
+     * The current device orientation will be available in values[0]. The only
+     * available values are:
+     * <ul>
+     * <li> 0: device is in default orientation (Y axis is vertical and points up)
+     * <li> 1: device is rotated 90 degrees counter-clockwise from default
+     *         orientation (X axis is vertical and points up)
+     * <li> 2: device is rotated 180 degrees from default orientation (Y axis is
+     *         vertical and points down)
+     * <li> 3: device is rotated 90 degrees clockwise from default orientation (X axis
+     *         is vertical and points down)
+     * </ul>
      */
     public final float[] values;
 

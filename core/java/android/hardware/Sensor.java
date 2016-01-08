@@ -534,6 +534,24 @@ public final class Sensor {
     public static final String STRING_TYPE_WRIST_TILT_GESTURE = "android.sensor.wrist_tilt_gesture";
 
     /**
+     * The current orientation of the device.
+     * <p>
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     * @hide Expected to be used internally for auto-rotate and speaker rotation.
+     *
+     */
+    public static final int TYPE_DEVICE_ORIENTATION = 27;
+
+    /**
+     * A constant string describing a device orientation sensor type.
+     *
+     * @hide
+     * @see #TYPE_DEVICE_ORIENTATION
+     */
+    public static final String STRING_TYPE_DEVICE_ORIENTATION = "android.sensor.device_orientation";
+
+    /**
      * A constant describing all sensor types.
      */
     public static final int TYPE_ALL = -1;
@@ -618,6 +636,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_GLANCE_GESTURE
             1, // SENSOR_TYPE_PICK_UP_GESTURE
             1, // SENSOR_TYPE_WRIST_TILT_GESTURE
+            1, // SENSOR_TYPE_DEVICE_ORIENTATION
     };
 
     /**
@@ -938,6 +957,9 @@ public final class Sensor {
                 return true;
             case TYPE_TEMPERATURE:
                 mStringType = STRING_TYPE_TEMPERATURE;
+                return true;
+            case TYPE_DEVICE_ORIENTATION:
+                mStringType = STRING_TYPE_DEVICE_ORIENTATION;
                 return true;
             default:
                 return false;
