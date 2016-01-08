@@ -1140,6 +1140,9 @@ bool android_media_getIntConstantFromClass(JNIEnv* pEnv, jclass theClass, const 
 // ----------------------------------------------------------------------------
 int register_android_media_AudioTrack(JNIEnv *env)
 {
+    // must be first
+    int res = RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
+
     javaAudioTrackFields.nativeTrackInJavaObj = NULL;
     javaAudioTrackFields.postNativeEventInJava = NULL;
 
@@ -1178,7 +1181,7 @@ int register_android_media_AudioTrack(JNIEnv *env)
     // initialize PlaybackParams field info
     gPlaybackParamsFields.init(env);
 
-    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
+    return res;
 }
 
 
