@@ -858,7 +858,7 @@ public class UsbDeviceManager {
                             .setOngoing(true)
                             .setTicker(title)
                             .setDefaults(0)  // please be quiet
-                            .setPriority(Notification.PRIORITY_LOW)
+                            .setPriority(Notification.PRIORITY_DEFAULT)
                             .setColor(mContext.getColor(
                                     com.android.internal.R.color.system_notification_accent_color))
                             .setContentTitle(title)
