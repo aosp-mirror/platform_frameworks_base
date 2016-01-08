@@ -4967,7 +4967,7 @@ public abstract class PackageManager {
     public abstract void removePackageFromPreferred(String packageName);
 
     /**
-     * @deprecated Retrieve the list of all currently configured preferred packages.  The
+     * Retrieve the list of all currently configured preferred packages.  The
      * first package on the list is the most preferred, the last is the
      * least preferred.
      *
