@@ -2363,7 +2363,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     SystemClock.uptimeMillis());
 
             if (!mOnlyCore) {
-                mRequiredVerifierPackage = getRequiredVerifierLPr();
+                mRequiredVerifierPackage = getRequiredButNotReallyRequiredVerifierLPr();
                 mRequiredInstallerPackage = getRequiredInstallerLPr();
                 mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
                 mIntentFilterVerifier = new IntentVerifierProxy(mContext,
@@ -2438,7 +2438,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         return mIsUpgrade;
     }
 
-    private @NonNull String getRequiredVerifierLPr() {
+    private @Nullable String getRequiredButNotReallyRequiredVerifierLPr() {
         final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
 
         final List<ResolveInfo> matches = queryIntentReceivers(intent, PACKAGE_MIME_TYPE,
@@ -2446,7 +2446,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (matches.size() == 1) {
             return matches.get(0).getComponentInfo().packageName;
         } else {
-            throw new RuntimeException("There must be exactly one verifier; found " + matches);
+            Log.e(TAG, "There should probably be exactly one verifier; found " + matches);
+            return null;
         }
     }
 
