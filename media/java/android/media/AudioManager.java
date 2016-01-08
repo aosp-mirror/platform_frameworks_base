@@ -176,6 +176,16 @@ public class AudioManager {
         "android.media.MASTER_MUTE_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when the master mono state changes.
+     * Includes the new mono state
+     *
+     * @see #EXTRA_MASTER_MONO
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String MASTER_MONO_CHANGED_ACTION =
+        "android.media.MASTER_MONO_CHANGED_ACTION";
+
+    /**
      * The new vibrate setting for a particular type.
      *
      * @see #VIBRATE_SETTING_CHANGED_ACTION
@@ -252,6 +262,13 @@ public class AudioManager {
      */
     public static final String EXTRA_STREAM_VOLUME_MUTED =
         "android.media.EXTRA_STREAM_VOLUME_MUTED";
+
+    /**
+     * @hide The new master mono state for the master mono changed intent.
+     * Value is boolean
+     */
+    public static final String EXTRA_MASTER_MONO =
+        "android.media.EXTRA_MASTER_MONO";
 
     /**
      * Broadcast Action: Wired Headset plugged in or unplugged.
@@ -880,6 +897,17 @@ public class AudioManager {
         }
     }
 
+    /** @hide */
+    public void setMasterMono(boolean mono) {
+        IAudioService service = getService();
+        try {
+            service.setMasterMono(mono, getContext().getOpPackageName(),
+                    UserHandle.getCallingUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setMasterMono", e);
+        }
+    }
+
     /**
      * Returns the current ringtone mode.
      *
@@ -1137,6 +1165,21 @@ public class AudioManager {
             return service.isMasterMute();
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in isMasterMute", e);
+            return false;
+        }
+    }
+
+    /**
+     * get master mono state.
+     *
+     * @hide
+     */
+    public boolean isMasterMono() {
+        IAudioService service = getService();
+        try {
+            return service.isMasterMono();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isMasterMono", e);
             return false;
         }
     }

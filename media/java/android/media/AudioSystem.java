@@ -624,6 +624,11 @@ public class AudioSystem
     public static native boolean getMasterMute();
     public static native int getDevicesForStream(int stream);
 
+    /** @hide returns true if master mono is enabled. */
+    public static native boolean getMasterMono();
+    /** @hide enables or disables the master mono mode. */
+    public static native int setMasterMono(boolean mono);
+
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
     public static native int getPrimaryOutputSamplingRate();
     public static native int getPrimaryOutputFrameCount();
