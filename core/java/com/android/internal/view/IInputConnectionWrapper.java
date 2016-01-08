@@ -30,7 +30,7 @@ import android.view.inputmethod.InputConnection;
 
 import java.lang.ref.WeakReference;
 
-public class IInputConnectionWrapper extends IInputContext.Stub {
+public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     static final String TAG = "IInputConnectionWrapper";
 
     private static final int DO_GET_TEXT_AFTER_CURSOR = 10;
@@ -80,15 +80,25 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
     }
     
     public IInputConnectionWrapper(Looper mainLooper, InputConnection conn) {
-        mInputConnection = new WeakReference<InputConnection>(conn);
+        mInputConnection = new WeakReference<>(conn);
         mMainLooper = mainLooper;
         mH = new MyHandler(mMainLooper);
     }
 
-    public boolean isActive() {
-        return true;
-    }
-    
+    abstract protected boolean isActive();
+
+    /**
+     * Called when the user took some actions that should be taken into consideration to update the
+     * LRU list for input method rotation.
+     */
+    abstract protected void onUserAction();
+
+    /**
+     * Called when the input method started or stopped full-screen mode.
+     *
+     */
+    abstract protected void onReportFullscreenMode(boolean enabled);
+
     public void getTextAfterCursor(int length, int flags, int seq, IInputContextCallback callback) {
         dispatchMessage(obtainMessageIISC(DO_GET_TEXT_AFTER_CURSOR, length, flags, seq, callback));
     }
@@ -284,6 +294,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.commitText((CharSequence)msg.obj, msg.arg1);
+                onUserAction();
                 return;
             }
             case DO_SET_SELECTION: {
@@ -338,6 +349,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.setComposingText((CharSequence)msg.obj, msg.arg1);
+                onUserAction();
                 return;
             }
             case DO_SET_COMPOSING_REGION: {
@@ -369,6 +381,7 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     return;
                 }
                 ic.sendKeyEvent((KeyEvent)msg.obj);
+                onUserAction();
                 return;
             }
             case DO_CLEAR_META_KEY_STATES: {
@@ -413,7 +426,9 @@ public class IInputConnectionWrapper extends IInputContext.Stub {
                     Log.w(TAG, "reportFullscreenMode on inexistent InputConnection");
                     return;
                 }
-                ic.reportFullscreenMode(msg.arg1 == 1);
+                final boolean enabled = msg.arg1 == 1;
+                ic.reportFullscreenMode(enabled);
+                onReportFullscreenMode(enabled);
                 return;
             }
             case DO_PERFORM_PRIVATE_COMMAND: {

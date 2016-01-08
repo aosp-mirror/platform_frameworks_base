@@ -527,7 +527,7 @@ public final class InputMethodManager {
             }
         }
     }
-    
+
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
         private boolean mActive;
@@ -549,13 +549,23 @@ public final class InputMethodManager {
         }
 
         @Override
+        protected void onUserAction() {
+            mParentInputMethodManager.notifyUserAction();
+        }
+
+        @Override
+        protected void onReportFullscreenMode(boolean enabled) {
+            mParentInputMethodManager.setFullscreenMode(enabled);
+        }
+
+        @Override
         public String toString() {
             return "ControlledInputConnectionWrapper{mActive=" + mActive
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + "}";
         }
     }
-    
+
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
