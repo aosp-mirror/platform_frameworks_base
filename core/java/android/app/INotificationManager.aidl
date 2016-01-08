@@ -68,6 +68,9 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
+    void requestBindListener(in ComponentName component);
+    void requestUnbindListener(in INotificationListener token);
+
     void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
