@@ -495,9 +495,6 @@ public class TaskStack {
         // Sort all the tasks to ensure they are ordered correctly
         Collections.sort(newTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
 
-        // TODO: Update screen pinning for the new front-most task post refactoring lockToTask out
-        // of the Task
-
         // Filter out the historical tasks from this new list
         ArrayList<Task> stackTasks = new ArrayList<>();
         ArrayList<Task> historyTasks = new ArrayList<>();

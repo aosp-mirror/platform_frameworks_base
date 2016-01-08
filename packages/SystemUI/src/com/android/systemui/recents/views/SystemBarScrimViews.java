@@ -22,9 +22,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import com.android.systemui.R;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.RecentsActivityLaunchState;
-import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 
@@ -64,8 +61,6 @@ public class SystemBarScrimViews {
      */
     public void prepareEnterRecentsAnimation(boolean hasStatusBarScrim, boolean animateStatusBarScrim,
             boolean hasNavBarScrim, boolean animateNavBarScrim) {
-        RecentsConfiguration config = Recents.getConfiguration();
-        RecentsActivityLaunchState launchState = config.getLaunchState();
         mHasNavBarScrim = hasStatusBarScrim;
         mShouldAnimateStatusBarScrim = animateStatusBarScrim;
         mHasStatusBarScrim = hasNavBarScrim;

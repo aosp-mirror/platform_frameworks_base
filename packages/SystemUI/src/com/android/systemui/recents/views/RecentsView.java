@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -34,8 +33,8 @@ import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import com.android.internal.logging.MetricsLogger;
 import android.widget.TextView;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -45,7 +44,6 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
-import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
@@ -61,13 +59,13 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
@@ -215,7 +213,6 @@ public class RecentsView extends FrameLayout {
     /** Launches the focused task from the first stack if possible */
     public boolean launchFocusedTask() {
         if (mTaskStackView != null) {
-            TaskStack stack = mTaskStackView.getStack();
             Task task = mTaskStackView.getFocusedTask();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
@@ -245,7 +242,6 @@ public class RecentsView extends FrameLayout {
     /** Launches a given task. */
     public boolean launchTask(Task task, Rect taskBounds, int destinationStack) {
         if (mTaskStackView != null) {
-            TaskStack stack = mTaskStackView.getStack();
             // Iterate the stack views and try and find the given task.
             List<TaskView> taskViews = mTaskStackView.getTaskViews();
             int taskViewCount = taskViews.size();
@@ -645,9 +641,7 @@ public class RecentsView extends FrameLayout {
     private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates, int overrideAlpha) {
         ArraySet<TaskStack.DockState> newDockStatesSet = new ArraySet<>();
         if (newDockStates != null) {
-            for (TaskStack.DockState dockState : newDockStates) {
-                newDockStatesSet.add(dockState);
-            }
+            Collections.addAll(newDockStatesSet, newDockStates);
         }
         for (TaskStack.DockState dockState : mVisibleDockStates) {
             TaskStack.DockState.ViewState viewState = dockState.viewState;

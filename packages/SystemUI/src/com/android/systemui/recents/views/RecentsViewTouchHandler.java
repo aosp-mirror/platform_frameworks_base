@@ -145,7 +145,6 @@ public class RecentsViewTouchHandler {
 
     /**
      * Handles dragging touch events
-     * @param ev
      */
     private void handleTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
