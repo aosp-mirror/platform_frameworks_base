@@ -1308,7 +1308,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mMemWatchDumpUid;
     String mTrackAllocationApp = null;
 
-    final long[] mTmpLong = new long[1];
+    final long[] mTmpLong = new long[2];
 
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
@@ -2241,7 +2241,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 int num = 0;
-                long[] tmp = new long[1];
+                long[] tmp = new long[2];
                 do {
                     ProcessRecord proc;
                     int procState;
@@ -2273,7 +2273,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (pss != 0 && proc.thread != null && proc.setProcState == procState
                                     && proc.pid == pid && proc.lastPssTime == lastPssTime) {
                                 num++;
-                                recordPssSampleLocked(proc, procState, pss, tmp[0],
+                                recordPssSampleLocked(proc, procState, pss, tmp[0], tmp[1],
                                         SystemClock.uptimeMillis());
                             }
                         }
@@ -12259,6 +12259,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             sb.append(proc.processName);
                             sb.append(" in idle maint: pss=");
                             sb.append(proc.lastPss);
+                            sb.append(", swapPss=");
+                            sb.append(proc.lastSwapPss);
                             sb.append(", initialPss=");
                             sb.append(proc.initialIdlePss);
                             sb.append(", period=");
@@ -15166,6 +15168,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print("state: cur="); pw.print(ProcessList.makeProcStateString(r.curProcState));
                 pw.print(" set="); pw.print(ProcessList.makeProcStateString(r.setProcState));
                 pw.print(" lastPss="); DebugUtils.printSizeValue(pw, r.lastPss*1024);
+                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, r.lastSwapPss*1024);
                 pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, r.lastCachedPss*1024);
                 pw.println();
                 pw.print(prefix);
@@ -19148,8 +19151,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Record new PSS sample for a process.
      */
-    void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long now) {
-        EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024);
+    void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long swapPss,
+            long now) {
+        EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024,
+                swapPss * 1024);
         proc.lastPssTime = now;
         proc.baseProcessTracker.addPss(pss, uss, true, proc.pkgList);
         if (DEBUG_PSS) Slog.d(TAG_PSS,
@@ -19159,8 +19164,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             proc.initialIdlePss = pss;
         }
         proc.lastPss = pss;
+        proc.lastSwapPss = swapPss;
         if (procState >= ActivityManager.PROCESS_STATE_HOME) {
             proc.lastCachedPss = pss;
+            proc.lastCachedSwapPss = swapPss;
         }
 
         final SparseArray<Pair<Long, String>> watchUids
@@ -19596,7 +19603,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // states, which well tend to give noisy data.
                 long start = SystemClock.uptimeMillis();
                 long pss = Debug.getPss(app.pid, mTmpLong, null);
-                recordPssSampleLocked(app, app.curProcState, pss, mTmpLong[0], now);
+                recordPssSampleLocked(app, app.curProcState, pss, mTmpLong[0], mTmpLong[1], now);
                 mPendingPssProcesses.remove(app);
                 Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
                         + " to " + app.curProcState + ": "
