@@ -92,8 +92,6 @@ public final class MediaFormat {
     public static final String MIMETYPE_VIDEO_H263 = "video/3gpp";
     public static final String MIMETYPE_VIDEO_MPEG2 = "video/mpeg2";
     public static final String MIMETYPE_VIDEO_RAW = "video/raw";
-    public static final String MIMETYPE_VIDEO_DOLBY_AVC = "video/dolby-avc";
-    public static final String MIMETYPE_VIDEO_DOLBY_HEVC = "video/dolby-hevc";
 
     public static final String MIMETYPE_AUDIO_AMR_NB = "audio/3gpp";
     public static final String MIMETYPE_AUDIO_AMR_WB = "audio/amr-wb";

@@ -1735,8 +1735,7 @@ public final class MediaCodecInfo {
             CodecProfileLevel[] profileLevels = mParent.profileLevels;
             String mime = mParent.getMimeType();
 
-            if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AVC) ||
-                    mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_DOLBY_AVC)) {
+            if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AVC)) {
                 maxBlocks = 99;
                 maxBlocksPerSecond = 1485;
                 maxBps = 64000;
@@ -2090,8 +2089,7 @@ public final class MediaCodecInfo {
                 applyMacroBlockLimits(Short.MAX_VALUE, Short.MAX_VALUE,
                         maxBlocks, maxBlocksPerSecond, blockSize, blockSize,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
-            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC) ||
-                    mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_DOLBY_HEVC)) {
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
                 maxBlocks = 36864;
                 maxBlocksPerSecond = maxBlocks * 15;
                 maxBps = 128000;
