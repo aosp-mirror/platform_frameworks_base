@@ -27,8 +27,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
-import android.annotation.UserIdInt;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
@@ -50,6 +50,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 import android.util.AndroidException;
+import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -65,6 +66,7 @@ import java.util.List;
  * You can find this class through {@link Context#getPackageManager}.
  */
 public abstract class PackageManager {
+    private static final String TAG = "PackageManager";
 
     /**
      * This exception is thrown when a given package, application, or component
@@ -3329,6 +3331,14 @@ public abstract class PackageManager {
     public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
 
+    /** {@hide} */
+    @Deprecated
+    public List<ResolveInfo> queryBroadcastReceivers(Intent intent,
+            @ResolveInfoFlags int flags, @UserIdInt int userId) {
+        Log.w(TAG, "STAHP USING HIDDEN APIS KTHX");
+        return queryBroadcastReceiversAsUser(intent, flags, userId);
+    }
+
     /**
      * Determine the best service to handle for a given Intent.
      *
@@ -3958,7 +3968,6 @@ public abstract class PackageManager {
      *             but the older observer interface will not get additional
      *             failure details.
      */
-    // @SystemApi
     public abstract void installPackage(
             Uri packageURI, IPackageInstallObserver observer, int flags,
             String installerPackageName);
@@ -3994,7 +4003,6 @@ public abstract class PackageManager {
      *             continue to be supported but the older observer interface
      *             will not get additional failure details.
      */
-    // @SystemApi
     public abstract void installPackageWithVerification(Uri packageURI,
             IPackageInstallObserver observer, int flags, String installerPackageName,
             Uri verificationURI,
@@ -4148,7 +4156,6 @@ public abstract class PackageManager {
      * on the system for other users, also install it for the calling user.
      * @hide
      */
-    // @SystemApi
     public abstract int installExistingPackage(String packageName) throws NameNotFoundException;
 
     /**
