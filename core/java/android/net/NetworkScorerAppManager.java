@@ -93,7 +93,7 @@ public final class NetworkScorerAppManager {
     public static Collection<NetworkScorerAppData> getAllValidScorers(Context context) {
         // Network scorer apps can only run as the primary user so exit early if we're not the
         // primary user.
-        if (UserHandle.getCallingUserId() != 0 /*USER_SYSTEM*/) {
+        if (UserHandle.getCallingUserId() != UserHandle.USER_SYSTEM) {
             return Collections.emptyList();
         }
 
