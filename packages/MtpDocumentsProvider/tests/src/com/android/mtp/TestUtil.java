@@ -16,27 +16,18 @@
 
 package com.android.mtp;
 
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
 import junit.framework.Assert;
 
 /**
  * Static utility methods for testing.
  */
 final class TestUtil {
-    private static final String ACTION_USB_PERMISSION =
-            "com.android.mtp.USB_PERMISSION";
-
     private TestUtil() {}
 
     /**
@@ -48,8 +39,7 @@ final class TestUtil {
             UsbManager usbManager,
             MtpManager manager) throws InterruptedException, IOException {
         for (int i = 0; i < 2; i++) {
-            final UsbDevice device = findMtpDevice(instrumentation, usbManager);
-            manager.openDevice(device.getDeviceId());
+            final UsbDevice device = findMtpDevice(instrumentation, usbManager, manager);
             try {
                 waitForStorages(instrumentation, manager, device.getDeviceId());
                 return device;
@@ -65,7 +55,8 @@ final class TestUtil {
 
     private static UsbDevice findMtpDevice(
             TestResultInstrumentation instrumentation,
-            UsbManager usbManager) throws InterruptedException {
+            UsbManager usbManager,
+            MtpManager manager) throws InterruptedException {
         while (true) {
             final HashMap<String,UsbDevice> devices = usbManager.getDeviceList();
             if (devices.size() == 0) {
@@ -74,47 +65,30 @@ final class TestUtil {
                 continue;
             }
             final UsbDevice device = devices.values().iterator().next();
-            requestPermission(instrumentation, usbManager, device);
-            final UsbDeviceConnection connection = usbManager.openDevice(device);
-            if (connection == null) {
-                Assert.fail("Cannot open USB connection.");
-                return null;
+            try {
+                manager.openDevice(device.getDeviceId());
+            } catch (IOException e) {
+                // Maybe other application is using the device.
+                // Force to obtain ownership of the device so that we can use the device next call
+                // of findMtpDevice.
+                instrumentation.show("Tries to get ownership of MTP device.");
+                final UsbDeviceConnection connection = usbManager.openDevice(device);
+                if (connection == null) {
+                    Assert.fail("Cannot open USB connection.");
+                    return null;
+                }
+                for (int i = 0; i < device.getInterfaceCount(); i++) {
+                    // Since the test runs real environment, we need to call claim interface with
+                    // force = true to rob interfaces from other applications.
+                    connection.claimInterface(device.getInterface(i), true);
+                    connection.releaseInterface(device.getInterface(i));
+                }
+                connection.close();
+                Thread.sleep(1000);
+                continue;
             }
-            for (int i = 0; i < device.getInterfaceCount(); i++) {
-                // Since the test runs real environment, we need to call claim interface with
-                // force = true to rob interfaces from other applications.
-                connection.claimInterface(device.getInterface(i), true);
-                connection.releaseInterface(device.getInterface(i));
-            }
-            connection.close();
             return device;
         }
-    }
-
-    private static void requestPermission(
-            final TestResultInstrumentation instrumentation,
-            UsbManager usbManager,
-            UsbDevice device) throws InterruptedException {
-        if (usbManager.hasPermission(device)) {
-            return;
-        }
-        final CountDownLatch latch = new CountDownLatch(1);
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                latch.countDown();
-                instrumentation.getTargetContext().unregisterReceiver(this);
-            }
-        };
-        instrumentation.getTargetContext().registerReceiver(
-                receiver, new IntentFilter(ACTION_USB_PERMISSION));
-        usbManager.requestPermission(device, PendingIntent.getBroadcast(
-                instrumentation.getTargetContext(),
-                0 /* requstCode */,
-                new Intent(ACTION_USB_PERMISSION),
-                0 /* flags */));
-        latch.await();
-        Assert.assertTrue(usbManager.hasPermission(device));
     }
 
     private static void waitForStorages(
