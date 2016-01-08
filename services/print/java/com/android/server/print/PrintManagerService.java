@@ -531,12 +531,14 @@ public final class PrintManagerService extends SystemService {
 
                 @Override
                 public void onPackageModified(String packageName) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     updateServices(packageName);
                     getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
                 }
 
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
+                    if (!mUserManager.isUserUnlocked(getChangingUserId())) return;
                     updateServices(packageName);
                     getOrCreateUserStateLocked(getChangingUserId()).prunePrintServices();
                 }
