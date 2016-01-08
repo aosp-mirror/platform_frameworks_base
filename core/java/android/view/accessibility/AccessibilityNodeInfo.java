@@ -647,6 +647,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
     private final Rect mBoundsInScreen = new Rect();
+    private int mDrawingOrderInParent;
 
     private CharSequence mPackageName;
     private CharSequence mClassName;
@@ -1892,6 +1893,37 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Get the drawing order of the view corresponding it this node.
+     * <p>
+     * Drawing order is determined only within the node's parent, so this index is only relative
+     * to its siblings.
+     * <p>
+     * In some cases, the drawing order is essentially simultaneous, so it is possible for two
+     * siblings to return the same value. It is also possible that values will be skipped.
+     *
+     * @return The drawing position of the view corresponding to this node relative to its siblings.
+     */
+    public int getDrawingOrder() {
+        return mDrawingOrderInParent;
+    }
+
+    /**
+     * Set the drawing order of the view corresponding it this node.
+     *
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     * @param drawingOrderInParent
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setDrawingOrder(int drawingOrderInParent) {
+        enforceNotSealed();
+        mDrawingOrderInParent = drawingOrderInParent;
+    }
+
+    /**
      * Gets the collection info if the node is a collection. A collection
      * child is always a collection item.
      *
@@ -2753,6 +2785,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mTextSelectionEnd);
         parcel.writeInt(mInputType);
         parcel.writeInt(mLiveRegion);
+        parcel.writeInt(mDrawingOrderInParent);
 
         if (mExtras != null) {
             parcel.writeInt(1);
@@ -2850,6 +2883,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionEnd = other.mTextSelectionEnd;
         mInputType = other.mInputType;
         mLiveRegion = other.mLiveRegion;
+        mDrawingOrderInParent = other.mDrawingOrderInParent;
         if (other.mExtras != null && !other.mExtras.isEmpty()) {
             getExtras().putAll(other.mExtras);
         }
@@ -2927,6 +2961,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mInputType = parcel.readInt();
         mLiveRegion = parcel.readInt();
+        mDrawingOrderInParent = parcel.readInt();
 
         if (parcel.readInt() == 1) {
             getExtras().putAll(parcel.readBundle());
@@ -2982,6 +3017,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
+        mDrawingOrderInParent = 0;
         mPackageName = null;
         mClassName = null;
         mText = null;
