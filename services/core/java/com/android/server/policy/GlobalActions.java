@@ -388,7 +388,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 public void run() {
                     try {
                         // Take an "interactive" bugreport.
-                        ActivityManagerNative.getDefault().requestBugReport(true);
+                        ActivityManagerNative.getDefault().requestBugReport(
+                                ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
                     } catch (RemoteException e) {
                     }
                 }
@@ -404,7 +405,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
             try {
                 // Take a "full" bugreport.
-                ActivityManagerNative.getDefault().requestBugReport(false);
+                ActivityManagerNative.getDefault().requestBugReport(
+                        ActivityManager.BUGREPORT_OPTION_FULL);
             } catch (RemoteException e) {
             }
             return false;

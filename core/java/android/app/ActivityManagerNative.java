@@ -2306,8 +2306,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case REQUEST_BUG_REPORT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            boolean progress = data.readInt() != 0;
-            requestBugReport(progress);
+            int bugreportType = data.readInt();
+            requestBugReport(bugreportType);
             reply.writeNoException();
             return true;
         }
@@ -5820,11 +5820,12 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void requestBugReport(boolean progress) throws RemoteException {
+    public void requestBugReport(@ActivityManager.BugreportMode int bugreportType)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(progress ? 1 : 0);
+        data.writeInt(bugreportType);
         mRemote.transact(REQUEST_BUG_REPORT_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

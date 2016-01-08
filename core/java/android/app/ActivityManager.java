@@ -17,6 +17,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -68,6 +69,8 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,6 +84,36 @@ public class ActivityManager {
 
     private final Context mContext;
     private final Handler mHandler;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            BUGREPORT_OPTION_FULL,
+            BUGREPORT_OPTION_INTERACTIVE,
+            BUGREPORT_OPTION_REMOTE
+    })
+    /**
+     * Defines acceptable types of bugreports.
+     * @hide
+     */
+    public @interface BugreportMode {}
+    /**
+     * Takes a bugreport without user interference (and hence causing less
+     * interference to the system), but includes all sections.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_FULL = 0;
+    /**
+     * Allows user to monitor progress and enter additional data; might not include all
+     * sections.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_INTERACTIVE = 1;
+    /**
+     * Takes a bugreport requested remotely by administrator of the Device Owner app,
+     * not the device's user.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_REMOTE = 2;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
