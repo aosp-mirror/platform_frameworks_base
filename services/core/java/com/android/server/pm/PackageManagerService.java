@@ -2849,12 +2849,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final PackageParser.Package p = mPackages.get(packageName);
-            if (p != null) {
+            if (p != null && p.isMatch(flags)) {
                 return UserHandle.getUid(userId, p.applicationInfo.uid);
             }
             if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (ps != null) {
+                if (ps != null && ps.isMatch(flags)) {
                     return UserHandle.getUid(userId, ps.appId);
                 }
             }
@@ -2878,13 +2878,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final PackageParser.Package p = mPackages.get(packageName);
-            if (p != null) {
+            if (p != null && p.isMatch(flags)) {
                 PackageSetting ps = (PackageSetting) p.mExtras;
                 return ps.getPermissionsState().computeGids(userId);
             }
             if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (ps != null) {
+                if (ps != null && ps.isMatch(flags)) {
                     return ps.getPermissionsState().computeGids(userId);
                 }
             }
@@ -3150,8 +3150,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private int updateFlagsForPackage(int flags, int userId, Object cookie) {
         boolean triaged = true;
-        if ((flags & PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
-                | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS) != 0) {
+        if ((flags & (PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
+                | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS)) != 0) {
             // Caller is asking for component details, so they'd better be
             // asking for specific encryption matching behavior, or be triaged
             if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
@@ -3161,12 +3161,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if ((flags & (PackageManager.MATCH_UNINSTALLED_PACKAGES
+                | PackageManager.MATCH_SYSTEM_ONLY
                 | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
             triaged = false;
         }
         if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
-            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie,
-                    new Throwable());
+            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
+                    + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
         return updateFlagsForEncryption(flags, userId);
     }
@@ -3182,6 +3183,12 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Update given flags when being used to request {@link ComponentInfo}.
      */
     private int updateFlagsForComponent(int flags, int userId, Object cookie) {
+        if (cookie instanceof Intent) {
+            if ((((Intent) cookie).getFlags() & Intent.FLAG_DEBUG_TRIAGED_MISSING) != 0) {
+                flags |= PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+            }
+        }
+
         boolean triaged = true;
         // Caller is asking for component details, so they'd better be
         // asking for specific encryption matching behavior, or be triaged
@@ -3191,8 +3198,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             triaged = false;
         }
         if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
-            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie,
-                    new Throwable());
+            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
+                    + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
         return updateFlagsForEncryption(flags, userId);
     }

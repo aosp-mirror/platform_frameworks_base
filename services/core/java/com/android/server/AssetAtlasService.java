@@ -176,7 +176,8 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
     private static String queryVersionName(Context context) {
         try {
             String packageName = context.getPackageName();
-            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
+            PackageInfo info = context.getPackageManager().getPackageInfo(packageName,
+                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
             return info.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(LOG_TAG, "Could not get package info", e);

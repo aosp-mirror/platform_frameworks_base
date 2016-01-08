@@ -255,6 +255,8 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
@@ -1952,6 +1954,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case SYSTEM_USER_UNLOCK_MSG: {
                 mSystemServiceManager.unlockUser(msg.arg1);
+                mRecentTasks.cleanupLocked(msg.arg1);
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
@@ -2290,7 +2293,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ServiceManager.addService("processinfo", new ProcessInfoService(this));
 
             ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
-                    "android", STOCK_PM_FLAGS);
+                    "android", STOCK_PM_FLAGS | MATCH_SYSTEM_ONLY);
             mSystemThread.installSystemApplicationInfo(info, getClass().getClassLoader());
 
             synchronized (this) {
@@ -3442,7 +3445,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     checkTime(startTime, "startProcess: getting gids from package manager");
                     final IPackageManager pm = AppGlobals.getPackageManager();
-                    permGids = pm.getPackageGids(app.info.packageName, app.userId);
+                    permGids = pm.getPackageGidsEtc(app.info.packageName,
+                            MATCH_DEBUG_TRIAGED_MISSING, app.userId);
                     MountServiceInternal mountServiceInternal = LocalServices.getService(
                             MountServiceInternal.class);
                     mountExternal = mountServiceInternal.getExternalStorageMountMode(uid,
@@ -9881,7 +9885,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ParceledListSlice<ProviderInfo> slice = AppGlobals.getPackageManager()
                     .queryContentProviders(app.processName, app.uid,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS
-                                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+                                    | MATCH_DEBUG_TRIAGED_MISSING);
             providers = slice != null ? slice.getList() : null;
         } catch (RemoteException ex) {
         }
@@ -17121,7 +17125,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private List<ResolveInfo> collectReceiverComponents(Intent intent, String resolvedType,
             int callingUid, int[] users) {
         // TODO: come back and remove this assumption to triage all broadcasts
-        int pmFlags = STOCK_PM_FLAGS | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+        int pmFlags = STOCK_PM_FLAGS | MATCH_DEBUG_TRIAGED_MISSING;
 
         List<ResolveInfo> receivers = null;
         try {

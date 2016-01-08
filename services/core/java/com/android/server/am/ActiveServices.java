@@ -1211,10 +1211,11 @@ public final class ActiveServices {
         }
         if (r == null) {
             try {
-                ResolveInfo rInfo =
-                    AppGlobals.getPackageManager().resolveService(
-                                service, resolvedType,
-                                ActivityManagerService.STOCK_PM_FLAGS, userId);
+                // TODO: come back and remove this assumption to triage all services
+                ResolveInfo rInfo = AppGlobals.getPackageManager().resolveService(service,
+                        resolvedType, ActivityManagerService.STOCK_PM_FLAGS
+                                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                        userId);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {

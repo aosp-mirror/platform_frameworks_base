@@ -130,9 +130,11 @@ class RecentTasks extends ArrayList<TaskRecord> {
                     ActivityInfo ai = tmpAvailActCache.get(task.realActivity);
                     if (ai == null) {
                         try {
+                            // At this first cut, we're only interested in
+                            // activities that are fully runnable based on
+                            // current system state.
                             ai = pm.getActivityInfo(task.realActivity,
-                                    PackageManager.GET_UNINSTALLED_PACKAGES
-                                            | PackageManager.GET_DISABLED_COMPONENTS, user);
+                                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user);
                         } catch (RemoteException e) {
                             // Will never happen.
                             continue;
@@ -150,8 +152,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                         if (app == null) {
                             try {
                                 app = pm.getApplicationInfo(task.realActivity.getPackageName(),
-                                        PackageManager.GET_UNINSTALLED_PACKAGES
-                                                | PackageManager.GET_DISABLED_COMPONENTS, user);
+                                        PackageManager.MATCH_UNINSTALLED_PACKAGES, user);
                             } catch (RemoteException e) {
                                 // Will never happen.
                                 continue;

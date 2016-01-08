@@ -139,9 +139,8 @@ public class WebViewProviderInfo implements Parcelable {
     private String[] signatures;
 
     private PackageInfo packageInfo;
-    // flags declaring we want extra info from the package manager
-    private final static int PACKAGE_FLAGS =
-        PackageManager.GET_META_DATA
-        | PackageManager.GET_SIGNATURES;
-}
 
+    // flags declaring we want extra info from the package manager
+    private final static int PACKAGE_FLAGS = PackageManager.GET_META_DATA
+            | PackageManager.GET_SIGNATURES | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+}

@@ -37,7 +37,6 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.Trace;
@@ -52,6 +51,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.util.jar.StrictJarFile;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -85,8 +85,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
-
-import android.util.jar.StrictJarFile;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -421,8 +419,7 @@ public class PackageParser {
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             Set<String> grantedPermissions, PackageUserState state, int userId) {
-
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state) || !p.isMatch(flags)) {
             return null;
         }
         PackageInfo pi = new PackageInfo();
@@ -4623,6 +4620,13 @@ public class PackageParser {
                     && !isForwardLocked() && !applicationInfo.isExternalAsec();
         }
 
+        public boolean isMatch(int flags) {
+            if ((flags & PackageManager.MATCH_SYSTEM_ONLY) != 0) {
+                return isSystemApp();
+            }
+            return true;
+        }
+
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
@@ -4873,7 +4877,7 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalledOrHidden(flags, state)) {
+        if (!checkUseInstalledOrHidden(flags, state) || !p.isMatch(flags)) {
             return null;
         }
         if (!copyNeeded(flags, p, state, null, userId)
