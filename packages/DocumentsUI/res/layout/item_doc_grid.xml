@@ -39,7 +39,7 @@
             android:contentDescription="@null" />
 
         <com.android.documentsui.GridItemThumbnail
-            android:id="@+id/icon_mime"
+            android:id="@+id/icon_mime_lg"
             android:layout_width="@dimen/icon_size"
             android:layout_height="@dimen/icon_size"
             android:layout_gravity="center"
@@ -62,13 +62,25 @@
         android:paddingRight="12dp">
 
         <ImageView
-            android:id="@android:id/icon1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:id="@+id/icon_mime_sm"
+            android:layout_width="@dimen/grid_item_icon_size"
+            android:layout_height="@dimen/grid_item_icon_size"
             android:layout_marginEnd="8dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:scaleType="centerInside"
+            android:scaleType="center"
+            android:contentDescription="@null"/>
+
+        <ImageView
+            android:id="@+id/icon_check"
+            android:src="@drawable/ic_check_circle"
+            android:alpha="0"
+            android:layout_width="@dimen/check_icon_size"
+            android:layout_height="@dimen/check_icon_size"
+            android:layout_marginEnd="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:scaleType="fitCenter"
             android:contentDescription="@null"/>
 
         <TextView
@@ -76,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@android:id/icon1"
+            android:layout_toEndOf="@id/icon_mime_sm"
             android:singleLine="true"
             android:ellipsize="middle"
             android:textAlignment="viewStart"
@@ -87,7 +99,7 @@
             android:id="@+id/size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@android:id/icon1"
+            android:layout_toEndOf="@id/icon_mime_sm"
             android:layout_below="@android:id/title"
             android:layout_marginEnd="4dp"
             android:singleLine="true"

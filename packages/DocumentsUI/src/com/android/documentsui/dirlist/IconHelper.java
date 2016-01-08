@@ -91,7 +91,8 @@ public class IconHelper {
                 thumbSize = mContext.getResources().getDimensionPixelSize(R.dimen.grid_width);
                 break;
             case MODE_LIST:
-                thumbSize = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
+                thumbSize = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.list_item_thumbnail_size);
                 break;
             case MODE_UNKNOWN:
             default:
