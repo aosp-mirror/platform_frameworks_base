@@ -868,6 +868,9 @@ public class PackageInstaller {
         public static final int MODE_INHERIT_EXISTING = 2;
 
         /** {@hide} */
+        public static final int UID_UNKNOWN = -1;
+
+        /** {@hide} */
         public int mode = MODE_INVALID;
         /** {@hide} */
         public int installFlags;
@@ -885,6 +888,8 @@ public class PackageInstaller {
         public long appIconLastModified = -1;
         /** {@hide} */
         public Uri originatingUri;
+        /** {@hide} */
+        public int originatingUid = UID_UNKNOWN;
         /** {@hide} */
         public Uri referrerUri;
         /** {@hide} */
@@ -915,6 +920,7 @@ public class PackageInstaller {
             appIcon = source.readParcelable(null);
             appLabel = source.readString();
             originatingUri = source.readParcelable(null);
+            originatingUid = source.readInt();
             referrerUri = source.readParcelable(null);
             abiOverride = source.readString();
             volumeUuid = source.readString();
@@ -983,6 +989,15 @@ public class PackageInstaller {
         }
 
         /**
+         * Sets the UID that initiated package installation. Used for verification purposes.
+         *
+         * @see PackageManager#EXTRA_VERIFICATION_INSTALLER_UID
+         */
+        public void setOriginatingUid(int originatingUid) {
+            this.originatingUid = originatingUid;
+        }
+
+        /**
          * Optionally set the URI that referred you to install this package. Used
          * for verification purposes.
          *
@@ -1022,6 +1037,11 @@ public class PackageInstaller {
         }
 
         /** {@hide} */
+        public void setInstallFlagsForcePermissionPrompt() {
+            installFlags |= PackageManager.INSTALL_FORCE_PERMISSION_PROMPT;
+        }
+
+        /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
             pw.printHexPair("installFlags", installFlags);
@@ -1031,6 +1051,7 @@ public class PackageInstaller {
             pw.printPair("appIcon", (appIcon != null));
             pw.printPair("appLabel", appLabel);
             pw.printPair("originatingUri", originatingUri);
+            pw.printPair("originatingUid", originatingUid);
             pw.printPair("referrerUri", referrerUri);
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
@@ -1053,6 +1074,7 @@ public class PackageInstaller {
             dest.writeParcelable(appIcon, flags);
             dest.writeString(appLabel);
             dest.writeParcelable(originatingUri, flags);
+            dest.writeInt(originatingUid);
             dest.writeParcelable(referrerUri, flags);
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
