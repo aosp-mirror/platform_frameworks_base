@@ -751,6 +751,11 @@ public class TaskStackLayoutAlgorithm {
      * Updates the current transforms that would put a TaskView at the front and back of the stack.
      */
     private void updateFrontBackTransforms() {
+        // Return early if we have not yet initialized
+        if (mStackRect.isEmpty()) {
+            return;
+        }
+
         float min = mUnfocusedRange.relativeMin +
                 mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
         float max = mUnfocusedRange.relativeMax +
