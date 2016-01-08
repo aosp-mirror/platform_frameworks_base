@@ -2764,8 +2764,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (!r.isFocusable()) {
-            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
-                    "setFocusedActivityLocked: unfocusable r=" + r);
+            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: unfocusable r=" + r);
             return false;
         }
 
@@ -2874,9 +2873,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
                 if (task != null) {
-                    ActivityRecord r = task.topRunningActivityLocked();
-                    if (r != null) {
-                        setFocusedActivityLocked(r, "setFocusedTask");
+                    final ActivityRecord r = task.topRunningActivityLocked();
+                    if (setFocusedActivityLocked(r, "setFocusedTask")) {
                         mStackSupervisor.resumeFocusedStackTopActivityLocked();
                     }
                 }
