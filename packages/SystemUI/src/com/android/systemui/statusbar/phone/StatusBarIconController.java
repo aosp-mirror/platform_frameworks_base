@@ -21,9 +21,11 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.view.View;
@@ -33,7 +35,6 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.BatteryMeterView;
@@ -54,7 +55,7 @@ import java.util.ArrayList;
  * limited to: notification icons, signal cluster, additional status icons, and clock in the status
  * bar.
  */
-public class StatusBarIconController implements Tunable {
+public class StatusBarIconController extends StatusBarIconList implements Tunable {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
 
@@ -146,23 +147,27 @@ public class StatusBarIconController implements Tunable {
         }
         // Remove all the icons.
         for (int i = views.size() - 1; i >= 0; i--) {
-            removeSystemIcon(views.get(i).getSlot(), i, i);
+            removeIcon(views.get(i).getSlot());
         }
         // Add them all back
         for (int i = 0; i < views.size(); i++) {
-            addSystemIcon(views.get(i).getSlot(), i, i, views.get(i).getStatusBarIcon());
+            setIcon(views.get(i).getSlot(), views.get(i).getStatusBarIcon());
         }
-    };
+    }
 
     public void updateResources() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
         mIconHPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_padding);
+        defineSlots(mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_statusBarIcons));
         FontSizeUtils.updateFontSize(mClock, R.dimen.status_bar_clock_size);
     }
 
-    public void addSystemIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
+    private void addSystemIcon(int index, StatusBarIcon icon) {
+        String slot = getSlot(index);
+        int viewIndex = getViewIndex(index);
         boolean blocked = mIconBlacklist.contains(slot);
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
@@ -175,18 +180,82 @@ public class StatusBarIconController implements Tunable {
         applyIconTint();
     }
 
-    public void updateSystemIcon(String slot, int index, int viewIndex,
-            StatusBarIcon old, StatusBarIcon icon) {
+    public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
+        int index = getSlotIndex(slot);
+        StatusBarIcon icon = getIcon(index);
+        if (icon == null) {
+            icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                    Icon.createWithResource(mContext, resourceId), 0, 0, contentDescription);
+            setIcon(slot, icon);
+        } else {
+            icon.icon = Icon.createWithResource(mContext, resourceId);
+            icon.contentDescription = contentDescription;
+            handleSet(index, icon);
+        }
+    }
+
+    public void setExternalIcon(String slot) {
+        int viewIndex = getViewIndex(getSlotIndex(slot));
+        ImageView imageView = (ImageView) mStatusIcons.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+        imageView = (ImageView) mStatusIconsKeyguard.getChildAt(viewIndex);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setAdjustViewBounds(true);
+    }
+
+    public void setIcon(String slot, StatusBarIcon icon) {
+        setIcon(getSlotIndex(slot), icon);
+    }
+
+    public void removeIcon(String slot) {
+        int index = getSlotIndex(slot);
+        removeIcon(index);
+    }
+
+    public void setIconVisibility(String slot, boolean visibility) {
+        int index = getSlotIndex(slot);
+        StatusBarIcon icon = getIcon(index);
+        if (icon == null || icon.visible == visibility) {
+            return;
+        }
+        icon.visible = visibility;
+        handleSet(index, icon);
+    }
+
+    @Override
+    public void removeIcon(int index) {
+        if (getIcon(index) == null) {
+            return;
+        }
+        super.removeIcon(index);
+        int viewIndex = getViewIndex(index);
+        mStatusIcons.removeViewAt(viewIndex);
+        mStatusIconsKeyguard.removeViewAt(viewIndex);
+    }
+
+    @Override
+    public void setIcon(int index, StatusBarIcon icon) {
+        if (icon == null) {
+            removeIcon(index);
+            return;
+        }
+        boolean isNew = getIcon(index) == null;
+        super.setIcon(index, icon);
+        if (isNew) {
+            addSystemIcon(index, icon);
+        } else {
+            handleSet(index, icon);
+        }
+    }
+
+    private void handleSet(int index, StatusBarIcon icon) {
+        int viewIndex = getViewIndex(index);
         StatusBarIconView view = (StatusBarIconView) mStatusIcons.getChildAt(viewIndex);
         view.set(icon);
         view = (StatusBarIconView) mStatusIconsKeyguard.getChildAt(viewIndex);
         view.set(icon);
         applyIconTint();
-    }
-
-    public void removeSystemIcon(String slot, int index, int viewIndex) {
-        mStatusIcons.removeViewAt(viewIndex);
-        mStatusIconsKeyguard.removeViewAt(viewIndex);
     }
 
     public void updateNotificationIcons(NotificationData notificationData) {

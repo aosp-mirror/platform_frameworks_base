@@ -16,6 +16,7 @@
 package android.service.quicksettings;
 
 import android.content.ComponentName;
+import android.graphics.drawable.Icon;
 import android.service.quicksettings.Tile;
 
 /**
@@ -23,6 +24,8 @@ import android.service.quicksettings.Tile;
  */
 interface IQSService {
     void updateQsTile(in Tile tile);
+    void updateStatusIcon(in Tile tile, in Icon icon,
+            String contentDescription);
     void onShowDialog(in Tile tile);
     void setTileMode(in ComponentName component, int mode);
 }

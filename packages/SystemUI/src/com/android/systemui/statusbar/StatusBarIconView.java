@@ -30,8 +30,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.ImageView;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.R;
 
@@ -76,7 +74,7 @@ public class StatusBarIconView extends AnimatedImageView {
             setScaleY(scale);
         }
 
-        setScaleType(ImageView.ScaleType.CENTER);
+        setScaleType(ScaleType.CENTER);
     }
 
     public void setNotification(Notification notification) {

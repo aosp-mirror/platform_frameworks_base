@@ -17,22 +17,20 @@
 package com.android.server.statusbar;
 
 import android.app.StatusBarManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
+import android.util.ArrayMap;
 import android.util.Slog;
-
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.internal.statusbar.StatusBarIconList;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.wm.WindowManagerService;
@@ -56,7 +54,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private Handler mHandler = new Handler();
     private NotificationDelegate mNotificationDelegate;
     private volatile IStatusBar mBar;
-    private StatusBarIconList mIcons = new StatusBarIconList();
+    private ArrayMap<String, StatusBarIcon> mIcons = new ArrayMap<>();
 
     // for disabling the status bar
     private final ArrayList<DisableRecord> mDisableRecords = new ArrayList<DisableRecord>();
@@ -95,9 +93,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     public StatusBarManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
         mWindowManager = windowManager;
-
-        final Resources res = context.getResources();
-        mIcons.defineSlots(res.getStringArray(com.android.internal.R.array.config_statusBarIcons));
 
         LocalServices.addService(StatusBarManagerInternal.class, mInternalService);
     }
@@ -300,19 +295,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
             StatusBarIcon icon = new StatusBarIcon(iconPackage, UserHandle.SYSTEM, iconId,
                     iconLevel, 0, contentDescription);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
-            mIcons.setIcon(index, icon);
+            mIcons.put(slot, icon);
 
             if (mBar != null) {
                 try {
-                    mBar.setIcon(index, icon);
+                    mBar.setIcon(slot, icon);
                 } catch (RemoteException ex) {
                 }
             }
@@ -320,26 +310,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void setIconVisibility(String slot, boolean visible) {
+    public void setIconVisibility(String slot, boolean visibility) {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
-            StatusBarIcon icon = mIcons.getIcon(index);
+            StatusBarIcon icon = mIcons.get(slot);
             if (icon == null) {
                 return;
             }
-
-            if (icon.visible != visible) {
-                icon.visible = visible;
+            if (icon.visible != visibility) {
+                icon.visible = visibility;
 
                 if (mBar != null) {
                     try {
-                        mBar.setIcon(index, icon);
+                        mBar.setIcon(slot, icon);
                     } catch (RemoteException ex) {
                     }
                 }
@@ -352,16 +336,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         enforceStatusBar();
 
         synchronized (mIcons) {
-            int index = mIcons.getSlotIndex(slot);
-            if (index < 0) {
-                throw new SecurityException("invalid status bar icon slot: " + slot);
-            }
-
-            mIcons.removeIcon(index);
+            mIcons.remove(slot);
 
             if (mBar != null) {
                 try {
-                    mBar.removeIcon(index);
+                    mBar.removeIcon(slot);
                 } catch (RemoteException ex) {
                 }
             }
@@ -583,14 +562,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // Callbacks from the status bar service.
     // ================================================================================
     @Override
-    public void registerStatusBar(IStatusBar bar, StatusBarIconList iconList,
-            int switches[], List<IBinder> binders) {
+    public void registerStatusBar(IStatusBar bar, List<String> iconSlots,
+            List<StatusBarIcon> iconList, int switches[], List<IBinder> binders) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
         mBar = bar;
         synchronized (mIcons) {
-            iconList.copyFrom(mIcons);
+            for (String slot : mIcons.keySet()) {
+                iconSlots.add(slot);
+                iconList.add(mIcons.get(slot));
+            }
         }
         synchronized (mLock) {
             switches[0] = gatherDisableActionsLocked(mCurrentUserId, 1);
@@ -810,10 +792,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
             return;
-        }
-
-        synchronized (mIcons) {
-            mIcons.dump(pw);
         }
 
         synchronized (mLock) {

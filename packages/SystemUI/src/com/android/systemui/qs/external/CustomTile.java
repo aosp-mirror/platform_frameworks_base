@@ -132,6 +132,7 @@ public class CustomTile extends QSTile<QSTile.State> {
             } catch (RemoteException e) {
             }
         }
+        mHost.getTileServices().freeService(this, mServiceManager);
     }
 
     @Override

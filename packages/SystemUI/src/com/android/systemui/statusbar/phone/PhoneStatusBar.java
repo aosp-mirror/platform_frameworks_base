@@ -83,7 +83,6 @@ import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
@@ -95,7 +94,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -152,7 +150,6 @@ import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
-import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityControllerImpl;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -637,8 +634,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         addNavigationBar();
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController,
-                mUserInfoController, mBluetoothController);
+        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCastController,
+                mHotspotController, mUserInfoController, mBluetoothController);
         mIconPolicy.setCurrentUserSetup(mUserSetup);
         mSettingsObserver.onChange(false); // set up
 
@@ -894,7 +891,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
                     mUserSwitcherController, mUserInfoController, mKeyguardMonitor,
-                    mSecurityController, mBatteryController);
+                    mSecurityController, mBatteryController, mIconController);
             mQSPanel.setHost(qsh);
             mQSPanel.setTiles(qsh.getTiles());
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
@@ -1239,17 +1236,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return lp;
     }
 
-    public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
-        mIconController.addSystemIcon(slot, index, viewIndex, icon);
+    @Override
+    public void setIcon(String slot, StatusBarIcon icon) {
+        mIconController.setIcon(slot, icon);
     }
 
-    public void updateIcon(String slot, int index, int viewIndex,
-            StatusBarIcon old, StatusBarIcon icon) {
-        mIconController.updateSystemIcon(slot, index, viewIndex, old, icon);
-    }
-
-    public void removeIcon(String slot, int index, int viewIndex) {
-        mIconController.removeSystemIcon(slot, index, viewIndex);
+    @Override
+    public void removeIcon(String slot) {
+        mIconController.removeIcon(slot);
     }
 
     public UserHandle getCurrentUserHandle() {

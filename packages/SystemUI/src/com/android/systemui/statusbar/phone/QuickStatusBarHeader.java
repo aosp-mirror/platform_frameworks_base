@@ -205,7 +205,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 host.getCastController(), host.getFlashlightController(),
                 host.getUserSwitcherController(), host.getUserInfoController(),
                 host.getKeyguardMonitor(), host.getSecurityController(),
-                host.getBatteryController());
+                host.getBatteryController(), host.getIconController());
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(myHost);
         mHeaderQsPanel.setMaxTiles(5);
