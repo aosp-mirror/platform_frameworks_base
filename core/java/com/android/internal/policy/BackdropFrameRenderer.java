@@ -99,6 +99,9 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mResizingBackgroundDrawable = resizingBackgroundDrawable;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
         mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable;
+        if (mCaptionBackgroundDrawable == null) {
+            mCaptionBackgroundDrawable = mResizingBackgroundDrawable;
+        }
         if (statusBarColor != 0) {
             mStatusBarColor = new ColorDrawable(statusBarColor);
             addSystemBarNodeIfNeeded();

@@ -1616,14 +1616,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     void onResourcesLoaded(LayoutInflater inflater, int layoutResource) {
         mStackId = getStackId();
 
-        mResizingBackgroundDrawable = getResizingBackgroundDrawable(
-                mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
-        if (mCaptionBackgroundDrawable == null) {
-            mCaptionBackgroundDrawable = getContext().getDrawable(
-                    R.drawable.decor_caption_title_focused);
-        }
-
         if (mBackdropFrameRenderer != null) {
+            loadBackgroundDrawablesIfNeeded();
             mBackdropFrameRenderer.onResourcesLoaded(
                     this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
@@ -1643,6 +1637,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         mContentRoot = (ViewGroup) root;
         initializeElevation();
+    }
+
+    private void loadBackgroundDrawablesIfNeeded() {
+        if (mResizingBackgroundDrawable == null) {
+            mResizingBackgroundDrawable = getResizingBackgroundDrawable(
+                    mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
+        }
+        if (mCaptionBackgroundDrawable == null) {
+            mCaptionBackgroundDrawable = getContext().getDrawable(
+                    R.drawable.decor_caption_title_focused);
+        }
     }
 
     // Free floating overlapping windows require a caption.
@@ -1815,6 +1820,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         final ThreadedRenderer renderer = getHardwareRenderer();
         if (renderer != null) {
+            loadBackgroundDrawablesIfNeeded();
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
