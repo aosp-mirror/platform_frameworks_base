@@ -48,6 +48,9 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.KeyEvent;
 
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
+
 /**
  * Tests the TextView widget from an Activity
  */
@@ -81,6 +84,43 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
         // Delete text at specified index and see if we got the right one.
         onView(withId(R.id.textview)).perform(pressKey(KeyEvent.KEYCODE_FORWARD_DEL));
         onView(withId(R.id.textview)).check(matches(withText("Hello orld!")));
+    }
+
+    @SmallTest
+    public void testPositionCursorAtTextAtIndex_arabic() throws Exception {
+        // Arabic text. The expected cursorable boundary is
+        // | \u0623 \u064F | \u067A | \u0633 \u0652 |
+        final String text = "\u0623\u064F\u067A\u0633\u0652";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(1));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(anyOf(is(0), is(2))));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(2));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(2));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(3));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(3));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(4));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(anyOf(is(3), is(5))));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(5));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(5));
+    }
+
+    @SmallTest
+    public void testPositionCursorAtTextAtIndex_devanagari() throws Exception {
+        // Devanagari text. The expected cursorable boundary is | \u0915 \u093E |
+        final String text = "\u0915\u093E";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(replaceText(text));
+
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(1));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(anyOf(is(0), is(2))));
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(2));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(2));
     }
 
     @SmallTest
