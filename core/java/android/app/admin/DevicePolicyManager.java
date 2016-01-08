@@ -773,10 +773,26 @@ public class DevicePolicyManager {
      * have the user select a new password in order to meet the current
      * constraints. Upon being resumed from this activity, you can check the new
      * password characteristics to see if they are sufficient.
+     *
+     * If the intent is launched from within a managed profile with a profile
+     * owner built against {@link android.os.Build.VERSION_CODES#M} or before,
+     * this will trigger entering a new password for the parent of the profile.
+     * For all other cases it will trigger entering a new password for the user
+     * or profile it is launched from.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
             = "android.app.action.SET_NEW_PASSWORD";
+
+    /**
+     * Activity action: have the user enter a new password for the parent profile.
+     * If the intent is launched from within a managed profile, this will trigger
+     * entering a new password for the parent of the profile. In all other cases
+     * the behaviour is identical to {@link #ACTION_SET_NEW_PASSWORD}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SET_NEW_PARENT_PROFILE_PASSWORD
+            = "android.app.action.SET_NEW_PARENT_PROFILE_PASSWORD";
 
     /**
      * Flag used by {@link #addCrossProfileIntentFilter} to allow activities in
