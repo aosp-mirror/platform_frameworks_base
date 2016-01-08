@@ -419,7 +419,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
     }
 
     @Override
-    public void onPowerSaveChanged() {
+    public void onPowerSaveChanged(boolean isPowerSave) {
         // could not care less
     }
 

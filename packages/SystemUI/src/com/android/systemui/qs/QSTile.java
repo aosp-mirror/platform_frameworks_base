@@ -109,7 +109,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     public interface DetailAdapter {
-        int getTitle();
+        CharSequence getTitle();
         Boolean getToggleState();
         View createDetailView(Context context, View convertView, ViewGroup parent);
         Intent getSettingsIntent();

@@ -223,8 +223,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     private final class CellularDetailAdapter implements DetailAdapter {
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_cellular_detail_title;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_cellular_detail_title);
         }
 
         @Override

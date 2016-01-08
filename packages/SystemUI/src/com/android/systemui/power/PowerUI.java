@@ -76,10 +76,6 @@ public class PowerUI extends SystemUI {
         mReceiver.init();
     }
 
-    private void setSaverMode(boolean mode) {
-        mWarnings.showSaverMode(mode);
-    }
-
     void updateBatteryWarningLevels() {
         int critLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -141,11 +137,6 @@ public class PowerUI extends SystemUI {
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
             filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             mContext.registerReceiver(this, filter, null, mHandler);
-            updateSaverMode();
-        }
-
-        private void updateSaverMode() {
-            setSaverMode(mPowerManager.isPowerSaveMode());
         }
 
         @Override
@@ -210,10 +201,6 @@ public class PowerUI extends SystemUI {
                 mScreenOffTime = -1;
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mWarnings.userSwitched();
-            } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)) {
-                updateSaverMode();
-            } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGING.equals(action)) {
-                setSaverMode(intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false));
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
@@ -251,7 +238,6 @@ public class PowerUI extends SystemUI {
 
     public interface WarningsUI {
         void update(int batteryLevel, int bucket, long screenOffTime);
-        void showSaverMode(boolean mode);
         void dismissLowBatteryWarning();
         void showLowBatteryWarning(boolean playSound);
         void dismissInvalidChargerWarning();

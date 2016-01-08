@@ -810,10 +810,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addStateChangedCallback(new BatteryStateChangeCallback() {
             @Override
-            public void onPowerSaveChanged() {
+            public void onPowerSaveChanged(boolean isPowerSave) {
                 mHandler.post(mCheckBarModes);
                 if (mDozeServiceHost != null) {
-                    mDozeServiceHost.firePowerSaveChanged(mBatteryController.isPowerSave());
+                    mDozeServiceHost.firePowerSaveChanged(isPowerSave);
                 }
             }
             @Override

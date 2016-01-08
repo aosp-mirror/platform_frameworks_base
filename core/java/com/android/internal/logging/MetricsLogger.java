@@ -27,7 +27,6 @@ import android.view.View;
  */
 public class MetricsLogger implements MetricsConstants {
     // Temporary constants go here, to await migration to MetricsConstants.
-    public static final int QS_LOCK_TILE = 257;
     public static final int QS_USER_TILE = 258;
     public static final int QS_BATTERY_TILE = 259;
     public static final int NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 260;
@@ -62,6 +61,8 @@ public class MetricsLogger implements MetricsConstants {
      * credentials UI.
      */
     public static final int PROFILE_CHALLENGE = 271;
+    public static final int ACTION_WINDOW_DOCK_SWIPE = 272;
+    public static final int QS_BATTERY_DETAIL = 273;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {

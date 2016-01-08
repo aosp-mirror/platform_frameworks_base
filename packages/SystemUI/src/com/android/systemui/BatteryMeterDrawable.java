@@ -49,7 +49,8 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
-    private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
+    private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint,
+            mPlusPaint;
     private float mTextHeight, mWarningTextHeight;
     private int mIconTint = Color.WHITE;
 
@@ -60,10 +61,13 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     private int mChargeColor;
     private final float[] mBoltPoints;
     private final Path mBoltPath = new Path();
+    private final float[] mPlusPoints;
+    private final Path mPlusPath = new Path();
 
     private final RectF mFrame = new RectF();
     private final RectF mButtonFrame = new RectF();
     private final RectF mBoltFrame = new RectF();
+    private final RectF mPlusFrame = new RectF();
 
     private final Path mShapePath = new Path();
     private final Path mClipPath = new Path();
@@ -141,6 +145,9 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mBoltPaint.setColor(context.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
 
+        mPlusPaint = new Paint(mBoltPaint);
+        mPlusPoints = loadPlusPoints(res);
+
         mDarkModeBackgroundColor =
                 context.getColor(R.color.dark_mode_icon_color_dual_tone_background);
         mDarkModeFillColor = context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
@@ -187,13 +194,28 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     }
 
     @Override
-    public void onPowerSaveChanged() {
-        mPowerSaveEnabled = mBatteryController.isPowerSave();
+    public void onPowerSaveChanged(boolean isPowerSave) {
+        mPowerSaveEnabled = isPowerSave;
         invalidateSelf();
     }
 
     private static float[] loadBoltPoints(Resources res) {
         final int[] pts = res.getIntArray(R.array.batterymeter_bolt_points);
+        int maxX = 0, maxY = 0;
+        for (int i = 0; i < pts.length; i += 2) {
+            maxX = Math.max(maxX, pts[i]);
+            maxY = Math.max(maxY, pts[i + 1]);
+        }
+        final float[] ptsF = new float[pts.length];
+        for (int i = 0; i < pts.length; i += 2) {
+            ptsF[i] = (float)pts[i] / maxX;
+            ptsF[i + 1] = (float)pts[i + 1] / maxY;
+        }
+        return ptsF;
+    }
+
+    private static float[] loadPlusPoints(Resources res) {
+        final int[] pts = res.getIntArray(R.array.batterymeter_plus_points);
         int maxX = 0, maxY = 0;
         for (int i = 0; i < pts.length; i += 2) {
             maxX = Math.max(maxX, pts[i]);
@@ -328,9 +350,9 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
 
         if (mPluggedIn) {
             // define the bolt shape
-            final float bl = mFrame.left + mFrame.width() / 4.5f;
+            final float bl = mFrame.left + mFrame.width() / 4f;
             final float bt = mFrame.top + mFrame.height() / 6f;
-            final float br = mFrame.right - mFrame.width() / 7f;
+            final float br = mFrame.right - mFrame.width() / 4f;
             final float bb = mFrame.bottom - mFrame.height() / 10f;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
@@ -357,6 +379,39 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
             } else {
                 // otherwise cut the bolt out of the overall shape
                 mShapePath.op(mBoltPath, Path.Op.DIFFERENCE);
+            }
+        } else if (mPowerSaveEnabled) {
+            // define the plus shape
+            final float pw = mFrame.width() * 2 / 3;
+            final float pl = mFrame.left + (mFrame.width() - pw) / 2;
+            final float pt = mFrame.top + (mFrame.height() - pw) / 2;
+            final float pr = mFrame.right - (mFrame.width() - pw) / 2;
+            final float pb = mFrame.bottom - (mFrame.height() - pw) / 2;
+            if (mPlusFrame.left != pl || mPlusFrame.top != pt
+                    || mPlusFrame.right != pr || mPlusFrame.bottom != pb) {
+                mPlusFrame.set(pl, pt, pr, pb);
+                mPlusPath.reset();
+                mPlusPath.moveTo(
+                        mPlusFrame.left + mPlusPoints[0] * mPlusFrame.width(),
+                        mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
+                for (int i = 2; i < mPlusPoints.length; i += 2) {
+                    mPlusPath.lineTo(
+                            mPlusFrame.left + mPlusPoints[i] * mPlusFrame.width(),
+                            mPlusFrame.top + mPlusPoints[i + 1] * mPlusFrame.height());
+                }
+                mPlusPath.lineTo(
+                        mPlusFrame.left + mPlusPoints[0] * mPlusFrame.width(),
+                        mPlusFrame.top + mPlusPoints[1] * mPlusFrame.height());
+            }
+
+            float boltPct = (mPlusFrame.bottom - levelTop) / (mPlusFrame.bottom - mPlusFrame.top);
+            boltPct = Math.min(Math.max(boltPct, 0), 1);
+            if (boltPct <= BOLT_LEVEL_THRESHOLD) {
+                // draw the bolt if opaque
+                c.drawPath(mPlusPath, mPlusPaint);
+            } else {
+                // otherwise cut the bolt out of the overall shape
+                mShapePath.op(mPlusPath, Path.Op.DIFFERENCE);
             }
         }
 

@@ -165,8 +165,8 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         private QSDetailItems mItems;
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_bluetooth_label;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_bluetooth_label);
         }
 
         @Override

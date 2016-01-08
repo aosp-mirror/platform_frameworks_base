@@ -643,8 +643,8 @@ public class UserSwitcherController {
         private final Intent USER_SETTINGS_INTENT = new Intent("android.settings.USER_SETTINGS");
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_user_title;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_user_title);
         }
 
         @Override

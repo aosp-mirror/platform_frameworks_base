@@ -466,7 +466,7 @@ public class QSPanel extends FrameLayout implements Tunable {
             MetricsLogger.visible(mContext, detailAdapter.getMetricsCategory());
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_quick_settings_detail,
-                    mContext.getString(detailAdapter.getTitle())));
+                    detailAdapter.getTitle()));
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
             if (r instanceof TileRecord && visibleDiff) {

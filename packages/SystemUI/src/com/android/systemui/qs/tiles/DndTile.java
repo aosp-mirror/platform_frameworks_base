@@ -218,8 +218,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_dnd_label;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_dnd_label);
         }
 
         @Override

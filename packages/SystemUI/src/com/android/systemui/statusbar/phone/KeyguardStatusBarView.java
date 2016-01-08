@@ -166,7 +166,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     @Override
-    public void onPowerSaveChanged() {
+    public void onPowerSaveChanged(boolean isPowerSave) {
         // could not care less
     }
 

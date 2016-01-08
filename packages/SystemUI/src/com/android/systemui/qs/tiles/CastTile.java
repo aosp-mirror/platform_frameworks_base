@@ -160,8 +160,8 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         private QSDetailItems mItems;
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_cast_title;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_cast_title);
         }
 
         @Override

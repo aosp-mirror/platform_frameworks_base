@@ -70,9 +70,14 @@ public class BatteryController extends BroadcastReceiver {
         pw.print("  mPowerSave="); pw.println(mPowerSave);
     }
 
+    public void setPowerSaveMode(boolean powerSave) {
+        mPowerManager.setPowerSaveMode(powerSave);
+    }
+
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
         cb.onBatteryLevelChanged(mLevel, mPluggedIn, mCharging);
+        cb.onPowerSaveChanged(mPowerSave);
     }
 
     public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
@@ -158,12 +163,12 @@ public class BatteryController extends BroadcastReceiver {
     private void firePowerSaveChanged() {
         final int N = mChangeCallbacks.size();
         for (int i = 0; i < N; i++) {
-            mChangeCallbacks.get(i).onPowerSaveChanged();
+            mChangeCallbacks.get(i).onPowerSaveChanged(mPowerSave);
         }
     }
 
     public interface BatteryStateChangeCallback {
         void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging);
-        void onPowerSaveChanged();
+        void onPowerSaveChanged(boolean isPowerSave);
     }
 }

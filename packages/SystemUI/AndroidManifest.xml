@@ -143,6 +143,9 @@
     <!-- Block notifications inline notifications -->
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
 
+    <!-- Access battery information -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"

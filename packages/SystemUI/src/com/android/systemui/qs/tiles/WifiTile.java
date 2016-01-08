@@ -240,8 +240,8 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         private AccessPoint[] mAccessPoints;
 
         @Override
-        public int getTitle() {
-            return R.string.quick_settings_wifi_label;
+        public CharSequence getTitle() {
+            return mContext.getString(R.string.quick_settings_wifi_label);
         }
 
         public Intent getSettingsIntent() {
