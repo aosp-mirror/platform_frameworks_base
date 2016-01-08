@@ -29,7 +29,7 @@ import java.util.Set;
 
 public class TestModel extends Model {
 
-    private static final String[] COLUMNS = new String[]{
+    static final String[] COLUMNS = new String[]{
         RootCursorWrapper.COLUMN_AUTHORITY,
         Document.COLUMN_DOCUMENT_ID,
         Document.COLUMN_FLAGS,
