@@ -106,7 +106,11 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
         List<String> modelIds = mDelegate.getModelIds();
         for (int i = 0; i < modelIds.size(); i++) {
             if (!isDirectory(model, i)) {
-                mBreakPosition = i;
+                // If the break is the first thing in the list, then there are actually no
+                // directories. In that case, don't insert a break at all.
+                if (i > 0) {
+                    mBreakPosition = i;
+                }
                 break;
             }
         }
