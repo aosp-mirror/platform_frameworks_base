@@ -31,7 +31,6 @@ namespace android {
 namespace uirenderer {
 
 class BatchBase {
-
 public:
     BatchBase(batchid_t batchId, BakedOpState* op, bool merging)
             : mBatchId(batchId)
@@ -213,7 +212,8 @@ OpReorderer::LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
         , repaintRect(repaintRect)
         , offscreenBuffer(renderNode ? renderNode->getLayer() : nullptr)
         , beginLayerOp(beginLayerOp)
-        , renderNode(renderNode) {}
+        , renderNode(renderNode)
+        , viewportClip(Rect(width, height)) {}
 
 // iterate back toward target to see if anything drawn since should overlap the new op
 // if no target, merging ops still iterate to find similar batch to insert after
@@ -270,7 +270,8 @@ void OpReorderer::LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
         SimpleRectsOp* op = new (allocator) SimpleRectsOp(bounds,
                 Matrix4::identity(), nullptr, paint,
                 verts, vertCount);
-        BakedOpState* bakedState = BakedOpState::directConstruct(allocator, bounds, *op);
+        BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
+                &viewportClip, bounds, *op);
 
 
         deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
@@ -1030,13 +1031,14 @@ void OpReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     dstRect.doIntersect(mCanvasState.currentSnapshot()->getRenderTargetClip());
 
     // Allocate a holding position for the layer object (copyTo will produce, copyFrom will consume)
-    OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>();
+    OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>(nullptr);
 
     /**
      * First, defer an operation to copy out the content from the rendertarget into a layer.
      */
     auto copyToOp = new (mAllocator) CopyToLayerOp(op, layerHandle);
-    BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator, dstRect, *copyToOp);
+    BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator,
+            &(currentLayer().viewportClip), dstRect, *copyToOp);
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
 
     /**
@@ -1050,11 +1052,12 @@ void OpReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
      * a balanced EndUnclippedLayerOp is seen
      */
     auto copyFromOp = new (mAllocator) CopyFromLayerOp(op, layerHandle);
-    bakedState = BakedOpState::directConstruct(mAllocator, dstRect, *copyFromOp);
+    bakedState = BakedOpState::directConstruct(mAllocator,
+            &(currentLayer().viewportClip), dstRect, *copyFromOp);
     currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
 }
 
-void OpReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& op) {
+void OpReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
     LOG_ALWAYS_FATAL_IF(currentLayer().activeUnclippedSaveLayers.empty(), "no layer to end!");
 
     BakedOpState* copyFromLayerOp = currentLayer().activeUnclippedSaveLayers.back();

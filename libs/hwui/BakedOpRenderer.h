@@ -19,6 +19,7 @@
 
 #include "BakedOpState.h"
 #include "Matrix.h"
+#include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
@@ -61,9 +62,10 @@ public:
 
     void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect);
     void endFrame(const Rect& repaintRect);
-    OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
+    WARN_UNUSED_RESULT OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height);
     void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect);
     void endLayer();
+    WARN_UNUSED_RESULT OffscreenBuffer* copyToLayer(const Rect& area);
 
     Texture* getTexture(const SkBitmap* bitmap);
     const LightInfo& getLightInfo() const { return mLightInfo; }

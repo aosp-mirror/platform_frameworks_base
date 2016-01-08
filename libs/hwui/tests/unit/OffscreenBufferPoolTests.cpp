@@ -15,11 +15,11 @@
  */
 
 #include <gtest/gtest.h>
+#include <Rect.h>
 #include <renderstate/OffscreenBufferPool.h>
 
 #include <tests/common/TestUtils.h>
 
-using namespace android;
 using namespace android::uirenderer;
 
 TEST(OffscreenBuffer, computeIdealDimension) {
@@ -43,6 +43,18 @@ TEST(OffscreenBuffer, construct) {
     });
 }
 
+TEST(OffscreenBuffer, getTextureCoordinates) {
+    TestUtils::runOnRenderThread([] (renderthread::RenderThread& thread) {
+        OffscreenBuffer layerAligned(thread.renderState(), Caches::getInstance(), 256u, 256u);
+        EXPECT_EQ(Rect(0, 1, 1, 0),
+                layerAligned.getTextureCoordinates());
+
+        OffscreenBuffer layerUnaligned(thread.renderState(), Caches::getInstance(), 200u, 225u);
+        EXPECT_EQ(Rect(0, 225.0f / 256.0f, 200.0f / 256.0f, 0),
+                layerUnaligned.getTextureCoordinates());
+    });
+}
+
 TEST(OffscreenBufferPool, construct) {
     TestUtils::runOnRenderThread([] (renderthread::RenderThread& thread) {
         OffscreenBufferPool pool;
@@ -51,7 +63,6 @@ TEST(OffscreenBufferPool, construct) {
         EXPECT_EQ((uint32_t) Properties::layerPoolSize, pool.getMaxSize())
                 << "pool must read size from Properties";
     });
-
 }
 
 TEST(OffscreenBufferPool, getPutClear) {

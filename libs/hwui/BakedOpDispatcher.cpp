@@ -736,6 +736,7 @@ void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const Textur
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     OffscreenBuffer* buffer = *op.layerHandle;
 
+    // Note that we don't use op->paint here - it's never set on a LayerOp
     float layerAlpha = op.alpha * state.alpha;
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
@@ -754,11 +755,35 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
 }
 
 void BakedOpDispatcher::onCopyToLayerOp(BakedOpRenderer& renderer, const CopyToLayerOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("TODO!");
+    LOG_ALWAYS_FATAL_IF(*(op.layerHandle) != nullptr, "layer already exists!");
+    *(op.layerHandle) = renderer.copyToLayer(state.computedState.clippedBounds);
+    LOG_ALWAYS_FATAL_IF(*op.layerHandle == nullptr, "layer copy failed");
 }
 
 void BakedOpDispatcher::onCopyFromLayerOp(BakedOpRenderer& renderer, const CopyFromLayerOp& op, const BakedOpState& state) {
-    LOG_ALWAYS_FATAL("TODO!");
+    LOG_ALWAYS_FATAL_IF(*op.layerHandle == nullptr, "no layer to draw underneath!");
+    if (!state.computedState.clippedBounds.isEmpty()) {
+        if (op.paint && op.paint->getAlpha() < 255) {
+            SkPaint layerPaint;
+            layerPaint.setAlpha(op.paint->getAlpha());
+            layerPaint.setXfermodeMode(SkXfermode::kDstIn_Mode);
+            layerPaint.setColorFilter(op.paint->getColorFilter());
+            RectOp rectOp(state.computedState.clippedBounds, Matrix4::identity(), nullptr, &layerPaint);
+            BakedOpDispatcher::onRectOp(renderer, rectOp, state);
+        }
+
+        OffscreenBuffer& layer = **(op.layerHandle);
+        auto mode = PaintUtils::getXfermodeDirect(op.paint);
+        Glop glop;
+        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                .setRoundRectClipState(state.roundRectClipState)
+                .setMeshTexturedUvQuad(nullptr, layer.getTextureCoordinates())
+                .setFillLayer(layer.texture, nullptr, 1.0f, mode, Blend::ModeOrderSwap::Swap)
+                .setTransform(state.computedState.transform, TransformFlags::None)
+                .setModelViewMapUnitToRect(state.computedState.clippedBounds)
+                .build();
+        renderer.renderGlop(state, glop);
+    }
 }
 
 } // namespace uirenderer

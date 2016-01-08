@@ -46,6 +46,8 @@ public:
             uint32_t viewportWidth, uint32_t viewportHeight);
     ~OffscreenBuffer();
 
+    Rect getTextureCoordinates();
+
     // must be called prior to rendering, to construct/update vertex buffer
     void updateMeshFromRegion();
 

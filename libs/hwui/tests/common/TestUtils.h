@@ -53,6 +53,13 @@ typedef DisplayListCanvas TestCanvas;
             && MathUtils::areEqual(a.right, b.right) \
             && MathUtils::areEqual(a.bottom, b.bottom));
 
+#define EXPECT_CLIP_RECT(expRect, clipStatePtr) \
+        EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped"; \
+        if ((clipStatePtr)->mode == ClipMode::Rectangle) { \
+            EXPECT_EQ((expRect), reinterpret_cast<const ClipRect*>(clipStatePtr)->rect); \
+        } else { \
+            ADD_FAILURE() << "ClipState not a rect"; \
+        }
 /**
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
  * (for e.g. accessing its RenderState)

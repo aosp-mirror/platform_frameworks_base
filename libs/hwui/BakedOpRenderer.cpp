@@ -79,6 +79,20 @@ void BakedOpRenderer::endLayer() {
     mRenderTarget.frameBufferId = 0;
 }
 
+OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState,
+            area.getWidth(), area.getHeight());
+    if (!area.isEmpty()) {
+        mCaches.textureState().activateTexture(0);
+        mCaches.textureState().bindTexture(buffer->texture.id);
+
+        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
+                area.left, mRenderTarget.viewportHeight - area.bottom,
+                area.getWidth(), area.getHeight());
+    }
+    return buffer;
+}
+
 void BakedOpRenderer::startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) {
     LOG_ALWAYS_FATAL_IF(mRenderTarget.frameBufferId != 0, "primary framebufferId must be 0");
     mRenderState.bindFramebuffer(0);

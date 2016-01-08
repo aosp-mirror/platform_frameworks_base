@@ -54,6 +54,12 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
             GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 }
 
+Rect OffscreenBuffer::getTextureCoordinates() {
+    const float texX = 1.0f / float(texture.width);
+    const float texY = 1.0f / float(texture.height);
+    return Rect(0, viewportHeight * texY, viewportWidth * texX, 0);
+}
+
 void OffscreenBuffer::updateMeshFromRegion() {
     // avoid T-junctions as they cause artifacts in between the resultant
     // geometry when complex transforms occur.
