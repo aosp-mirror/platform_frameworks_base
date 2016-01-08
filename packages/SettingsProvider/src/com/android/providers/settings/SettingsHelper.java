@@ -229,18 +229,25 @@ public class SettingsHelper {
     }
 
     private boolean isAlreadyConfiguredCriticalAccessibilitySetting(String name) {
-        // These are the critical accessibility settings that are required for a
-        // blind user to be able to interact with the device. If these settings are
+        // These are the critical accessibility settings that are required for users with
+        // accessibility needs to be able to interact with the device. If these settings are
         // already configured, we will not overwrite them. If they are already set,
-        // it means that the user has performed a global gesture to enable accessibility
-        // and definitely needs these features working after the restore.
+        // it means that the user has performed a global gesture to enable accessibility or set
+        // these settings in the Accessibility portion of the Setup Wizard, and definitely needs
+        // these features working after the restore.
         if (Settings.Secure.ACCESSIBILITY_ENABLED.equals(name)
                 || Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION.equals(name)
                 || Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD.equals(name)
-                || Settings.Secure.TOUCH_EXPLORATION_ENABLED.equals(name)) {
+                || Settings.Secure.TOUCH_EXPLORATION_ENABLED.equals(name)
+                || Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED.equals(name)
+                || Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED.equals(name)
+                || Settings.Secure.UI_NIGHT_MODE.equals(name)) {
             return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) != 0;
         } else if (Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES.equals(name)
-                || Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(name)) {
+                || Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(name)
+                || Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX.equals(name)
+                || Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER.equals(name)
+                || Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE.equals(name)) {
             return !TextUtils.isEmpty(Settings.Secure.getString(
                     mContext.getContentResolver(), name));
         }
