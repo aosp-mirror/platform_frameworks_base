@@ -168,7 +168,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>The active capture session determines the set of potential output Surfaces for
      * the camera device for each capture request. A given request may use all
      * or only some of the outputs. Once the CameraCaptureSession is created, requests can be
-     * can be submitted with {@link CameraCaptureSession#capture capture},
+     * submitted with {@link CameraCaptureSession#capture capture},
      * {@link CameraCaptureSession#captureBurst captureBurst},
      * {@link CameraCaptureSession#setRepeatingRequest setRepeatingRequest}, or
      * {@link CameraCaptureSession#setRepeatingBurst setRepeatingBurst}.</p>
