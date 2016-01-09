@@ -205,6 +205,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mDownTouchPos.set((int) (ev.getX() * getScaleX()), (int) (ev.getY() * getScaleY()));
@@ -244,12 +249,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform,
             TaskViewAnimation toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
         RecentsConfiguration config = Recents.getConfiguration();
-        Utilities.cancelAnimation(mTransformAnimation);
+        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
 
         // Compose the animations for the transform
         mTmpAnimators.clear();
-        boolean requiresHwLayers = toTransform.applyToTaskView(this, mTmpAnimators, toAnimation,
-                !config.fakeShadows);
+        toTransform.applyToTaskView(this, mTmpAnimators, toAnimation, !config.fakeShadows);
         if (toAnimation.isImmediate()) {
             setTaskProgress(toTransform.p);
             if (toAnimation.listener != null) {
@@ -266,22 +270,13 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
             // Create the animator
             mTransformAnimation = toAnimation.createAnimator(mTmpAnimators);
-            if (requiresHwLayers) {
-                setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                mTransformAnimation.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        setLayerType(View.LAYER_TYPE_NONE, null);
-                    }
-                });
-            }
             mTransformAnimation.start();
         }
     }
 
     /** Resets this view's properties */
     void resetViewProperties() {
-        Utilities.cancelAnimation(mTransformAnimation);
+        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
         setDim(0);
         setVisibility(View.VISIBLE);
         getViewBounds().reset();
@@ -297,7 +292,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      * Cancels any current transform animations.
      */
     public void cancelTransformAnimation() {
-        Utilities.cancelAnimation(mTransformAnimation);
+        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
     }
 
     /** Enables/disables handling touch on this task view. */

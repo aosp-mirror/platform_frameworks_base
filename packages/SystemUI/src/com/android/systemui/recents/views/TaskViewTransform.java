@@ -125,15 +125,12 @@ public class TaskViewTransform {
 
     /**
      * Applies this transform to a view.
-     *
-     * @return whether hardware layers are required for this animation.
      */
-    public boolean applyToTaskView(TaskView v, ArrayList<Animator> animators,
+    public void applyToTaskView(TaskView v, ArrayList<Animator> animators,
             TaskViewAnimation taskAnimation, boolean allowShadows) {
         // Return early if not visible
-        boolean requiresHwLayers = false;
         if (!visible) {
-            return requiresHwLayers;
+            return;
         }
 
         if (taskAnimation.isImmediate()) {
@@ -163,7 +160,6 @@ public class TaskViewTransform {
             }
             if (hasAlphaChangedFrom(v.getAlpha())) {
                 animators.add(ObjectAnimator.ofFloat(v, View.ALPHA, v.getAlpha(), alpha));
-                requiresHwLayers = true;
             }
             if (hasRectChangedFrom(v)) {
                 animators.add(ObjectAnimator.ofPropertyValuesHolder(v,
@@ -173,7 +169,6 @@ public class TaskViewTransform {
                         PropertyValuesHolder.ofInt(BOTTOM, v.getBottom(), (int) rect.bottom)));
             }
         }
-        return requiresHwLayers;
     }
 
     /** Reset the transform on a view. */
