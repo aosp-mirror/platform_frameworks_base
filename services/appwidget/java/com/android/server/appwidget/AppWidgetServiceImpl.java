@@ -16,7 +16,6 @@
 
 package com.android.server.appwidget;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -2206,9 +2205,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final Resources resources;
             final long identity = Binder.clearCallingIdentity();
             try {
-                resources = mContext.getPackageManager()
-                        .getResourcesForApplicationAsUser(activityInfo.packageName,
-                                UserHandle.getUserId(providerId.uid));
+                final PackageManager pm = mContext.getPackageManager();
+                final int userId = UserHandle.getUserId(providerId.uid);
+                final ApplicationInfo app = pm.getApplicationInfoAsUser(activityInfo.packageName,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+                resources = pm.getResourcesForApplication(app);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2308,6 +2309,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         final long identity = Binder.clearCallingIdentity();
         try {
             int flags = PackageManager.GET_META_DATA;
+
+            // We really need packages to be around and parsed to know if they
+            // provide widgets, and we only load widgets after user is unlocked.
+            flags |= PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
             // Widgets referencing shared libraries need to have their
             // dependencies loaded.

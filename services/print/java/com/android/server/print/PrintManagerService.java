@@ -16,6 +16,9 @@
 
 package com.android.server.print;
 
+import static android.content.pm.PackageManager.GET_SERVICES;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -61,7 +64,6 @@ import java.util.List;
  * Context.PRINT_SERVICE.
  * PrintManager implementation is contained within.
  */
-
 public final class PrintManagerService extends SystemService {
     private final PrintManagerImpl mPrintManagerImpl;
 
@@ -586,7 +588,8 @@ public final class PrintManagerService extends SystemService {
                     intent.setPackage(packageName);
 
                     List<ResolveInfo> installedServices = mContext.getPackageManager()
-                            .queryIntentServicesAsUser(intent, PackageManager.GET_SERVICES,
+                            .queryIntentServicesAsUser(intent,
+                                    GET_SERVICES | MATCH_DEBUG_TRIAGED_MISSING,
                                     getChangingUserId());
 
                     if (installedServices != null) {

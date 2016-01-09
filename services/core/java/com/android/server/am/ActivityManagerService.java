@@ -257,6 +257,7 @@ import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEME
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
@@ -3445,7 +3446,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     checkTime(startTime, "startProcess: getting gids from package manager");
                     final IPackageManager pm = AppGlobals.getPackageManager();
-                    permGids = pm.getPackageGidsEtc(app.info.packageName,
+                    permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DEBUG_TRIAGED_MISSING, app.userId);
                     MountServiceInternal mountServiceInternal = LocalServices.getService(
                             MountServiceInternal.class);
@@ -3705,21 +3706,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             mCheckedForSetup = true;
 
             // See if we should be showing the platform update setup UI.
-            Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
-            List<ResolveInfo> ris = mContext.getPackageManager()
-                    .queryIntentActivities(intent, PackageManager.GET_META_DATA);
-
-            // We don't allow third party apps to replace this.
-            ResolveInfo ri = null;
-            for (int i=0; ris != null && i<ris.size(); i++) {
-                if ((ris.get(i).activityInfo.applicationInfo.flags
-                        & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                    ri = ris.get(i);
-                    break;
-                }
-            }
-
-            if (ri != null) {
+            final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
+            final List<ResolveInfo> ris = mContext.getPackageManager().queryIntentActivities(intent,
+                    PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA);
+            if (!ris.isEmpty()) {
+                final ResolveInfo ri = ris.get(0);
                 String vers = ri.activityInfo.metaData != null
                         ? ri.activityInfo.metaData.getString(Intent.METADATA_SETUP_VERSION)
                         : null;
@@ -5387,7 +5378,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int pkgUid = -1;
             synchronized(this) {
                 try {
-                    pkgUid = pm.getPackageUid(packageName, userId);
+                    pkgUid = pm.getPackageUid(packageName, MATCH_UNINSTALLED_PACKAGES, userId);
                 } catch (RemoteException e) {
                 }
                 if (pkgUid == -1) {
@@ -5472,7 +5463,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized(this) {
                 int appId = -1;
                 try {
-                    appId = UserHandle.getAppId(pm.getPackageUid(packageName, 0));
+                    appId = UserHandle.getAppId(
+                            pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId));
                 } catch (RemoteException e) {
                 }
                 if (appId == -1) {
@@ -5558,7 +5550,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 for (int user : users) {
                     int pkgUid = -1;
                     try {
-                        pkgUid = pm.getPackageUid(packageName, user);
+                        pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
+                                user);
                     } catch (RemoteException e) {
                     }
                     if (pkgUid == -1) {
@@ -5952,8 +5945,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (appId < 0 && packageName != null) {
             try {
-                appId = UserHandle.getAppId(
-                        AppGlobals.getPackageManager().getPackageUid(packageName, 0));
+                appId = UserHandle.getAppId(AppGlobals.getPackageManager()
+                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId));
             } catch (RemoteException e) {
             }
         }
@@ -6933,8 +6926,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             try {
                 if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
-                    int uid = AppGlobals.getPackageManager()
-                            .getPackageUid(packageName, UserHandle.getUserId(callingUid));
+                    final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                            MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callingUid));
                     if (!UserHandle.isSameApp(callingUid, uid)) {
                         String msg = "Permission Denial: getIntentSender() from pid="
                             + Binder.getCallingPid()
@@ -7029,8 +7022,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             PendingIntentRecord rec = (PendingIntentRecord)sender;
             try {
-                int uid = AppGlobals.getPackageManager()
-                        .getPackageUid(rec.key.packageName, UserHandle.getCallingUserId());
+                final int uid = AppGlobals.getPackageManager().getPackageUid(rec.key.packageName,
+                        MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getCallingUserId());
                 if (!UserHandle.isSameApp(uid, Binder.getCallingUid())) {
                     String msg = "Permission Denial: cancelIntentSender() from pid="
                         + Binder.getCallingPid()
@@ -7777,7 +7770,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         int targetUid = lastTargetUid;
         if (targetUid < 0 && targetPkg != null) {
             try {
-                targetUid = pm.getPackageUid(targetPkg, UserHandle.getUserId(callingUid));
+                targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+                        UserHandle.getUserId(callingUid));
                 if (targetUid < 0) {
                     if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION,
                             "Can't grant URI permission no uid for: " + targetPkg);
@@ -7915,7 +7909,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         int targetUid;
         final IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            targetUid = pm.getPackageUid(targetPkg, targetUserId);
+            targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING, targetUserId);
         } catch (RemoteException ex) {
             return;
         }
@@ -7976,7 +7970,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             targetUid = needed.targetUid;
         } else {
             try {
-                targetUid = pm.getPackageUid(targetPkg, targetUserId);
+                targetUid = pm.getPackageUid(targetPkg, MATCH_DEBUG_TRIAGED_MISSING,
+                        targetUserId);
             } catch (RemoteException ex) {
                 return null;
             }
@@ -8443,8 +8438,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (pi != null && sourcePkg.equals(pi.packageName)) {
                             int targetUid = -1;
                             try {
-                                targetUid = AppGlobals.getPackageManager()
-                                        .getPackageUid(targetPkg, targetUserId);
+                                targetUid = AppGlobals.getPackageManager().getPackageUid(
+                                        targetPkg, MATCH_UNINSTALLED_PACKAGES, targetUserId);
                             } catch (RemoteException e) {
                             }
                             if (targetUid != -1) {
@@ -8600,7 +8595,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final int callingUid = Binder.getCallingUid();
         final IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            final int packageUid = pm.getPackageUid(packageName, UserHandle.getUserId(callingUid));
+            final int packageUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
+                    UserHandle.getUserId(callingUid));
             if (packageUid != callingUid) {
                 throw new SecurityException(
                         "Package " + packageName + " does not belong to calling UID " + callingUid);
@@ -12459,19 +12455,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         List<ResolveInfo> ris = null;
         try {
             ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, 0, UserHandle.USER_SYSTEM);
+                    intent, null, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
         } catch (RemoteException e) {
         }
         if (ris == null) {
             return false;
         }
-        for (int i=ris.size()-1; i>=0; i--) {
-            if ((ris.get(i).activityInfo.applicationInfo.flags
-                    &ApplicationInfo.FLAG_SYSTEM) == 0) {
-                ris.remove(i);
-            }
-        }
-        intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE);
+        intent.addFlags(Intent.FLAG_RECEIVER_BOOT_UPGRADE | Intent.FLAG_DEBUG_TRIAGED_MISSING);
 
         ArrayList<ComponentName> lastDoneReceivers = readLastDonePreBootReceivers();
         for (int i=0; i<ris.size(); i++) {
@@ -13991,7 +13981,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dumpPackage != null) {
             IPackageManager pm = AppGlobals.getPackageManager();
             try {
-                dumpUid = pm.getPackageUid(dumpPackage, 0);
+                dumpUid = pm.getPackageUid(dumpPackage, MATCH_UNINSTALLED_PACKAGES, 0);
             } catch (RemoteException e) {
             }
         }
@@ -14927,7 +14917,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             int dumpUid = -2;
             if (dumpPackage != null) {
                 try {
-                    dumpUid = mContext.getPackageManager().getPackageUidAsUser(dumpPackage, 0);
+                    dumpUid = mContext.getPackageManager().getPackageUidAsUser(dumpPackage,
+                            MATCH_UNINSTALLED_PACKAGES, 0);
                 } catch (NameNotFoundException e) {
                     dumpUid = -1;
                 }
@@ -21080,7 +21071,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         IPackageManager pm = AppGlobals.getPackageManager();
         int pkgUid = -1;
         try {
-            pkgUid = pm.getPackageUid(packageName, userId);
+            pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
         } catch (RemoteException e) {
         }
         if (pkgUid == -1) {

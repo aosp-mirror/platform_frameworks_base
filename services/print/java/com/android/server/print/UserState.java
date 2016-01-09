@@ -16,12 +16,15 @@
 
 package com.android.server.print;
 
+import static android.content.pm.PackageManager.GET_META_DATA;
+import static android.content.pm.PackageManager.GET_SERVICES;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
@@ -676,8 +679,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         Set<PrintServiceInfo> tempPrintServices = new HashSet<PrintServiceInfo>();
 
         List<ResolveInfo> installedServices = mContext.getPackageManager()
-                .queryIntentServicesAsUser(mQueryIntent, PackageManager.GET_SERVICES
-                        | PackageManager.GET_META_DATA, mUserId);
+                .queryIntentServicesAsUser(mQueryIntent,
+                        GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING, mUserId);
 
         final int installedCount = installedServices.size();
         for (int i = 0, count = installedCount; i < count; i++) {

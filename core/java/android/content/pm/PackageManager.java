@@ -2541,6 +2541,10 @@ public abstract class PackageManager {
     public abstract ApplicationInfo getApplicationInfo(String packageName,
             @ApplicationInfoFlags int flags) throws NameNotFoundException;
 
+    /** {@hide} */
+    public abstract ApplicationInfo getApplicationInfoAsUser(String packageName,
+            @ApplicationInfoFlags int flags, @UserIdInt int userId) throws NameNotFoundException;
+
     /**
      * Retrieve all of the information we know about a particular activity
      * class.

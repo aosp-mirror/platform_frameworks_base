@@ -2355,7 +2355,8 @@ class MountService extends IMountService.Stub
             return false;
         }
 
-        final int packageUid = mPms.getPackageUid(packageName, UserHandle.getUserId(callerUid));
+        final int packageUid = mPms.getPackageUid(packageName,
+                PackageManager.MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(callerUid));
 
         if (DEBUG_OBB) {
             Slog.d(TAG, "packageName = " + packageName + ", packageUid = " +

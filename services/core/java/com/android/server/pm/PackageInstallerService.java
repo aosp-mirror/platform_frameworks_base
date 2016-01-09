@@ -386,8 +386,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
         final int userId = readIntAttribute(in, ATTR_USER_ID);
         final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
-        final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID,
-                mPm.getPackageUid(installerPackageName, userId));
+        final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID, mPm.getPackageUid(
+                installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
         final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
         final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;

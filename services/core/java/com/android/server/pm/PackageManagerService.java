@@ -59,6 +59,7 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
@@ -2836,12 +2837,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public int getPackageUid(String packageName, int userId) {
-        return getPackageUidEtc(packageName, 0, userId);
-    }
-
-    @Override
-    public int getPackageUidEtc(String packageName, int flags, int userId) {
+    public int getPackageUid(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return -1;
         flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package uid");
@@ -2864,12 +2860,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public int[] getPackageGids(String packageName, int userId) {
-        return getPackageGidsEtc(packageName, 0, userId);
-    }
-
-    @Override
-    public int[] getPackageGidsEtc(String packageName, int flags, int userId) {
+    public int[] getPackageGids(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForPackage(flags, userId, packageName);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
@@ -4039,7 +4030,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "canShowRequestPermissionRationale for user " + userId);
         }
 
-        final int uid = getPackageUid(packageName, userId);
+        final int uid = getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
         if (UserHandle.getAppId(getCallingUid()) != UserHandle.getAppId(uid)) {
             return false;
         }
@@ -11205,7 +11196,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * do, then we'll defer to them to verify the packages.
                  */
                 final int requiredUid = mRequiredVerifierPackage == null ? -1
-                        : getPackageUid(mRequiredVerifierPackage, verifierUser.getIdentifier());
+                        : getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                                verifierUser.getIdentifier());
                 if (!origin.existing && requiredUid != -1
                         && isVerificationEnabled(verifierUser.getIdentifier(), installFlags)) {
                     final Intent verification = new Intent(
@@ -12052,8 +12044,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         int doPreCopy() {
             if (isFwdLocked()) {
-                if (!PackageHelper.fixSdPermissions(cid,
-                        getPackageUid(DEFAULT_CONTAINER_PACKAGE, 0), RES_FILE_NAME)) {
+                if (!PackageHelper.fixSdPermissions(cid, getPackageUid(DEFAULT_CONTAINER_PACKAGE,
+                        MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM), RES_FILE_NAME)) {
                     return PackageManager.INSTALL_FAILED_CONTAINER_ERROR;
                 }
             }
@@ -13055,6 +13047,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final int verifierUid = getPackageUid(
                 mIntentFilterVerifierComponent.getPackageName(),
+                MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? UserHandle.USER_SYSTEM : userId);
 
         mHandler.removeMessages(START_INTENT_FILTER_VERIFICATIONS);
@@ -15686,11 +15679,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pw.print("  Required: ");
                     pw.print(mRequiredVerifierPackage);
                     pw.print(" (uid=");
-                    pw.print(getPackageUid(mRequiredVerifierPackage, 0));
+                    pw.print(getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.USER_SYSTEM));
                     pw.println(")");
                 } else if (mRequiredVerifierPackage != null) {
                     pw.print("vrfy,"); pw.print(mRequiredVerifierPackage);
-                    pw.print(","); pw.println(getPackageUid(mRequiredVerifierPackage, 0));
+                    pw.print(",");
+                    pw.println(getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                            UserHandle.USER_SYSTEM));
                 }
             }
 
@@ -15705,11 +15701,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pw.print("  Using: ");
                         pw.print(verifierPackageName);
                         pw.print(" (uid=");
-                        pw.print(getPackageUid(verifierPackageName, 0));
+                        pw.print(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
+                                UserHandle.USER_SYSTEM));
                         pw.println(")");
                     } else if (verifierPackageName != null) {
                         pw.print("ifv,"); pw.print(verifierPackageName);
-                        pw.print(","); pw.println(getPackageUid(verifierPackageName, 0));
+                        pw.print(",");
+                        pw.println(getPackageUid(verifierPackageName, MATCH_DEBUG_TRIAGED_MISSING,
+                                UserHandle.USER_SYSTEM));
                     }
                 } else {
                     pw.println();

@@ -16,9 +16,8 @@
 
 package com.android.server;
 
+import android.app.AppOpsManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.MemoryFile;
@@ -66,6 +65,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
     private static final int HISTORY_SIZE = 20;
 
     private final Context mContext;
+    private final AppOpsManager mAppOps;
     private final Object mLock = new Object();
     private ArrayList<ActiveBuffer> mActive = new ArrayList<>();
     private HistoricalData[] mHistoricalLog = new HistoricalData[HISTORY_SIZE];
@@ -74,15 +74,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     public GraphicsStatsService(Context context) {
         mContext = context;
-    }
-
-    private boolean isValid(int uid, String packageName) {
-        try {
-            PackageInfo info = mContext.getPackageManager().getPackageInfo(packageName, 0);
-            return info.applicationInfo.uid == uid;
-        } catch (NameNotFoundException e) {
-        }
-        return false;
+        mAppOps = context.getSystemService(AppOpsManager.class);
     }
 
     @Override
@@ -93,9 +85,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         ParcelFileDescriptor pfd = null;
         long callingIdentity = Binder.clearCallingIdentity();
         try {
-            if (!isValid(uid, packageName)) {
-                throw new RemoteException("Invalid package name");
-            }
+            mAppOps.checkPackage(uid, packageName);
             synchronized (mLock) {
                 pfd = requestBufferForProcessLocked(token, uid, pid, packageName);
             }

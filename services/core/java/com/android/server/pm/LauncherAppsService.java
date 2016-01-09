@@ -24,8 +24,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -45,7 +45,6 @@ import android.util.Slog;
 import com.android.internal.content.PackageMonitor;
 import com.android.server.SystemService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -200,7 +199,8 @@ public class LauncherAppsService extends SystemService {
             mainIntent.setPackage(packageName);
             long ident = Binder.clearCallingIdentity();
             try {
-                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent, 0 /* flags */,
+                List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                         user.getIdentifier());
                 return new ParceledListSlice<>(apps);
             } finally {
@@ -218,7 +218,8 @@ public class LauncherAppsService extends SystemService {
 
             long ident = Binder.clearCallingIdentity();
             try {
-                ResolveInfo app = mPm.resolveActivityAsUser(intent, 0, user.getIdentifier());
+                ResolveInfo app = mPm.resolveActivityAsUser(intent,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
                 return app;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -236,7 +237,8 @@ public class LauncherAppsService extends SystemService {
             long ident = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                PackageInfo info = pm.getPackageInfo(packageName, 0, user.getIdentifier());
+                PackageInfo info = pm.getPackageInfo(packageName,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
                 return info != null && info.applicationInfo.enabled;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -254,7 +256,8 @@ public class LauncherAppsService extends SystemService {
             long ident = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                ActivityInfo info = pm.getActivityInfo(component, 0, user.getIdentifier());
+                ActivityInfo info = pm.getActivityInfo(component,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
                 return info != null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -279,7 +282,8 @@ public class LauncherAppsService extends SystemService {
             long ident = Binder.clearCallingIdentity();
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
-                ActivityInfo info = pm.getActivityInfo(component, 0, user.getIdentifier());
+                ActivityInfo info = pm.getActivityInfo(component,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
                 if (!info.exported) {
                     throw new SecurityException("Cannot launch non-exported components "
                             + component);
@@ -289,7 +293,7 @@ public class LauncherAppsService extends SystemService {
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
                 List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(launchIntent,
-                        0 /* flags */, user.getIdentifier());
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
                 final int size = apps.size();
                 for (int i = 0; i < size; ++i) {
                     ActivityInfo activityInfo = apps.get(i).activityInfo;

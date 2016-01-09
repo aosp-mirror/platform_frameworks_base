@@ -265,8 +265,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     Ops ops = it.next();
                     int curUid = -1;
                     try {
-                        curUid = AppGlobals.getPackageManager().getPackageUidEtc(ops.packageName,
-                                PackageManager.GET_UNINSTALLED_PACKAGES,
+                        curUid = AppGlobals.getPackageManager().getPackageUid(ops.packageName,
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES,
                                 UserHandle.getUserId(ops.uidState.uid));
                     } catch (RemoteException ignored) {
                     }
@@ -691,7 +691,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (reqPackageName != null) {
             try {
                 reqUid = AppGlobals.getPackageManager().getPackageUid(
-                        reqPackageName, reqUserId);
+                        reqPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, reqUserId);
             } catch (RemoteException e) {
                 /* ignore - local call */
             }
@@ -1167,7 +1167,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                     int pkgUid = -1;
                     try {
                         ApplicationInfo appInfo = ActivityThread.getPackageManager()
-                                .getApplicationInfo(packageName, 0, UserHandle.getUserId(uid));
+                                .getApplicationInfo(packageName,
+                                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                                        UserHandle.getUserId(uid));
                         if (appInfo != null) {
                             pkgUid = appInfo.uid;
                             isPrivileged = (appInfo.privateFlags
@@ -1647,7 +1649,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             if ("root".equals(packageName)) {
                 packageUid = 0;
             } else {
-                packageUid = AppGlobals.getPackageManager().getPackageUid(packageName, userId);
+                packageUid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             }
             if (packageUid < 0) {
                 err.println("Error: No UID for " + packageName + " in user " + userId);

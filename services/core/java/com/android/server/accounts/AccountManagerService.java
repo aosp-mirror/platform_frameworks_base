@@ -3174,7 +3174,8 @@ public class AccountManagerService
         int packageUid = -1;
         try {
             packageUid = AppGlobals.getPackageManager().getPackageUid(
-                    packageName, UserHandle.getCallingUserId());
+                    packageName, PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                    UserHandle.getCallingUserId());
         } catch (RemoteException re) {
             Slog.e(TAG, "Couldn't determine the packageUid for " + packageName + re);
             return new Account[0];
