@@ -404,16 +404,17 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = 0x10000000;
 
     /**
-     * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
-     * when resolving an intent that matches the {@link CrossProfileIntentFilter}, the current
-     * profile will be skipped.
-     * Only activities in the target user can respond to the intent.
+     * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
+     * resolving an intent that matches the {@code CrossProfileIntentFilter},
+     * the current profile will be skipped. Only activities in the target user
+     * can respond to the intent.
+     *
      * @hide
      */
     public static final int SKIP_CURRENT_PROFILE = 0x00000002;
 
     /**
-     * Flag for {@link addCrossProfileIntentFilter}: if this flag is set:
+     * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set:
      * activities in the other profiles can respond to the intent only if no activity with
      * non-negative priority in current profile can respond to the intent.
      * @hide
@@ -520,17 +521,37 @@ public abstract class PackageManager {
      */
     public static final int COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4;
 
+    /** @hide */
+    @IntDef(flag = true, value = {
+            INSTALL_FORWARD_LOCK,
+            INSTALL_REPLACE_EXISTING,
+            INSTALL_ALLOW_TEST,
+            INSTALL_EXTERNAL,
+            INSTALL_INTERNAL,
+            INSTALL_FROM_ADB,
+            INSTALL_ALL_USERS,
+            INSTALL_ALLOW_DOWNGRADE,
+            INSTALL_GRANT_RUNTIME_PERMISSIONS,
+            INSTALL_FORCE_VOLUME_UUID,
+            INSTALL_FORCE_PERMISSION_PROMPT,
+            INSTALL_EPHEMERAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallFlags {}
+
     /**
-     * Flag parameter for {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} to
-     * indicate that this package should be installed as forward locked, i.e. only the app itself
-     * should have access to its code and non-resource assets.
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * should be installed as forward locked, i.e. only the app itself should
+     * have access to its code and non-resource assets.
+     *
      * @hide
      */
     public static final int INSTALL_FORWARD_LOCK = 0x00000001;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that you want to replace an already
-     * installed package, if one exists.
+     * Flag parameter for {@link #installPackage} to indicate that you want to
+     * replace an already installed package, if one exists.
+     *
      * @hide
      */
     public static final int INSTALL_REPLACE_EXISTING = 0x00000002;
@@ -623,170 +644,181 @@ public abstract class PackageManager {
     public static final int DONT_KILL_APP = 0x00000001;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} on success.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} on success.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_SUCCEEDED = 1;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package is
-     * already installed.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the package is already installed.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package archive
-     * file is invalid.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the package archive file is invalid.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_INVALID_APK = -2;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the URI passed in
-     * is invalid.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the URI passed in is invalid.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_INVALID_URI = -3;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if the package manager
-     * service found that the device didn't have enough storage space to install the app.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the package manager service found that
+     * the device didn't have enough storage space to install the app.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_INSUFFICIENT_STORAGE = -4;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if a
-     * package is already installed with the same name.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if a package is already installed with
+     * the same name.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_DUPLICATE_PACKAGE = -5;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the requested shared user does not exist.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the requested shared user does not
+     * exist.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_NO_SHARED_USER = -6;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * a previously installed package of the same name has a different signature
-     * than the new package (and the old package's data was not removed).
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if a previously installed package of the
+     * same name has a different signature than the new package (and the old
+     * package's data was not removed).
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_UPDATE_INCOMPATIBLE = -7;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package is requested a shared user which is already installed on the
-     * device and does not have matching signature.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package is requested a shared
+     * user which is already installed on the device and does not have matching
+     * signature.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_SHARED_USER_INCOMPATIBLE = -8;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package uses a shared library that is not available.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package uses a shared library
+     * that is not available.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_MISSING_SHARED_LIBRARY = -9;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package uses a shared library that is not available.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package uses a shared library
+     * that is not available.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_REPLACE_COULDNT_DELETE = -10;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package failed while optimizing and validating its dex files,
-     * either because there was not enough storage or the validation failed.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package failed while
+     * optimizing and validating its dex files, either because there was not
+     * enough storage or the validation failed.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_DEXOPT = -11;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package failed because the current SDK version is older than
-     * that required by the package.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package failed because the
+     * current SDK version is older than that required by the package.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_OLDER_SDK = -12;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package failed because it contains a content provider with the
-     * same authority as a provider already installed in the system.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package failed because it
+     * contains a content provider with the same authority as a provider already
+     * installed in the system.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_CONFLICTING_PROVIDER = -13;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package failed because the current SDK version is newer than
-     * that required by the package.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package failed because the
+     * current SDK version is newer than that required by the package.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_NEWER_SDK = -14;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package failed because it has specified that it is a test-only
-     * package and the caller has not supplied the {@link #INSTALL_ALLOW_TEST}
-     * flag.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package failed because it has
+     * specified that it is a test-only package and the caller has not supplied
+     * the {@link #INSTALL_ALLOW_TEST} flag.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_TEST_ONLY = -15;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the package being installed contains native code, but none that is
-     * compatible with the device's CPU_ABI.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the package being installed contains
+     * native code, but none that is compatible with the device's CPU_ABI.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_CPU_ABI_INCOMPATIBLE = -16;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package uses a feature that is not available.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package uses a feature that is
+     * not available.
+     *
      * @hide
      */
     @SystemApi
@@ -794,217 +826,234 @@ public abstract class PackageManager {
 
     // ------ Errors related to sdcard
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * a secure container mount point couldn't be accessed on external media.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if a secure container mount point
+     * couldn't be accessed on external media.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_CONTAINER_ERROR = -18;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package couldn't be installed in the specified install
-     * location.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package couldn't be installed
+     * in the specified install location.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_INVALID_INSTALL_LOCATION = -19;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package couldn't be installed in the specified install
-     * location because the media is not available.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package couldn't be installed
+     * in the specified install location because the media is not available.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_MEDIA_UNAVAILABLE = -20;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package couldn't be installed because the verification timed out.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package couldn't be installed
+     * because the verification timed out.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_VERIFICATION_TIMEOUT = -21;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package couldn't be installed because the verification did not succeed.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package couldn't be installed
+     * because the verification did not succeed.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_VERIFICATION_FAILURE = -22;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the package changed from what the calling program expected.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the package changed from what the
+     * calling program expected.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package is assigned a different UID than it previously held.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package is assigned a
+     * different UID than it previously held.
+     *
      * @hide
      */
     public static final int INSTALL_FAILED_UID_CHANGED = -24;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the new package has an older version code than the currently installed package.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the new package has an older version
+     * code than the currently installed package.
+     *
      * @hide
      */
     public static final int INSTALL_FAILED_VERSION_DOWNGRADE = -25;
 
     /**
-     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
-     * the old package has target SDK high enough to support runtime permission and
-     * the new package has target SDK low enough to not support runtime permissions.
+     * Installation return code: this is passed to the
+     * {@link IPackageInstallObserver} if the old package has target SDK high
+     * enough to support runtime permission and the new package has target SDK
+     * low enough to not support runtime permissions.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_PERMISSION_MODEL_DOWNGRADE = -26;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser was given a path that is not a file, or does not end with the expected
-     * '.apk' extension.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser was given a path that is
+     * not a file, or does not end with the expected '.apk' extension.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_NOT_APK = -100;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser was unable to retrieve the AndroidManifest.xml file.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser was unable to retrieve the
+     * AndroidManifest.xml file.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_MANIFEST = -101;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser encountered an unexpected exception.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser encountered an unexpected
+     * exception.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION = -102;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser did not find any certificates in the .apk.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser did not find any
+     * certificates in the .apk.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_NO_CERTIFICATES = -103;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser found inconsistent certificates on the files in the .apk.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser found inconsistent
+     * certificates on the files in the .apk.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES = -104;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser encountered a CertificateEncodingException in one of the
-     * files in the .apk.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser encountered a
+     * CertificateEncodingException in one of the files in the .apk.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING = -105;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser encountered a bad or missing package name in the manifest.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser encountered a bad or
+     * missing package name in the manifest.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME = -106;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser encountered a bad shared user id name in the manifest.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser encountered a bad shared
+     * user id name in the manifest.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID = -107;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser encountered some structural problem in the manifest.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser encountered some structural
+     * problem in the manifest.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_MANIFEST_MALFORMED = -108;
 
     /**
-     * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the parser did not find any actionable tags (instrumentation or application)
-     * in the manifest.
+     * Installation parse return code: this is passed to the
+     * {@link IPackageInstallObserver} if the parser did not find any actionable
+     * tags (instrumentation or application) in the manifest.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_PARSE_FAILED_MANIFEST_EMPTY = -109;
 
     /**
-     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the system failed to install the package because of system issues.
+     * Installation failed return code: this is passed to the
+     * {@link IPackageInstallObserver} if the system failed to install the
+     * package because of system issues.
+     *
      * @hide
      */
     @SystemApi
     public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;
 
     /**
-     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the system failed to install the package because the user is restricted from installing
-     * apps.
+     * Installation failed return code: this is passed to the
+     * {@link IPackageInstallObserver} if the system failed to install the
+     * package because the user is restricted from installing apps.
+     *
      * @hide
      */
     public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
 
     /**
-     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the system failed to install the package because it is attempting to define a
-     * permission that is already defined by some existing package.
+     * Installation failed return code: this is passed to the
+     * {@link IPackageInstallObserver} if the system failed to install the
+     * package because it is attempting to define a permission that is already
+     * defined by some existing package.
+     * <p>
+     * The package name of the app which has already defined the permission is
+     * passed to a {@link PackageInstallObserver}, if any, as the
+     * {@link #EXTRA_FAILURE_EXISTING_PACKAGE} string extra; and the name of the
+     * permission being redefined is passed in the
+     * {@link #EXTRA_FAILURE_EXISTING_PERMISSION} string extra.
      *
-     * <p>The package name of the app which has already defined the permission is passed to
-     * a {@link PackageInstallObserver}, if any, as the {@link #EXTRA_EXISTING_PACKAGE}
-     * string extra; and the name of the permission being redefined is passed in the
-     * {@link #EXTRA_EXISTING_PERMISSION} string extra.
      * @hide
      */
     public static final int INSTALL_FAILED_DUPLICATE_PERMISSION = -112;
 
     /**
-     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
-     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
-     * if the system failed to install the package because its packaged native code did not
-     * match any of the ABIs supported by the system.
+     * Installation failed return code: this is passed to the
+     * {@link IPackageInstallObserver} if the system failed to install the
+     * package because its packaged native code did not match any of the ABIs
+     * supported by the system.
      *
      * @hide
      */
@@ -1029,6 +1078,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_EPHEMERAL_INVALID = -116;
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            DELETE_KEEP_DATA,
+            DELETE_ALL_USERS,
+            DELETE_SYSTEM_APP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeleteFlags {}
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
@@ -1059,8 +1117,8 @@ public abstract class PackageManager {
 
     /**
      * Return code for when package deletion succeeds. This is passed to the
-     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
-     * succeeded in deleting the package.
+     * {@link IPackageDeleteObserver} if the system succeeded in deleting the
+     * package.
      *
      * @hide
      */
@@ -1068,8 +1126,8 @@ public abstract class PackageManager {
 
     /**
      * Deletion failed return code: this is passed to the
-     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
-     * failed to delete the package for an unspecified reason.
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * for an unspecified reason.
      *
      * @hide
      */
@@ -1077,9 +1135,8 @@ public abstract class PackageManager {
 
     /**
      * Deletion failed return code: this is passed to the
-     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
-     * failed to delete the package because it is the active DevicePolicy
-     * manager.
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * because it is the active DevicePolicy manager.
      *
      * @hide
      */
@@ -1087,8 +1144,8 @@ public abstract class PackageManager {
 
     /**
      * Deletion failed return code: this is passed to the
-     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
-     * failed to delete the package since the user is restricted.
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * since the user is restricted.
      *
      * @hide
      */
@@ -1096,9 +1153,9 @@ public abstract class PackageManager {
 
     /**
      * Deletion failed return code: this is passed to the
-     * {@link IPackageDeleteObserver} by {@link #deletePackage()} if the system
-     * failed to delete the package because a profile
-     * or device owner has marked the package as uninstallable.
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * because a profile or device owner has marked the package as
+     * uninstallable.
      *
      * @hide
      */
@@ -1108,8 +1165,7 @@ public abstract class PackageManager {
     public static final int DELETE_FAILED_ABORTED = -5;
 
     /**
-     * Return code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)} when the
+     * Return code that is passed to the {@link IPackageMoveObserver} when the
      * package has been successfully moved by the system.
      *
      * @hide
@@ -1117,59 +1173,57 @@ public abstract class PackageManager {
     public static final int MOVE_SUCCEEDED = -100;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * when the package hasn't been successfully moved by the system
-     * because of insufficient memory on specified media.
+     * Error code that is passed to the {@link IPackageMoveObserver} when the
+     * package hasn't been successfully moved by the system because of
+     * insufficient memory on specified media.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_INSUFFICIENT_STORAGE = -1;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * if the specified package doesn't exist.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package doesn't exist.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_DOESNT_EXIST = -2;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * if the specified package cannot be moved since its a system package.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package cannot be moved since its a system package.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_SYSTEM_PACKAGE = -3;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * if the specified package cannot be moved since its forward locked.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package cannot be moved since its forward locked.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_FORWARD_LOCKED = -4;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * if the specified package cannot be moved to the specified location.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package cannot be moved to the specified location.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_INVALID_LOCATION = -5;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)}
-     * if the specified package cannot be moved to the specified location.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package cannot be moved to the specified location.
+     *
      * @hide
      */
     public static final int MOVE_FAILED_INTERNAL_ERROR = -6;
 
     /**
-     * Error code that is passed to the {@link IPackageMoveObserver} by
-     * {@link #movePackage(android.net.Uri, IPackageMoveObserver)} if the
-     * specified package already has an operation pending in the
-     * {@link PackageHandler} queue.
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package already has an operation pending in the queue.
      *
      * @hide
      */
@@ -1245,28 +1299,31 @@ public abstract class PackageManager {
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED = 0;
 
     /**
-     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
-     * to indicate that the User will always be prompted the Intent Disambiguation Dialog if there
-     * are two or more Intent resolved for the IntentFilter's domain(s).
+     * Used as the {@code status} argument for
+     * {@link #updateIntentVerificationStatusAsUser} to indicate that the User
+     * will always be prompted the Intent Disambiguation Dialog if there are two
+     * or more Intent resolved for the IntentFilter's domain(s).
      *
      * @hide
      */
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK = 1;
 
     /**
-     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
-     * to indicate that the User will never be prompted the Intent Disambiguation Dialog if there
-     * are two or more resolution of the Intent. The default App for the domain(s) specified in the
-     * IntentFilter will also ALWAYS be used.
+     * Used as the {@code status} argument for
+     * {@link #updateIntentVerificationStatusAsUser} to indicate that the User
+     * will never be prompted the Intent Disambiguation Dialog if there are two
+     * or more resolution of the Intent. The default App for the domain(s)
+     * specified in the IntentFilter will also ALWAYS be used.
      *
      * @hide
      */
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS = 2;
 
     /**
-     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
-     * to indicate that the User may be prompted the Intent Disambiguation Dialog if there
-     * are two or more Intent resolved. The default App for the domain(s) specified in the
+     * Used as the {@code status} argument for
+     * {@link #updateIntentVerificationStatusAsUser} to indicate that the User
+     * may be prompted the Intent Disambiguation Dialog if there are two or more
+     * Intent resolved. The default App for the domain(s) specified in the
      * IntentFilter will also NEVER be presented to the User.
      *
      * @hide
@@ -1274,12 +1331,13 @@ public abstract class PackageManager {
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER = 3;
 
     /**
-     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
-     * to indicate that this app should always be considered as an ambiguous candidate for
-     * handling the matching Intent even if there are other candidate apps in the "always"
-     * state.  Put another way: if there are any 'always ask' apps in a set of more than
-     * one candidate app, then a disambiguation is *always* presented even if there is
-     * another candidate app with the 'always' state.
+     * Used as the {@code status} argument for
+     * {@link #updateIntentVerificationStatusAsUser} to indicate that this app
+     * should always be considered as an ambiguous candidate for handling the
+     * matching Intent even if there are other candidate apps in the "always"
+     * state. Put another way: if there are any 'always ask' apps in a set of
+     * more than one candidate app, then a disambiguation is *always* presented
+     * even if there is another candidate app with the 'always' state.
      *
      * @hide
      */
@@ -2062,9 +2120,9 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
-     * Extra field name for the ID of a intent filter pending verification. Passed to
-     * an intent filter verifier and is used to call back to
-     * {@link PackageManager#verifyIntentFilter(int, int)}
+     * Extra field name for the ID of a intent filter pending verification.
+     * Passed to an intent filter verifier and is used to call back to
+     * {@link #verifyIntentFilter}
      *
      * @hide
      */
@@ -3245,7 +3303,7 @@ public abstract class PackageManager {
      *
      * @see #isEphemeralApplication()
      * @see #getEphemeralCookieMaxSizeBytes()
-     * @see #getEphemeralCookie();
+     * @see #getEphemeralCookie()
      */
     public abstract boolean setEphemeralCookie(@NonNull  byte[] cookie);
 
@@ -4359,211 +4417,64 @@ public abstract class PackageManager {
     }
 
     /**
-     * @hide Install a package. Since this may take a little while, the result
-     *       will be posted back to the given observer. An installation will
-     *       fail if the calling context lacks the
-     *       {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if
-     *       the package named in the package file's manifest is already
-     *       installed, or if there's no space available on the device.
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package
-     *            installation is complete.
-     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. This parameter must not be
-     *            null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING},
-     *            {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @deprecated Use {@link #installPackage(Uri, PackageInstallObserver, int,
-     *             String)} instead. This method will continue to be supported
-     *             but the older observer interface will not get additional
-     *             failure details.
+     * @deprecated replaced by {@link PackageInstaller}
+     * @hide
      */
+    @Deprecated
     public abstract void installPackage(
-            Uri packageURI, IPackageInstallObserver observer, int flags,
+            Uri packageURI, IPackageInstallObserver observer, @InstallFlags int flags,
             String installerPackageName);
 
     /**
-     * Similar to
-     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
-     * with an extra verification file provided.
-     *
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package
-     *            installation is complete.
-     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. This parameter must not be
-     *            null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING},
-     *            {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @param verificationURI The location of the supplementary verification
-     *            file. This can be a 'file:' or a 'content:' URI. May be
-     *            {@code null}.
-     * @param encryptionParams if the package to be installed is encrypted,
-     *            these parameters describing the encryption and authentication
-     *            used. May be {@code null}.
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
-     * @deprecated Use {@link #installPackageWithVerification(Uri,
-     *             PackageInstallObserver, int, String, Uri,
-     *             ContainerEncryptionParams)} instead. This method will
-     *             continue to be supported but the older observer interface
-     *             will not get additional failure details.
      */
+    @Deprecated
     public abstract void installPackageWithVerification(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI,
-            ContainerEncryptionParams encryptionParams);
+            IPackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
+            Uri verificationURI, ContainerEncryptionParams encryptionParams);
 
     /**
-     * Similar to
-     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
-     * with an extra verification information provided.
-     *
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package
-     *            installation is complete.
-     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
-     *            will be called when that happens. This parameter must not be
-     *            null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING},
-     *            {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @param verificationParams an object that holds signal information to
-     *            assist verification. May be {@code null}.
-     * @param encryptionParams if the package to be installed is encrypted,
-     *            these parameters describing the encryption and authentication
-     *            used. May be {@code null}.
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
-     * @deprecated Use {@link #installPackageWithVerificationAndEncryption(Uri,
-     *             PackageInstallObserver, int, String, VerificationParams,
-     *             ContainerEncryptionParams)} instead. This method will
-     *             continue to be supported but the older observer interface
-     *             will not get additional failure details.
      */
     @Deprecated
     public abstract void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams,
-            ContainerEncryptionParams encryptionParams);
-
-    // Package-install variants that take the new, expanded form of observer interface.
-    // Note that these *also* take the original observer type and will redundantly
-    // report the same information to that observer if supplied; but it is not required.
+            IPackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
+            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams);
 
     /**
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
-     *
-     * Install a package. Since this may take a little while, the result will
-     * be posted back to the given observer.  An installation will fail if the calling context
-     * lacks the {@link android.Manifest.permission#INSTALL_PACKAGES} permission, if the
-     * package named in the package file's manifest is already installed, or if there's no space
-     * available on the device.
-     *
-     * @param packageURI The location of the package file to install.  This can be a 'file:' or a
-     * 'content:' URI.
-     * @param observer An observer callback to get notified when the package installation is
-     * complete. {@link PackageInstallObserver#packageInstalled(String, Bundle, int)} will be
-     * called when that happens. This parameter must not be null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     * {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that is performing the
-     * installation. This identifies which market the package came from.
      */
-    public abstract void installPackage(
-            Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName);
-
+    @Deprecated
+    public abstract void installPackage(Uri packageURI, PackageInstallObserver observer,
+            @InstallFlags int flags, String installerPackageName);
 
     /**
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
-     * Install a package. Since this may take a little while, the result will be
-     * posted back to the given observer. An installation will fail if the package named
-     * in the package file's manifest is already installed, or if there's no space
-     * available on the device.
-     * @param packageURI The location of the package file to install. This can be a 'file:' or a
-     * 'content:' URI.
-     * @param observer An observer callback to get notified when the package installation is
-     * complete. {@link PackageInstallObserver#packageInstalled(String, Bundle, int)} will be
-     * called when that happens. This parameter must not be null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     * {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that is performing the
-     * installation. This identifies which market the package came from.
-     * @param userId The user id.
      */
-     @RequiresPermission(anyOf = {
-            Manifest.permission.INSTALL_PACKAGES,
-            Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public abstract void installPackageAsUser(
-            Uri packageURI, PackageInstallObserver observer, int flags,
-            String installerPackageName, @UserIdInt int userId);
+    @Deprecated
+    public abstract void installPackageAsUser(Uri packageURI, PackageInstallObserver observer,
+            @InstallFlags int flags, String installerPackageName, @UserIdInt int userId);
 
     /**
-     * Similar to
-     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
-     * with an extra verification file provided.
-     *
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package installation is
-     * complete. {@link PackageInstallObserver#packageInstalled(String, Bundle, int)} will be
-     * called when that happens. This parameter must not be null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @param verificationURI The location of the supplementary verification
-     *            file. This can be a 'file:' or a 'content:' URI. May be
-     *            {@code null}.
-     * @param encryptionParams if the package to be installed is encrypted,
-     *            these parameters describing the encryption and authentication
-     *            used. May be {@code null}.
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
      */
+    @Deprecated
     public abstract void installPackageWithVerification(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI,
-            ContainerEncryptionParams encryptionParams);
+            PackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
+            Uri verificationURI, ContainerEncryptionParams encryptionParams);
 
     /**
-     * Similar to
-     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
-     * with an extra verification information provided.
-     *
-     * @param packageURI The location of the package file to install. This can
-     *            be a 'file:' or a 'content:' URI.
-     * @param observer An observer callback to get notified when the package installation is
-     * complete. {@link PackageInstallObserver#packageInstalled(String, Bundle, int)} will be
-     * called when that happens. This parameter must not be null.
-     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
-     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}.
-     * @param installerPackageName Optional package name of the application that
-     *            is performing the installation. This identifies which market
-     *            the package came from.
-     * @param verificationParams an object that holds signal information to
-     *            assist verification. May be {@code null}.
-     * @param encryptionParams if the package to be installed is encrypted,
-     *            these parameters describing the encryption and authentication
-     *            used. May be {@code null}.
-     *
+     * @deprecated replaced by {@link PackageInstaller}
      * @hide
      */
+    @Deprecated
     public abstract void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
+            PackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams);
 
     /**
@@ -4779,45 +4690,44 @@ public abstract class PackageManager {
             String installerPackageName);
 
     /**
-     * Attempts to delete a package.  Since this may take a little while, the result will
-     * be posted back to the given observer.  A deletion will fail if the calling context
-     * lacks the {@link android.Manifest.permission#DELETE_PACKAGES} permission, if the
-     * named package cannot be found, or if the named package is a "system package".
-     * (TODO: include pointer to documentation on "system packages")
+     * Attempts to delete a package. Since this may take a little while, the
+     * result will be posted back to the given observer. A deletion will fail if
+     * the calling context lacks the
+     * {@link android.Manifest.permission#DELETE_PACKAGES} permission, if the
+     * named package cannot be found, or if the named package is a system
+     * package.
      *
      * @param packageName The name of the package to delete
-     * @param observer An observer callback to get notified when the package deletion is
-     * complete. {@link android.content.pm.IPackageDeleteObserver#packageDeleted(boolean)} will be
-     * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags Possible values: {@link #DELETE_KEEP_DATA},
-     * {@link #DELETE_ALL_USERS}.
-     *
+     * @param observer An observer callback to get notified when the package
+     *            deletion is complete.
+     *            {@link android.content.pm.IPackageDeleteObserver#packageDeleted}
+     *            will be called when that happens. observer may be null to
+     *            indicate that no callback is desired.
      * @hide
      */
-    // @SystemApi
-    public abstract void deletePackage(
-            String packageName, IPackageDeleteObserver observer, int flags);
+    public abstract void deletePackage(String packageName, IPackageDeleteObserver observer,
+            @DeleteFlags int flags);
 
     /**
-     * Attempts to delete a package.  Since this may take a little while, the result will
-     * be posted back to the given observer. A deletion will fail if the named package cannot be
-     * found, or if the named package is a "system package".
-     * (TODO: include pointer to documentation on "system packages")
+     * Attempts to delete a package. Since this may take a little while, the
+     * result will be posted back to the given observer. A deletion will fail if
+     * the named package cannot be found, or if the named package is a system
+     * package.
      *
      * @param packageName The name of the package to delete
-     * @param observer An observer callback to get notified when the package deletion is
-     * complete. {@link android.content.pm.IPackageDeleteObserver#packageDeleted(boolean)} will be
-     * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags Possible values: {@link #DELETE_KEEP_DATA}, {@link #DELETE_ALL_USERS}.
+     * @param observer An observer callback to get notified when the package
+     *            deletion is complete.
+     *            {@link android.content.pm.IPackageDeleteObserver#packageDeleted}
+     *            will be called when that happens. observer may be null to
+     *            indicate that no callback is desired.
      * @param userId The user Id
-     *
      * @hide
      */
      @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.INTERACT_ACROSS_USERS_FULL})
-    public abstract void deletePackageAsUser(
-            String packageName, IPackageDeleteObserver observer, int flags, @UserIdInt int userId);
+    public abstract void deletePackageAsUser(String packageName, IPackageDeleteObserver observer,
+            @DeleteFlags int flags, @UserIdInt int userId);
 
     /**
      * Retrieve the package name of the application that installed a package. This identifies
@@ -4884,7 +4794,6 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    // @SystemApi
     public void freeStorageAndNotify(long freeStorageSize, IPackageDataObserver observer) {
         freeStorageAndNotify(null, freeStorageSize, observer);
     }
@@ -5268,27 +5177,6 @@ public abstract class PackageManager {
     public abstract boolean isSignedByExactly(String packageName, KeySet ks);
 
     /**
-     * Attempts to move package resources from internal to external media or vice versa.
-     * Since this may take a little while, the result will
-     * be posted back to the given observer.   This call may fail if the calling context
-     * lacks the {@link android.Manifest.permission#MOVE_PACKAGE} permission, if the
-     * named package cannot be found, or if the named package is a "system package".
-     *
-     * @param packageName The name of the package to delete
-     * @param observer An observer callback to get notified when the package move is
-     * complete. {@link android.content.pm.IPackageMoveObserver#packageMoved(boolean)} will be
-     * called when that happens.  observer may be null to indicate that no callback is desired.
-     * @param flags To indicate install location {@link #MOVE_INTERNAL} or
-     * {@link #MOVE_EXTERNAL_MEDIA}
-     *
-     * @hide
-     */
-    @Deprecated
-    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Puts the package in a suspended state, making the package un-runnable,
      * but it doesn't remove the data or the actual package file. The application notifications
      * will be hidden and also the application will not show up in recents.
@@ -5359,22 +5247,25 @@ public abstract class PackageManager {
     public abstract @NonNull PackageInstaller getPackageInstaller();
 
     /**
-     * Adds a {@link CrossProfileIntentFilter}. After calling this method all intents sent from the
-     * user with id sourceUserId can also be be resolved by activities in the user with id
-     * targetUserId if they match the specified intent filter.
+     * Adds a {@code CrossProfileIntentFilter}. After calling this method all
+     * intents sent from the user with id sourceUserId can also be be resolved
+     * by activities in the user with id targetUserId if they match the
+     * specified intent filter.
+     *
      * @param filter The {@link IntentFilter} the intent has to match
      * @param sourceUserId The source user id.
      * @param targetUserId The target user id.
-     * @param flags The possible values are {@link SKIP_CURRENT_PROFILE} and
-     *        {@link ONLY_IF_NO_MATCH_FOUND}.
+     * @param flags The possible values are {@link #SKIP_CURRENT_PROFILE} and
+     *            {@link #ONLY_IF_NO_MATCH_FOUND}.
      * @hide
      */
     public abstract void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId,
             int targetUserId, int flags);
 
     /**
-     * Clearing {@link CrossProfileIntentFilter}s which have the specified user as their
-     * source, and have been set by the app calling this method.
+     * Clearing {@code CrossProfileIntentFilter}s which have the specified user
+     * as their source, and have been set by the app calling this method.
+     *
      * @param sourceUserId The source user id.
      * @hide
      */
