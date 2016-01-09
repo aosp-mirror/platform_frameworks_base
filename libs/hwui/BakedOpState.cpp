@@ -75,9 +75,9 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     clipSideFlags = OpClipSideFlags::Full;
 }
 
-ResolvedRenderState::ResolvedRenderState(const Rect& dstRect)
+ResolvedRenderState::ResolvedRenderState(const ClipRect* viewportRect, const Rect& dstRect)
         : transform(Matrix4::identity())
-        , clipState(nullptr)
+        , clipState(viewportRect)
         , clippedBounds(dstRect)
         , clipSideFlags(OpClipSideFlags::None) {}
 

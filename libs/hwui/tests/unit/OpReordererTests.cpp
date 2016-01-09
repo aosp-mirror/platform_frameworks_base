@@ -565,7 +565,7 @@ TEST(OpReorderer, saveLayerUnclipped_simple) {
         void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(0, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
-            EXPECT_EQ(nullptr, state.computedState.clipState);
+            EXPECT_CLIP_RECT(Rect(200, 200), state.computedState.clipState);
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
         void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
@@ -583,7 +583,7 @@ TEST(OpReorderer, saveLayerUnclipped_simple) {
         void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(3, mIndex++);
             EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds);
-            EXPECT_EQ(nullptr, state.computedState.clipState);
+            EXPECT_CLIP_RECT(Rect(200, 200), state.computedState.clipState);
             EXPECT_TRUE(state.computedState.transform.isIdentity());
         }
     };

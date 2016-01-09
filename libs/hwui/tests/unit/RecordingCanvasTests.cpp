@@ -33,14 +33,6 @@ static void playbackOps(const DisplayList& displayList,
     }
 }
 
-#define EXPECT_CLIP_RECT(expRect, clipStatePtr) \
-    EXPECT_NE(nullptr, (clipStatePtr)) << "Op is unclipped"; \
-    if ((clipStatePtr)->mode == ClipMode::Rectangle) { \
-        EXPECT_EQ((expRect), reinterpret_cast<const ClipRect*>(clipStatePtr)->rect); \
-    } else { \
-        ADD_FAILURE() << "ClipState not a rect"; \
-    }
-
 TEST(RecordingCanvas, emptyPlayback) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);

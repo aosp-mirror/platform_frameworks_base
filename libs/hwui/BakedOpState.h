@@ -58,9 +58,8 @@ public:
     // Constructor for unbounded ops without transform/clip (namely shadows)
     ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot);
 
-    // Constructor for primitive ops without clip or transform
-    // NOTE: these ops can't be queried for RT clip / local clip
-    ResolvedRenderState(const Rect& dstRect);
+    // Constructor for primitive ops provided clip, and no transform
+    ResolvedRenderState(const ClipRect* viewportRect, const Rect& dstRect);
 
     Rect computeLocalSpaceClip() const {
         Matrix4 inverse;
@@ -71,15 +70,13 @@ public:
         return outClip;
     }
 
-    // NOTE: Can only be used on clipped/snapshot based ops
     const Rect& clipRect() const {
         return clipState->rect;
     }
 
-    // NOTE: Can only be used on clipped/snapshot based ops
     bool requiresClip() const {
         return clipSideFlags != OpClipSideFlags::None
-                || CC_UNLIKELY(clipState->mode != ClipMode::Rectangle);
+               || CC_UNLIKELY(clipState->mode != ClipMode::Rectangle);
     }
 
     // returns the clip if it's needed to draw the operation, otherwise nullptr
@@ -144,8 +141,8 @@ public:
     }
 
     static BakedOpState* directConstruct(LinearAllocator& allocator,
-            const Rect& dstRect, const RecordedOp& recordedOp) {
-        return new (allocator) BakedOpState(dstRect, recordedOp);
+            const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp) {
+        return new (allocator) BakedOpState(clip, dstRect, recordedOp);
     }
 
     static void* operator new(size_t size, LinearAllocator& allocator) {
@@ -177,8 +174,8 @@ private:
             , projectionPathMask(snapshot.projectionPathMask)
             , op(shadowOpPtr) {}
 
-    BakedOpState(const Rect& dstRect, const RecordedOp& recordedOp)
-            : computedState(dstRect)
+    BakedOpState(const ClipRect* viewportRect, const Rect& dstRect, const RecordedOp& recordedOp)
+            : computedState(viewportRect, dstRect)
             , alpha(1.0f)
             , roundRectClipState(nullptr)
             , projectionPathMask(nullptr)
