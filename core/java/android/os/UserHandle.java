@@ -33,13 +33,13 @@ public final class UserHandle implements Parcelable {
     public static final int PER_USER_RANGE = 100000;
 
     /** @hide A user id to indicate all users on the device */
-    public static final int USER_ALL = -1;
+    public static final @UserIdInt int USER_ALL = -1;
 
     /** @hide A user handle to indicate all users on the device */
     public static final UserHandle ALL = new UserHandle(USER_ALL);
 
     /** @hide A user id to indicate the currently active user */
-    public static final int USER_CURRENT = -2;
+    public static final @UserIdInt int USER_CURRENT = -2;
 
     /** @hide A user handle to indicate the current user of the device */
     public static final UserHandle CURRENT = new UserHandle(USER_CURRENT);
@@ -47,7 +47,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user id to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
      *  to the caller's user instead of failing with a security exception */
-    public static final int USER_CURRENT_OR_SELF = -3;
+    public static final @UserIdInt int USER_CURRENT_OR_SELF = -3;
 
     /** @hide A user handle to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
@@ -55,14 +55,14 @@ public final class UserHandle implements Parcelable {
     public static final UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
 
     /** @hide An undefined user id */
-    public static final int USER_NULL = -10000;
+    public static final @UserIdInt int USER_NULL = -10000;
 
     /**
      * @hide A user id constant to indicate the "owner" user of the device
      * @deprecated Consider using either {@link UserHandle#USER_SYSTEM} constant or
      * check the target user's flag {@link android.content.pm.UserInfo#isAdmin}.
      */
-    public static final int USER_OWNER = 0;
+    public static final @UserIdInt int USER_OWNER = 0;
 
     /**
      * @hide A user handle to indicate the primary/owner user of the device
@@ -72,7 +72,7 @@ public final class UserHandle implements Parcelable {
     public static final UserHandle OWNER = new UserHandle(USER_OWNER);
 
     /** @hide A user id constant to indicate the "system" user of the device */
-    public static final int USER_SYSTEM = 0;
+    public static final @UserIdInt int USER_SYSTEM = 0;
 
     /** @hide A user handle to indicate the "system" user of the device */
     public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);

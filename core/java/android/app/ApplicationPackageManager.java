@@ -221,7 +221,7 @@ public class ApplicationPackageManager extends PackageManager {
     public int[] getPackageGids(String packageName, int flags)
             throws NameNotFoundException {
         try {
-            int[] gids = mPM.getPackageGidsEtc(packageName, flags, mContext.getUserId());
+            int[] gids = mPM.getPackageGids(packageName, flags, mContext.getUserId());
             if (gids != null) {
                 return gids;
             }
@@ -246,7 +246,7 @@ public class ApplicationPackageManager extends PackageManager {
     public int getPackageUidAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
         try {
-            int uid = mPM.getPackageUidEtc(packageName, flags, userId);
+            int uid = mPM.getPackageUid(packageName, flags, userId);
             if (uid >= 0) {
                 return uid;
             }
@@ -314,8 +314,14 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
             throws NameNotFoundException {
+        return getApplicationInfoAsUser(packageName, flags, mContext.getUserId());
+    }
+
+    @Override
+    public ApplicationInfo getApplicationInfoAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
         try {
-            ApplicationInfo ai = mPM.getApplicationInfo(packageName, flags, mContext.getUserId());
+            ApplicationInfo ai = mPM.getApplicationInfo(packageName, flags, userId);
             if (ai != null) {
                 // This is a temporary hack. Callers must use
                 // createPackageContext(packageName).getApplicationInfo() to
@@ -351,7 +357,6 @@ public class ApplicationPackageManager extends PackageManager {
             }
         }
     }
-
 
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, int flags)
@@ -1169,8 +1174,10 @@ public class ApplicationPackageManager extends PackageManager {
         throw new NameNotFoundException("Package " + appPackageName + " doesn't exist");
     }
 
-    int mCachedSafeMode = -1;
-    @Override public boolean isSafeMode() {
+    volatile int mCachedSafeMode = -1;
+
+    @Override
+    public boolean isSafeMode() {
         try {
             if (mCachedSafeMode < 0) {
                 mCachedSafeMode = mPM.isSafeMode() ? 1 : 0;

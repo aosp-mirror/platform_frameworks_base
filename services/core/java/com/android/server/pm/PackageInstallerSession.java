@@ -947,7 +947,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         final int uid = mPm.getPackageUid(PackageManagerService.DEFAULT_CONTAINER_PACKAGE,
-                UserHandle.USER_SYSTEM);
+                PackageManager.MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM);
         final int gid = UserHandle.getSharedAppGid(uid);
         if (!PackageHelper.fixSdPermissions(cid, gid, null)) {
             throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,

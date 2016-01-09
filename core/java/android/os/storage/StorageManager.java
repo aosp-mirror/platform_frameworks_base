@@ -882,7 +882,7 @@ public class StorageManager {
                 }
                 packageName = packageNames[0];
             }
-            final int uid = ActivityThread.getPackageManager().getPackageUidEtc(packageName,
+            final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
                     PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             if (uid <= 0) {
                 return new StorageVolume[0];

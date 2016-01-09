@@ -145,6 +145,12 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public ApplicationInfo getApplicationInfoAsUser(String packageName, int flags, int userId)
+            throws NameNotFoundException {
+        return null;
+    }
+
+    @Override
     public ActivityInfo getActivityInfo(ComponentName component, int flags)
             throws NameNotFoundException {
         return null;

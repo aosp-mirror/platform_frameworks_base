@@ -418,7 +418,8 @@ public class UsageStatsService extends SystemService implements
 
     private void notifyBatteryStats(String packageName, int userId, boolean idle) {
         try {
-            int uid = AppGlobals.getPackageManager().getPackageUid(packageName, userId);
+            final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             if (idle) {
                 mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE,
                         packageName, uid);
