@@ -187,7 +187,7 @@ public class Model implements SiblingProvider {
                     }
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    longValues[pos] = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+                    longValues[pos] = getLastModified(mCursor);
                     stringValues[pos] = getCursorString(mCursor, Document.COLUMN_MIME_TYPE);
                     break;
                 case SORT_ORDER_SIZE:
@@ -309,9 +309,17 @@ public class Model implements SiblingProvider {
                 } else {
                     final long lhs = pivotValue;
                     final long rhs = sortKey[mid];
-                    // Sort in descending numerical order. This matches legacy behaviour, which yields
-                    // largest or most recent items on top.
+                    // Sort in descending numerical order. This matches legacy behaviour, which
+                    // yields largest or most recent items on top.
                     compare = -Long.compare(lhs, rhs);
+                }
+
+                // If numerical comparison yields a tie, use document ID as a tie breaker.  This
+                // will yield stable results even if incoming items are continually shuffling and
+                // have identical numerical sort keys.  One common example of this scenario is seen
+                // when sorting a set of active downloads by mod time.
+                if (compare == 0) {
+                    compare = pivotId.compareTo(ids.get(mid));
                 }
 
                 if (compare < 0) {
@@ -348,6 +356,16 @@ public class Model implements SiblingProvider {
             mimeTypes[left] = pivotMime;
             ids.set(left, pivotId);
         }
+    }
+
+    /**
+     * @return Timestamp for the given document. Some docs (e.g. active downloads) have a null
+     * timestamp - these will be replaced with MAX_LONG so that such files get sorted to the top
+     * when sorting by date.
+     */
+    long getLastModified(Cursor cursor) {
+        long l = getCursorLong(mCursor, Document.COLUMN_LAST_MODIFIED);
+        return (l == -1) ? Long.MAX_VALUE : l;
     }
 
     @Nullable Cursor getItem(String modelId) {

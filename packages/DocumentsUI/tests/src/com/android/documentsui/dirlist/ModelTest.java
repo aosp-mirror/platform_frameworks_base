@@ -34,8 +34,10 @@ import com.android.documentsui.model.DocumentInfo;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 @SmallTest
@@ -50,6 +52,7 @@ public class ModelTest extends AndroidTestCase {
         Document.COLUMN_FLAGS,
         Document.COLUMN_DISPLAY_NAME,
         Document.COLUMN_SIZE,
+        Document.COLUMN_LAST_MODIFIED,
         Document.COLUMN_MIME_TYPE
     };
 
@@ -261,6 +264,43 @@ public class ModelTest extends AndroidTestCase {
 
         // Check that all items were accounted for.
         assertEquals(ITEM_COUNT, seen.cardinality());
+    }
+
+    public void testSort_time() {
+        final int DL_COUNT = 3;
+        MatrixCursor c = new MatrixCursor(COLUMNS);
+        Set<String> currentDownloads = new HashSet<>();
+
+        // Add some files
+        for (int i = 0; i < ITEM_COUNT; i++) {
+            MatrixCursor.RowBuilder row = c.newRow();
+            row.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY);
+            row.add(Document.COLUMN_DOCUMENT_ID, Integer.toString(i));
+            row.add(Document.COLUMN_LAST_MODIFIED, System.currentTimeMillis());
+        }
+        // Add some current downloads (no timestamp)
+        for (int i = ITEM_COUNT; i < ITEM_COUNT + DL_COUNT; i++) {
+            MatrixCursor.RowBuilder row = c.newRow();
+            String id = Integer.toString(i);
+            row.add(RootCursorWrapper.COLUMN_AUTHORITY, AUTHORITY);
+            row.add(Document.COLUMN_DOCUMENT_ID, id);
+            currentDownloads.add(Model.createModelId(AUTHORITY, id));
+        }
+
+        DirectoryResult r = new DirectoryResult();
+        r.cursor = c;
+        r.sortOrder = State.SORT_ORDER_LAST_MODIFIED;
+        model.update(r);
+
+        List<String> ids = model.getModelIds();
+
+        // Check that all items were accounted for
+        assertEquals(ITEM_COUNT + DL_COUNT, ids.size());
+
+        // Check that active downloads are sorted to the top.
+        for (int i = 0; i < DL_COUNT; i++) {
+            assertTrue(currentDownloads.contains(ids.get(i)));
+        }
     }
 
     // Tests that Model.delete works correctly.
