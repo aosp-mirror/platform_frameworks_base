@@ -33,4 +33,6 @@
     <color name="item_doc_background">#fffafafa</color>
     <color name="item_doc_background_selected">#ffe0f2f1</color>
 
+    <color name="menu_search_background">#ff676f74</color>
+
 </resources>

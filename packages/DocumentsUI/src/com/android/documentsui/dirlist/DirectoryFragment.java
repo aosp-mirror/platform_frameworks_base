@@ -403,7 +403,6 @@ public class DirectoryFragment extends Fragment {
                     state.derivedMode = result.mode;
                 }
                 state.derivedSortOrder = result.sortOrder;
-                ((BaseActivity) context).onStateChanged();
 
                 updateDisplayState();
 
