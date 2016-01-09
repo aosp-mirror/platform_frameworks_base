@@ -650,7 +650,11 @@ public class TaskStackLayoutAlgorithm {
             y += (mStackRect.top - mTaskRect.top);
             z = Math.max(mMinTranslationZ, Math.min(mMaxTranslationZ,
                     mMinTranslationZ + (p * (mMaxTranslationZ - mMinTranslationZ))));
-            relP = unfocusedP;
+            if (mNumStackTasks == 1) {
+                relP = 1f;
+            } else {
+                relP = Math.min(mMaxScrollP, unfocusedP);
+            }
         }
 
         // Fill out the transform
