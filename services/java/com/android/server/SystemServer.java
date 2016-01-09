@@ -45,7 +45,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.WindowManager;
-import android.webkit.WebViewFactory;
 
 import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
@@ -81,7 +80,6 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.restrictions.RestrictionsManagerService;
-import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -138,6 +136,9 @@ public final class SystemServer {
             "com.android.server.job.JobSchedulerService";
     private static final String MOUNT_SERVICE_CLASS =
             "com.android.server.MountService$Lifecycle";
+    private static final String SEARCH_MANAGER_SERVICE_CLASS =
+            "com.android.server.search.SearchManagerService$Lifecycle";
+
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
     /**
@@ -844,8 +845,7 @@ public final class SystemServer {
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("StartSearchManagerService");
                 try {
-                    ServiceManager.addService(Context.SEARCH_SERVICE,
-                            new SearchManagerService(context));
+                    mSystemServiceManager.startService(SEARCH_MANAGER_SERVICE_CLASS);
                 } catch (Throwable e) {
                     reportWtf("starting Search Service", e);
                 }
