@@ -463,92 +463,60 @@ public class PackageParser {
                 p.featureGroups.toArray(pi.featureGroups);
             }
         }
-        if ((flags&PackageManager.GET_ACTIVITIES) != 0) {
-            int N = p.activities.size();
+        if ((flags & PackageManager.GET_ACTIVITIES) != 0) {
+            final int N = p.activities.size();
             if (N > 0) {
-                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                    pi.activities = new ActivityInfo[N];
-                } else {
-                    int num = 0;
-                    for (int i=0; i<N; i++) {
-                        if (p.activities.get(i).info.enabled) num++;
-                    }
-                    pi.activities = new ActivityInfo[num];
-                }
-                for (int i=0, j=0; i<N; i++) {
-                    final Activity activity = p.activities.get(i);
-                    if (activity.info.enabled
-                        || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags,
-                                state, userId);
+                int num = 0;
+                final ActivityInfo[] res = new ActivityInfo[N];
+                for (int i = 0; i < N; i++) {
+                    final Activity a = p.activities.get(i);
+                    if (state.isMatch(a.info, flags)) {
+                        res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
+                pi.activities = ArrayUtils.trimToSize(res, num);
             }
         }
-        if ((flags&PackageManager.GET_RECEIVERS) != 0) {
-            int N = p.receivers.size();
+        if ((flags & PackageManager.GET_RECEIVERS) != 0) {
+            final int N = p.receivers.size();
             if (N > 0) {
-                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                    pi.receivers = new ActivityInfo[N];
-                } else {
-                    int num = 0;
-                    for (int i=0; i<N; i++) {
-                        if (p.receivers.get(i).info.enabled) num++;
-                    }
-                    pi.receivers = new ActivityInfo[num];
-                }
-                for (int i=0, j=0; i<N; i++) {
-                    final Activity activity = p.receivers.get(i);
-                    if (activity.info.enabled
-                        || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags,
-                                state, userId);
+                int num = 0;
+                final ActivityInfo[] res = new ActivityInfo[N];
+                for (int i = 0; i < N; i++) {
+                    final Activity a = p.receivers.get(i);
+                    if (state.isMatch(a.info, flags)) {
+                        res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
+                pi.receivers = ArrayUtils.trimToSize(res, num);
             }
         }
-        if ((flags&PackageManager.GET_SERVICES) != 0) {
-            int N = p.services.size();
+        if ((flags & PackageManager.GET_SERVICES) != 0) {
+            final int N = p.services.size();
             if (N > 0) {
-                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                    pi.services = new ServiceInfo[N];
-                } else {
-                    int num = 0;
-                    for (int i=0; i<N; i++) {
-                        if (p.services.get(i).info.enabled) num++;
-                    }
-                    pi.services = new ServiceInfo[num];
-                }
-                for (int i=0, j=0; i<N; i++) {
-                    final Service service = p.services.get(i);
-                    if (service.info.enabled
-                        || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags,
-                                state, userId);
+                int num = 0;
+                final ServiceInfo[] res = new ServiceInfo[N];
+                for (int i = 0; i < N; i++) {
+                    final Service s = p.services.get(i);
+                    if (state.isMatch(s.info, flags)) {
+                        res[num++] = generateServiceInfo(s, flags, state, userId);
                     }
                 }
+                pi.services = ArrayUtils.trimToSize(res, num);
             }
         }
-        if ((flags&PackageManager.GET_PROVIDERS) != 0) {
-            int N = p.providers.size();
+        if ((flags & PackageManager.GET_PROVIDERS) != 0) {
+            final int N = p.providers.size();
             if (N > 0) {
-                if ((flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                    pi.providers = new ProviderInfo[N];
-                } else {
-                    int num = 0;
-                    for (int i=0; i<N; i++) {
-                        if (p.providers.get(i).info.enabled) num++;
-                    }
-                    pi.providers = new ProviderInfo[num];
-                }
-                for (int i=0, j=0; i<N; i++) {
-                    final Provider provider = p.providers.get(i);
-                    if (provider.info.enabled
-                        || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags,
-                                state, userId);
+                int num = 0;
+                final ProviderInfo[] res = new ProviderInfo[N];
+                for (int i = 0; i < N; i++) {
+                    final Provider pr = p.providers.get(i);
+                    if (state.isMatch(pr.info, flags)) {
+                        res[num++] = generateProviderInfo(pr, flags, state, userId);
                     }
                 }
+                pi.providers = ArrayUtils.trimToSize(res, num);
             }
         }
         if ((flags&PackageManager.GET_INSTRUMENTATION) != 0) {

@@ -3799,63 +3799,11 @@ final class Settings {
     }
 
     boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
-        return isEnabledLPr(componentInfo, flags, userId)
-                && isMatchLPr(componentInfo, flags);
-    }
+        final PackageSetting ps = mPackages.get(componentInfo.packageName);
+        if (ps == null) return false;
 
-    private boolean isEnabledLPr(ComponentInfo componentInfo, int flags, int userId) {
-        if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
-            return true;
-        }
-        final PackageSetting packageSettings = mPackages.get(componentInfo.packageName);
-        if (PackageManagerService.DEBUG_SETTINGS) {
-            Log.v(PackageManagerService.TAG, "isEnabledLock - packageName = "
-                    + componentInfo.packageName + " componentName = " + componentInfo.name);
-            Log.v(PackageManagerService.TAG, "enabledComponents: "
-                    + compToString(packageSettings.getEnabledComponents(userId)));
-            Log.v(PackageManagerService.TAG, "disabledComponents: "
-                    + compToString(packageSettings.getDisabledComponents(userId)));
-        }
-        if (packageSettings == null) {
-            return false;
-        }
-        PackageUserState ustate = packageSettings.readUserState(userId);
-        if ((flags & MATCH_DISABLED_UNTIL_USED_COMPONENTS) != 0) {
-            if (ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
-                return true;
-            }
-        }
-        if (ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED
-                || ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_USER
-                || ustate.enabled == COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
-                || (packageSettings.pkg != null && !packageSettings.pkg.applicationInfo.enabled
-                    && ustate.enabled == COMPONENT_ENABLED_STATE_DEFAULT)) {
-            return false;
-        }
-        if (ustate.enabledComponents != null
-                && ustate.enabledComponents.contains(componentInfo.name)) {
-            return true;
-        }
-        if (ustate.disabledComponents != null
-                && ustate.disabledComponents.contains(componentInfo.name)) {
-            return false;
-        }
-        return componentInfo.enabled;
-    }
-
-    private boolean isMatchLPr(ComponentInfo componentInfo, int flags) {
-        if ((flags & MATCH_SYSTEM_ONLY) != 0) {
-            final PackageSetting ps = mPackages.get(componentInfo.packageName);
-            if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                return false;
-            }
-        }
-
-        final boolean matchesUnaware = ((flags & MATCH_ENCRYPTION_UNAWARE) != 0)
-                && !componentInfo.encryptionAware;
-        final boolean matchesAware = ((flags & MATCH_ENCRYPTION_AWARE) != 0)
-                && componentInfo.encryptionAware;
-        return matchesUnaware || matchesAware;
+        final PackageUserState userState = ps.readUserState(userId);
+        return userState.isMatch(componentInfo, flags);
     }
 
     String getInstallerPackageNameLPr(String packageName) {

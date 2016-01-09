@@ -3119,7 +3119,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Update given flags based on encryption status of current user.
      */
-    private int updateFlagsForEncryption(int flags, int userId) {
+    private int updateFlags(int flags, int userId) {
         if ((flags & (PackageManager.MATCH_ENCRYPTION_UNAWARE
                 | PackageManager.MATCH_ENCRYPTION_AWARE)) != 0) {
             // Caller expressed an explicit opinion about what encryption
@@ -3133,6 +3133,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 flags |= PackageManager.MATCH_ENCRYPTION_AWARE;
             }
         }
+
+        // Safe mode means we should ignore any third-party apps
+        if (mSafeMode) {
+            flags |= PackageManager.MATCH_SYSTEM_ONLY;
+        }
+
         return flags;
     }
 
@@ -3160,7 +3166,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
                     + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
-        return updateFlagsForEncryption(flags, userId);
+        return updateFlags(flags, userId);
     }
 
     /**
@@ -3192,7 +3198,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
                     + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
-        return updateFlagsForEncryption(flags, userId);
+        return updateFlags(flags, userId);
     }
 
     /**
@@ -5916,8 +5922,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     : null;
             return ps != null
                     && mSettings.isEnabledAndMatchLPr(provider.info, flags, userId)
-                    && (!mSafeMode || (provider.info.applicationInfo.flags
-                            &ApplicationInfo.FLAG_SYSTEM) != 0)
                     ? PackageParser.generateProviderInfo(provider, flags,
                             ps.readUserState(userId), userId)
                     : null;
@@ -5972,9 +5976,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && (processName == null
                                 || (p.info.processName.equals(processName)
                                         && UserHandle.isSameApp(p.info.applicationInfo.uid, uid)))
-                        && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)
-                        && (!mSafeMode
-                                || (p.info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
+                        && mSettings.isEnabledAndMatchLPr(p.info, flags, userId)) {
                     if (finalList == null) {
                         finalList = new ArrayList<ProviderInfo>(3);
                     }
@@ -9240,10 +9242,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final PackageParser.Activity activity = info.activity;
-            if (mSafeMode && (activity.info.applicationInfo.flags
-                    &ApplicationInfo.FLAG_SYSTEM) == 0) {
-                return null;
-            }
             PackageSetting ps = (PackageSetting) activity.owner.mExtras;
             if (ps == null) {
                 return null;
@@ -9464,10 +9462,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final PackageParser.Service service = info.service;
-            if (mSafeMode && (service.info.applicationInfo.flags
-                    &ApplicationInfo.FLAG_SYSTEM) == 0) {
-                return null;
-            }
             PackageSetting ps = (PackageSetting) service.owner.mExtras;
             if (ps == null) {
                 return null;
@@ -9687,10 +9681,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final PackageParser.Provider provider = info.provider;
-            if (mSafeMode && (provider.info.applicationInfo.flags
-                    & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                return null;
-            }
             PackageSetting ps = (PackageSetting) provider.owner.mExtras;
             if (ps == null) {
                 return null;

@@ -26,6 +26,7 @@ import libcore.util.EmptyArray;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -372,6 +373,10 @@ public class ArrayUtils {
         return (array != null) ? array.clone() : null;
     }
 
+    public static @Nullable <T> ArraySet<T> cloneOrNull(@Nullable ArraySet<T> array) {
+        return (array != null) ? new ArraySet<T>(array) : null;
+    }
+
     public static @NonNull <T> ArraySet<T> add(@Nullable ArraySet<T> cur, T val) {
         if (cur == null) {
             cur = new ArraySet<>();
@@ -418,6 +423,16 @@ public class ArrayUtils {
 
     public static <T> boolean contains(@Nullable ArrayList<T> cur, T val) {
         return (cur != null) ? cur.contains(val) : false;
+    }
+
+    public static @Nullable <T> T[] trimToSize(@Nullable T[] array, int size) {
+        if (array == null || size == 0) {
+            return null;
+        } else if (array.length == size) {
+            return array;
+        } else {
+            return Arrays.copyOf(array, size);
+        }
     }
 
     /**
