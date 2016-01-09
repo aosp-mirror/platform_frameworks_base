@@ -198,16 +198,16 @@
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
 
     <!-- The min translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_min">20dp</dimen>
+    <dimen name="recents_task_view_z_min">16dp</dimen>
 
     <!-- The max translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_max">80dp</dimen>
+    <dimen name="recents_task_view_z_max">48dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
 
     <!-- The amount of highlight to make on each task view. -->
-    <dimen name="recents_task_view_highlight">1.5dp</dimen>
+    <dimen name="recents_task_view_highlight">1dp</dimen>
 
     <!-- The amount to offset when animating into an affiliate group. -->
     <dimen name="recents_task_view_affiliate_group_enter_offset">64dp</dimen>
