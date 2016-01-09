@@ -3623,7 +3623,7 @@ public abstract class PackageManager {
      *
      * @return Returns a List of ResolveInfo objects containing one entry for each
      *         matching service, ordered from best to worst. In other words, the first
-     *         item is what would be returned by {@link #resoveService}. If there are
+     *         item is what would be returned by {@link #resolveService}. If there are
      *         no matching services, an empty list or null is returned.
      *
      * @see #GET_META_DATA
@@ -3658,7 +3658,7 @@ public abstract class PackageManager {
      *
      * @return Returns a List of ResolveInfo objects containing one entry for each
      *         matching service, ordered from best to worst. In other words, the first
-     *         item is what would be returned by {@link #resoveService}. If there are
+     *         item is what would be returned by {@link #resolveService}. If there are
      *         no matching services, an empty list or null is returned.
      *
      * @see #GET_META_DATA
