@@ -1762,10 +1762,6 @@ class ContextImpl extends Context {
 
     @Override
     public Context createDeviceEncryptedStorageContext() {
-        if (!StorageManager.isFileBasedEncryptionEnabled()) {
-            return null;
-        }
-
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_ENCRYPTED_STORAGE)
                 | Context.CONTEXT_DEVICE_ENCRYPTED_STORAGE;
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,

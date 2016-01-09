@@ -4021,13 +4021,16 @@ public abstract class Context {
      * Because device-encrypted data is available before user authentication,
      * you should carefully consider what data you store using this Context.
      * <p>
+     * If the underlying device does not have the ability to store
+     * device-encrypted and credential-encrypted data using different keys, then
+     * both storage areas will become available at the same time. They remain
+     * two distinct storage areas, and only the window of availability changes.
+     * <p>
      * Each call to this method returns a new instance of a Context object;
      * Context objects are not shared, however common state (ClassLoader, other
      * Resources for the same configuration) may be so the Context itself can be
      * fairly lightweight.
      *
-     * @return new Context or {@code null} if device-encrypted storage is not
-     *         supported or available on this device.
      * @see #isDeviceEncryptedStorage()
      */
     public abstract Context createDeviceEncryptedStorageContext();
@@ -4040,6 +4043,11 @@ public abstract class Context {
      * key tied to user credentials, and they can be accessed
      * <em>only after</em> the user has entered their credentials (such as a
      * lock pattern or PIN).
+     * <p>
+     * If the underlying device does not have the ability to store
+     * device-encrypted and credential-encrypted data using different keys, then
+     * both storage areas will become available at the same time. They remain
+     * two distinct storage areas, and only the window of availability changes.
      * <p>
      * Each call to this method returns a new instance of a Context object;
      * Context objects are not shared, however common state (ClassLoader, other
