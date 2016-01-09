@@ -32,12 +32,12 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
-import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -45,6 +45,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
@@ -64,7 +65,6 @@ import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
@@ -529,7 +529,10 @@ class ActivityStarter {
             // switch...  just dismiss the keyguard now, because we
             // probably want to see whatever is behind it.
             mSupervisor.notifyActivityDrawnForKeyguard();
+        } else {
+            launchRecentsAppIfNeeded(stack);
         }
+
         return err;
     }
 
@@ -1004,6 +1007,16 @@ class ActivityStarter {
         }
 
         return START_SUCCESS;
+    }
+
+    private void launchRecentsAppIfNeeded(ActivityStack topStack) {
+        if (topStack.mStackId == HOME_STACK_ID && mTargetStack.mStackId == DOCKED_STACK_ID) {
+            // We launch an activity while being in home stack, which means either launcher or
+            // recents into docked stack. We don't want the launched activity to be alone in a
+            // docked stack, so we want to immediately launch recents too.
+            if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
+            mWindowManager.showRecentApps();
+        }
     }
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,

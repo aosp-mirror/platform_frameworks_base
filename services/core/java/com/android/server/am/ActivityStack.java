@@ -3368,9 +3368,9 @@ final class ActivityStack {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
-                    int res = mService.mActivityStarter.startActivityLocked(srec.app.thread, destIntent,
-                            null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null, null,
-                            parent.appToken, null, 0, -1, parent.launchedFromUid,
+                    int res = mService.mActivityStarter.startActivityLocked(srec.app.thread,
+                            destIntent, null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null,
+                            null, parent.appToken, null, 0, -1, parent.launchedFromUid,
                             parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
                             false, true, null, null, null);
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
