@@ -22,7 +22,9 @@
          isn't a longpress action associated with a shortcut item, put in an empty item to make
          sure everything lines up.
     -->
-    <array name="car_shortcut_icons" />
-    <array name="car_shortcut_intent_uris" />
-    <array name="car_shortcut_longpress_intent_uris" />
+    <array name="car_facet_icons" />
+    <array name="car_facet_intent_uris" />
+    <array name="car_facet_longpress_intent_uris" />
+    <array name="car_facet_package_filters"/>
+    <array name="car_facet_category_filters"/>
 </resources>
