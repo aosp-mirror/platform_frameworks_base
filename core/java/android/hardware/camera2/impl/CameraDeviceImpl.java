@@ -89,7 +89,6 @@ public class CameraDeviceImpl extends CameraDevice {
             new SparseArray<CaptureCallbackHolder>();
 
     private int mRepeatingRequestId = REQUEST_ID_NONE;
-    private final ArrayList<Integer> mRepeatingRequestIdDeletedList = new ArrayList<Integer>();
     // Map stream IDs to input/output configurations
     private SimpleEntry<Integer, InputConfiguration> mConfiguredInput =
             new SimpleEntry<>(REQUEST_ID_NONE, null);
@@ -915,11 +914,6 @@ public class CameraDeviceImpl extends CameraDevice {
 
                 int requestId = mRepeatingRequestId;
                 mRepeatingRequestId = REQUEST_ID_NONE;
-
-                // Queue for deletion after in-flight requests finish
-                if (mCaptureCallbackMap.get(requestId) != null) {
-                    mRepeatingRequestIdDeletedList.add(requestId);
-                }
 
                 try {
                     LongParcelable lastFrameNumberRef = new LongParcelable();
