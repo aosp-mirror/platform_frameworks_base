@@ -327,12 +327,19 @@ public final class BridgeTypedArray extends TypedArray {
             return null;
         }
 
-        // let the framework inflate the ColorStateList from the XML file.
-        File f = new File(value);
-        if (f.isFile()) {
-            try {
-                XmlPullParser parser = ParserFactory.create(f);
 
+        try {
+            // Get the state list file content from callback to parse PSI file
+            XmlPullParser parser = mContext.getLayoutlibCallback().getXmlFileParser(value);
+            if (parser == null) {
+                // If used with a version of Android Studio that does not implement getXmlFileParser
+                // fall back to reading the file from disk
+                File f = new File(value);
+                if (f.isFile()) {
+                    parser = ParserFactory.create(f);
+                }
+            }
+            if (parser != null) {
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                         parser, mContext, resValue.isFramework());
                 try {
@@ -341,18 +348,18 @@ public final class BridgeTypedArray extends TypedArray {
                 } finally {
                     blockParser.ensurePopped();
                 }
-            } catch (XmlPullParserException e) {
-                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                        "Failed to configure parser for " + value, e, null);
-                return null;
-            } catch (Exception e) {
-                // this is an error and not warning since the file existence is checked before
-                // attempting to parse it.
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
-                        "Failed to parse file " + value, e, null);
-
-                return null;
             }
+        } catch (XmlPullParserException e) {
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    "Failed to configure parser for " + value, e, null);
+            return null;
+        } catch (Exception e) {
+            // this is an error and not warning since the file existence is checked before
+            // attempting to parse it.
+            Bridge.getLog().error(LayoutLog.TAG_RESOURCES_READ,
+                    "Failed to parse file " + value, e, null);
+
+            return null;
         }
 
         try {
