@@ -423,14 +423,16 @@ public class RankingHelper implements RankingConfig {
 
     /**
      * Sets the default importance for all new topics that appear in the future, and resets
-     * the importance of all current topics.
+     * the importance of all current topics (unless the app is being blocked).
      */
     @Override
     public void setAppImportance(String pkgName, int uid, int importance) {
         final Record r = getOrCreateRecord(pkgName, uid);
         r.importance = importance;
-        for (Topic t :  r.topics.values()) {
-            t.importance = importance;
+        if (Ranking.IMPORTANCE_NONE != importance) {
+            for (Topic t : r.topics.values()) {
+                t.importance = importance;
+            }
         }
         updateConfig();
     }
@@ -483,7 +485,9 @@ public class RankingHelper implements RankingConfig {
             pw.print(prefix);
             pw.println("per-package config:");
         }
+        pw.println("Records:");
         dumpRecords(pw, prefix, filter, mRecords);
+        pw.println("Restored without uid:");
         dumpRecords(pw, prefix, filter, mRestoredWithoutUids);
     }
 

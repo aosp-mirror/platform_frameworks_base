@@ -28,6 +28,7 @@ import static android.service.notification.NotificationAssistantService.REASON_L
 import static android.service.notification.NotificationAssistantService.REASON_LISTENER_CANCEL_ALL;
 import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
+import static android.service.notification.NotificationAssistantService.REASON_TOPIC_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
@@ -741,7 +742,7 @@ public class NotificationManagerService extends SystemService {
                     for (String pkgName : pkgList) {
                         if (cancelNotifications) {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, 0, 0, !queryRestart,
-                                    changeUserId, REASON_PACKAGE_CHANGED, null);
+                                    changeUserId, REASON_PACKAGE_CHANGED, null, null);
                         }
                     }
                 }
@@ -774,7 +775,7 @@ public class NotificationManagerService extends SystemService {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
-                            REASON_USER_STOPPED, null);
+                            REASON_USER_STOPPED, null, null);
                 }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
@@ -1051,7 +1052,7 @@ public class NotificationManagerService extends SystemService {
         // Now, cancel any outstanding notifications that are part of a just-disabled app
         if (ENABLE_BLOCKED_NOTIFICATIONS && !enabled) {
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, 0, 0, true, UserHandle.getUserId(uid),
-                    REASON_PACKAGE_BANNED, null);
+                    REASON_PACKAGE_BANNED, null, null);
         }
     }
 
@@ -1209,7 +1210,7 @@ public class NotificationManagerService extends SystemService {
             // running foreground services.
             cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
                     pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId,
-                    REASON_APP_CANCEL_ALL, null);
+                    REASON_APP_CANCEL_ALL, null, null);
         }
 
         @Override
@@ -1266,6 +1267,11 @@ public class NotificationManagerService extends SystemService {
         public void setTopicImportance(String pkg, int uid, Notification.Topic topic,
                 int importance) {
             enforceSystemOrSystemUI("Caller not system or systemui");
+            if (NotificationListenerService.Ranking.IMPORTANCE_NONE == importance) {
+                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, 0, 0, true,
+                        UserHandle.getUserId(uid),
+                        REASON_TOPIC_BANNED, topic, null);
+            }
             mRankingHelper.setTopicImportance(pkg, uid, topic, importance);
             savePolicyFile();
         }
@@ -2284,8 +2290,9 @@ public class NotificationManagerService extends SystemService {
                     mRankingHelper.extractSignals(r);
                     savePolicyFile();
 
-                    // blocked apps
-                    if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {
+                    // blocked apps/topics
+                    if (r.getImportance() == NotificationListenerService.Ranking.IMPORTANCE_NONE
+                            || !noteNotificationOp(pkg, callingUid)) {
                         if (!isSystemNotification) {
                             Slog.e(TAG, "Suppressing notification from package " + pkg
                                     + " by user request.");
@@ -3067,11 +3074,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Cancels all notifications from a given package that have all of the
+     * Cancels all notifications from a given package or topic that have all of the
      * {@code mustHaveFlags}.
      */
     boolean cancelAllNotificationsInt(int callingUid, int callingPid, String pkg, int mustHaveFlags,
-            int mustNotHaveFlags, boolean doit, int userId, int reason,
+            int mustNotHaveFlags, boolean doit, int userId, int reason, Notification.Topic topic,
             ManagedServiceInfo listener) {
         String listenerName = listener == null ? null : listener.component.toShortString();
         EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
@@ -3097,6 +3104,10 @@ public class NotificationManagerService extends SystemService {
                     continue;
                 }
                 if (pkg != null && !r.sbn.getPackageName().equals(pkg)) {
+                    continue;
+                }
+                if (topic != null
+                        && !topic.getId().equals(r.getNotification().getTopic().getId())) {
                     continue;
                 }
                 if (canceledNotifications == null) {

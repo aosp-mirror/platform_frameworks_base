@@ -95,6 +95,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled because it was an invisible member of a group. */
     public static final int REASON_GROUP_OPTIMIZATION = 13;
 
+    /** Notification was canceled by the user banning the topic. */
+    public static final int REASON_TOPIC_BANNED = 14;
+
     public class Adjustment {
         int mImportance;
         CharSequence mExplanation;
