@@ -338,8 +338,8 @@ static void renderConvexPath(BakedOpRenderer& renderer, const BakedOpState& stat
 static void renderPathTexture(BakedOpRenderer& renderer, const BakedOpState& state,
         PathTexture& texture, const RecordedOp& op) {
     Rect dest(texture.width, texture.height);
-    dest.translate(texture.left + op.unmappedBounds.left - texture.offset,
-            texture.top + op.unmappedBounds.top - texture.offset);
+    dest.translate(texture.left - texture.offset,
+            texture.top - texture.offset);
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
