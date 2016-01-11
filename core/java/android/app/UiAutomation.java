@@ -1031,6 +1031,11 @@ public final class UiAutomation {
                         float scale, float centerX, float centerY) {
                     /* do nothing */
                 }
+
+                @Override
+                public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
+                    /* do nothing */
+                }
             });
         }
     }

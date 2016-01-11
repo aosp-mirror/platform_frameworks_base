@@ -16,11 +16,13 @@
 
 package android.accessibilityservice;
 
+import android.accessibilityservice.GestureDescription.MotionEventGenerator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,8 +31,11 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
@@ -41,10 +46,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -376,6 +378,7 @@ public abstract class AccessibilityService extends Service {
         public boolean onKeyEvent(KeyEvent event);
         public void onMagnificationChanged(@NonNull Region region,
                 float scale, float centerX, float centerY);
+        public void onPerformGestureResult(int sequence, boolean completedSuccessfully);
     }
 
     private int mConnectionId;
@@ -387,6 +390,12 @@ public abstract class AccessibilityService extends Service {
     private WindowManager mWindowManager;
 
     private MagnificationController mMagnificationController;
+
+    private int mGestureStatusCallbackSequence;
+
+    private SparseArray<GestureResultCallbackInfo> mGestureStatusCallbackInfos;
+
+    private final Object mLock = new Object();
 
     /**
      * Callback for {@link android.view.accessibility.AccessibilityEvent}s.
@@ -549,6 +558,88 @@ public abstract class AccessibilityService extends Service {
             mMagnificationController = new MagnificationController(this);
         }
         return mMagnificationController;
+    }
+
+    /**
+     * Dispatch a gesture to the touch screen. Any gestures currently in progress, whether from
+     * the user, this service, or another service, will be cancelled.
+     * <p>
+     * <strong>Note:</strong> In order to dispatch gestures, your service
+     * must declare the capability by setting the
+     * {@link android.R.styleable#AccessibilityService_canPerformGestures}
+     * property in its meta-data. For more information, see
+     * {@link #SERVICE_META_DATA}.
+     *
+     * @param gesture The gesture to dispatch
+     * @param callback The object to call back when the status of the gesture is known. If
+     * {@code null}, no status is reported.
+     * @param handler The handler on which to call back the {@code callback} object. If
+     * {@code null}, the object is called back on the service's main thread.
+     *
+     * @return {@code true} if the gesture is dispatched, {@code false} if not.
+     */
+    public final boolean dispatchGesture(@NonNull GestureDescription gesture,
+            @Nullable GestureResultCallback callback,
+            @Nullable Handler handler) {
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(
+                        mConnectionId);
+        if (connection == null) {
+            return false;
+        }
+        List<MotionEvent> events = MotionEventGenerator.getMotionEventsFromGestureDescription(
+                gesture, 100);
+        try {
+            synchronized (mLock) {
+                connection.sendMotionEvents(++mGestureStatusCallbackSequence,
+                        new ParceledListSlice<>(events));
+                if (callback != null) {
+                    if (mGestureStatusCallbackInfos == null) {
+                        mGestureStatusCallbackInfos = new SparseArray<>();
+                    }
+                    GestureResultCallbackInfo callbackInfo = new GestureResultCallbackInfo(gesture,
+                            callback, handler);
+                    mGestureStatusCallbackInfos.put(mGestureStatusCallbackSequence, callbackInfo);
+                }
+            }
+        } catch (RemoteException re) {
+            throw new RuntimeException(re);
+        }
+        return true;
+    }
+
+    void onPerformGestureResult(int sequence, final boolean completedSuccessfully) {
+        if (mGestureStatusCallbackInfos == null) {
+            return;
+        }
+        GestureResultCallbackInfo callbackInfo;
+        synchronized (mLock) {
+            callbackInfo = mGestureStatusCallbackInfos.get(sequence);
+        }
+        final GestureResultCallbackInfo finalCallbackInfo = callbackInfo;
+        if ((callbackInfo != null) && (callbackInfo.gestureDescription != null)
+                && (callbackInfo.callback != null)) {
+            if (callbackInfo.handler != null) {
+                callbackInfo.handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (completedSuccessfully) {
+                            finalCallbackInfo.callback
+                                    .onCompleted(finalCallbackInfo.gestureDescription);
+                        } else {
+                            finalCallbackInfo.callback
+                                    .onCancelled(finalCallbackInfo.gestureDescription);
+                        }
+                    }
+                });
+                return;
+            }
+            if (completedSuccessfully) {
+                callbackInfo.callback.onCompleted(callbackInfo.gestureDescription);
+            } else {
+                callbackInfo.callback.onCancelled(callbackInfo.gestureDescription);
+            }
+        }
     }
 
     private void onMagnificationChanged(@NonNull Region region, float scale,
@@ -1082,6 +1173,11 @@ public abstract class AccessibilityService extends Service {
                     float scale, float centerX, float centerY) {
                 AccessibilityService.this.onMagnificationChanged(region, scale, centerX, centerY);
             }
+
+            @Override
+            public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
+                AccessibilityService.this.onPerformGestureResult(sequence, completedSuccessfully);
+            }
         });
     }
 
@@ -1100,6 +1196,7 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_CLEAR_ACCESSIBILITY_CACHE = 5;
         private static final int DO_ON_KEY_EVENT = 6;
         private static final int DO_ON_MAGNIFICATION_CHANGED = 7;
+        private static final int DO_GESTURE_COMPLETE = 8;
 
         private final HandlerCaller mCaller;
 
@@ -1155,6 +1252,12 @@ public abstract class AccessibilityService extends Service {
             args.arg4 = centerY;
 
             final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
+            mCaller.sendMessage(message);
+        }
+
+        public void onPerformGestureResult(int sequence, boolean successfully) {
+            Message message = mCaller.obtainMessageII(DO_GESTURE_COMPLETE, sequence,
+                    successfully ? 1 : 0);
             mCaller.sendMessage(message);
         }
 
@@ -1242,9 +1345,47 @@ public abstract class AccessibilityService extends Service {
                     mCallback.onMagnificationChanged(region, scale, centerX, centerY);
                 } return;
 
+                case DO_GESTURE_COMPLETE: {
+                    final boolean successfully = message.arg2 == 1;
+                    mCallback.onPerformGestureResult(message.arg1, successfully);
+                } return;
+
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }
+        }
+    }
+
+    /**
+     * Class used to report status of dispatched gestures
+     */
+    public static abstract class GestureResultCallback {
+        /** Called when the gesture has completed successfully
+         *
+         * @param gestureDescription The description of the gesture that completed.
+         */
+        public void onCompleted(GestureDescription gestureDescription) {
+        }
+
+        /** Called when the gesture was cancelled
+         *
+         * @param gestureDescription The description of the gesture that was cancelled.
+         */
+        public void onCancelled(GestureDescription gestureDescription) {
+        }
+    }
+
+    /* Object to keep track of gesture result callbacks */
+    private static class GestureResultCallbackInfo {
+        GestureDescription gestureDescription;
+        GestureResultCallback callback;
+        Handler handler;
+
+        GestureResultCallbackInfo(GestureDescription gestureDescription,
+                GestureResultCallback callback, Handler handler) {
+            this.gestureDescription = gestureDescription;
+            this.callback = callback;
+            this.handler = handler;
         }
     }
 }
