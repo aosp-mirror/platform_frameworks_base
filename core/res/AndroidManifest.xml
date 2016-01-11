@@ -1070,6 +1070,12 @@
     <permission android:name="android.permission.READ_WIFI_CREDENTIAL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows applications to change tether state and run
+         tether carrier provisioning.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.TETHER_PRIVILEGED"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi @hide Allow system apps to receive broadcast
          when a wifi network credential is changed.
          <p>Not for use by third-party applications. -->
