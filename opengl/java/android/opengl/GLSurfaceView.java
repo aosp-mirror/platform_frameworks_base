@@ -161,7 +161,7 @@ import android.view.SurfaceView;
  * </pre>
  *
  */
-public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
     private final static String TAG = "GLSurfaceView";
     private final static boolean LOG_ATTACH_DETACH = false;
     private final static boolean LOG_THREADS = false;
@@ -540,6 +540,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         mGLThread.onWindowResize(w, h);
     }
+
+    /**
+     * This method is part of the SurfaceHolder.Callback interface, and is
+     * not normally called or subclassed by clients of GLSurfaceView.
+     */
+    @Override
+    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+        mGLThread.requestRenderAndWait();
+    }
+
 
     /**
      * Inform the view that the activity is paused. The owner of this view must
@@ -1226,6 +1236,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mHeight = 0;
             mRequestRender = true;
             mRenderMode = RENDERMODE_CONTINUOUSLY;
+            mWantRenderNotification = false;
             mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
         }
 
@@ -1271,6 +1282,8 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             mEglHelper = new EglHelper(mGLSurfaceViewWeakRef);
             mHaveEglContext = false;
             mHaveEglSurface = false;
+            mWantRenderNotification = false;
+
             try {
                 GL10 gl = null;
                 boolean createEglContext = false;
@@ -1278,7 +1291,6 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 boolean createGlInterface = false;
                 boolean lostEglContext = false;
                 boolean sizeChanged = false;
-                boolean wantRenderNotification = false;
                 boolean doRenderNotification = false;
                 boolean askedToReleaseEglContext = false;
                 int w = 0;
@@ -1383,7 +1395,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                 if (LOG_SURFACE) {
                                     Log.i("GLThread", "sending render notification tid=" + getId());
                                 }
-                                wantRenderNotification = false;
+                                mWantRenderNotification = false;
                                 doRenderNotification = false;
                                 mRenderComplete = true;
                                 sGLThreadManager.notifyAll();
@@ -1422,7 +1434,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                         sizeChanged = true;
                                         w = mWidth;
                                         h = mHeight;
-                                        wantRenderNotification = true;
+                                        mWantRenderNotification = true;
                                         if (LOG_SURFACE) {
                                             Log.i("GLThread",
                                                     "noticing that we want render notification tid="
@@ -1562,7 +1574,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             break;
                     }
 
-                    if (wantRenderNotification) {
+                    if (mWantRenderNotification) {
                         doRenderNotification = true;
                     }
                 }
@@ -1608,6 +1620,23 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             synchronized(sGLThreadManager) {
                 mRequestRender = true;
                 sGLThreadManager.notifyAll();
+            }
+        }
+
+        public void requestRenderAndWait() {
+            synchronized(sGLThreadManager) {
+                mWantRenderNotification = true;
+                mRequestRender = true;
+                mRenderComplete = false;
+                sGLThreadManager.notifyAll();
+                while (!mExited && !mPaused && mRenderComplete == false) {
+                    try {
+                        sGLThreadManager.wait();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
             }
         }
 
@@ -1766,6 +1795,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
         private int mHeight;
         private int mRenderMode;
         private boolean mRequestRender;
+        private boolean mWantRenderNotification;
         private boolean mRenderComplete;
         private ArrayList<Runnable> mEventQueue = new ArrayList<Runnable>();
         private boolean mSizeChanged = true;

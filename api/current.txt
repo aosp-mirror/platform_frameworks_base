@@ -27230,7 +27230,7 @@ package android.opengl {
     ctor public GLException(int, java.lang.String);
   }
 
-  public class GLSurfaceView extends android.view.SurfaceView implements android.view.SurfaceHolder.Callback {
+  public class GLSurfaceView extends android.view.SurfaceView implements android.view.SurfaceHolder.Callback2 {
     ctor public GLSurfaceView(android.content.Context);
     ctor public GLSurfaceView(android.content.Context, android.util.AttributeSet);
     method public int getDebugFlags();
@@ -27254,6 +27254,7 @@ package android.opengl {
     method public void surfaceChanged(android.view.SurfaceHolder, int, int, int);
     method public void surfaceCreated(android.view.SurfaceHolder);
     method public void surfaceDestroyed(android.view.SurfaceHolder);
+    method public void surfaceRedrawNeeded(android.view.SurfaceHolder);
     field public static final int DEBUG_CHECK_GL_ERROR = 1; // 0x1
     field public static final int DEBUG_LOG_GL_CALLS = 2; // 0x2
     field public static final int RENDERMODE_CONTINUOUSLY = 1; // 0x1
