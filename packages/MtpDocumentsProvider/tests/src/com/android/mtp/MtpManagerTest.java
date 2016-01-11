@@ -21,8 +21,10 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.mtp.MtpConstants;
 import android.mtp.MtpEvent;
+import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 
@@ -96,6 +98,52 @@ public class MtpManagerTest extends InstrumentationTestCase {
             assertTrue(event.getObjectHandle() != 0);
             break;
         }
+    }
+
+    public void testCreateDocumentAndGetPartialObject() throws Exception {
+        final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
+        final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
+        int storageId = 0;
+        for (final MtpDeviceRecord record : mManager.getDevices()) {
+            if (record.deviceId == mUsbDevice.getDeviceId()) {
+                storageId = record.roots[0].mStorageId;
+                break;
+            }
+        }
+        assertTrue("Valid storage not found.", storageId != 0);
+        final String testFileName = "MtpManagerTest_testFile.txt";
+        for (final int handle : mManager.getObjectHandles(
+                mUsbDevice.getDeviceId(), storageId, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN)) {
+            if (mManager.getObjectInfo(mUsbDevice.getDeviceId(), handle)
+                    .getName().equals(testFileName)) {
+                mManager.deleteDocument(mUsbDevice.getDeviceId(), handle);
+                break;
+            }
+        }
+        final byte[] expectedBytes = "Hello Android!".getBytes("ascii");
+        final int objectHandle;
+        try {
+            stream.write(expectedBytes);
+            objectHandle = mManager.createDocument(
+                    mUsbDevice.getDeviceId(),
+                    new MtpObjectInfo.Builder()
+                            .setStorageId(storageId)
+                            .setName(testFileName)
+                            .setCompressedSize(expectedBytes.length)
+                            .setFormat(MtpConstants.FORMAT_TEXT)
+                            .build(),
+                    fds[0]);
+        } finally {
+            stream.close();
+        }
+        final byte[] bytes = new byte[100];
+        assertEquals(5, mManager.getPartialObject(
+                mUsbDevice.getDeviceId(), objectHandle, 0, 5, bytes));
+        assertEquals("Hello", new String(bytes, 0, 5, "ascii"));
+        assertEquals(8, mManager.getPartialObject(
+                mUsbDevice.getDeviceId(), objectHandle, 6, 100, bytes));
+        assertEquals("Android!", new String(bytes, 0, 8, "ascii"));
     }
 
     private Context getContext() {

@@ -188,6 +188,15 @@ class MtpManager {
         }
     }
 
+    @VisibleForTesting
+    long getPartialObject(int deviceId, int objectHandle, long offset, long size, byte[] buffer)
+            throws IOException {
+        final MtpDevice device = getDevice(deviceId);
+        synchronized (device) {
+            return device.getPartialObject(objectHandle, offset, size, buffer);
+        }
+    }
+
     byte[] getThumbnail(int deviceId, int objectHandle) throws IOException {
         final MtpDevice device = getDevice(deviceId);
         synchronized (device) {
