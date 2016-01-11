@@ -134,6 +134,11 @@ public class ApprovedPrintServices {
     public void pruneApprovedServices(List<ComponentName> serviceNamesToKeep) {
         synchronized (sLock) {
             Set<String> approvedServices = getApprovedServices();
+
+            if (approvedServices == null) {
+                return;
+            }
+
             Set<String> newApprovedServices = new ArraySet<>(approvedServices.size());
 
             final int numServiceNamesToKeep = serviceNamesToKeep.size();
