@@ -62,10 +62,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIM 卡的 PUK 已鎖定。請輸入 PUK 碼解除鎖定。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"請輸入 PUK2 以解鎖 SIM 卡。"</string>
     <string name="enablePin" msgid="209412020907207950">"操作失敗，請啟用 SIM/RUIM 鎖定。"</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
-    <item quantity="other" msgid="7530597808358774740">"您還可以再試 <xliff:g id="NUMBER">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖住。"</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖定。</item>
+      <item quantity="one">您還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，SIM 卡將被鎖定。</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"來電顯示"</string>
@@ -73,7 +73,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"連接的線路 ID"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"連接的線路 ID 限制"</string>
     <string name="CfMmi" msgid="5123218989141573515">"來電轉接"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"來電待接"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"來電等待"</string>
     <string name="BaMmi" msgid="455193067926770581">"通話限制"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"變更密碼"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN 已變更"</string>
@@ -116,7 +116,7 @@
     <string name="roamingText7" msgid="7112078724097233605">"漫遊 - 聯盟合作夥伴"</string>
     <string name="roamingText8" msgid="5989569778604089291">"漫遊 - Google Premium 合作夥伴"</string>
     <string name="roamingText9" msgid="7969296811355152491">"漫遊 - 完整服務功能"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"漫遊 - 部份服務功能"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"漫遊 - 部分服務功能"</string>
     <string name="roamingText11" msgid="4154476854426920970">"漫遊橫幅開啟"</string>
     <string name="roamingText12" msgid="1189071119992726320">"漫遊橫幅關閉"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"正在搜尋服務"</string>
@@ -157,8 +157,8 @@
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"平板電腦選項"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"電話選項"</string>
     <string name="silent_mode" msgid="7167703389802618663">"靜音模式"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線網路"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線網路"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線電"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線電"</string>
     <string name="screen_lock" msgid="799094655496098153">"螢幕鎖定"</string>
     <string name="power_off" msgid="4266614107412865048">"關機"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
@@ -1063,75 +1063,76 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> 需要啟用「輕觸探索」。開啟這項功能時，系統會在您的手指輕觸螢幕上的物件時顯示或朗讀說明，您也可以執行手勢來與手機互動。"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 個月以前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 個月前"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 秒以前"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> 秒前"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 分鐘以前"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> 分鐘前"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 小時以前"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> 小時前"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"最近 <xliff:g id="COUNT">%d</xliff:g> 天"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒前</item>
+      <item quantity="one">1 秒前</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分鐘前</item>
+      <item quantity="one">1 分鐘前</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時前</item>
+      <item quantity="one">1 小時前</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">過去 <xliff:g id="COUNT_1">%d</xliff:g> 天內</item>
+      <item quantity="one">過去 <xliff:g id="COUNT_0">%d</xliff:g> 天內</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"上個月"</string>
     <string name="older" msgid="5211975022815554840">"較舊"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"昨天"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 秒內"</item>
-    <item quantity="other" msgid="1241926116443974687">"在 <xliff:g id="COUNT">%d</xliff:g> 秒內"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 分鐘內"</item>
-    <item quantity="other" msgid="3330713936399448749">"在 <xliff:g id="COUNT">%d</xliff:g> 分鐘內"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 小時內"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> 小時內"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"明天"</item>
-    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> 天內"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 秒以前"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> 秒以前"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 分鐘以前"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> 分鐘以前"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 小時以前"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> 小時前"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"昨天"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> 天前"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 秒內"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> 秒內"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 分鐘內"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> 分鐘內"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 小時內"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> 小時內"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"明天"</item>
-    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> 天內"</item>
-  </plurals>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 天前</item>
+      <item quantity="one">昨天</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒後</item>
+      <item quantity="one">1 秒後</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分鐘後</item>
+      <item quantity="one">1 分鐘後</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時後</item>
+      <item quantity="one">1 小時後</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 天後</item>
+      <item quantity="one">明天</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒前</item>
+      <item quantity="one">1 秒前</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分鐘前</item>
+      <item quantity="one">1 分鐘前</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時前</item>
+      <item quantity="one">1 小時前</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 天前</item>
+      <item quantity="one">昨天</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒後</item>
+      <item quantity="one">1 秒後</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分鐘後</item>
+      <item quantity="one">1 分鐘後</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時後</item>
+      <item quantity="one">1 小時後</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 天後</item>
+      <item quantity="one">明天</item>
+    </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"於 <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"於<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"於 <xliff:g id="YEAR">%s</xliff:g> 年"</string>
@@ -1147,18 +1148,18 @@
     <string name="weeks" msgid="6509623834583944518">"週"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 秒"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> 秒"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 分鐘"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> 分鐘"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 小時"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> 小時"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 秒</item>
+      <item quantity="one">1 秒</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 分鐘</item>
+      <item quantity="one">1 分鐘</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> 小時</item>
+      <item quantity="one">1 小時</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"影片發生問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"這部影片的格式無效，因此無法在此裝置中串流播放。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"無法播放這部影片。"</string>
@@ -1266,14 +1267,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"無"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"鈴聲"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"未知的鈴聲"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"已偵測到 Wi-Fi 網路"</item>
-    <item quantity="other" msgid="4192424489168397386">"已偵測到 Wi-Fi 網路"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"開啟可用 Wi-Fi 網路"</item>
-    <item quantity="other" msgid="7915895323644292768">"開啟可用 Wi-Fi 網路"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">有多個可用的 Wi-Fi 網路</item>
+      <item quantity="one">有一個可用的 Wi-Fi 網路</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">有多個可用的開放 Wi-Fi 網路</item>
+      <item quantity="one">有多個可用的開放 Wi-Fi 網路</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"登入 Wi-Fi 網路"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1460,10 +1461,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"略過"</string>
     <string name="no_matches" msgid="8129421908915840737">"沒有相符項目"</string>
     <string name="find_on_page" msgid="1946799233822820384">"在頁面中尋找"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 個相符項目"</item>
-    <item quantity="other" msgid="4641872797067609177">"第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個相符項目)"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other">第 <xliff:g id="INDEX">%d</xliff:g> 個相符項目 (共 <xliff:g id="TOTAL">%d</xliff:g> 個)</item>
+      <item quantity="one">1 個相符項目</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完成"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"正在卸載 USB 儲存裝置…"</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"正在卸載 SD 卡…"</string>
@@ -1745,10 +1746,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"建立修改限制所需的 PIN"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN 不符，請再試一次。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN 長度太短，至少必須為 4 位數。"</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 秒後再試一次"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> 秒後再試一次"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">請於 <xliff:g id="COUNT">%d</xliff:g> 秒後再試一次</item>
+      <item quantity="one">請於 1 秒後再試一次</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"稍後再試"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"從頂端往下滑動即可退出全螢幕模式。"</string>
     <string name="done_label" msgid="2093726099505892398">"完成"</string>
@@ -1778,13 +1779,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"節約耗電量功能會降低裝置的效能，並限制震動和大多數背景資料，藉此延長電池續航力。此外，電子郵件、聊天工具和其他需要使用同步功能的應用程式若未開啟，將不會自動更新。\n\n當您為裝置充電時，節約耗電量功能會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"1 分鐘"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d 分鐘"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"1 小時"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d 小時"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">持續 %d 分鐘</item>
+      <item quantity="one">持續 1 分鐘</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">持續 %d 小時</item>
+      <item quantity="one">持續 1 小時</item>
+    </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
 </resources>

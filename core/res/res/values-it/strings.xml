@@ -62,10 +62,10 @@
     <string name="needPuk" msgid="919668385956251611">"La SIM è bloccata tramite PUK. Digita il codice PUK per sbloccarla."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata."</item>
-    <item quantity="other" msgid="7530597808358774740">"Hai ancora <xliff:g id="NUMBER">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
+      <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID chiamante in entrata"</string>
@@ -179,7 +179,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Spegni"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Segnalazione di bug"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Apri segnalazione bug"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Raccoglierà informazioni sullo stato corrente del dispositivo che verranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Verranno raccolte informazioni sullo stato corrente del dispositivo che saranno inviate sotto forma di messaggio email. Passerà un po\' di tempo prima che la segnalazione di bug aperta sia pronta per essere inviata; ti preghiamo di avere pazienza."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modalità silenziosa"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Audio non attivo"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Audio attivo"</string>
@@ -199,8 +199,8 @@
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Consentono di leggere e scrivere SMS, email e altri messaggi."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informazioni personali"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Accesso diretto alle informazioni su di te memorizzate nella tua scheda di contatto."</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Tue informazioni sociali"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accesso diretto alle informazioni sui tuoi contatti e sulle tue connessioni sociali."</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Le tue informazioni social"</string>
+    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Accesso diretto alle informazioni sui tuoi contatti e sulle tue connessioni social."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"La tua posizione"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Monitoraggio della posizione fisica dell\'utente."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Comunicazione di rete"</string>
@@ -256,7 +256,7 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesso alla scheda SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funzioni di accessibilità"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funzioni che possono essere richieste dalla tecnologia di ausilio."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti finestra"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperare contenuti della finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Esaminare i contenuti di una finestra con cui interagisci."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Attivare Esplora al tocco"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Gli elementi toccati verranno pronunciati ad alta voce e sarà possibile esplorare lo schermo utilizzando i gesti."</string>
@@ -376,7 +376,7 @@
     <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Consente all\'applicazione di avviare l\'interfaccia utente di conferma del backup completo. Non utilizzare per nessuna applicazione."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Consente all\'applicazione di creare finestre destinate all\'uso da parte dell\'interfaccia utente del sistema interno. Da non usare per normali applicazioni."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"spostamento sopra altre app"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"posizionamento davanti ad altre app"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Consente all\'applicazione di spostarsi sopra ad altre applicazioni o parti dell\'interfaccia utente. Potrebbe interferire con il tuo utilizzo dell\'interfaccia in qualsiasi applicazione o cambiare ciò che credi di vedere in altre applicazioni."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"modifica velocità di animazione globale"</string>
     <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Consente all\'applicazione di modificare la velocità di animazione globale (animazioni più veloci o più lente) in qualsiasi momento."</string>
@@ -495,9 +495,9 @@
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Consente all\'applicazione di modificare o aggiungere informazioni ai dati del profilo personale memorizzati sul dispositivo, come il tuo nome e le tue informazioni di contatto. Significa che l\'applicazione può identificarti e inviare le informazioni del tuo profilo ad altri."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"sensori per il corpo (come il cardiofrequenzimetro)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Consente all\'app di accedere a dati derivanti dai sensori utilizzati per rilevare cosa sta accadendo nel tuo corpo, ad esempio la frequenza cardiaca."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lettura del tuo stream sociale"</string>
+    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"lettura del tuo stream social"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Consente all\'applicazione di accedere agli aggiornamenti dei social network tra te e i tuoi amici e di sincronizzarli. Fai attenzione quando condividi informazioni: questa autorizzazione consente all\'applicazione di leggere le comunicazioni tra te e i tuoi amici sui social network, indipendentemente dal livello di riservatezza. Nota. È possibile che questa autorizzazione non sia applicabile su tutti i social network."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"scrittura nel tuo stream sociale"</string>
+    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"scrittura nel tuo stream social"</string>
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Consente all\'applicazione di visualizzare gli aggiornamenti dei social network dai tuoi amici. Fai attenzione quando condividi informazioni: questa autorizzazione consente all\'applicazione di produrre messaggi apparentemente provenienti da un amico. Nota. È possibile che questa autorizzazione non sia applicabile su tutti i social network."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lettura di eventi di calendario e di informazioni riservate"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Consente all\'applicazione di leggere tutti gli eventi di calendario memorizzati sul tablet, inclusi quelli di amici o colleghi. Ciò potrebbe consentire all\'applicazione di condividere o salvare i dati del tuo calendario, a prescindere dal livello di riservatezza o privacy."</string>
@@ -539,7 +539,7 @@
     <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Consente all\'app di controllare la riproduzione dei contenuti multimediali e l\'accesso alle informazioni su tali contenuti (titolo, autore etc.)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifica impostazioni audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Consente all\'applicazione di modificare le impostazioni audio globali, come il volume e quale altoparlante viene utilizzato per l\'uscita."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"registrazione audio"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"registrare audio"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Consente all\'applicazione di registrare audio con il microfono. Questa autorizzazione consente all\'applicazione di registrare audio in qualsiasi momento senza la tua conferma."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"comunicazione SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Consente all\'app di inviare comandi alla SIM. Questo è molto pericoloso."</string>
@@ -702,7 +702,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lettura contenuti scheda SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"L\'app può leggere i contenuti dell\'archivio USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Consente all\'applicazione di leggere i contenuti della scheda SD."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"Modifica/eliminazione contenuti USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"modifica/eliminazione contenuti USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"modifica o eliminazione dei contenuti della scheda SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Consente all\'applicazione di scrivere nell\'archivio USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Consente all\'applicazione di scrivere sulla scheda SD."</string>
@@ -837,7 +837,7 @@
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personalizzato"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Compleanno"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Anniversario"</string>
-    <string name="eventTypeOther" msgid="7388178939010143077">"Altri"</string>
+    <string name="eventTypeOther" msgid="7388178939010143077">"Altro"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizzato"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Lavoro"</string>
@@ -857,7 +857,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangout"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1063,76 +1063,77 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vuole attivare la funzione Esplora al tocco. Quando la funzione Esplora al tocco è attiva, puoi ascoltare o visualizzare le descrizioni di ciò che stai toccando oppure interagire con il telefono tramite gesti."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 mese fa"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Oltre 1 mese fa"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 secondo fa"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> secondi fa"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 minuto fa"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> minuti fa"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 ora fa"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ore fa"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Ultimi <xliff:g id="COUNT">%d</xliff:g> giorni"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> secondi fa</item>
+      <item quantity="one">1 secondo fa</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuti fa</item>
+      <item quantity="one">1 minuto fa</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ore fa</item>
+      <item quantity="one">1 ora fa</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Ultimi <xliff:g id="COUNT_1">%d</xliff:g> giorni</item>
+      <item quantity="one">Ultimo giorno (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ultimo mese"</string>
     <string name="older" msgid="5211975022815554840">"Precedente"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ieri"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> giorni fa"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"tra 1 secondo"</item>
-    <item quantity="other" msgid="1241926116443974687">"tra <xliff:g id="COUNT">%d</xliff:g> secondi"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"tra 1 minuto"</item>
-    <item quantity="other" msgid="3330713936399448749">"tra <xliff:g id="COUNT">%d</xliff:g> minuti"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"tra 1 ora"</item>
-    <item quantity="other" msgid="547290677353727389">"tra <xliff:g id="COUNT">%d</xliff:g> ore"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"domani"</item>
-    <item quantity="other" msgid="5109449375100953247">"tra <xliff:g id="COUNT">%d</xliff:g> giorni"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 sec fa"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> sec fa"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 min fa"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> min fa"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 ora fa"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> ore fa"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"ieri"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> giorni fa"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"tra 1 sec"</item>
-    <item quantity="other" msgid="5495880108825805108">"tra <xliff:g id="COUNT">%d</xliff:g> sec"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"tra 1 min"</item>
-    <item quantity="other" msgid="4216113292706568726">"tra <xliff:g id="COUNT">%d</xliff:g> min"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"tra 1 ora"</item>
-    <item quantity="other" msgid="3705373766798013406">"tra <xliff:g id="COUNT">%d</xliff:g> ore"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"domani"</item>
-    <item quantity="other" msgid="2973062968038355991">"tra <xliff:g id="COUNT">%d</xliff:g> giorni"</item>
-  </plurals>
-    <string name="preposition_for_date" msgid="9093949757757445117">"in data <xliff:g id="DATE">%s</xliff:g>"</string>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> giorni fa</item>
+      <item quantity="one">ieri</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> secondi</item>
+      <item quantity="one">tra 1 secondo</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> minuti</item>
+      <item quantity="one">tra 1 minuto</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> ore</item>
+      <item quantity="one">tra 1 ora</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> giorni</item>
+      <item quantity="one">domani</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> secondi fa</item>
+      <item quantity="one">1 secondo fa</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuti fa</item>
+      <item quantity="one">1 minuto fa</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ore fa</item>
+      <item quantity="one">1 ora fa</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> giorni fa</item>
+      <item quantity="one">ieri</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> secondi</item>
+      <item quantity="one">tra 1 secondo</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> minuti</item>
+      <item quantity="one">tra 1 minuto</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> ore</item>
+      <item quantity="one">tra 1 ora</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="other">tra <xliff:g id="COUNT">%d</xliff:g> giorni</item>
+      <item quantity="one">domani</item>
+    </plurals>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"alle ore <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"nel <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"giorno"</string>
@@ -1147,18 +1148,18 @@
     <string name="weeks" msgid="6509623834583944518">"settimane"</string>
     <string name="year" msgid="4001118221013892076">"anno"</string>
     <string name="years" msgid="6881577717993213522">"anni"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 secondo"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> secondi"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 minuto"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minuti"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 ora"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ore"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> secondi</item>
+      <item quantity="one">1 secondo</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuti</item>
+      <item quantity="one">1 minuto</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ore</item>
+      <item quantity="one">1 ora</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemi video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Questo video non è valido per lo streaming su questo dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Impossibile riprodurre il video."</string>
@@ -1232,7 +1233,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Riattivala in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Upgrade di Android..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Avvio di Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ottimizzazione archiviazione."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1266,14 +1267,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Nessuna"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Suonerie"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Suoneria sconosciuta"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Rete Wi-Fi disponibile"</item>
-    <item quantity="other" msgid="4192424489168397386">"Reti Wi-Fi disponibili"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Rete Wi-Fi aperta disponibile"</item>
-    <item quantity="other" msgid="7915895323644292768">"Reti Wi-Fi aperte disponibili"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Reti Wi-Fi disponibili</item>
+      <item quantity="one">Rete Wi-Fi disponibile</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Apri reti Wi-Fi disponibili</item>
+      <item quantity="one">Apri rete Wi-Fi disponibile</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Accedi a rete Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Accedi alla rete"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1356,7 +1357,7 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiere"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiera"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostra metodo immissione"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Seleziona layout tastiera"</string>
@@ -1460,10 +1461,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Ignora"</string>
     <string name="no_matches" msgid="8129421908915840737">"Nessuna corrispondenza"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Trova nella pagina"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 corrispondenza"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> di <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> di <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 partita</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fine"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Smontaggio dell\'archivio USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Smontaggio scheda SD..."</string>
@@ -1745,10 +1746,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crea un PIN per la modifica delle limitazioni"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"I PIN non corrispondono. Riprova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Il PIN è troppo corto. Deve avere almeno quattro cifre."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Riprova fra 1 s."</item>
-    <item quantity="other" msgid="4730868920742952817">"Riprova tra <xliff:g id="COUNT">%d</xliff:g> s."</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">Riprova tra <xliff:g id="COUNT">%d</xliff:g> secondi</item>
+      <item quantity="one">Riprova tra 1 secondo</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Riprova più tardi"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Scorri dall\'alto verso il basso per uscire dalla modalità schermo intero."</string>
     <string name="done_label" msgid="2093726099505892398">"Fine"</string>
@@ -1773,18 +1774,18 @@
     <string name="lock_to_app_positive" msgid="7085139175671313864">"AVVIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggistica e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Per un minuto"</item>
-    <item quantity="other" msgid="6924190729213550991">"Per %d minuti"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Per un\'ora"</item>
-    <item quantity="other" msgid="5408537517529822157">"Per %d ore"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">Per %d minuti</item>
+      <item quantity="one">Per un minuto</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">Per %d ore</item>
+      <item quantity="one">Per un\'ora</item>
+    </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
 </resources>

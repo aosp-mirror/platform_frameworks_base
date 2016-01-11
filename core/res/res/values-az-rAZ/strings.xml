@@ -27,6 +27,17 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> gün"</string>
+    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> gan <xliff:g id="HOURS">%2$d</xliff:g> saat"</string>
+    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> gün <xliff:g id="HOURS">%2$d</xliff:g> saat"</string>
+    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> saat"</string>
+    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> saat <xliff:g id="MINUTES">%2$d</xliff:g> dəq"</string>
+    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> saat <xliff:g id="MINUTES">%2$d</xliff:g> dəq"</string>
+    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> dəqiqə"</string>
+    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> dəq <xliff:g id="SECONDS">%2$d</xliff:g> san"</string>
+    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> dəq <xliff:g id="SECONDS">%2$d</xliff:g> san"</string>
+    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> saniyə"</string>
+    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> saniyə"</string>
     <string name="untitled" msgid="4638956954852782576">"Başlıqsız"</string>
     <string name="ellipsis" msgid="7899829516048813237">"..."</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
@@ -50,10 +61,17 @@
     <string name="invalidPuk" msgid="8761456210898036513">"8 və daha çox rəqəmi olan PUK yazın."</string>
     <string name="needPuk" msgid="919668385956251611">"Sizin SİM kart PUK ilə kilidlənib. Onu açmaq üçün PUK kodu yazın."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM kartın kilidini açmaq üçün PUK2 yazın"</string>
+    <string name="enablePin" msgid="209412020907207950">"Alınmadı, SIM/RUIM Kilidini aktiv edin."</string>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">SIM kartınızın kilidlənməsindən öncə <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
+      <item quantity="one">SIM kartınızın kilidlənməsindən öncə <xliff:g id="NUMBER_0">%d</xliff:g> cəhdiniz qalır.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Daxil olan zəng edənin ID\'si"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Gedən Zəng ID"</string>
+    <string name="ColpMmi" msgid="3065121483740183974">"Qoşulmuş Xətt ID"</string>
+    <string name="ColrMmi" msgid="4996540314421889589">"Qoşulmuş Xətt ID Məhdudluğu"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Zəng yönləndirmə"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Zəng gözləyir"</string>
     <string name="BaMmi" msgid="455193067926770581">"Zəng qadağası"</string>
@@ -130,7 +148,11 @@
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Sinxronlaşdırma"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Həddindən çox <xliff:g id="CONTENT_TYPE">%s</xliff:g> silinmələri var."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Planşetin yaddaşı doludur. Boş yer üçün bəzi faylları silin."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"Yaddaş dolub. Boşaltmaq üçün bəzi faylları silin."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefonun yaddaşı doludur. Boş yer üçün bəzi faylları silin."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Şəbəkə monitor edilə bilər"</string>
+    <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bilinməyən üçüncü tərəfdən"</string>
+    <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tərəfindən"</string>
     <string name="me" msgid="6545696007631404292">"Mən"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planşet seçimləri"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefon seçimləri"</string>
@@ -144,6 +166,7 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zəngvuran açıqdır"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Söndürülür..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Planşetiniz sönəcək."</string>
+    <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Saatınız sönəcək."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Telefonunuz sönəcək."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Söndürmək istəyirsiz?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Təhlükəsiz rejimdə yenidən başlayın"</string>
@@ -163,9 +186,13 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Təyyarə rejimi"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Uçuş rejimi açıqdır"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Təyyarə rejimi qapalıdır"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"Ayarlar"</string>
+    <string name="global_action_lockdown" msgid="8751542514724332873">"İndi kilidləyin"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Təhlükəsiz rejim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android sistemi"</string>
+    <string name="user_owner_label" msgid="6465364741001216388">"Şəxsi tətbiqlər"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"İş"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Ödənişli xidmətlər"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Xərc tutulacaq əməliyyatlar edir"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Sizin mesajlarınız"</string>
@@ -243,8 +270,12 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Tətbiqə status paneli olmağa imkan verir."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"status panelini genişlətmək və ya yığmaq"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tətbiqə status panelini genişləndirməyə və ya yox etməyə imkan verir."</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"qısayolları quraşdır"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"İstifadəçi müdaxiləsi olmadan tətbiqə İş Stolu qısayolları əlavə etməyə icazə verir."</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"qısayolları sistemdən sil"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"İstifadəçi müdaxiləsi olmadan tətbiqə İş Stolu qısayollarını silməyə icazə verir."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"gedən zənglərin marşrutunu dəyişmək"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tətbiqə zəng etməyə və zəng edilən nömrəni dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək gedən zəngləri izləyə, yönləndirə və ya qarşısını ala bilər."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Tətbiqə gedən zəng zamanı yığılan nömrəni görməyə imkan verir. Bu zaman zəngi başqa nömrəyə yönləndirmək və ya bütün zəngləri ləğv etmək funsiyası da təqdim olunur."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"SMS qəbul etmək"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tətbiqə MMS mesajlarını almaq və emal etmək icazəsi verir. Bu o deməkdir ki, tətbiq sizin mesajlarınızı sizə göstərmədən monitorinq edə və ya silə bilər."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"mətn mesajlarını qəbul edir (MMS)"</string>
@@ -265,8 +296,12 @@
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tətbiqə telefonunuzda və ya SİM kartınızda yerləşən SMS mesajlara yazma icazəsi verir. Zərərli tətbiqlər sizin mesajlarınızı silə bilər."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"mətn mesajları qəbul etmək (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Tətbiqə WAP mesajlar göndərmək və ya qəbul etmək imkanı verir. Buna mesajları izləmək və Sizə xəbər vermədən silmək imkanları da daxildir."</string>
+    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth mesajları əldə edin (MAP)"</string>
+    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Tətbiqə Bluetooth MAP mesajlarını əldə etməyə və emal etməyə imkan verir. Bu, o deməkdir ki, tətbiq cihazınıza göndərilən mesajları Sizə göstərmədən nəzərdən keçirə və ya silə bilər."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"işlənən tətbiqlər əldə etmək"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Tətbiqə hazırda və az öncə işləyən tapşırıqlar haqqında ətraflı məlumat əldə etməyə imkan verir. Bu da cihazda hansı tətbiqlərin istifadə olunması haqqında məlumatların əldə edilməsinə imkan verir."</string>
+    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"sonunculardan tapşırığa başlayın"</string>
+    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() üzərindən qayıtmış işləməyən tapşırığı işə salmaq üçün ActivityManager.RecentTaskInfo obyektini istifadə etməyə tətbiqə imkan verir."</string>
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"istifadəçilər arasında əlaqə qurur"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Tətbiqə bu cihazdakı digər istifadəçilərlə müxtəlif işləri görməyə icazə verir. Zərərli tətbiqlər bundan istifadəçilər arasındakı qorunmanı pozmaq üçün istifadə edə bilər."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"bütün istifadəçilər ilə əlaqə saxlamaq üçün tam hüquq"</string>
@@ -303,18 +338,18 @@
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Tətbiqə aktiv pəncərənin məzmununu əldə etməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək pəncərə məzmununu ələ keçirib parollları oxuya bilər."</string>
     <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"giriş imkanını müvəqqəti açmaq"</string>
     <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Tətbiqə cihaza girişi müvəqqəti olaraq aktivləşdirməyə imkan verir. Zərərli tətbiqlər istifadəçi razılığı olmadan girişi aktivləşdirə bilər."</string>
-    <string name="permlab_retrieve_window_info" msgid="8532295199112519378">"pəncərə infosunu bərpa edir"</string>
-    <string name="permdesc_retrieve_window_info" msgid="4998836370424186849">"Tətbiqə pəncərə idarəçisindən gələn windows haqqında olan məlumatı bərpa etməyə imkan verir. Zərərli tətbiqlər daxili sistem istifadəsi üçün nəzərdə tutulan məlumatı bərpa edə bilər."</string>
+    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"pəncərə nişanının bərpası"</string>
+    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Tətbiqə pəncərə niaşını bərpa etməyə imkan verir. Ziyanverici tətbiqlər sistemin adından fəaliyyət göstərərək tətbiq pəncərəsi ilə icazəsiz qarşılıqlı əlaqə qura bilər."</string>
+    <string name="permlab_frameStats" msgid="7056374987314361639">"çərçivə statistikasının bərpası"</string>
+    <string name="permdesc_frameStats" msgid="4758001089491284919">"Tətbiqə çərçivə statistikasını toplamağa imkan verir. Ziyanverici tətbiqlər digər tətbiqlərdən olan pəncərələrin çərçivə statistikasını izləyə bilər."</string>
     <string name="permlab_filter_events" msgid="8675535648807427389">"tədbirləri filtr edir"</string>
     <string name="permdesc_filter_events" msgid="8006236315888347680">"Tətbiqə daxiletmə filtrini qeydiyyat etdirməyə imkan verir, bu filtr bütün istifadəçi tədbirlərini göndərilməmişdən əvvəl filtrdən keçirir. Zərərli tətbiq istifadəçi müdaxiləsi olmadan İstifadəçi İnterfeysi sisteminə nəzarət edə bilər."</string>
-    <string name="permlab_magnify_display" msgid="5973626738170618775">"ekranı böyüdür"</string>
-    <string name="permdesc_magnify_display" msgid="7121235684515003792">"Tətbiqə ekran kontentini böyütmək icazəsi verir. Zərərli tətbiqlər bundan istifadə edərək ekranda kontenti böyüdərək cihazın qeyri-stabilliyinə səbəb ola bilər."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"qismən söndürür"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Aktivlik idarəçiliyini qapanmış hala gətirir. Tam qapanmanı həyata keçirmir."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"tətbiqdən tətbiqə keçidin qarşısını almaq"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"İstifadəçinin başqa tətbiqə keçməsinin qarşısını alır."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"cari tətbiq informasiyası əldə etmək"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Sahibə ekran önündə cari tətbiq və xidmətlər haqqında şəxsi məlumat əldə etməyə imkan verir."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Sahibinə ekranda öndə olan cari tətbiq haqda gizli məlumatı almaq icazəsi verir."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"işə salınan bütün tətbiqləri izləyir və idarə edir"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tətbiqə sistemin fəaliyyətləri necə başlatdığını nəzarət və kontrol etməyə imkan verir. Zərərli tətbiqlər sistemi tamamilə kompromis edə bilər. Bu icazə yalnız inkişaf üçündür, heç vaxt normal istifadə üçün deyil."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"qaldırılmış yayım paketini göndər"</string>
@@ -370,10 +405,20 @@
     <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Sahibinə bir Vpn xidmətinin ən üst səviyyə araüzünü bağlamağa imkan verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"divar kağızına bağlanır"</string>
     <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Cihaz sahibinə yuxarı səviyyəli divar kağızı interfeysini cildləməyə imkan verir. Normal tətbiqlər tərəfindən istifadə olunmamalıdır."</string>
+    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"səs interaktoruna bənd edin"</string>
+    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Sahibə səs interaktiyası xidmətinin yuxarı səviyyəli interfeysini bənd etməyə imkan verir. Normal tətbiqlər tərəfindən istənilməməlidir."</string>
+    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"səsli açar sözləri idarə edin"</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Səsli əmr sözlərinin müəyyən edilməsi üçün açar sözlərin idarə edilməsi imkanını verir. Normal tətbiqlər tərəfindən heç zaman istənilmir."</string>
+    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"uzaq displeyə birləşdirin"</string>
+    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Sahibə uzaq displeyin yüksək dərəcəli interfeysini birləşdirməyə icazə verir. Normal tətbiqlər üçün heç vaxt lazım olmur."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"widget servisini qoşma"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Sahibinə vidcet servisin yüksək səviyyəli interfeysi ilə əlaqə saxlamaq icazəsi verir. Normal tətbiqlər tərəfindən heç vaxt istənilməməlidir."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"cihaz admini ilə ünsiyyət qurmaq"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Sahibinə bir cihaz idarəçisinə planlar göndərmək üçün imkan verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV girişinə bənd edin"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Sahibə TV girişinin yuxarı səviyyəli interfeysini bənd etməyə imkan verir. Normal tətbiqlər tərəfindən heç vaxt istənilmir."</string>
+    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"valideyn nəzarətinə dəyişiklik edin"</string>
+    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Sahibə sistemin valideyn nəzarət datasına dəyişiklik etməsinə icazə verir. Normal tətbiqlər tərəfindən heç vaxt tələb edilmir."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"cihaz admini əlavə edin və ya silin"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Sahibinə aktiv cihaz administratorlarını əlavə etməyə və ya silməyə icazə verir. Normal tətbiqlər üçün tələb olunmamalıdır."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran oriyentasiyasını dəyişir"</string>
@@ -409,6 +454,8 @@
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Tətbiqə playback\'i deşifrə etmək üçün hər hansı bir quraşdırılmış media deşifrələyicisini istifadə etmık imkanı verir."</string>
     <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"etibarlı etimadnamələri idarə et"</string>
     <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Tətbiqə etibarlı etimadnamələr kimi CA sertifikatlarını quraşdırmaq və sistemdən silməyə icazə verir."</string>
+    <string name="permlab_bindJobService" msgid="3637568367978271086">"tətbiqi planlanmış şəkildə arxa fonda işə salın"</string>
+    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Bu icazə tələb olunan halda Android sisteminə tətbiqi arxa fonda işlətməyə icazə verir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diaga məxsus olan mənbələri yaz/oxu"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Tətbiqə diag qrupa məsus olan resursları yazmaq və oxumaq icazəsi verir; məsələn  /dev qovluğundakı fayllar. Bu sistemin stabilliyinə və təhlükəsizliyinə təsir edə bilər. Bu ancaq istehsalçı və ya operator tərəfindən avadanlığa xas diaqnostika üçün olmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"tətbiq komponentlərini aktivləşdirmə və ya deaktivləşdirmə"</string>
@@ -446,6 +493,8 @@
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Tətbiqə cihazınızda yerləşən adınız və kontakt məlumatlarınız kimi şəxsi profil məlumatlarını oxuma icazəsi verir. Bu o deməkdir ki, tətbiq sizi tanıya və sizin profil məlumatlarınızı başqalarına göndərə bilər."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"sizin kontakt kartınızda dəyişiklik etmək"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Tətbiqə cihazınızda yerləşən adınız və kontakt məlumatlarınız kimi şəxsi profil məlumatlarını dəyişmək və ya əlavə etmək icazəsi verir. Bu o deməkdir ki, tətbiq sizi tanıya və sizin profil məlumatlarınızı başqalarına göndərə bilər."</string>
+    <string name="permlab_bodySensors" msgid="4871091374767171066">"bədən sensorları (ürək döyüntüsü sayı kimi)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2998865085124153531">"Tətbiqə bədəndə baş verənləri (məsələn, ürək döyüntüsü sayı) ölçmək üçün sensor vasitəsilə məlumat almağa imkan verir."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"sosial lentinizi oxuyur"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Tətbiqə Sizin və dostlarınızın sosial güncəllərini əldə etmək və sinxronizə etmək icazəsi verir. Məlumat paylaşarkən diqqətli olun - konfidensiallıqdan asılı olmayaraq bu, Siz və dostlarınız arasında sosial şəbəkələrdəki danışığı oxumaq imkanı verir. Qeyd: bu icazə bütün sosial şəbəkələrdə icra edilə bilməz."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"sosial axınınıza yazır"</string>
@@ -459,7 +508,7 @@
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"test üçün saxta məkan mənbələri"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Test üçün saxta məkan mənbələri yaradın və ya yeni məkan provayderi quraşdırın. Bu tətbiqlərə GPS və məkan provayderləri kimi məkan mənbələrindən alınan məkan və/ya statusları yenidən yazmağa icazə verir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"əlavə məkan provayderi əmrlərinə çıxış"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="5945166642335800763">"Tətbiqə əlavə məkan provayderi əmrlərinə daxil olmaq imkanı verir. Bu tətbiqə GPS əməliyyatına və ya digər məkan mənbələrinə mane olmaq imkanı verə bilər."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"Məkan provayderini quraşdırmaq icazəsi"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Yeni yerləşmə təchizatçısını test etmək və ya quraşdırmaq üçün mock yerləşmə mənbələri yarat. Bu tətbiqə yerləşmənin və/ya digər yerləşmə mənbələrindən GPS və ya yerləşmə təchizatçıları qayıtmış statusların ləğv etməsinə imkan verir."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"dəqiq yeri (GPS və şəbəkə-əsaslı)"</string>
@@ -478,14 +527,22 @@
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tətbiqə Wifi displeylərinin aşağı səviyyəli funksiyalarını idarə etmək imkanı verir."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"audio çıxışı alın"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Tətbiqə audio çıxışı almaq və yenidən yönləndirmək imkanı verir."</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Qaynar söz aşkarlama"</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Tətbiqə qaynar söz aşkarlaması üçün audio tutmağa icazə verir. Tutma geridə baş verə bilər, lakin digər audio tutmanın qarşısını almır (misal üçün, videokamera)."</string>
+    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Audio Marşrut"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tətbiqə audio marşrutu birbaşa idarə etməyə və audio siyasət qərarlarını öncədən təyin etməyə imkan verir."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video çıxışı alın"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tətbiqə video çıxışı almaq və yenidən yönləndirmək imkanı verir."</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"təhlükəsiz video çıxışı alın"</string>
     <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Tətbiqə güvənli video çıxışı almaq və yenidən yönləndirmək imkanı verir."</string>
+    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"media oynatma və metadata girişi idarəsi"</string>
+    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Tətbiqə media oxutma və media məlumatlarına (başlıq, müəlllif...) giriş idarəsinə icazə verir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"səs yaz"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Tətbiqə mikrofonla audio yazmaq icazəsi verir. İcazə tətbiqə sizin təsdiqiniz olmadan istənilən zaman səs yazma izni verir."</string>
+    <string name="permlab_sim_communication" msgid="1180265879464893029">"sim rabitəsi"</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tətbiqə SIM-ə əmrlər göndərməyə imkan verir. Bu, çox təhlükəlidir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"şəkil və video çəkmək"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Tətbiqə kamera ilə şəkil və video çəkməyə imkan yaradır. Bu icazə tətbiqə sizin təsdiqiniz olmadan kameradan istifadə icazəsi verir."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"kamera istifadə edildikdə LED göstərici ötürülməsini deaktiv edir"</string>
@@ -524,6 +581,8 @@
     <string name="permdesc_accessMtp" msgid="6532961200486791570">"Kernel MTP drayverə girişə imkan verir ki, MTP USB protokolunu həyata keçirsin."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"avadanlığı sınaq edir"</string>
     <string name="permdesc_hardware_test" msgid="6597964191208016605">"Tətbiqə avadanlığı yoxlamaq üçün müxtəlif periferiyaları kontrol etməyə imkan verir."</string>
+    <string name="permlab_fm" msgid="8749504526866832">"FM radiosuna giriş"</string>
+    <string name="permdesc_fm" msgid="4145699441237962818">"Proqramları dinləmək üçün tətbiqə FM radiosuna daxil olmağa imkan verir."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"telefon nömrələrinə birbaşa zəng edir"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Tətbiqə Sizin müdaxiləniz olmadan telefon zəngləri etməyə imkan verir. Zərərli tətbiqlər Sizdən xəbərsiz şəkildə müxtəlif zənglər edərək, Sizə maddi ziyan vura bilər. Qeyd: Bu, tətbiqlərə təcili nömrələrə zəng etməyə icazə vermir."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"istənilən nömrəyə birbaşa zəng edir"</string>
@@ -541,14 +600,21 @@
     <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Tətbiqə cihazın telefon funksiyalarını idarə etmək imkanı verir. Belə icazəli tətbiq Sizi xəbərdar etmədən şəbəkələri qoşa, telefon radiosunu yandırıb-söndürə bilər."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefon statusunu və identifikasiyanı oxuyur"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Tətbiqə cihazın telefon funksiyalarına giriş icazəsi verir. Belə icazəli tətbiq bu telefonun nömrəsini və cihaz İD\'ni, zəngin aktiv olub-olmadığını və zəng edilən nömrəni müəyyən edə bilər."</string>
+    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"telefonun dəqiq vəziyyəti haqqında oxuyun"</string>
+    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Tətbiqə telefonun dəqiq vəziyyətini əldə etmək imkanı verir. Bu imkana gedən və gələn zənglərin durumu, zəngin aktiv və ya arxa planda olması, alınmamış zənglər, dəqiq data bağlantı statusu və data bağlantı problemləri haqqında məlumat əldə etmək daxildir."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planşetin yuxu rejiminin qarşısını almaq"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"telefonun yuxu rejiminə keçməsini əngəllə"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tətbiqə planşetin yuxu rejimini qadağan etməyə imkan verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Tətbiqə telefonun yuxu rejimini qadağan etmək imkanı verir."</string>
+    <string name="permlab_transmitIr" msgid="7545858504238530105">"infraqırmızı ötür"</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Tətbiqə tabletin infraqırmızı ötürücüsünü istifadə etməyə icazə verir."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Tətbiqə telefonun infraqırmızı ötürücüsünü istifadə etməyə icazə verir."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"planşeti yandırma və ya söndürmə"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefonu yandırmaq və ya söndürmək"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Tətbiqə planşeti yandırmağa və söndürməyə imkan verir."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Tətbiqə telefonu yandırıb söndürmə icazəsi verir."</string>
+    <string name="permlab_userActivity" msgid="1677844893921729548">"displey zaman aşımını sıfırlayın"</string>
+    <string name="permdesc_userActivity" msgid="651746160252248024">"Tətbiqə displey zaman aşımını sıfırlamaq imkanı verir."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"zavod test rejimində işləyir"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Planşet avadanlığına tam girişə imkan verməklə aşağı səviyyəli istehsalçı sınağı kimi işləyir. Yalnız planşet istehsalçı sınaq rejimində olduqda işləyir."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Bir aşağı səviyyəli istehsalçı testi kimi çalışdırın, telefon hardware üçün tam giriş imkanı verir. Ancaq telefon, istehsalçı test rejimində çalışdığı zaman aktivdir."</string>
@@ -597,11 +663,20 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth ayarlarını əldə edir"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tətbiqə yerli Bluetooth planşetinin konfiqurasiyasını görməyə və məsafədən cihazları tapmağa və cütləməyə imkan verir."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tətbiqə lokal Bluetooth telefonunu konfiqurə etməyə və uzaq cihazları kəşf etmək və onlara qoşulmaq icazəsi verir."</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Tətbiq tərəfindən Bluetooth bağlantısına imkan verir"</string>
+    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"İstifadəçinin müdaxiləsi olmadan tətbiqə məsafədən digər cihazlarla bağlantı yaratmağa imkan verir."</string>
+    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"İstifadəçinin müdaxiləsi olmadan tətbiqə məsafədən digər cihazlarla bağlantı yaratmağa imkan verir."</string>
+    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP datasına giriş"</string>
+    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Tətbiqə Bluetooth MAP datasına giriş icazəsi verir."</string>
+    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Tətbiqə Bluetooth MAP datasına giriş icazəsi verir."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX\'a qoşul və bağlantını kəs"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tətbiqə WiMAX mövcudluğu və qoşulmuş WiMAX şəbəkələrini təyin etməyə icazə verir."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX vəziyyətini dəyişir"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tətbiqə planşeti WiMAX şəbəkələrinə qoşmaq və onlardan ayırmaq icazəsi verir."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tətbiqə telefonu WiMAX şəbəkəsinə qoşmağa və ya WiMAX şəbəkəsindən ayırmağa imkan verir."</string>
+    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"şəbəkələri hesablayın"</string>
+    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Tətbiqə şəbəkələri cərgələməyə və planşetin şəbəkə seçiminə təsir etməyə imkan verir."</string>
+    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Tətbiqə şəbəkələri cərgələməyə və telefonun şəbəkə seçiminə təsir etməyə imkan verir."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth cihazları ilə cütləndirmək"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tətbiqə yerli Bluetooth planşetinin konfiqurasiyasını görməyə və cütlənmiş cihazlarla bağlantılar etməyə və qəbul etməyə imkan verir."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tətbiqə Bluetooth və ya telefon konfiqurasiyalarını görməyə və qoşulmuş cihazlarla əlaqə qurmağa və qəbul etməyə icazə verir."</string>
@@ -623,10 +698,10 @@
     <string name="permdesc_readDictionary" msgid="659614600338904243">"Tətbiqə istifadəçinin lüğətdə saxladığı bütün sözləri, adları və frazaları oxumaq icazəsi verir."</string>
     <string name="permlab_writeDictionary" msgid="2183110402314441106">"istifadəçi lüğətinə sözlər əlavə etmək"</string>
     <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Tətbiqə istifadəçi lüğətinə yeni sözlər yazmağa imkan verir."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="8235341515605559677">"qorunmuş yaddaşa daxil olmağa cəhd etmək"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"qorunmuş yaddaşa daxil olmağa cəhd etmək"</string>
-    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Tətbiqə gələcək cihazlarda əlçatımlı olacaq USB yaddaş üçün icazə testi etməyə imkan verir."</string>
-    <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Tətbiqə gələcək cihazlarda mövcud olacaq SD kart üçün icazəni test etmək üçün imkan verir."</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB yaddaşınızın kontentini oxuyun"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD kartınızın kontentini oxuyun"</string>
+    <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Tətbiqə USB yaddaşdan kontent oxuma icazəsi verir."</string>
+    <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Tətbiqə SD kartınızın məzmununu oxumağa imkan verir."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"USB yaddaşınızın məzmununu dəyişmək və ya silmək"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD kart kontentlərini dəyişir və ya silir"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Tətbiqə USB yaddaşa yazmağa imkan verir."</string>
@@ -639,26 +714,40 @@
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Tətbiqə bütün istifadəçilər üçün olan xarici yaddaşa giriş imkanı verir."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"keş fayl sisteminə girmək"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Tətbiqə keş fayl sistemini oxumağa və yazmağa icazə verir."</string>
-    <string name="permlab_use_sip" msgid="5986952362795870502">"İnternet zəngləri etmək və ya qəbul etmək"</string>
-    <string name="permdesc_use_sip" msgid="4717632000062674294">"Tətbiqə internet zənglərinin göndərilməsi və qəbul edilməsi üçün SIP servisindən istifadə icazəsi verir."</string>
+    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP çağrıları göndərin/qəbul edin"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"Tətbiqə SIP çağrılarını göndərməyə və qəbul etməyə icazə verin."</string>
+    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"çağrıdaxili ekrana müdaxilə"</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Tətbiqə istifadəçinin zəngdə ikən ekranı nə vaxt və necə görəcəyinə icazə verir."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"telefoniya xidmətləri ilə qarşılıqlı əlaqə"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Tətbiqə telefoniya xidmətləri ilə qarşılıqlı əlaqədə olmağa, zəng etməyə və zəng qəbul etməyə icazə verir."</string>
+    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"çağrıdaxili istifadəçi tərcübəsinin təmini"</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Tətbiqə çağrıdaxili istifadəçi təcrübəsi təmin etməyə icazə verir."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"tarixi şəbəkə istifadəsini oxu"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Tətbiqə xüsusi şəbəkələr və tətbiqlər üçün tarixi şəbəkə istifadəsini oxumağa icazə verir."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"şəbəkə siyasətini idarə etmək"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Tətbiqə şəbəkə qanunlarını və tətbiqin xüsusi qaydalarını idarə etmək imkanı verir."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"şəbəkə istifadə hesabını dəyişmək"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Tətbiqə şəbəkə istifadəsinin tətbiqlərə qarşı nizamlarını redaktə etməyə icazə verir. Normal tətbiqlər tərəfindən istifadə edilmir."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"soket işarələrini dəyişin"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Tətbiqə araşdırma üçün soket işarələrini dəyişmək imkanı verir"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"bildirişlərə daxil ol"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tətbiqə bildirişləri əldə etməyə, sınamağa və təmizləməyə imkan verir, buna digər tətbiqlər tərəfindən verilmiş bildirişlər də daxildir."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildiriş dinləmə xidmətinə bağlanır"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Sahibinə yüksək səviyyəli bildiriş dinləmə servisi ilə əlaqə saxlamağa icazə verir. Normal tətbiqlər tərəfindən heç vaxt istənilməməlidir."</string>
+    <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"şərait provayderi xidmətinə bənd edin"</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Sahibə şərait provayderi xidmətinin yuxarı səviyyəli interfeysini bənd etməyə imkan verir. Normal tətbiqlər tərəfindən istənilməməlidir."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"xəyal xidmətinə bənd edin"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Yuxarı səviyyəli interfeysi xəyal xidmətinə bənd etməyə icazə verir. Normal tətbiqlər tərəfindən heç vaxt istənilmir."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operator xidmətli konfiurasiya tətbiqinə müraciət edin"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Sahibinə operator xidmətli tətbiq konfiqurasiyasına  müraciət imkanı verir. Normal tətbiqlər üçün tələb olunmamalıdır."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"şəbəkə şəraiti haqqında müşahidələr üçün qulaq asmaq"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tətbiqə şəbəkə şəraiti üzrə müşahidələr üçün qulaq asmaq imkanı verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
-    <string name="permlab_hotwordRecognition" msgid="3225080408746361313">"isti söz tanınması tələb et"</string>
-    <string name="permdesc_hotwordRecognition" msgid="3716741260195364252">"Tətbiqə isti söz tanınması tələb etməyə imkan verir. Normal tətbiq üçün lazım ola bilməz."</string>
+    <string name="permlab_setInputCalibration" msgid="4902620118878467615">"daxiletmə cihaz kalibrasiyasını dəyişin"</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Sensor ekran parametr kalibrasiyalarını dəyişmək üçün tətbiqə icazə verin. Normal tətbiqlər belə şeyləri istəmir."</string>
+    <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM sertifikatlarına giriş"</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Tətbiqə DRM sertifikatları təmin etməyə və işlətməyə icazə verir. Normal tətbiqlər tərəfindən heç vaxt istənilməməlidir."</string>
+    <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beam transfer statusunu əldə edin"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Bu tətbiqə hazırkı Android Beam transferləri haqqında məlumat əldə etməyə icazə verir"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"Müəllif hüquqlarının qorunması üçün texniki vasitələr sertifikatlarını silin"</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Tətbiqə müəllif hüquqlarının qorunması üçün texniki vasitələr sertifikatlarını silməyə icazə verir. Normal tətbiqlər tərəfindən heç vaxt tələb edilmir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qaydalarını təyin edin"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açan şifrələrin uzunluğunu və onlardakı icazə verilən işarələrə nəzarət edir."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidi cəhdlərini monitorinq et"</string>
@@ -768,7 +857,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Görüşlər"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -794,6 +883,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Əsas səhifə"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"İş"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Digər"</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Bu kontakta baxmaq üçün heç bir tətbiq tapılmadı."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"PİN kodu daxil edin"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK və yeni PİN kod daxil edin"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK kod"</string>
@@ -826,11 +916,13 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SİM kart yoxdur və ya oxuna bilinmir. SİM kart daxil edin."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Yararsız SIM kart."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Sizin SİM kartınız daimi olaraq deaktivləşib.\n Başqa SİM kart üçün simsiz xidmət provayderinizə müraciət edin."</string>
-    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Əvvəlki trek düyməsi"</string>
-    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Növbəti trek düyməsi"</string>
-    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pauza düyməsi"</string>
-    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Oxutma düyməsi"</string>
-    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Dayandırma düyməsi"</string>
+    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Öncəki trek"</string>
+    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Növbəti trek"</string>
+    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Pauza"</string>
+    <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Oyun"</string>
+    <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Dayandır"</string>
+    <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Geri sarıma"</string>
+    <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Sürətlə irəli"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Yalnız təcili zənglər"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Şəbəkə kilidlidir"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM kart PUK ilə kilidlənib."</string>
@@ -931,8 +1023,12 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Tətbiqə Brauzer tarixçəsi və telefonunuzda saxlanılan əlfəcinlərə dəyişiklik etmək imkanı verir. Bununla tətbiqlə Brauzer datanızı silə və ya dəyişdirə bilər. Qeyd: bu icazə veb brauzer imkanları olan üçüncü tərəf brazuerləri və digər tətbiqlər tərəfindən yerinə yetirilə bilməz."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"siqnal qurur"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tətbiqə quraşdırlmış zəngli saata alarm ayarlamağa imkan verir. Bəzi zəngli saat tətbiqləri bu özəlliyi dəstəkləməyə bilər."</string>
+    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"səsli məktub yazın"</string>
+    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Tətbiqə səsli mesaj qutusundakı mesajlara dəyişiklik etməyə və onları silməyə icazə verir."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"Səsli poçt əlavə et"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tətbiqə səsli poçt qutunuza mesaj əlavə etməyə imkan verir."</string>
+    <string name="permlab_readVoicemail" msgid="8415201752589140137">"səsli məktubu oxuyun"</string>
+    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Tətbiqə səsli məktublarınızı oxumağa icazə verin."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Brauzerin geolokasiya icazələrini dəyişir"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tətbiqə Brauzerin geolokasiya icazələrini dəyişməyə imkan verir. Zərərli tətbiqlər bundan istifadə edərək məkan məlumatlarını təsadüfi saytlara göndərə bilər."</string>
     <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"paketləri təsdiqlə"</string>
@@ -967,75 +1063,76 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Toxunaraq Kəşf Et rejimini aktivləşdirmək istəyir. Toxunaraq Kəşf Et açıldığı zaman, barmağınızın altında nə olduğu haqda olan təsvirləri eşidə və ya görə bilərsiniz və ya telefonda insanlarla əlaqəyə keçmək üçün jestlər həyata keçirə bilərsiniz"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ay öncə"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 ay əvvəl"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 saniyə əvvəl"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> saniyə əvvəl"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 dəqiqə əvvəl"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> dəqiqə əvvəl"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 saat əvvəl"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> saat əvvəl"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Son <xliff:g id="COUNT">%d</xliff:g> gün"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniyə əvvəl</item>
+      <item quantity="one">1 saniyə əvvəl</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dəqiqə əvvəl</item>
+      <item quantity="one">1 dəqiqə əvvəl</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat əvvəl</item>
+      <item quantity="one">1 saat əvvəl</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Son <xliff:g id="COUNT_1">%d</xliff:g> gün</item>
+      <item quantity="one">Son <xliff:g id="COUNT_0">%d</xliff:g> gün</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Keçən ay"</string>
     <string name="older" msgid="5211975022815554840">"Köhnə"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"dünən"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> gün əvvəl"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 saniyə ərzində"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> saniyə içində"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 dəqiqə içində"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> dəqiqə ərzində"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 saata"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> saata"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"sabah"</item>
-    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> gün ərzində"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 saniyə əvvəl"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> san əvvəl"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 dəqiqə əvvəl"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> dəqiqə əvvəl"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 saat əvvəl"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> saat əvvəl"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"dünən"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> gün əvvəl"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 san ərzində"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> san ərzində"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 dəq ərzində"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> dəqiqəyə"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 saat ərzində"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> saata"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"sabah"</item>
-    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> günə"</item>
-  </plurals>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> gün əvvəl</item>
+      <item quantity="one">dünən</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> saniyə ərzində</item>
+      <item quantity="one"> 1 saniyə ərzində</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> dəqiqə ərzində</item>
+      <item quantity="one"> 1 dəqiqə ərzində</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> saat ərzində</item>
+      <item quantity="one"> 1 saat ərzində</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> gün ərzində</item>
+      <item quantity="one">sabah</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniyə əvvəl</item>
+      <item quantity="one">1 saniyə əvvəl</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dəqiqə əvvəl</item>
+      <item quantity="one">1 dəqiqə əvvəl</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat əvvəl</item>
+      <item quantity="one">1 saat əvvəl</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> gün əvvəl</item>
+      <item quantity="one">dünən</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> saniyə ərzində</item>
+      <item quantity="one"> 1 saniyə ərzində</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> dəqiqə ərzində</item>
+      <item quantity="one"> 1 dəqiqə ərzində</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> saat ərzində</item>
+      <item quantity="one"> 1 saat ərzində</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> gün ərzində</item>
+      <item quantity="one">sabah</item>
+    </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> tarixində"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"saat <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> ilində"</string>
@@ -1051,18 +1148,18 @@
     <string name="weeks" msgid="6509623834583944518">"həftə"</string>
     <string name="year" msgid="4001118221013892076">"il"</string>
     <string name="years" msgid="6881577717993213522">"il"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 saniyə"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> saniyə"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 dəqiqə"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> dəqiqə"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 saat"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> saat"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saniyə</item>
+      <item quantity="one">1 saniyə</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dəqiqə</item>
+      <item quantity="one">1 dəqiqə</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
+      <item quantity="one">1 saat</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video problemi"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Bu video bu cihaza strim olunmaq üçün uyğun deyil."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Bu video oxumur"</string>
@@ -1089,6 +1186,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Mətn əməliyyatları"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Yaddaş yeri bitir"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bəzi sistem funksiyaları işləməyə bilər"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistem üçün yetərincə yaddaş ehtiyatı yoxdur. 250 MB yaddaş ehtiyatının olmasına əmin olun və yenidən başladın."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> işlənir"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Daha çox məlumat üçün və ya tətbiqi dayandırmaq üçün toxunun."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1100,7 +1198,17 @@
     <string name="capital_on" msgid="1544682755514494298">"AÇIQ"</string>
     <string name="capital_off" msgid="6815870386972805832">"QAPALI"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Əməliyyatı tamamlayın:"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s istifadə edərək əməliyyatı tamamlayın"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Bununla açın"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s ilə açın"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Bununla düzəliş edin:"</string>
+    <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ilə düzəliş edin"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Bununla paylaşın"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ilə paylaşın"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"Əsas tətbiqi seçin"</string>
+    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s tətbiqini Əsas olaraq işlədin"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Bu fəaliyyət üçün defolt istifadə edin"</string>
+    <string name="use_a_different_app" msgid="8134926230585710243">"Başqa tətbiq istifadə edin"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Sistem ayarlarında, Tətbiqlərdə və Endirilmişlərdə defoltu təmizləyin."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Fəaliyyət seçin"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB cihaz üçün tətbiq seçin"</string>
@@ -1126,6 +1234,8 @@
     <string name="smv_application" msgid="3307209192155442829">"Tətbiq <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) StrictMode siyasətini pozdu."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> prosesi StrictMode siyasətini pozdu."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android təkmilləşdirilir..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android işə başlayır..."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Yaddaş optimallaşdırılır."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> əddədən <xliff:g id="NUMBER_0">%1$d</xliff:g> tətbiq optimallaşır."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Tətbiqlər başladılır."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Yükləmə başa çatır."</string>
@@ -1157,14 +1267,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Heç biri"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Zəng səsləri"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Naməlum rinqton"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi şəbəkəsi mövcuddur"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi şəbəkələri mövcuddur"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Wi-Fi şəbəkəni açın"</item>
-    <item quantity="other" msgid="7915895323644292768">"Açıq Wi-Fi şəbəkələri mövcuddur"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Əlçatan Wi-Fi şəbəkələri</item>
+      <item quantity="one">Əlçatan Wi-Fi şəbəkəsi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Əlçatan açıq Wi-Fi şəbəkələri</item>
+      <item quantity="one">Əlçatan açıq Wi-Fi şəbəkəsi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi şəbəkəsinə daxil ol"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Şəbəkəyə daxil olun"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1192,8 +1302,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"İcazə verin"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Rədd edin"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; ünvanına mesaj göndərmək istəyir."</string>
-    <string name="sms_short_code_details" msgid="3492025719868078457">"Bu, mobil hesabınıza "<font fgcolor="#ffffb060">"əlavə tariflərin tətbiq olunması"</font>" ilə nəticələnə bilər."</string>
-    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Bu mobil hesabınızda ödənişlərə səbəb olacaq."</font></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Bu, mobil cihazınızda "<b>"dəyişikliyə səbəb ola bilər."</b></string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Bu, mobil hesabınızda dəyişikliyə səbəb ola bilər."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Göndər"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Ləğv et"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Mənim seçimimi yadda saxla"</string>
@@ -1201,10 +1311,10 @@
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Həmişə icazə ver"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Heç vaxt icazə verməyin"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM kart çıxarıldı"</string>
-    <string name="sim_removed_message" msgid="2333164559970958645">"Cihazınızı etibarlı SIM kart ilə başladana kimi mobil şəbəkə əlçatmaz olacaq."</string>
+    <string name="sim_removed_message" msgid="5450336489923274918">"Taxılmış etibarlı SIM kart ilə yenidən başladılana taxana qədər mobil şəbəkə əlçatmaz olacaq."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Bitdi"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SİM kart əlavə edildi"</string>
-    <string name="sim_added_message" msgid="6599945301141050216">"Mobil şəbəkəyə qoşulmaq üçün cihazınızı yenidən başladın."</string>
+    <string name="sim_added_message" msgid="7797975656153714319">"Mobil şəbəkəyə giriş üçün cihazınızı sıfırlayın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yenidən başlat"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Vaxt ayarlayın"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tarixi quraşdır"</string>
@@ -1246,9 +1356,9 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB sazlama qoşuludur"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB debaqı deaktivasiya etmək üçün toxunun."</string>
-    <string name="select_input_method" msgid="4653387336791222978">"Daxiletmə metodunu seçin"</string>
-    <string name="configure_input_methods" msgid="9091652157722495116">"Daxiletmə üsullarını ayarlayın"</string>
-    <string name="use_physical_keyboard" msgid="6203112478095117625">"Fiziki klaviatura"</string>
+    <string name="select_input_method" msgid="8547250819326693584">"Klaviaturanı dəyişin"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Klaviaturaları seçin"</string>
+    <string name="show_ime" msgid="9157568568695230830">"Daxiletmə metodunu göstərin"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Klaviatura sxemi seçin"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Klaviatura tərtibatı seçmək üçün toxunun."</string>
@@ -1289,6 +1399,20 @@
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Tətbiqə keguard təhlükəsiz yaddaşa çatmağa icazə verir."</string>
     <string name="permlab_control_keyguard" msgid="172195184207828387">"Klaviatura kilidinin görülməsini və gizlədilməsini idarə edir"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Tətbiqə keguardı idarə etmək icazəsi verir."</string>
+    <string name="permlab_trust_listener" msgid="1765718054003704476">"Əmanət durumu dəyişikliklərini dinləyin."</string>
+    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Tətbiqə əmanət durumundakı dəyişiklikləri dinləməyə imkan verir."</string>
+    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Güvən agenti təmin edin."</string>
+    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Tətbiqə güvən agentini təmin etməyə imkan verir."</string>
+    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Güvən agenti ayarları menyusunu işə salın."</string>
+    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Tətbiqə güvən agentinin davranışını dəyişən fəaliyyəti işə salmağa imkan verir."</string>
+    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Güvən agenti xidməti ilə əlaqələndirin"</string>
+    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Tətbiqə güvən agenti xidməti ilə əlaqələnməyə imkan verir."</string>
+    <string name="permlab_recovery" msgid="3157024487744125846">"Güncəlləşmə və bərpa sistemi ilə əlaqəyə girin"</string>
+    <string name="permdesc_recovery" msgid="8511774533266359571">"Tətbiqə bərpa sistemi və sistem güncəlləşmələri ilə əlaqəyə girməyə imkan verir."</string>
+    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Media layihələmə sessiyalarının idarəsi"</string>
+    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Tətbiqə media layihələmə sessiyalarını idarə etməyə icazə verir. Bu sessiyalar tətbiqlərə displeydəki görünüşü və audio məzmunu qeydə almağa imkan verir. Normal tətbiqlər tərəfindən istənilməməlidir."</string>
+    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Quraşdırma sessiyalarını oxuyun"</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Tətbiqə quraşdırma sessiyalarını oxumağa yardım edir. Bu da aktiv paket quraşdırmaları haqqında məlumatları görməyə imkan verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Zoom nəzarəti üçün iki dəfə toxunun"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Widget əlavə edilə bilmədi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Get"</string>
@@ -1307,12 +1431,15 @@
     <string name="deny" msgid="2081879885755434506">"Rədd et"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"İcazə tələb olunur"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">\n" hesabı üçün<xliff:g id="ACCOUNT">%s</xliff:g> icazə sorğusu göndərildi."</string>
+    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Bu tətbiqi iş profilinizdən kənarda istifadə edirsiniz"</string>
+    <string name="forward_intent_to_work" msgid="621480743856004612">"Bu tətbiqi iş profilinizdə istifadə edirsiniz"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Daxiletmə metodu"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinxronizasiya"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Əlçatımlılıq"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Divar kağızı"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Divar kağızını dəyişin"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Bildiriş dinləyən"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Şərait provayderi"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktivləşdirildi"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g> tərəfindən aktivləşdirilib"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Şəbəkəni idarə etmək üçün toxunun."</string>
@@ -1332,16 +1459,12 @@
     <string name="back_button_label" msgid="2300470004503343439">"Geri"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Növbəti"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Keç"</string>
-    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Yüksək mobil data istifadəsi"</string>
-    <string name="throttle_warning_notification_message" msgid="3340822228599337743">"Mobil data istifadəsi haqqında daha çox öyrənmək üçün toxunun."</string>
-    <string name="throttled_notification_title" msgid="6269541897729781332">"Mobil data limiti keçildi"</string>
-    <string name="throttled_notification_message" msgid="5443457321354907181">"Mobil data istifadəsi haqqında daha çox öyrənmək üçün toxunun."</string>
     <string name="no_matches" msgid="8129421908915840737">"Uyğunluq yoxdur"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Səhifədə tap"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 uyğunluq"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ədəddən <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 eynilik</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hazırdır"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB yaddaşı qaldırılır..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD kart demontaj edilir..."</string>
@@ -1398,18 +1521,10 @@
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Daxil olun"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Tətbiq seçin"</string>
+    <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> tətbiqini işə salmaq alınmadı"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Bununla paylaşın"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ilə paylaşın"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Sürüşən qulp. Toxunaraq basılı tutun."</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün yuxarı sürüşdürün."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün aşağı sürüşdürün."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün sola sürüşdür."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> üçün sağa sürüşdür."</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Kilidi aç"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Səssiz"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Səs açıqdır"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Axtar"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Kilidi açmaq üçün vurun."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Parolların səsləndirilməsi üçün qulaqlıqları taxın."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Nöqtə."</string>
@@ -1421,17 +1536,17 @@
     <string name="storage_internal" msgid="4891916833657929263">"Daxili yaddaş"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD kart"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB yaddaş"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redaktə et"</string>
+    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Düzəliş edin"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Data istifadə xəbərdarlığı"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"İstifadə və ayarları görmək üçün toxunun"</string>
-    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G data deaktivdir"</string>
-    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G data deaktiv edildi"</string>
-    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobil data deaktivdir"</string>
-    <string name="data_usage_wifi_limit_title" msgid="8992154736441284865">"Wi-Fi data deaktiv edildi"</string>
-    <string name="data_usage_limit_body" msgid="3317964706973601386">"Aktivləşdirmək üçün toxunun."</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G data limitinə çatdı"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G data limitinə çatdı"</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Şəbəkə data limitinə çatdı"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi data limitinə çatdı"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Dövrün digər hissəsi üçün data durduruldu"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G data limiti aşılıb"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G data limiti keçildi"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobil data limiti keçildi"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Şəbəkə datası limiti keçildi"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi data limiti keçildi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> müəyyən edilmiş limit aşır."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Arxaplan datası məhdudlaşdırıldı"</string>
@@ -1459,6 +1574,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Zəngi qəbul edək?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Həmişə"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Sadəcə bir dəfə"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s iş profilini dəstəkləmir"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Planşet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Qulaqlıq"</string>
@@ -1467,8 +1583,12 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Simsiz ekran"</string>
-    <string name="media_route_chooser_grouping_done" msgid="7966438307723317169">"Hazırdır"</string>
-    <string name="media_route_button_content_description" msgid="5758553567065145276">"Media çıxışı"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"İştirakçılar"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Cihaza qoş"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekranı cihaza yayımla"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Cihazlar axtarılır..."</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Ayarlar"</string>
+    <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Bağlantını kəs"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skan edilir..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Qoşulur..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Əlçatımlı"</string>
@@ -1479,9 +1599,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Örtük #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", təhlükəsiz"</string>
-    <string name="wifi_display_notification_title" msgid="2223050649240326557">"Simsiz ekran qoşulub"</string>
-    <string name="wifi_display_notification_message" msgid="4498802012464170685">"Bu ekran digər cihazda göstərir"</string>
-    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Bağlantını kəsin"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Təcili zəng"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Şablonu unutmuşam"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Yanlış Model"</string>
@@ -1498,7 +1615,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SİM kartın kilidi açılır..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Yanlış PİN kod."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"4-dən 8-ə qədər rəqəmi olan PIN yazın."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kod 8 rəqəm və ya daha çox olmalıdır."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kod 8 rəqəmli olmalıdır."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Düzgün PUK kodu yenidən daxil edin. Təkrarlanan cəhdlər SIM\'i birdəfəlik sıradan çıxaracaq."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodları uyğun deyil"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Həddindən çox cəhd edildi!"</string>
@@ -1520,58 +1637,106 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz artıq modeli <xliff:g id="NUMBER_0">%d</xliff:g> dəfə yanlış daxil etmisiniz.<xliff:g id="NUMBER_1">%d</xliff:g> dəfə də yanlış daxil etsəniz, telefonun kilidinin açılması üçün elektron poçt ünvanınız tələb olunacaq.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> saniyə ərzində yenidən cəhd edin."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Yığışdır"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Səs gücü tövsiyə edilən səviyyədən artırılsın?\nUzun müddət yüksək səs gücü ilə dinləmə Sizin eşitmə qabiliyyətinizə mənfi təsir edə bilər."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Səsin həcmi tövsiyə olunan səviyyədən artıq olsun?\n\nYüksək səsi uzun zaman dinləmək eşitmə qabiliyyətinizə zərər vura bilər."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Əlçatımlığı aktivləşdirmək üçün iki barmağınızı basılı saxlayın."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Əlçatımlılıq aktivləşdirildi"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Giriş imkanı ləğv edilib."</string>
     <string name="user_switched" msgid="3768006783166984410">"Cari istifadəçi <xliff:g id="NAME">%1$s</xliff:g>."</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> adına keçirilir…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Sahib"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Xəta"</string>
-    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Bu tətbiq məhdud profillər üçün hesabları dəstəkləmir."</string>
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Bu dəyişikliyə administrator icazə vermir"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Bu əməliyyatı idarə etmək üçün heç bir tətbiq tapılmadı."</string>
     <string name="revoke" msgid="5404479185228271586">"Ləğv edin"</string>
-    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
-    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
-    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
-    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
-    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
-    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
-    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
-    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
-    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
-    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
-    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
-    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
-    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
-    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
-    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
-    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"B4 ISO"</string>
-    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
-    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
-    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
-    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
-    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
-    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
-    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
-    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
-    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
-    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
-    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
-    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
-    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
-    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
-    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
-    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
-    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
-    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Məktub"</string>
-    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Hökumət Məktubu"</string>
-    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Hüquqi"</string>
-    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Kiçik Hüquq"</string>
-    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Qovluq"</string>
-    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Qısa"</string>
+    <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
+    <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
+    <string name="mediasize_iso_a2" msgid="3097535991925798280">"ISO A2"</string>
+    <string name="mediasize_iso_a3" msgid="3023213259314236123">"ISO A3"</string>
+    <string name="mediasize_iso_a4" msgid="231745325296873764">"ISO A4"</string>
+    <string name="mediasize_iso_a5" msgid="3484327407340865411">"ISO A5"</string>
+    <string name="mediasize_iso_a6" msgid="4861908487129577530">"ISO A6"</string>
+    <string name="mediasize_iso_a7" msgid="5890208588072936130">"ISO A7"</string>
+    <string name="mediasize_iso_a8" msgid="4319425041085816612">"ISO A8"</string>
+    <string name="mediasize_iso_a9" msgid="4882220529506432008">"ISO A9"</string>
+    <string name="mediasize_iso_a10" msgid="2382866026365359391">"ISO A10"</string>
+    <string name="mediasize_iso_b0" msgid="3651827147402009675">"ISO B0"</string>
+    <string name="mediasize_iso_b1" msgid="6072859628278739957">"ISO B1"</string>
+    <string name="mediasize_iso_b2" msgid="1348731852150380378">"ISO B2"</string>
+    <string name="mediasize_iso_b3" msgid="2612510181259261379">"ISO B3"</string>
+    <string name="mediasize_iso_b4" msgid="695151378838115434">"ISO B4"</string>
+    <string name="mediasize_iso_b5" msgid="4863754285582212487">"ISO B5"</string>
+    <string name="mediasize_iso_b6" msgid="5305816292139647241">"ISO B6"</string>
+    <string name="mediasize_iso_b7" msgid="531673542602786624">"ISO B7"</string>
+    <string name="mediasize_iso_b8" msgid="9164474595708850034">"ISO B8"</string>
+    <string name="mediasize_iso_b9" msgid="282102976764774160">"ISO B9"</string>
+    <string name="mediasize_iso_b10" msgid="4517141714407898976">"ISO B10"</string>
+    <string name="mediasize_iso_c0" msgid="3103521357901591100">"ISO C0"</string>
+    <string name="mediasize_iso_c1" msgid="1231954105985048595">"ISO C1"</string>
+    <string name="mediasize_iso_c2" msgid="927702816980087462">"ISO C2"</string>
+    <string name="mediasize_iso_c3" msgid="835154173518304159">"ISO C3"</string>
+    <string name="mediasize_iso_c4" msgid="5095951985108194011">"ISO C4"</string>
+    <string name="mediasize_iso_c5" msgid="1985397450332305739">"ISO C5"</string>
+    <string name="mediasize_iso_c6" msgid="8147421924174693013">"ISO C6"</string>
+    <string name="mediasize_iso_c7" msgid="8993994925276122950">"ISO C7"</string>
+    <string name="mediasize_iso_c8" msgid="6871178104139598957">"ISO C8"</string>
+    <string name="mediasize_iso_c9" msgid="7983532635227561362">"ISO C9"</string>
+    <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
+    <string name="mediasize_na_letter" msgid="2841414839888344296">"Məktub"</string>
+    <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"Hökumət Məktubu"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"Hüquqi"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"Junior Legal"</string>
+    <string name="mediasize_na_ledger" msgid="5567030340509075333">"Ledger"</string>
+    <string name="mediasize_na_tabloid" msgid="4571735038501661757">"Tabloid"</string>
+    <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"Indeks Kartı 3x5"</string>
+    <string name="mediasize_na_index_4x6" msgid="7687620625422312396">"Indeks Kartı 4x6"</string>
+    <string name="mediasize_na_index_5x8" msgid="8834215284646872800">"Indeks Kartı 5x8"</string>
+    <string name="mediasize_na_monarch" msgid="213639906956550754">"Monarch"</string>
+    <string name="mediasize_na_quarto" msgid="835778493593023223">"Quarto"</string>
+    <string name="mediasize_na_foolscap" msgid="1573911237983677138">"Foolscap"</string>
+    <string name="mediasize_chinese_roc_8k" msgid="3626855847189438896">"ROC 8K"</string>
+    <string name="mediasize_chinese_roc_16k" msgid="9182191577022943355">"ROC 16K"</string>
+    <string name="mediasize_chinese_prc_1" msgid="4793232644980170500">"PRC 1"</string>
+    <string name="mediasize_chinese_prc_2" msgid="5404109730975720670">"PRC 2"</string>
+    <string name="mediasize_chinese_prc_3" msgid="1335092253339363526">"PRC 3"</string>
+    <string name="mediasize_chinese_prc_4" msgid="9167997800486569834">"PRC 4"</string>
+    <string name="mediasize_chinese_prc_5" msgid="845875168823541497">"PRC 5"</string>
+    <string name="mediasize_chinese_prc_6" msgid="3220325667692648789">"PRC 6"</string>
+    <string name="mediasize_chinese_prc_7" msgid="1776792138507038527">"PRC 7"</string>
+    <string name="mediasize_chinese_prc_8" msgid="1417176642687456692">"PRC 8"</string>
+    <string name="mediasize_chinese_prc_9" msgid="4785983473123798365">"PRC 9"</string>
+    <string name="mediasize_chinese_prc_10" msgid="7847982299391851899">"PRC 10"</string>
+    <string name="mediasize_chinese_prc_16k" msgid="262793383539980677">"PRC 16K"</string>
+    <string name="mediasize_chinese_om_pa_kai" msgid="5256815579447959814">"Pa Kai"</string>
+    <string name="mediasize_chinese_om_dai_pa_kai" msgid="7336412963441354407">"Dai Pa Kai"</string>
+    <string name="mediasize_chinese_om_jurro_ku_kai" msgid="6324465444100490742">"Jurro Ku Kai"</string>
+    <string name="mediasize_japanese_jis_b10" msgid="1787262845627694376">"JIS B10"</string>
+    <string name="mediasize_japanese_jis_b9" msgid="3336035783663287470">"JIS B9"</string>
+    <string name="mediasize_japanese_jis_b8" msgid="6195398299104345731">"JIS B8"</string>
+    <string name="mediasize_japanese_jis_b7" msgid="1674621886902828884">"JIS B7"</string>
+    <string name="mediasize_japanese_jis_b6" msgid="4170576286062657435">"JIS B6"</string>
+    <string name="mediasize_japanese_jis_b5" msgid="4899297958100032533">"JIS B5"</string>
+    <string name="mediasize_japanese_jis_b4" msgid="4213158129126666847">"JIS B4"</string>
+    <string name="mediasize_japanese_jis_b3" msgid="8513715307410310696">"JIS B3"</string>
+    <string name="mediasize_japanese_jis_b2" msgid="4777690211897131190">"JIS B2"</string>
+    <string name="mediasize_japanese_jis_b1" msgid="4608142385457034603">"JIS B1"</string>
+    <string name="mediasize_japanese_jis_b0" msgid="7587108366572243991">"JIS B0"</string>
+    <string name="mediasize_japanese_jis_exec" msgid="5244075432263649068">"JIS Exec"</string>
+    <string name="mediasize_japanese_chou4" msgid="4941652015032631361">"Chou4"</string>
+    <string name="mediasize_japanese_chou3" msgid="6387319169263957010">"Chou3"</string>
+    <string name="mediasize_japanese_chou2" msgid="1299112025415343982">"Chou2"</string>
+    <string name="mediasize_japanese_hagaki" msgid="8070115620644254565">"Hagaki"</string>
+    <string name="mediasize_japanese_oufuku" msgid="6049065587307896564">"Oufuku"</string>
+    <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"Kahu"</string>
+    <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"Kaku2"</string>
+    <string name="mediasize_japanese_you4" msgid="2091777168747058008">"You4"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"Naməlum portret"</string>
+    <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"Naməlum mənzərə"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Ləğv edildi"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Kontent yazmna xətası"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"naməlum"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"Çap xidməti aktiv deyil"</string>
+    <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> xidməti quraşdırıldı"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"Aktivləşdirmək üçün tıklayın"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Administrator PIN kodunu daxil edin"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN daxil edin"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Səhv"</string>
@@ -1581,11 +1746,46 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Dəyişmə məhdudiyyətləri üçün PİN yaradın"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PİN uyğun gəlmir. Yenidən cəhd edin."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PİN çox qısadır. Ən azı 4 rəqəm olmalıdır."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 saniyə sonra təkrar yoxlayın"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> saniyə sonra təkrar yoxlayın"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other"> <xliff:g id="COUNT">%d</xliff:g> saniyə ərzində yenidən cəhd edin</item>
+      <item quantity="one">1 saniyə ərzində yenidən cəhd edin</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Daha sonra yenidən yoxlayın."</string>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Paneli göstərmək üçün ekranın küncünü sürüşdürün"</string>
-    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sistem panelini göstərmək üçün ekranın küncündən sürüşdürün"</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Tam ekrandan çıxmaq üçün yuxarıdan aşağıya çəkin."</string>
+    <string name="done_label" msgid="2093726099505892398">"Hazırdır"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Dairəvi saat slayderi"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Dairəvi dəqiqə slayderi"</string>
+    <string name="select_hours" msgid="6043079511766008245">"Saat seçin"</string>
+    <string name="select_minutes" msgid="3974345615920336087">"Dəqiqə seçin"</string>
+    <string name="day_picker_description" msgid="8990847925961297968">"Ayın gün bölgüsü"</string>
+    <string name="year_picker_description" msgid="5524331207436052403">"İl siyahısı"</string>
+    <string name="select_day" msgid="7774759604701773332">"Ay və gün seçin"</string>
+    <string name="select_year" msgid="7952052866994196170">"İl seçin"</string>
+    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seçilmiş"</string>
+    <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> silindi"</string>
+    <string name="managed_profile_label_badge" msgid="2355652472854327647">"İş <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"Sancağı götürmək üçün Geri və İcmal düymələrinə eyni zamanda toxunun və saxlayın."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Sancağı götürmək üçün İcmala toxunun və saxlayın."</string>
+    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Screen is pinned. Unpinning isn\'t allowed by your organization."</string>
+    <string name="lock_to_app_title" msgid="1682643873107812874">"Use screen pinning?"</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Ekran sancaqlanması displeyi tək görünüşdə saxlayır.\n\nSancağı götürmək üçün Geri və İcmal düymələrinə eyni zamanda toxunun və saxlayın."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Ekran sancaqlanması displeyi tək görünüşdə saxlayır.\n\nSancağı götürmək üçün İcmala toxunun və saxlayın."</string>
+    <string name="lock_to_app_negative" msgid="2259143719362732728">"YOX, ÇOX SAĞ OLUN"</string>
+    <string name="lock_to_app_positive" msgid="7085139175671313864">"BAŞLA"</string>
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Screen pinned"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Screen unpinned"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ayırmadan öncə PIN istənilsin"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ayırmadan öncə kilid modeli istənilsin"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ayırmadan öncə parol istənilsin"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Enerji qənaətini artırmağa yardım etmək üçün, enerjiyə qənaət proqramı cihazın performansını azaldır, vibrasiyaya və bir çox arxa fon datasına məhdudiyyət qoyur. Belə olan halda, sinxronizasiyaya əsaslanan e-poçt, mesajlaşma və digər tətbiqlər onlar açılana qədər güncəlləşməyəcək.\n\nCihaz qidalanan zaman enerjiyə qənaət proqramı avtomatik deaktiv edilir."</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"İşsiz dayanma vaxtının saat <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> radəsində bitənə qədər"</string>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other"> %d dəqiqəlik</item>
+      <item quantity="one">Bir dəqiqəlik</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other"> %d saatlıq</item>
+      <item quantity="one">Bir saatlıq</item>
+    </plurals>
+    <string name="zen_mode_forever" msgid="4316804956488785559">"Qeyri-müəyyən vaxta"</string>
 </resources>

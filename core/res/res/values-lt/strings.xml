@@ -62,10 +62,12 @@
     <string name="needPuk" msgid="919668385956251611">"Jūsų SIM kortelė yra užrakinta PUK kodu. Jei norite ją atrakinti, įveskite PUK kodą."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Įveskite PUK2 kodą, kad panaikintumėte SIM kortelės blokavimą."</string>
     <string name="enablePin" msgid="209412020907207950">"Nepavyko. Įgalinti SIM / RUIM užraktą."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui SIM kortelė bus užrakinta."</item>
-    <item quantity="other" msgid="7530597808358774740">"Liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui SIM kortelė bus užrakinta."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas. Tada SIM kortelė bus užrakinta.</item>
+      <item quantity="few">Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai. Tada SIM kortelė bus užrakinta.</item>
+      <item quantity="many">Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo. Tada SIM kortelė bus užrakinta.</item>
+      <item quantity="other">Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų. Tada SIM kortelė bus užrakinta.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Įeinančio skambintojo ID"</string>
@@ -287,7 +289,7 @@
     <string name="permlab_sendSms" msgid="5600830612147671529">"siųsti SMS pranešimus"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Leidžiama programai siųsti SMS pranešimus. Dėl to gali atsirasti nenumatytų apmokestinimų. Kenkėjiškos programos gali siųsti mokamus pranešimus be jūsų patvirtinimo."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"siųsti atsakymų pranešimu įvykius"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Programai leidžiama siųsti užklausas į kitas susirašinėjimo pranešimais programas, kad būtų galima apdoroti atsakymų pranešimu įvykius, susijusius su gaunamaisiais skambučiais."</string>
+    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Programai leidžiama siųsti užklausas į kitas susirašinėjimo programas, kad būtų galima apdoroti atsakymų pranešimu įvykius, susijusius su gaunamaisiais skambučiais."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"skaityti teksto pranešimus (SMS arba MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Leidžiama programai skaityti planšetiniame kompiuteryje ar SIM kortelėje saugomus SMS pranešimus. Taip programai leidžiama skaityti visus SMS pranešimus, neatsižvelgiant į turinį ar konfidencialumą."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Leidžiama programai skaityti telefone ar SIM kortelėje saugomus SMS pranešimus. Taip programai leidžiama skaityti visus SMS pranešimus, neatsižvelgiant į turinį ar konfidencialumą."</string>
@@ -771,37 +773,37 @@
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Funkcijų išjung. klaviat. aps."</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Naudojant klaviatūros apsaugos funkciją, neleisti naudoti kai kurių funkcijų."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Pagrindinis"</item>
+    <item msgid="8901098336658710359">"Namų"</item>
     <item msgid="869923650527136615">"Mobilusis"</item>
     <item msgid="7897544654242874543">"Darbo"</item>
     <item msgid="1103601433382158155">"Darbo faksas"</item>
     <item msgid="1735177144948329370">"Namų faksas"</item>
     <item msgid="603878674477207394">"Pranešimų gaviklis"</item>
     <item msgid="1650824275177931637">"Kita"</item>
-    <item msgid="9192514806975898961">"Priskirtas"</item>
+    <item msgid="9192514806975898961">"Tinkintas"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Pagrindinis"</item>
     <item msgid="7084237356602625604">"Darbo"</item>
     <item msgid="1112044410659011023">"Kita"</item>
-    <item msgid="2374913952870110618">"Priskirtas"</item>
+    <item msgid="2374913952870110618">"Tinkintas"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Pagrindinis"</item>
     <item msgid="5629153956045109251">"Darbo"</item>
     <item msgid="4966604264500343469">"Kita"</item>
-    <item msgid="4932682847595299369">"Priskirtas"</item>
+    <item msgid="4932682847595299369">"Tinkintas"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Pagrindinis"</item>
     <item msgid="1359644565647383708">"Darbo"</item>
     <item msgid="7868549401053615677">"Kita"</item>
-    <item msgid="3145118944639869809">"Priskirtas"</item>
+    <item msgid="3145118944639869809">"Tinkintas"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Darbo"</item>
     <item msgid="4378074129049520373">"Kita"</item>
-    <item msgid="3455047468583965104">"Priskirtas"</item>
+    <item msgid="3455047468583965104">"Tinkintas"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -811,10 +813,10 @@
     <item msgid="7532363178459444943">"QQ"</item>
     <item msgid="3713441034299660749">"„Google“ pokalbiai"</item>
     <item msgid="2506857312718630823">"ICQ"</item>
-    <item msgid="1648797903785279353">"„Jabber“"</item>
+    <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Priskirtas"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Pagrindinis"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Tinkintas"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Namų"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilusis"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Darbo"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Darbo faksas"</string>
@@ -834,24 +836,24 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Darbo pranešimų gaviklis"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistentas"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Priskirtas"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Tinkintas"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Gimimo diena"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Sukaktis"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Kita"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Priskirtas"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Tinkintas"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Pagrindinis"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Darbo"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Kita"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilusis"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Priskirtas"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Tinkintas"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Pagrindinis"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Darbo"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Kita"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Priskirtas"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Tinkintas"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Pagrindinis"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Darbo"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Kita"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Priskirtas"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Tinkintas"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -859,12 +861,12 @@
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
     <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangout"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
-    <string name="imProtocolJabber" msgid="2279917630875771722">"„Jabber“"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Darbo"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Kita"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Priskirtas"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Priskirtas"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Tinkintas"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Tinkintas"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistentas (-ė)"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brolis"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Vaikas"</string>
@@ -879,7 +881,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Giminaitis (-ė)"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Sesuo"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Sutuoktinis (-ė)"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Priskirtas"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Tinkintas"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Pagrindinis"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Darbas"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Kita"</string>
@@ -1063,75 +1065,110 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"„<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>“ nori įgalinti naršymą liečiant. Kai naršymas liečiant bus įjungtas, galėsite išgirsti ar peržiūrėti pirštu liečiamų elementų aprašus arba atlikdami gestus naudoti telefoną."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Prieš 1 mėn."</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Prieš maždaug 1 mėnesį"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"Prieš 1 sek."</item>
-    <item quantity="other" msgid="3903706804349556379">"Prieš <xliff:g id="COUNT">%d</xliff:g> sek."</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"Prieš 1 minutę"</item>
-    <item quantity="other" msgid="2176942008915455116">"Prieš <xliff:g id="COUNT">%d</xliff:g> min."</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Prieš 1 valandą"</item>
-    <item quantity="other" msgid="2467273239587587569">"Prieš <xliff:g id="COUNT">%d</xliff:g> val."</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Paskutinės <xliff:g id="COUNT">%d</xliff:g> dienos (-ų)"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> sekundę</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> sekundes</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> minutę</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> minutes</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> minutės</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> minučių</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> valandą</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> valandas</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> valandos</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> valandų</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> pastaroji diena</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> pastarosios dienos</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> pastarosios dienos</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> pastarųjų dienų</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Paskutinį mėnesį"</string>
     <string name="older" msgid="5211975022815554840">"Senesni"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"vakar"</item>
-    <item quantity="other" msgid="2479586466153314633">"Prieš <xliff:g id="COUNT">%d</xliff:g> d."</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"po 1 sek."</item>
-    <item quantity="other" msgid="1241926116443974687">"po <xliff:g id="COUNT">%d</xliff:g> sek."</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"po 1 min."</item>
-    <item quantity="other" msgid="3330713936399448749">"po <xliff:g id="COUNT">%d</xliff:g> min."</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"po 1 val."</item>
-    <item quantity="other" msgid="547290677353727389">"po <xliff:g id="COUNT">%d</xliff:g> val."</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"rytoj"</item>
-    <item quantity="other" msgid="5109449375100953247">"po <xliff:g id="COUNT">%d</xliff:g> d."</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"Prieš 1 sek."</item>
-    <item quantity="other" msgid="3699169366650930415">"Prieš <xliff:g id="COUNT">%d</xliff:g> sek."</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"Prieš 1 min."</item>
-    <item quantity="other" msgid="851164968597150710">"Prieš <xliff:g id="COUNT">%d</xliff:g> min."</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Prieš 1 valandą"</item>
-    <item quantity="other" msgid="6889970745748538901">"Prieš <xliff:g id="COUNT">%d</xliff:g> val."</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"vakar"</item>
-    <item quantity="other" msgid="3453342639616481191">"Prieš <xliff:g id="COUNT">%d</xliff:g> d."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"po 1 sek."</item>
-    <item quantity="other" msgid="5495880108825805108">"po <xliff:g id="COUNT">%d</xliff:g> sek."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"po 1 min."</item>
-    <item quantity="other" msgid="4216113292706568726">"po <xliff:g id="COUNT">%d</xliff:g> min."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"po 1 val."</item>
-    <item quantity="other" msgid="3705373766798013406">"po <xliff:g id="COUNT">%d</xliff:g> val."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"rytoj"</item>
-    <item quantity="other" msgid="2973062968038355991">"po <xliff:g id="COUNT">%d</xliff:g> d."</item>
-  </plurals>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> dieną</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> dienas</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> dienos</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> dienų</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> minutės</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> minučių</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> minutės</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> minučių</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> valandos</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> valandų</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> valandos</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> valandų</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> dienos</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> dienų</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> dienos</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> dienų</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> min.</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> val.</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="one">prieš <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="few">prieš <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="many">prieš <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="other">prieš <xliff:g id="COUNT">%d</xliff:g> d.</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> sek.</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> min.</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> min.</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> val.</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> val.</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="one">po <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="few">po <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="many">po <xliff:g id="COUNT">%d</xliff:g> d.</item>
+      <item quantity="other">po <xliff:g id="COUNT">%d</xliff:g> d.</item>
+    </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> m."</string>
@@ -1147,18 +1184,24 @@
     <string name="weeks" msgid="6509623834583944518">"sav."</string>
     <string name="year" msgid="4001118221013892076">"metai"</string>
     <string name="years" msgid="6881577717993213522">"metai"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 sek."</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> sek."</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 min."</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min."</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 val."</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> val."</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sekundė</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> minutė</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minutės</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minutės</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minučių</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> valanda</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> valandos</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> valandos</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> valandų</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Vaizdo įrašo problema"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Šis vaizdo įrašas netinkamas srautiniu būdu perduoti į šį įrenginį."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Negalima paleisti šio vaizdo įrašo."</string>
@@ -1221,7 +1264,7 @@
     <string name="anr_application_process" msgid="8941757607340481057">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako. Ar norite ją uždaryti?"</string>
     <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
-    <string name="report" msgid="4060218260984795706">"Ataskaita"</string>
+    <string name="report" msgid="4060218260984795706">"Pranešti"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Puslapis neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Programa peradresuota"</string>
@@ -1266,14 +1309,18 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Nėra"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Skambėjimo tonai"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nežinomas skambėjimo tonas"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Galimas „Wi-Fi“ tinklas"</item>
-    <item quantity="other" msgid="4192424489168397386">"galimi „Wi-Fi“ tinklai"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Atidaryti galimą „Wi-Fi“ tinklą"</item>
-    <item quantity="other" msgid="7915895323644292768">"Atidaryti galimus „Wi-Fi“ tinklus"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Pasiekiami „Wi-Fi“ tinklai</item>
+      <item quantity="few">Pasiekiami „Wi-Fi“ tinklai</item>
+      <item quantity="many">Pasiekiami „Wi-Fi“ tinklai</item>
+      <item quantity="other">Pasiekiami „Wi-Fi“ tinklai</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
+      <item quantity="few">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
+      <item quantity="many">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
+      <item quantity="other">Pasiekiami atvirieji „Wi-Fi“ tinklai</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Prisijungti prie „Wi-Fi“ ryšio tinklo"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Prisijungti prie tinklo"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1354,7 +1401,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Bus prarasti visi kortelėje esantys duomenys."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatuoti"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Palieskite, kad neleistumėte USB derinimo."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Neleisti USB derinimo."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Pasirinkti klaviatūras"</string>
     <string name="show_ime" msgid="9157568568695230830">"Rodyti įvesties metodą"</string>
@@ -1460,10 +1507,12 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Praleisti"</string>
     <string name="no_matches" msgid="8129421908915840737">"Nėra atitikčių"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Ieškoti puslapyje"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 atitiktis"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> iš <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> iš <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> iš <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> iš <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> iš <xliff:g id="TOTAL">%d</xliff:g></item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Atlikta"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Pašalinama USB atmintis..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Pašalinama SD kortelė..."</string>
@@ -1745,15 +1794,17 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Sukurti modifikavimo apribojimų PIN kodą"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN kodas neatitinka. Bandykite dar kartą."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN kodas per trumpas. Jis turi būti bent 4 skaitmenų."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Band. dar po 1 s"</item>
-    <item quantity="other" msgid="4730868920742952817">"Band. dar po <xliff:g id="COUNT">%d</xliff:g> s"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">Bandykite dar kartą po <xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="few">Bandykite dar kartą po <xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+      <item quantity="many">Bandykite dar kartą po <xliff:g id="COUNT">%d</xliff:g> sekundės</item>
+      <item quantity="other">Bandykite dar kartą po <xliff:g id="COUNT">%d</xliff:g> sekundžių</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Vėliau bandykite dar kartą"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Perbraukite nuo viršaus žemyn, kad išeitumėte iš viso ekrano režimo"</string>
     <string name="done_label" msgid="2093726099505892398">"Atlikta"</string>
-    <string name="hour_picker_description" msgid="6698199186859736512">"Apskritas valandų slankiklis"</string>
-    <string name="minute_picker_description" msgid="8606010966873791190">"Apskritas minučių slankiklis"</string>
+    <string name="hour_picker_description" msgid="6698199186859736512">"Apskritas valandų šliaužiklis"</string>
+    <string name="minute_picker_description" msgid="8606010966873791190">"Apskritas minučių šliaužiklis"</string>
     <string name="select_hours" msgid="6043079511766008245">"Pasirinkite valandas"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Pasirinkite minutes"</string>
     <string name="day_picker_description" msgid="8990847925961297968">"Mėnesio dienų tinklelis"</string>
@@ -1776,15 +1827,19 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prašyti PIN kodo prieš atsegant"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Prašyti atrakinimo piešinio prieš atsegant"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Prašyti slaptažodžio prieš atsegant"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Siekiant pailginti akumuliatoriaus veikimo laiką, Akumuliatoriaus tausojimo priemonė sumažina įrenginio našumą ir apriboja vibravimą bei daugumą foninių duomenų. El. paštas, pranešimų siuntimas ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali nebūti atnaujintos, nebent jas atidarysite.\n\nKraunant įrenginį Akumuliatoriaus tausojimo priemonė automatiškai išjungiama."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Siekiant pailginti akumuliatoriaus veikimo laiką, Akumuliatoriaus tausojimo priemonė sumažina įrenginio našumą ir apriboja vibravimą bei daugumą foninių duomenų. El. pašto, susirašinėjimo ir kitos programos, kurios veikia sinchronizavimo pagrindu, gali nebūti atnaujintos, nebent jas atidarysite.\n\nKraunant įrenginį Akumuliatoriaus tausojimo priemonė automatiškai išjungiama."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kol jūsų prastova baigsis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"1 min."</item>
-    <item quantity="other" msgid="6924190729213550991">"%d min."</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"1 val."</item>
-    <item quantity="other" msgid="5408537517529822157">"%d val."</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">%d minutę</item>
+      <item quantity="few">%d minutes</item>
+      <item quantity="many">%d minutės</item>
+      <item quantity="other">%d minučių</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">%d valandą</item>
+      <item quantity="few">%d valandas</item>
+      <item quantity="many">%d valandos</item>
+      <item quantity="other">%d valandų</item>
+    </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Neapibrėžta"</string>
 </resources>
