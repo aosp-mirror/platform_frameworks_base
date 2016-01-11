@@ -620,6 +620,21 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_LOGO_URI";
 
     /**
+     * A boolean extra indicating if user setup should be skipped, for when provisioning is started
+     * during setup-wizard.
+     *
+     * <p>If unspecified, defaults to {@code true} to match the behavior in
+     * {@link android.os.Build.VERSION_CODES#M} and earlier.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE},
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE} or {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PROVISIONING_SKIP_USER_SETUP =
+            "android.app.extra.PROVISIONING_SKIP_USER_SETUP";
+
+    /**
      * This MIME type is used for starting the Device Owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
