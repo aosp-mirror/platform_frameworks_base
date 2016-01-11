@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Разрешает сохранение приложений на внешние накопители независимо от значения манифеста"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Изменение размера в многооконном режиме"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Позволяет менять размер в многооконном режиме (независимо от значений манифеста)"</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Разрешить создание окон произвольной формы"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Включить экспериментальную функцию создания окон произвольной формы"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Пароль для резервного копирования"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Полные резервные копии в настоящее время не защищены"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Изменить или удалить пароль для резервного копирования"</string>
