@@ -200,8 +200,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        mHeaderView.onTaskViewSizeChanged(w, h);
-        mThumbnailView.onTaskViewSizeChanged(w, h);
+        if (w > 0 && h > 0) {
+            mHeaderView.onTaskViewSizeChanged(w, h);
+            mThumbnailView.onTaskViewSizeChanged(w, h);
+        }
     }
 
     @Override
@@ -378,7 +380,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         } else {
             float dimAlpha = mDimAlpha / 255.0f;
             mThumbnailView.setDimAlpha(dimAlpha);
-            mHeaderView.setDimAlpha(dim);
+            mHeaderView.setDimAlpha(dimAlpha);
         }
     }
 

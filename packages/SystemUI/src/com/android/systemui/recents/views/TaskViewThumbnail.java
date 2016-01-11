@@ -93,6 +93,11 @@ public class TaskViewThumbnail extends View {
      * to match the frame changes.
      */
     public void onTaskViewSizeChanged(int width, int height) {
+        // Return early if the bounds have not changed
+        if (mTaskViewRect.width() == width && mTaskViewRect.height() == height) {
+            return;
+        }
+
         mTaskViewRect.set(0, 0, width, height);
         updateThumbnailScale();
         invalidate();
