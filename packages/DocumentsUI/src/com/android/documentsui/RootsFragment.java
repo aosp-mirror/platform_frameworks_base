@@ -297,7 +297,7 @@ public class RootsFragment extends Fragment {
 
             for (final RootInfo root : roots) {
                 final RootItem item = new RootItem(root);
-                if (root.isLibrary() || root.isHome()) {
+                if (root.isLibrary()) {
                     libraries.add(item);
                 } else {
                     others.add(item);
