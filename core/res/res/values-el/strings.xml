@@ -43,29 +43,29 @@
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Δεν υπάρχει τηλεφωνικός αριθμός)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Άγνωστο)"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτ/τος τηλεφωνητής"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτόματος τηλεφωνητής"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας MMI."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε προκαθορισμένους αριθμούς κλήσης."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε καθορισμένους αριθμούς κλήσης."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Η υπηρεσία ενεργοποιήθηκε."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Η υπηρεσία ενεργοποιήθηκε για:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Η υπηρεσία έχει απενεργοποιηθεί."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Η εγγραφή ήταν επιτυχής."</string>
     <string name="serviceErased" msgid="1288584695297200972">"Η διαγραφή ήταν επιτυχής."</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"Λανθασμένος κωδικός πρόσβασης."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"Εσφαλμένος κωδικός πρόσβασης."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"Το MMI ολοκληρώθηκε."</string>
-    <string name="badPin" msgid="9015277645546710014">"Ο παλιός αριθμός PIN που πληκτρολογήσατε είναι λάθος."</string>
-    <string name="badPuk" msgid="5487257647081132201">"Ο κωδικός PUK που πληκτρολογήσατε είναι λάθος."</string>
+    <string name="badPin" msgid="9015277645546710014">"Ο παλιός αριθμός PIN που πληκτρολογήσατε είναι εσφαλμένος."</string>
+    <string name="badPuk" msgid="5487257647081132201">"Ο κωδικός PUK που πληκτρολογήσατε είναι εσφαλμένος."</string>
     <string name="mismatchPin" msgid="609379054496863419">"Οι αριθμοί PIN που πληκτρολογήσατε δεν ταιριάζουν."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Πληκτρολογήστε έναν αριθμό PIN μεγέθους 4 έως 8 αριθμών."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Πληκτρολογήστε έναν κωδικό PUK με 8 αριθμούς ή περισσότερους."</string>
     <string name="needPuk" msgid="919668385956251611">"Η κάρτα SIM έχει κλειδωθεί με κωδικό PUK. Πληκτρολογήστε τον κωδικό PUK για να την ξεκλειδώσετε."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Πληκτρολογήστε τον κωδικό PUK2 για την κατάργηση αποκλεισμού της κάρτας SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Ανεπιτυχής προσπάθεια. Ενεργοποιήστε το Κλείδωμα SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες προτού κλειδωθεί η κάρτα SIM.</item>
-      <item quantity="one">Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια προτού κλειδωθεί η κάρτα SIM.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Απομένει άλλη <xliff:g id="NUMBER">%d</xliff:g> προσπάθεια προτού η κάρτα SIM κλειδωθεί."</item>
+    <item quantity="other" msgid="7530597808358774740">"Απομένουν <xliff:g id="NUMBER">%d</xliff:g> προσπάθειες προτού η κάρτα SIM κλειδωθεί."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Εισερχόμενη αναγνώριση κλήσης"</string>
@@ -73,7 +73,7 @@
     <string name="ColpMmi" msgid="3065121483740183974">"Αναγνωριστικό συνδεδεμένης γραμμής"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Περιορισμός αναγνωριστικού συνδεδεμένης πρόσβασης"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Προώθηση κλήσεων"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Αναμονή"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Αναμ. κλήσ."</string>
     <string name="BaMmi" msgid="455193067926770581">"Φραγή κλήσεων"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Αλλαγή κωδικού πρόσβασης"</string>
     <string name="PinMmi" msgid="3113117780361190304">"Αλλαγή αριθμού PIN"</string>
@@ -199,7 +199,7 @@
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Ανάγνωση και εγγραφή μηνυμάτων SMS, μηνυμάτων ηλεκτρονικού ταχυδρομείου και άλλων μηνυμάτων."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Οι προσωπικές σας πληροφορίες"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Άμεση πρόσβαση σε πληροφορίες σχετικά με εσάς, οι οποίες είναι αποθηκευμένες στην κάρτα επαφών σας."</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Κοινωνικά δίκτυα"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Οι κοινωνικές πληροφορίες σας"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Άμεση πρόσβαση σε πληροφορίες σχετικά με τις επαφές και τις κοινωνικές συνδέσεις σας."</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Η τοποθεσία σας"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Παρακολούθηση της φυσικής τοποθεσίας σας."</string>
@@ -331,7 +331,7 @@
     <string name="permlab_forceStopPackages" msgid="2329627428832067700">"επιβολή διακοπής άλλων εφαρμογών"</string>
     <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Επιτρέπει στην εφαρμογή να πραγματοποιήσει αναγκαστική διακοπή άλλων εφαρμογών."</string>
     <string name="permlab_forceBack" msgid="652935204072584616">"αναγκαστικός τερματισμός εφαρμογής"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Επιτρέπει στην εφαρμογή να εξαναγκάσει οποιαδήποτε δραστηριότητα που βρίσκεται στο προσκήνιο να κλείσει και να μεταβεί στο παρασκήνιο. Δεν απαιτείται πάντα για συνήθεις εφαρμογές."</string>
+    <string name="permdesc_forceBack" msgid="3892295830419513623">"Επιτρέπει στην εφαρμογή να εξαναγκάσει οποιαδήποτε δραστηριότητα που βρίσκεται στο προσκήνιο να κλείσει και να μεταβεί στο φόντο. Δεν απαιτείται πάντα για συνήθεις εφαρμογές."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"ανάκτηση εσωτερικής κατάστασης συστήματος"</string>
     <string name="permdesc_dump" msgid="1778299088692290329">"Επιτρέπει στην  εφαρμογή την ανάκτηση της εσωτερικής κατάστασης του συστήματος. Τυχόν κακόβουλες εφαρμογές ενδέχεται να ανακτήσουν μεγάλη ποικιλία ιδιωτικών πληροφοριών και πληροφοριών ασφάλειας οι οποίες δεν θα έπρεπε να τους είναι απαραίτητες υπό φυσιολογικές συνθήκες."</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"ανάκτηση περιεχομένου οθόνης"</string>
@@ -361,7 +361,7 @@
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"περιορισμός αριθμού εκτελούμενων διαδικασιών"</string>
     <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Επιτρέπει στην εφαρμογή τον έλεγχο του μέγιστου αριθμού διαδικασιών που θα εκτελούνται. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
     <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"αναγκαστικός τερματισμός εφαρμογών στο παρασκήνιο"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Επιτρέπει στην εφαρμογή να ελέγχει αν οι δραστηριότητες ολοκληρώνονται πάντοτε μόλις μεταβούν στο παρασκήνιο. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
+    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Επιτρέπει στην εφαρμογή να ελέγχει αν οι δραστηριότητες ολοκληρώνονται πάντοτε μόλις μεταβούν στο φόντο. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_batteryStats" msgid="2789610673514103364">"ανάγνωση στατιστικών στοιχείων μπαταρίας"</string>
     <string name="permdesc_batteryStats" msgid="5897346582882915114">"Επιτρέπει σε μια εφαρμογή να διαβάζει τα δεδομένα τρέχουσας χαμηλού επιπέδου χρήσης μπαταρίας. Ενδέχεται να επιτρέπει στην εφαρμογή να εντοπίσει λεπτομερείς πληροφορίες σχετικά με τις εφαρμογές που χρησιμοποιείτε."</string>
     <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"τροποποίηση στατιστικών στοιχείων μπαταρίας"</string>
@@ -652,7 +652,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"αλλαγή συνδεσιμότητας μέσω σύνδεσης με κινητή συσκευή"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Επιτρέπει στην εφαρμογή την αλλαγή της κατάστασης συνδεσιμότητας δικτύου."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"αλλαγή ρύθμισης της χρήσης δεδομένων στο παρασκήνιο"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Επιτρέπει στην εφαρμογή την αλλαγή της ρύθμισης χρήσης δεδομένων παρασκηνίου."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Επιτρέπει στην εφαρμογή την αλλαγή της ρύθμισης χρήσης δεδομένων φόντου."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"προβολή συνδέσεων Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Επιτρέπει στην εφαρμογή την προβολή πληροφοριών σχετικά με τη δικτύωση Wi-Fi, όπως εάν το Wi-Fi είναι ενεργοποιημένο και τα ονόματα των συνδεδεμένων συσκευών Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"σύνδεση και αποσύνδεση από το Wi-Fi"</string>
@@ -868,19 +868,19 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Βοηθός"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Αδερφός"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Παιδί"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Σύνοικος"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Σύντρ. ελεύθ. συμβ."</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Πατέρας"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Φίλος"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Διευθυντής"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Μητέρα"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Γονέας"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Σύντροφος"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Συνεργάτης"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Συστήθηκε από"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Συγγενής"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Αδερφή"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Σύζυγος"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Προσαρμοσμένο"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Οικία"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Αρχική σελίδα"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Εργασία"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Άλλο"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Δεν βρέθηκε καμία εφαρμογή για την προβολή αυτής της επαφής."</string>
@@ -891,7 +891,7 @@
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Αγγίξτε για εισαγ. κωδ. πρόσβ."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Πληκτρολογήστε τον κωδικό πρόσβασης για ξεκλείδωμα"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Πληκτρολογήστε τον αριθμό PIN για ξεκλείδωμα"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Λανθασμένος κωδικός PIN."</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Εσφαλμένος κωδικός PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Για ξεκλείδωμα, πατήστε το πλήκτρο Menu και, στη συνέχεια, το πλήκτρο 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Αριθμός έκτακτης ανάγκης"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Καμία υπηρεσία."</string>
@@ -1063,76 +1063,75 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Η υπηρεσία <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> απαιτεί ενεργοποίηση της Εξερεύνησης μέσω αφής. Όταν είναι ενεργοποιημένη η Εξερεύνηση μέσω αφής, μπορείτε να δείτε ή να ακούσετε περιγραφές για τις επιλογές που βρίσκονται κάτω από το δάχτυλό σας ή να κάνετε κινήσεις αλληλεπίδρασης με το τηλέφωνό σας."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"πριν από 1 μήνα"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Παλαιότερα από 1 μήνα"</string>
-    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">πριν από 1 δευτερόλεπτο</item>
-    </plurals>
-    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
-      <item quantity="one">πριν από 1 λεπτό</item>
-    </plurals>
-    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες</item>
-      <item quantity="one">πριν από 1 ώρα</item>
-    </plurals>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">Τελευταίες <xliff:g id="COUNT_1">%d</xliff:g> ημέρες</item>
-      <item quantity="one">Τελευταία <xliff:g id="COUNT_0">%d</xliff:g> ημέρα</item>
-    </plurals>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"πριν από 1 δευτερόλεπτο"</item>
+    <item quantity="other" msgid="3903706804349556379">"πριν από <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"πριν από 1 λεπτό"</item>
+    <item quantity="other" msgid="2176942008915455116">"πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"πριν από 1 ώρα"</item>
+    <item quantity="other" msgid="2467273239587587569">"πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Τελευταίες <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Τελευταίος μήνας"</string>
     <string name="older" msgid="5211975022815554840">"Παλαιότερα"</string>
-    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες</item>
-      <item quantity="one">χθες</item>
-    </plurals>
-    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">σε 1 δευτερόλεπτο</item>
-    </plurals>
-    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
-      <item quantity="one">σε 1 λεπτό</item>
-    </plurals>
-    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> ώρες</item>
-      <item quantity="one">σε 1 ώρα</item>
-    </plurals>
-    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> ημέρες</item>
-      <item quantity="one">αύριο</item>
-    </plurals>
-    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
-      <item quantity="other">πριν <xliff:g id="COUNT">%d</xliff:g> από δευτερόλεπτα</item>
-      <item quantity="one">πριν από 1 δευτερόλεπτο</item>
-    </plurals>
-    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
-      <item quantity="one">πριν από 1 λεπτό</item>
-    </plurals>
-    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες</item>
-      <item quantity="one">πριν από 1 ώρα</item>
-    </plurals>
-    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
-      <item quantity="other">πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες</item>
-      <item quantity="one">χθες</item>
-    </plurals>
-    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">σε 1 δευτερόλεπτο</item>
-    </plurals>
-    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
-      <item quantity="one">σε 1 λεπτό</item>
-    </plurals>
-    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> ώρες</item>
-      <item quantity="one">σε 1 ώρα</item>
-    </plurals>
-    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
-      <item quantity="other">σε <xliff:g id="COUNT">%d</xliff:g> ημέρες</item>
-      <item quantity="one">αύριο</item>
-    </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"χθες"</item>
+    <item quantity="other" msgid="2479586466153314633">"πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"σε 1 δευτερόλεπτο"</item>
+    <item quantity="other" msgid="1241926116443974687">"σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"σε 1 λεπτό"</item>
+    <item quantity="other" msgid="3330713936399448749">"σε <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"σε 1 ώρα"</item>
+    <item quantity="other" msgid="547290677353727389">"σε <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"αύριο"</item>
+    <item quantity="other" msgid="5109449375100953247">"σε <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"πριν από 1 δευτερόλεπτο"</item>
+    <item quantity="other" msgid="3699169366650930415">"πριν από <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"πριν από 1 λεπτό"</item>
+    <item quantity="other" msgid="851164968597150710">"πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"πριν από 1 ώρα"</item>
+    <item quantity="other" msgid="6889970745748538901">"πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"χθες"</item>
+    <item quantity="other" msgid="3453342639616481191">"πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"σε 1 δευτερόλεπτο"</item>
+    <item quantity="other" msgid="5495880108825805108">"σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"σε 1 λεπτό"</item>
+    <item quantity="other" msgid="4216113292706568726">"σε <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"σε 1 ώρα"</item>
+    <item quantity="other" msgid="3705373766798013406">"σε <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"αύριο"</item>
+    <item quantity="other" msgid="2973062968038355991">"σε <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
+  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"στις <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"στις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"το <xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1148,18 +1147,18 @@
     <string name="weeks" msgid="6509623834583944518">"εβδομάδες"</string>
     <string name="year" msgid="4001118221013892076">"έτος"</string>
     <string name="years" msgid="6881577717993213522">"έτη"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">1 δευτερόλεπτο</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> λεπτά</item>
-      <item quantity="one">1 λεπτό</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ώρες</item>
-      <item quantity="one">1 ώρα</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 δευτερόλεπτο"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 λεπτό"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 ώρα"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Πρόβλημα με το βίντεο"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Αυτό το βίντεο δεν είναι έγκυρο για ροή σε αυτή τη συσκευή."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Δεν μπορείτε να αναπαράγετε αυτό το βίντεο."</string>
@@ -1267,14 +1266,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Κανένας"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ήχοι κλήσης"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Άγνωστος ήχος κλήσης"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Υπάρχουν διαθέσιμα δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο δίκτυο Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Υπάρχει διαθέσιμο δίκτυο Wi-Fi"</item>
+    <item quantity="other" msgid="4192424489168397386">"Υπάρχουν διαθέσιμα δίκτυα Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Σύνδεση στο δίκτυο Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Σύνδεση σε δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1355,7 +1354,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Όλα τα δεδομένα που υπάρχουν στην κάρτα σας θα χαθούν."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Διαμόρφωση"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Απεν. του εντοπ. σφαλμάτων USB."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Αγγίξτε για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Αλλαγή πληκτρολογίου"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Επιλογή πληκτρολογίων"</string>
     <string name="show_ime" msgid="9157568568695230830">"Εμφάνιση μεθόδου εισαγ."</string>
@@ -1461,10 +1460,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Παράλειψη"</string>
     <string name="no_matches" msgid="8129421908915840737">"Δεν υπάρχουν αποτελέσματα"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Εύρεση στη σελίδα"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 αντιστοιχία</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 αποτέλεσμα"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Τέλος"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Αποσύνδεση του χώρου αποθήκευσης USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Αφαίρεση κάρτας SD..."</string>
@@ -1601,9 +1600,9 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ασφαλές"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Κλήσεις επείγουσας ανάγκης"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Ξεχάσατε το μοτίβο"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Λάθος μοτίβο"</string>
-    <string name="kg_wrong_password" msgid="2333281762128113157">"Λανθασμένος κωδικός πρόσβασης"</string>
-    <string name="kg_wrong_pin" msgid="1131306510833563801">"Λανθασμένος κωδικός PIN"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Εσφαλμένο μοτίβο"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"Εσφαλμένος κωδικός πρόσβασης"</string>
+    <string name="kg_wrong_pin" msgid="1131306510833563801">"Εσφαλμένος κωδικός PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%1$d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Σχεδιάστε το μοτίβο σας"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Εισαγωγή PIN SIM"</string>
@@ -1613,7 +1612,7 @@
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Εισαγάγετε τον απαιτούμενο κωδικό PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Επιβεβαιώστε τον απαιτούμενο κωδικό PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ξεκλείδωμα κάρτας SIM..."</string>
-    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Λανθασμένος κωδικός PIN."</string>
+    <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Εσφαλμένος κωδικός PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Πληκτρολογήστε έναν αριθμό PIN που να αποτελείται από 4 έως 8 αριθμούς."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"Ο κωδικός PUK θα πρέπει να αποτελείται από 8 αριθμούς."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Εισαγάγετε ξανά τον κωδικό PUK. Οι επαναλαμβανόμενες προσπάθειες θα απενεργοποιήσουν οριστικά την κάρτα SIM."</string>
@@ -1746,10 +1745,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Δημιουργία PIN για τροποποίηση περιορισμών"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Τα PIN δεν συμφωνούν. Προσπαθήστε ξανά."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Το PIN είναι υπερβολικά μικρό. Πρέπει να έχει μέγεθος τουλάχιστον 4 χαρακτήρων."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Επανάληψη σε 1 δευτ."</item>
+    <item quantity="other" msgid="4730868920742952817">"Επανάληψη σε <xliff:g id="COUNT">%d</xliff:g> δευτ."</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Δοκιμάστε ξανά αργότερα"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Σάρωση προς τα κάτω για έξοδο από πλήρη οθόνη"</string>
     <string name="done_label" msgid="2093726099505892398">"Τέλος"</string>
@@ -1779,13 +1778,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Να γίνεται ερώτηση για τον κωδικό πρόσβασης, πριν από το ξεκαρφίτσωμα"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Για τη βελτίωση της διάρκειας ζωής της μπαταρίας, η λειτουργία εξοικονόμησης μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει τη δόνηση και την πλειονότητα των δεδομένων παρασκηνίου. Το ηλεκτρονικό ταχυδρομείου, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται, παρά μόνο εάν τις ανοίξετε.\n\nΗ λειτουργία εξοικονόμησης μπαταρίας απενεργοποιείται αυτόματα κατά τη φόρτιση της συσκευής σας."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Έως τη λήξη του νεκρού χρόνου σας στις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">Για %d λεπτά</item>
-      <item quantity="one">Για ένα λεπτό</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">Για %d ώρες</item>
-      <item quantity="one">Για μία ώρα</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Για ένα λεπτό"</item>
+    <item quantity="other" msgid="6924190729213550991">"Για %d λεπτά"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Για μία ώρα"</item>
+    <item quantity="other" msgid="5408537517529822157">"Για %d ώρες"</item>
+  </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Επ\' αόριστον"</string>
 </resources>

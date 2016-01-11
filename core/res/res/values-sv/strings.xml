@@ -62,10 +62,10 @@
     <string name="needPuk" msgid="919668385956251611">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
     <string name="enablePin" msgid="209412020907207950">"Försöket misslyckades. Aktivera SIM-/RUIM-lås."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Du har <xliff:g id="NUMBER_1">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
-      <item quantity="one">Du har <xliff:g id="NUMBER_0">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+    <item quantity="other" msgid="7530597808358774740">"Du har <xliff:g id="NUMBER">%d</xliff:g> försök kvar innan SIM-kortet låses."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI-kod"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Nummerpresentatör för inkommande samtal"</string>
@@ -415,8 +415,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en widget. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"arbeta med en enhetsadministratör"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga appar behöver aldrig göra detta."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"binda till en TV-insignal"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en TV-insignal. Ska inte behövas för vanliga appar."</string>
+    <string name="permlab_bindTvInput" msgid="5601264742478168987">"binda till en tv-insignal"</string>
+    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en tv-insignal. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ändra föräldrakontroll"</string>
     <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Tillåter innehavaren att ändra systemets föräldrakontrolldata. Behövs inte för vanliga appar."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"lägga till eller ta bort en enhetsadministratör"</string>
@@ -593,7 +593,7 @@
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"styra meddelanden för platsuppdatering"</string>
     <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Tillåter att appen aktiverar/inaktiverar meddelanden om platsuppdateringar från radion. Används inte av vanliga appar."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"få åtkomst till incheckningsegenskaper"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som laddas upp via incheckningstjänsten. Används inte av vanliga appar."</string>
+    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Tillåter att appen får läs/skrivåtkomst till egenskaper som läggs upp via incheckningstjänsten. Används inte av vanliga appar."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"välja widgetar"</string>
     <string name="permdesc_bindGadget" msgid="8261326938599049290">"Tillåter att appen meddelar systemet vilka widgetar som kan användas av vilka appar. Med den här behörigheten kan andra appar få åtkomst till personliga uppgifter. Används inte av vanliga appar."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"ändra telefonstatus"</string>
@@ -757,7 +757,7 @@
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Ändra skärmlåsets lösenord."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skärmen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollera hur och när skärmlåset aktiveras."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Radera all data"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Radera alla data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ta bort data från surfplattan utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ta bort data från mobilen utan förvarning genom att återställa standardinställningarna."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ange global proxyserver"</string>
@@ -875,7 +875,7 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Mamma"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Förälder"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Genom"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Rekommenderad av"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Släkting"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Syster"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Make/maka"</string>
@@ -1063,76 +1063,75 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill aktivera Explore by Touch. När funktionen är aktiv kan du höra eller se beskrivningar av vad du har under fingret eller utföra gester för att göra saker med telefonen."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"för 1 månad sedan"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"För mer än en månad sedan"</string>
-    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> sekunder sedan</item>
-      <item quantity="one">för 1 sekund sedan</item>
-    </plurals>
-    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> minuter sedan</item>
-      <item quantity="one">för 1 minut sedan</item>
-    </plurals>
-    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> timmar sedan</item>
-      <item quantity="one">för 1 timme sedan</item>
-    </plurals>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">De senaste <xliff:g id="COUNT_1">%d</xliff:g> dagarna</item>
-      <item quantity="one">Den senaste dagen (<xliff:g id="COUNT_0">%d</xliff:g>)</item>
-    </plurals>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"för 1 sekund sedan"</item>
+    <item quantity="other" msgid="3903706804349556379">"för <xliff:g id="COUNT">%d</xliff:g> sekunder sedan"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"för 1 minut sedan"</item>
+    <item quantity="other" msgid="2176942008915455116">"för <xliff:g id="COUNT">%d</xliff:g> minuter sedan"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"för 1 timme sedan"</item>
+    <item quantity="other" msgid="2467273239587587569">"för <xliff:g id="COUNT">%d</xliff:g> timmar sedan"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"De senaste <xliff:g id="COUNT">%d</xliff:g> dagarna"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Föregående månad"</string>
     <string name="older" msgid="5211975022815554840">"Äldre"</string>
-    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> dagar sedan</item>
-      <item quantity="one">i går</item>
-    </plurals>
-    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">om 1 sekund</item>
-    </plurals>
-    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> minuter</item>
-      <item quantity="one">om 1 minut</item>
-    </plurals>
-    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> timmar</item>
-      <item quantity="one">om 1 timme</item>
-    </plurals>
-    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> dagar</item>
-      <item quantity="one">i morgon</item>
-    </plurals>
-    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> sek sedan</item>
-      <item quantity="one">för 1 sek sedan</item>
-    </plurals>
-    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> min sedan</item>
-      <item quantity="one">för 1 min sedan</item>
-    </plurals>
-    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> timmar sedan</item>
-      <item quantity="one">för 1 timme sedan</item>
-    </plurals>
-    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
-      <item quantity="other">för <xliff:g id="COUNT">%d</xliff:g> dagar sedan</item>
-      <item quantity="one">i går</item>
-    </plurals>
-    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">om 1 sekund</item>
-    </plurals>
-    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> minuter</item>
-      <item quantity="one">om 1 minut</item>
-    </plurals>
-    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> timmar</item>
-      <item quantity="one">om 1 timme</item>
-    </plurals>
-    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
-      <item quantity="other">om <xliff:g id="COUNT">%d</xliff:g> dagar</item>
-      <item quantity="one">i morgon</item>
-    </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"igår"</item>
+    <item quantity="other" msgid="2479586466153314633">"för <xliff:g id="COUNT">%d</xliff:g> dagar sedan"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"om 1 sekund"</item>
+    <item quantity="other" msgid="1241926116443974687">"om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"om 1 minut"</item>
+    <item quantity="other" msgid="3330713936399448749">"om <xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"om 1 timme"</item>
+    <item quantity="other" msgid="547290677353727389">"om <xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"imorgon"</item>
+    <item quantity="other" msgid="5109449375100953247">"om <xliff:g id="COUNT">%d</xliff:g> dagar"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"för 1 sek sedan"</item>
+    <item quantity="other" msgid="3699169366650930415">"för <xliff:g id="COUNT">%d</xliff:g> sekunder sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"för 1 minut sedan"</item>
+    <item quantity="other" msgid="851164968597150710">"för <xliff:g id="COUNT">%d</xliff:g> minuter sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"för 1 timme sedan"</item>
+    <item quantity="other" msgid="6889970745748538901">"för <xliff:g id="COUNT">%d</xliff:g> timmar sedan"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"igår"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> dagar sedan"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"om 1 sekund"</item>
+    <item quantity="other" msgid="5495880108825805108">"om <xliff:g id="COUNT">%d</xliff:g> sek"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"om 1 minut"</item>
+    <item quantity="other" msgid="4216113292706568726">"om <xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"om 1 timme"</item>
+    <item quantity="other" msgid="3705373766798013406">"om <xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"imorgon"</item>
+    <item quantity="other" msgid="2973062968038355991">"om <xliff:g id="COUNT">%d</xliff:g> dagar"</item>
+  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"den <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"kl. <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1148,18 +1147,18 @@
     <string name="weeks" msgid="6509623834583944518">"veckor"</string>
     <string name="year" msgid="4001118221013892076">"år"</string>
     <string name="years" msgid="6881577717993213522">"år"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">1 sekund</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuter</item>
-      <item quantity="one">1 minut</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> timmar</item>
-      <item quantity="one">1 timme</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 sekund"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minut"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minuter"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 timme"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> timmar"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoproblem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Videon kan tyvärr inte spelas upp i den här enheten."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Det går inte att spela upp videon."</string>
@@ -1171,7 +1170,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Midnatt"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Markera allt"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Välj alla"</string>
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiera"</string>
     <string name="paste" msgid="5629880836805036433">"Klistra in"</string>
@@ -1267,14 +1266,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringsignaler"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Okänd ringsignal"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Öppna Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Öppet Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+    <item quantity="other" msgid="7915895323644292768">"Öppna Wi-Fi-nätverk är tillgängliga"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Logga in på Wi-Fi-nätverk"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1461,10 +1460,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Hoppa över"</string>
     <string name="no_matches" msgid="8129421908915840737">"Inga träffar"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Sök på sidan"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 träff</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 träff"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> av <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Klar"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Monterar bort USB-lagringsenhet ..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Monterar bort SD-kort ..."</string>
@@ -1525,7 +1524,7 @@
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Dela med"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dela med <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Skärmlåsfunktion. Tryck och dra."</string>
-    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att svepa."</string>
+    <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Lås upp genom att dra."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Anslut mikrofonlurar om du vill att lösenordet ska läsas upp."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Punkt."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Visa startsidan"</string>
@@ -1533,7 +1532,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Fler alternativ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"lagring"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Internminne"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD-kort"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-lagring"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Redigera"</string>
@@ -1746,12 +1745,12 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Skapa en pinkod om du vill ändra begränsningar"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Pinkoderna stämmer inte överens. Försök igen."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Pinkoden är för kort. Måste vara minst fyra siffror."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Försök igen om <xliff:g id="COUNT">%d</xliff:g> sekunder</item>
-      <item quantity="one">Försök igen om en sekund</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Försök igen om en sekund"</item>
+    <item quantity="other" msgid="4730868920742952817">"Försök igen om <xliff:g id="COUNT">%d</xliff:g> sekunder"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Försök igen senare"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Svep nedåt om du vill avbryta fullskärmsläget."</string>
+    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Dra nedåt om du vill avbryta fullskärmsläget."</string>
     <string name="done_label" msgid="2093726099505892398">"Klart"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Cirkelreglage för minuter"</string>
@@ -1779,13 +1778,13 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Be om lösenord innan skärmen slutar fästas"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre, och vibration samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, chatt och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Tills avbrottstiden är slut <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">I %d minuter</item>
-      <item quantity="one">I en minut</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">I %d timmar</item>
-      <item quantity="one">I en timme</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"I en minut"</item>
+    <item quantity="other" msgid="6924190729213550991">"I %d minuter"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"I en timme"</item>
+    <item quantity="other" msgid="5408537517529822157">"I %d timmar"</item>
+  </plurals>
     <string name="zen_mode_forever" msgid="4316804956488785559">"För alltid"</string>
 </resources>
