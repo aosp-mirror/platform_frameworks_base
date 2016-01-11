@@ -26,7 +26,7 @@ public class DevicePolicyManagerTestable extends DevicePolicyManager {
 
     public DevicePolicyManagerTestable(DpmMockContext context,
             DevicePolicyManagerServiceTestable dpms) {
-        super(context, dpms);
+        super(context, dpms, /* parentInstance = */ false);
         this.dpms = dpms;
     }
 

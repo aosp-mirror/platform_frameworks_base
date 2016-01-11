@@ -88,22 +88,25 @@ public class DevicePolicyManager {
 
     private final Context mContext;
     private final IDevicePolicyManager mService;
-    private boolean mParentInstance;
+    private final boolean mParentInstance;
 
     private static final String REMOTE_EXCEPTION_MESSAGE =
             "Failed to talk with device policy manager service";
 
     private DevicePolicyManager(Context context, boolean parentInstance) {
-        this(context, IDevicePolicyManager.Stub.asInterface(
-                        ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)));
-        mParentInstance = parentInstance;
+        this(context,
+                IDevicePolicyManager.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_POLICY_SERVICE)),
+                parentInstance);
     }
 
     /** @hide */
     @VisibleForTesting
-    protected DevicePolicyManager(Context context, IDevicePolicyManager service) {
+    protected DevicePolicyManager(
+            Context context, IDevicePolicyManager service, boolean parentInstance) {
         mContext = context;
         mService = service;
+        mParentInstance = parentInstance;
     }
 
     /** @hide */
@@ -1145,7 +1148,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumLength(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumLength(admin, length);
+                mService.setPasswordMinimumLength(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1166,7 +1169,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumLength(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumLength(admin, userHandle);
+                return mService.getPasswordMinimumLength(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1199,7 +1202,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumUpperCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumUpperCase(admin, length);
+                mService.setPasswordMinimumUpperCase(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1227,7 +1230,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumUpperCase(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumUpperCase(admin, userHandle);
+                return mService.getPasswordMinimumUpperCase(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1260,7 +1263,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumLowerCase(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumLowerCase(admin, length);
+                mService.setPasswordMinimumLowerCase(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1288,7 +1291,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumLowerCase(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumLowerCase(admin, userHandle);
+                return mService.getPasswordMinimumLowerCase(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1320,7 +1323,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumLetters(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumLetters(admin, length);
+                mService.setPasswordMinimumLetters(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1346,7 +1349,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumLetters(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumLetters(admin, userHandle);
+                return mService.getPasswordMinimumLetters(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1378,7 +1381,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumNumeric(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumNumeric(admin, length);
+                mService.setPasswordMinimumNumeric(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1405,7 +1408,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumNumeric(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumNumeric(admin, userHandle);
+                return mService.getPasswordMinimumNumeric(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1437,7 +1440,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumSymbols(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumSymbols(admin, length);
+                mService.setPasswordMinimumSymbols(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1463,7 +1466,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumSymbols(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumSymbols(admin, userHandle);
+                return mService.getPasswordMinimumSymbols(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1495,7 +1498,7 @@ public class DevicePolicyManager {
     public void setPasswordMinimumNonLetter(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordMinimumNonLetter(admin, length);
+                mService.setPasswordMinimumNonLetter(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1522,7 +1525,7 @@ public class DevicePolicyManager {
     public int getPasswordMinimumNonLetter(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumNonLetter(admin, userHandle);
+                return mService.getPasswordMinimumNonLetter(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1555,7 +1558,7 @@ public class DevicePolicyManager {
     public void setPasswordHistoryLength(@NonNull ComponentName admin, int length) {
         if (mService != null) {
             try {
-                mService.setPasswordHistoryLength(admin, length);
+                mService.setPasswordHistoryLength(admin, length, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1587,7 +1590,7 @@ public class DevicePolicyManager {
     public void setPasswordExpirationTimeout(@NonNull ComponentName admin, long timeout) {
         if (mService != null) {
             try {
-                mService.setPasswordExpirationTimeout(admin, timeout);
+                mService.setPasswordExpirationTimeout(admin, timeout, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1606,7 +1609,7 @@ public class DevicePolicyManager {
     public long getPasswordExpirationTimeout(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordExpirationTimeout(admin, myUserId());
+                return mService.getPasswordExpirationTimeout(admin, myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1627,7 +1630,7 @@ public class DevicePolicyManager {
     public long getPasswordExpiration(@Nullable ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getPasswordExpiration(admin, myUserId());
+                return mService.getPasswordExpiration(admin, myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1650,7 +1653,7 @@ public class DevicePolicyManager {
     public int getPasswordHistoryLength(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getPasswordHistoryLength(admin, userHandle);
+                return mService.getPasswordHistoryLength(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1702,7 +1705,7 @@ public class DevicePolicyManager {
     public int getCurrentFailedPasswordAttempts() {
         if (mService != null) {
             try {
-                return mService.getCurrentFailedPasswordAttempts(myUserId());
+                return mService.getCurrentFailedPasswordAttempts(myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1749,7 +1752,7 @@ public class DevicePolicyManager {
     public void setMaximumFailedPasswordsForWipe(@NonNull ComponentName admin, int num) {
         if (mService != null) {
             try {
-                mService.setMaximumFailedPasswordsForWipe(admin, num);
+                mService.setMaximumFailedPasswordsForWipe(admin, num, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1771,7 +1774,8 @@ public class DevicePolicyManager {
     public int getMaximumFailedPasswordsForWipe(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getMaximumFailedPasswordsForWipe(admin, userHandle);
+                return mService.getMaximumFailedPasswordsForWipe(
+                        admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1789,7 +1793,8 @@ public class DevicePolicyManager {
     public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle) {
         if (mService != null) {
             try {
-                return mService.getProfileWithMinimumFailedPasswordsForWipe(userHandle);
+                return mService.getProfileWithMinimumFailedPasswordsForWipe(
+                        userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1881,7 +1886,7 @@ public class DevicePolicyManager {
     public void setMaximumTimeToLock(@NonNull ComponentName admin, long timeMs) {
         if (mService != null) {
             try {
-                mService.setMaximumTimeToLock(admin, timeMs);
+                mService.setMaximumTimeToLock(admin, timeMs, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1904,7 +1909,7 @@ public class DevicePolicyManager {
     public long getMaximumTimeToLock(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getMaximumTimeToLock(admin, userHandle);
+                return mService.getMaximumTimeToLock(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -1923,7 +1928,7 @@ public class DevicePolicyManager {
     public void lockNow() {
         if (mService != null) {
             try {
-                mService.lockNow();
+                mService.lockNow(mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -2720,7 +2725,7 @@ public class DevicePolicyManager {
     public void setKeyguardDisabledFeatures(@NonNull ComponentName admin, int which) {
         if (mService != null) {
             try {
-                mService.setKeyguardDisabledFeatures(admin, which);
+                mService.setKeyguardDisabledFeatures(admin, which, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -2730,8 +2735,8 @@ public class DevicePolicyManager {
     /**
      * Determine whether or not features have been disabled in keyguard either by the calling
      * admin, if specified, or all admins.
-     * @param admin The name of the admin component to check, or {@code null} to check whether any admins
-     * have disabled features in keyguard.
+     * @param admin The name of the admin component to check, or {@code null} to check whether any
+     * admins have disabled features in keyguard.
      * @return bitfield of flags. See {@link #setKeyguardDisabledFeatures(ComponentName, int)}
      * for a list.
      */
@@ -2743,7 +2748,7 @@ public class DevicePolicyManager {
     public int getKeyguardDisabledFeatures(@Nullable ComponentName admin, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getKeyguardDisabledFeatures(admin, userHandle);
+                return mService.getKeyguardDisabledFeatures(admin, userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -4666,7 +4671,8 @@ public class DevicePolicyManager {
      * @see #addCrossProfileWidgetProvider(android.content.ComponentName, String)
      * @see #getCrossProfileWidgetProviders(android.content.ComponentName)
      */
-    public boolean removeCrossProfileWidgetProvider(@NonNull ComponentName admin, String packageName) {
+    public boolean removeCrossProfileWidgetProvider(
+            @NonNull ComponentName admin, String packageName) {
         if (mService != null) {
             try {
                 return mService.removeCrossProfileWidgetProvider(admin, packageName);
@@ -5125,7 +5131,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Obtains a {@link DevicePolicyManager} whose calls act on the parent profile.
+     * Called by the profile owner of a managed profile to obtain a {@link DevicePolicyManager}
+     * whose calls act on the parent profile.
      *
      * <p> Note only some methods will work on the parent Manager.
      *
