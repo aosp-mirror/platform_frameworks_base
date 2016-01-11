@@ -207,6 +207,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
             PrinterInfo favoritePrinter = favoritePrinters.get(i).first;
             if (!alreadyAddedPrinter.contains(favoritePrinter.getId())) {
                 updateAndAddPrinter(printers, favoritePrinter, discoveredPrinters);
+                alreadyAddedPrinter.add(favoritePrinter.getId());
             }
         }
 
