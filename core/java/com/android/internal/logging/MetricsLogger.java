@@ -15,69 +15,21 @@
  */
 package com.android.internal.logging;
 
-
 import android.content.Context;
 import android.os.Build;
 import android.view.View;
+
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 /**
  * Log all the things.
  *
  * @hide
  */
-public class MetricsLogger implements MetricsConstants {
-    // Temporary constants go here, to await migration to MetricsConstants.
-    public static final int QS_USER_TILE = 258;
-    public static final int QS_BATTERY_TILE = 259;
-    public static final int NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 260;
-    public static final int ACTION_ZEN_ALLOW_PEEK = 261;
-    public static final int ACTION_ZEN_ALLOW_LIGHTS = 262;
-    public static final int NOTIFICATION_TOPIC_NOTIFICATION = 263;
-    public static final int ACTION_DEFAULT_SMS_APP_CHANGED = 264;
-    public static final int QS_COLOR_MATRIX = 265;
-    public static final int QS_CUSTOM = 266;
-    public static final int ACTION_ZEN_ALLOW_SCREEN_ON = 267;
+public class MetricsLogger implements com.android.internal.logging.MetricsConstants {
+    // define metric categories in frameworks/base/core/proto/src/metrics_constants.proto.
 
-    /**
-     * Logged when the user docks a window from recents by longpressing a task and dragging it to
-     * the dock area.
-     */
-    public static final int ACTION_WINDOW_DOCK_DRAG_DROP = 268;
-
-    /**
-     * Logged when the user docks a fullscreen window by long pressing recents which also opens
-     * recents on the lower/right side.
-     */
-    public static final int ACTION_WINDOW_DOCK_LONGPRESS = 269;
-
-    /**
-     * Logged when the user docks a window by dragging from the navbar which also opens recents on
-     * the lower/right side.
-     */
-    public static final int ACTION_WINDOW_DOCK_SWIPE = 270;
-
-    /**
-     * Logged when the user launches a profile-specific app and we intercept it with the confirm
-     * credentials UI.
-     */
-    public static final int PROFILE_CHALLENGE = 271;
-    public static final int QS_BATTERY_DETAIL = 272;
-
-    /**
-     * Logged when the user goes into the overview history.
-     */
-    public static final int OVERVIEW_HISTORY = 273;
-
-    /**
-     * Logged when the user pages through overview.
-     */
-    public static final int ACTION_OVERVIEW_PAGE = 274;
-
-    /**
-     * Logged when the user launches a task from overview.
-     */
-    public static final int ACTION_OVERVIEW_SELECT = 275;
-
+    public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {

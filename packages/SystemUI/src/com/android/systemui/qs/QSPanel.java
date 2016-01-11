@@ -34,7 +34,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
@@ -245,7 +247,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
-        MetricsLogger.visibility(mContext, MetricsLogger.QS_PANEL, mExpanded);
+        MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
             closeDetail();
         } else {
@@ -498,7 +500,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         int newVis = visible ? VISIBLE : INVISIBLE;
         mQsContainer.setVisibility(newVis);
         if (mGridContentVisible != visible) {
-            MetricsLogger.visibility(mContext, MetricsLogger.QS_PANEL, newVis);
+            MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, newVis);
         }
         mGridContentVisible = visible;
     }
