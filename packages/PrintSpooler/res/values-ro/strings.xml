@@ -70,11 +70,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Se anulează <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Eroare de printare: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printare blocată: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="few"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> activități de printare</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> de activități de printare</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> activitate de printare</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Anulați"</string>
     <string name="restart" msgid="2472034227037808749">"Reporniți"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nu există conexiune la o imprimantă"</string>

@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> বাতিল করা হচ্ছে"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> মুদ্রক ত্রুটি"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"মুদ্রক <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> অবরুদ্ধ করেছে"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> মুদ্রণ কার্যগুলি</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> মুদ্রণ কার্যগুলি</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"বাতিল করুন"</string>
     <string name="restart" msgid="2472034227037808749">"পুনর্সূচনা"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"মুদ্রকে কোনো সংযোগ নেই"</string>

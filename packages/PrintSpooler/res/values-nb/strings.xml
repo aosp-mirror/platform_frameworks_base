@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Avbryter <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Skriverfeil <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Skriveren blokkerte <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> utskriftsjobber</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> utskriftsjobb</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Avbryt"</string>
     <string name="restart" msgid="2472034227037808749">"Start på nytt"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Ingen forbindelse med skriveren"</string>

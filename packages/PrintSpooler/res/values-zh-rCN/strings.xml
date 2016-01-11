@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"正在取消打印“<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>”"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"打印机在打印“<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>”时出错"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"打印机拒绝打印“<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>”"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other">“<xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g>”打印作业</item>
-      <item quantity="one">“<xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g>”打印作业</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"取消"</string>
     <string name="restart" msgid="2472034227037808749">"重新开始"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"未与打印机建立连接"</string>

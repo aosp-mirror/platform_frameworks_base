@@ -71,12 +71,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Завдання \"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>\" скасовується"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Помилка завдання \"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>\""</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Завдання \"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>\" заблоковано"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> завдання друку</item>
-      <item quantity="few"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> завдання друку</item>
-      <item quantity="many"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> завдань друку</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> завдань друку</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Скасувати"</string>
     <string name="restart" msgid="2472034227037808749">"Перезапустити"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Немає з’єднання з принтером"</string>

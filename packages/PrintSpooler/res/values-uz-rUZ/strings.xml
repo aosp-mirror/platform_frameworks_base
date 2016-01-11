@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> bekor qilinmoqda"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printerda xatolik: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ni taqiqladi"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> chop qilish vazifalari</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> chop qilish vazifasi</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Bekor qilish"</string>
     <string name="restart" msgid="2472034227037808749">"Qayta boshlash"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Printer ulanmagan"</string>

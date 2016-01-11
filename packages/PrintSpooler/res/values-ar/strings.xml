@@ -73,14 +73,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"جارٍ إلغاء <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"خطا في الطابعة <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"رفضت الطابعة <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="zero"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> مهمة طباعة</item>
-      <item quantity="two">مهمتا طباعة (<xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g>)</item>
-      <item quantity="few"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> مهام طباعة</item>
-      <item quantity="many"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> مهمة طباعة</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> من مهام الطباعة</item>
-      <item quantity="one">مهمة طباعة واحدة (<xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g>)</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"إلغاء"</string>
     <string name="restart" msgid="2472034227037808749">"إعادة تشغيل"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"لا يوجد اتصال بالطابعة"</string>

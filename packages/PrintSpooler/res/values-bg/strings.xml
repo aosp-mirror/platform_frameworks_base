@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"„<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“ се анулира"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Грешка в принтера при „<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Принтерът блокира при „<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>“"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other">Задания за отпечатване: <xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g></item>
-      <item quantity="one">Задание за отпечатване: <xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g></item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Отказ"</string>
     <string name="restart" msgid="2472034227037808749">"Рестартиране"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Няма връзка с принтера"</string>

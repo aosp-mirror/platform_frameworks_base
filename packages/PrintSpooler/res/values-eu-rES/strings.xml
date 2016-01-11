@@ -69,10 +69,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> bertan behera uzten"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Errorea <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> inprimatzean"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Inprimag. <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> blokeatu du"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> inprimatze-lanak</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> inprimatze-lana</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Utzi"</string>
     <string name="restart" msgid="2472034227037808749">"Berrabiarazi"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Inprimagailua ez dago konektatuta"</string>

@@ -71,12 +71,6 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"Prebieha zrušenie úlohy <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Chyba tlačiarne – úloha <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Tlačiareň zablok. úlohu <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
-      <item quantity="few"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tlačové úlohy</item>
-      <item quantity="many"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tlačovej úlohy</item>
-      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> tlačových úloh</item>
-      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> tlačová úloha</item>
-    </plurals>
     <string name="cancel" msgid="4373674107267141885">"Zrušiť"</string>
     <string name="restart" msgid="2472034227037808749">"Spustiť znova"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Žiadne pripojenie k tlačiarni"</string>
