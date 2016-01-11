@@ -22546,7 +22546,16 @@ package android.mtp {
 
   public class MtpEvent {
     ctor public MtpEvent();
+    method public int getDevicePropCode();
     method public int getEventCode();
+    method public int getObjectFormatCode();
+    method public int getObjectHandle();
+    method public int getObjectPropCode();
+    method public int getParameter1();
+    method public int getParameter2();
+    method public int getParameter3();
+    method public int getStorageId();
+    method public int getTransactionId();
   }
 
   public final class MtpObjectInfo {
