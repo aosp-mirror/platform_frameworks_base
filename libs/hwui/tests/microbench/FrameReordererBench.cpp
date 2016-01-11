@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 #include "BakedOpState.h"
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "FrameReorderer.h"
 #include "LayerUpdateQueue.h"
-#include "OpReorderer.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
 #include "tests/common/TestContext.h"
@@ -61,20 +61,20 @@ static std::vector<sp<RenderNode>> createTestNodeList() {
     return vec;
 }
 
-BENCHMARK_NO_ARG(BM_OpReorderer_defer);
-void BM_OpReorderer_defer::Run(int iters) {
+BENCHMARK_NO_ARG(BM_FrameBuilder_defer);
+void BM_FrameBuilder_defer::Run(int iters) {
     auto nodes = createTestNodeList();
     StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+        FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                 nodes, sLightCenter);
         MicroBench::DoNotOptimize(&reorderer);
     }
     StopBenchmarkTiming();
 }
 
-BENCHMARK_NO_ARG(BM_OpReorderer_deferAndRender);
-void BM_OpReorderer_deferAndRender::Run(int iters) {
+BENCHMARK_NO_ARG(BM_FrameBuilder_deferAndRender);
+void BM_FrameBuilder_deferAndRender::Run(int iters) {
     TestUtils::runOnRenderThread([this, iters](RenderThread& thread) {
         auto nodes = createTestNodeList();
         BakedOpRenderer::LightInfo lightInfo = {50.0f, 128, 128 };
@@ -84,7 +84,7 @@ void BM_OpReorderer_deferAndRender::Run(int iters) {
 
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+            FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                     nodes, sLightCenter);
 
             BakedOpRenderer renderer(caches, renderState, true, lightInfo);
@@ -117,7 +117,7 @@ static void benchDeferScene(testing::Benchmark& benchmark, int iters, const char
     auto nodes = getSyncedSceneNodes(sceneName);
     benchmark.StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        OpReorderer reorderer(sEmptyLayerUpdateQueue,
+        FrameReorderer reorderer(sEmptyLayerUpdateQueue,
                 SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                 nodes, sLightCenter);
         MicroBench::DoNotOptimize(&reorderer);
@@ -136,7 +136,7 @@ static void benchDeferAndRenderScene(testing::Benchmark& benchmark,
 
         benchmark.StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            OpReorderer reorderer(sEmptyLayerUpdateQueue,
+            FrameReorderer reorderer(sEmptyLayerUpdateQueue,
                     SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                     nodes, sLightCenter);
 
@@ -148,13 +148,13 @@ static void benchDeferAndRenderScene(testing::Benchmark& benchmark,
     });
 }
 
-BENCHMARK_NO_ARG(BM_OpReorderer_listview_defer);
-void BM_OpReorderer_listview_defer::Run(int iters) {
+BENCHMARK_NO_ARG(BM_FrameBuilder_listview_defer);
+void BM_FrameBuilder_listview_defer::Run(int iters) {
     benchDeferScene(*this, iters, "listview");
 }
 
-BENCHMARK_NO_ARG(BM_OpReorderer_listview_deferAndRender);
-void BM_OpReorderer_listview_deferAndRender::Run(int iters) {
+BENCHMARK_NO_ARG(BM_FrameBuilder_listview_deferAndRender);
+void BM_FrameBuilder_listview_deferAndRender::Run(int iters) {
     benchDeferAndRenderScene(*this, iters, "listview");
 }
 

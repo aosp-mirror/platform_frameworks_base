@@ -87,7 +87,7 @@ class RenderNode;
  */
 class RenderNode : public VirtualLightRefBase {
 friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
-friend class OpReorderer;
+friend class FrameReorderer;
 public:
     enum DirtyPropertyMask {
         GENERIC         = 1 << 1,

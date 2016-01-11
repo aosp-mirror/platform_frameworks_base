@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 
 #include <BakedOpState.h>
 #include <DeferredLayerUpdater.h>
+#include <FrameReorderer.h>
 #include <LayerUpdateQueue.h>
-#include <OpReorderer.h>
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
 #include <tests/common/TestUtils.h>
@@ -113,7 +113,7 @@ public:
 
 class FailRenderer : public TestRendererBase {};
 
-TEST(OpReorderer, simple) {
+TEST(FrameReorderer, simple) {
     class SimpleTestRenderer : public TestRendererBase {
     public:
         void startFrame(uint32_t width, uint32_t height, const Rect& repaintRect) override {
@@ -138,14 +138,14 @@ TEST(OpReorderer, simple) {
         canvas.drawRect(0, 0, 100, 200, SkPaint());
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
             createSyncedNodeList(node), sLightCenter);
     SimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
 }
 
-TEST(OpReorderer, simpleStroke) {
+TEST(FrameReorderer, simpleStroke) {
     class SimpleStrokeTestRenderer : public TestRendererBase {
     public:
         void onPointsOp(const PointsOp& op, const BakedOpState& state) override {
@@ -164,14 +164,14 @@ TEST(OpReorderer, simpleStroke) {
         strokedPaint.setStrokeWidth(10);
         canvas.drawPoint(50, 50, strokedPaint);
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
             createSyncedNodeList(node), sLightCenter);
     SimpleStrokeTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
 }
 
-TEST(OpReorderer, simpleRejection) {
+TEST(FrameReorderer, simpleRejection) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -179,14 +179,14 @@ TEST(OpReorderer, simpleRejection) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, simpleBatching) {
+TEST(FrameReorderer, simpleBatching) {
     const int LOOPS = 5;
     class SimpleBatchingTestRenderer : public TestRendererBase {
     public:
@@ -214,7 +214,7 @@ TEST(OpReorderer, simpleBatching) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     SimpleBatchingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -222,7 +222,7 @@ TEST(OpReorderer, simpleBatching) {
             << "Expect number of ops = 2 * loop count";
 }
 
-TEST(OpReorderer, clippedMerging) {
+TEST(FrameReorderer, clippedMerging) {
     class ClippedMergingTestRenderer : public TestRendererBase {
     public:
         void onMergedBitmapOps(const MergedBakedOpList& opList) override {
@@ -255,14 +255,14 @@ TEST(OpReorderer, clippedMerging) {
         canvas.drawBitmap(bitmap, 40, 70, nullptr);
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
             createSyncedNodeList(node), sLightCenter);
     ClippedMergingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-TEST(OpReorderer, textMerging) {
+TEST(FrameReorderer, textMerging) {
     class TextMergingTestRenderer : public TestRendererBase {
     public:
         void onMergedTextOps(const MergedBakedOpList& opList) override {
@@ -283,14 +283,14 @@ TEST(OpReorderer, textMerging) {
         TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 0); // will be top clipped
         TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 100); // not clipped
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
             createSyncedNodeList(node), sLightCenter);
     TextMergingTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex()) << "Expect 2 ops";
 }
 
-TEST(OpReorderer, textStrikethrough) {
+TEST(FrameReorderer, textStrikethrough) {
     const int LOOPS = 5;
     class TextStrikethroughTestRenderer : public TestRendererBase {
     public:
@@ -314,7 +314,7 @@ TEST(OpReorderer, textStrikethrough) {
             TestUtils::drawTextToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
         }
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 2000), 200, 2000,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 2000), 200, 2000,
             createSyncedNodeList(node), sLightCenter);
     TextStrikethroughTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -322,7 +322,7 @@ TEST(OpReorderer, textStrikethrough) {
             << "Expect number of ops = 2 * loop count";
 }
 
-RENDERTHREAD_TEST(OpReorderer, textureLayer) {
+RENDERTHREAD_TEST(FrameReorderer, textureLayer) {
     class TextureLayerTestRenderer : public TestRendererBase {
     public:
         void onTextureLayerOp(const TextureLayerOp& op, const BakedOpState& state) override {
@@ -348,14 +348,14 @@ RENDERTHREAD_TEST(OpReorderer, textureLayer) {
         canvas.drawLayer(layerUpdater.get());
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     TextureLayerTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
 }
 
-TEST(OpReorderer, renderNode) {
+TEST(FrameReorderer, renderNode) {
     class RenderNodeTestRenderer : public TestRendererBase {
     public:
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
@@ -393,13 +393,13 @@ TEST(OpReorderer, renderNode) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
     RenderNodeTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, clipped) {
+TEST(FrameReorderer, clipped) {
     class ClippedTestRenderer : public TestRendererBase {
     public:
         void onBitmapOp(const BitmapOp& op, const BakedOpState& state) override {
@@ -416,14 +416,14 @@ TEST(OpReorderer, clipped) {
         canvas.drawBitmap(bitmap, 0, 0, nullptr);
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue,
             SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
             200, 200, createSyncedNodeList(node), sLightCenter);
     ClippedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, saveLayer_simple) {
+TEST(FrameReorderer, saveLayer_simple) {
     class SaveLayerSimpleTestRenderer : public TestRendererBase {
     public:
         OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
@@ -459,14 +459,14 @@ TEST(OpReorderer, saveLayer_simple) {
         canvas.drawRect(10, 10, 190, 190, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     SaveLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-TEST(OpReorderer, saveLayer_nested) {
+TEST(FrameReorderer, saveLayer_nested) {
     /* saveLayer1 { rect1, saveLayer2 { rect2 } } will play back as:
      * - startTemporaryLayer2, rect2 endLayer2
      * - startTemporaryLayer1, rect1, drawLayer2, endLayer1
@@ -531,14 +531,14 @@ TEST(OpReorderer, saveLayer_nested) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(800, 800), 800, 800,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(800, 800), 800, 800,
             createSyncedNodeList(node), sLightCenter);
     SaveLayerNestedTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
 }
 
-TEST(OpReorderer, saveLayer_contentRejection) {
+TEST(FrameReorderer, saveLayer_contentRejection) {
         auto node = TestUtils::createNode(0, 0, 200, 200,
                 [](RenderProperties& props, RecordingCanvas& canvas) {
         canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
@@ -551,7 +551,7 @@ TEST(OpReorderer, saveLayer_contentRejection) {
         canvas.restore();
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
@@ -559,7 +559,7 @@ TEST(OpReorderer, saveLayer_contentRejection) {
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 }
 
-TEST(OpReorderer, saveLayerUnclipped_simple) {
+TEST(FrameReorderer, saveLayerUnclipped_simple) {
     class SaveLayerUnclippedSimpleTestRenderer : public TestRendererBase {
     public:
         void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
@@ -594,14 +594,14 @@ TEST(OpReorderer, saveLayerUnclipped_simple) {
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
 }
 
-TEST(OpReorderer, saveLayerUnclipped_mergedClears) {
+TEST(FrameReorderer, saveLayerUnclipped_mergedClears) {
     class SaveLayerUnclippedMergedClearsTestRenderer : public TestRendererBase {
     public:
         void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
@@ -648,7 +648,7 @@ TEST(OpReorderer, saveLayerUnclipped_mergedClears) {
         canvas.drawRect(0, 0, 100, 100, SkPaint());
         canvas.restoreToCount(restoreTo);
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedMergedClearsTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -660,7 +660,7 @@ TEST(OpReorderer, saveLayerUnclipped_mergedClears) {
  * - startTemporaryLayer, onCopyToLayer, onSimpleRects, onRect, onCopyFromLayer, endLayer
  * - startFrame, onCopyToLayer, onSimpleRects, drawLayer, onCopyFromLayer, endframe
  */
-TEST(OpReorderer, saveLayerUnclipped_complex) {
+TEST(FrameReorderer, saveLayerUnclipped_complex) {
     class SaveLayerUnclippedComplexTestRenderer : public TestRendererBase {
     public:
         OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) {
@@ -710,14 +710,14 @@ TEST(OpReorderer, saveLayerUnclipped_complex) {
         canvas.restore();
         canvas.restore();
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(600, 600), 600, 600,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(600, 600), 600, 600,
             createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedComplexTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(12, renderer.getIndex());
 }
 
-RENDERTHREAD_TEST(OpReorderer, hwLayer_simple) {
+RENDERTHREAD_TEST(FrameReorderer, hwLayer_simple) {
     class HwLayerSimpleTestRenderer : public TestRendererBase {
     public:
         void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
@@ -768,7 +768,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayer_simple) {
     LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(25, 25, 75, 75));
 
-    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             syncedNodeList, sLightCenter);
     HwLayerSimpleTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -778,7 +778,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayer_simple) {
     *layerHandle = nullptr;
 }
 
-RENDERTHREAD_TEST(OpReorderer, hwLayer_complex) {
+RENDERTHREAD_TEST(FrameReorderer, hwLayer_complex) {
     /* parentLayer { greyRect, saveLayer { childLayer { whiteRect } } } will play back as:
      * - startRepaintLayer(child), rect(grey), endLayer
      * - startTemporaryLayer, drawLayer(child), endLayer
@@ -869,7 +869,7 @@ RENDERTHREAD_TEST(OpReorderer, hwLayer_complex) {
     layerUpdateQueue.enqueueLayerWithDamage(child.get(), Rect(100, 100));
     layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(200, 200));
 
-    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             syncedList, sLightCenter);
     HwLayerComplexTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -894,7 +894,7 @@ static void drawOrderedNode(RecordingCanvas* canvas, uint8_t expectedDrawOrder, 
     node->setPropertyFieldsDirty(RenderNode::TRANSLATION_Z);
     canvas->drawRenderNode(node.get()); // canvas takes reference/sole ownership
 }
-TEST(OpReorderer, zReorder) {
+TEST(FrameReorderer, zReorder) {
     class ZReorderTestRenderer : public TestRendererBase {
     public:
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
@@ -918,14 +918,14 @@ TEST(OpReorderer, zReorder) {
         drawOrderedRect(&canvas, 8);
         drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
     });
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
             createSyncedNodeList(parent), sLightCenter);
     ZReorderTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
 };
 
-TEST(OpReorderer, projectionReorder) {
+TEST(FrameReorderer, projectionReorder) {
     static const int scrollX = 5;
     static const int scrollY = 10;
     class ProjectionReorderTestRenderer : public TestRendererBase {
@@ -1001,7 +1001,7 @@ TEST(OpReorderer, projectionReorder) {
         canvas.restore();
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
             createSyncedNodeList(parent), sLightCenter);
     ProjectionReorderTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -1020,7 +1020,7 @@ static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
     });
 }
 
-TEST(OpReorderer, shadow) {
+TEST(FrameReorderer, shadow) {
     class ShadowTestRenderer : public TestRendererBase {
     public:
         void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
@@ -1044,14 +1044,14 @@ TEST(OpReorderer, shadow) {
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
     ShadowTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex());
 }
 
-TEST(OpReorderer, shadowSaveLayer) {
+TEST(FrameReorderer, shadowSaveLayer) {
     class ShadowSaveLayerTestRenderer : public TestRendererBase {
     public:
         OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {
@@ -1085,14 +1085,14 @@ TEST(OpReorderer, shadowSaveLayer) {
         canvas.restoreToCount(count);
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), (Vector3) { 100, 100, 100 });
     ShadowSaveLayerTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(5, renderer.getIndex());
 }
 
-RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
+RENDERTHREAD_TEST(FrameReorderer, shadowHwLayer) {
     class ShadowHwLayerTestRenderer : public TestRendererBase {
     public:
         void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
@@ -1135,7 +1135,7 @@ RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
     auto syncedList = createSyncedNodeList(parent);
     LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(100, 100));
-    OpReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             syncedList, (Vector3) { 100, 100, 100 });
     ShadowHwLayerTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -1145,7 +1145,7 @@ RENDERTHREAD_TEST(OpReorderer, shadowHwLayer) {
     *layerHandle = nullptr;
 }
 
-TEST(OpReorderer, shadowLayering) {
+TEST(FrameReorderer, shadowLayering) {
     class ShadowLayeringTestRenderer : public TestRendererBase {
     public:
         void onShadowOp(const ShadowOp& op, const BakedOpState& state) override {
@@ -1164,7 +1164,7 @@ TEST(OpReorderer, shadowLayering) {
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0001f).get());
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
             createSyncedNodeList(parent), sLightCenter);
     ShadowLayeringTestRenderer renderer;
     reorderer.replayBakedOps<TestDispatcher>(renderer);
@@ -1192,14 +1192,14 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
         canvas.drawRect(0, 0, 100, 100, paint);
     });
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
             createSyncedNodeList(node), sLightCenter);
     PropertyTestRenderer renderer(opValidateCallback);
     reorderer.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex()) << "Should have seen one op";
 }
 
-TEST(OpReorderer, renderPropOverlappingRenderingAlpha) {
+TEST(FrameReorderer, renderPropOverlappingRenderingAlpha) {
     testProperty([](RenderProperties& properties) {
         properties.setAlpha(0.5f);
         properties.setHasOverlappingRendering(false);
@@ -1208,7 +1208,7 @@ TEST(OpReorderer, renderPropOverlappingRenderingAlpha) {
     });
 }
 
-TEST(OpReorderer, renderPropClipping) {
+TEST(FrameReorderer, renderPropClipping) {
     testProperty([](RenderProperties& properties) {
         properties.setClipToBounds(true);
         properties.setClipBounds(Rect(10, 20, 300, 400));
@@ -1218,7 +1218,7 @@ TEST(OpReorderer, renderPropClipping) {
     });
 }
 
-TEST(OpReorderer, renderPropRevealClip) {
+TEST(FrameReorderer, renderPropRevealClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableRevealClip().set(true, 50, 50, 25);
     }, [](const RectOp& op, const BakedOpState& state) {
@@ -1229,7 +1229,7 @@ TEST(OpReorderer, renderPropRevealClip) {
     });
 }
 
-TEST(OpReorderer, renderPropOutlineClip) {
+TEST(FrameReorderer, renderPropOutlineClip) {
     testProperty([](RenderProperties& properties) {
         properties.mutableOutline().setShouldClip(true);
         properties.mutableOutline().setRoundRect(10, 20, 30, 40, 5.0f, 0.5f);
@@ -1241,7 +1241,7 @@ TEST(OpReorderer, renderPropOutlineClip) {
     });
 }
 
-TEST(OpReorderer, renderPropTransform) {
+TEST(FrameReorderer, renderPropTransform) {
     testProperty([](RenderProperties& properties) {
         properties.setLeftTopRightBottom(10, 10, 110, 110);
 
@@ -1334,7 +1334,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
     });
     auto nodes = createSyncedNodeList(node); // sync before querying height
 
-    OpReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes, sLightCenter);
+    FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes, sLightCenter);
     SaveLayerAlphaClipTestRenderer renderer(outObservedData);
     reorderer.replayBakedOps<TestDispatcher>(renderer);
 
@@ -1342,7 +1342,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
     ASSERT_EQ(4, renderer.getIndex()) << "Test must trigger saveLayer alpha behavior.";
 }
 
-TEST(OpReorderer, renderPropSaveLayerAlphaClipBig) {
+TEST(FrameReorderer, renderPropSaveLayerAlphaClipBig) {
     SaveLayerAlphaData observedData;
     testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
         properties.setTranslationX(10); // offset rendering content
@@ -1358,7 +1358,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaClipBig) {
             << "expect content to be translated as part of being clipped";
 }
 
-TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
+TEST(FrameReorderer, renderPropSaveLayerAlphaRotate) {
     SaveLayerAlphaData observedData;
     testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
         // Translate and rotate the view so that the only visible part is the top left corner of
@@ -1377,7 +1377,7 @@ TEST(OpReorderer, renderPropSaveLayerAlphaRotate) {
     EXPECT_MATRIX_APPROX_EQ(Matrix4::identity(), observedData.rectMatrix);
 }
 
-TEST(OpReorderer, renderPropSaveLayerAlphaScale) {
+TEST(FrameReorderer, renderPropSaveLayerAlphaScale) {
     SaveLayerAlphaData observedData;
     testSaveLayerAlphaClip(&observedData, [](RenderProperties& properties) {
         properties.setPivotX(0);

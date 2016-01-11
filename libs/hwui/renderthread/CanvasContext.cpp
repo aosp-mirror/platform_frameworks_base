@@ -31,7 +31,7 @@
 #include "utils/TimeUtils.h"
 
 #if HWUI_NEW_OPS
-#include "OpReorderer.h"
+#include "FrameReorderer.h"
 #endif
 
 #include <cutils/properties.h>
@@ -338,7 +338,7 @@ void CanvasContext::draw() {
     mEglManager.damageFrame(frame, dirty);
 
 #if HWUI_NEW_OPS
-    OpReorderer reorderer(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
+    FrameReorderer reorderer(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
             mRenderNodes, mLightCenter);
     mLayerUpdateQueue.clear();
     BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(),

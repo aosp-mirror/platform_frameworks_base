@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "OpReorderer.h"
+#include "FrameReorderer.h"
 
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
@@ -30,343 +30,7 @@
 namespace android {
 namespace uirenderer {
 
-class BatchBase {
-public:
-    BatchBase(batchid_t batchId, BakedOpState* op, bool merging)
-            : mBatchId(batchId)
-            , mMerging(merging) {
-        mBounds = op->computedState.clippedBounds;
-        mOps.push_back(op);
-    }
-
-    bool intersects(const Rect& rect) const {
-        if (!rect.intersects(mBounds)) return false;
-
-        for (const BakedOpState* op : mOps) {
-            if (rect.intersects(op->computedState.clippedBounds)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    batchid_t getBatchId() const { return mBatchId; }
-    bool isMerging() const { return mMerging; }
-
-    const std::vector<BakedOpState*>& getOps() const { return mOps; }
-
-    void dump() const {
-        ALOGD("    Batch %p, id %d, merging %d, count %d, bounds " RECT_STRING,
-                this, mBatchId, mMerging, mOps.size(), RECT_ARGS(mBounds));
-    }
-protected:
-    batchid_t mBatchId;
-    Rect mBounds;
-    std::vector<BakedOpState*> mOps;
-    bool mMerging;
-};
-
-class OpBatch : public BatchBase {
-public:
-    static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
-    }
-
-    OpBatch(batchid_t batchId, BakedOpState* op)
-            : BatchBase(batchId, op, false) {
-    }
-
-    void batchOp(BakedOpState* op) {
-        mBounds.unionWith(op->computedState.clippedBounds);
-        mOps.push_back(op);
-    }
-};
-
-class MergingOpBatch : public BatchBase {
-public:
-    static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
-    }
-
-    MergingOpBatch(batchid_t batchId, BakedOpState* op)
-            : BatchBase(batchId, op, true)
-            , mClipSideFlags(op->computedState.clipSideFlags) {
-    }
-
-    /*
-     * Helper for determining if a new op can merge with a MergingDrawBatch based on their bounds
-     * and clip side flags. Positive bounds delta means new bounds fit in old.
-     */
-    static inline bool checkSide(const int currentFlags, const int newFlags, const int side,
-            float boundsDelta) {
-        bool currentClipExists = currentFlags & side;
-        bool newClipExists = newFlags & side;
-
-        // if current is clipped, we must be able to fit new bounds in current
-        if (boundsDelta > 0 && currentClipExists) return false;
-
-        // if new is clipped, we must be able to fit current bounds in new
-        if (boundsDelta < 0 && newClipExists) return false;
-
-        return true;
-    }
-
-    static bool paintIsDefault(const SkPaint& paint) {
-        return paint.getAlpha() == 255
-                && paint.getColorFilter() == nullptr
-                && paint.getShader() == nullptr;
-    }
-
-    static bool paintsAreEquivalent(const SkPaint& a, const SkPaint& b) {
-        return a.getAlpha() == b.getAlpha()
-                && a.getColorFilter() == b.getColorFilter()
-                && a.getShader() == b.getShader();
-    }
-
-    /*
-     * Checks if a (mergeable) op can be merged into this batch
-     *
-     * If true, the op's multiDraw must be guaranteed to handle both ops simultaneously, so it is
-     * important to consider all paint attributes used in the draw calls in deciding both a) if an
-     * op tries to merge at all, and b) if the op can merge with another set of ops
-     *
-     * False positives can lead to information from the paints of subsequent merged operations being
-     * dropped, so we make simplifying qualifications on the ops that can merge, per op type.
-     */
-    bool canMergeWith(BakedOpState* op) const {
-        bool isTextBatch = getBatchId() == OpBatchType::Text
-                || getBatchId() == OpBatchType::ColorText;
-
-        // Overlapping other operations is only allowed for text without shadow. For other ops,
-        // multiDraw isn't guaranteed to overdraw correctly
-        if (!isTextBatch || PaintUtils::hasTextShadow(op->op->paint)) {
-            if (intersects(op->computedState.clippedBounds)) return false;
-        }
-
-        const BakedOpState* lhs = op;
-        const BakedOpState* rhs = mOps[0];
-
-        if (!MathUtils::areEqual(lhs->alpha, rhs->alpha)) return false;
-
-        // Identical round rect clip state means both ops will clip in the same way, or not at all.
-        // As the state objects are const, we can compare their pointers to determine mergeability
-        if (lhs->roundRectClipState != rhs->roundRectClipState) return false;
-        if (lhs->projectionPathMask != rhs->projectionPathMask) return false;
-
-        /* Clipping compatibility check
-         *
-         * Exploits the fact that if a op or batch is clipped on a side, its bounds will equal its
-         * clip for that side.
-         */
-        const int currentFlags = mClipSideFlags;
-        const int newFlags = op->computedState.clipSideFlags;
-        if (currentFlags != OpClipSideFlags::None || newFlags != OpClipSideFlags::None) {
-            const Rect& opBounds = op->computedState.clippedBounds;
-            float boundsDelta = mBounds.left - opBounds.left;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Left, boundsDelta)) return false;
-            boundsDelta = mBounds.top - opBounds.top;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Top, boundsDelta)) return false;
-
-            // right and bottom delta calculation reversed to account for direction
-            boundsDelta = opBounds.right - mBounds.right;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Right, boundsDelta)) return false;
-            boundsDelta = opBounds.bottom - mBounds.bottom;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Bottom, boundsDelta)) return false;
-        }
-
-        const SkPaint* newPaint = op->op->paint;
-        const SkPaint* oldPaint = mOps[0]->op->paint;
-
-        if (newPaint == oldPaint) {
-            // if paints are equal, then modifiers + paint attribs don't need to be compared
-            return true;
-        } else if (newPaint && !oldPaint) {
-            return paintIsDefault(*newPaint);
-        } else if (!newPaint && oldPaint) {
-            return paintIsDefault(*oldPaint);
-        }
-        return paintsAreEquivalent(*newPaint, *oldPaint);
-    }
-
-    void mergeOp(BakedOpState* op) {
-        mBounds.unionWith(op->computedState.clippedBounds);
-        mOps.push_back(op);
-
-        // Because a new op must have passed canMergeWith(), we know it's passed the clipping compat
-        // check, and doesn't extend past a side of the clip that's in use by the merged batch.
-        // Therefore it's safe to simply always merge flags, and use the bounds as the clip rect.
-        mClipSideFlags |= op->computedState.clipSideFlags;
-    }
-
-    int getClipSideFlags() const { return mClipSideFlags; }
-    const Rect& getClipRect() const { return mBounds; }
-
-private:
-    int mClipSideFlags;
-};
-
-OpReorderer::LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
-        const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
-        : width(width)
-        , height(height)
-        , repaintRect(repaintRect)
-        , offscreenBuffer(renderNode ? renderNode->getLayer() : nullptr)
-        , beginLayerOp(beginLayerOp)
-        , renderNode(renderNode)
-        , viewportClip(Rect(width, height)) {}
-
-// iterate back toward target to see if anything drawn since should overlap the new op
-// if no target, merging ops still iterate to find similar batch to insert after
-void OpReorderer::LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
-        BatchBase** targetBatch, size_t* insertBatchIndex) const {
-    for (int i = mBatches.size() - 1; i >= 0; i--) {
-        BatchBase* overBatch = mBatches[i];
-
-        if (overBatch == *targetBatch) break;
-
-        // TODO: also consider shader shared between batch types
-        if (batchId == overBatch->getBatchId()) {
-            *insertBatchIndex = i + 1;
-            if (!*targetBatch) break; // found insert position, quit
-        }
-
-        if (overBatch->intersects(clippedBounds)) {
-            // NOTE: it may be possible to optimize for special cases where two operations
-            // of the same batch/paint could swap order, such as with a non-mergeable
-            // (clipped) and a mergeable text operation
-            *targetBatch = nullptr;
-            break;
-        }
-    }
-}
-
-void OpReorderer::LayerReorderer::deferLayerClear(const Rect& rect) {
-    mClearRects.push_back(rect);
-}
-
-void OpReorderer::LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
-    if (CC_UNLIKELY(!mClearRects.empty())) {
-        const int vertCount = mClearRects.size() * 4;
-        // put the verts in the frame allocator, since
-        //     1) SimpleRectsOps needs verts, not rects
-        //     2) even if mClearRects stored verts, std::vectors will move their contents
-        Vertex* const verts = (Vertex*) allocator.alloc(vertCount * sizeof(Vertex));
-
-        Vertex* currentVert = verts;
-        Rect bounds = mClearRects[0];
-        for (auto&& rect : mClearRects) {
-            bounds.unionWith(rect);
-            Vertex::set(currentVert++, rect.left, rect.top);
-            Vertex::set(currentVert++, rect.right, rect.top);
-            Vertex::set(currentVert++, rect.left, rect.bottom);
-            Vertex::set(currentVert++, rect.right, rect.bottom);
-        }
-        mClearRects.clear(); // discard rects before drawing so this method isn't reentrant
-
-        // One or more unclipped saveLayers have been enqueued, with deferred clears.
-        // Flush all of these clears with a single draw
-        SkPaint* paint = allocator.create<SkPaint>();
-        paint->setXfermodeMode(SkXfermode::kClear_Mode);
-        SimpleRectsOp* op = new (allocator) SimpleRectsOp(bounds,
-                Matrix4::identity(), nullptr, paint,
-                verts, vertCount);
-        BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
-                &viewportClip, bounds, *op);
-
-
-        deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
-    }
-}
-
-void OpReorderer::LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
-        BakedOpState* op, batchid_t batchId) {
-    if (batchId != OpBatchType::CopyToLayer) {
-        // if first op after one or more unclipped saveLayers, flush the layer clears
-        flushLayerClears(allocator);
-    }
-
-    OpBatch* targetBatch = mBatchLookup[batchId];
-
-    size_t insertBatchIndex = mBatches.size();
-    if (targetBatch) {
-        locateInsertIndex(batchId, op->computedState.clippedBounds,
-                (BatchBase**)(&targetBatch), &insertBatchIndex);
-    }
-
-    if (targetBatch) {
-        targetBatch->batchOp(op);
-    } else  {
-        // new non-merging batch
-        targetBatch = new (allocator) OpBatch(batchId, op);
-        mBatchLookup[batchId] = targetBatch;
-        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
-    }
-}
-
-void OpReorderer::LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
-        BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
-    if (batchId != OpBatchType::CopyToLayer) {
-        // if first op after one or more unclipped saveLayers, flush the layer clears
-        flushLayerClears(allocator);
-    }
-    MergingOpBatch* targetBatch = nullptr;
-
-    // Try to merge with any existing batch with same mergeId
-    auto getResult = mMergingBatchLookup[batchId].find(mergeId);
-    if (getResult != mMergingBatchLookup[batchId].end()) {
-        targetBatch = getResult->second;
-        if (!targetBatch->canMergeWith(op)) {
-            targetBatch = nullptr;
-        }
-    }
-
-    size_t insertBatchIndex = mBatches.size();
-    locateInsertIndex(batchId, op->computedState.clippedBounds,
-            (BatchBase**)(&targetBatch), &insertBatchIndex);
-
-    if (targetBatch) {
-        targetBatch->mergeOp(op);
-    } else  {
-        // new merging batch
-        targetBatch = new (allocator) MergingOpBatch(batchId, op);
-        mMergingBatchLookup[batchId].insert(std::make_pair(mergeId, targetBatch));
-
-        mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
-    }
-}
-
-void OpReorderer::LayerReorderer::replayBakedOpsImpl(void* arg,
-        BakedOpReceiver* unmergedReceivers, MergedOpReceiver* mergedReceivers) const {
-    ATRACE_NAME("flush drawing commands");
-    for (const BatchBase* batch : mBatches) {
-        size_t size = batch->getOps().size();
-        if (size > 1 && batch->isMerging()) {
-            int opId = batch->getOps()[0]->op->opId;
-            const MergingOpBatch* mergingBatch = static_cast<const MergingOpBatch*>(batch);
-            MergedBakedOpList data = {
-                    batch->getOps().data(),
-                    size,
-                    mergingBatch->getClipSideFlags(),
-                    mergingBatch->getClipRect()
-            };
-            mergedReceivers[opId](arg, data);
-        } else {
-            for (const BakedOpState* op : batch->getOps()) {
-                unmergedReceivers[op->op->opId](arg, *op);
-            }
-        }
-    }
-}
-
-void OpReorderer::LayerReorderer::dump() const {
-    ALOGD("LayerReorderer %p, %ux%u buffer %p, blo %p, rn %p",
-            this, width, height, offscreenBuffer, beginLayerOp, renderNode);
-    for (const BatchBase* batch : mBatches) {
-        batch->dump();
-    }
-}
-
-OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+FrameReorderer::FrameReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
         const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter)
         : mCanvasState(*this) {
@@ -413,11 +77,11 @@ OpReorderer::OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
     }
 }
 
-void OpReorderer::onViewportInitialized() {}
+void FrameReorderer::onViewportInitialized() {}
 
-void OpReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
+void FrameReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
-void OpReorderer::deferNodePropsAndOps(RenderNode& node) {
+void FrameReorderer::deferNodePropsAndOps(RenderNode& node) {
     const RenderProperties& properties = node.properties();
     const Outline& outline = properties.getOutline();
     if (properties.getAlpha() <= 0
@@ -549,7 +213,7 @@ static size_t findNonNegativeIndex(const V& zTranslatedNodes) {
 }
 
 template <typename V>
-void OpReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
+void FrameReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
     const int size = zTranslatedNodes.size();
     if (size == 0
             || (mode == ChildrenSelectMode::Negative&& zTranslatedNodes[0].key > 0.0f)
@@ -599,7 +263,7 @@ void OpReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedN
     }
 }
 
-void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
+void FrameReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
     auto& node = *casterNodeOp.renderNode;
     auto& properties = node.properties();
 
@@ -655,7 +319,7 @@ void OpReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
     }
 }
 
-void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
+void FrameReorderer::deferProjectedChildren(const RenderNode& renderNode) {
     const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
     int count = mCanvasState.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
@@ -688,15 +352,15 @@ void OpReorderer::deferProjectedChildren(const RenderNode& renderNode) {
 }
 
 /**
- * Used to define a list of lambdas referencing private OpReorderer::onXX::defer() methods.
+ * Used to define a list of lambdas referencing private FrameReorderer::onXX::defer() methods.
  *
  * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas.
- * E.g. a BitmapOp op then would be dispatched to OpReorderer::onBitmapOp(const BitmapOp&)
+ * E.g. a BitmapOp op then would be dispatched to FrameReorderer::onBitmapOp(const BitmapOp&)
  */
 #define OP_RECEIVER(Type) \
-        [](OpReorderer& reorderer, const RecordedOp& op) { reorderer.defer##Type(static_cast<const Type&>(op)); },
-void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
-    typedef void (*OpDispatcher) (OpReorderer& reorderer, const RecordedOp& op);
+        [](FrameReorderer& reorderer, const RecordedOp& op) { reorderer.defer##Type(static_cast<const Type&>(op)); },
+void FrameReorderer::deferNodeOps(const RenderNode& renderNode) {
+    typedef void (*OpDispatcher) (FrameReorderer& reorderer, const RecordedOp& op);
     static OpDispatcher receivers[] = BUILD_DEFERRABLE_OP_LUT(OP_RECEIVER);
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
@@ -720,7 +384,7 @@ void OpReorderer::deferNodeOps(const RenderNode& renderNode) {
     }
 }
 
-void OpReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
+void FrameReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) return;
     int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
@@ -735,7 +399,7 @@ void OpReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     mCanvasState.restoreToCount(count);
 }
 
-void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
+void FrameReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
     if (!op.skipInOrderDraw) {
         deferRenderNodeOpImpl(op);
     }
@@ -745,7 +409,7 @@ void OpReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
  * Defers an unmergeable, strokeable op, accounting correctly
  * for paint's style on the bounds being computed.
  */
-void OpReorderer::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+void FrameReorderer::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
@@ -767,7 +431,7 @@ static batchid_t tessBatchId(const RecordedOp& op) {
             : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
 }
 
-void OpReorderer::deferArcOp(const ArcOp& op) {
+void FrameReorderer::deferArcOp(const ArcOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
@@ -776,7 +440,7 @@ static bool hasMergeableClip(const BakedOpState& state) {
             || state.computedState.clipState->mode == ClipMode::Rectangle;
 }
 
-void OpReorderer::deferBitmapOp(const BitmapOp& op) {
+void FrameReorderer::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -796,19 +460,19 @@ void OpReorderer::deferBitmapOp(const BitmapOp& op) {
     }
 }
 
-void OpReorderer::deferBitmapMeshOp(const BitmapMeshOp& op) {
+void FrameReorderer::deferBitmapMeshOp(const BitmapMeshOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void OpReorderer::deferBitmapRectOp(const BitmapRectOp& op) {
+void FrameReorderer::deferBitmapRectOp(const BitmapRectOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
+void FrameReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
     // allocate a temporary oval op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
     float x = *(op.x);
@@ -823,22 +487,22 @@ void OpReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
     deferOvalOp(*resolvedOp);
 }
 
-void OpReorderer::deferFunctorOp(const FunctorOp& op) {
+void FrameReorderer::deferFunctorOp(const FunctorOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Functor);
 }
 
-void OpReorderer::deferLinesOp(const LinesOp& op) {
+void FrameReorderer::deferLinesOp(const LinesOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void OpReorderer::deferOvalOp(const OvalOp& op) {
+void FrameReorderer::deferOvalOp(const OvalOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::deferPatchOp(const PatchOp& op) {
+void FrameReorderer::deferPatchOp(const PatchOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -856,24 +520,24 @@ void OpReorderer::deferPatchOp(const PatchOp& op) {
     }
 }
 
-void OpReorderer::deferPathOp(const PathOp& op) {
+void FrameReorderer::deferPathOp(const PathOp& op) {
     deferStrokeableOp(op, OpBatchType::Bitmap);
 }
 
-void OpReorderer::deferPointsOp(const PointsOp& op) {
+void FrameReorderer::deferPointsOp(const PointsOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void OpReorderer::deferRectOp(const RectOp& op) {
+void FrameReorderer::deferRectOp(const RectOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::deferRoundRectOp(const RoundRectOp& op) {
+void FrameReorderer::deferRoundRectOp(const RoundRectOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void OpReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
+void FrameReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     // allocate a temporary round rect op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
     const RoundRectOp* resolvedOp = new (mAllocator) RoundRectOp(
@@ -884,7 +548,7 @@ void OpReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     deferRoundRectOp(*resolvedOp);
 }
 
-void OpReorderer::deferSimpleRectsOp(const SimpleRectsOp& op) {
+void FrameReorderer::deferSimpleRectsOp(const SimpleRectsOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
@@ -895,7 +559,7 @@ static batchid_t textBatchId(const SkPaint& paint) {
     return paint.getColor() == SK_ColorBLACK ? OpBatchType::Text : OpBatchType::ColorText;
 }
 
-void OpReorderer::deferTextOp(const TextOp& op) {
+void FrameReorderer::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -910,19 +574,19 @@ void OpReorderer::deferTextOp(const TextOp& op) {
     }
 }
 
-void OpReorderer::deferTextOnPathOp(const TextOnPathOp& op) {
+void FrameReorderer::deferTextOnPathOp(const TextOnPathOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
 }
 
-void OpReorderer::deferTextureLayerOp(const TextureLayerOp& op) {
+void FrameReorderer::deferTextureLayerOp(const TextureLayerOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::TextureLayer);
 }
 
-void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+void FrameReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
         float contentTranslateX, float contentTranslateY,
         const Rect& repaintRect,
         const Vector3& lightCenter,
@@ -941,7 +605,7 @@ void OpReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
     mLayerReorderers.emplace_back(layerWidth, layerHeight, repaintRect, beginLayerOp, renderNode);
 }
 
-void OpReorderer::restoreForLayer() {
+void FrameReorderer::restoreForLayer() {
     // restore canvas, and pop finished layer off of the stack
     mCanvasState.restore();
     mLayerStack.pop_back();
@@ -949,7 +613,7 @@ void OpReorderer::restoreForLayer() {
 
 // TODO: defer time rejection (when bounds become empty) + tests
 // Option - just skip layers with no bounds at playback + defer?
-void OpReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
+void FrameReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
     uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
     uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
 
@@ -994,7 +658,7 @@ void OpReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
             &op, nullptr);
 }
 
-void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
+void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     const BeginLayerOp& beginLayerOp = *currentLayer().beginLayerOp;
     int finishedLayerIndex = mLayerStack.back();
 
@@ -1022,7 +686,7 @@ void OpReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     }
 }
 
-void OpReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
+void FrameReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     Matrix4 boundsTransform(*(mCanvasState.currentSnapshot()->transform));
     boundsTransform.multiply(op.localMatrix);
 
@@ -1057,7 +721,7 @@ void OpReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
 }
 
-void OpReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
+void FrameReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
     LOG_ALWAYS_FATAL_IF(currentLayer().activeUnclippedSaveLayers.empty(), "no layer to end!");
 
     BakedOpState* copyFromLayerOp = currentLayer().activeUnclippedSaveLayers.back();
