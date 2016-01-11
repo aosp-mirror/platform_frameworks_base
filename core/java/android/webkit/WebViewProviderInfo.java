@@ -40,9 +40,11 @@ public class WebViewProviderInfo implements Parcelable {
         public WebViewPackageNotFoundException(Exception e) { super(e); }
     }
 
-    public WebViewProviderInfo(String packageName, String description, String[] signatures) {
+    public WebViewProviderInfo(String packageName, String description, String availableByDefault,
+            String[] signatures) {
         this.packageName = packageName;
         this.description = description;
+        this.availableByDefault = availableByDefault.equals("true");
         this.signatures = signatures;
     }
 
@@ -87,6 +89,39 @@ public class WebViewProviderInfo implements Parcelable {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this package is enabled.
+     * This state can be changed by the user from Settings->Apps
+     */
+    public boolean isEnabled() {
+        try {
+            PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+            int enabled_state = pm.getApplicationEnabledSetting(packageName);
+            switch (enabled_state) {
+                case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
+                    return true;
+                case PackageManager.COMPONENT_ENABLED_STATE_DEFAULT:
+                    ApplicationInfo applicationInfo = getPackageInfo().applicationInfo;
+                    return applicationInfo.enabled;
+                default:
+                    return false;
+            }
+        } catch (WebViewPackageNotFoundException e) {
+            return false;
+        } catch (IllegalArgumentException e) {
+            // Thrown by PackageManager.getApplicationEnabledSetting if the package does not exist
+            return false;
+        }
+    }
+
+    /**
+     * Returns whether the provider is always available as long as it is valid.
+     * If this returns false, the provider will only be used if the user chose this provider.
+     */
+    public boolean isAvailableByDefault() {
+        return availableByDefault;
     }
 
     public PackageInfo getPackageInfo() {
@@ -135,6 +170,7 @@ public class WebViewProviderInfo implements Parcelable {
     // fields read from framework resource
     public String packageName;
     public String description;
+    private boolean availableByDefault;
 
     private String[] signatures;
 

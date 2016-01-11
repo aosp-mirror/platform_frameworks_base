@@ -131,6 +131,8 @@ public final class WebViewFactory {
     private static String TAG_WEBVIEW_PROVIDER = "webviewprovider";
     private static String TAG_PACKAGE_NAME = "packageName";
     private static String TAG_DESCRIPTION = "description";
+    // Whether or not the provider must be explicitly chosen by the user to be used.
+    private static String TAG_AVAILABILITY = "availableByDefault";
     private static String TAG_SIGNATURE = "signature";
 
     /**
@@ -180,8 +182,12 @@ public final class WebViewFactory {
                         throw new MissingWebViewPackageException(
                                 "WebView provider in framework resources missing description");
                     }
+                    String availableByDefault = parser.getAttributeValue(null, TAG_AVAILABILITY);
+                    if (availableByDefault == null) {
+                        availableByDefault = "false";
+                    }
                     webViewProviders.add(
-                            new WebViewProviderInfo(packageName, description,
+                            new WebViewProviderInfo(packageName, description, availableByDefault,
                                 readSignatures(parser)));
                 }
                 else {
