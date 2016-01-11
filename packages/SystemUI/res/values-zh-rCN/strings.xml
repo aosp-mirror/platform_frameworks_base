@@ -77,7 +77,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"USB文件传输选项"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"作为媒体播放器(MTP)装载"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"作为相机(PTP)装载"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于Mac的Android文件传输应用"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于 Mac 的 Android 文件传输应用"</string>
     <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"主屏幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"菜单"</string>
@@ -460,10 +460,8 @@
     <string name="notification_importance_default" msgid="4926529615920610817">"显示这些通知，但不发出提示音"</string>
     <string name="notification_importance_high" msgid="3222680136612408223">"在通知列表顶部显示，并发出提示音"</string>
     <string name="notification_importance_max" msgid="5236987171904756134">"在屏幕上持续显示，并发出提示音"</string>
-    <!-- no translation found for notification_more_settings (816306283396553571) -->
-    <skip />
-    <!-- no translation found for notification_done (5279426047273930175) -->
-    <skip />
+    <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
+    <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="color_matrix_none" msgid="2121957926040543148">"常规颜色"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"夜间颜色"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自定义颜色"</string>
