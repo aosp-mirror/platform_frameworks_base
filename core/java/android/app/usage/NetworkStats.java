@@ -121,12 +121,12 @@ public final class NetworkStats implements AutoCloseable {
      */
     public static class Bucket {
         /**
-         * Combined usage across all other states.
+         * Combined usage across all states.
          */
         public static final int STATE_ALL = -1;
 
         /**
-         * Usage not accounted in any other states.
+         * Usage not accounted for in any other state.
          */
         public static final int STATE_DEFAULT = 0x1;
 
@@ -150,8 +150,40 @@ public final class NetworkStats implements AutoCloseable {
          */
         public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
+        /**
+         * Combined usage across all metering states.
+         */
+        public static final int METERING_ALL = -1;
+
+        /**
+         * Usage not accounted for in any other metering state.
+         */
+        public static final int METERING_DEFAULT = 0x1;
+
+        /**
+         * Metered usage.
+         */
+        public static final int METERING_METERED = 0x2;
+
+        /**
+         * Combined usage across all roaming states.
+         */
+        public static final int ROAMING_ALL = -1;
+
+        /**
+         * Usage not accounted for in any other roaming state.
+         */
+        public static final int ROAMING_DEFAULT = 0x1;
+
+        /**
+         * Roaming usage.
+         */
+        public static final int ROAMING_ROAMING = 0x2;
+
         private int mUid;
         private int mState;
+        private int mMetering;
+        private int mRoaming;
         private long mBeginTimeStamp;
         private long mEndTimeStamp;
         private long mRxBytes;
@@ -203,6 +235,30 @@ public final class NetworkStats implements AutoCloseable {
          */
         public int getState() {
             return mState;
+        }
+
+        /**
+         * Metering state. One of the following values:<p/>
+         * <ul>
+         * <li>{@link #METERING_ALL}</li>
+         * <li>{@link #METERING_DEFAULT}</li>
+         * <li>{@link #METERING_METERED}</li>
+         * </ul>
+         */
+        public int getMetering() {
+            return mMetering;
+        }
+
+        /**
+         * Roaming state. One of the following values:<p/>
+         * <ul>
+         * <li>{@link #ROAMING_ALL}</li>
+         * <li>{@link #ROAMING_DEFAULT}</li>
+         * <li>{@link #ROAMING_ROAMING}</li>
+         * </ul>
+         */
+        public int getRoaming() {
+            return mRoaming;
         }
 
         /**
@@ -398,6 +454,9 @@ public final class NetworkStats implements AutoCloseable {
     private void fillBucketFromSummaryEntry(Bucket bucketOut) {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
+        // TODO: Implement metering/roaming tracking.
+        bucketOut.mMetering = Bucket.METERING_ALL;
+        bucketOut.mRoaming = Bucket.ROAMING_ALL;
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
         bucketOut.mEndTimeStamp = mEndTimeStamp;
         bucketOut.mRxBytes = mRecycledSummaryEntry.rxBytes;
@@ -444,6 +503,8 @@ public final class NetworkStats implements AutoCloseable {
                         mRecycledHistoryEntry);
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mState = Bucket.STATE_ALL;
+                bucketOut.mMetering = Bucket.METERING_ALL;
+                bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;
                 bucketOut.mEndTimeStamp = mRecycledHistoryEntry.bucketStart +
                         mRecycledHistoryEntry.bucketDuration;
