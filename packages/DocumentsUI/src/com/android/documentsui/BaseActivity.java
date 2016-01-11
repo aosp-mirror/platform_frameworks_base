@@ -38,12 +38,14 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -218,6 +220,7 @@ public abstract class BaseActivity extends Activity {
                 case R.id.menu_advanced:
                 case R.id.menu_file_size:
                 case R.id.menu_new_window:
+                case R.id.menu_search:
                     break;
                 default:
                     item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -318,6 +321,8 @@ public abstract class BaseActivity extends Activity {
      * the (abstract) directoryChanged method will be called.
      * @param anim
      */
+    // TODO: Refactor the usage of the method - now it is called not only when the directory
+    // changed, but also to refresh the content of the directory while searching
     final void onCurrentDirectoryChanged(int anim) {
         mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
         onDirectoryChanged(anim);
@@ -328,7 +333,11 @@ public abstract class BaseActivity extends Activity {
         }
 
         updateActionBar();
-        invalidateOptionsMenu();
+
+        // Prevents searchView from being recreated while searching
+        if (!mSearchManager.isSearching()) {
+            invalidateOptionsMenu();
+        }
     }
 
     final List<String> getExcludedAuthorities() {
@@ -720,7 +729,7 @@ public abstract class BaseActivity extends Activity {
      * Facade over the various search parts in the menu.
      */
     final class SearchManager implements
-            SearchView.OnCloseListener, OnActionExpandListener, OnQueryTextListener,
+            SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener,
             DocumentsToolBar.OnActionViewCollapsedListener {
 
         private boolean mSearchExpanded;
@@ -738,9 +747,10 @@ public abstract class BaseActivity extends Activity {
             mView = (SearchView) mMenu.getActionView();
 
             mActionBar.setOnActionViewCollapsedListener(this);
-            mMenu.setOnActionExpandListener(this);
             mView.setOnQueryTextListener(this);
             mView.setOnCloseListener(this);
+            mView.setOnSearchClickListener(this);
+            mView.setOnQueryTextFocusChangeListener(this);
         }
 
         /**
@@ -793,19 +803,13 @@ public abstract class BaseActivity extends Activity {
          *     search currently.
          */
         boolean cancelSearch() {
-            boolean collapsed = false;
-            boolean closed = false;
-
-            if (mActionBar.hasExpandedActionView()) {
-                mActionBar.collapseActionView();
-                collapsed = true;
-            }
-
             if (isExpanded() || isSearching()) {
-                onClose();
-                closed = true;
+                // If the query string is not empty search view won't get iconified
+                mView.setQuery("", false);
+                mView.setIconified(true);
+                return true;
             }
-            return collapsed || closed;
+            return false;
         }
 
         boolean isSearching() {
@@ -816,6 +820,11 @@ public abstract class BaseActivity extends Activity {
             return mSearchExpanded;
         }
 
+        /**
+         * Clears the search.
+         * @return True if the default behavior of clearing/dismissing SearchView should be
+         *      overridden. False otherwise.
+         */
         @Override
         public boolean onClose() {
             mSearchExpanded = false;
@@ -824,33 +833,33 @@ public abstract class BaseActivity extends Activity {
                 return false;
             }
 
-            mState.currentSearch = null;
-            onCurrentDirectoryChanged(ANIM_NONE);
+            mView.setBackgroundColor(
+                    getResources().getColor(android.R.color.transparent, null));
+
+            // Refresh the directory if a search was done
+            if(mState.currentSearch != null) {
+                mState.currentSearch = null;
+                onCurrentDirectoryChanged(ANIM_NONE);
+            }
+
             return false;
         }
 
+        /**
+         * Sets mSearchExpanded.
+         * Called when search icon is clicked to start search.
+         * Used to detect when the view expanded instead of onMenuItemActionExpand, because
+         * SearchView has showAsAction set to always and onMenuItemAction* methods are not called.
+         */
         @Override
-        public boolean onMenuItemActionExpand(MenuItem item) {
+        public void onClick (View v) {
             mSearchExpanded = true;
-            updateActionBar();
-            return true;
-        }
-
-        @Override
-        public boolean onMenuItemActionCollapse(MenuItem item) {
-            mSearchExpanded = false;
-            if (mIgnoreNextCollapse) {
-                mIgnoreNextCollapse = false;
-                return true;
-            }
-            mState.currentSearch = null;
-            onCurrentDirectoryChanged(ANIM_NONE);
-            return true;
+            mView.setBackgroundColor(
+                    getResources().getColor(R.color.menu_search_background, null));
         }
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            mSearchExpanded = true;
             mState.currentSearch = query;
             mView.clearFocus();
             onCurrentDirectoryChanged(ANIM_NONE);
@@ -860,6 +869,18 @@ public abstract class BaseActivity extends Activity {
         @Override
         public boolean onQueryTextChange(String newText) {
             return false;
+        }
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(!hasFocus) {
+                if(mState.currentSearch == null) {
+                    mView.setIconified(true);
+                }
+                else if(TextUtils.isEmpty(mView.getQuery())) {
+                    cancelSearch();
+                }
+            }
         }
 
         @Override

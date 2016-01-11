@@ -15,11 +15,19 @@
 -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- showAsAction flag impacts the behavior of SearchView.
+     When set to collapseActionView, collapsing SearchView to icon is the
+     default behavior. It would fit UX, however after expanding SearchView is
+     shown on the left site of the toolbar (replacing title). Since no way to
+     prevent this behavior was found, the flag is set to always. SearchView is
+     always visible by default and it is being collapse manually by calling
+     setIconified() method
+-->
     <item
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
         android:icon="@drawable/ic_menu_search"
-        android:showAsAction="always|collapseActionView"
+        android:showAsAction="always"
         android:actionViewClass="android.widget.SearchView"
         android:imeOptions="actionSearch" />
     <item

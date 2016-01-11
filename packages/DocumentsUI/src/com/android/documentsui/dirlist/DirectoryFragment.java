@@ -407,7 +407,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     state.derivedMode = result.mode;
                 }
                 state.derivedSortOrder = result.sortOrder;
-                ((BaseActivity) context).onStateChanged();
 
                 updateDisplayState();
 
