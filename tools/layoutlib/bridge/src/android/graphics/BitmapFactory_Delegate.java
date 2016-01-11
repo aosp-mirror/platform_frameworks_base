@@ -122,4 +122,35 @@ import java.util.Set;
     /*package*/ static boolean nativeIsSeekable(FileDescriptor fd) {
         return true;
     }
+
+    /**
+     * Set the newly decoded bitmap's density based on the Options.
+     *
+     * Copied from {@link BitmapFactory#setDensityFromOptions(Bitmap, Options)}.
+     */
+    @LayoutlibDelegate
+    /*package*/ static void setDensityFromOptions(Bitmap outputBitmap, Options opts) {
+        if (outputBitmap == null || opts == null) return;
+
+        final int density = opts.inDensity;
+        if (density != 0) {
+            outputBitmap.setDensity(density);
+            final int targetDensity = opts.inTargetDensity;
+            if (targetDensity == 0 || density == targetDensity || density == opts.inScreenDensity) {
+                return;
+            }
+
+            // --- Change from original implementation begins ---
+            // LayoutLib doesn't scale the nine patch when decoding it. Hence, don't change the
+            // density of the source bitmap in case of ninepatch.
+
+            if (opts.inScaled) {
+            // --- Change from original implementation ends. ---
+                outputBitmap.setDensity(targetDensity);
+            }
+        } else if (opts.inBitmap != null) {
+            // bitmap was reused, ensure density is reset
+            outputBitmap.setDensity(Bitmap.getDefaultDensity());
+        }
+    }
 }
