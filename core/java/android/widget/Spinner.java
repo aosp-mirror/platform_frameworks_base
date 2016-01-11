@@ -271,6 +271,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                         attrs, R.styleable.Spinner, defStyleAttr, defStyleRes);
                 mDropDownWidth = pa.getLayoutDimension(R.styleable.Spinner_dropDownWidth,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
+                if (pa.hasValueOrEmpty(R.styleable.Spinner_dropDownSelector)) {
+                    popup.setListSelector(pa.getDrawable(
+                            R.styleable.Spinner_dropDownSelector));
+                }
                 popup.setBackgroundDrawable(pa.getDrawable(R.styleable.Spinner_popupBackground));
                 popup.setPromptText(a.getString(R.styleable.Spinner_prompt));
                 pa.recycle();
