@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
@@ -56,8 +57,19 @@ public final class LocaleList implements Parcelable {
         return mList.length == 0;
     }
 
+    @IntRange(from=0)
     public int size() {
         return mList.length;
+    }
+
+    @IntRange(from=-1)
+    public int indexOf(Locale locale) {
+        for (int i = 0; i < mList.length; i++) {
+            if (mList[i].equals(locale)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -69,7 +81,7 @@ public final class LocaleList implements Parcelable {
         final Locale[] otherList = ((LocaleList) other).mList;
         if (mList.length != otherList.length)
             return false;
-        for (int i = 0; i < mList.length; ++i) {
+        for (int i = 0; i < mList.length; i++) {
             if (!mList[i].equals(otherList[i]))
                 return false;
         }
@@ -79,7 +91,7 @@ public final class LocaleList implements Parcelable {
     @Override
     public int hashCode() {
         int result = 1;
-        for (int i = 0; i < mList.length; ++i) {
+        for (int i = 0; i < mList.length; i++) {
             result = 31 * result + mList[i].hashCode();
         }
         return result;
@@ -89,7 +101,7 @@ public final class LocaleList implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (int i = 0; i < mList.length; ++i) {
+        for (int i = 0; i < mList.length; i++) {
             sb.append(mList[i]);
             if (i < mList.length - 1) {
                 sb.append(',');
@@ -150,12 +162,12 @@ public final class LocaleList implements Parcelable {
             final Locale[] localeList = new Locale[list.length];
             final HashSet<Locale> seenLocales = new HashSet<Locale>();
             final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < list.length; ++i) {
+            for (int i = 0; i < list.length; i++) {
                 final Locale l = list[i];
                 if (l == null) {
-                    throw new NullPointerException();
+                    throw new NullPointerException("list[" + i + "] is null");
                 } else if (seenLocales.contains(l)) {
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("list[" + i + "] is a repetition");
                 } else {
                     final Locale localeClone = (Locale) l.clone();
                     localeList[i] = localeClone;
@@ -169,6 +181,55 @@ public final class LocaleList implements Parcelable {
             mList = localeList;
             mStringRepresentation = sb.toString();
         }
+    }
+
+    /**
+     * Constructs a locale list, with the topLocale moved to the front if it already is
+     * in otherLocales, or added to the front if it isn't.
+     *
+     * {@hide}
+     */
+    public LocaleList(@NonNull Locale topLocale, LocaleList otherLocales) {
+        if (topLocale == null) {
+            throw new NullPointerException("topLocale is null");
+        }
+
+        final int inputLength = (otherLocales == null) ? 0 : otherLocales.mList.length;
+        int topLocaleIndex = -1;
+        for (int i = 0; i < inputLength; i++) {
+            if (topLocale.equals(otherLocales.mList[i])) {
+                topLocaleIndex = i;
+                break;
+            }
+        }
+
+        final int outputLength = inputLength + (topLocaleIndex == -1 ? 1 : 0);
+        final Locale[] localeList = new Locale[outputLength];
+        localeList[0] = (Locale) topLocale.clone();
+        if (topLocaleIndex == -1) {
+            // topLocale was not in otherLocales
+            for (int i = 0; i < inputLength; i++) {
+                localeList[i + 1] = (Locale) otherLocales.mList[i].clone();
+            }
+        } else {
+            for (int i = 0; i < topLocaleIndex; i++) {
+                localeList[i + 1] = (Locale) otherLocales.mList[i].clone();
+            }
+            for (int i = topLocaleIndex + 1; i < inputLength; i++) {
+                localeList[i] = (Locale) otherLocales.mList[i].clone();
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < outputLength; i++) {
+            sb.append(localeList[i].toLanguageTag());
+            if (i < outputLength - 1) {
+                sb.append(',');
+            }
+        }
+
+        mList = localeList;
+        mStringRepresentation = sb.toString();
     }
 
     public static final Parcelable.Creator<LocaleList> CREATOR
@@ -196,7 +257,7 @@ public final class LocaleList implements Parcelable {
         } else {
             final String[] tags = list.split(",");
             final Locale[] localeArray = new Locale[tags.length];
-            for (int i = 0; i < localeArray.length; ++i) {
+            for (int i = 0; i < localeArray.length; i++) {
                 localeArray[i] = Locale.forLanguageTag(tags[i]);
             }
             return new LocaleList(localeArray);
@@ -227,6 +288,7 @@ public final class LocaleList implements Parcelable {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
     }
 
+    @IntRange(from=0, to=1)
     private static int matchScore(Locale supported, Locale desired) {
         if (supported.equals(desired)) {
             return 1;  // return early so we don't do unnecessary computation
@@ -330,18 +392,79 @@ public final class LocaleList implements Parcelable {
     private final static Object sLock = new Object();
 
     @GuardedBy("sLock")
-    private static LocaleList sDefaultLocaleList;
+    private static LocaleList sLastExplicitlySetLocaleList = null;
+    @GuardedBy("sLock")
+    private static LocaleList sDefaultLocaleList = null;
+    @GuardedBy("sLock")
+    private static Locale sLastDefaultLocale = null;
 
-    // TODO: fix this to return the default system locale list once we have that
+    /**
+     * The result is guaranteed to include the default Locale returned by Locale.getDefault(), but
+     * not necessarily at the top of the list. The default locale not being at the top of the list
+     * is an indication that the system has set the default locale to one of the user's other
+     * preferred locales, having concluded that the primary preference is not supported but a
+     * secondary preference is.
+     *
+     * Note that the default LocaleList would change if Locale.setDefault() is called. This method
+     * takes that into account by always checking the output of Locale.getDefault() and adjusting
+     * the default LocaleList if needed.
+     */
     @NonNull @Size(min=1)
     public static LocaleList getDefault() {
-        Locale defaultLocale = Locale.getDefault();
+        final Locale defaultLocale = Locale.getDefault();
         synchronized (sLock) {
-            if (sDefaultLocaleList == null || sDefaultLocaleList.size() != 1
-                    || !defaultLocale.equals(sDefaultLocaleList.getPrimary())) {
-                sDefaultLocaleList = new LocaleList(defaultLocale);
+            if (!defaultLocale.equals(sLastDefaultLocale)) {
+                sLastDefaultLocale = defaultLocale;
+                // It's either the first time someone has asked for the default locale list, or
+                // someone has called Locale.setDefault() since we last set or adjusted the default
+                // locale list. So let's adjust the locale list.
+                if (sDefaultLocaleList != null
+                        && defaultLocale.equals(sDefaultLocaleList.getPrimary())) {
+                    // The default Locale has changed, but it happens to be the first locale in the
+                    // default locale list, so we don't need to construct a new locale list.
+                    return sDefaultLocaleList;
+                }
+                sDefaultLocaleList = new LocaleList(defaultLocale, sLastExplicitlySetLocaleList);
             }
+            // sDefaultLocaleList can't be null, since it can't be set to null by
+            // LocaleList.setDefault(), and if getDefault() is called before a call to
+            // setDefault(), sLastDefaultLocale would be null and the check above would set
+            // sDefaultLocaleList.
+            return sDefaultLocaleList;
         }
-        return sDefaultLocaleList;
+    }
+
+    /**
+     * Also sets the default locale by calling Locale.setDefault() with the first locale in the
+     * list.
+     *
+     * @throws NullPointerException if the input is <code>null</code>.
+     * @throws IllegalArgumentException if the input is empty.
+     */
+    public static void setDefault(@NonNull @Size(min=1) LocaleList locales) {
+        setDefault(locales, 0);
+    }
+
+    /**
+     * This may be used directly by system processes to set the default locale list for apps. For
+     * such uses, the default locale list would always come from the user preferences, but the
+     * default locale may have been chosen to be a locale other than the first locale in the locale
+     * list (based on the locales the app supports).
+     *
+     * {@hide}
+     */
+    public static void setDefault(@NonNull @Size(min=1) LocaleList locales, int localeIndex) {
+        if (locales == null) {
+            throw new NullPointerException("locales is null");
+        }
+        if (locales.isEmpty()) {
+            throw new IllegalArgumentException("locales is empty");
+        }
+        synchronized (sLock) {
+            sLastDefaultLocale = locales.get(localeIndex);
+            Locale.setDefault(sLastDefaultLocale);
+            sLastExplicitlySetLocaleList = locales;
+            sDefaultLocaleList = locales;
+        }
     }
 }
