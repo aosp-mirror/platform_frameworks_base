@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -72,6 +73,7 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
+import android.view.MotionEvent;
 import android.view.WindowInfo;
 import android.view.WindowManager;
 import android.view.WindowManagerInternal;
@@ -185,6 +187,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private boolean mHasInputFilter;
 
     private KeyEventDispatcher mKeyEventDispatcher;
+
+    private MotionEventInjector mMotionEventInjector;
 
     private final Set<ComponentName> mTempComponentNameSet = new HashSet<>();
 
@@ -779,6 +783,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
+     * Called by AccessibilityInputFilter when it creates or destroys the motionEventInjector.
+     * Not using a getter because the AccessibilityInputFilter isn't thread-safe
+     *
+     * @param motionEventInjector The new value of the motionEventInjector. May be null.
+     */
+    void setMotionEventInjector(MotionEventInjector motionEventInjector) {
+        synchronized (mLock) {
+            mMotionEventInjector = motionEventInjector;
+        }
+    }
+
+    /**
      * Gets a point within the accessibility focused node where we can send down
      * and up events to perform a click.
      *
@@ -1273,6 +1289,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             if (userState.mIsAutoclickEnabled) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_AUTOCLICK;
             }
+            if (userState.mIsPerformGesturesEnabled) {
+                flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
+            }
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
@@ -1363,6 +1382,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateAccessibilityFocusBehaviorLocked(userState);
         updateFilterKeyEventsLocked(userState);
         updateTouchExplorationLocked(userState);
+        updatePerformGesturesLocked(userState);
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
         updateMagnificationLocked(userState);
@@ -1449,6 +1469,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
         }
+    }
+
+    private void updatePerformGesturesLocked(UserState userState) {
+        final int serviceCount = userState.mBoundServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            Service service = userState.mBoundServices.get(i);
+            if ((service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) != 0) {
+                userState.mIsPerformGesturesEnabled = true;
+                return;
+            }
+        }
+        userState.mIsPerformGesturesEnabled = false;
     }
 
     private void updateFilterKeyEventsLocked(UserState userState) {
@@ -2561,6 +2594,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             }
             return false;
+        }
+
+        @Override
+        public void sendMotionEvents(int sequence, ParceledListSlice events) {
+            synchronized (mLock) {
+                if (mSecurityPolicy.canPerformGestures(this) && (mMotionEventInjector != null)) {
+                    mMotionEventInjector.injectEvents((List<MotionEvent>) events.getList(),
+                            mServiceInterface, sequence);
+                    return;
+                }
+            }
+            try {
+                mServiceInterface.onPerformGestureResult(sequence, false);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error sending motion event injection failure to "
+                        + mServiceInterface, re);
+            }
         }
 
         @Override
@@ -3734,6 +3784,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     & AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION) != 0;
         }
 
+        public boolean canPerformGestures(Service service) {
+            return (service.mAccessibilityServiceInfo.getCapabilities()
+                    & AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) != 0;
+        }
+
         private int resolveProfileParentLocked(int userId) {
             if (userId != mCurrentUserId) {
                 final long identity = Binder.clearCallingIdentity();
@@ -3878,6 +3933,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mIsEnhancedWebAccessibilityEnabled;
         public boolean mIsDisplayMagnificationEnabled;
         public boolean mIsAutoclickEnabled;
+        public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
         public boolean mHasDisplayColorAdjustment;
         public boolean mAccessibilityFocusOnlyInActiveWindow;
