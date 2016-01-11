@@ -163,6 +163,11 @@ Maybe<android::FileMap> mmapPath(const StringPiece& path, std::string* outError)
     }
 
     android::FileMap fileMap;
+    if (fileStats.st_size == 0) {
+        // mmap doesn't like a length of 0. Instead we return an empty FileMap.
+        return std::move(fileMap);
+    }
+
     if (!fileMap.create(path.data(), fd, 0, fileStats.st_size, true)) {
         if (outError) *outError = strerror(errno);
         return {};

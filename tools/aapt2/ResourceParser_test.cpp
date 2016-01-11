@@ -47,13 +47,26 @@ struct ResourceParserTest : public ::testing::Test {
         mContext = test::ContextBuilder().build();
     }
 
+    ::testing::AssertionResult testParse(const StringPiece& str) {
+        return testParse(str, ConfigDescription{}, {});
+    }
+
+    ::testing::AssertionResult testParse(const StringPiece& str, const ConfigDescription& config) {
+        return testParse(str, config, {});
+    }
+
     ::testing::AssertionResult testParse(const StringPiece& str,
-                                         std::initializer_list<std::u16string> products = {}) {
+                                         std::initializer_list<std::u16string> products) {
+        return testParse(str, {}, std::move(products));
+    }
+
+    ::testing::AssertionResult testParse(const StringPiece& str, const ConfigDescription& config,
+                                         std::initializer_list<std::u16string> products) {
         std::stringstream input(kXmlPreamble);
         input << "<resources>\n" << str << "\n</resources>" << std::endl;
         ResourceParserOptions parserOptions;
         parserOptions.products = products;
-        ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, {},
+        ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, config,
                               parserOptions);
         xml::XmlPullParser xmlParser(input);
         if (parser.parse(&xmlParser)) {
@@ -136,6 +149,26 @@ TEST_F(ResourceParserTest, ParseAttr) {
     attr = test::getValue<Attribute>(&mTable, u"@attr/bar");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(uint32_t(android::ResTable_map::TYPE_ANY), attr->typeMask);
+}
+
+// Old AAPT allowed attributes to be defined under different configurations, but ultimately
+// stored them with the default configuration. Check that we have the same behavior.
+TEST_F(ResourceParserTest, ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoConfig) {
+    const ConfigDescription watchConfig = test::parseConfigOrDie("watch");
+    std::string input = R"EOF(
+        <attr name="foo" />
+        <declare-styleable name="bar">
+          <attr name="baz" />
+        </declare-styleable>)EOF";
+    ASSERT_TRUE(testParse(input, watchConfig));
+
+    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, u"@attr/foo", watchConfig));
+    EXPECT_EQ(nullptr, test::getValueForConfig<Attribute>(&mTable, u"@attr/baz", watchConfig));
+    EXPECT_EQ(nullptr, test::getValueForConfig<Styleable>(&mTable, u"@styleable/bar", watchConfig));
+
+    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, u"@attr/foo"));
+    EXPECT_NE(nullptr, test::getValue<Attribute>(&mTable, u"@attr/baz"));
+    EXPECT_NE(nullptr, test::getValue<Styleable>(&mTable, u"@styleable/bar"));
 }
 
 TEST_F(ResourceParserTest, ParseAttrWithMinMax) {

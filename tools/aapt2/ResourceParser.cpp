@@ -70,6 +70,7 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
  */
 struct ParsedResource {
     ResourceName name;
+    ConfigDescription config;
     Source source;
     ResourceId id;
     Maybe<SymbolState> symbolState;
@@ -108,8 +109,7 @@ bool ResourceParser::shouldStripResource(const ResourceNameRef& name,
 }
 
 // Recursively adds resources to the ResourceTable.
-static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& config,
-                                IDiagnostics* diag, ParsedResource* res) {
+static bool addResourcesToTable(ResourceTable* table, IDiagnostics* diag, ParsedResource* res) {
     if (res->symbolState) {
         Symbol symbol;
         symbol.state = res->symbolState.value();
@@ -125,14 +125,14 @@ static bool addResourcesToTable(ResourceTable* table, const ConfigDescription& c
         res->value->setComment(std::move(res->comment));
         res->value->setSource(std::move(res->source));
 
-        if (!table->addResource(res->name, res->id, config, std::move(res->value), diag)) {
+        if (!table->addResource(res->name, res->id, res->config, std::move(res->value), diag)) {
             return false;
         }
     }
 
     bool error = false;
     for (ParsedResource& child : res->childResources) {
-        error |= !addResourcesToTable(table, config, diag, &child);
+        error |= !addResourcesToTable(table, diag, &child);
     }
     return !error;
 }
@@ -290,6 +290,7 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
         }
 
         ParsedResource parsedResource;
+        parsedResource.config = mConfig;
         parsedResource.source = mSource.withLine(parser->getLineNumber());
         parsedResource.comment = std::move(comment);
 
@@ -310,7 +311,7 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
             // Record that we stripped out this resource name.
             // We will check that at least one variant of this resource was included.
             strippedResources.insert(parsedResource.name);
-        } else if (!addResourcesToTable(mTable, mConfig, mDiag, &parsedResource)) {
+        } else if (!addResourcesToTable(mTable, mDiag, &parsedResource)) {
             error = true;
         }
     }
@@ -769,6 +770,13 @@ bool ResourceParser::parseAttrImpl(xml::XmlPullParser* parser, ParsedResource* o
                                    bool weak) {
     outResource->name.type = ResourceType::kAttr;
 
+    // Attributes only end up in default configuration.
+    if (outResource->config != ConfigDescription::defaultConfig()) {
+        mDiag->warn(DiagMessage(outResource->source) << "ignoring configuration '"
+                    << outResource->config << "' for attribute " << outResource->name);
+        outResource->config = ConfigDescription::defaultConfig();
+    }
+
     uint32_t typeMask = 0;
 
     Maybe<StringPiece16> maybeFormat = xml::findAttribute(parser, u"format");
@@ -940,8 +948,7 @@ Maybe<Attribute::Symbol> ResourceParser::parseEnumOrFlagItem(xml::XmlPullParser*
     }
 
     return Attribute::Symbol{
-            Reference(ResourceNameRef({}, ResourceType::kId, maybeName.value())),
-            val.data };
+            Reference(ResourceNameRef({}, ResourceType::kId, maybeName.value())), val.data };
 }
 
 static Maybe<Reference> parseXmlAttributeName(StringPiece16 str) {
@@ -1190,11 +1197,20 @@ bool ResourceParser::parsePlural(xml::XmlPullParser* parser, ParsedResource* out
     return true;
 }
 
-bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* outResource) {
+bool ResourceParser::parseDeclareStyleable(xml::XmlPullParser* parser,
+                                           ParsedResource* outResource) {
     outResource->name.type = ResourceType::kStyleable;
 
     // Declare-styleable is kPrivate by default, because it technically only exists in R.java.
     outResource->symbolState = SymbolState::kPublic;
+
+    // Declare-styleable only ends up in default config;
+    if (outResource->config != ConfigDescription::defaultConfig()) {
+        mDiag->warn(DiagMessage(outResource->source) << "ignoring configuration '"
+                            << outResource->config << "' for styleable "
+                            << outResource->name.entry);
+        outResource->config = ConfigDescription::defaultConfig();
+    }
 
     std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "StringPool.h"
 #include "util/BigBuffer.h"
 #include "util/StringPiece.h"
-#include "StringPool.h"
 #include "util/Util.h"
 
 #include <algorithm>
@@ -342,7 +342,14 @@ bool StringPool::flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
 
             // Encode the actual UTF16 string length.
             data = encodeLength(data, entry->value.size());
-            strncpy16(data, entry->value.data(), entry->value.size());
+            const size_t byteLength = entry->value.size() * sizeof(char16_t);
+
+            // NOTE: For some reason, strncpy16(data, entry->value.data(), entry->value.size())
+            // truncates the string.
+            memcpy(data, entry->value.data(), byteLength);
+
+            // The null-terminating character is already here due to the block of data being set
+            // to 0s on allocation.
         }
     }
 

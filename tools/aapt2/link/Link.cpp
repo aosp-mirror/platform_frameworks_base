@@ -51,16 +51,19 @@ struct LinkOptions {
     std::vector<std::string> includePaths;
     std::vector<std::string> overlayFiles;
     Maybe<std::string> generateJavaClassPath;
-    std::set<std::string> extraJavaPackages;
+    Maybe<std::u16string> customJavaPackage;
+    std::set<std::u16string> extraJavaPackages;
     Maybe<std::string> generateProguardRulesPath;
     bool noAutoVersion = false;
     bool staticLib = false;
     bool verbose = false;
     bool outputToDirectory = false;
     bool autoAddOverlay = false;
+    bool doNotCompressAnything = false;
+    std::vector<std::string> extensionsToNotCompress;
     Maybe<std::u16string> privateSymbols;
-    Maybe<std::u16string> minSdkVersionDefault;
-    Maybe<std::u16string> targetSdkVersionDefault;
+    ManifestFixerOptions manifestFixerOptions;
+
 };
 
 struct LinkContext : public IAaptContext {
@@ -186,7 +189,20 @@ public:
         return resFile;
     }
 
-    bool copyFileToArchive(io::IFile* file, const std::string& outPath, uint32_t flags,
+    uint32_t getCompressionFlags(const StringPiece& str) {
+        if (mOptions.doNotCompressAnything) {
+            return 0;
+        }
+
+        for (const std::string& extension : mOptions.extensionsToNotCompress) {
+            if (util::stringEndsWith<char>(str, extension)) {
+                return 0;
+            }
+        }
+        return ArchiveEntry::kCompress;
+    }
+
+    bool copyFileToArchive(io::IFile* file, const std::string& outPath,
                            IArchiveWriter* writer) {
         std::unique_ptr<io::IData> data = file->openAsData();
         if (!data) {
@@ -202,7 +218,7 @@ public:
             return false;
         }
 
-        if (writer->startEntry(outPath, flags)) {
+        if (writer->startEntry(outPath, getCompressionFlags(outPath))) {
             if (writer->writeEntry(reinterpret_cast<const uint8_t*>(data->data()) + offset,
                                    data->size() - static_cast<size_t>(offset))) {
                 if (writer->finishEntry()) {
@@ -318,7 +334,6 @@ public:
         if (!flattener.consume(&mContext, xmlRes)) {
             return false;
         }
-
 
         if (writer->startEntry(path, ArchiveEntry::kCompress)) {
             if (writer->writeEntry(buffer)) {
@@ -520,7 +535,7 @@ public:
         const Source& src = file->getSource();
         if (util::stringEndsWith<char>(src.path, ".arsc.flat")) {
             return mergeResourceTable(file, override);
-        } else {
+        } else if (util::stringEndsWith<char>(src.path, ".flat")){
             // Try opening the file and looking for an Export header.
             std::unique_ptr<io::IData> data = file->openAsData();
             if (!data) {
@@ -533,7 +548,11 @@ public:
             if (resourceFile) {
                 return mergeCompiledFile(file, std::move(resourceFile), override);
             }
+        } else {
+            // Ignore non .flat files. This could be classes.dex or something else that happens
+            // to be in an archive.
         }
+
         return false;
     }
 
@@ -646,10 +665,7 @@ public:
 
         bool error = false;
         {
-            ManifestFixerOptions manifestFixerOptions;
-            manifestFixerOptions.minSdkVersionDefault = mOptions.minSdkVersionDefault;
-            manifestFixerOptions.targetSdkVersionDefault = mOptions.targetSdkVersionDefault;
-            ManifestFixer manifestFixer(manifestFixerOptions);
+            ManifestFixer manifestFixer(mOptions.manifestFixerOptions);
             if (!manifestFixer.consume(&mContext, manifestXml.get())) {
                 error = true;
             }
@@ -786,7 +802,7 @@ public:
                     mContext.getDiagnostics()->note(DiagMessage() << "copying " << path);
                 }
 
-                if (!copyFileToArchive(fileToMerge.file, fileToMerge.dstPath, 0,
+                if (!copyFileToArchive(fileToMerge.file, fileToMerge.dstPath,
                                        archiveWriter.get())) {
                     error = true;
                 }
@@ -813,12 +829,18 @@ public:
 
         if (mOptions.generateJavaClassPath) {
             JavaClassGeneratorOptions options;
+            options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
+
             if (mOptions.staticLib) {
                 options.useFinal = false;
             }
 
-            StringPiece16 actualPackage = mContext.getCompilationPackage();
+            const StringPiece16 actualPackage = mContext.getCompilationPackage();
             StringPiece16 outputPackage = mContext.getCompilationPackage();
+            if (mOptions.customJavaPackage) {
+                // Override the output java package to the custom one.
+                outputPackage = mOptions.customJavaPackage.value();
+            }
 
             if (mOptions.privateSymbols) {
                 // If we defined a private symbols package, we only emit Public symbols
@@ -826,7 +848,7 @@ public:
 
                 options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
                 if (!writeJavaFile(&mFinalTable, mContext.getCompilationPackage(),
-                                   mContext.getCompilationPackage(), options)) {
+                                   outputPackage, options)) {
                     return 1;
                 }
 
@@ -838,9 +860,8 @@ public:
                 return 1;
             }
 
-            for (const std::string& extraPackage : mOptions.extraJavaPackages) {
-                if (!writeJavaFile(&mFinalTable, actualPackage, util::utf8ToUtf16(extraPackage),
-                                   options)) {
+            for (const std::u16string& extraPackage : mOptions.extraJavaPackages) {
+                if (!writeJavaFile(&mFinalTable, actualPackage, extraPackage, options)) {
                     return 1;
                 }
             }
@@ -877,13 +898,16 @@ int link(const std::vector<StringPiece>& args) {
     LinkOptions options;
     Maybe<std::string> privateSymbolsPackage;
     Maybe<std::string> minSdkVersion, targetSdkVersion;
+    Maybe<std::string> renameManifestPackage, renameInstrumentationTargetPackage;
+    Maybe<std::string> versionCode, versionName;
+    Maybe<std::string> customJavaPackage;
     std::vector<std::string> extraJavaPackages;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
                           &options.manifestPath)
             .optionalFlagList("-I", "Adds an Android APK to link against", &options.includePaths)
-            .optionalFlagList("-R", "Compilation unit to link, using `overlay` semantics. "
+            .optionalFlagList("-R", "Compilation unit to link, using `overlay` semantics.\n"
                               "The last conflicting resource given takes precedence.",
                               &options.overlayFiles)
             .optionalFlag("--java", "Directory in which to generate R.java",
@@ -900,15 +924,29 @@ int link(const std::vector<StringPiece>& args) {
                           "AndroidManifest.xml", &minSdkVersion)
             .optionalFlag("--target-sdk-version", "Default target SDK version to use for "
                           "AndroidManifest.xml", &targetSdkVersion)
+            .optionalFlag("--version-code", "Version code (integer) to inject into the "
+                          "AndroidManifest.xml if none is present", &versionCode)
+            .optionalFlag("--version-name", "Version name to inject into the AndroidManifest.xml "
+                          "if none is present", &versionName)
             .optionalSwitch("--static-lib", "Generate a static Android library", &options.staticLib)
             .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
                           "private symbols.\n"
                           "If not specified, public and private symbols will use the application's "
                           "package name", &privateSymbolsPackage)
+            .optionalFlag("--custom-package", "Custom Java package under which to generate R.java",
+                          &customJavaPackage)
             .optionalFlagList("--extra-packages", "Generate the same R.java but with different "
                               "package names", &extraJavaPackages)
             .optionalSwitch("--auto-add-overlay", "Allows the addition of new resources in "
                             "overlays without <add-resource> tags", &options.autoAddOverlay)
+            .optionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml",
+                          &renameManifestPackage)
+            .optionalFlag("--rename-instrumentation-target-package",
+                          "Changes the name of the target package for instrumentation. Most useful "
+                          "when used\nin conjunction with --rename-manifest-package",
+                          &renameInstrumentationTargetPackage)
+            .optionalFlagList("-0", "File extensions not to compress",
+                              &options.extensionsToNotCompress)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
@@ -920,18 +958,42 @@ int link(const std::vector<StringPiece>& args) {
     }
 
     if (minSdkVersion) {
-        options.minSdkVersionDefault = util::utf8ToUtf16(minSdkVersion.value());
+        options.manifestFixerOptions.minSdkVersionDefault =
+                util::utf8ToUtf16(minSdkVersion.value());
     }
 
     if (targetSdkVersion) {
-        options.targetSdkVersionDefault = util::utf8ToUtf16(targetSdkVersion.value());
+        options.manifestFixerOptions.targetSdkVersionDefault =
+                util::utf8ToUtf16(targetSdkVersion.value());
+    }
+
+    if (renameManifestPackage) {
+        options.manifestFixerOptions.renameManifestPackage =
+                util::utf8ToUtf16(renameManifestPackage.value());
+    }
+
+    if (renameInstrumentationTargetPackage) {
+        options.manifestFixerOptions.renameInstrumentationTargetPackage =
+                util::utf8ToUtf16(renameInstrumentationTargetPackage.value());
+    }
+
+    if (versionCode) {
+        options.manifestFixerOptions.versionCodeDefault = util::utf8ToUtf16(versionCode.value());
+    }
+
+    if (versionName) {
+        options.manifestFixerOptions.versionNameDefault = util::utf8ToUtf16(versionName.value());
+    }
+
+    if (customJavaPackage) {
+        options.customJavaPackage = util::utf8ToUtf16(customJavaPackage.value());
     }
 
     // Populate the set of extra packages for which to generate R.java.
     for (std::string& extraPackage : extraJavaPackages) {
         // A given package can actually be a colon separated list of packages.
         for (StringPiece package : util::split(extraPackage, ':')) {
-            options.extraJavaPackages.insert(package.toString());
+            options.extraJavaPackages.insert(util::utf8ToUtf16(package));
         }
     }
 

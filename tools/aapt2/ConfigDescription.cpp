@@ -30,6 +30,11 @@ using android::ResTable_config;
 
 static const char* kWildcardName = "any";
 
+const ConfigDescription& ConfigDescription::defaultConfig() {
+    static ConfigDescription config = {};
+    return config;
+}
+
 static bool parseMcc(const char* name, ResTable_config* out) {
     if (strcmp(name, kWildcardName) == 0) {
         if (out) out->mcc = 0;

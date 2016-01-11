@@ -210,4 +210,19 @@ void Debug::printStyleGraph(ResourceTable* table, const ResourceName& targetStyl
     std::cout << "}" << std::endl;
 }
 
+void Debug::dumpHex(const void* data, size_t len) {
+    const uint8_t* d = (const uint8_t*) data;
+    for (size_t i = 0; i < len; i++) {
+        std::cerr << std::hex << std::setfill('0') << std::setw(2) << (uint32_t) d[i] << " ";
+        if (i % 8 == 7) {
+            std::cerr << "\n";
+        }
+    }
+
+    if (len - 1 % 8 != 7) {
+        std::cerr << std::endl;
+    }
+}
+
+
 } // namespace aapt

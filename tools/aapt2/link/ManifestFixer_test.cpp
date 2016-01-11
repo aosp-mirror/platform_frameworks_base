@@ -82,8 +82,6 @@ TEST_F(ManifestFixerTest, EnsureManifestHasPackage) {
     EXPECT_EQ(nullptr, verify("<manifest package=\"@string/str\" />"));
 }
 
-
-
 TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
     ManifestFixerOptions options = { std::u16string(u"8"), std::u16string(u"22") };
 
@@ -97,7 +95,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
     xml::Element* el;
     xml::Attribute* attr;
 
-    el = xml::findRootElement(doc->root.get());
+    el = xml::findRootElement(doc.get());
     ASSERT_NE(nullptr, el);
     el = el->findChild({}, u"uses-sdk");
     ASSERT_NE(nullptr, el);
@@ -115,7 +113,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
       </manifest>)EOF", options);
     ASSERT_NE(nullptr, doc);
 
-    el = xml::findRootElement(doc->root.get());
+    el = xml::findRootElement(doc.get());
     ASSERT_NE(nullptr, el);
     el = el->findChild({}, u"uses-sdk");
     ASSERT_NE(nullptr, el);
@@ -133,7 +131,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
       </manifest>)EOF", options);
     ASSERT_NE(nullptr, doc);
 
-    el = xml::findRootElement(doc->root.get());
+    el = xml::findRootElement(doc.get());
     ASSERT_NE(nullptr, el);
     el = el->findChild({}, u"uses-sdk");
     ASSERT_NE(nullptr, el);
@@ -149,7 +147,7 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
                 package="android" />)EOF", options);
     ASSERT_NE(nullptr, doc);
 
-    el = xml::findRootElement(doc->root.get());
+    el = xml::findRootElement(doc.get());
     ASSERT_NE(nullptr, el);
     el = el->findChild({}, u"uses-sdk");
     ASSERT_NE(nullptr, el);
@@ -159,6 +157,100 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
     attr = el->findAttribute(xml::kSchemaAndroid, u"targetSdkVersion");
     ASSERT_NE(nullptr, attr);
     EXPECT_EQ(u"22", attr->value);
+}
+
+TEST_F(ManifestFixerTest, RenameManifestPackageAndFullyQualifyClasses) {
+    ManifestFixerOptions options;
+    options.renameManifestPackage = std::u16string(u"com.android");
+
+    std::unique_ptr<xml::XmlResource> doc = verifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <application name=".MainApplication" text="hello">
+          <activity name=".activity.Start" />
+          <receiver name="com.google.android.Receiver" />
+        </application>
+      </manifest>)EOF", options);
+    ASSERT_NE(nullptr, doc);
+
+    xml::Element* manifestEl = xml::findRootElement(doc.get());
+    ASSERT_NE(nullptr, manifestEl);
+
+    xml::Attribute* attr = nullptr;
+
+    attr = manifestEl->findAttribute({}, u"package");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"com.android"), attr->value);
+
+    xml::Element* applicationEl = manifestEl->findChild({}, u"application");
+    ASSERT_NE(nullptr, applicationEl);
+
+    attr = applicationEl->findAttribute({}, u"name");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"android.MainApplication"), attr->value);
+
+    attr = applicationEl->findAttribute({}, u"text");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"hello"), attr->value);
+
+    xml::Element* el;
+    el = applicationEl->findChild({}, u"activity");
+    ASSERT_NE(nullptr, el);
+
+    attr = el->findAttribute({}, u"name");
+    ASSERT_NE(nullptr, el);
+    EXPECT_EQ(std::u16string(u"android.activity.Start"), attr->value);
+
+    el = applicationEl->findChild({}, u"receiver");
+    ASSERT_NE(nullptr, el);
+
+    attr = el->findAttribute({}, u"name");
+    ASSERT_NE(nullptr, el);
+    EXPECT_EQ(std::u16string(u"com.google.android.Receiver"), attr->value);
+}
+
+TEST_F(ManifestFixerTest, RenameManifestInstrumentationPackageAndFullyQualifyTarget) {
+    ManifestFixerOptions options;
+    options.renameInstrumentationTargetPackage = std::u16string(u"com.android");
+
+    std::unique_ptr<xml::XmlResource> doc = verifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <instrumentation android:targetPackage="android" />
+      </manifest>)EOF", options);
+    ASSERT_NE(nullptr, doc);
+
+    xml::Element* manifestEl = xml::findRootElement(doc.get());
+    ASSERT_NE(nullptr, manifestEl);
+
+    xml::Element* instrumentationEl = manifestEl->findChild({}, u"instrumentation");
+    ASSERT_NE(nullptr, instrumentationEl);
+
+    xml::Attribute* attr = instrumentationEl->findAttribute(xml::kSchemaAndroid, u"targetPackage");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"com.android"), attr->value);
+}
+
+TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
+    ManifestFixerOptions options;
+    options.versionNameDefault = std::u16string(u"Beta");
+    options.versionCodeDefault = std::u16string(u"0x10000000");
+
+    std::unique_ptr<xml::XmlResource> doc = verifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android" />)EOF", options);
+    ASSERT_NE(nullptr, doc);
+
+    xml::Element* manifestEl = xml::findRootElement(doc.get());
+    ASSERT_NE(nullptr, manifestEl);
+
+    xml::Attribute* attr = manifestEl->findAttribute(xml::kSchemaAndroid, u"versionName");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"Beta"), attr->value);
+
+    attr = manifestEl->findAttribute(xml::kSchemaAndroid, u"versionCode");
+    ASSERT_NE(nullptr, attr);
+    EXPECT_EQ(std::u16string(u"0x10000000"), attr->value);
 }
 
 } // namespace aapt
