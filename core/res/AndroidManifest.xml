@@ -408,6 +408,7 @@
     <protected-broadcast android:name="com.android.server.Wifi.action.TOGGLE_PNO" />
     <protected-broadcast android:name="intent.action.ACTION_RF_BAND_INFO" />
     <protected-broadcast android:name="android.intent.action.MEDIA_RESOURCE_GRANTED" />
+    <protected-broadcast android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
 
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL" />

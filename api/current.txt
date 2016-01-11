@@ -5783,6 +5783,7 @@ package android.app.admin {
     method public void onProfileProvisioningComplete(android.content.Context, android.content.Intent);
     method public deprecated void onReadyForUserInitialization(android.content.Context, android.content.Intent);
     method public void onReceive(android.content.Context, android.content.Intent);
+    method public void onSecurityLogsAvailable(android.content.Context, android.content.Intent);
     method public void onSystemUpdatePending(android.content.Context, android.content.Intent, long);
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLED = "android.app.action.DEVICE_ADMIN_DISABLED";
     field public static final java.lang.String ACTION_DEVICE_ADMIN_DISABLE_REQUESTED = "android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED";
@@ -5829,6 +5830,7 @@ package android.app.admin {
     method public boolean getCrossProfileContactsSearchDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
+    method public boolean getDeviceLoggingEnabled(android.content.ComponentName);
     method public java.lang.String getDeviceOwnerLockScreenInfo();
     method public java.util.List<byte[]> getInstalledCaCerts(android.content.ComponentName);
     method public int getKeyguardDisabledFeatures(android.content.ComponentName);
@@ -5885,6 +5887,8 @@ package android.app.admin {
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean requestBugreport(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
+    method public java.util.List<android.auditing.SecurityLog.SecurityEvent> retrieveDeviceLogs(android.content.ComponentName);
+    method public java.util.List<android.auditing.SecurityLog.SecurityEvent> retrievePreviousDeviceLogs(android.content.ComponentName);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setAlwaysOnVpnPackage(android.content.ComponentName, java.lang.String);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
@@ -5896,6 +5900,7 @@ package android.app.admin {
     method public void setCertInstallerPackage(android.content.ComponentName, java.lang.String) throws java.lang.SecurityException;
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
     method public void setCrossProfileContactsSearchDisabled(android.content.ComponentName, boolean);
+    method public void setDeviceLoggingEnabled(android.content.ComponentName, boolean);
     method public boolean setDeviceOwnerLockScreenInfo(android.content.ComponentName, java.lang.String);
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public boolean setKeyguardDisabled(android.content.ComponentName, boolean);

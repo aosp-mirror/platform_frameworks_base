@@ -266,6 +266,14 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.BUGREPORT_SHARE";
 
     /**
+     * Broadcast action: notify that a new batch of device logs is ready to be collected.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SECURITY_LOGS_AVAILABLE
+            = "android.app.action.SECURITY_LOGS_AVAILABLE";
+
+    /**
      * A string containing the SHA-256 hash of the bugreport file.
      *
      * @see #ACTION_BUGREPORT_SHARE
@@ -596,6 +604,18 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called when a new batch of device logs can be retrieved.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @see DevicePolicyManager#retrieveDeviceLogs(ComponentName)
+     */
+    public void onSecurityLogsAvailable(Context context, Intent intent) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -647,6 +667,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             int failureCode = intent.getIntExtra(EXTRA_BUGREPORT_FAILURE_REASON,
                     BUGREPORT_FAILURE_FAILED_COMPLETING);
             onBugreportFailed(context, intent, failureCode);
+        } else if (ACTION_SECURITY_LOGS_AVAILABLE.equals(action)) {
+            onSecurityLogsAvailable(context, intent);
         }
     }
 }

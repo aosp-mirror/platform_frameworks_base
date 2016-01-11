@@ -50,6 +50,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.auditing.SecurityLog;
+import android.auditing.SecurityLog.SecurityEvent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -63,6 +64,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -210,6 +212,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
 
+    /**
+     *  System property whose value is either "true" or "false", indicating whether
+     */
+    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.device_owner";
+
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
             StatusBarManager.DISABLE_NOTIFICATION_ICONS |
@@ -286,6 +293,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * public methods.
      */
     private boolean mHasFeature;
+
+    private final SecurityLogMonitor mSecurityLogMonitor;
 
     private final AtomicBoolean mRemoteBugreportServiceIsActive = new AtomicBoolean();
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
@@ -438,7 +447,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     || KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
                 new MonitoringCertNotificationTask().execute(intent);
             }
-            if (Intent.ACTION_USER_REMOVED.equals(action)) {
+            if (Intent.ACTION_USER_ADDED.equals(action)) {
+                disableDeviceLoggingIfNotCompliant();
+            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+                disableDeviceLoggingIfNotCompliant();
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
@@ -1470,6 +1482,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
 
+        mSecurityLogMonitor = new SecurityLogMonitor(this);
+
         mHasFeature = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN);
         if (!mHasFeature) {
@@ -1479,6 +1493,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(ACTION_EXPIRED_PASSWORD_NOTIFICATION);
+        filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
         filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
@@ -1559,12 +1574,41 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void loadOwners() {
         synchronized (this) {
             mOwners.load();
+            setDeviceOwnerSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
             migrateUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
 
             updateDeviceOwnerLocked();
+        }
+    }
+
+    private void setDeviceOwnerSystemPropertyLocked() {
+        // Device owner may still be provisioned, do not set the read-only system property yet.
+        if (mInjector.settingsGlobalGetInt(Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
+            return;
+        }
+        // Still at the first stage of CryptKeeper double bounce, mOwners.hasDeviceOwner is
+        // always false at this point.
+        if ("encrypted".equals(mInjector.systemPropertiesGet("ro.crypto.state"))
+                && "trigger_restart_min_framework".equals(
+                        mInjector.systemPropertiesGet("vold.decrypt"))){
+            return;
+        }
+
+        if (!TextUtils.isEmpty(mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT))) {
+            Slog.wtf(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
+        } else {
+            if (mOwners.hasDeviceOwner()) {
+                mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
+                disableDeviceLoggingIfNotCompliant();
+                if (SecurityLog.getLoggingEnabledProperty()) {
+                    mSecurityLogMonitor.start();
+                }
+            } else {
+                mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "false");
+            }
         }
     }
 
@@ -4897,26 +4941,34 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void ensureDeviceOwnerManagingSingleUser(ComponentName who) throws SecurityException {
+    private boolean isDeviceOwnerManagedSingleUserDevice() {
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (!mOwners.hasDeviceOwner()) {
+                return false;
+            }
         }
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
             if (mInjector.userManagerIsSplitSystemUser()) {
                 // In split system user mode, only allow the case where the device owner is managing
                 // the only non-system user of the device
-                if (mUserManager.getUserCount() > 2
-                        || mOwners.getDeviceOwnerUserId() == UserHandle.USER_SYSTEM) {
-                    throw new SecurityException(
-                            "There should only be one user, managed by Device Owner");
-                }
-            } else if (mUserManager.getUserCount() > 1) {
-                throw new SecurityException(
-                        "There should only be one user, managed by Device Owner");
+                return (mUserManager.getUserCount() == 2
+                        && mOwners.getDeviceOwnerUserId() != UserHandle.USER_SYSTEM);
+            } else  {
+                return mUserManager.getUserCount() == 1;
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(callingIdentity);
+        }
+    }
+
+    private void ensureDeviceOwnerManagingSingleUser(ComponentName who) throws SecurityException {
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+        if (!isDeviceOwnerManagedSingleUserDevice()) {
+            throw new SecurityException(
+                    "There should only be one user, managed by Device Owner");
         }
     }
 
@@ -4961,7 +5013,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private synchronized void sendDeviceOwnerCommand(String action, Bundle extras) {
+    synchronized void sendDeviceOwnerCommand(String action, Bundle extras) {
         Intent intent = new Intent(action);
         intent.setComponent(mOwners.getDeviceOwnerComponent());
         if (extras != null) {
@@ -5305,6 +5357,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.setDeviceOwner(admin, ownerName, userId);
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
+            setDeviceOwnerSystemPropertyLocked();
             Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
 
             ident = mInjector.binderClearCallingIdentity();
@@ -5436,6 +5489,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.clearDeviceOwner();
             mOwners.writeDeviceOwner();
             updateDeviceOwnerLocked();
+            disableDeviceLoggingIfNotCompliant();
             // Reactivate backup service.
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -7561,6 +7615,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         private final Uri mUserSetupComplete = Settings.Secure.getUriFor(
                 Settings.Secure.USER_SETUP_COMPLETE);
+        private final Uri mDeviceProvisioned = Settings.Global.getUriFor(
+                Settings.Global.DEVICE_PROVISIONED);
 
         public SetupContentObserver(Handler handler) {
             super(handler);
@@ -7568,12 +7624,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         void register(ContentResolver resolver) {
             resolver.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDeviceProvisioned, false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (mUserSetupComplete.equals(uri)) {
                 updateUserSetupComplete();
+            } else if (mDeviceProvisioned.equals(uri)) {
+                // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
+                // is delayed until device is marked as provisioned.
+                setDeviceOwnerSystemPropertyLocked();
             }
         }
     }
@@ -8252,5 +8313,60 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return false;
+    }
+
+    private void disableDeviceLoggingIfNotCompliant() {
+        if (!isDeviceOwnerManagedSingleUserDevice()) {
+            SecurityLog.setLoggingEnabledProperty(false);
+            Slog.w(LOG_TAG, "Device logging turned off as it's no longer a single user device.");
+        }
+    }
+
+    @Override
+    public void setDeviceLoggingEnabled(ComponentName admin, boolean enabled) {
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        synchronized (this) {
+            SecurityLog.setLoggingEnabledProperty(enabled);
+            if (enabled) {
+                mSecurityLogMonitor.start();
+            } else {
+                mSecurityLogMonitor.stop();
+            }
+        }
+    }
+
+    @Override
+    public boolean getDeviceLoggingEnabled(ComponentName admin) {
+        Preconditions.checkNotNull(admin);
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return SecurityLog.getLoggingEnabledProperty();
+        }
+    }
+
+    @Override
+    public ParceledListSlice<SecurityEvent> retrievePreviousDeviceLogs(ComponentName admin) {
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        ArrayList<SecurityEvent> output = new ArrayList<SecurityEvent>();
+        try {
+            SecurityLog.readPreviousEvents(output);
+            return new ParceledListSlice<SecurityEvent>(output);
+        } catch (IOException e) {
+            Slog.w(LOG_TAG, "Fail to read previous events" , e);
+            return new ParceledListSlice<SecurityEvent>(Collections.<SecurityEvent>emptyList());
+        }
+    }
+
+    @Override
+    public ParceledListSlice<SecurityEvent> retrieveDeviceLogs(ComponentName admin) {
+        Preconditions.checkNotNull(admin);
+        ensureDeviceOwnerManagingSingleUser(admin);
+
+        List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
+        return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
     }
 }

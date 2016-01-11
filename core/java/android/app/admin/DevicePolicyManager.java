@@ -23,12 +23,15 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
+import android.auditing.SecurityLog;
+import android.auditing.SecurityLog.SecurityEvent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
@@ -2210,7 +2213,6 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_ENCRYPTION
             = "android.app.action.START_ENCRYPTION";
-
     /**
      * Widgets are enabled in keyguard
      */
@@ -5352,6 +5354,66 @@ public class DevicePolicyManager {
                 throw new SecurityException("The current user does not have a parent profile.");
             }
             return new DevicePolicyManager(mContext, true);
+        } catch (RemoteException e) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            return null;
+        }
+    }
+
+    /**
+     * Called by device owner to control the device logging feature. Logging can only be
+     * enabled on single user devices where the sole user is managed by the device owner.
+     *
+     * <p> Device logs contain various information intended for security auditing purposes.
+     * See {@link SecurityEvent} for details.
+     *
+     * @param admin Which device owner this request is associated with.
+     * @param enabled whether device logging should be enabled or not.
+     * @see #retrieveDeviceLogs
+     */
+    public void setDeviceLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
+        try {
+            mService.setDeviceLoggingEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+        }
+    }
+
+    /**
+     * Return whether device logging is enabled or not by the device owner.
+     *
+     * @param admin Which device owner this request is associated with.
+     * @return {@code true} if device logging is enabled by device owner, {@code false} otherwise.
+     */
+    public boolean getDeviceLoggingEnabled(@NonNull ComponentName admin) {
+        try {
+            return mService.getDeviceLoggingEnabled(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return false;
+        }
+    }
+
+    /**
+     * Called by device owner to retrieve all new device logging entries since the last call to
+     * this API after device boots.
+     *
+     * <p> Access to the logs is rate limited and it will only return new logs after the device
+     * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
+     *
+     * @param admin Which device owner this request is associated with.
+     * @return the new batch of device logs which is a list of {@link SecurityEvent},
+     * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
+     */
+    public List<SecurityEvent> retrieveDeviceLogs(@NonNull ComponentName admin) {
+        try {
+            ParceledListSlice<SecurityEvent> list = mService.retrieveDeviceLogs(admin);
+            if (list != null) {
+                return list.getList();
+            } else {
+                // Rate limit exceeded.
+                return null;
+            }
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return null;
@@ -5372,6 +5434,28 @@ public class DevicePolicyManager {
                     + " does not have a parent profile.");
         }
         return new DevicePolicyManager(mContext, true);
+    }
+
+    /**
+     * Called by device owners to retrieve device logs from before the device's last reboot.
+     *
+     * <p>
+     * <strong> The device logs are retrieved from a RAM region which is not guaranteed to be
+     * corruption-free during power cycles, due to hardware variations and limitations. As a
+     * result, this API is provided as best-effort and the returned logs may contain corrupted data.
+     * </strong>
+     *
+     * @param admin Which device owner this request is associated with.
+     * @return Device logs from before the latest reboot of the system.
+     */
+    public List<SecurityEvent> retrievePreviousDeviceLogs(@NonNull ComponentName admin) {
+        try {
+            ParceledListSlice<SecurityEvent> list = mService.retrievePreviousDeviceLogs(admin);
+            return list.getList();
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return Collections.<SecurityEvent>emptyList();
+        }
     }
 
     /**

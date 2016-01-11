@@ -21,6 +21,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -285,4 +286,9 @@ interface IDevicePolicyManager {
 
     void setAffiliationIds(in ComponentName admin, in List<String> ids);
     boolean isAffiliatedUser();
+
+    void setDeviceLoggingEnabled(in ComponentName admin, boolean enabled);
+    boolean getDeviceLoggingEnabled(in ComponentName admin);
+    ParceledListSlice retrieveDeviceLogs(in ComponentName admin);
+    ParceledListSlice retrievePreviousDeviceLogs(in ComponentName admin);
 }
