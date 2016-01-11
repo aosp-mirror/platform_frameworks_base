@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.util.EventLog;
@@ -27,9 +26,6 @@ import android.util.SparseArray;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
-import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -249,64 +245,17 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 setBounds(null);
             } else {
                 mTmpRect2.set(mBounds);
-                int newRotation = mDisplayContent.getDisplayInfo().rotation;
-                if (mRotation == newRotation) {
-                    setBounds(mTmpRect2);
+                mDisplayContent.rotateBounds(
+                        mRotation, mDisplayContent.getDisplayInfo().rotation, mTmpRect2);
+                if (setBounds(mTmpRect2)) {
+                    // Post message to inform activity manager of the bounds change simulating
+                    // a one-way call. We do this to prevent a deadlock between window manager
+                    // lock and activity manager lock been held.
+                    mService.mH.sendMessage(mService.mH.obtainMessage(
+                            RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mBounds));
                 }
-
-                // If the rotation changes, we'll handle it in updateBoundsAfterRotation
             }
         }
-    }
-
-    /**
-     * Updates the bounds after rotating the screen. We can't handle it in
-     * {@link #updateDisplayInfo} because at that point the configuration might not be fully updated
-     * yet.
-     */
-    void updateBoundsAfterRotation() {
-        final int newRotation = getDisplayInfo().rotation;
-        mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (mStackId == DOCKED_STACK_ID) {
-            snapDockedStackAfterRotation(mTmpRect2);
-        }
-
-        // Post message to inform activity manager of the bounds change simulating
-        // a one-way call. We do this to prevent a deadlock between window manager
-        // lock and activity manager lock been held.
-        mService.mH.sendMessage(mService.mH.obtainMessage(
-                RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mTmpRect2));
-    }
-
-    /**
-     * Snaps the bounds after rotation to the closest snap target for the docked stack.
-     */
-    private void snapDockedStackAfterRotation(Rect outBounds) {
-
-        // Calculate the current position.
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
-        final int dividerSize = mService.getDefaultDisplayContentLocked()
-                .getDockedDividerController().getContentWidth();
-        final int dockSide = getDockSide(outBounds);
-        final int dividerPosition = DockedDividerUtils.calculatePositionForBounds(outBounds,
-                dockSide, dividerSize);
-        final int displayWidth = mDisplayContent.getDisplayInfo().logicalWidth;
-        final int displayHeight = mDisplayContent.getDisplayInfo().logicalHeight;
-
-        // Snap the position to a target.
-        final int rotation = displayInfo.rotation;
-        final int orientation = mService.mCurConfiguration.orientation;
-        mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
-        final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
-                mService.mContext.getResources(),
-                0 /* minFlingVelocityPxPerSecond */, displayWidth, displayHeight,
-                dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds);
-        final SnapTarget target = algorithm.calculateNonDismissingSnapTarget(dividerPosition);
-
-        // Recalculate the bounds based on the position of the target.
-        DockedDividerUtils.calculateBoundsForPosition(target.position, dockSide,
-                outBounds, displayInfo.logicalWidth, displayInfo.logicalHeight,
-                dividerSize);
     }
 
     boolean isAnimating() {
@@ -733,10 +682,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * information which side of the screen was the dock anchored.
      */
     int getDockSide() {
-        return getDockSide(mBounds);
-    }
-
-    int getDockSide(Rect bounds) {
         if (mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId)) {
             return DOCKED_INVALID;
         }
@@ -747,14 +692,14 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final int orientation = mService.mCurConfiguration.orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // Portrait mode, docked either at the top or the bottom.
-            if (bounds.top - mTmpRect.top < mTmpRect.bottom - bounds.bottom) {
+            if (mBounds.top - mTmpRect.top < mTmpRect.bottom - mBounds.bottom) {
                 return DOCKED_TOP;
             } else {
                 return DOCKED_BOTTOM;
             }
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // Landscape mode, docked either on the left or on the right.
-            if (bounds.left - mTmpRect.left < mTmpRect.right - bounds.right) {
+            if (mBounds.left - mTmpRect.left < mTmpRect.right - mBounds.right) {
                 return DOCKED_LEFT;
             } else {
                 return DOCKED_RIGHT;

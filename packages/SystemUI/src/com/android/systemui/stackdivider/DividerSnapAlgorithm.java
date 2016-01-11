@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy;
+package com.android.systemui.stackdivider;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Rect;
+
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.util.ArrayList;
 
 /**
  * Calculates the snap targets and the snap position given a position and a velocity. All positions
  * here are to be interpreted as the left/top edge of the divider rectangle.
- *
- * @hide
  */
 public class DividerSnapAlgorithm {
 
@@ -45,7 +44,8 @@ public class DividerSnapAlgorithm {
      */
     private static final int SNAP_ONLY_1_1 = 2;
 
-    private final float mMinFlingVelocityPxPerSecond;
+    private final Context mContext;
+    private final FlingAnimationUtils mFlingAnimationUtils;
     private final int mDisplayWidth;
     private final int mDisplayHeight;
     private final int mDividerSize;
@@ -63,17 +63,18 @@ public class DividerSnapAlgorithm {
     private final SnapTarget mDismissStartTarget;
     private final SnapTarget mDismissEndTarget;
 
-    public DividerSnapAlgorithm(Resources res, float minFlingVelocityPxPerSecond,
+    public DividerSnapAlgorithm(Context ctx, FlingAnimationUtils flingAnimationUtils,
             int displayWidth, int displayHeight, int dividerSize, boolean isHorizontalDivision,
             Rect insets) {
-        mMinFlingVelocityPxPerSecond = minFlingVelocityPxPerSecond;
+        mContext = ctx;
+        mFlingAnimationUtils = flingAnimationUtils;
         mDividerSize = dividerSize;
         mDisplayWidth = displayWidth;
         mDisplayHeight = displayHeight;
         mInsets.set(insets);
-        mSnapMode = res.getInteger(
+        mSnapMode = ctx.getResources().getInteger(
                 com.android.internal.R.integer.config_dockedStackDividerSnapMode);
-        mFixedRatio = res.getFraction(
+        mFixedRatio = ctx.getResources().getFraction(
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
         calculateTargets(isHorizontalDivision);
         mFirstSplitTarget = mTargets.get(1);
@@ -83,7 +84,7 @@ public class DividerSnapAlgorithm {
     }
 
     public SnapTarget calculateSnapTarget(int position, float velocity) {
-        if (Math.abs(velocity) < mMinFlingVelocityPxPerSecond) {
+        if (Math.abs(velocity) < mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
             return snap(position);
         }
         if (position < mFirstSplitTarget.position && velocity < 0) {
@@ -96,17 +97,6 @@ public class DividerSnapAlgorithm {
             return mFirstSplitTarget;
         } else {
             return mLastSplitTarget;
-        }
-    }
-
-    public SnapTarget calculateNonDismissingSnapTarget(int position) {
-        SnapTarget target = snap(position);
-        if (target == mDismissStartTarget) {
-            return mFirstSplitTarget;
-        } else if (target == mDismissEndTarget) {
-            return mLastSplitTarget;
-        } else {
-            return target;
         }
     }
 

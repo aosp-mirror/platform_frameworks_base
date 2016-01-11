@@ -3788,7 +3788,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // size.  We need to do this directly, instead of relying on
             // it to bubble up from the nav bar, because this needs to
             // change atomically with screen rotations.
-            mNavigationBarOnBottom = isNavigationBarOnBottom(displayWidth, displayHeight);
+            mNavigationBarOnBottom = (!mNavigationBarCanMove || displayWidth < displayHeight);
             if (mNavigationBarOnBottom) {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
                 int top = displayHeight - overscanBottom
@@ -3857,10 +3857,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return false;
-    }
-
-    private boolean isNavigationBarOnBottom(int displayWidth, int displayHeight) {
-        return !mNavigationBarCanMove || displayWidth < displayHeight;
     }
 
     /** {@inheritDoc} */
@@ -5932,22 +5928,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.startKeyguardExitAnimation");
             mKeyguardDelegate.startKeyguardExitAnimation(startTime, fadeoutDuration);
-        }
-    }
-
-    @Override
-    public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets) {
-        outInsets.setEmpty();
-        if (mStatusBar != null) {
-            outInsets.top = mStatusBarHeight;
-        }
-        if (mNavigationBar != null) {
-            if (isNavigationBarOnBottom(displayWidth, displayHeight)) {
-                outInsets.bottom = mNavigationBarHeightForRotation[displayRotation];
-            } else {
-                outInsets.right = mNavigationBarWidthForRotation[displayRotation];
-            }
         }
     }
 
