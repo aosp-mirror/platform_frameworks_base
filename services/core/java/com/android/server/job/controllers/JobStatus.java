@@ -19,11 +19,14 @@ package com.android.server.job.controllers;
 import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
+import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
+import android.util.ArraySet;
+import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,6 +64,17 @@ public class JobStatus {
     final AtomicBoolean unmeteredConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean connectivityConstraintSatisfied = new AtomicBoolean();
     final AtomicBoolean appNotIdleConstraintSatisfied = new AtomicBoolean();
+    final AtomicBoolean contentTriggerConstraintSatisfied = new AtomicBoolean();
+
+    // These are filled in by controllers when preparing for execution.
+    public ArraySet<Uri> changedUris;
+    public ArraySet<String> changedAuthorities;
+
+    /**
+     * For use only by ContentObserverController: state it is maintaining about content URIs
+     * being observed.
+     */
+    ContentObserverController.JobInstance contentObserverJobInstance;
 
     /**
      * Earliest point in the future at which this job will be eligible to run. A value of 0
@@ -220,6 +234,10 @@ public class JobStatus {
         return job.isRequireDeviceIdle();
     }
 
+    public boolean hasContentTriggerConstraint() {
+        return job.getTriggerContentUris() != null;
+    }
+
     public boolean isPersisted() {
         return job.isPersisted();
     }
@@ -252,7 +270,8 @@ public class JobStatus {
                 && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
                 && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
                 && (!hasUnmeteredConstraint() || unmeteredConstraintSatisfied.get())
-                && (!hasIdleConstraint() || idleConstraintSatisfied.get());
+                && (!hasIdleConstraint() || idleConstraintSatisfied.get())
+                && (!hasContentTriggerConstraint() || contentTriggerConstraintSatisfied.get());
     }
 
     public boolean matches(int uid, int jobId) {
@@ -268,8 +287,9 @@ public class JobStatus {
                 + ",R=(" + formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME)
                 + "," + formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME) + ")"
                 + ",N=" + job.getNetworkType() + ",C=" + job.isRequireCharging()
-                + ",I=" + job.isRequireDeviceIdle() + ",F=" + numFailures
-                + ",P=" + job.isPersisted()
+                + ",I=" + job.isRequireDeviceIdle()
+                + ",U=" + (job.getTriggerContentUris() != null)
+                + ",F=" + numFailures + ",P=" + job.isPersisted()
                 + ",ANI=" + appNotIdleConstraintSatisfied.get()
                 + (isReady() ? "(READY)" : "")
                 + "]";
@@ -310,13 +330,132 @@ public class JobStatus {
      * {@link #toString()} returns.
      */
     public String toShortString() {
-        return job.getService().flattenToShortString() + " jId=" + job.getId() +
-                ", u" + getUserId();
+        StringBuilder sb = new StringBuilder();
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(" jId=");
+        sb.append(job.getId());
+        sb.append(" uid=");
+        UserHandle.formatUid(sb, uId);
+        sb.append(' ');
+        sb.append(job.getService().flattenToShortString());
+        return sb.toString();
     }
 
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); UserHandle.formatUid(pw, uId);
+        pw.print(" tag="); pw.println(tag);
         pw.print(prefix);
-        pw.println(this.toString());
+        pw.print("Source: uid="); UserHandle.formatUid(pw, sourceUid);
+        pw.print(" user="); pw.print(sourceUserId);
+        pw.print(" pkg="); pw.println(sourcePackageName);
+        pw.print(prefix); pw.println("JobInfo:");
+        pw.print(prefix); pw.print("  Service: ");
+        pw.println(job.getService().flattenToShortString());
+        if (job.isPeriodic()) {
+            pw.print(prefix); pw.print("  PERIODIC: interval=");
+            TimeUtils.formatDuration(job.getIntervalMillis(), pw);
+            pw.print(" flex=");
+            TimeUtils.formatDuration(job.getFlexMillis(), pw);
+            pw.println();
+        }
+        if (job.isPersisted()) {
+            pw.print(prefix); pw.println("  PERSISTED");
+        }
+        if (job.getPriority() != 0) {
+            pw.print(prefix); pw.print("  Priority: ");
+            pw.println(job.getPriority());
+        }
+        pw.print(prefix); pw.print("  Requires: charging=");
+        pw.print(job.isRequireCharging());
+        pw.print(" deviceIdle=");
+        pw.println(job.isRequireDeviceIdle());
+        if (job.getTriggerContentUris() != null) {
+            pw.print(prefix); pw.println("  Trigger content URIs:");
+            for (int i=0; i<job.getTriggerContentUris().length; i++) {
+                JobInfo.TriggerContentUri trig = job.getTriggerContentUris()[i];
+                pw.print(prefix); pw.print("    ");
+                pw.print(Integer.toHexString(trig.getFlags()));
+                pw.print(' ' );
+                pw.println(trig.getUri());
+            }
+        }
+        if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
+            pw.print(prefix); pw.print("  Network type: ");
+            pw.println(job.getNetworkType());
+        }
+        if (job.getMinLatencyMillis() != 0) {
+            pw.print(prefix); pw.print("  Minimum latency: ");
+            TimeUtils.formatDuration(job.getMinLatencyMillis(), pw);
+            pw.println();
+        }
+        if (job.getMaxExecutionDelayMillis() != 0) {
+            pw.print(prefix); pw.print("  Max execution delay: ");
+            TimeUtils.formatDuration(job.getMaxExecutionDelayMillis(), pw);
+            pw.println();
+        }
+        pw.print(prefix); pw.print("  Backoff: policy=");
+        pw.print(job.getBackoffPolicy());
+        pw.print(" initial=");
+        TimeUtils.formatDuration(job.getInitialBackoffMillis(), pw);
+        pw.println();
+        if (job.hasEarlyConstraint()) {
+            pw.print(prefix); pw.println("  Has early constraint");
+        }
+        if (job.hasLateConstraint()) {
+            pw.print(prefix); pw.println("  Has late constraint");
+        }
+        pw.print(prefix); pw.println("Constraints:");
+        if (hasChargingConstraint()) {
+            pw.print(prefix); pw.print("  Charging: ");
+            pw.println(chargingConstraintSatisfied.get());
+        }
+        if (hasTimingDelayConstraint()) {
+            pw.print(prefix); pw.print("  Time delay: ");
+            pw.println(timeDelayConstraintSatisfied.get());
+        }
+        if (hasDeadlineConstraint()) {
+            pw.print(prefix); pw.print("  Deadline: ");
+            pw.println(deadlineConstraintSatisfied.get());
+        }
+        if (hasIdleConstraint()) {
+            pw.print(prefix); pw.print("  System idle: ");
+            pw.println(idleConstraintSatisfied.get());
+        }
+        if (hasUnmeteredConstraint()) {
+            pw.print(prefix); pw.print("  Unmetered: ");
+            pw.println(unmeteredConstraintSatisfied.get());
+        }
+        if (hasConnectivityConstraint()) {
+            pw.print(prefix); pw.print("  Connectivity: ");
+            pw.println(connectivityConstraintSatisfied.get());
+        }
+        if (hasIdleConstraint()) {
+            pw.print(prefix); pw.print("  App not idle: ");
+            pw.println(appNotIdleConstraintSatisfied.get());
+        }
+        if (hasContentTriggerConstraint()) {
+            pw.print(prefix); pw.print("  Content trigger: ");
+            pw.println(contentTriggerConstraintSatisfied.get());
+        }
+        if (changedAuthorities != null) {
+            pw.print(prefix); pw.println("Changed authorities:");
+            for (int i=0; i<changedAuthorities.size(); i++) {
+                pw.print(prefix); pw.print("  "); pw.println(changedAuthorities.valueAt(i));
+            }
+            if (changedUris != null) {
+                pw.print(prefix); pw.println("Changed URIs:");
+                for (int i=0; i<changedUris.size(); i++) {
+                    pw.print(prefix); pw.print("  "); pw.println(changedUris.valueAt(i));
+                }
+            }
+        }
+        pw.print(prefix); pw.print("Earliest run time: ");
+        pw.println(formatRunTime(earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME));
+        pw.print(prefix); pw.print("Latest run time: ");
+        pw.println(formatRunTime(latestRunTimeElapsedMillis, NO_LATEST_RUNTIME));
+        if (numFailures != 0) {
+            pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
+        }
     }
 }

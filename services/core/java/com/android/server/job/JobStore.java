@@ -187,9 +187,8 @@ public class JobStore {
      */
     public List<JobStatus> getJobsByUser(int userHandle) {
         List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
-        Iterator<JobStatus> it = mJobSet.iterator();
-        while (it.hasNext()) {
-            JobStatus ts = it.next();
+        for (int i=mJobSet.size()-1; i>=0; i--) {
+            JobStatus ts = mJobSet.valueAt(i);
             if (UserHandle.getUserId(ts.getUid()) == userHandle) {
                 matchingJobs.add(ts);
             }
@@ -203,9 +202,8 @@ public class JobStore {
      */
     public List<JobStatus> getJobsByUid(int uid) {
         List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
-        Iterator<JobStatus> it = mJobSet.iterator();
-        while (it.hasNext()) {
-            JobStatus ts = it.next();
+        for (int i=mJobSet.size()-1; i>=0; i--) {
+            JobStatus ts = mJobSet.valueAt(i);
             if (ts.getUid() == uid) {
                 matchingJobs.add(ts);
             }
@@ -219,9 +217,8 @@ public class JobStore {
      * @return the JobStatus that matches the provided uId and jobId, or null if none found.
      */
     public JobStatus getJobByUidAndJobId(int uid, int jobId) {
-        Iterator<JobStatus> it = mJobSet.iterator();
-        while (it.hasNext()) {
-            JobStatus ts = it.next();
+        for (int i=mJobSet.size()-1; i>=0; i--) {
+            JobStatus ts = mJobSet.valueAt(i);
             if (ts.getUid() == uid && ts.getJobId() == jobId) {
                 return ts;
             }

@@ -6186,6 +6186,7 @@ package android.app.job {
     method public long getMinLatencyMillis();
     method public int getNetworkType();
     method public android.content.ComponentName getService();
+    method public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
     method public boolean isPeriodic();
     method public boolean isPersisted();
     method public boolean isRequireCharging();
@@ -6205,6 +6206,7 @@ package android.app.job {
 
   public static final class JobInfo.Builder {
     ctor public JobInfo.Builder(int, android.content.ComponentName);
+    method public android.app.job.JobInfo.Builder addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri);
     method public android.app.job.JobInfo build();
     method public android.app.job.JobInfo.Builder setBackoffCriteria(long, int);
     method public android.app.job.JobInfo.Builder setExtras(android.os.PersistableBundle);
@@ -6218,10 +6220,22 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setRequiresDeviceIdle(boolean);
   }
 
+  public static final class JobInfo.TriggerContentUri implements android.os.Parcelable {
+    ctor public JobInfo.TriggerContentUri(android.net.Uri, int);
+    method public int describeContents();
+    method public int getFlags();
+    method public android.net.Uri getUri();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.job.JobInfo.TriggerContentUri> CREATOR;
+    field public static final int FLAG_NOTIFY_FOR_DESCENDANTS = 1; // 0x1
+  }
+
   public class JobParameters implements android.os.Parcelable {
     method public int describeContents();
     method public android.os.PersistableBundle getExtras();
     method public int getJobId();
+    method public java.lang.String[] getTriggeredContentAuthorities();
+    method public android.net.Uri[] getTriggeredContentUris();
     method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;

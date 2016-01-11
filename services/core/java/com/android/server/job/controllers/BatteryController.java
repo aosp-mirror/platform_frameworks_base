@@ -16,8 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,7 +77,7 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus) {
+    public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
         final boolean isOnStablePower = mChargeTracker.isOnStablePower();
         if (taskStatus.hasChargingConstraint()) {
             synchronized (mTrackedTasks) {
@@ -90,7 +88,7 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus) {
+    public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
         if (taskStatus.hasChargingConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.remove(taskStatus);

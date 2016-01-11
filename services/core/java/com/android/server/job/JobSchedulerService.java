@@ -60,6 +60,7 @@ import com.android.server.LocalServices;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
+import com.android.server.job.controllers.ContentObserverController;
 import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
@@ -108,6 +109,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * things early.
      */
     static final int MIN_CONNECTIVITY_COUNT = 1;  // Run connectivity jobs as soon as ready.
+    /**
+     * Minimum # of content trigger jobs that must be ready in order to force the JMS to schedule
+     * things early.
+     */
+    static final int MIN_CONTENT_COUNT = 1;
     /**
      * Minimum # of jobs (with no particular constraints) for which the JMS will be happy running
      * some work early.
@@ -229,7 +235,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (packageName != null) {
             jobStatus.setSource(packageName, userId);
         }
-        cancelJob(uId, job.getId());
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
@@ -239,7 +244,15 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         } catch (RemoteException e) {
         }
-        startTrackingJob(jobStatus);
+        if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
+        JobStatus toCancel;
+        synchronized (mJobs) {
+            toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
+        }
+        startTrackingJob(jobStatus, toCancel);
+        if (toCancel != null) {
+            cancelJobImpl(toCancel);
+        }
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
         return JobScheduler.RESULT_SUCCESS;
     }
@@ -316,9 +329,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     private void cancelJobImpl(JobStatus cancelled) {
-        if (DEBUG) {
-            Slog.d(TAG, "Cancelling: " + cancelled);
-        }
+        if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         stopTrackingJob(cancelled);
         synchronized (mJobs) {
             // Remove from pending queue.
@@ -410,6 +421,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(IdleController.get(this));
         mControllers.add(BatteryController.get(this));
         mControllers.add(AppIdleController.get(this));
+        mControllers.add(ContentObserverController.get(this));
 
         mHandler = new JobHandler(context.getMainLooper());
         mJobSchedulerStub = new JobSchedulerStub();
@@ -461,7 +473,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     JobStatus job = jobs.valueAt(i);
                     for (int controller=0; controller<mControllers.size(); controller++) {
                         mControllers.get(controller).deviceIdleModeChanged(mDeviceIdleMode);
-                        mControllers.get(controller).maybeStartTrackingJob(job);
+                        mControllers.get(controller).maybeStartTrackingJob(job, null);
                     }
                 }
                 // GO GO GO!
@@ -475,7 +487,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * {@link com.android.server.job.JobStore}, and make sure all the relevant controllers know
      * about.
      */
-    private void startTrackingJob(JobStatus jobStatus) {
+    private void startTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         boolean update;
         boolean rocking;
         synchronized (mJobs) {
@@ -486,9 +498,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (int i=0; i<mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
                 if (update) {
-                    controller.maybeStopTrackingJob(jobStatus);
+                    controller.maybeStopTrackingJob(jobStatus, true);
                 }
-                controller.maybeStartTrackingJob(jobStatus);
+                controller.maybeStartTrackingJob(jobStatus, lastJob);
             }
         }
     }
@@ -508,7 +520,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (removed && rocking) {
             for (int i=0; i<mControllers.size(); i++) {
                 StateController controller = mControllers.get(i);
-                controller.maybeStopTrackingJob(jobStatus);
+                controller.maybeStopTrackingJob(jobStatus, false);
             }
         }
         return removed;
@@ -577,8 +589,13 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         delayMillis =
                 Math.min(delayMillis, JobInfo.MAX_BACKOFF_DELAY_MILLIS);
-        return new JobStatus(failureToReschedule, elapsedNowMillis + delayMillis,
+        JobStatus newJob = new JobStatus(failureToReschedule, elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, backoffAttempts);
+        for (int ic=0; ic<mControllers.size(); ic++) {
+            StateController controller = mControllers.get(ic);
+            controller.rescheduleForFailure(newJob, failureToReschedule);
+        }
+        return newJob;
     }
 
     /**
@@ -632,14 +649,21 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }
+            // We still want to check for jobs to execute, because this job may have
+            // scheduled a new job under the same job id, and now we can run it.
+            mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
             return;
         }
+        // Note: there is a small window of time in here where, when rescheduling a job,
+        // we will stop monitoring its content providers.  This should be fixed by stopping
+        // the old job after scheduling the new one, but since we have no lock held here
+        // that may cause ordering problems if the app removes jobStatus while in here.
         if (needsReschedule) {
             JobStatus rescheduled = getRescheduleJobForFailure(jobStatus);
-            startTrackingJob(rescheduled);
+            startTrackingJob(rescheduled, jobStatus);
         } else if (jobStatus.getJob().isPeriodic()) {
             JobStatus rescheduledPeriodic = getRescheduleJobForPeriodic(jobStatus);
-            startTrackingJob(rescheduledPeriodic);
+            startTrackingJob(rescheduledPeriodic, jobStatus);
         }
         reportActive();
         mHandler.obtainMessage(MSG_CHECK_JOB_GREEDY).sendToTarget();
@@ -760,8 +784,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             int idleCount =  0;
             int backoffCount = 0;
             int connectivityCount = 0;
+            int contentCount = 0;
             List<JobStatus> runnableJobs = null;
             ArraySet<JobStatus> jobs = mJobs.getJobs();
+            if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
             for (int i=0; i<jobs.size(); i++) {
                 JobStatus job = jobs.valueAt(i);
                 if (isReadyToBeExecutedLocked(job)) {
@@ -788,6 +814,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (job.hasChargingConstraint()) {
                         chargingCount++;
                     }
+                    if (job.hasContentTriggerConstraint()) {
+                        contentCount++;
+                    }
                     if (runnableJobs == null) {
                         runnableJobs = new ArrayList<>();
                     }
@@ -801,6 +830,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     idleCount >= MIN_IDLE_COUNT ||
                     connectivityCount >= MIN_CONNECTIVITY_COUNT ||
                     chargingCount >= MIN_CHARGING_COUNT ||
+                    contentCount  >= MIN_CONTENT_COUNT ||
                     (runnableJobs != null && runnableJobs.size() >= MIN_READY_JOBS_COUNT)) {
                 if (DEBUG) {
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
@@ -952,6 +982,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (DEBUG) {
                         Slog.d(TAG, "About to run job on context "
                                 + String.valueOf(i) + ", job: " + contextIdToJobMap[i]);
+                    }
+                    for (int ic=0; ic<mControllers.size(); ic++) {
+                        StateController controller = mControllers.get(ic);
+                        controller.prepareForExecution(contextIdToJobMap[i]);
                     }
                     if (!mActiveServices.get(i).executeRunnableJob(contextIdToJobMap[i])) {
                         Slog.d(TAG, "Error executing " + contextIdToJobMap[i]);
@@ -1162,7 +1196,20 @@ public class JobSchedulerService extends com.android.server.SystemService
                 ArraySet<JobStatus> jobs = mJobs.getJobs();
                 for (int i=0; i<jobs.size(); i++) {
                     JobStatus job = jobs.valueAt(i);
-                    job.dump(pw, "  ");
+                    pw.print("  Job #"); pw.print(i); pw.print(": ");
+                    pw.println(job.toShortString());
+                    job.dump(pw, "    ");
+                    pw.print("    Ready: ");
+                    pw.print(mHandler.isReadyToBeExecutedLocked(job));
+                    pw.print(" (job=");
+                    pw.print(job.isReady());
+                    pw.print(" pending=");
+                    pw.print(mPendingJobs.contains(job));
+                    pw.print(" active=");
+                    pw.print(isCurrentlyActiveLocked(job));
+                    pw.print(" user=");
+                    pw.print(mStartedUsers.contains(job.getUserId()));
+                    pw.println(")");
                 }
             } else {
                 pw.println("  None.");
