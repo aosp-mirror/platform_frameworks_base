@@ -55,16 +55,16 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI நிறைவடைந்தது."</string>
     <string name="badPin" msgid="9015277645546710014">"உள்ளிட்ட பழைய பின் தவறானது."</string>
     <string name="badPuk" msgid="5487257647081132201">"உள்ளிட்ட PUK2 தவறானது."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட PINகள் பொருந்தவில்லை."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"உள்ளிட்ட பின்கள் பொருந்தவில்லை."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 இலிருந்து 8 எண்கள் வரையுள்ள பின் ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 அல்லது அதற்கு மேல் எண்கள் உள்ள PUK ஐத் தட்டச்சு செய்யவும்."</string>
     <string name="needPuk" msgid="919668385956251611">"உங்கள் சிம் கார்டு PUK பூட்டுதல் செய்யப்பட்டுள்ளது. அதைத் திறக்க PUK குறியீட்டைத் உள்ளிடவும்."</string>
     <string name="needPuk2" msgid="4526033371987193070">"சிம் கார்டைத் தடுப்பு நீக்க PUK2 ஐ உள்ளிடவும்."</string>
     <string name="enablePin" msgid="209412020907207950">"தோல்வி, சிம்/RUIM பூட்டை இயக்கவும்."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER">%d</xliff:g> முறை முயற்சிக்கலாம்."</item>
-    <item quantity="other" msgid="7530597808358774740">"சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER">%d</xliff:g> முறை முயற்சிக்கலாம்."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_1">%d</xliff:g> முறை முயற்சிக்கலாம்.</item>
+      <item quantity="one">சிம் பூட்டப்படுவதற்கு முன், நீங்கள் <xliff:g id="NUMBER_0">%d</xliff:g> முறை முயற்சிக்கலாம்.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"உள்வரும் அழைப்பாளர் ஐடி"</string>
@@ -271,13 +271,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD கார்டை அணுகவும்."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"அணுகல்தன்மை அம்சங்கள்"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"தொழில்நுட்பம் உதவி கோரக்கூடிய அம்சங்கள்."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறவும்"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் ஊடாடிக்கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கவும்"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"தொட்ட உருப்படிகள் சத்தமாகப் பேசும் மற்றும் சைகைகளைப் பயன்படுத்தி திரையை ஆராயலாம்."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கவும்"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்பட்டிருக்கலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கவும்"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"மேம்பட்ட இணைய அணுகல்தன்மையை இயக்கும்"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"பயன்பாட்டு உள்ளடக்கத்தை மேலும் எளிதாக அணுகக்கூடியதாக்க ஸ்கிரிப்ட்கள் நிறுவப்படலாம்."</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -934,14 +934,14 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"வாழ்வுத் துணை"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"தந்தை"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"நண்பர்"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"நிர்வாகி"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"மேலாளர்"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"தாய்"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"பெற்றோர்"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"கூட்டாளர்"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"பரிந்துரைத்தவர்"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"உறவினர்"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"சகோதரி"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"வாழ்க்கைத்துணை"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"துணைவர்"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"தனிப்பயன்"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"வீடு"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"அலுவலகம்"</string>
@@ -1128,75 +1128,76 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"தொடுவதன் மூலம் அறிக என்பதை இயக்க <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> விரும்புகிறது. தொடுவதன் மூலம் அறிக என்பது இயக்கப்பட்டிருக்கும்போது, உங்கள் விரலுக்கு அடியில் இருப்பவையின் விளக்கங்களை நீங்கள் கேட்கவோ, பார்க்கவோ செய்யலாம் அல்லது மொபைலுடன் ஊடாட சைகைகளை மேற்கொள்ளலாம்."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 மாதத்திற்கு முன்பு"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1 மாதத்திற்கு முன்பு"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 வினாடிக்கு முன்பு"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகளுக்கு முன்பு"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 நிமிடம் முன்பு"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> நிமிடத்திற்கு முன்"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 மணிநேரம் முன்பு"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்திற்கு முன்பு"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"கடந்த <xliff:g id="COUNT">%d</xliff:g> நாட்கள்"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள் முன்பு</item>
+      <item quantity="one">1 வினாடி முன்பு</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள் முன்பு</item>
+      <item quantity="one">1 நிமிடம் முன்பு</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம் முன்பு</item>
+      <item quantity="one">1 மணிநேரம் முன்பு</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">கடந்த <xliff:g id="COUNT_1">%d</xliff:g> நாட்களில்</item>
+      <item quantity="one">கடந்த <xliff:g id="COUNT_0">%d</xliff:g> நாளில்</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"சென்ற மாதம்"</string>
     <string name="older" msgid="5211975022815554840">"பழையது"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"நேற்று"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> நாட்களுக்கு முன்பு"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 வினாடியில்"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகளில்"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 நிமிடத்தில்"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> நிமிடங்களில்"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 மணிநேரத்தில்"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"நாளை"</item>
-    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> நாட்களில்"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 வினாடி முன்பு"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகளுக்கு முன்பு"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 நிமிடம் முன்பு"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> நிமிடத்திற்கு முன்"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 மணிநேரம் முன்பு"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்திற்கு முன்பு"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"நேற்று"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> நாட்களுக்கு முன்பு"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 வினாடியில்"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகளில்"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 நிமிடத்தில்"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> நிமிடங்களில்"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 மணிநேரத்தில்"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"நாளை"</item>
-    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> நாட்களில்"</item>
-  </plurals>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நாட்களுக்கு முன்பு</item>
+      <item quantity="one">நேற்று</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகளில்</item>
+      <item quantity="one">1 வினாடியில்</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்களில்</item>
+      <item quantity="one">1 நிமிடத்தில்</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்</item>
+      <item quantity="one">1 மணிநேரத்தில்</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நாட்களில்</item>
+      <item quantity="one">நாளை</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள் முன்பு</item>
+      <item quantity="one">1 வினாடி முன்பு</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள் முன்பு</item>
+      <item quantity="one">1 நிமிடம் முன்பு</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம் முன்பு</item>
+      <item quantity="one">1 மணிநேரம் முன்பு</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நாட்களுக்கு முன்பு</item>
+      <item quantity="one">நேற்று</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகளில்</item>
+      <item quantity="one">1 வினாடியில்</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்களில்</item>
+      <item quantity="one">1 நிமிடத்தில்</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரத்தில்</item>
+      <item quantity="one">1 மணிநேரத்தில்</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நாட்களில்</item>
+      <item quantity="one">நாளை</item>
+    </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> அன்று"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g> இல்"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> இல்"</string>
@@ -1212,18 +1213,18 @@
     <string name="weeks" msgid="6509623834583944518">"வாரங்கள்"</string>
     <string name="year" msgid="4001118221013892076">"ஆண்டு"</string>
     <string name="years" msgid="6881577717993213522">"ஆண்டுகள்"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 வினாடி"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகள்"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 நிமிடம்"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள்"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 மணிநேரம்"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> மணிநேரம்"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள்</item>
+      <item quantity="one">1 வினாடி</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> நிமிடங்கள்</item>
+      <item quantity="one">1 நிமிடம்</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> மணிநேரம்</item>
+      <item quantity="one">1 மணிநேரம்</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"வீடியோவில் சிக்கல்"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"சாதனத்தில் ஸ்ட்ரீம் செய்வதற்கு இது சரியான வீடியோ அல்ல."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"இந்த வீடியோவை இயக்க முடியவில்லை."</string>
@@ -1331,14 +1332,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"ஏதுமில்லை"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ரிங்டோன்கள்"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"அறியப்படாத ரிங்டோன்"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"வைஃபை நெட்வொர்க் உள்ளது"</item>
-    <item quantity="other" msgid="4192424489168397386">"வைஃபை நெட்வொர்க்குகள் உள்ளன"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"இருக்கும் வைஃபை நெட்வொர்க்கைத் திற"</item>
-    <item quantity="other" msgid="7915895323644292768">"இருக்கும் வைஃபை நெட்வொர்க்குகளைத் திற"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">வைஃபை நெட்வொர்க்குகள் உள்ளன</item>
+      <item quantity="one">வைஃபை நெட்வொர்க் உள்ளது</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">பொது வைஃபை நெட்வொர்க்குகள் உள்ளன</item>
+      <item quantity="one">பொது வைஃபை நெட்வொர்க் உள்ளது</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"வைஃபை நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1526,10 +1527,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"தவிர்"</string>
     <string name="no_matches" msgid="8129421908915840737">"பொருத்தம் ஏதுமில்லை"</string>
     <string name="find_on_page" msgid="1946799233822820384">"பக்கத்தில் கண்டறி"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 பொருத்தம்"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g> இல் <xliff:g id="INDEX">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 பொருத்தம்</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"முடிந்தது"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB சேமிப்பிடத்தை இணைப்பு நீக்குகிறது…"</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD கார்டை இணைப்பு நீக்குகிறது…"</string>
@@ -1625,7 +1626,7 @@
     <string name="issued_by" msgid="2647584988057481566">"வழங்கியது:"</string>
     <string name="validity_period" msgid="8818886137545983110">"செல்லுபடியாகும் காலம்:"</string>
     <string name="issued_on" msgid="5895017404361397232">"வழங்கிய நாள்:"</string>
-    <string name="expires_on" msgid="3676242949915959821">"இதில் காலாவதியாகிறது:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"காலாவதியாவது:"</string>
     <string name="serial_number" msgid="758814067660862493">"வரிசை எண்:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"கைரேகைகள்:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 கைரேகை:"</string>
@@ -1813,12 +1814,12 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"புதிய பின்"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"புதிய பின்னை உறுதிப்படுத்தவும்"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"வரம்புகளைத் திருத்துவதற்கு பின்னை உருவாக்கவும்"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINகள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"பின்கள் பொருந்தவில்லை. மீண்டும் முயற்சிக்கவும்."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"பின் மிகவும் சிறியதாக உள்ளது. குறைந்தது 4 இலக்கங்கள் இருக்க வேண்டும்."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 வினாடி கழித்து முயற்சிக்கவும்"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்</item>
+      <item quantity="one">1 வினாடி கழித்து முயற்சிக்கவும்</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"மீண்டும் முயற்சிக்கவும்"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"முழுத் திரையிலிருந்து வெளியேற மேலிருந்து கீழே ஸ்வைப் செய்யவும்."</string>
     <string name="done_label" msgid="2093726099505892398">"முடிந்தது"</string>
@@ -1841,25 +1842,25 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகளானது அவற்றைத் திறக்கும்வரையில் புதுப்பிக்கப்படாமல் போகக்கூடும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"பேட்டரி ஆயுளை மேம்படுத்த, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்துள்ள மின்னஞ்சல், செய்தியிடல் மற்றும் பிற பயன்பாடுகள் திறக்கும்வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே முடங்கும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"செயலற்ற நேரம் முடியும் வரை"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
+      <item quantity="one">ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> வரை)</item>
+      <item quantity="one">ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> வரை)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">%d நிமிடங்களுக்கு</item>
+      <item quantity="one">ஒரு நிமிடத்திற்கு</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">%d மணிநேரத்திற்கு</item>
+      <item quantity="one">ஒரு மணிநேரத்திற்கு</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>

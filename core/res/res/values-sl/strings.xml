@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"Št. dni: <xliff:g id="DAYS">%1$d</xliff:g>"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
@@ -61,10 +61,12 @@
     <string name="needPuk" msgid="919668385956251611">"Kartica SIM je zaklenjena s kodo PUK. Če jo želite odkleniti, vnesite kodo PUK."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Če želite odstraniti blokiranje kartice SIM, vnesite PUK2."</string>
     <string name="enablePin" msgid="209412020907207950">"Ni uspelo. Omogočite zaklepanje kartice SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem se bo kartica SIM zaklenila."</item>
-    <item quantity="other" msgid="7530597808358774740">"Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat. Potem se bo kartica SIM zaklenila."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus. Potem se bo kartica SIM zaklenila.</item>
+      <item quantity="two">Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa. Potem se bo kartica SIM zaklenila.</item>
+      <item quantity="few">Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse. Potem se bo kartica SIM zaklenila.</item>
+      <item quantity="other">Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov. Potem se bo kartica SIM zaklenila.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID dohodnega klicatelja"</string>
@@ -271,13 +273,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostop do kartice SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcije za ljudi s posebnimi potrebami"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcije, ki jih lahko zahteva tehnologija za ljudi s posebnimi potrebami."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobivanje vsebine okna"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverite vsebino okna, ki ga uporabljate."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklop raziskovanja z dotikom"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Elementi, ki se jih dotaknete, bodo izrečeni naglas, zaslon pa lahko raziskujete s potezami."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklop izboljšanja dostopnosti spleta za ljudi s posebnimi potrebami"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Vklopiti izboljšano dostopnost spleta za ljudi s posebnimi potrebami"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za boljšo dostopnost vsebine aplikacije je mogoče namestiti skripte."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovanje besedila, ki ga natipkate"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Opazovati besedilo, ki ga natipkate"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogočanje ali spreminjanje vrstice stanja"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikacijam omogoča onemogočenje vrstice stanja ali dodajanje in odstranjevanje ikon sistema."</string>
@@ -834,7 +836,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Onemogočanje funkcij tipkov."</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Preprečitev uporabe nekaterih funkcij tipkovnice."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Začetna stran"</item>
+    <item msgid="8901098336658710359">"Dom"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
     <item msgid="7897544654242874543">"Služba"</item>
     <item msgid="1103601433382158155">"Službeni faks"</item>
@@ -850,7 +852,7 @@
     <item msgid="2374913952870110618">"Po meri"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Začetna stran"</item>
+    <item msgid="6880257626740047286">"Dom"</item>
     <item msgid="5629153956045109251">"Služba"</item>
     <item msgid="4966604264500343469">"Drugo"</item>
     <item msgid="4932682847595299369">"Po meri"</item>
@@ -877,7 +879,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Po meri"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Začetna stran"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Dom"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilni"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Služba"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Službeni faks"</string>
@@ -888,7 +890,7 @@
     <string name="phoneTypeCar" msgid="8738360689616716982">"Avto"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Podjetje (glavno)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavna"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavni"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Drugi faks"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telefaks"</string>
@@ -907,7 +909,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Drugo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Po meri"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Začetna stran"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Dom"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Služba"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Drugo"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Po meri"</string>
@@ -931,7 +933,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pomočnik"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Brat"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Otrok"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Domači partner"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Oče"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Prijatelj"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Vodja"</string>
@@ -1128,75 +1130,110 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Storitev <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> želi omogočiti raziskovanje z dotikom. Ko je raziskovanje z dotikom vklopljeno, lahko slišite ali vidite opise tega, kar je pod vašim prstom, ali izvajate poteze za interakcijo s telefonom."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Pred 1 mesecem"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Pred več kot 1 mesecem"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"Pred 1 sekundo"</item>
-    <item quantity="other" msgid="3903706804349556379">"pred toliko sekundami: <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"pred 1 minuto"</item>
-    <item quantity="other" msgid="2176942008915455116">"Pred <xliff:g id="COUNT">%d</xliff:g> minutami"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"pred 1 uro"</item>
-    <item quantity="other" msgid="2467273239587587569">"Pred <xliff:g id="COUNT">%d</xliff:g> urami"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Zadnjih <xliff:g id="COUNT">%d</xliff:g> dni"</item>
-  </plurals>
+    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> sekundo</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> sekundama</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> sekundami</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> sekundami</item>
+    </plurals>
+    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> minuto</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> minutama</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> minutami</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> minutami</item>
+    </plurals>
+    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> uro</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> urama</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> urami</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> urami</item>
+    </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">Zadnji <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
+      <item quantity="two">Zadnja <xliff:g id="COUNT_1">%d</xliff:g> dneva</item>
+      <item quantity="few">Zadnje <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
+      <item quantity="other">Zadnjih <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Pretekli mesec"</string>
     <string name="older" msgid="5211975022815554840">"Starejše"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"včeraj"</item>
-    <item quantity="other" msgid="2479586466153314633">"Pred <xliff:g id="COUNT">%d</xliff:g> dnevi"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"čez 1 sekundo"</item>
-    <item quantity="other" msgid="1241926116443974687">"Čez <xliff:g id="COUNT">%d</xliff:g> sekund"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"čez 1 minuto"</item>
-    <item quantity="other" msgid="3330713936399448749">"Čez toliko minut: <xliff:g id="COUNT">%d</xliff:g>."</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"čez 1 uro"</item>
-    <item quantity="other" msgid="547290677353727389">"čez <xliff:g id="COUNT">%d</xliff:g> ur"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"jutri"</item>
-    <item quantity="other" msgid="5109449375100953247">"čez <xliff:g id="COUNT">%d</xliff:g> dni"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"pred 1 sekundo"</item>
-    <item quantity="other" msgid="3699169366650930415">"Pred toliko sekundami: <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"pred 1 minuto"</item>
-    <item quantity="other" msgid="851164968597150710">"Pred <xliff:g id="COUNT">%d</xliff:g> minutami"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"pred 1 uro"</item>
-    <item quantity="other" msgid="6889970745748538901">"Pred <xliff:g id="COUNT">%d</xliff:g> urami"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"včeraj"</item>
-    <item quantity="other" msgid="3453342639616481191">"Pred <xliff:g id="COUNT">%d</xliff:g> dnevi"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"čez 1 sekundo"</item>
-    <item quantity="other" msgid="5495880108825805108">"čez toliko sekund: <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"čez 1 min"</item>
-    <item quantity="other" msgid="4216113292706568726">"čez <xliff:g id="COUNT">%d</xliff:g> minut"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"čez 1 uro"</item>
-    <item quantity="other" msgid="3705373766798013406">"čez <xliff:g id="COUNT">%d</xliff:g> ur"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"jutri"</item>
-    <item quantity="other" msgid="2973062968038355991">"čez <xliff:g id="COUNT">%d</xliff:g> dni"</item>
-  </plurals>
+    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> dnevom</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> dnevoma</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> dnevi</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> dnevi</item>
+    </plurals>
+    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> sekundo</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> sekundi</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> sekunde</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
+    </plurals>
+    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> minuto</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> minuti</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> minute</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> uro</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> uri</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> ure</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> ur</item>
+    </plurals>
+    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> dan</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> dneva</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> dni</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> dni</item>
+    </plurals>
+    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> s</item>
+    </plurals>
+    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> min</item>
+    </plurals>
+    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> uro</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> urama</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> urami</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> urami</item>
+    </plurals>
+    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
+      <item quantity="one">pred <xliff:g id="COUNT">%d</xliff:g> dnevom</item>
+      <item quantity="two">pred <xliff:g id="COUNT">%d</xliff:g> dnevoma</item>
+      <item quantity="few">pred <xliff:g id="COUNT">%d</xliff:g> dnevi</item>
+      <item quantity="other">pred <xliff:g id="COUNT">%d</xliff:g> dnevi</item>
+    </plurals>
+    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> s</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> s</item>
+    </plurals>
+    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> min</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> min</item>
+    </plurals>
+    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> uro</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> uri</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> ure</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> ur</item>
+    </plurals>
+    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
+      <item quantity="one">čez <xliff:g id="COUNT">%d</xliff:g> dan</item>
+      <item quantity="two">čez <xliff:g id="COUNT">%d</xliff:g> dneva</item>
+      <item quantity="few">čez <xliff:g id="COUNT">%d</xliff:g> dni</item>
+      <item quantity="other">čez <xliff:g id="COUNT">%d</xliff:g> dni</item>
+    </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"vsak <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"leta <xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1212,18 +1249,24 @@
     <string name="weeks" msgid="6509623834583944518">"tednov"</string>
     <string name="year" msgid="4001118221013892076">"leto"</string>
     <string name="years" msgid="6881577717993213522">"let"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 sekunda"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> s"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 minuta"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 ura"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> h"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sekunda</item>
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> sekundi</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekunde</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekund</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> minuta</item>
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> minuti</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minute</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> ura</item>
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> uri</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> ure</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> ur</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Težava z videoposnetkom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ta videoposnetek ni veljaven za pretakanje v to napravo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Tega videoposnetka ni mogoče predvajati."</string>
@@ -1331,14 +1374,18 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Brez"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Melodije zvonjenja"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznana melodija zvonjenja"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Na voljo je brezžično omrežje"</item>
-    <item quantity="other" msgid="4192424489168397386">"Na voljo so brezžična omrežja"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Odpiranje razpoložljivega brezžičnega omrežja"</item>
-    <item quantity="other" msgid="7915895323644292768">"Odpiranje razpoložljivih brezžičnih omrežij"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Na voljo so omrežja Wi-Fi</item>
+      <item quantity="two">Na voljo so omrežja Wi-Fi</item>
+      <item quantity="few">Na voljo so omrežja Wi-Fi</item>
+      <item quantity="other">Na voljo so omrežja Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Na voljo so odprta omrežja Wi-Fi</item>
+      <item quantity="two">Na voljo so odprta omrežja Wi-Fi</item>
+      <item quantity="few">Na voljo so odprta omrežja Wi-Fi</item>
+      <item quantity="other">Na voljo so odprta omrežja Wi-Fi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Prijava v omrežje Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Prijava v omrežje"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1350,7 +1397,7 @@
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct ni bilo mogoče zagnati."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct je vklopljen"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Dotaknite se za nastavitve"</string>
-    <string name="accept" msgid="1645267259272829559">"Sprejmi"</string>
+    <string name="accept" msgid="1645267259272829559">"Sprejmem"</string>
     <string name="decline" msgid="2112225451706137894">"Zavrni"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Povabilo je poslano"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Povabilo za povezavo"</string>
@@ -1526,10 +1573,12 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Preskoči"</string>
     <string name="no_matches" msgid="8129421908915840737">"Ni ujemanj"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Najdi na strani"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 ujemanje"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="two"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Končano"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Izpenjanje pomnilnika USB ..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Izpenjanje kartice SD ..."</string>
@@ -1598,7 +1647,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"Notranji pomnilnik"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"Notranja shramba"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kartica SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Pomnilnik USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Uredi"</string>
@@ -1815,10 +1864,12 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Ustvarite PIN za spreminjanje omejitev"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kodi PIN se ne ujemata. Poskusite znova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN je prekratek. Imeti mora vsaj 4 števke."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Poskusite znova čez sekundo"</item>
-    <item quantity="other" msgid="4730868920742952817">"Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> s"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekundo</item>
+      <item quantity="two">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekundi</item>
+      <item quantity="few">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekunde</item>
+      <item quantity="other">Poskusite znova čez <xliff:g id="COUNT">%d</xliff:g> sekund</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Poskusite znova pozneje"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Povlecite z vrha, da zaprete celozaslonski način."</string>
     <string name="done_label" msgid="2093726099505892398">"Dokončano"</string>
@@ -1838,28 +1889,36 @@
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pripet. Vaša organizacija ne dovoli odpenjanja."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je odpet"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odpenjanjem vprašaj za PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zahtevaj PIN pred odpenjanjem"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pred odpenjanjem vprašaj za vzorec za odklepanje"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred odpenjanjem vprašaj za geslo"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Do konca prekinitve delovanja ob <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do konca časa nedelovanja"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Eno minuto (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"Toliko minut: %1$d (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Eno uro (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"Toliko ur: %1$d (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Za eno minuto"</item>
-    <item quantity="other" msgid="6924190729213550991">"Za %d min"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Za eno uro"</item>
-    <item quantity="other" msgid="5408537517529822157">"Za %d h"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">%d minuto (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">%d minuti (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%d minute (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">%1$d uro (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="two">%1$d uri (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d ure (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d ur (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">%d minuto</item>
+      <item quantity="two">%d minuti</item>
+      <item quantity="few">%d minute</item>
+      <item quantity="other">%d minut</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">%d uro</item>
+      <item quantity="two">%d uri</item>
+      <item quantity="few">%d ure</item>
+      <item quantity="other">%d ur</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Za nedoločen čas"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Strni"</string>
