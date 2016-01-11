@@ -166,6 +166,9 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         int y = (int) event.getY();
         int xDiff = Math.abs(x - mTouchDownX);
         int yDiff = Math.abs(y - mTouchDownY);
+        if (mDivider == null || mRecentsComponent == null) {
+            return false;
+        }
         if (!mDockWindowTouchSlopExceeded) {
             boolean touchSlopExceeded = !mIsVertical
                     ? yDiff > mScrollTouchSlop && yDiff > xDiff
@@ -214,7 +217,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private void handleDragActionUpEvent(MotionEvent event) {
         mVelocityTracker.addMovement(event);
         mVelocityTracker.computeCurrentVelocity(1000);
-        if (mDockWindowTouchSlopExceeded) {
+        if (mDockWindowTouchSlopExceeded && mDivider != null && mRecentsComponent != null) {
             if (mDragMode == DRAG_MODE_DIVIDER) {
                 mDivider.getView().stopDragging(mIsVertical
                                 ? (int) event.getRawX()
@@ -254,7 +257,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         float absVelY = Math.abs(velocityY);
         boolean isValidFling = absVelX > mMinFlingVelocity &&
                 mIsVertical ? (absVelY > absVelX) : (absVelX > absVelY);
-        if (isValidFling) {
+        if (isValidFling && mRecentsComponent != null) {
             boolean showNext;
             if (!mIsRTL) {
                 showNext = mIsVertical ? (velocityY < 0) : (velocityX < 0);
