@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Gjør at apper kan skrives til ekstern lagring, uavhengig av manifestverdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til å kunne endre størrelse"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Dette gjør at alle aktivitene kan endre størrelse for flervindusmodus, uavhengig av manifestverdier."</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"Slå på vinduer i fritt format"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Slår på støtte for vinduer i eksperimentelt fritt format."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Passord for sikkerhetskopiering på datamaskin"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Fullstendig sikkerhetskopiering på datamaskin beskyttes ikke for øyeblikket."</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Trykk for å endre eller fjerne passordet for fullstendige sikkerhetskopier på datamaskinen"</string>

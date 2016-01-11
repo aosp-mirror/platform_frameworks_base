@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলিকে আকার পরিবর্তনযোগ্য করে তোলে৷"</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"ফ্রি-ফর্ম উইন্ডোগুলি সক্ষম করুন"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ডেস্কটপ পূর্ণ ব্যাকআপ বর্তমানে সুরক্ষিত নয়"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ডেস্কটপ পুরো ব্যাকআপের জন্য পাসওয়ার্ড পরিবর্তন বা মুছে ফেলার জন্য স্পর্শ করুন"</string>

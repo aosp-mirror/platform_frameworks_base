@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"මැනිෆෙස්ට් අගයන් නොසලකා, ඕනෑම යෙදුමක් අභ්‍යන්තර ගබඩාවට ලිවීමට සුදුසුකම් ලබා දෙයි"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ක්‍රියාකාරකම් ප්‍රතිප්‍රමාණ කළ හැකි බවට බල කරන්න"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"මැනිෆෙස්ට් අගයන් නොසලකා, සියලු ක්‍රියාකාරකම් බහු-කවුළු සඳහා ප්‍රතිප්‍රමාණ කළ හැකි බවට පත් කරයි."</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"අනියම් හැඩැති කවුළු සබල කරන්න"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"පරීක්ෂණාත්මක අනියම් හැඩැති කවුළු සඳහා සහාය සබල කරයි."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ඩෙස්ක්ටොප් උපස්ථ මුරපදය"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ දැනට ආරක්ෂා කර නොමැත"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ සඳහා මුරපදය වෙනස් කිරීමට හෝ ඉවත් කිරීමට ස්පර්ශ කරන්න"</string>

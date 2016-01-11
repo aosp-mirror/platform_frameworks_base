@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"மேனிஃபெஸ்ட் மதிப்புகளை பொருட்படுத்தாமல், எந்தப் பயன்பாட்டையும் வெளிப்புற சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமைக்கும்."</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"பரிசோதனைக்குரிய குறிப்பிட்ட வடிவமில்லாத சாளரங்களுக்கான ஆதரவை இயக்கும்."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"டெஸ்க்டாப் காப்புப்பிரதி கடவுச்சொல்"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"டெஸ்க்டாப்பின் முழு காப்புப்பிரதிகள் தற்போது பாதுகாக்கப்படவில்லை"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"டெஸ்க்டாப்பின் முழுமையான காப்புப்பிரதிகளுக்கான கடவுச்சொல்லை மாற்றுவதற்கு அல்லது அகற்றுவதற்குத் தொடவும்"</string>

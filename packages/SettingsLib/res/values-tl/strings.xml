@@ -247,10 +247,8 @@
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Mara-write na sa external storage ang anumang app, anuman ang manifest value"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Sapilitang gawing resizable ang mga aktibidad"</string>
     <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Gawing resizable para sa multi-window ang lahat ng aktibidad, anuman ang mga manifest value."</string>
-    <!-- no translation found for enable_freeform_support (1461893351278940416) -->
-    <skip />
-    <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
-    <skip />
+    <string name="enable_freeform_support" msgid="1461893351278940416">"I-enable ang mga freeform window"</string>
+    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Ine-enable ang suporta para sa mga pang-eksperimentong freeform window."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Password ng pag-backup ng desktop"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Kasalukuyang hindi pinoprotektahan ang mga buong pag-backup ng desktop"</string>
     <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Pindutin upang baguhin o alisin ang password para sa mga buong pag-backup ng desktop"</string>
