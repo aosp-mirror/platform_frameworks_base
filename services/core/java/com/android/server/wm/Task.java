@@ -558,8 +558,9 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     boolean isResizeableByDockedStack() {
-        return mStack != null && getDisplayContent().getDockedStackLocked() != null &&
-                StackId.isTaskResizeableByDockedStack(mStack.mStackId);
+        final DisplayContent displayContent = getDisplayContent();
+        return displayContent != null && displayContent.getDockedStackLocked() != null
+                && mStack != null && StackId.isTaskResizeableByDockedStack(mStack.mStackId);
     }
 
     /**
