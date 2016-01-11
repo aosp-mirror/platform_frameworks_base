@@ -2977,7 +2977,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter,
                     mCurConfiguration.orientation, frame, insets, surfaceInsets, isVoiceInteraction,
-                    freeform, atoken.mTask.mTaskId);
+                    !fullscreen, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) {
                     RuntimeException e = null;
