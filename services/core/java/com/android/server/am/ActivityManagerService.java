@@ -515,9 +515,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private Installer mInstaller;
 
     /** Run all ActivityStacks through this */
-    ActivityStackSupervisor mStackSupervisor;
+    final ActivityStackSupervisor mStackSupervisor;
 
-    ActivityStarter mActivityStarter;
+    final ActivityStarter mActivityStarter;
 
     /** Task stack change listeners. */
     private RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
@@ -3643,11 +3643,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
         Intent intent = getHomeIntent();
-        ActivityInfo aInfo =
-            resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
         if (aInfo != null) {
-            intent.setComponent(new ComponentName(
-                    aInfo.applicationInfo.packageName, aInfo.name));
+            intent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
             // Don't do this if the home app is currently being
             // instrumented.
             aInfo = new ActivityInfo(aInfo);
