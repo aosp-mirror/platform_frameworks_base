@@ -109,7 +109,8 @@ ifeq (true, $(HWUI_NEW_OPS))
         BakedOpDispatcher.cpp \
         BakedOpRenderer.cpp \
         BakedOpState.cpp \
-        OpReorderer.cpp \
+        FrameReorderer.cpp \
+        LayerReorderer.cpp \
         RecordingCanvas.cpp
 
     hwui_cflags += -DHWUI_NEW_OPS
@@ -236,8 +237,8 @@ LOCAL_SRC_FILES += \
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
         tests/unit/BakedOpStateTests.cpp \
-        tests/unit/RecordingCanvasTests.cpp \
-        tests/unit/OpReordererTests.cpp
+        tests/unit/FrameReordererTests.cpp \
+        tests/unit/RecordingCanvasTests.cpp
 endif
 
 include $(BUILD_NATIVE_TEST)
@@ -298,7 +299,7 @@ LOCAL_SRC_FILES += \
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
-        tests/microbench/OpReordererBench.cpp
+        tests/microbench/FrameReordererBench.cpp
 endif
 
 include $(BUILD_EXECUTABLE)

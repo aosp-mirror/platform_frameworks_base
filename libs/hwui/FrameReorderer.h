@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_OP_REORDERER_H
-#define ANDROID_HWUI_OP_REORDERER_H
+#pragma once
 
 #include "BakedOpState.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
+#include "LayerReorderer.h"
 #include "RecordedOp.h"
 
 #include <vector>
@@ -31,114 +31,34 @@ namespace android {
 namespace uirenderer {
 
 class BakedOpState;
-class BatchBase;
 class LayerUpdateQueue;
-class MergingOpBatch;
 class OffscreenBuffer;
-class OpBatch;
 class Rect;
 
-typedef int batchid_t;
-typedef const void* mergeid_t;
-
-namespace OpBatchType {
-    enum {
-        Bitmap,
-        MergedPatch,
-        AlphaVertices,
-        Vertices,
-        AlphaMaskTexture,
-        Text,
-        ColorText,
-        Shadow,
-        TextureLayer,
-        Functor,
-        CopyToLayer,
-        CopyFromLayer,
-
-        Count // must be last
-    };
-}
-
-class OpReorderer : public CanvasStateClient {
-    typedef void (*BakedOpReceiver)(void*, const BakedOpState&);
-    typedef void (*MergedOpReceiver)(void*, const MergedBakedOpList& opList);
-
-    /**
-     * Stores the deferred render operations and state used to compute ordering
-     * for a single FBO/layer.
-     */
-    class LayerReorderer {
-    public:
-        // Create LayerReorderer for Fbo0
-        LayerReorderer(uint32_t width, uint32_t height, const Rect& repaintRect)
-                : LayerReorderer(width, height, repaintRect, nullptr, nullptr) {};
-
-        // Create LayerReorderer for an offscreen layer, where beginLayerOp is present for a
-        // saveLayer, renderNode is present for a HW layer.
-        LayerReorderer(uint32_t width, uint32_t height,
-                const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
-
-        // iterate back toward target to see if anything drawn since should overlap the new op
-        // if no target, merging ops still iterate to find similar batch to insert after
-        void locateInsertIndex(int batchId, const Rect& clippedBounds,
-                BatchBase** targetBatch, size_t* insertBatchIndex) const;
-
-        void deferUnmergeableOp(LinearAllocator& allocator, BakedOpState* op, batchid_t batchId);
-
-        // insertion point of a new batch, will hopefully be immediately after similar batch
-        // (generally, should be similar shader)
-        void deferMergeableOp(LinearAllocator& allocator,
-                BakedOpState* op, batchid_t batchId, mergeid_t mergeId);
-
-        void replayBakedOpsImpl(void* arg, BakedOpReceiver* receivers, MergedOpReceiver*) const;
-
-        void deferLayerClear(const Rect& dstRect);
-
-        bool empty() const {
-            return mBatches.empty();
-        }
-
-        void clear() {
-            mBatches.clear();
-        }
-
-        void dump() const;
-
-        const uint32_t width;
-        const uint32_t height;
-        const Rect repaintRect;
-        OffscreenBuffer* offscreenBuffer;
-        const BeginLayerOp* beginLayerOp;
-        const RenderNode* renderNode;
-        const ClipRect viewportClip;
-
-        // list of deferred CopyFromLayer ops, to be deferred upon encountering EndUnclippedLayerOps
-        std::vector<BakedOpState*> activeUnclippedSaveLayers;
-    private:
-        void flushLayerClears(LinearAllocator& allocator);
-
-        std::vector<BatchBase*> mBatches;
-
-        /**
-         * Maps the mergeid_t returned by an op's getMergeId() to the most recently seen
-         * MergingDrawBatch of that id. These ids are unique per draw type and guaranteed to not
-         * collide, which avoids the need to resolve mergeid collisions.
-         */
-        std::unordered_map<mergeid_t, MergingOpBatch*> mMergingBatchLookup[OpBatchType::Count];
-
-        // Maps batch ids to the most recent *non-merging* batch of that id
-        OpBatch* mBatchLookup[OpBatchType::Count] = { nullptr };
-
-        std::vector<Rect> mClearRects;
-    };
-
+/**
+ * Traverses all of the drawing commands from the layers and RenderNodes passed into it, preparing
+ * them to be rendered.
+ *
+ * Resolves final drawing state for each operation (including clip, alpha and matrix), and then
+ * reorder and merge each op as it is resolved for drawing efficiency. Each layer of content (either
+ * from the LayerUpdateQueue, or temporary layers created by saveLayer operations in the
+ * draw stream) will create different reorder contexts, each in its own LayerReorderer.
+ *
+ * Then the prepared or 'baked' drawing commands can be issued by calling the templated
+ * replayBakedOps() function, which will dispatch them (including any created merged op collections)
+ * to a Dispatcher and Renderer. See BakedOpDispatcher for how these baked drawing operations are
+ * resolved into Glops and rendered via BakedOpRenderer.
+ *
+ * This class is also the authoritative source for traversing RenderNodes, both for standard op
+ * traversal within a DisplayList, and for out of order RenderNode traversal for Z and projection.
+ */
+class FrameReorderer : public CanvasStateClient {
 public:
-    OpReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+    FrameReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
 
-    virtual ~OpReorderer() {}
+    virtual ~FrameReorderer() {}
 
     /**
      * replayBakedOps() is templated based on what class will receive ops being replayed.
@@ -253,7 +173,7 @@ private:
             BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
 
     /**
-     * Declares all OpReorderer::deferXXXXOp() methods for every RecordedOp type.
+     * Declares all FrameReorderer::deferXXXXOp() methods for every RecordedOp type.
      *
      * These private methods are called from within deferImpl to defer each individual op
      * type differently.
@@ -287,5 +207,3 @@ private:
 
 }; // namespace uirenderer
 }; // namespace android
-
-#endif // ANDROID_HWUI_OP_REORDERER_H
