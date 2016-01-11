@@ -61,8 +61,7 @@ public class MetricsLogger implements MetricsConstants {
      * credentials UI.
      */
     public static final int PROFILE_CHALLENGE = 271;
-    public static final int ACTION_WINDOW_DOCK_SWIPE = 272;
-    public static final int QS_BATTERY_DETAIL = 273;
+    public static final int QS_BATTERY_DETAIL = 272;
 
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
