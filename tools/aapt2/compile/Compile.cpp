@@ -107,6 +107,7 @@ struct CompileOptions {
     Maybe<std::string> resDir;
     std::vector<std::u16string> products;
     bool pseudolocalize = false;
+    bool legacyMode = false;
     bool verbose = false;
 };
 
@@ -192,6 +193,7 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
 
         ResourceParserOptions parserOptions;
         parserOptions.products = options.products;
+        parserOptions.errorOnPositionalArguments = !options.legacyMode;
 
         // If the filename includes donottranslate, then the default translatable is false.
         parserOptions.translatable = pathData.name.find(u"donottranslate") == std::string::npos;
@@ -438,6 +440,8 @@ int compile(const std::vector<StringPiece>& args) {
             .optionalFlag("--dir", "Directory to scan for resources", &options.resDir)
             .optionalSwitch("--pseudo-localize", "Generate resources for pseudo-locales "
                             "(en-XA and ar-XB)", &options.pseudolocalize)
+            .optionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
+                            &options.legacyMode)
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
     if (!flags.parse("aapt2 compile", args, &std::cerr)) {
         return 1;

@@ -228,29 +228,53 @@ public:
         return {};
     }
 
+    /**
+     * Precondition: ResourceTable doesn't have any IDs assigned yet, nor is it linked.
+     * Postcondition: ResourceTable has only one package left. All others are stripped, or there
+     *                is an error and false is returned.
+     */
     bool verifyNoExternalPackages() {
+        auto isExtPackageFunc = [&](const std::unique_ptr<ResourceTablePackage>& pkg) -> bool {
+            return mContext.getCompilationPackage() != pkg->name ||
+                    !pkg->id ||
+                    pkg->id.value() != mContext.getPackageId();
+        };
+
         bool error = false;
         for (const auto& package : mFinalTable.packages) {
-            if (mContext.getCompilationPackage() != package->name ||
-                    !package->id || package->id.value() != mContext.getPackageId()) {
+            if (isExtPackageFunc(package)) {
                 // We have a package that is not related to the one we're building!
                 for (const auto& type : package->types) {
                     for (const auto& entry : type->entries) {
+                        ResourceNameRef resName(package->name, type->type, entry->name);
+
                         for (const auto& configValue : entry->values) {
-                            mContext.getDiagnostics()->error(
-                                    DiagMessage(configValue.value->getSource())
-                                                << "defined resource '"
-                                                << ResourceNameRef(package->name,
-                                                                   type->type,
-                                                                   entry->name)
-                                                << "' for external package '"
-                                                << package->name << "'");
-                            error = true;
+                            // Special case the occurrence of an ID that is being generated for the
+                            // 'android' package. This is due to legacy reasons.
+                            if (valueCast<Id>(configValue.value.get()) &&
+                                    package->name == u"android") {
+                                mContext.getDiagnostics()->warn(
+                                        DiagMessage(configValue.value->getSource())
+                                        << "generated id '" << resName
+                                        << "' for external package '" << package->name
+                                        << "'");
+                            } else {
+                                mContext.getDiagnostics()->error(
+                                        DiagMessage(configValue.value->getSource())
+                                        << "defined resource '" << resName
+                                        << "' for external package '" << package->name
+                                        << "'");
+                                error = true;
+                            }
                         }
                     }
                 }
             }
         }
+
+        auto newEndIter = std::remove_if(mFinalTable.packages.begin(), mFinalTable.packages.end(),
+                                         isExtPackageFunc);
+        mFinalTable.packages.erase(newEndIter, mFinalTable.packages.end());
         return !error;
     }
 
