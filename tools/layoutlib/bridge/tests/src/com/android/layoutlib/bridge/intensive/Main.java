@@ -305,6 +305,11 @@ public class Main {
         renderAndVerify("array_check.xml", "array_check.png");
     }
 
+    @Test
+    public void testAllWidgetsTablet() throws ClassNotFoundException {
+        renderAndVerify("allwidgets.xml", "allwidgets_tab.png", ConfigGenerator.NEXUS_7_2012);
+    }
+
     @AfterClass
     public static void tearDown() {
         sLayoutLibLog = null;
@@ -423,6 +428,16 @@ public class Main {
      */
     private void renderAndVerify(String layoutFileName, String goldenFileName)
             throws ClassNotFoundException {
+        renderAndVerify(layoutFileName, goldenFileName, ConfigGenerator.NEXUS_5);
+    }
+
+    /**
+     * Create a new rendering session and test that rendering given layout on given device
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(String layoutFileName, String goldenFileName,
+            ConfigGenerator deviceConfig)
+            throws ClassNotFoundException {
         // Create the layout pull parser.
         LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
         // Create LayoutLibCallback.
@@ -430,7 +445,7 @@ public class Main {
         layoutLibCallback.initResources();
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
-        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+        SessionParams params = getSessionParams(parser, deviceConfig,
                 layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
         renderAndVerify(params, goldenFileName);
     }
