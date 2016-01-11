@@ -428,6 +428,15 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
     /**
+     * Determine whether user can switch Wi-Fi preferred or Cellular preferred in calling preference.
+     * Some operators support Wi-Fi Calling only, not VoLTE.
+     * They don't need "Cellular preferred" option.
+     * In this case, set uneditalbe attribute for preferred preference.
+     * @hide
+     */
+    public static final String KEY_EDITABLE_WFC_MODE_BOOL = "editable_wfc_mode_bool";
+
+    /**
      * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
      * non-zero value is specified, the UE shall wait for the specified amount of time before it
      * sends out successive DTMF tones on the network.
@@ -560,6 +569,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
+        sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
 
         // MMS defaults
