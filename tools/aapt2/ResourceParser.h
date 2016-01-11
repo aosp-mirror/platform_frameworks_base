@@ -44,6 +44,11 @@ struct ResourceParserOptions {
      * Whether the default setting for this parser is to allow translation.
      */
     bool translatable = true;
+
+    /**
+     * Whether positional arguments in formatted strings are treated as errors or warnings.
+     */
+    bool errorOnPositionalArguments = true;
 };
 
 /*

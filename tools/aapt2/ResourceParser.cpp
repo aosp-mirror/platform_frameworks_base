@@ -582,10 +582,15 @@ bool ResourceParser::parseString(xml::XmlPullParser* parser, ParsedResource* out
 
         if (formatted && translateable) {
             if (!util::verifyJavaStringFormat(*stringValue->value)) {
-                mDiag->error(DiagMessage(outResource->source)
-                             << "multiple substitutions specified in non-positional format; "
-                                "did you mean to add the formatted=\"false\" attribute?");
-                return false;
+                DiagMessage msg(outResource->source);
+                msg << "multiple substitutions specified in non-positional format; "
+                       "did you mean to add the formatted=\"false\" attribute?";
+                if (mOptions.errorOnPositionalArguments) {
+                    mDiag->error(msg);
+                    return false;
+                }
+
+                mDiag->warn(msg);
             }
         }
 
