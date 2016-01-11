@@ -64,6 +64,14 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // Indicates that motion events are being collected to match a gesture.
     private boolean mRecognizingGesture;
 
+    // Indicates that motion events from the second pointer are being checked
+    // for a double tap.
+    private boolean mSecondFingerDoubleTap;
+
+    // Tracks the most recent time where ACTION_POINTER_DOWN was sent for the
+    // second pointer.
+    private long mSecondPointerDownTime;
+
     // Policy flags of the previous event.
     private int mPolicyFlags;
 
@@ -102,6 +110,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mDoubleTapDetected = false;
+                mSecondFingerDoubleTap = false;
                 mRecognizingGesture = true;
                 mPreviousX = x;
                 mPreviousY = y;
@@ -133,6 +142,43 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                     }
                 }
                 break;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+                // Once a second finger is used, we're definitely not
+                // recognizing a gesture.
+                cancelGesture();
+
+                if (event.getPointerCount() == 2) {
+                    // If this was the second finger, attempt to recognize double
+                    // taps on it.
+                    mSecondFingerDoubleTap = true;
+                    mSecondPointerDownTime = event.getEventTime();
+                } else {
+                    // If there are more than two fingers down, stop watching
+                    // for a double tap.
+                    mSecondFingerDoubleTap = false;
+                }
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                // If we're detecting taps on the second finger, see if we
+                // should finish the double tap.
+                if (mSecondFingerDoubleTap && maybeFinishDoubleTap(event, policyFlags)) {
+                    return true;
+                }
+                break;
+        }
+
+        // If we're detecting taps on the second finger, map events from the
+        // finger to the first finger.
+        if (mSecondFingerDoubleTap) {
+            MotionEvent newEvent = mapSecondPointerToFirstPointer(event);
+            if (newEvent == null) {
+                return false;
+            }
+            boolean handled = mGestureDetector.onTouchEvent(newEvent);
+            newEvent.recycle();
+            return handled;
         }
 
         if (!mRecognizingGesture) {
@@ -146,6 +192,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     public void clear() {
         mFirstTapDetected = false;
         mDoubleTapDetected = false;
+        mSecondFingerDoubleTap = false;
         cancelGesture();
         mStrokeBuffer.clear();
     }
@@ -228,5 +275,29 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         }
 
         return false;
+    }
+
+    private MotionEvent mapSecondPointerToFirstPointer(MotionEvent event) {
+        // Only map basic events when two fingers are down.
+        if (event.getPointerCount() != 2 ||
+                (event.getActionMasked() != MotionEvent.ACTION_POINTER_DOWN &&
+                 event.getActionMasked() != MotionEvent.ACTION_POINTER_UP &&
+                 event.getActionMasked() != MotionEvent.ACTION_MOVE)) {
+            return null;
+        }
+
+        int action = event.getActionMasked();
+
+        if (action == MotionEvent.ACTION_POINTER_DOWN) {
+            action = MotionEvent.ACTION_DOWN;
+        } else if (action == MotionEvent.ACTION_POINTER_UP) {
+            action = MotionEvent.ACTION_UP;
+        }
+
+        // Map the information from the second pointer to the first.
+        return MotionEvent.obtain(mSecondPointerDownTime, event.getEventTime(), action,
+                event.getX(1), event.getY(1), event.getPressure(1), event.getSize(1),
+                event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
+                event.getDeviceId(), event.getEdgeFlags());
     }
 }
