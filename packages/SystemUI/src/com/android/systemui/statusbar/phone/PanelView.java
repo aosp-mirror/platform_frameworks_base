@@ -432,7 +432,7 @@ public abstract class PanelView extends FrameLayout {
 
     protected void onTrackingStopped(boolean expand) {
         mTracking = false;
-        mBar.onTrackingStopped(PanelView.this, expand);
+        mBar.onTrackingStopped(expand);
         notifyBarPanelExpansionChanged();
     }
 
@@ -440,7 +440,7 @@ public abstract class PanelView extends FrameLayout {
         endClosing();
         mTracking = true;
         mCollapseAfterPeek = false;
-        mBar.onTrackingStarted(PanelView.this);
+        mBar.onTrackingStarted();
         notifyExpandingStarted();
         notifyBarPanelExpansionChanged();
     }
@@ -893,7 +893,6 @@ public abstract class PanelView extends FrameLayout {
                                 != mStatusBar.getStatusBarHeight()) {
                             getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (animate) {
-                                mBar.startOpeningPanel(PanelView.this);
                                 notifyExpandingStarted();
                                 fling(0, true /* expand */);
                             } else {
@@ -1025,7 +1024,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected void notifyBarPanelExpansionChanged() {
-        mBar.panelExpansionChanged(this, mExpandedFraction, mExpandedFraction > 0f || mPeekPending
+        mBar.panelExpansionChanged(mExpandedFraction, mExpandedFraction > 0f || mPeekPending
                 || mPeekAnimator != null || mInstantExpanding || isPanelVisibleBecauseOfHeadsUp()
                 || mTracking || mHeightAnimator != null);
     }

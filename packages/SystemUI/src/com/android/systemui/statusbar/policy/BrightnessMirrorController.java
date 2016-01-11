@@ -35,25 +35,25 @@ public class BrightnessMirrorController {
 
     private final ScrimView mScrimBehind;
     private final View mBrightnessMirror;
-    private final View mPanelHolder;
+    private final View mNotificationPanel;
     private final int[] mInt2Cache = new int[2];
 
     public BrightnessMirrorController(StatusBarWindowView statusBarWindow) {
         mScrimBehind = (ScrimView) statusBarWindow.findViewById(R.id.scrim_behind);
         mBrightnessMirror = statusBarWindow.findViewById(R.id.brightness_mirror);
-        mPanelHolder = statusBarWindow.findViewById(R.id.panel_holder);
+        mNotificationPanel = statusBarWindow.findViewById(R.id.notification_panel);
     }
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
         mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, PhoneStatusBar.ALPHA_OUT);
-        outAnimation(mPanelHolder.animate())
+        outAnimation(mNotificationPanel.animate())
                 .withLayer();
     }
 
     public void hideMirror() {
         mScrimBehind.animateViewAlpha(1.0f, TRANSITION_DURATION_IN, PhoneStatusBar.ALPHA_IN);
-        inAnimation(mPanelHolder.animate())
+        inAnimation(mNotificationPanel.animate())
                 .withLayer()
                 .withEndAction(new Runnable() {
             @Override
