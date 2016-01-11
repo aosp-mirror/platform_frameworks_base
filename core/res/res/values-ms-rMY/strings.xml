@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Kad SIM anda dikunci PUK. Taipkan kod PUK untuk membuka kuncinya."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Taipkan PUK2 untuk menyahsekat kad SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Tidak berjaya, dayakan Kunci SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Anda ada <xliff:g id="NUMBER_1">%d</xliff:g> cubaan lagi sebelum SIM dikunci.</item>
-      <item quantity="one">Anda ada <xliff:g id="NUMBER_0">%d</xliff:g> cubaan lagi sebelum SIM dikunci.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+    <item quantity="other" msgid="7530597808358774740">"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM dikunci."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID Pemanggil Masuk"</string>
@@ -192,7 +192,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan kuasa"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan pepijat"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan pepijat"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Harap bersabar, mungkin perlu sedikit masa untuk memulakan laporan sehingga siap untuk dihantar."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpul maklumat tentang keadaan peranti semasa anda untuk dihantarkan sebagai mesej e-mel. Proses ini akan mengambil sedikit masa bermula dari laporan pepijat sehingga siap untuk dihantar; jadi diharap bersabar."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mod senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Bunyi DIMATIKAN"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Bunyi DIHIDUPKAN"</string>
@@ -278,7 +278,7 @@
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Hidupkan kebolehcapaian web dipertingkat"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skrip boleh dipasang untuk menjadikan kandungan apl lebih mudah diakses."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Perhatikan teks yang anda taip"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Berserta data peribadi seperti nombor kad kredit dan kata laluan."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"bar status"</string>
@@ -818,7 +818,7 @@
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Tukar kata laluan buka kunci skrin"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Tukar kata laluan buka kunci skrin."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kunci skrin"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan masa skrin dikunci."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan bila skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Padam data TV tanpa amaran dengan melakukan tetapan semula data kilang."</string>
@@ -834,7 +834,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lumpuh ciri pelindung kekunci"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Cegah penggunaan beberapa ciri dalam pelindung kekunci."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Rumah"</item>
+    <item msgid="8901098336658710359">"Laman Utama"</item>
     <item msgid="869923650527136615">"Mudah alih"</item>
     <item msgid="7897544654242874543">"Kerja"</item>
     <item msgid="1103601433382158155">"Faks Kerja"</item>
@@ -856,7 +856,7 @@
     <item msgid="4932682847595299369">"Peribadi"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Rumah"</item>
+    <item msgid="1738585194601476694">"Laman Utama"</item>
     <item msgid="1359644565647383708">"Kerja"</item>
     <item msgid="7868549401053615677">"Lain-lain"</item>
     <item msgid="3145118944639869809">"Peribadi"</item>
@@ -877,7 +877,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Peribadi"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Rumah"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Laman Utama"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mudah Alih"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Kerja"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faks Kerja"</string>
@@ -907,11 +907,11 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Lain-lain"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mudah Alih"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Peribadi"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Rumah"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Laman Utama"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Kerja"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Lain-lain"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Peribadi"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Rumah"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Laman Utama"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Kerja"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Lain-lain"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Peribadi"</string>
@@ -931,7 +931,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Pembantu"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Abang/Adik"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Anak"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Pasangan Hidup"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Rakan Kongsi Domestik"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Bapa"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Rakan"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Pengurus"</string>
@@ -990,8 +990,8 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Kad SIM dikunci."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Membuka kunci kad SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nSila cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah tersilap taip menaip kata laluan anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah tersilap taip PIN anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Anda telah tersilap lukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta untuk membuka kunci TV anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam masa <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
@@ -1128,10 +1128,9 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ingin mendayakan Jelajah melalui Sentuhan. Apabila Jelajah melalui Sentuhan didayakan, anda boleh mendengar atau melihat penerangan tentang apa di bawah jari anda atau melakukan gerak isyarat untuk berinteraksi dengan telefon."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 bulan yang lalu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Sebelum 1 bulan yang lalu"</string>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> hari terakhir</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> hari terakhir</item>
-    </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> hari terakhir"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Bulan lepas"</string>
     <string name="older" msgid="5211975022815554840">"Lebih lama"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"pada <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1149,18 +1148,18 @@
     <string name="weeks" msgid="6509623834583944518">"minggu"</string>
     <string name="year" msgid="4001118221013892076">"tahun"</string>
     <string name="years" msgid="6881577717993213522">"tahun"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> saat</item>
-      <item quantity="one">1 saat</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minit</item>
-      <item quantity="one">1 minit</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> jam</item>
-      <item quantity="one">1 jam</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 saat"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> saat"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minit"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minit"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 jam"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> jam"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Masalah video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Maaf, video ini tidak sah untuk penstriman ke peranti ini."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Tidak dapat mainkan video ini."</string>
@@ -1268,14 +1267,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Tiada"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Nada dering"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nada dering tidak diketahui"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Rangkaian Wi-Fi tersedia</item>
-      <item quantity="one">Rangkaian Wi-Fi tersedia</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Rangkaian Wi-Fi terbuka tersedia</item>
-      <item quantity="one">Rangkaian Wi-Fi terbuka tersedia</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Rangkaian Wi-Fi tersedia"</item>
+    <item quantity="other" msgid="4192424489168397386">"Rangkaian Wi-Fi tersedia"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Rangkaian Wi-Fi terbuka tersedia"</item>
+    <item quantity="other" msgid="7915895323644292768">"Rangkaian Wi-Fi terbuka tersedia"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Log masuk ke rangkaian Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Log masuk ke rangkaian"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1463,10 +1462,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Langkau"</string>
     <string name="no_matches" msgid="8129421908915840737">"Tiada padanan"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Cari di halaman"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> daripada <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 padanan</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 padanan"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> daripada <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Selesai"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Menyahlekap storan USB…"</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Menyahlekap kad SD…"</string>
@@ -1629,8 +1628,8 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau kata laluan tidak sah."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?\nLawati"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Menyemak akaun…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Anda telah cuba membuka kunci TV secara tidak betul sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, TV akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
@@ -1752,10 +1751,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Buat PIN untuk mengubah suai sekatan"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN tidak sepadan. Cuba lagi."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN terlalu pendek. Mesti sekurang-kurangnya 4 angka."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">Cuba lagi dalam masa <xliff:g id="COUNT">%d</xliff:g> saat</item>
-      <item quantity="one">Cuba lagi dalam masa 1 saat</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Cuba 1 saat lagi"</item>
+    <item quantity="other" msgid="4730868920742952817">"Cuba <xliff:g id="COUNT">%d</xliff:g> saat lagi"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Cuba sebentar lagi"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Leret ke bawah dari atas untuk keluar dari skrin penuh."</string>
     <string name="done_label" msgid="2093726099505892398">"Selesai"</string>
@@ -1778,25 +1777,25 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Minta PIN sebelum menyahsemat"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Minta corak buka kunci sebelum menyahsemat"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Minta kata laluan sebelum menyahsemat"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan mengehadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran, perkhidmatan lokasi dan kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung kepada penyegerakan mungkin tidak mengemas kini, melainkan anda membuka apl itu.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda sedang dicas."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Sehingga waktu gendala anda berakhir pada <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Sehingga waktu gendala anda berakhir"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">Selama %1$d jam (sehingga <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Selama satu jam (sehingga <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">Selama %d minit</item>
-      <item quantity="one">Selama satu minit</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">Selama %d jam</item>
-      <item quantity="one">Selama satu jam</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Selama satu jam (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Selama %1$d jam (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Selama satu minit"</item>
+    <item quantity="other" msgid="6924190729213550991">"Selama %d minit"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Selama satu jam"</item>
+    <item quantity="other" msgid="5408537517529822157">"Selama %d jam"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Sehingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Selama-lamanya"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Runtuhkan"</string>
