@@ -8288,7 +8288,6 @@ public final class Settings {
         /**
          * Whether to enable contacts metadata syncing or not
          * The value 1 - enable, 0 - disable
-         * @hide
          */
         public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
 
