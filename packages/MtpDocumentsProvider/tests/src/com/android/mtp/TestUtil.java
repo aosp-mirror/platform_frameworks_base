@@ -42,9 +42,8 @@ final class TestUtil {
             UsbManager usbManager,
             MtpManager manager) {
         while (true) {
-            final UsbDevice device = findMtpDevice(instrumentation, usbManager, manager);
             try {
-                manager.openDevice(device.getDeviceId());
+                final UsbDevice device = findMtpDevice(usbManager, manager);
                 waitForStorages(instrumentation, manager, device.getDeviceId());
                 return device;
             } catch (IOException exp) {
@@ -59,41 +58,26 @@ final class TestUtil {
     }
 
     private static UsbDevice findMtpDevice(
-            TestResultInstrumentation instrumentation,
             UsbManager usbManager,
-            MtpManager manager) {
-        while (true) {
-            final HashMap<String,UsbDevice> devices = usbManager.getDeviceList();
-            if (devices.size() == 0) {
-                instrumentation.show("Wait for devices.");
-                SystemClock.sleep(1000);
-                continue;
-            }
-            final UsbDevice device = devices.values().iterator().next();
-            try {
-                manager.openDevice(device.getDeviceId());
-            } catch (IOException e) {
-                // Maybe other application is using the device.
-                // Force to obtain ownership of the device so that we can use the device next call
-                // of findMtpDevice.
-                instrumentation.show("Tries to get ownership of MTP device.");
-                final UsbDeviceConnection connection = usbManager.openDevice(device);
-                if (connection == null) {
-                    Assert.fail("Cannot open USB connection.");
-                    return null;
-                }
-                for (int i = 0; i < device.getInterfaceCount(); i++) {
-                    // Since the test runs real environment, we need to call claim interface with
-                    // force = true to rob interfaces from other applications.
-                    connection.claimInterface(device.getInterface(i), true);
-                    connection.releaseInterface(device.getInterface(i));
-                }
-                connection.close();
-                SystemClock.sleep(1000);
-                continue;
-            }
-            return device;
+            MtpManager manager) throws IOException {
+        final HashMap<String,UsbDevice> devices = usbManager.getDeviceList();
+        if (devices.size() == 0) {
+            throw new IOException("Device not found.");
         }
+        final UsbDevice device = devices.values().iterator().next();
+        // Tries to get ownership of the device in case that another application use it.
+        if (usbManager.hasPermission(device)) {
+            final UsbDeviceConnection connection = usbManager.openDevice(device);
+            for (int i = 0; i < device.getInterfaceCount(); i++) {
+                // Since the test runs real environment, we need to call claim interface with
+                // force = true to rob interfaces from other applications.
+                connection.claimInterface(device.getInterface(i), true);
+                connection.releaseInterface(device.getInterface(i));
+            }
+            connection.close();
+        }
+        manager.openDevice(device.getDeviceId());
+        return device;
     }
 
     private static void waitForStorages(
