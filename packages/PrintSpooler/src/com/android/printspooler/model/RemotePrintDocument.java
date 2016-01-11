@@ -173,15 +173,19 @@ public final class RemotePrintDocument {
         if (DEBUG) {
             Log.i(LOG_TAG, "[CALLED] start()");
         }
-        if (mState != STATE_INITIAL) {
-            throw new IllegalStateException("Cannot start in state:" + stateToString(mState));
-        }
-        try {
-            mPrintDocumentAdapter.start();
-            mState = STATE_STARTED;
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error calling start()", re);
-            mState = STATE_FAILED;
+        if (mState == STATE_FAILED) {
+            Log.w(LOG_TAG, "Failed before start.");
+        } else {
+            if (mState != STATE_INITIAL) {
+                throw new IllegalStateException("Cannot start in state:" + stateToString(mState));
+            }
+            try {
+                mPrintDocumentAdapter.start();
+                mState = STATE_STARTED;
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error calling start()", re);
+                mState = STATE_FAILED;
+            }
         }
     }
 
