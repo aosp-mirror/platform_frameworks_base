@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"Ihre SIM-Karte ist mit einem PUK gesperrt. Geben Sie zum Entsperren den PUK-Code ein."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Geben Sie zum Entsperren der SIM-Karte den PUK2 ein."</string>
     <string name="enablePin" msgid="209412020907207950">"Fehler. SIM-/RUIM-Sperre aktivieren."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">Sie haben noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche, bevor Ihre SIM-Karte gesperrt wird.</item>
-      <item quantity="one">Sie haben noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor Ihre SIM-Karte gesperrt wird.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Ihre SIM-Karte gesperrt wird."</item>
+    <item quantity="other" msgid="7530597808358774740">"Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche, bevor Ihre SIM-Karte gesperrt wird."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Anrufer-ID für eingehenden Anruf"</string>
@@ -257,7 +257,7 @@
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ihre Konten"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Zugriff auf verfügbare Konten"</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardware-Steuerelemente"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkter Zugriff auf Hardware über das Mobiltelefon"</string>
+    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Direkter Zugriff auf Hardware über Headset"</string>
     <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Anrufe"</string>
     <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Überwachen, Aufzeichnen und Verarbeiten von Telefonanrufen"</string>
     <string name="permgrouplab_systemTools" msgid="4652191644082714048">"System-Tools"</string>
@@ -272,7 +272,7 @@
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funktionen der Bedienungshilfen"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funktionen, die für Bedienungshilfentechnologie beantragt werden können"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem Sie interagieren, werden abgerufen."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters mit dem Sie interagieren werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Berührte Elemente werden laut vorgelesen und der Bildschirm kann über Gesten erkundet werden."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbesserte Web-Bedienung aktivieren"</string>
@@ -908,7 +908,7 @@
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Benutzerdefiniert"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Privat"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Geschäftlich"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Büro"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Sonstige"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Benutzerdefiniert"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Privat"</string>
@@ -1128,76 +1128,75 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> fordert die Aktivierung von \"Tippen &amp; Entdecken\". Wenn \"Tippen &amp; Entdecken\" aktiviert ist, können Sie Beschreibungen dessen hören oder sehen, was sich unter ihren Fingern befindet, oder Gesten ausführen, um mit dem Telefon zu kommunizieren."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Vor 1 Monat"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Vor mehr als 1 Monat"</string>
-    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">vor 1 Sekunde</item>
-    </plurals>
-    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">vor 1 Minute</item>
-    </plurals>
-    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">vor 1 Stunde</item>
-    </plurals>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">Letzte <xliff:g id="COUNT_1">%d</xliff:g> Tage</item>
-      <item quantity="one">Gestern (<xliff:g id="COUNT_0">%d</xliff:g> Tag)</item>
-    </plurals>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"vor 1 Sekunde"</item>
+    <item quantity="other" msgid="3903706804349556379">"vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"vor 1 Minute"</item>
+    <item quantity="other" msgid="2176942008915455116">"vor <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"vor 1 Stunde"</item>
+    <item quantity="other" msgid="2467273239587587569">"vor <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Letzte <xliff:g id="COUNT">%d</xliff:g> Tage"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Letzter Monat"</string>
     <string name="older" msgid="5211975022815554840">"Älter"</string>
-    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Tagen</item>
-      <item quantity="one">gestern</item>
-    </plurals>
-    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">in 1 Sekunde</item>
-    </plurals>
-    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">in 1 Minute</item>
-    </plurals>
-    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">in 1 Stunde</item>
-    </plurals>
-    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Tagen</item>
-      <item quantity="one">morgen</item>
-    </plurals>
-    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">vor 1 Sekunde</item>
-    </plurals>
-    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">vor 1 Minute</item>
-    </plurals>
-    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">vor 1 Stunde</item>
-    </plurals>
-    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
-      <item quantity="other">vor <xliff:g id="COUNT">%d</xliff:g> Tagen</item>
-      <item quantity="one">gestern</item>
-    </plurals>
-    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">in 1 Sekunde</item>
-    </plurals>
-    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">in 1 Minute</item>
-    </plurals>
-    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">in 1 Stunde</item>
-    </plurals>
-    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
-      <item quantity="other">in <xliff:g id="COUNT">%d</xliff:g> Tagen</item>
-      <item quantity="one">morgen</item>
-    </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"gestern"</item>
+    <item quantity="other" msgid="2479586466153314633">"vor <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"in 1 Sekunde"</item>
+    <item quantity="other" msgid="1241926116443974687">"in <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"in 1 Minute"</item>
+    <item quantity="other" msgid="3330713936399448749">"in <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"in 1 Stunde"</item>
+    <item quantity="other" msgid="547290677353727389">"In <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"morgen"</item>
+    <item quantity="other" msgid="5109449375100953247">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"vor 1 Sekunde"</item>
+    <item quantity="other" msgid="3699169366650930415">"vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"vor 1 Minute"</item>
+    <item quantity="other" msgid="851164968597150710">"vor <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"vor 1 Stunde"</item>
+    <item quantity="other" msgid="6889970745748538901">"vor <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"gestern"</item>
+    <item quantity="other" msgid="3453342639616481191">"vor <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"in 1 Sekunde"</item>
+    <item quantity="other" msgid="5495880108825805108">"in <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"in 1 Minute"</item>
+    <item quantity="other" msgid="4216113292706568726">"in <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"in 1 Stunde"</item>
+    <item quantity="other" msgid="3705373766798013406">"In <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"morgen"</item>
+    <item quantity="other" msgid="2973062968038355991">"in <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
+  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"am <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"um <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"im Jahr <xliff:g id="YEAR">%s</xliff:g>"</string>
@@ -1213,18 +1212,18 @@
     <string name="weeks" msgid="6509623834583944518">"Wochen"</string>
     <string name="year" msgid="4001118221013892076">"Jahr"</string>
     <string name="years" msgid="6881577717993213522">"Jahre"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Sekunden</item>
-      <item quantity="one">1 Sekunde</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Minuten</item>
-      <item quantity="one">1 Minute</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> Stunden</item>
-      <item quantity="one">1 Stunde</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 Sekunde"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 Minute"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 Stunde"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobleme"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Dieses Video ist nicht für Streaming auf diesem Gerät gültig."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Video kann nicht wiedergegeben werden."</string>
@@ -1268,7 +1267,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Mit %1$s öffnen"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Bearbeiten mit"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Mit %1$s bearbeiten"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Freigeben über"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Freigeben für"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Für %1$s freigeben"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Start-App auswählen"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s als Start-App verwenden"</string>
@@ -1329,17 +1328,17 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Benachrichtigungslautstärke"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standard-Klingelton"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard-Klingelton (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Ohne"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Keine"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Klingeltöne"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Unbekannter Klingelton"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WLAN-Netzwerke verfügbar</item>
-      <item quantity="one">WLAN-Netzwerk verfügbar</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Verfügbare WLAN-Netzwerke öffnen</item>
-      <item quantity="one">Verfügbares WLAN-Netzwerk öffnen</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"WLAN-Netzwerk verfügbar"</item>
+    <item quantity="other" msgid="4192424489168397386">"WLAN-Netzwerke verfügbar"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Verfügbares WLAN-Netzwerk öffnen"</item>
+    <item quantity="other" msgid="7915895323644292768">"Verfügbare WLAN-Netzwerke öffnen"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Im WLAN-Netzwerk anmelden"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1421,7 +1420,7 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Alle Daten auf Ihrer Karte gehen verloren."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Format"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-Debugging"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren berühren"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"Zum Deaktivieren von USB-Debugging berühren"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tastatur ändern"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Tastatur auswählen"</string>
     <string name="show_ime" msgid="9157568568695230830">"Eingabemethode anzeigen"</string>
@@ -1527,10 +1526,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Überspringen"</string>
     <string name="no_matches" msgid="8129421908915840737">"Keine Treffer"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Auf Seite suchen"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 Treffer</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 Treffer"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> von <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Fertig"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB-Speicher wird getrennt..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD-Karte wird getrennt..."</string>
@@ -1816,10 +1815,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"PIN für das Ändern von Einschränkungen erstellen"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Die PINs stimmen nicht überein. Bitte versuchen Sie es erneut."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Die PIN ist zu kurz. Sie muss mindestens 4 Ziffern umfassen."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other">In <xliff:g id="COUNT">%d</xliff:g> Sek. wiederholen</item>
-      <item quantity="one">In 1 Sek. wiederholen</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"In 1 Sek. wiederholen"</item>
+    <item quantity="other" msgid="4730868920742952817">"In <xliff:g id="COUNT">%d</xliff:g> Sek. wiederholen"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Später erneut versuchen"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Zum Schließen des Vollbilds von oben nach unten wischen"</string>
     <string name="done_label" msgid="2093726099505892398">"Fertig"</string>
@@ -1843,24 +1842,24 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vor dem Beenden nach Passwort fragen"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf Ihrem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn Ihr Gerät aufgeladen wird."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Ruhezeit um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Bis zum Ende der Ruhezeit"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">%1$d Minuten (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 Minute (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d Stunden (bis <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 Stunde (bis <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">Für %d Minuten</item>
-      <item quantity="one">Für 1 Minute</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">Für %d Stunden</item>
-      <item quantity="one">Für eine Stunde</item>
-    </plurals>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Downtime um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Bis zum Ende der Inaktivität"</string>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"1 Minute (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d Minuten (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"1 Stunde (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d Stunden (bis <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Für eine Minute"</item>
+    <item quantity="other" msgid="6924190729213550991">"Für %d Minuten"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Für eine Stunde"</item>
+    <item quantity="other" msgid="5408537517529822157">"Für %d Stunden"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Unbegrenzt"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>

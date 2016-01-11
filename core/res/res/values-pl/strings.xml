@@ -61,16 +61,14 @@
     <string name="needPuk" msgid="919668385956251611">"Karta SIM jest zablokowana kodem PUK. Wprowadź kod PUK, aby odblokować kartę."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Wprowadź kod PUK2, aby odblokować kartę SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Nie udało się. Włącz blokadę karty SIM/RUIM."</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="few">Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie zablokowana.</item>
-      <item quantity="many">Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> prób, zanim karta SIM zostanie zablokowana.</item>
-      <item quantity="other">Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie zablokowana.</item>
-      <item quantity="one">Masz jeszcze <xliff:g id="NUMBER_0">%d</xliff:g> próbę, zanim karta SIM zostanie zablokowana.</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> próbę, zanim karta SIM zostanie zablokowana."</item>
+    <item quantity="other" msgid="7530597808358774740">"Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> prób(y), zanim karta SIM zostanie zablokowana."</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"ID rozmówcy przy połączeniach przychodzących"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"ID rozmówcy przy połączeniach wychodzących"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Nazwa rozmówcy przy połączeniach przychodzących"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Nazwa rozmówcy przy połączeniach wychodzących"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identyfikator połączonej linii"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ograniczenie identyfikatora połączonej linii"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Przekierowanie połączeń"</string>
@@ -84,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Odrzucanie niepożądanych, irytujących połączeń"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Dostarczanie numeru telefonującego"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Nie przeszkadzać"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"ID rozmówcy ustawiony jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Nazwa rozmówcy ustawiona jest domyślnie na „zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: zastrzeżony"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nazwa rozmówcy ustawiona jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia identyfikatora rozmówcy."</string>
     <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Zmieniono ograniczenie dostępu"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Usługa transmisji danych jest zablokowana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Usługa połączeń alarmowych jest zablokowana."</string>
@@ -214,7 +212,7 @@
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Wykonywanie czynności, za które pobierana jest opłata."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Twoje wiadomości"</string>
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Czytanie i zapisywanie wiadomości SMS, e-mail i innych"</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informacje osobowe"</string>
+    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Informacje osobiste"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Bezpośredni dostęp do informacji o Tobie zapisanych na wizytówce."</string>
     <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Twoje informacje społecznościowe"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Bezpośredni dostęp do informacji o Twoich kontaktach i powiązaniach społecznościowych."</string>
@@ -819,9 +817,9 @@
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Przy odblokowywaniu ekranu monitoruje, ile razy wpisano nieprawidłowe hasło, i blokuje telefon lub usuwa z niego wszystkie dane, jeśli nieprawidłowe hasło podano zbyt wiele razy"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Zmień hasło odblokowania ekranu"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Zmienianie hasła odblokowania ekranu"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Blokowanie ekranu"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Zablokuj ekran"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolowanie sposobu i warunków blokowania ekranu"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Usuwanie wszystkich danych"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Usuń wszystkie dane"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Wymazywanie danych z tabletu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Skasowanie danych w telewizorze bez ostrzeżenia przez przywrócenie danych fabrycznych."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wymazywanie danych z telefonu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
@@ -1130,110 +1128,75 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> chce włączyć Czytanie dotykiem. Gdy ta funkcja jest włączona, słyszysz i widzisz opisy elementów, które są pod Twoim palcem, oraz możesz obsługiwać telefon gestami."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 miesiąc temu"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Ponad 1 miesiąc temu"</string>
-    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundy temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekund temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekundy temu</item>
-      <item quantity="one">sekundę temu</item>
-    </plurals>
-    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minuty temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minut temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuty temu</item>
-      <item quantity="one">minutę temu</item>
-    </plurals>
-    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> godziny temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> godzin temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> godziny temu</item>
-      <item quantity="one">godzinę temu</item>
-    </plurals>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="few">Ostatnie <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
-      <item quantity="many">Ostatnich <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
-      <item quantity="other">Ostatnie <xliff:g id="COUNT_1">%d</xliff:g> dnia</item>
-      <item quantity="one">Ostatni <xliff:g id="COUNT_0">%d</xliff:g> dzień</item>
-    </plurals>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"sekundę temu"</item>
+    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> sek. temu"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"1 minutę temu"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> min temu"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"godzinę temu"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"Ostatni miesiąc"</string>
     <string name="older" msgid="5211975022815554840">"Starsze"</string>
-    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> dni temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> dni temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dnia temu</item>
-      <item quantity="one">wczoraj</item>
-    </plurals>
-    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> sekund</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="one">za sekundę</item>
-    </plurals>
-    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> minut</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="one">za minutę</item>
-    </plurals>
-    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> godzin</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="one">za godzinę</item>
-    </plurals>
-    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> dni</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> dni</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> dnia</item>
-      <item quantity="one">jutro</item>
-    </plurals>
-    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> s temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> s temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> s temu</item>
-      <item quantity="one">1 s temu</item>
-    </plurals>
-    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> min temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> min temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> min temu</item>
-      <item quantity="one">1 min temu</item>
-    </plurals>
-    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> godziny temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> godzin temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> godziny temu</item>
-      <item quantity="one">godzinę temu</item>
-    </plurals>
-    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> dni temu</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> dni temu</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> dnia temu</item>
-      <item quantity="one">wczoraj</item>
-    </plurals>
-    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> s</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> s</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> s</item>
-      <item quantity="one">za 1 s</item>
-    </plurals>
-    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> min</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> min</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> min</item>
-      <item quantity="one">za 1 min</item>
-    </plurals>
-    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> godzin</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="one">za godzinę</item>
-    </plurals>
-    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
-      <item quantity="few">za <xliff:g id="COUNT">%d</xliff:g> dni</item>
-      <item quantity="many">za <xliff:g id="COUNT">%d</xliff:g> dni</item>
-      <item quantity="other">za <xliff:g id="COUNT">%d</xliff:g> dnia</item>
-      <item quantity="one">jutro</item>
-    </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"wczoraj"</item>
+    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> dni temu"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"za sekundę"</item>
+    <item quantity="other" msgid="1241926116443974687">"za <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"za minutę"</item>
+    <item quantity="other" msgid="3330713936399448749">"za <xliff:g id="COUNT">%d</xliff:g> min."</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"za godzinę"</item>
+    <item quantity="other" msgid="547290677353727389">"za <xliff:g id="COUNT">%d</xliff:g> godzin"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"jutro"</item>
+    <item quantity="other" msgid="5109449375100953247">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"sekundę temu"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> s temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"minutę temu"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> min temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"godzinę temu"</item>
+    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"wczoraj"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> dni temu"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"za sekundę"</item>
+    <item quantity="other" msgid="5495880108825805108">"za <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"za minutę"</item>
+    <item quantity="other" msgid="4216113292706568726">"za <xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"za godzinę"</item>
+    <item quantity="other" msgid="3705373766798013406">"za <xliff:g id="COUNT">%d</xliff:g> godz."</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"jutro"</item>
+    <item quantity="other" msgid="2973062968038355991">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
+  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"w dniu <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"o godzinie <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"w <xliff:g id="YEAR">%s</xliff:g> r."</string>
@@ -1249,24 +1212,18 @@
     <string name="weeks" msgid="6509623834583944518">"tygodni"</string>
     <string name="year" msgid="4001118221013892076">"rok"</string>
     <string name="years" msgid="6881577717993213522">"lat"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekund</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="one">1 sekunda</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minut</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
-      <item quantity="one">1 minuta</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> godzin</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> godziny</item>
-      <item quantity="one">1 godzina</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 sekunda"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minuta"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 godzina"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> godz."</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem z filmem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ten film nie nadaje się do strumieniowego przesyłania do tego urządzenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nie można odtworzyć tego filmu."</string>
@@ -1374,18 +1331,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Brak"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Dzwonki"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nieznany dzwonek"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="few">Dostępne są sieci Wi-Fi</item>
-      <item quantity="many">Dostępne są sieci Wi-Fi</item>
-      <item quantity="other">Dostępne są sieci Wi-Fi</item>
-      <item quantity="one">Dostępna jest sieć Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="few">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="many">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="other">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="one">Dostępna jest otwarta sieć Wi-Fi</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Sieć Wi-Fi jest dostępna"</item>
+    <item quantity="other" msgid="4192424489168397386">"Dostępne sieci Wi-Fi"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Otwórz dostępne sieci Wi-Fi"</item>
+    <item quantity="other" msgid="7915895323644292768">"Otwórz dostępne sieci Wi-Fi"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Zaloguj się do sieci Wi-Fi."</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1556,9 +1509,9 @@
     <string name="vpn_title_long" msgid="6400714798049252294">"Obsługa sieci VPN została włączona przez aplikację <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="3011306607126450322">"Dotknij, aby zarządzać siecią."</string>
     <string name="vpn_text_long" msgid="6407351006249174473">"Nawiązano połączenie z: <xliff:g id="SESSION">%s</xliff:g>. Dotknij, aby zarządzać siecią."</string>
-    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę ze stałą siecią VPN…"</string>
-    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono ze stałą siecią VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd stałej sieci VPN"</string>
+    <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Łączę z zawsze włączoną siecią VPN…"</string>
+    <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Połączono z zawsze włączoną siecią VPN"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Błąd zawsze włączonej sieci VPN"</string>
     <string name="vpn_lockdown_config" msgid="6415899150671537970">"Kliknij, by skonfigurować"</string>
     <string name="upload_file" msgid="2897957172366730416">"Wybierz plik"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie wybrano pliku"</string>
@@ -1573,12 +1526,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Pomiń"</string>
     <string name="no_matches" msgid="8129421908915840737">"Brak wyników"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Znajdź na stronie"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 dopasowanie</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1 wynik"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Gotowe"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Odłączanie nośnika USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Odłączanie karty SD..."</string>
@@ -1636,7 +1587,7 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Wybierz aplikację"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez:"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Przesuń, aby odblokować."</string>
@@ -1681,7 +1632,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Odcisk cyfrowy SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobacz wszystkie"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Wybierz działanie"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez:"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Udostępnij przez"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Wysyłanie..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Uruchomić przeglądarkę?"</string>
@@ -1741,9 +1692,9 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nieprawidłowa nazwa użytkownika lub hasło."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nie pamiętasz nazwy użytkownika lub hasła?\nWejdź na "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Sprawdzam konto"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Wpisałeś nieprawidłowy kod PIN <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowy PIN. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowe hasło. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Narysowałeś nieprawidłowy wzór odblokowania <xliff:g id="NUMBER_0">%d</xliff:g> razy. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> razy narysowałeś nieprawidłowy wzór odblokowania. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować tablet. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach tablet zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Podałeś nieprawidłowe dane odblokowania telewizora <xliff:g id="NUMBER_0">%d</xliff:g> razy. Po jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telewizor zostanie zresetowany do stanu fabrycznego, a wszystkie dane użytkownika zostaną skasowane."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować telefon. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
@@ -1864,12 +1815,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Utwórz PIN wymagany przy zmianie ograniczeń"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kody PIN nie są identyczne. Spróbuj ponownie."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN jest za krótki. Musi mieć co najmniej 4 cyfry."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="few">Spróbuj ponownie za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="many">Spróbuj ponownie za <xliff:g id="COUNT">%d</xliff:g> sekund</item>
-      <item quantity="other">Spróbuj ponownie za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
-      <item quantity="one">Spróbuj ponownie za sekundę</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"Spróbuj za sekundę"</item>
+    <item quantity="other" msgid="4730868920742952817">"Spróbuj za <xliff:g id="COUNT">%d</xliff:g> s"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Spróbuj ponownie później"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Przesuń z góry w dół, by zamknąć pełny ekran."</string>
     <string name="done_label" msgid="2093726099505892398">"Gotowe"</string>
@@ -1889,36 +1838,28 @@
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekran jest przypięty. Ustawienia organizacji nie pozwalają go odpiąć."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran przypięty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran odpięty"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Podaj PIN, aby odpiąć"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Aby odpiąć, poproś o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Aby odpiąć, poproś o hasło"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Do zakończenia przestoju o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do zakończenia wyłączenia"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="few">Przez %1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Przez %1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Przez %1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Przez minutę (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="few">Przez %1$d godziny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Przez %1$d godzin (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Przez %1$d godziny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Przez godzinę (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="few">Przez %d minuty</item>
-      <item quantity="many">Przez %d minut</item>
-      <item quantity="other">Przez %d minuty</item>
-      <item quantity="one">Przez minutę</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="few">Przez %d godziny</item>
-      <item quantity="many">Przez %d godzin</item>
-      <item quantity="other">Przez %d godziny</item>
-      <item quantity="one">Przez godzinę</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Przez minutę (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Przez %1$d min (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Przez godzinę (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Przez %1$d godz. (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"Przez minutę"</item>
+    <item quantity="other" msgid="6924190729213550991">"Przez %d min"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"Przez 1 godz."</item>
+    <item quantity="other" msgid="5408537517529822157">"Przez %d godz."</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Na czas nieokreślony"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zwiń"</string>

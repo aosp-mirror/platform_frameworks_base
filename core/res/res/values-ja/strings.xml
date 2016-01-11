@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIMカードはPUKでロックされています。ロックを解除するにはPUKコードを入力してください。"</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIMカードのロック解除のためPUK2を入力します。"</string>
     <string name="enablePin" msgid="209412020907207950">"SIM/RUIMロックを有効にしてください。"</string>
-    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="other">入力できるのはあと<xliff:g id="NUMBER_1">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。</item>
-      <item quantity="one">入力できるのはあと<xliff:g id="NUMBER_0">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。</item>
-    </plurals>
+  <plurals name="pinpuk_attempts">
+    <item quantity="one" msgid="6596245285809790142">"入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。"</item>
+    <item quantity="other" msgid="7530597808358774740">"入力できるのはあと<xliff:g id="NUMBER">%d</xliff:g>回です。この回数を超えるとSIMがロックされます。"</item>
+  </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"着信時の発信者番号"</string>
@@ -207,7 +207,7 @@
     <string name="safeMode" msgid="2788228061547930246">"セーフモード"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Androidシステム"</string>
     <string name="user_owner_label" msgid="6465364741001216388">"プライベートアプリ"</string>
-    <string name="managed_profile_label" msgid="6260850669674791528">"仕事用"</string>
+    <string name="managed_profile_label" msgid="6260850669674791528">"職場"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"料金の発生するサービス"</string>
     <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"料金発生の可能性がある操作を実行します。"</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"送受信したメッセージ"</string>
@@ -274,9 +274,9 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"タップしたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"触れたアイテムが読み上げられ、ジェスチャーで画面のガイドを利用できます。"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"ウェブアクセシビリティ拡張の有効化"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"スクリプトをインストールしてアプリコンテンツにアクセスしやすくできます。"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"アプリコンテンツのアクティビティをもっと向上させるためにスクリプトをインストールできます。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"入力テキストの監視"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
@@ -518,9 +518,9 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"テレビの通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"携帯端末の通話履歴（着信や発信のデータなど）の変更をアプリに許可します。この許可を悪意のあるアプリに利用されると、通話履歴が消去または変更される恐れがあります。"</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"自分の連絡先カードの読み取り"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"端末に保存されている個人のプロファイル情報（名前、連絡先情報など）の読み取りをアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロファイル情報を第三者に転送する可能性があります。"</string>
+    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の読み取りをアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"自分の連絡先カードの変更"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロファイル情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロファイル情報を第三者に転送する可能性があります。"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"端末に保存されている個人のプロフィール情報（名前、連絡先情報など）の変更と追加をアプリに許可します。これにより、アプリがユーザーの身元を特定できるようになり、プロフィール情報を第三者に転送する可能性があります。"</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ボディーセンサー（心拍数モニターなど）"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"心拍数など、身体状態を監視するセンサーからのデータにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ソーシャルストリームを読む"</string>
@@ -931,7 +931,7 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"アシスタント"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"兄弟"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"子ども"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"同棲相手"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"パートナー（国内）"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"父"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"友だち"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"上司"</string>
@@ -1128,76 +1128,75 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>がタッチガイドをONにしようとしています。タッチガイドをONにすると、指の位置にあるアイテムの説明を読み上げたり表示したりできます。また、携帯端末を通常とは違うジェスチャーで操作できます。"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1か月前"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"1か月前"</string>
-    <plurals name="num_seconds_ago" formatted="false" msgid="5758689745711719722">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒前</item>
-      <item quantity="one">1秒前</item>
-    </plurals>
-    <plurals name="num_minutes_ago" formatted="false" msgid="1316158837806796048">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>分前</item>
-      <item quantity="one">1分前</item>
-    </plurals>
-    <plurals name="num_hours_ago" formatted="false" msgid="536049915552841680">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間前</item>
-      <item quantity="one">1時間前</item>
-    </plurals>
-    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="other">過去<xliff:g id="COUNT_1">%d</xliff:g>日間</item>
-      <item quantity="one">過去<xliff:g id="COUNT_0">%d</xliff:g>日間</item>
-    </plurals>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"1秒前"</item>
+    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"1分前"</item>
+    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g>分前"</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"1時間前"</item>
+    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g>時間前"</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"過去<xliff:g id="COUNT">%d</xliff:g>日間"</item>
+  </plurals>
     <string name="last_month" msgid="3959346739979055432">"先月"</string>
     <string name="older" msgid="5211975022815554840">"もっと前"</string>
-    <plurals name="num_days_ago" formatted="false" msgid="7259653235010088281">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>日前</item>
-      <item quantity="one">昨日</item>
-    </plurals>
-    <plurals name="in_num_seconds" formatted="false" msgid="916057335323583627">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後</item>
-      <item quantity="one">1秒後</item>
-    </plurals>
-    <plurals name="in_num_minutes" formatted="false" msgid="958738197454489454">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>分後</item>
-      <item quantity="one">1分後</item>
-    </plurals>
-    <plurals name="in_num_hours" formatted="false" msgid="3795322677968446157">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間後</item>
-      <item quantity="one">1時間後</item>
-    </plurals>
-    <plurals name="in_num_days" formatted="false" msgid="1488706566722014584">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>日後</item>
-      <item quantity="one">明日</item>
-    </plurals>
-    <plurals name="abbrev_num_seconds_ago" formatted="false" msgid="6686259755264474381">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒前</item>
-      <item quantity="one">1秒前</item>
-    </plurals>
-    <plurals name="abbrev_num_minutes_ago" formatted="false" msgid="534218309835972121">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>分前</item>
-      <item quantity="one">1分前</item>
-    </plurals>
-    <plurals name="abbrev_num_hours_ago" formatted="false" msgid="5723991167628170403">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間前</item>
-      <item quantity="one">1時間前</item>
-    </plurals>
-    <plurals name="abbrev_num_days_ago" formatted="false" msgid="2874605076838326011">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>日前</item>
-      <item quantity="one">昨日</item>
-    </plurals>
-    <plurals name="abbrev_in_num_seconds" formatted="false" msgid="2301527120375906345">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後</item>
-      <item quantity="one">1秒後</item>
-    </plurals>
-    <plurals name="abbrev_in_num_minutes" formatted="false" msgid="7389851346130784777">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>分後</item>
-      <item quantity="one">1分後</item>
-    </plurals>
-    <plurals name="abbrev_in_num_hours" formatted="false" msgid="5331698142388677272">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間後</item>
-      <item quantity="one">1時間後</item>
-    </plurals>
-    <plurals name="abbrev_in_num_days" formatted="false" msgid="1571346728159142300">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>日後</item>
-      <item quantity="one">明日</item>
-    </plurals>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"昨日"</item>
+    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g>日前"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"1秒後"</item>
+    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g>秒後"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"1分後"</item>
+    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g>分後"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"1時間後"</item>
+    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g>時間後"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"明日"</item>
+    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g>日後"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"1秒前"</item>
+    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g>秒前"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"1分前"</item>
+    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g>分前"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"1時間前"</item>
+    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g>時間前"</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"昨日"</item>
+    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g>日前"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"1秒後"</item>
+    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g>秒後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"1分後"</item>
+    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g>分後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"1時間後"</item>
+    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g>時間後"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"明日"</item>
+    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g>日後"</item>
+  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g>年"</string>
@@ -1213,18 +1212,18 @@
     <string name="weeks" msgid="6509623834583944518">"週間"</string>
     <string name="year" msgid="4001118221013892076">"年"</string>
     <string name="years" msgid="6881577717993213522">"年"</string>
-    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒</item>
-      <item quantity="one">1秒</item>
-    </plurals>
-    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>分</item>
-      <item quantity="one">1分</item>
-    </plurals>
-    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>時間</item>
-      <item quantity="one">1時間</item>
-    </plurals>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1秒"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g>秒"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1分"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g>分"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1時間"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g>時間"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"動画の問題"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"この動画はこの端末にストリーミングできません。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"この動画を再生できません。"</string>
@@ -1332,14 +1331,14 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"なし"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"着信音"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"不明な着信音"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">複数のWi-Fiネットワークが利用できます</item>
-      <item quantity="one">Wi-Fiネットワークが利用できます</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">複数のWi-Fiオープンネットワークが利用できます</item>
-      <item quantity="one">Wi-Fiオープンネットワークが利用できます</item>
-    </plurals>
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Wi-Fiを利用できます"</item>
+    <item quantity="other" msgid="4192424489168397386">"Wi-Fiを利用できます"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Wi-Fiオープンネットワークが利用できます"</item>
+    <item quantity="other" msgid="7915895323644292768">"Wi-Fiオープンネットワークが利用できます"</item>
+  </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fiネットワークにログイン"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"ネットワークにログイン"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1421,10 +1420,10 @@
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"カード内のすべてのデータが失われます。"</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"フォーマット"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効にします。"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
-    <string name="show_ime" msgid="9157568568695230830">"スクリーンキーボードを表示する"</string>
+    <string name="show_ime" msgid="9157568568695230830">"入力方法を表示する"</string>
     <string name="hardware" msgid="7517821086888990278">"ハードウェア"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"キーボードレイアウトの選択"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"タップしてキーボードレイアウトを選択してください。"</string>
@@ -1518,7 +1517,7 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"ファイルが選択されていません"</string>
     <string name="reset" msgid="2448168080964209908">"リセット"</string>
     <string name="submit" msgid="1602335572089911941">"送信"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モード中"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"運転モードになっています"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"タップすると運転モードを終了します"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"テザリングまたはアクセスポイントが有効です"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"タップしてセットアップします。"</string>
@@ -1527,10 +1526,10 @@
     <string name="skip_button_label" msgid="1275362299471631819">"スキップ"</string>
     <string name="no_matches" msgid="8129421908915840737">"該当なし"</string>
     <string name="find_on_page" msgid="1946799233822820384">"ページ内を検索"</string>
-    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g>件（<xliff:g id="TOTAL">%d</xliff:g>件中）</item>
-      <item quantity="one">1件一致</item>
-    </plurals>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"1件一致"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g>件"</item>
+  </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"完了"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USBストレージのマウント解除中..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SDカードのマウント解除中..."</string>
@@ -1616,7 +1615,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fiデータの上限を超えました"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"指定した上限を<xliff:g id="SIZE">%s</xliff:g>超えました。"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"バックグラウンドデータに上限あり"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"タップして制限を削除します。"</string>
+    <string name="data_usage_restricted_body" msgid="6741521330997452990">"タップして上限をなくします。"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"セキュリティ証明書"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"証明書は有効です。"</string>
     <string name="issued_to" msgid="454239480274921032">"発行先:"</string>
@@ -1816,10 +1815,10 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINが一致しません。もう一度お試しください。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PINが短すぎます。4桁以上にしてください。"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
-      <item quantity="one">1秒後にもう一度お試しください</item>
-    </plurals>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="311050995198548675">"1秒後に再試行"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒後に再試行"</item>
+  </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"全画面表示を終了するには、上から下にスワイプ"</string>
     <string name="done_label" msgid="2093726099505892398">"完了"</string>
@@ -1845,22 +1844,22 @@
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンタイムが終わるまで"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"ダウンタイム終了まで"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="other">%1$d分間（<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>まで）</item>
-      <item quantity="one">1分間（<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>まで）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="other">%1$d時間（<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>まで）</item>
-      <item quantity="one">1時間（<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>まで）</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="other">%d分</item>
-      <item quantity="one">1分</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="other">%d時間</item>
-      <item quantity="one">1時間</item>
-    </plurals>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"1分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"1時間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d時間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_minutes">
+    <item quantity="one" msgid="9040808414992812341">"1分"</item>
+    <item quantity="other" msgid="6924190729213550991">"%d分"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours">
+    <item quantity="one" msgid="3480040795582254384">"1時間"</item>
+    <item quantity="other" msgid="5408537517529822157">"%d時間"</item>
+  </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"制限なし"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
