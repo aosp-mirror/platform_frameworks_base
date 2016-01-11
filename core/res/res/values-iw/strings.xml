@@ -61,10 +61,12 @@
     <string name="needPuk" msgid="919668385956251611">"‏כרטיס ה-SIM נעול באמצעות PUK. הקלד את קוד PUK כדי לבטל את נעילתו."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏הקלד PUK2 כדי לבטל את חסימת כרטיס ה-SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏לא הצלחת. הפעל נעילת SIM/RUIM."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"‏נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> לפני נעילת כרטיס ה-SIM."</item>
-    <item quantity="other" msgid="7530597808358774740">"‏נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות לפני נעילת כרטיס ה-SIM."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="two">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני נעילת כרטיס ה-SIM.</item>
+      <item quantity="many">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני נעילת כרטיס ה-SIM.</item>
+      <item quantity="other">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני נעילת כרטיס ה-SIM.</item>
+      <item quantity="one">‏נותר לך ניסיון <xliff:g id="NUMBER_0">%d</xliff:g> לפני נעילת כרטיס ה-SIM.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"זיהוי מתקשר של שיחה נכנסת"</string>
@@ -192,7 +194,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"כיבוי"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"דיווח על באג"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"שלח דיווח על באג"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד שיהיה ניתן לבצע שליחה. התאזר בסבלנות."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"פעולה זו תאסוף מידע על מצב המכשיר הנוכחי שלך על מנת לשלוח אותו כהודעת אימייל. היא תימשך זמן קצר מרגע פתיחת דיווח הבאג ועד לשליחת ההודעה בפועל. אנא המתן בסבלנות."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"מצב שקט"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"הקול כבוי"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"קול מופעל"</string>
@@ -271,13 +273,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"‏גש לכרטיס SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"תכונות נגישות"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"תכונות שטכנולוגיה מסייעת יכולה לבקש."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזר תוכן של חלון"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעל את \'גילוי באמצעות מגע\'"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"פריטים שנגעת בהם ייאמרו בקול וניתן לנווט במסך באמצעות תנועות."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעל גישה משופרת לאינטרנט"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"להפעיל גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצג טקסט שאתה מקליד"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצגת טקסט בזמן הקלדה"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
@@ -337,8 +339,8 @@
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"מאפשר לאפליקציה להתחיל בפעילות מכל סוג שהוא, ללא התחשבות בהגנת הרשאות או במצב מיוצא."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"הגדרת תאימות מסך"</string>
     <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"מאפשר לאפליקציה לשלוט במצב תאימות המסך של אפליקציות אחרות. אפליקציות זדוניות עלולות לפגוע בהתנהגות של אפליקציות אחרות."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"הפעלה של ניקוי באגים באפליקציות"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"הרשאה זו מאפשרת לאפליקציה להפעיל ניקוי באגים עבור אפליקציה אחרת. אפליקציות זדוניות עלולות להשתמש באפשרות זו כדי לסגור אפליקציות אחרות."</string>
+    <string name="permlab_setDebugApp" msgid="3022107198686584052">"הפעלה של ניפוי באגים באפליקציות"</string>
+    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"הרשאה זו מאפשרת לאפליקציה להפעיל ניפוי באגים עבור אפליקציה אחרת. אפליקציות זדוניות עלולות להשתמש באפשרות זו כדי לסגור אפליקציות אחרות."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"שינוי הגדרות תצוגה של המערכת"</string>
     <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"הרשאה זו מאפשרת לאפליקציה לשנות את התצורה הנוכחית, כגון המקום או גודל הגופן הכללי."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"הפוך מצב מכונית לפעיל"</string>
@@ -395,8 +397,8 @@
     <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"הרשאה זו מאפשרת לאפליקציה ליצור חלונות המיועדים לשימוש על ידי ממשק המשתמש של המערכת הפנימית. לא מיועד לשימוש באפליקציות רגילות."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ציור על אפליקציות אחרות"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"מאפשר לאפליקציה לצייר על אפליקציות אחרות או על חלקים מממשק המשתמש. הדבר עשוי להפריע לך להשתמש בממשק של אפליקציות, או לשנות את מה שאתה חושב שאתה רואה באפליקציות אחרות."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"שנה את מהירות ההנפשה הגלובלית"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"הרשאה זו מאפשרת לאפליקציה לשנות את מהירות ההנפשה הכללית (הנפשות מהירות או איטיות יותר) בכל עת."</string>
+    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"שנה את מהירות האנימציה הגלובלית"</string>
+    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"הרשאה זו מאפשרת לאפליקציה לשנות את מהירות האנימציה הכללית (הנפשות מהירות או איטיות יותר) בכל עת."</string>
     <string name="permlab_manageAppTokens" msgid="1286505717050121370">"ניהול אסימוני אפליקציות"</string>
     <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"‏מאפשר לאפליקציה ליצור ולנהל אסימונים משלהם, תוך עקיפת סידור ה-Z הרגיל שלהם. הרשאה זו לעולם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_freezeScreen" msgid="4708181184441880175">"הקפאת מסך"</string>
@@ -745,7 +747,7 @@
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"מאפשר לאפליקציה לקרוא את סטטיסטיקת הסנכרון של חשבון, כולל היסטוריית אירועי הסנכרון וכמות הנתונים שסונכרנה."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"קרא עדכוני מנויים"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"מאפשר לאפליקציה לקבל פרטים על ההזנות הנוכחיות שמסונכרנות."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"כתוב עדכונים מנויים"</string>
+    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"כתיבת עדכוני מנויים"</string>
     <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"מאפשר לאפליקציה לשנות את ההזנות הנוכחיות שלך שמסונכרנות. אפליקציות זדוניות עלולות לשמות את ההזנות המסונכרנות שלך."</string>
     <string name="permlab_readDictionary" msgid="4107101525746035718">"קריאת מונחים שהוספת למילון"</string>
     <string name="permdesc_readDictionary" msgid="659614600338904243">"מאפשר לאפליקציה לקרוא את כל המילים, השמות והביטויים שהמשתמש אחסן במילון המשתמש."</string>
@@ -793,8 +795,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"מאפשרת לבעלים לאגד לממשק ברמה העליונה של שירות ספק תנאי. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
-    <string name="permlab_bindDreamService" msgid="4153646965978563462">"‏איגוד לשירות Dream"</string>
-    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"‏מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות Dream. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילות."</string>
+    <string name="permlab_bindDreamService" msgid="4153646965978563462">"איגוד לשירות ׳חלום בהקיץ׳"</string>
+    <string name="permdesc_bindDreamService" msgid="7325825272223347863">"מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות ׳חלום בהקיץ׳. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילות."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"הפעלה של אפליקציית תצורה שסופקה על ידי ספק"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ההרשאה הזו מאפשרת לבעלים להפעיל את אפליקציית התצורה שסופקה על ידי ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"קליטת מעקב אחר תנאי רשת"</string>
@@ -817,12 +819,12 @@
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ניהול מעקב אחר מספר הסיסמאות השגויות שהוקלדו בעת ביטול נעילה המסך, וביצוע נעילה של הטלפון או מחיקה של כל נתוני הטלפון אם הוקלדו יותר מדי סיסמאות שגויות."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"שנה את הסיסמה לביטול נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"שנה את הסיסמה לביטול נעילת המסך."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"נעל את המסך"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"שלוט באופן ובתזמון של נעילת המסך"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"מחק את כל הנתונים"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"נעילת המסך"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"מחק את נתוני הטאבלט ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"מחיקה של נתוני הטלוויזיה ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"מחק את נתוני הטלפון ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"מחיקה של נתוני הטלפון, ללא אזהרה, על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"‏הגדר את שרת ה-Proxy הכללי של המכשיר"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"‏הגדר שימוש בשרת ה-Proxy הגלובלי של המכשיר כאשר המדיניות מופעלת. רק מנהל המכשיר הראשון מגדיר את שרת ה-Proxy הגלובלי הפעיל."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"הגדר תאריך תפוגה לסיסמה של נעילת המסך"</string>
@@ -1128,9 +1130,12 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'חקור על ידי מגע\'. כאשר התכונה \'חקור על ידי מגע\' מופעלת, אתה יכול לשמוע או לראות תיאורים של הפריטים שעליהם אצבעך מונחת או לקיים אינטראקציה עם הטלפון באמצעות תנועות אצבע."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"לפני חודש אחד"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"לפני חודש אחד"</string>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> הימים האחרונים"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> הימים האחרונים</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> הימים האחרונים</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> הימים האחרונים</item>
+      <item quantity="one">יום <xliff:g id="COUNT_0">%d</xliff:g> אחרון</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"בחודש שעבר"</string>
     <string name="older" msgid="5211975022815554840">"ישן יותר"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"בתאריך <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1148,18 +1153,24 @@
     <string name="weeks" msgid="6509623834583944518">"שבועות"</string>
     <string name="year" msgid="4001118221013892076">"שנה"</string>
     <string name="years" msgid="6881577717993213522">"שנים"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"שנייה אחת"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> שניות"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"דקה אחת"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> דקות"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"שעה אחת"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> שעות"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="one">שנייה אחת</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> דקות</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> דקות</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> דקות</item>
+      <item quantity="one">דקה אחת</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="two"><xliff:g id="COUNT">%d</xliff:g> שעות</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> שעות</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> שעות</item>
+      <item quantity="one">שעה אחת</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"בעיה בווידאו"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"סרטון זה אינו חוקי להעברה כמדיה זורמת למכשיר זה."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"לא ניתן להפעיל סרטון זה."</string>
@@ -1193,7 +1204,7 @@
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="yes" msgid="5362982303337969312">"אישור"</string>
     <string name="no" msgid="5141531044935541497">"ביטול"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"לידיעתך"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"זהירות"</string>
     <string name="loading" msgid="7933681260296021180">"טוען..."</string>
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
@@ -1267,14 +1278,18 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"ללא"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"רינגטונים"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"רינגטון לא ידוע"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"‏רשת Wi-Fi זמינה"</item>
-    <item quantity="other" msgid="4192424489168397386">"‏רשתות Wi-Fi זמינות"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"‏רשת Wi-Fi פתוחה זמינה"</item>
-    <item quantity="other" msgid="7915895323644292768">"‏רשתות Wi-Fi פתוחות זמינות"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="two">‏יש רשתות Wi-Fi זמינות</item>
+      <item quantity="many">‏יש רשתות Wi-Fi זמינות</item>
+      <item quantity="other">‏יש רשתות Wi-Fi זמינות</item>
+      <item quantity="one">‏יש רשת Wi-Fi זמינה</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="two">‏יש רשתות Wi-Fi פתוחות וזמינות</item>
+      <item quantity="many">‏יש רשתות Wi-Fi פתוחות וזמינות</item>
+      <item quantity="other">‏יש רשתות Wi-Fi פתוחות וזמינות</item>
+      <item quantity="one">‏יש רשת Wi-Fi פתוחה וזמינה</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"‏כניסה לרשת Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"היכנס לרשת"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1355,8 +1370,8 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"‏כל הקבצים ששמורים באמצעי האחסון מסוג USB שלך יימחקו. פעולה זו היא בלתי הפיכה!"</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"כל הנתונים שמאוחסנים בכרטיס יאבדו."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"פרמוט"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניקוי באגים של USB מחובר"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏גע כדי להשבית את ניקוי הבאגים בהתקן ה-USB."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"‏ניפוי באגים של USB מחובר"</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"‏גע כדי להשבית ניפוי באגים בהתקן ה-USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"בחר מקלדות"</string>
     <string name="show_ime" msgid="9157568568695230830">"הצג שיטת קלט"</string>
@@ -1462,10 +1477,12 @@
     <string name="skip_button_label" msgid="1275362299471631819">"דלג"</string>
     <string name="no_matches" msgid="8129421908915840737">"אין התאמות"</string>
     <string name="find_on_page" msgid="1946799233822820384">"חפש בדף"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"התאמה אחת"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> מתוך <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="two"><xliff:g id="INDEX">%d</xliff:g> מתוך <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> מתוך <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> מתוך <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">התאמה אחת</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"סיום"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"‏מבטל טעינה של אחסון USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"‏מבטל טעינה של כרטיס SD..."</string>
@@ -1751,10 +1768,12 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"‏צור מספר PIN לשינוי הגבלות"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"‏מספרי ה-PIN לא תואמים. נסה שוב."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"‏מספר ה-PIN קצר מדי. חייב להיות באורך 4 ספרות לפחות."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"נסה שוב בעוד שנייה"</item>
-    <item quantity="other" msgid="4730868920742952817">"נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="two">נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="many">נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="other">נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות</item>
+      <item quantity="one">נסה שוב בעוד שנייה אחת</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"נסה שוב מאוחר יותר"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"החלק מטה מהחלק העליון כדי לצאת ממסך מלא."</string>
     <string name="done_label" msgid="2093726099505892398">"בוצע"</string>
@@ -1774,28 +1793,36 @@
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"המסך מוצמד. הארגון אוסר לבטל את הצמדתו."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"המסך מוצמד"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"הצמדת המסך בוטלה"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"בקש קוד אימות לפני ביטול הצמדה"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏בקש PIN לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"כדי לעזור בשיפור חיי הסוללה, תכונת החיסכון בסוללה מצמצמת את פעולות המכשיר ומגבילה רטט, שירותי מיקום ואת רוב נתוני הרקע. אימייל, העברת הודעות ואפליקציות אחרות המסתמכות על סנכרון עשויות שלא להתעדכן, אלא אם תפתח אותן.\n\nתכונת החיסכון בסוללה מושבתת אוטומטית כשהמכשיר בטעינה."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"עד לסיום ההשבתה בשעה <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"עד לסיום זמן ההשבתה"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"למשך דקה אחת (עד <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"למשך שעה אחת (עד <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"‏למשך %1$d שעות (עד <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"למשך דקה אחת"</item>
-    <item quantity="other" msgid="6924190729213550991">"‏למשך %d דקות"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"למשך שעה אחת"</item>
-    <item quantity="other" msgid="5408537517529822157">"‏למשך %d שעות"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="two">‏למשך %d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏למשך %1$d דקות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">למשך דקה אחת (עד <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="two">‏למשך %d שעות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">‏למשך %d שעות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">‏למשך %d שעות (עד <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">למשך שעה אחת (עד <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="two">‏למשך %d דקות</item>
+      <item quantity="many">‏למשך %d דקות</item>
+      <item quantity="other">‏למשך %d דקות</item>
+      <item quantity="one">למשך דקה אחת</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="two">‏למשך %d שעות</item>
+      <item quantity="many">‏למשך %d שעות</item>
+      <item quantity="other">‏למשך %d שעות</item>
+      <item quantity="one">למשך שעה אחת</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ללא הגבלה"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"כווץ"</string>

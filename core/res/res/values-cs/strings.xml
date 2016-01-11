@@ -61,10 +61,12 @@
     <string name="needPuk" msgid="919668385956251611">"SIM karta je blokována pomocí kódu PUK. Odblokujete ji zadáním kódu PUK."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Chcete-li odblokovat SIM kartu, zadejte kód PUK2."</string>
     <string name="enablePin" msgid="209412020907207950">"Operace nebyla úspěšná, povolte zámek SIM/RUIM karty."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"Máte ještě <xliff:g id="NUMBER">%d</xliff:g> pokus. Poté bude SIM karta uzamčena."</item>
-    <item quantity="other" msgid="7530597808358774740">"Počet zbývajících pokusů, po jejichž vyčerpání bude SIM karta uzamčena: <xliff:g id="NUMBER">%d</xliff:g>."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="few">Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusy. Poté bude SIM karta uzamčena.</item>
+      <item quantity="many">Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusu. Poté bude SIM karta uzamčena.</item>
+      <item quantity="other">Máte ještě <xliff:g id="NUMBER_1">%d</xliff:g> pokusů. Poté bude SIM karta uzamčena.</item>
+      <item quantity="one">Máte ještě <xliff:g id="NUMBER_0">%d</xliff:g> pokus. Poté bude SIM karta uzamčena.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Příchozí identifikace volajícího"</string>
@@ -192,7 +194,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnout"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlášení chyb"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
@@ -214,7 +216,7 @@
     <string name="permgroupdesc_messages" msgid="7821999071003699236">"Čtení a zápis zpráv SMS, e-mailů a dalších zpráv."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vaše osobní informace"</string>
     <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Přímý přístup k informacím o vás uložených na vaší vizitce"</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Informace o vašich kontaktech a sociálních sítích"</string>
+    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Vaše data na sociálních sítích"</string>
     <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Přímý přístup k informacím o vašich kontaktech a sociálních propojeních"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Vaše poloha"</string>
     <string name="permgroupdesc_location" msgid="5704679763124170100">"Sledovat vaši fyzickou polohu."</string>
@@ -271,14 +273,14 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Přístup ke kartě SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkce usnadnění"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkce, o které může asistenční technologie požádat."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načíst obsah okna"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Můžete prozkoumat obsah okna, se kterým pracujete."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítat obsah oken"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Může prozkoumávat obsah oken, se kterými pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Položky, na které klepnete, budou přečteny nahlas a obrazovku bude možné procházet pomocí gest."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Zapnout vylepšené usnadnění přístupu k webu"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Za účelem usnadnění přístupu k obsahu aplikací mohou být nainstalovány skripty."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sledovat zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledování zahrnuje osobní údaje, jako jsou například čísla kreditních karet a hesla."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"stavový řádek"</string>
@@ -610,7 +612,7 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"ovládání kontrolky"</string>
-    <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikaci ovládat baterku."</string>
+    <string name="permdesc_flashlight" msgid="6522284794568368310">"Umožňuje aplikaci ovládat svítilnu."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"spravovat nastavení a oprávnění pro zařízení USB"</string>
     <string name="permdesc_manageUsb" msgid="7776155430218239833">"Umožňuje aplikaci spravovat nastavení a oprávnění pro zařízení USB."</string>
     <string name="permlab_accessMtp" msgid="4953468676795917042">"implementace protokolu MTP"</string>
@@ -850,7 +852,7 @@
     <item msgid="2374913952870110618">"Vlastní"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Domů"</item>
+    <item msgid="6880257626740047286">"Domov"</item>
     <item msgid="5629153956045109251">"Práce"</item>
     <item msgid="4966604264500343469">"Ostatní"</item>
     <item msgid="4932682847595299369">"Vlastní"</item>
@@ -907,7 +909,7 @@
     <string name="emailTypeOther" msgid="2923008695272639549">"Jiné"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Vlastní"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Domů"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Domov"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Práce"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Jiné"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Vlastní"</string>
@@ -931,9 +933,9 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Asistent"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Bratr"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Dítě"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Druh/družka"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Partner(ka)"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Otec"</string>
-    <string name="relationTypeFriend" msgid="7313106762483391262">"Známý"</string>
+    <string name="relationTypeFriend" msgid="7313106762483391262">"Kamarád(ka)"</string>
     <string name="relationTypeManager" msgid="6365677861610137895">"Vedoucí"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Matka"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Rodič"</string>
@@ -1128,9 +1130,12 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Služba <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> požaduje povolení funkce Prozkoumání dotykem. Pokud je funkce Prozkoumání dotykem zapnuta, můžete slyšet nebo vidět popisy objektů pod vaším prstem nebo ovládat telefon gesty."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"před 1 měsícem"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Déle než před 1 měsícem"</string>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Posledních <xliff:g id="COUNT">%d</xliff:g> dnů"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="few">Poslední <xliff:g id="COUNT_1">%d</xliff:g> dny</item>
+      <item quantity="many">Posledních <xliff:g id="COUNT_1">%d</xliff:g> dne</item>
+      <item quantity="other">Posledních <xliff:g id="COUNT_1">%d</xliff:g> dnů</item>
+      <item quantity="one">Poslední <xliff:g id="COUNT_0">%d</xliff:g> den</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Poslední měsíc"</string>
     <string name="older" msgid="5211975022815554840">"Starší"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"dne <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1148,18 +1153,24 @@
     <string name="weeks" msgid="6509623834583944518">"týd."</string>
     <string name="year" msgid="4001118221013892076">"rokem"</string>
     <string name="years" msgid="6881577717993213522">"lety"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 sekunda"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> s"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 minuta"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> min"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 hodina"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> h"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> sekundy</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekund</item>
+      <item quantity="one">1 sekunda</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> minuty</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minut</item>
+      <item quantity="one">1 minuta</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="few">[<xliff:g id="COUNT">%d</xliff:g>] hodiny</item>
+      <item quantity="many"><xliff:g id="COUNT">%d</xliff:g> hodiny</item>
+      <item quantity="other">[<xliff:g id="COUNT">%d</xliff:g>] hodin</item>
+      <item quantity="one">1 hodina</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Potíže s videem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Toto video nelze přenášet datovým proudem do tohoto zařízení."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nelze přehrát."</string>
@@ -1264,27 +1275,31 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitost oznámení"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Žádné"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Žádný"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváněcí tóny"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámý vyzváněcí tón"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"K dispozici je síť Wi-Fi."</item>
-    <item quantity="other" msgid="4192424489168397386">"Jsou k dispozici sítě Wi-Fi."</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"K dispozici je veřejná síť Wi-Fi"</item>
-    <item quantity="other" msgid="7915895323644292768">"Jsou k dispozici veřejné sítě Wi-Fi"</item>
-  </plurals>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="few">K dispozici jsou sítě Wi-Fi</item>
+      <item quantity="many">K dispozici jsou sítě Wi-Fi</item>
+      <item quantity="other">K dispozici jsou sítě Wi-Fi</item>
+      <item quantity="one">K dispozici je síť Wi-Fi</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="few">K dispozici jsou veřejné sítě Wi-Fi</item>
+      <item quantity="many">K dispozici jsou veřejné sítě Wi-Fi</item>
+      <item quantity="other">K dispozici jsou veřejné sítě Wi-Fi</item>
+      <item quantity="one">K dispozici je veřejná síť Wi-Fi</item>
+    </plurals>
     <string name="wifi_available_sign_in" msgid="4029489716605255386">"Přihlásit se k síti Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Přihlášení k síti"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Připojení k síti Wi-Fi se nezdařilo"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má pomalé připojení k internetu."</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Přímé připojení sítě Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustit přímé připojení sítě Wi-Fi. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Přímé připojení sítě Wi-Fi se nepodařilo spustit."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Přímé připojení sítě Wi-Fi je zapnuto"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustit Wi-Fi Direct. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct se nepodařilo spustit."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct je zapnuto"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Nastavení otevřete dotykem"</string>
     <string name="accept" msgid="1645267259272829559">"Přijmout"</string>
     <string name="decline" msgid="2112225451706137894">"Odmítnout"</string>
@@ -1317,7 +1332,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karta přidána."</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobilní síť bude přístupná po restartu zařízení."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Restartovat"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavit čas"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavení data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Hotovo"</string>
@@ -1355,10 +1370,10 @@
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Všechny soubory uložené v úložišti USB budou vymazány. Tuto akci nelze vrátit zpět."</string>
     <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Všechna data na kartě budou ztracena."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formátovat"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes rozhraní USB připojeno"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vyberte klávesnice"</string>
+    <string name="configure_input_methods" msgid="4769971288371946846">"Vybrat klávesnici"</string>
     <string name="show_ime" msgid="9157568568695230830">"Zobrazit metodu zadávání"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Výběr rozložení klávesnice"</string>
@@ -1436,7 +1451,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Tuto aplikaci používáte v pracovním profilu"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Metoda zadávání dat"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synchronizace"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Usnadnění"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Přístupnost"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Tapeta"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Změnit tapetu"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Aplikace poslouchající oznámení"</string>
@@ -1455,17 +1470,19 @@
     <string name="submit" msgid="1602335572089911941">"Odeslat"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Aktivován režim V autě"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Dotykem ukončíte režim V autě."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Je aktivní tethering nebo hotspot"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Sdílené připojení nebo hotspot je aktivní."</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Dotykem nastavíte."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Zpět"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Další"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Přeskočit"</string>
     <string name="no_matches" msgid="8129421908915840737">"Žádné shody"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Hledat na stránce"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 shoda"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> ze <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> z <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 shoda</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Hotovo"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"Odpojování úložiště USB..."</string>
     <string name="progress_unmounting" product="default" msgid="1327894998409537190">"Odpojování karty SD..."</string>
@@ -1550,7 +1567,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Dosažen limit mobilních dat"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Datový limit Wi-Fi byl překročen"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> nad stanoveným limitem."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Přenos dat na pozadí je omezen"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data na pozadí jsou omezena"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Klepnutím omezení odstraníte."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
@@ -1751,10 +1768,12 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Vytvořit kód PIN pro úpravy omezení"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN se neshodují. Zkuste to znovu."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je příliš krátký. Musí mít alespoň čtyři číslice."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Zkuste to znovu za 1 s"</item>
-    <item quantity="other" msgid="4730868920742952817">"Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> s"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="few">Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
+      <item quantity="many">Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> sekundy</item>
+      <item quantity="other">Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> sekund</item>
+      <item quantity="one">Zkuste to znovu za 1 sekundu</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Zkuste to znovu později"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Režim celé obrazovky ukončíte přejetím dolů."</string>
     <string name="done_label" msgid="2093726099505892398">"Hotovo"</string>
@@ -1774,28 +1793,36 @@
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Obrazovka je připnuta. Vaše organizace uvolnění zakázala."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o kód PIN"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Před uvolněním požádat o bezpečnostní gesto"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí období klidu"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí období klidu"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Jednu minutu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d min (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Jednu hodinu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d h (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Na jednu minutu"</item>
-    <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
-    <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="few">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d minut (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Jednu minutu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="few">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="many">%1$d hodiny (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d hodin (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Jednu hodinu (do <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="few">%d minuty</item>
+      <item quantity="many">%d minuty</item>
+      <item quantity="other">%d minut</item>
+      <item quantity="one">Jednu minutu</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="few">%d hodiny</item>
+      <item quantity="many">%d hodiny</item>
+      <item quantity="other">%d hodin</item>
+      <item quantity="one">Jednu hodinu</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Na dobu neurčitou"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
