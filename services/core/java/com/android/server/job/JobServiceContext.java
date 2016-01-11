@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -190,7 +191,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 return false;
             }
             try {
-                mBatteryStats.noteJobStart(job.getName(), job.getUid());
+                mBatteryStats.noteJobStart(job.getName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
@@ -566,7 +567,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 }
                 completedJob = mRunningJob;
                 try {
-                    mBatteryStats.noteJobFinish(mRunningJob.getName(), mRunningJob.getUid());
+                    mBatteryStats.noteJobFinish(mRunningJob.getName(), mRunningJob.getSourceUid());
                 } catch (RemoteException e) {
                     // Whatever.
                 }

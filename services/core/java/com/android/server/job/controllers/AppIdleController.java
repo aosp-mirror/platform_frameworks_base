@@ -65,9 +65,9 @@ public class AppIdleController extends StateController {
     public void maybeStartTrackingJob(JobStatus jobStatus) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.add(jobStatus);
-            String packageName = jobStatus.job.getService().getPackageName();
+            String packageName = jobStatus.getSourcePackageName();
             final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                    jobStatus.uId, jobStatus.getUserId());
+                    jobStatus.getSourceUid(), jobStatus.getSourceUserId());
             if (DEBUG) {
                 Slog.d(LOG_TAG, "Start tracking, setting idle state of "
                         + packageName + " to " + appIdle);
@@ -89,7 +89,7 @@ public class AppIdleController extends StateController {
         pw.println("Parole On: " + mAppIdleParoleOn);
         synchronized (mTrackedTasks) {
             for (JobStatus task : mTrackedTasks) {
-                pw.print(task.job.getService().getPackageName());
+                pw.print(task.getSourcePackageName());
                 pw.print(":idle=" + !task.appNotIdleConstraintSatisfied.get());
                 pw.print(", ");
             }
@@ -106,9 +106,9 @@ public class AppIdleController extends StateController {
             }
             mAppIdleParoleOn = isAppIdleParoleOn;
             for (JobStatus task : mTrackedTasks) {
-                String packageName = task.job.getService().getPackageName();
+                String packageName = task.getSourcePackageName();
                 final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                        task.uId, task.getUserId());
+                        task.getSourceUid(), task.getSourceUserId());
                 if (DEBUG) {
                     Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
                 }
@@ -133,8 +133,8 @@ public class AppIdleController extends StateController {
                     return;
                 }
                 for (JobStatus task : mTrackedTasks) {
-                    if (task.job.getService().getPackageName().equals(packageName)
-                            && task.getUserId() == userId) {
+                    if (task.getSourcePackageName().equals(packageName)
+                            && task.getSourceUserId() == userId) {
                         if (task.appNotIdleConstraintSatisfied.get() != !idle) {
                             if (DEBUG) {
                                 Slog.d(LOG_TAG, "App Idle state changed, setting idle state of "

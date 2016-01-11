@@ -49,6 +49,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.Process;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -220,7 +221,14 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @return Result of this operation. See <code>JobScheduler#RESULT_*</code> return codes.
      */
     public int schedule(JobInfo job, int uId) {
+        return scheduleAsPackage(job, uId, null, -1);
+    }
+
+    public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId) {
         JobStatus jobStatus = new JobStatus(job, uId);
+        if (packageName != null) {
+            jobStatus.setSource(packageName, userId);
+        }
         cancelJob(uId, job.getId());
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
@@ -1035,6 +1043,25 @@ public class JobSchedulerService extends com.android.server.SystemService
             long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.schedule(job, uid);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public int scheduleAsPackage(JobInfo job, String packageName, int userId)
+                throws RemoteException {
+            if (DEBUG) {
+                Slog.d(TAG, "Scheduling job: " + job.toString() + " on behalf of " + packageName);
+            }
+            final int uid = Binder.getCallingUid();
+            if (uid != Process.SYSTEM_UID) {
+                throw new IllegalArgumentException("Only system process is allowed"
+                        + "to set packageName");
+            }
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return JobSchedulerService.this.scheduleAsPackage(job, uid, packageName, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

@@ -16,9 +16,11 @@
 
 package com.android.server.job.controllers;
 
+import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
@@ -46,6 +48,10 @@ public class JobStatus {
     final int uId;
     final String name;
     final String tag;
+
+    String sourcePackageName;
+    int sourceUserId = -1;
+    int sourceUid = -1;
 
     // Constraints.
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
@@ -77,6 +83,7 @@ public class JobStatus {
     private JobStatus(JobInfo job, int uId, int numFailures) {
         this.job = job;
         this.uId = uId;
+        this.sourceUid = uId;
         this.name = job.getService().flattenToShortString();
         this.tag = "*job*/" + this.name;
         this.numFailures = numFailures;
@@ -146,6 +153,21 @@ public class JobStatus {
         return job.getService();
     }
 
+    public String getSourcePackageName() {
+        return sourcePackageName != null ? sourcePackageName : job.getService().getPackageName();
+    }
+
+    public int getSourceUid() {
+        return sourceUid;
+    }
+
+    public int getSourceUserId() {
+        if (sourceUserId == -1) {
+            sourceUserId = getUserId();
+        }
+        return sourceUserId;
+    }
+
     public int getUserId() {
         return UserHandle.getUserId(uId);
     }
@@ -165,7 +187,7 @@ public class JobStatus {
     public PersistableBundle getExtras() {
         return job.getExtras();
     }
-    
+
     public int getPriority() {
         return job.getPriority();
     }
@@ -260,6 +282,22 @@ public class JobStatus {
             } else {
                 return "-" + DateUtils.formatElapsedTime(nextRuntime / -1000);
             }
+        }
+    }
+
+    public void setSource(String sourcePackageName, int sourceUserId) {
+        this.sourcePackageName = sourcePackageName;
+        this.sourceUserId = sourceUserId;
+        try {
+            sourceUid = AppGlobals.getPackageManager().getPackageUid(sourcePackageName, 0,
+                    sourceUserId);
+        } catch (RemoteException ex) {
+            // Can't happen, PackageManager runs in the same process.
+        }
+        if (sourceUid == -1) {
+            sourceUid = uId;
+            this.sourceUserId = getUserId();
+            this.sourcePackageName = null;
         }
     }
 

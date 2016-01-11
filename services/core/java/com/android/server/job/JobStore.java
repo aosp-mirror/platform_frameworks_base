@@ -345,6 +345,10 @@ public class JobStore {
             out.attribute(null, "jobid", Integer.toString(jobStatus.getJobId()));
             out.attribute(null, "package", jobStatus.getServiceComponent().getPackageName());
             out.attribute(null, "class", jobStatus.getServiceComponent().getClassName());
+            if (jobStatus.getSourcePackageName() != null) {
+                out.attribute(null, "sourcePackageName", jobStatus.getSourcePackageName());
+            }
+            out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
         }
@@ -542,7 +546,7 @@ public class JobStore {
         private JobStatus restoreJobFromXml(XmlPullParser parser) throws XmlPullParserException,
                 IOException {
             JobInfo.Builder jobBuilder;
-            int uid;
+            int uid, userId;
 
             // Read out job identifier attributes and priority.
             try {
@@ -550,14 +554,18 @@ public class JobStore {
                 jobBuilder.setPersisted(true);
                 uid = Integer.valueOf(parser.getAttributeValue(null, "uid"));
 
-                String priority = parser.getAttributeValue(null, "priority");
-                if (priority != null) {
-                    jobBuilder.setPriority(Integer.valueOf(priority));
+                String val = parser.getAttributeValue(null, "priority");
+                if (val != null) {
+                    jobBuilder.setPriority(Integer.valueOf(val));
                 }
+                val = parser.getAttributeValue(null, "sourceUserId");
+                userId = val == null ? -1 : Integer.valueOf(val);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
             }
+
+            final String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
 
             int eventType;
             // Read out constraints tag.
@@ -672,8 +680,12 @@ public class JobStore {
             jobBuilder.setExtras(extras);
             parser.nextTag(); // Consume </extras>
 
-            return new JobStatus(
+            JobStatus js = new JobStatus(
                     jobBuilder.build(), uid, elapsedRuntimes.first, elapsedRuntimes.second);
+            if (userId != -1) {
+                js.setSource(sourcePackageName, userId);
+            }
+            return js;
         }
 
         private JobInfo.Builder buildBuilderFromXml(XmlPullParser parser) throws NumberFormatException {
