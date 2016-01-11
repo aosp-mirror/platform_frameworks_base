@@ -18,10 +18,14 @@ package android.mtp;
 
 /**
  * This class encapsulates information about a MTP event.
- * Event constants are defined by the USB-IF MTP specification.
+ * This corresponds to the events described in appendix G of the MTP specification.
  */
 public class MtpEvent {
     private int mEventCode = MtpConstants.EVENT_UNDEFINED;
+
+    // Parameters for event. The interpretation of event parameters depends upon mEventCode.
+    private int mParameter1;
+    private int mParameter2;
 
     /**
      * Returns event code of MTP event.
@@ -29,4 +33,100 @@ public class MtpEvent {
      * @return event code
      */
     public int getEventCode() { return mEventCode; }
+
+    /**
+     * Obtains objectHandle event parameter.
+     */
+    public int getObjectHandle() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_OBJECT_ADDED:
+                return mParameter1;
+            case MtpConstants.EVENT_OBJECT_REMOVED:
+                return mParameter1;
+            case MtpConstants.EVENT_OBJECT_INFO_CHANGED:
+                return mParameter1;
+            case MtpConstants.EVENT_REQUEST_OBJECT_TRANSFER:
+                return mParameter1;
+            case MtpConstants.EVENT_OBJECT_PROP_CHANGED:
+                return mParameter1;
+            case MtpConstants.EVENT_OBJECT_REFERENCES_CHANGED:
+                return mParameter1;
+            default:
+                throw new IllegalParameterAccess("objectHandle", mEventCode);
+        }
+    }
+
+    /**
+     * Obtains storageID event parameter.
+     */
+    public int getStorageId() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_STORE_ADDED:
+                return mParameter1;
+            case MtpConstants.EVENT_STORE_REMOVED:
+                return mParameter1;
+            case MtpConstants.EVENT_STORE_FULL:
+                return mParameter1;
+            case MtpConstants.EVENT_STORAGE_INFO_CHANGED:
+                return mParameter1;
+            default:
+                throw new IllegalParameterAccess("storageID", mEventCode);
+        }
+    }
+
+    /**
+     * Obtains devicePropCode event parameter.
+     */
+    public int getDevicePropCode() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_DEVICE_PROP_CHANGED:
+                return mParameter1;
+            default:
+                throw new IllegalParameterAccess("devicePropCode", mEventCode);
+        }
+    }
+
+    /**
+     * Obtains transactionID event parameter.
+     */
+    public int getTransactionId() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_CAPTURE_COMPLETE:
+                return mParameter1;
+            default:
+                throw new IllegalParameterAccess("transactionID", mEventCode);
+        }
+    }
+
+    /**
+     * Obtains objectPropCode event parameter.
+     */
+    public int getObjectPropCode() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_OBJECT_PROP_CHANGED:
+                return mParameter2;
+            case MtpConstants.EVENT_OBJECT_PROP_DESC_CHANGED:
+                return mParameter1;
+            default:
+                throw new IllegalParameterAccess("objectPropCode", mEventCode);
+        }
+    }
+
+    /**
+     * Obtains objectFormatCode event parameter.
+     */
+    public int getObjectFormatCode() {
+        switch (mEventCode) {
+            case MtpConstants.EVENT_OBJECT_PROP_DESC_CHANGED:
+                return mParameter2;
+            default:
+                throw new IllegalParameterAccess("objectFormatCode", mEventCode);
+        }
+    }
+
+    private static class IllegalParameterAccess extends UnsupportedOperationException {
+        public IllegalParameterAccess(String propertyName, int eventCode) {
+            super("Cannot obtain " + propertyName + " for the event: " + eventCode + ".");
+        }
+    }
 }
