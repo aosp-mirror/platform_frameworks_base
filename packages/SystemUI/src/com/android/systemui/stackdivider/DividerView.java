@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
@@ -38,6 +39,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
@@ -46,10 +48,8 @@ import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
-import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
-import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
+import com.android.systemui.stackdivider.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
@@ -167,8 +167,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public boolean startDragging(boolean animate) {
         mHandle.setTouching(true, animate);
         mDockSide = mWindowManagerProxy.getDockSide();
-        mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(),
-                mFlingAnimationUtils.getMinVelocityPxPerSecond(), mDisplayWidth,
+        mSnapAlgorithm = new DividerSnapAlgorithm(getContext(), mFlingAnimationUtils, mDisplayWidth,
                 mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
         if (mDockSide != WindowManager.DOCKED_INVALID) {
             mWindowManagerProxy.setResizing(true);
@@ -363,6 +362,36 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         return mStartPosition + touchY - mStartY;
     }
 
+    public void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
+        outRect.set(0, 0, mDisplayWidth, mDisplayHeight);
+        switch (dockSide) {
+            case WindowManager.DOCKED_LEFT:
+                outRect.right = position;
+                break;
+            case WindowManager.DOCKED_TOP:
+                outRect.bottom = position;
+                break;
+            case WindowManager.DOCKED_RIGHT:
+                outRect.left = position + mDividerWindowWidth - 2 * mDividerInsets;
+                break;
+            case WindowManager.DOCKED_BOTTOM:
+                outRect.top = position + mDividerWindowWidth - 2 * mDividerInsets;
+                break;
+        }
+        if (outRect.left > outRect.right) {
+            outRect.left = outRect.right;
+        }
+        if (outRect.top > outRect.bottom) {
+            outRect.top = outRect.bottom;
+        }
+        if (outRect.right < outRect.left) {
+            outRect.right = outRect.left;
+        }
+        if (outRect.bottom < outRect.top) {
+            outRect.bottom = outRect.top;
+        }
+    }
+
     private int invertDockSide(int dockSide) {
         switch (dockSide) {
             case WindowManager.DOCKED_LEFT:
@@ -390,11 +419,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         int height = rect.height();
         rect.set(containingRect.right - width, containingRect.bottom - height,
                 containingRect.right, containingRect.bottom);
-    }
-
-    public void calculateBoundsForPosition(int position, int dockSide, Rect outRect) {
-        DockedDividerUtils.calculateBoundsForPosition(position, dockSide, outRect, mDisplayWidth,
-                mDisplayHeight, mDividerSize);
     }
 
     public void resizeStack(int position, int taskPosition, SnapTarget taskSnapTarget) {
