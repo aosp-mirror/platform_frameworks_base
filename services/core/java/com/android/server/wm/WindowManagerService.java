@@ -3523,6 +3523,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void setNewConfiguration(Configuration config) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setNewConfiguration()")) {
@@ -3536,7 +3537,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
+            if (orientationChanged) {
+                updateTaskStackBoundsAfterRotation();
+            }
             mWindowPlacerLocked.performSurfacePlacement();
+        }
+    }
+
+    private void updateTaskStackBoundsAfterRotation() {
+        for (int stackNdx = mStackIdToStack.size() - 1; stackNdx >= 0; stackNdx--) {
+            final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
+            stack.updateBoundsAfterRotation();
         }
     }
 

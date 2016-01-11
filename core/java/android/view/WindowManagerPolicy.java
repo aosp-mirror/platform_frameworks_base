@@ -1328,4 +1328,15 @@ public interface WindowManagerPolicy {
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+
+    /**
+     * Calculates the stable insets without running a layout.
+     *
+     * @param displayRotation the current display rotation
+     * @param outInsets the insets to return
+     * @param displayWidth the current display width
+     * @param displayHeight the current display height
+     */
+    public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
+            Rect outInsets);
 }
