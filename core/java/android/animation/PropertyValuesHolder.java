@@ -861,22 +861,23 @@ public class PropertyValuesHolder implements Cloneable {
         if (mProperty != null) {
             Object value = convertBack(mProperty.get(target));
             kf.setValue(value);
-        }
-        try {
-            if (mGetter == null) {
-                Class targetClass = target.getClass();
-                setupGetter(targetClass);
+        } else {
+            try {
                 if (mGetter == null) {
-                    // Already logged the error - just return to avoid NPE
-                    return;
+                    Class targetClass = target.getClass();
+                    setupGetter(targetClass);
+                    if (mGetter == null) {
+                        // Already logged the error - just return to avoid NPE
+                        return;
+                    }
                 }
+                Object value = convertBack(mGetter.invoke(target));
+                kf.setValue(value);
+            } catch (InvocationTargetException e) {
+                Log.e("PropertyValuesHolder", e.toString());
+            } catch (IllegalAccessException e) {
+                Log.e("PropertyValuesHolder", e.toString());
             }
-            Object value = convertBack(mGetter.invoke(target));
-            kf.setValue(value);
-        } catch (InvocationTargetException e) {
-            Log.e("PropertyValuesHolder", e.toString());
-        } catch (IllegalAccessException e) {
-            Log.e("PropertyValuesHolder", e.toString());
         }
     }
 
