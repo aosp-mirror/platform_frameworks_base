@@ -18330,9 +18330,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      * dialog / global actions also might want different behaviors.
      */
     private static final boolean shouldShowDialogs(Configuration config) {
-        return !(config.keyboard == Configuration.KEYBOARD_NOKEYS
-                && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
-                && config.navigation == Configuration.NAVIGATION_NONAV);
+        final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
+                                   && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
+                                   && config.navigation == Configuration.NAVIGATION_NONAV);
+        final boolean uiIsNotCarType = !((config.uiMode & Configuration.UI_MODE_TYPE_MASK)
+                                    == Configuration.UI_MODE_TYPE_CAR);
+        return inputMethodExists && uiIsNotCarType;
     }
 
     @Override
