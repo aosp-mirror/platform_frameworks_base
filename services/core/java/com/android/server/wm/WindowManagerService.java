@@ -1990,6 +1990,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            // If the window is being added to a task that's docked but non-resizeable,
+            // we need to update this new window's scroll position when it's added.
+            win.applyScrollIfNeeded();
+
             if (type == TYPE_DOCK_DIVIDER) {
                 getDefaultDisplayContentLocked().getDockedDividerController().setWindow(win);
             }

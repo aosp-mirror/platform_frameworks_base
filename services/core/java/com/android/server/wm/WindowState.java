@@ -1458,13 +1458,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean inDockedWorkspace() {
-        Task task = getTask();
+        final Task task = getTask();
         return task != null && task.inDockedWorkspace();
     }
 
     boolean isDockedInEffect() {
-        Task task = getTask();
+        final Task task = getTask();
         return task != null && task.isDockedInEffect();
+    }
+
+    void applyScrollIfNeeded() {
+        final Task task = getTask();
+        if (task != null && task.isTwoFingerScrollMode()) {
+            task.getDimBounds(mTmpRect);
+            mXOffset = mTmpRect.left;
+            mYOffset = mTmpRect.top;
+        }
     }
 
     int getTouchableRegion(Region region, int flags) {
