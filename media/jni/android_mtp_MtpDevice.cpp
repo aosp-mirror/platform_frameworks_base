@@ -372,16 +372,32 @@ android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jint 
     return nullptr;
 }
 
-static jint
+static jlong
 android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
                                          jobject thiz,
                                          jint objectID,
-                                         jint offset,
-                                         jint size,
+                                         jlong offset,
+                                         jlong size,
                                          jbyteArray array)
 {
     if (!array) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Array must not be null.");
+        return -1;
+    }
+
+    if (offset < 0 || 0xffffffffL < offset) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalArgumentException",
+                "Offset argument must be a 32-bit unsigned integer.");
+        return -1;
+    }
+
+    if (size < 0 || 0xffffffffL < size) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalArgumentException",
+                "Size argument must be a 32-bit unsigned integer.");
         return -1;
     }
 
@@ -393,16 +409,13 @@ android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
 
     JavaArrayWriter writer(env, array);
     uint32_t written_size;
-    bool success = device->readPartialObject(
+    const bool success = device->readPartialObject(
             objectID, offset, size, &written_size, JavaArrayWriter::writeTo, &writer);
     if (!success) {
         jniThrowException(env, "java/io/IOException", "Failed to read data.");
         return -1;
     }
-    // Note: assumption here is that a negative value will be treated as unsigned on the Java
-    //       level.
-    // TODO: Make sure that actually holds.
-    return static_cast<jint>(written_size);
+    return static_cast<jlong>(written_size);
 }
 
 static jbyteArray
@@ -615,7 +628,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_object_info",  "(I)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_get_object_info},
     {"native_get_object",       "(II)[B",(void *)android_mtp_MtpDevice_get_object},
-    {"native_get_partial_object", "(III[B)I", (void *)android_mtp_MtpDevice_get_partial_object},
+    {"native_get_partial_object", "(IJJ[B)J", (void *)android_mtp_MtpDevice_get_partial_object},
     {"native_get_thumbnail",    "(I)[B",(void *)android_mtp_MtpDevice_get_thumbnail},
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
     {"native_get_parent",       "(I)J", (void *)android_mtp_MtpDevice_get_parent},

@@ -218,6 +218,33 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that the argument long value is within the inclusive range.
+     *
+     * @param value a long value
+     * @param lower the lower endpoint of the inclusive range
+     * @param upper the upper endpoint of the inclusive range
+     * @param valueName the name of the argument to use if the check fails
+     *
+     * @return the validated long value
+     *
+     * @throws IllegalArgumentException if {@code value} was not within the range
+     */
+    public static long checkArgumentInRange(long value, long lower, long upper,
+            String valueName) {
+        if (value < lower) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "%s is out of range of [%d, %d] (too low)", valueName, lower, upper));
+        } else if (value > upper) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "%s is out of range of [%d, %d] (too high)", valueName, lower, upper));
+        }
+
+        return value;
+    }
+
+    /**
      * Ensures that the array is not {@code null}, and none of its elements are {@code null}.
      *
      * @param value an array of boxed objects

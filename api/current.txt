@@ -22556,7 +22556,7 @@ package android.mtp {
     method public int[] getObjectHandles(int, int, int);
     method public android.mtp.MtpObjectInfo getObjectInfo(int);
     method public long getParent(int);
-    method public int getPartialObject(int, int, int, byte[]) throws java.io.IOException;
+    method public long getPartialObject(int, long, long, byte[]) throws java.io.IOException;
     method public long getStorageId(int);
     method public int[] getStorageIds();
     method public android.mtp.MtpStorageInfo getStorageInfo(int);
