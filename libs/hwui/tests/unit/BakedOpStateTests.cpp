@@ -176,29 +176,26 @@ TEST(ResolvedRenderState, construct_expandForStroke) {
 }
 
 TEST(BakedOpState, tryConstruct) {
-    LinearAllocator allocator;
-
     Matrix4 translate100x0;
     translate100x0.loadTranslate(100, 0, 0);
 
     SkPaint paint;
     ClipRect clip(Rect(100, 200));
-    {
-        RectOp rejectOp(Rect(30, 40, 100, 200), translate100x0, &clip, &paint);
-        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        BakedOpState* bakedState = BakedOpState::tryConstruct(allocator, *snapshot, rejectOp);
 
-        EXPECT_EQ(nullptr, bakedState); // rejected by clip, so not constructed
-        EXPECT_GT(8u, allocator.usedSize()); // no significant allocation space used for rejected op
-    }
-    {
-        RectOp successOp(Rect(30, 40, 100, 200), Matrix4::identity(), &clip, &paint);
-        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
-        BakedOpState* bakedState = BakedOpState::tryConstruct(allocator, *snapshot, successOp);
+    LinearAllocator allocator;
+    RectOp successOp(Rect(30, 40, 100, 200), Matrix4::identity(), &clip, &paint);
+    auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
+    EXPECT_NE(nullptr, BakedOpState::tryConstruct(allocator, *snapshot, successOp))
+            << "successOp NOT rejected by clip, so should be constructed";
+    size_t successAllocSize = allocator.usedSize();
+    EXPECT_LE(64u, successAllocSize) << "relatively large alloc for non-rejected op";
 
-        EXPECT_NE(nullptr, bakedState); // NOT rejected by clip, so will be constructed
-        EXPECT_LE(64u, allocator.usedSize()); // relatively large alloc for non-rejected op
-    }
+    RectOp rejectOp(Rect(30, 40, 100, 200), translate100x0, &clip, &paint);
+    EXPECT_EQ(nullptr, BakedOpState::tryConstruct(allocator, *snapshot, rejectOp))
+            << "rejectOp rejected by clip, so should not be constructed";
+
+    // NOTE: this relies on the clip having already been serialized by the op above
+    EXPECT_EQ(successAllocSize, allocator.usedSize()) << "no extra allocation used for rejected op";
 }
 
 TEST(BakedOpState, tryShadowOpConstruct) {
@@ -207,15 +204,16 @@ TEST(BakedOpState, tryShadowOpConstruct) {
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
         BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
-        EXPECT_EQ(nullptr, bakedState); // rejected by clip, so not constructed
-        EXPECT_GT(8u, allocator.usedSize()); // no significant allocation space used for rejected op
+        EXPECT_EQ(nullptr, bakedState) << "op should be rejected by clip, so not constructed";
+        EXPECT_EQ(0u, allocator.usedSize()) << "no serialization, even for clip,"
+                "since op is quick rejected based on snapshot clip";
     }
     {
         auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
         BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
-        ASSERT_NE(nullptr, bakedState); // NOT rejected by clip, so will be constructed
-        EXPECT_LE(64u, allocator.usedSize()); // relatively large alloc for non-rejected op
+        ASSERT_NE(nullptr, bakedState) << "NOT rejected by clip, so op should be constructed";
+        EXPECT_LE(64u, allocator.usedSize()) << "relatively large alloc for non-rejected op";
     }
 }
 

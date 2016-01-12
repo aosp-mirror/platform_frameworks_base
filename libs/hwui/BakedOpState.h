@@ -99,6 +99,7 @@ class BakedOpState {
 public:
     static BakedOpState* tryConstruct(LinearAllocator& allocator,
             Snapshot& snapshot, const RecordedOp& recordedOp) {
+        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
         BakedOpState* bakedState = new (allocator) BakedOpState(
                 allocator, snapshot, recordedOp, false);
         if (bakedState->computedState.clippedBounds.isEmpty()) {
@@ -118,6 +119,7 @@ public:
 
     static BakedOpState* tryStrokeableOpConstruct(LinearAllocator& allocator,
             Snapshot& snapshot, const RecordedOp& recordedOp, StrokeBehavior strokeBehavior) {
+        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
         bool expandForStroke = (strokeBehavior == StrokeBehavior::StyleDefined)
                 ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
                 : true;
@@ -126,6 +128,7 @@ public:
                 allocator, snapshot, recordedOp, expandForStroke);
         if (bakedState->computedState.clippedBounds.isEmpty()) {
             // bounds are empty, so op is rejected
+            // NOTE: this won't succeed if a clip was allocated
             allocator.rewindIfLastAlloc(bakedState);
             return nullptr;
         }
@@ -134,7 +137,7 @@ public:
 
     static BakedOpState* tryShadowOpConstruct(LinearAllocator& allocator,
             Snapshot& snapshot, const ShadowOp* shadowOpPtr) {
-        if (snapshot.getRenderTargetClip().isEmpty()) return nullptr;
+        if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
 
         // clip isn't empty, so construct the op
         return new (allocator) BakedOpState(allocator, snapshot, shadowOpPtr);

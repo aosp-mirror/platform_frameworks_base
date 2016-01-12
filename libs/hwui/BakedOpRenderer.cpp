@@ -201,6 +201,7 @@ void BakedOpRenderer::setupStencilQuads(std::vector<Vertex>& quadVertices,
 }
 
 void BakedOpRenderer::setupStencilRectList(const ClipBase* clip) {
+    LOG_ALWAYS_FATAL_IF(clip->mode != ClipMode::RectangleList, "can't rectlist clip without rectlist");
     auto&& rectList = reinterpret_cast<const ClipRectList*>(clip)->rectList;
     int quadCount = rectList.getTransformedRectanglesCount();
     std::vector<Vertex> rectangleVertices;
@@ -234,6 +235,7 @@ void BakedOpRenderer::setupStencilRectList(const ClipBase* clip) {
 }
 
 void BakedOpRenderer::setupStencilRegion(const ClipBase* clip) {
+    LOG_ALWAYS_FATAL_IF(clip->mode != ClipMode::Region, "can't region clip without region");
     auto&& region = reinterpret_cast<const ClipRegion*>(clip)->region;
 
     std::vector<Vertex> regionVertices;
