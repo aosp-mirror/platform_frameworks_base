@@ -234,10 +234,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public boolean matches(WifiConfiguration config) {
-        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint())
+        if (config.isPasspoint() && mConfig != null && mConfig.isPasspoint()) {
             return config.FQDN.equals(mConfig.providerFriendlyName);
-        else
-            return ssid.equals(removeDoubleQuotes(config.SSID)) && security == getSecurity(config);
+        } else {
+            return ssid.equals(removeDoubleQuotes(config.SSID))
+                    && security == getSecurity(config)
+                    && (mConfig == null || mConfig.shared == config.shared);
+        }
     }
 
     public WifiConfiguration getConfig() {
