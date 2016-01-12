@@ -1488,7 +1488,8 @@ public final class ViewRootImpl implements ViewParent,
                 if ((lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT)
                         && (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
-                                || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD)) {
+                                || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD
+                                || lp.type == WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)) {
                     windowSizeMayChange = true;
                     // NOTE -- system code, won't try to do compat mode.
                     Point size = new Point();
