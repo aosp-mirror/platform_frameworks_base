@@ -1115,14 +1115,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     }
 
-    public boolean isTransformedTouchPointInView(float x, float y, TaskView tv) {
-        final float[] point = new float[2];
-        point[0] = x;
-        point[1] = y;
-        transformPointToViewLocal(point, tv);
-        x = point[0];
-        y = point[1];
-        return (0 <= x) && (x < tv.getWidth()) && (0 <= y) && (y < tv.getHeight());
+    public boolean isTouchPointInView(float x, float y, TaskView tv) {
+        return (tv.getLeft() <= x && x <= tv.getRight()) &&
+                (tv.getTop() <= y && y <= tv.getBottom());
     }
 
     @Override

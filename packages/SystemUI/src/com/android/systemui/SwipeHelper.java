@@ -86,6 +86,7 @@ public class SwipeHelper implements Gefingerpoken {
     final private int[] mTmpPos = new int[2];
     private int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
+    private boolean mDisableHwLayers;
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mCallback = callback;
@@ -113,6 +114,10 @@ public class SwipeHelper implements Gefingerpoken {
 
     public void setPagingTouchSlop(float pagingTouchSlop) {
         mPagingTouchSlop = pagingTouchSlop;
+    }
+
+    public void setDisableHardwareLayers(boolean disableHwLayers) {
+        mDisableHwLayers = disableHwLayers;
     }
 
     private float getPos(MotionEvent ev) {
@@ -147,7 +152,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
-    private float getSize(View v) {
+    protected float getSize(View v) {
         return mSwipeDirection == X ? v.getMeasuredWidth() :
                 v.getMeasuredHeight();
     }
@@ -178,10 +183,12 @@ public class SwipeHelper implements Gefingerpoken {
         if (!mCallback.updateSwipeProgress(animView, dismissable, swipeProgress)) {
             if (FADE_OUT_DURING_SWIPE && dismissable) {
                 float alpha = swipeProgress;
-                if (alpha != 0f && alpha != 1f) {
-                    animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                } else {
-                    animView.setLayerType(View.LAYER_TYPE_NONE, null);
+                if (!mDisableHwLayers) {
+                    if (alpha != 0f && alpha != 1f) {
+                        animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                    } else {
+                        animView.setLayerType(View.LAYER_TYPE_NONE, null);
+                    }
                 }
                 animView.setAlpha(getSwipeProgressForOffset(animView));
             }
@@ -345,7 +352,9 @@ public class SwipeHelper implements Gefingerpoken {
             duration = fixedDuration;
         }
 
-        animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        if (!mDisableHwLayers) {
+            animView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
         if (useAccelerateInterpolator) {
             anim.setInterpolator(mFastOutLinearInInterpolator);
@@ -362,7 +371,9 @@ public class SwipeHelper implements Gefingerpoken {
                 if (endAction != null) {
                     endAction.run();
                 }
-                animView.setLayerType(View.LAYER_TYPE_NONE, null);
+                if (!mDisableHwLayers) {
+                    animView.setLayerType(View.LAYER_TYPE_NONE, null);
+                }
             }
         });
         anim.addUpdateListener(new AnimatorUpdateListener() {

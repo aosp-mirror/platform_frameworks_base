@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -29,6 +30,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
@@ -80,19 +82,21 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         Resources res = context.getResources();
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mContext = context;
+        mSv = sv;
+        mScroller = scroller;
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mScrollTouchSlop = configuration.getScaledTouchSlop();
         mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
-        mSv = sv;
-        mScroller = scroller;
         mFlingAnimUtils = new FlingAnimationUtils(context, 0.2f);
-
-        float densityScale = res.getDisplayMetrics().density;
         mOverscrollSize = res.getDimensionPixelSize(R.dimen.recents_stack_overscroll);
-        mSwipeHelper = new SwipeHelper(context, SwipeHelper.X, this, densityScale,
-                configuration.getScaledPagingTouchSlop());
-        mSwipeHelper.setMinAlpha(1f);
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, context) {
+            @Override
+            protected float getSize(View v) {
+                return mSv.getWidth();
+            }
+        };
+        mSwipeHelper.setDisableHardwareLayers(true);
     }
 
     /** Velocity tracker helpers */
@@ -117,7 +121,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             if (tv.getVisibility() == View.VISIBLE) {
-                if (mSv.isTransformedTouchPointInView(x, y, tv)) {
+                if (mSv.isTouchPointInView(x, y, tv)) {
                     return tv;
                 }
             }
@@ -345,7 +349,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     @Override
     public void onBeginDrag(View v) {
         TaskView tv = (TaskView) v;
-        mSwipeHelper.setSnapBackTranslationX(tv.getTranslationX());
+
         // Disable clipping with the stack while we are swiping
         tv.setClipViewInStack(false);
         // Disallow touch events from this task view
@@ -358,8 +362,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     }
 
     @Override
-    public void onSwipeChanged(View v, float delta) {
-        // Do nothing
+    public boolean updateSwipeProgress(View v, boolean dismissable, float swipeProgress) {
+        return true;
     }
 
     @Override
@@ -377,7 +381,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     }
 
     @Override
-    public void onSnapBackCompleted(View v) {
+    public void onChildSnappedBack(View v) {
         TaskView tv = (TaskView) v;
         // Re-enable clipping with the stack
         tv.setClipViewInStack(true);
@@ -389,4 +393,20 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     public void onDragCancelled(View v) {
         // Do nothing
     }
+
+    @Override
+    public View getChildContentView(View v) {
+        return v;
+    }
+
+    @Override
+    public boolean isAntiFalsingNeeded() {
+        return false;
+    }
+
+    @Override
+    public float getFalsingThresholdFactor() {
+        return 0;
+    }
+
 }
