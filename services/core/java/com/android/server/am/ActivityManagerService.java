@@ -532,6 +532,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     // default actuion automatically.  Important for devices without direct input
     // devices.
     private boolean mShowDialogs = true;
+    private boolean mInVrMode = false;
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
@@ -2185,7 +2186,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case VR_MODE_CHANGE_MSG: {
                 VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-                vrService.setVrMode(msg.arg1 != 0);
+                final boolean vrMode = msg.arg1 != 0;
+                vrService.setVrMode(vrMode);
+
+                if (mInVrMode != vrMode) {
+                    synchronized (ActivityManagerService.this) {
+                        mInVrMode = vrMode;
+                        mShowDialogs = shouldShowDialogs(mConfiguration, mInVrMode);
+                    }
+                }
             } break;
             }
         }
@@ -18318,7 +18327,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // TODO: If our config changes, should we auto dismiss any currently
                 // showing dialogs?
-                mShowDialogs = shouldShowDialogs(newConfig);
+                mShowDialogs = shouldShowDialogs(newConfig, mInVrMode);
 
                 AttributeCache ac = AttributeCache.instance();
                 if (ac != null) {
@@ -18407,13 +18416,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      * A thought: SystemUI might also want to get told about this, the Power
      * dialog / global actions also might want different behaviors.
      */
-    private static final boolean shouldShowDialogs(Configuration config) {
+    private static final boolean shouldShowDialogs(Configuration config, boolean inVrMode) {
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                                    && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
         final boolean uiIsNotCarType = !((config.uiMode & Configuration.UI_MODE_TYPE_MASK)
                                     == Configuration.UI_MODE_TYPE_CAR);
-        return inputMethodExists && uiIsNotCarType;
+        return inputMethodExists && uiIsNotCarType && !inVrMode;
     }
 
     @Override
