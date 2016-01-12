@@ -687,7 +687,7 @@ public final class PhoneAccount implements Parcelable {
                 .append("] PhoneAccount: ")
                 .append(mAccountHandle)
                 .append(" Capabilities: ")
-                .append(mCapabilities)
+                .append(capabilitiesToString(mCapabilities))
                 .append(" Schemes: ");
         for (String scheme : mSupportedUriSchemes) {
             sb.append(scheme)
@@ -696,6 +696,44 @@ public final class PhoneAccount implements Parcelable {
         sb.append(" Extras: ");
         sb.append(mExtras);
         sb.append("]");
+        return sb.toString();
+    }
+
+    /**
+     * Generates a string representation of a capabilities bitmask.
+     *
+     * @param capabilities The capabilities bitmask.
+     * @return String representation of the capabilities bitmask.
+     */
+    private String capabilitiesToString(int capabilities) {
+        StringBuilder sb = new StringBuilder();
+        if (hasCapabilities(CAPABILITY_VIDEO_CALLING)) {
+            sb.append("Video ");
+        }
+        if (hasCapabilities(CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE)) {
+            sb.append("Presence ");
+        }
+        if (hasCapabilities(CAPABILITY_CALL_PROVIDER)) {
+            sb.append("CallProvider ");
+        }
+        if (hasCapabilities(CAPABILITY_CALL_SUBJECT)) {
+            sb.append("CallSubject ");
+        }
+        if (hasCapabilities(CAPABILITY_CONNECTION_MANAGER)) {
+            sb.append("ConnectionMgr ");
+        }
+        if (hasCapabilities(CAPABILITY_EMERGENCY_CALLS_ONLY)) {
+            sb.append("EmergOnly ");
+        }
+        if (hasCapabilities(CAPABILITY_MULTI_USER)) {
+            sb.append("MultiUser ");
+        }
+        if (hasCapabilities(CAPABILITY_PLACE_EMERGENCY_CALLS)) {
+            sb.append("PlaceEmerg ");
+        }
+        if (hasCapabilities(CAPABILITY_SIM_SUBSCRIPTION)) {
+            sb.append("SimSub ");
+        }
         return sb.toString();
     }
 }
