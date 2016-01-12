@@ -82,8 +82,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     public static final int PADDING_MODE_STACK = 1;
 
-    /** Value used for undefined start and end insets. */
-    private static final int UNDEFINED_INSET = Integer.MIN_VALUE;
+    /**
+     * Value used for undefined start and end insets.
+     *
+     * @see #getLayerInsetStart(int)
+     * @see #getLayerInsetEnd(int)
+     */
+    public static final int UNDEFINED_INSET = Integer.MIN_VALUE;
 
     LayerState mLayerState;
 
@@ -867,7 +872,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @param index the index of the layer
-     * @return number of pixels to inset from the start bound
+     * @return the number of pixels to inset from the start bound, or
+     *         {@link #UNDEFINED_INSET} if not specified
      * @attr ref android.R.styleable#LayerDrawableItem_start
      */
     public int getLayerInsetStart(int index) {
@@ -877,7 +883,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     /**
      * @param index the index of the layer to adjust
-     * @param e number of pixels to inset from the end bound
+     * @param e number of pixels to inset from the end bound, or
+     *         {@link #UNDEFINED_INSET} if not specified
      * @attr ref android.R.styleable#LayerDrawableItem_end
      */
     public void setLayerInsetEnd(int index, int e) {
@@ -977,34 +984,33 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             computeStackedPadding(padding);
         }
 
+        final int paddingT = layerState.mPaddingTop;
+        final int paddingB = layerState.mPaddingBottom;
+
+        // Resolve padding for RTL. Relative padding overrides absolute
+        // padding.
+        final boolean isLayoutRtl = getLayoutDirection() == LayoutDirection.RTL;
+        final int paddingRtlL = isLayoutRtl ? layerState.mPaddingEnd : layerState.mPaddingStart;
+        final int paddingRtlR = isLayoutRtl ? layerState.mPaddingStart : layerState.mPaddingEnd;
+        final int paddingL = paddingRtlL >= 0 ? paddingRtlL : layerState.mPaddingLeft;
+        final int paddingR = paddingRtlR >= 0 ? paddingRtlR : layerState.mPaddingRight;
+
         // If padding was explicitly specified (e.g. not -1) then override the
         // computed padding in that dimension.
-        if (layerState.mPaddingTop >= 0) {
-            padding.top = layerState.mPaddingTop;
+        if (paddingL >= 0) {
+            padding.left = paddingL;
         }
 
-        if (layerState.mPaddingBottom >= 0) {
-            padding.bottom = layerState.mPaddingBottom;
+        if (paddingT >= 0) {
+            padding.top = paddingT;
         }
 
-        final int paddingRtlLeft;
-        final int paddingRtlRight;
-        if (getLayoutDirection() == LayoutDirection.RTL) {
-            paddingRtlLeft = layerState.mPaddingEnd;
-            paddingRtlRight = layerState.mPaddingStart;
-        } else {
-            paddingRtlLeft = layerState.mPaddingStart;
-            paddingRtlRight = layerState.mPaddingEnd;
+        if (paddingR >= 0) {
+            padding.right = paddingR;
         }
 
-        final int paddingLeft =  paddingRtlLeft >= 0 ? paddingRtlLeft : layerState.mPaddingLeft;
-        if (paddingLeft >= 0) {
-            padding.left = paddingLeft;
-        }
-
-        final int paddingRight =  paddingRtlRight >= 0 ? paddingRtlRight : layerState.mPaddingRight;
-        if (paddingRight >= 0) {
-            padding.right = paddingRight;
+        if (paddingB >= 0) {
+            padding.bottom = paddingB;
         }
 
         return padding.left != 0 || padding.top != 0 || padding.right != 0 || padding.bottom != 0;
@@ -1471,58 +1477,59 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     private void updateLayerBounds(Rect bounds) {
-        int padL = 0;
-        int padT = 0;
-        int padR = 0;
-        int padB = 0;
+        int paddingL = 0;
+        int paddingT = 0;
+        int paddingR = 0;
+        int paddingB = 0;
 
         final Rect outRect = mTmpOutRect;
         final int layoutDirection = getLayoutDirection();
-        final boolean nest = mLayerState.mPaddingMode == PADDING_MODE_NEST;
+        final boolean isLayoutRtl = layoutDirection == LayoutDirection.RTL;
+        final boolean isPaddingNested = mLayerState.mPaddingMode == PADDING_MODE_NEST;
         final ChildDrawable[] array = mLayerState.mChildren;
-        final int N = mLayerState.mNum;
-        for (int i = 0; i < N; i++) {
+
+        for (int i = 0, count = mLayerState.mNum; i < count; i++) {
             final ChildDrawable r = array[i];
             final Drawable d = r.mDrawable;
             if (d == null) {
                 continue;
             }
 
-            final Rect container = mTmpContainer;
-            container.set(d.getBounds());
+            final int insetT = r.mInsetT;
+            final int insetB = r.mInsetB;
 
-            // Take the resolved layout direction into account. If start / end
-            // padding are defined, they will be resolved (hence overriding) to
-            // left / right or right / left depending on the resolved layout
-            // direction. If start / end padding are not defined, use the
-            // left / right ones.
-            final int insetL, insetR;
-            if (layoutDirection == LayoutDirection.RTL) {
-                insetL = r.mInsetE == UNDEFINED_INSET ? r.mInsetL : r.mInsetE;
-                insetR = r.mInsetS == UNDEFINED_INSET ? r.mInsetR : r.mInsetS;
-            } else {
-                insetL = r.mInsetS == UNDEFINED_INSET ? r.mInsetL : r.mInsetS;
-                insetR = r.mInsetE == UNDEFINED_INSET ? r.mInsetR : r.mInsetE;
-            }
+            // Resolve insets for RTL. Relative insets override absolute
+            // insets.
+            final int insetRtlL = isLayoutRtl ? r.mInsetE : r.mInsetS;
+            final int insetRtlR = isLayoutRtl ? r.mInsetS : r.mInsetE;
+            final int insetL = insetRtlL == UNDEFINED_INSET ? r.mInsetL : insetRtlL;
+            final int insetR = insetRtlR == UNDEFINED_INSET ? r.mInsetR : insetRtlR;
 
             // Establish containing region based on aggregate padding and
             // requested insets for the current layer.
-            container.set(bounds.left + insetL + padL, bounds.top + r.mInsetT + padT,
-                    bounds.right - insetR - padR, bounds.bottom - r.mInsetB - padB);
+            final Rect container = mTmpContainer;
+            container.set(bounds.left + insetL + paddingL, bounds.top + insetT + paddingT,
+                    bounds.right - insetR - paddingR, bounds.bottom - insetB - paddingB);
 
-            // Apply resolved gravity to drawable based on resolved size.
-            final int gravity = resolveGravity(r.mGravity, r.mWidth, r.mHeight,
-                    d.getIntrinsicWidth(), d.getIntrinsicHeight());
-            final int w = r.mWidth < 0 ? d.getIntrinsicWidth() : r.mWidth;
-            final int h = r.mHeight < 0 ? d.getIntrinsicHeight() : r.mHeight;
-            Gravity.apply(gravity, w, h, container, outRect, layoutDirection);
+            // Compute a reasonable default gravity based on the intrinsic and
+            // explicit dimensions, if specified.
+            final int intrinsicW = d.getIntrinsicWidth();
+            final int intrinsicH = d.getIntrinsicHeight();
+            final int layerW = r.mWidth;
+            final int layerH = r.mHeight;
+            final int gravity = resolveGravity(r.mGravity, layerW, layerH, intrinsicW, intrinsicH);
+
+            // Explicit dimensions override intrinsic dimensions.
+            final int resolvedW = layerW < 0 ? intrinsicW : layerW;
+            final int resolvedH = layerH < 0 ? intrinsicH : layerH;
+            Gravity.apply(gravity, resolvedW, resolvedH, container, outRect, layoutDirection);
             d.setBounds(outRect);
 
-            if (nest) {
-                padL += mPaddingL[i];
-                padR += mPaddingR[i];
-                padT += mPaddingT[i];
-                padB += mPaddingB[i];
+            if (isPaddingNested) {
+                paddingL += mPaddingL[i];
+                paddingR += mPaddingR[i];
+                paddingT += mPaddingT[i];
+                paddingB += mPaddingB[i];
             }
         }
     }
@@ -1578,6 +1585,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         int padR = 0;
 
         final boolean nest = mLayerState.mPaddingMode == PADDING_MODE_NEST;
+        final boolean isLayoutRtl = getLayoutDirection() == LayoutDirection.RTL;
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
@@ -1591,15 +1599,10 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
             // left / right or right / left depending on the resolved layout
             // direction. If start / end padding are not defined, use the
             // left / right ones.
-            final int insetL, insetR;
-            final int layoutDirection = getLayoutDirection();
-            if (layoutDirection == LayoutDirection.RTL) {
-                insetL = r.mInsetE == UNDEFINED_INSET ? r.mInsetL : r.mInsetE;
-                insetR = r.mInsetS == UNDEFINED_INSET ? r.mInsetR : r.mInsetS;
-            } else {
-                insetL = r.mInsetS == UNDEFINED_INSET ? r.mInsetL : r.mInsetS;
-                insetR = r.mInsetE == UNDEFINED_INSET ? r.mInsetR : r.mInsetE;
-            }
+            final int insetRtlL = isLayoutRtl ? r.mInsetE : r.mInsetS;
+            final int insetRtlR = isLayoutRtl ? r.mInsetS : r.mInsetE;
+            final int insetL = insetRtlL == UNDEFINED_INSET ? r.mInsetL : insetRtlL;
+            final int insetR = insetRtlR == UNDEFINED_INSET ? r.mInsetR : insetRtlR;
 
             // Don't apply padding and insets for children that don't have
             // an intrinsic dimension.
@@ -1659,8 +1662,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         if (r.mDrawable != null) {
             final Rect rect = mTmpRect;
             r.mDrawable.getPadding(rect);
-            if (rect.left != mPaddingL[i] || rect.top != mPaddingT[i] ||
-                    rect.right != mPaddingR[i] || rect.bottom != mPaddingB[i]) {
+            if (rect.left != mPaddingL[i] || rect.top != mPaddingT[i]
+                    || rect.right != mPaddingR[i] || rect.bottom != mPaddingB[i]) {
                 mPaddingL[i] = rect.left;
                 mPaddingT[i] = rect.top;
                 mPaddingR[i] = rect.right;
