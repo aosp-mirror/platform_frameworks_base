@@ -19,8 +19,9 @@ package com.android.systemui.qs.customize;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-
+import android.graphics.drawable.Drawable;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 
 public class BlankCustomTile extends QSTile<QSTile.State> {
@@ -72,7 +73,9 @@ public class BlankCustomTile extends QSTile<QSTile.State> {
         try {
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent, 0);
-            state.icon = new DrawableIcon(info.loadIcon(pm));
+            Drawable drawable = info.loadIcon(pm);
+            drawable.setTint(mContext.getColor(R.color.qs_tile_tint_active));
+            state.icon = new DrawableIcon(drawable);
             state.label = info.loadLabel(pm).toString();
             state.contentDescription = state.label;
         } catch (Exception e) {

@@ -36,6 +36,7 @@ import android.util.Log;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -199,6 +200,16 @@ public class TileServices extends IQSService.Stub {
     }
 
     @Override
+    public void onStartActivity(Tile tile) {
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            mHost.collapsePanels();
+        }
+    }
+
+    @Override
     public void updateStatusIcon(Tile tile, Icon icon, String contentDescription) {
         final ComponentName componentName = tile.getComponentName();
         String packageName = componentName.getPackageName();
@@ -226,6 +237,28 @@ public class TileServices extends IQSService.Stub {
             } catch (PackageManager.NameNotFoundException e) {
             }
         }
+    }
+
+    @Override
+    public void startUnlockAndRun(Tile tile) {
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            customTile.startUnlockAndRun();
+        }
+    }
+
+    @Override
+    public boolean isLocked() {
+        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        return keyguardMonitor.isShowing();
+    }
+
+    @Override
+    public boolean isSecure() {
+        KeyguardMonitor keyguardMonitor = mHost.getKeyguardMonitor();
+        return keyguardMonitor.isSecure() && keyguardMonitor.isShowing();
     }
 
     private CustomTile getTileForComponent(ComponentName component) {

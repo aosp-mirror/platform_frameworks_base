@@ -25,11 +25,14 @@ import android.os.RemoteException;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
@@ -88,6 +91,7 @@ public class CustomTile extends QSTile<QSTile.State> {
         mTile.setIcon(tile.getIcon());
         mTile.setLabel(tile.getLabel());
         mTile.setContentDescription(tile.getContentDescription());
+        mTile.setState(tile.getState());
     }
 
     public void onDialogShown() {
@@ -147,6 +151,9 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
+        if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
             mWindowManager.addWindowToken(mToken, WindowManager.LayoutParams.TYPE_QS_DIALOG);
@@ -172,9 +179,15 @@ public class CustomTile extends QSTile<QSTile.State> {
     @Override
     protected void handleUpdateState(State state, Object arg) {
         Drawable drawable = mTile.getIcon().loadDrawable(mContext);
-        drawable.setTint(mContext.getColor(android.R.color.white));
+        int color = mContext.getColor(getColor(mTile.getState()));
+        drawable.setTint(color);
         state.icon = new DrawableIcon(drawable);
         state.label = mTile.getLabel();
+        if (mTile.getState() == Tile.STATE_UNAVAILABLE) {
+            state.label = new SpannableStringBuilder().append(state.label,
+                    new ForegroundColorSpan(color),
+                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+        }
         if (mTile.getContentDescription() != null) {
             state.contentDescription = mTile.getContentDescription();
         } else {
@@ -185,6 +198,30 @@ public class CustomTile extends QSTile<QSTile.State> {
     @Override
     public int getMetricsCategory() {
         return MetricsLogger.QS_CUSTOM;
+    }
+
+    public void startUnlockAndRun() {
+        mHost.startRunnableDismissingKeyguard(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mService.onUnlockComplete();
+                } catch (RemoteException e) {
+                }
+            }
+        });
+    }
+
+    private static int getColor(int state) {
+        switch (state) {
+            case Tile.STATE_UNAVAILABLE:
+                return R.color.qs_tile_tint_unavailable;
+            case Tile.STATE_INACTIVE:
+                return R.color.qs_tile_tint_inactive;
+            case Tile.STATE_ACTIVE:
+                return R.color.qs_tile_tint_active;
+        }
+        return 0;
     }
 
     public static ComponentName getComponentFromSpec(String spec) {

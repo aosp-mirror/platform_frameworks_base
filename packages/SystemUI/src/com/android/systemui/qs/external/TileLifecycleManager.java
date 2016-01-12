@@ -55,6 +55,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private static final int MSG_ON_ADDED = 0;
     private static final int MSG_ON_REMOVED = 1;
     private static final int MSG_ON_CLICK = 2;
+    private static final int MSG_ON_UNLOCK_COMPLETE = 3;
 
     // Bind retry control.
     private static final int MAX_BIND_RETRIES = 5;
@@ -172,6 +173,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
                 // Skipping click since lost click privileges.
             } else {
                 onClick(mClickBinder);
+            }
+        }
+        if (queue.contains(MSG_ON_UNLOCK_COMPLETE)) {
+            if (DEBUG) Log.d(TAG, "Handling pending onUnlockComplete");
+            if (!mListening) {
+                Log.w(TAG, "Managed to get unlock on non-listening state...");
+                // Skipping unlock since lost click privileges.
+            } else {
+                onUnlockComplete();
             }
         }
         if (queue.contains(MSG_ON_REMOVED)) {
@@ -343,6 +353,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         if (mWrapper == null || !mWrapper.onClick(iBinder)) {
             mClickBinder = iBinder;
             queueMessage(MSG_ON_CLICK);
+            handleDeath();
+        }
+    }
+
+    @Override
+    public void onUnlockComplete() {
+        if (DEBUG) Log.d(TAG, "onUnlockComplete");
+        if (mWrapper == null || !mWrapper.onUnlockComplete()) {
+            queueMessage(MSG_ON_UNLOCK_COMPLETE);
             handleDeath();
         }
     }

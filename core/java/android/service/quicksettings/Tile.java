@@ -36,10 +36,37 @@ public final class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
 
+    /**
+     * This is the default state of any tile, until updated by the {@link TileService}.
+     * <p>
+     * An unavailable state indicates that for some reason this tile is not currently
+     * available to the user for some reason, and will have no click action.  The tile's
+     * icon will be tinted differently to reflect this state.
+     */
+    public static final int STATE_UNAVAILABLE = 0;
+
+    /**
+     * This represents a tile that is currently in a disabled state but is still interactable.
+     *
+     * A disabled state indicates that the tile is not currently active (e.g. wifi disconnected or
+     * bluetooth disabled), but is still interactable by the user to modify this state.  Tiles
+     * that have boolean states should use this to represent one of their states.  The tile's
+     * icon will be tinted differently to reflect this state, but still be distinct from unavailable.
+     */
+    public static final int STATE_INACTIVE = 1;
+
+    /**
+     * This represents a tile that is currently active. (e.g. wifi is connected, bluetooth is on,
+     * cast is casting).
+     */
+    public static final int STATE_ACTIVE = 2;
+
     private ComponentName mComponentName;
     private Icon mIcon;
     private CharSequence mLabel;
     private CharSequence mContentDescription;
+    // Default to active until clients of the new API can update.
+    private int mState = STATE_ACTIVE;
 
     private IQSService mService;
 
@@ -76,6 +103,29 @@ public final class Tile implements Parcelable {
      */
     public IQSService getQsService() {
         return mService;
+    }
+
+    /**
+     * The current state of the tile.
+     *
+     * @see #STATE_UNAVAILABLE
+     * @see #STATE_INACTIVE
+     * @see #STATE_ACTIVE
+     */
+    public int getState() {
+        return mState;
+    }
+
+    /**
+     * Sets the current state for the tile.
+     *
+     * Does not take effect until {@link #updateTile()} is called.
+     *
+     * @param state One of {@link #STATE_UNAVAILABLE}, {@link #STATE_INACTIVE},
+     * {@link #STATE_ACTIVE}
+     */
+    public void setState(int state) {
+        mState = state;
     }
 
     /**
@@ -165,6 +215,7 @@ public final class Tile implements Parcelable {
         } else {
             dest.writeByte((byte) 0);
         }
+        dest.writeInt(mState);
         TextUtils.writeToParcel(mLabel, dest, flags);
         TextUtils.writeToParcel(mContentDescription, dest, flags);
     }
@@ -180,6 +231,7 @@ public final class Tile implements Parcelable {
         } else {
             mIcon = null;
         }
+        mState = source.readInt();
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }

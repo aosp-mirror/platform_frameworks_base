@@ -29,4 +29,5 @@ oneway interface IQSTileService {
     void onStartListening();
     void onStopListening();
     void onClick(IBinder wtoken);
+    void onUnlockComplete();
 }

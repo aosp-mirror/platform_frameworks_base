@@ -283,6 +283,11 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
                 public void onClick(IBinder iBinder) throws RemoteException {
                     sendCallback("onClick");
                 }
+
+                @Override
+                public void onUnlockComplete() throws RemoteException {
+                    sendCallback("onUnlockComplete");
+                }
             };
         }
 
