@@ -255,7 +255,9 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -1954,8 +1956,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case SYSTEM_USER_UNLOCK_MSG: {
-                mSystemServiceManager.unlockUser(msg.arg1);
-                mRecentTasks.cleanupLocked(msg.arg1);
+                final int userId = msg.arg1;
+                mSystemServiceManager.unlockUser(userId);
+                mRecentTasks.cleanupLocked(userId);
+                installEncryptionUnawareProviders(userId);
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
@@ -10821,6 +10825,41 @@ public final class ActivityManagerService extends ActivityManagerNative
         mCoreSettingsObserver = new CoreSettingsObserver(this);
 
         //mUsageStatsService.monitorPackages();
+    }
+
+    /**
+     * When a user is unlocked, we need to install encryption-unaware providers
+     * belonging to any running apps.
+     */
+    private void installEncryptionUnawareProviders(int userId) {
+        synchronized (this) {
+            final int NP = mProcessNames.getMap().size();
+            for (int ip = 0; ip < NP; ip++) {
+                final SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
+                final int NA = apps.size();
+                for (int ia = 0; ia < NA; ia++) {
+                    final ProcessRecord app = apps.valueAt(ia);
+                    if (app.userId != userId || app.thread == null) continue;
+
+                    final int NG = app.pkgList.size();
+                    for (int ig = 0; ig < NG; ig++) {
+                        try {
+                            final String pkgName = app.pkgList.keyAt(ig);
+                            final PackageInfo pkgInfo = AppGlobals.getPackageManager()
+                                    .getPackageInfo(pkgName,
+                                            GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE, userId);
+                            if (pkgInfo != null && !ArrayUtils.isEmpty(pkgInfo.providers)) {
+                                for (ProviderInfo provInfo : pkgInfo.providers) {
+                                    Log.v(TAG, "Installing " + provInfo);
+                                    app.thread.scheduleInstallProvider(provInfo);
+                                }
+                            }
+                        } catch (RemoteException ignored) {
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
