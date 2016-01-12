@@ -5795,6 +5795,7 @@ package android.app.admin {
     method public boolean getCameraDisabled(android.content.ComponentName);
     method public java.lang.String getCertInstallerPackage(android.content.ComponentName) throws java.lang.SecurityException;
     method public boolean getCrossProfileCallerIdDisabled(android.content.ComponentName);
+    method public boolean getCrossProfileContactsSearchDisabled(android.content.ComponentName);
     method public java.util.List<java.lang.String> getCrossProfileWidgetProviders(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public java.lang.String getDeviceOwnerLockScreenInfo();
@@ -5859,6 +5860,7 @@ package android.app.admin {
     method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setCertInstallerPackage(android.content.ComponentName, java.lang.String) throws java.lang.SecurityException;
     method public void setCrossProfileCallerIdDisabled(android.content.ComponentName, boolean);
+    method public void setCrossProfileContactsSearchDisabled(android.content.ComponentName, boolean);
     method public boolean setDeviceOwnerLockScreenInfo(android.content.ComponentName, java.lang.String);
     method public void setGlobalSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public boolean setKeyguardDisabled(android.content.ComponentName, boolean);

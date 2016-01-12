@@ -3540,6 +3540,66 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a profile owner of a managed profile to set whether contacts search from
+     * the managed profile will be shown in the parent profile, for incoming calls.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param disabled If true contacts search in the managed profile is not displayed.
+     */
+    public void setCrossProfileContactsSearchDisabled(@NonNull ComponentName admin,
+            boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setCrossProfileContactsSearchDisabled(admin, disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to determine whether or not contacts search
+     * has been disabled.
+     *
+     * <p>The calling device admin must be a profile owner. If it is not, a
+     * security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     */
+    public boolean getCrossProfileContactsSearchDisabled(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getCrossProfileContactsSearchDisabled(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Determine whether or not contacts search has been disabled.
+     *
+     * @param userHandle The user for whom to check the contacts search permission
+     * @hide
+     */
+    public boolean getCrossProfileContactsSearchDisabled(@NonNull UserHandle userHandle) {
+        if (mService != null) {
+            try {
+                return mService
+                        .getCrossProfileContactsSearchDisabledForUser(userHandle.getIdentifier());
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Start Quick Contact on the managed profile for the user, if the policy allows.
      * @hide
      */
