@@ -64,6 +64,7 @@ import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
+import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -866,6 +867,28 @@ class ActivityStarter {
                 intentActivity.task.setIntent(mStartActivity);
             }
 
+            // This code path leads to delivering a new intent, we want to make sure we schedule it
+            // as the first operation, in case the activity will be resumed as a result of later
+            // operations.
+            if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
+                    || mLaunchSingleInstance || mLaunchSingleTask) {
+                // In this situation we want to remove all activities from the task up to the one
+                // being started. In most cases this means we are resetting the task to its initial
+                // state.
+                final ActivityRecord top = intentActivity.task.performClearTaskLocked(
+                        mStartActivity, mLaunchFlags);
+                if (top != null) {
+                    if (top.frontOfTask) {
+                        // Activity aliases may mean we use different intents for the top activity,
+                        // so make sure the task now has the identity of the new intent.
+                        top.task.setIntent(mStartActivity);
+                    }
+                    ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.task);
+                    top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+                            mStartActivity.launchedFromPackage);
+                }
+            }
+
             intentActivity = setTargetStackAndMoveToFrontIfNeeded(intentActivity);
 
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
@@ -907,7 +930,7 @@ class ActivityStarter {
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                 || mLaunchSingleTop || mLaunchSingleTask);
         if (dontStart) {
-            ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+            ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.task);
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
             if (mDoResume) {
@@ -1318,20 +1341,9 @@ class ActivityStarter {
             mReuseTask.setIntent(mStartActivity);
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                 || mLaunchSingleInstance || mLaunchSingleTask) {
-            // In this situation we want to remove all activities from the task up to the one
-            // being started. In most cases this means we are resetting the task to its initial
-            // state.
             ActivityRecord top = intentActivity.task.performClearTaskLocked(mStartActivity,
                     mLaunchFlags);
-            if (top != null) {
-                if (top.frontOfTask) {
-                    // Activity aliases may mean we use different intents for the top activity,
-                    // so make sure the task now has the identity of the new intent.
-                    top.task.setIntent(mStartActivity);
-                }
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, top.task);
-                top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
-            } else {
+            if (top == null) {
                 // A special case: we need to start the activity because it is not currently
                 // running, and the caller has asked to clear the current task to have this
                 // activity at the top.
@@ -1356,7 +1368,7 @@ class ActivityStarter {
             // desires.
             if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0 || mLaunchSingleTop)
                     && intentActivity.realActivity.equals(mStartActivity.realActivity)) {
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity,
+                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity,
                         intentActivity.task);
                 if (intentActivity.frontOfTask) {
                     intentActivity.task.setIntent(mStartActivity);
@@ -1452,7 +1464,7 @@ class ActivityStarter {
             ActivityRecord top = sourceTask.performClearTaskLocked(mStartActivity, mLaunchFlags);
             mKeepCurTransition = true;
             if (top != null) {
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, top.task);
+                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, top.task);
                 top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
                 // For paranoia, make sure we have correctly resumed the top activity.
                 mTargetStack.mLastPausedActivity = null;
@@ -1471,7 +1483,7 @@ class ActivityStarter {
                 final TaskRecord task = top.task;
                 task.moveActivityToFrontLocked(top);
                 top.updateOptionsLocked(mOptions);
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, mStartActivity, task);
+                ActivityStack.logStartActivity(AM_NEW_INTENT, mStartActivity, task);
                 top.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, mStartActivity.launchedFromPackage);
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {
@@ -1508,7 +1520,7 @@ class ActivityStarter {
         if (top != null && top.realActivity.equals(mStartActivity.realActivity) && top.userId == mStartActivity.userId) {
             if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                     || mLaunchSingleTop || mLaunchSingleTask) {
-                ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, top, top.task);
+                ActivityStack.logStartActivity(AM_NEW_INTENT, top, top.task);
                 if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                     // We don't need to start a new activity, and the client said not to do
                     // anything if that is the case, so this is it!
