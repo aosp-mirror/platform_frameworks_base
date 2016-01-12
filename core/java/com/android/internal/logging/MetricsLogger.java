@@ -63,6 +63,22 @@ public class MetricsLogger implements MetricsConstants {
     public static final int PROFILE_CHALLENGE = 271;
     public static final int QS_BATTERY_DETAIL = 272;
 
+    /**
+     * Logged when the user goes into the overview history.
+     */
+    public static final int OVERVIEW_HISTORY = 273;
+
+    /**
+     * Logged when the user pages through overview.
+     */
+    public static final int ACTION_OVERVIEW_PAGE = 274;
+
+    /**
+     * Logged when the user launches a task from overview.
+     */
+    public static final int ACTION_OVERVIEW_SELECT = 275;
+
+
     public static void visible(Context context, int category) throws IllegalArgumentException {
         if (Build.IS_DEBUGGABLE && category == VIEW_UNKNOWN) {
             throw new IllegalArgumentException("Must define metric category");

@@ -28,6 +28,7 @@ import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -99,6 +100,8 @@ public class RecentsHistoryView extends LinearLayout {
         });
         mAdapter.updateTasks(getContext(), stack);
         mIsVisible = true;
+
+        MetricsLogger.visible(mRecyclerView.getContext(), MetricsLogger.OVERVIEW_HISTORY);
     }
 
     /**
@@ -129,6 +132,8 @@ public class RecentsHistoryView extends LinearLayout {
             setVisibility(View.INVISIBLE);
         }
         mIsVisible = false;
+
+        MetricsLogger.hidden(mRecyclerView.getContext(), MetricsLogger.OVERVIEW_HISTORY);
     }
 
     /**

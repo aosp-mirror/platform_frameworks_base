@@ -628,6 +628,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                     mIterateTrigger.poke();
                 }
             }
+
+            MetricsLogger.action(this, MetricsLogger.ACTION_OVERVIEW_PAGE);
         }
     }
 
