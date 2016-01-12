@@ -1668,15 +1668,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return false;
     }
 
-    void finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+    TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+        TaskRecord finishedTask = null;
+        ActivityStack focusedStack = getFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                stack.finishTopRunningActivityLocked(app, reason);
+                TaskRecord t = stack.finishTopRunningActivityLocked(app, reason);
+                if (stack == focusedStack || finishedTask == null) {
+                    finishedTask = t;
+                }
             }
         }
+        return finishedTask;
     }
 
     void finishVoiceTask(IVoiceInteractionSession session) {

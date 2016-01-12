@@ -2775,7 +2775,7 @@ public final class ActiveServices {
         }
 
         if (anrMessage != null) {
-            mAm.appNotResponding(proc, null, null, false, anrMessage);
+            mAm.mAppErrors.appNotResponding(proc, null, null, false, anrMessage);
         }
     }
 
