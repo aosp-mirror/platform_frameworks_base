@@ -1310,6 +1310,20 @@ final class TaskRecord {
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
     }
 
+    Rect updateOverrideConfigurationFromLaunchBounds() {
+        final Rect bounds = validateBounds(getLaunchBounds());
+        updateOverrideConfiguration(bounds);
+        return bounds;
+    }
+
+    static Rect validateBounds(Rect bounds) {
+        if (bounds != null && bounds.isEmpty()) {
+            Slog.wtf(TAG, "Received strange task bounds: " + bounds, new Throwable());
+            return null;
+        }
+        return bounds;
+    }
+
     private void reportMultiWindowModeChange() {
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);

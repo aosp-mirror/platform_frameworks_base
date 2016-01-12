@@ -1739,7 +1739,7 @@ class ActivityStarter {
         if (options != null && (r.isResizeable() || (inTask != null && inTask.mResizeable))) {
             if (mSupervisor.canUseActivityOptionsLaunchBounds(
                     options, options.getLaunchStackId())) {
-                newBounds = options.getLaunchBounds();
+                newBounds = TaskRecord.validateBounds(options.getLaunchBounds());
             }
         }
         return newBounds;
