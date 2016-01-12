@@ -54,6 +54,8 @@ public class Task {
         public long firstActiveTime;
         public long lastActiveTime;
 
+        private int mHashCode;
+
         public TaskKey(int id, int stackId, Intent intent, int userId, long firstActiveTime,
                 long lastActiveTime) {
             this.id = id;
@@ -62,6 +64,12 @@ public class Task {
             this.userId = userId;
             this.firstActiveTime = firstActiveTime;
             this.lastActiveTime = lastActiveTime;
+            updateHashCode();
+        }
+
+        public void setStackId(int stackId) {
+            this.stackId = stackId;
+            updateHashCode();
         }
 
         public ComponentName getComponent() {
@@ -79,7 +87,7 @@ public class Task {
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, stackId, userId);
+            return mHashCode;
         }
 
         @Override
@@ -89,6 +97,10 @@ public class Task {
                     + "u: " + userId + ", "
                     + "lat: " + lastActiveTime + ", "
                     + getComponent().getPackageName();
+        }
+
+        private void updateHashCode() {
+            mHashCode = Objects.hash(id, stackId, userId);
         }
     }
 
@@ -113,6 +125,7 @@ public class Task {
     public Bitmap thumbnail;
     public String title;
     public String contentDescription;
+    public String dismissDescription;
     public int colorPrimary;
     public boolean useLightOnPrimaryColor;
 
@@ -139,9 +152,9 @@ public class Task {
     }
 
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
-                Bitmap thumbnail, String title, String contentDescription, int colorPrimary,
-                boolean isHistorical, Rect bounds,
-                ActivityManager.TaskDescription taskDescription) {
+                Bitmap thumbnail, String title, String contentDescription,
+                String dismissDescription, int colorPrimary, boolean isHistorical,
+                Rect bounds, ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -151,6 +164,7 @@ public class Task {
         this.thumbnail = thumbnail;
         this.title = title;
         this.contentDescription = contentDescription;
+        this.dismissDescription = dismissDescription;
         this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
@@ -169,6 +183,7 @@ public class Task {
         this.thumbnail = o.thumbnail;
         this.title = o.title;
         this.contentDescription = o.contentDescription;
+        this.dismissDescription = o.dismissDescription;
         this.colorPrimary = o.colorPrimary;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
         this.bounds = o.bounds;
@@ -201,7 +216,7 @@ public class Task {
      * Updates the stack id of this task.
      */
     public void setStackId(int stackId) {
-        key.stackId = stackId;
+        key.setStackId(stackId);
         int callbackCount = mCallbacks.size();
         for (int i = 0; i < callbackCount; i++) {
             mCallbacks.get(i).onTaskStackIdChanged();

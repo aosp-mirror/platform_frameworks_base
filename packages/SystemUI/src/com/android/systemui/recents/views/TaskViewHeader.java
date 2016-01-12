@@ -142,7 +142,6 @@ public class TaskViewHeader extends FrameLayout
     Drawable mDarkFullscreenIcon;
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
-    String mDismissContentDescription;
 
     // Header background
     private HighlightColorDrawable mBackground;
@@ -177,8 +176,6 @@ public class TaskViewHeader extends FrameLayout
         Resources res = context.getResources();
         mLightDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
-        mDismissContentDescription = context.getString(
-                R.string.accessibility_recents_item_will_be_dismissed);
         mCornerRadius = res.getDimensionPixelSize(R.dimen.recents_task_view_rounded_corners_radius);
         mHighlightHeight = res.getDimensionPixelSize(R.dimen.recents_task_view_highlight);
         mTaskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
@@ -363,8 +360,7 @@ public class TaskViewHeader extends FrameLayout
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
-        mDismissButton.setContentDescription(String.format(mDismissContentDescription,
-                t.contentDescription));
+        mDismissButton.setContentDescription(t.dismissDescription);
 
         // When freeform workspaces are enabled, then update the move-task button depending on the
         // current task

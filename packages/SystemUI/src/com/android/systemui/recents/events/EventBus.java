@@ -290,6 +290,28 @@ public class EventBus extends BroadcastReceiver {
     }
 
     /**
+     * An event that can be reusable, only used for situations where we want to reduce memory
+     * allocations when events are sent frequently (ie. on scroll).
+     */
+    public static class ReusableEvent extends Event {
+
+        private int mDispatchCount;
+
+        protected ReusableEvent() {}
+
+        @Override
+        void onPostDispatch() {
+            super.onPostDispatch();
+            mDispatchCount++;
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            throw new CloneNotSupportedException();
+        }
+    }
+
+    /**
      * An inter-process event super class that allows us to track user state across subscriber
      * invocations.
      */
@@ -770,8 +792,11 @@ public class EventBus extends BroadcastReceiver {
         event.onPreDispatch();
 
         // We need to clone the list in case a subscriber unregisters itself during traversal
+        // TODO: Investigate whether we can skip the object creation here
         eventHandlers = (ArrayList<EventHandler>) eventHandlers.clone();
-        for (final EventHandler eventHandler : eventHandlers) {
+        int eventHandlerCount = eventHandlers.size();
+        for (int i = 0; i < eventHandlerCount; i++) {
+            final EventHandler eventHandler = eventHandlers.get(i);
             if (eventHandler.subscriber.getReference() != null) {
                 if (event.requiresPost) {
                     mHandler.post(new Runnable() {

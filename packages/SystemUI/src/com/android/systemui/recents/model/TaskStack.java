@@ -29,6 +29,8 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.animation.Interpolator;
 import com.android.internal.policy.DockedDividerUtils;
@@ -44,8 +46,6 @@ import com.android.systemui.recents.views.DropTarget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -53,11 +53,11 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIG
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
 
 
 /**
@@ -73,17 +73,14 @@ interface TaskFilter {
  */
 class FilteredTaskList {
 
-    private static final String TAG = "FilteredTaskList";
-    private static final boolean DEBUG = false;
-
     ArrayList<Task> mTasks = new ArrayList<>();
     ArrayList<Task> mFilteredTasks = new ArrayList<>();
-    HashMap<Task.TaskKey, Integer> mTaskIndices = new HashMap<>();
+    ArrayMap<Task.TaskKey, Integer> mTaskIndices = new ArrayMap<>();
     TaskFilter mFilter;
 
     /** Sets the task filter, saving the current touch state */
     boolean setFilter(TaskFilter filter) {
-        ArrayList<Task> prevFilteredTasks = new ArrayList<Task>(mFilteredTasks);
+        ArrayList<Task> prevFilteredTasks = new ArrayList<>(mFilteredTasks);
         mFilter = filter;
         updateFilteredTasks();
         if (!prevFilteredTasks.equals(mFilteredTasks)) {
@@ -194,8 +191,9 @@ class FilteredTaskList {
 
     /** Updates the mapping of tasks to indices. */
     private void updateFilteredTaskIndices() {
-        mTaskIndices.clear();
         int taskCount = mFilteredTasks.size();
+        mTaskIndices.clear();
+        mTaskIndices.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             Task t = mFilteredTasks.get(i);
             mTaskIndices.put(t.key, i);
@@ -438,7 +436,7 @@ public class TaskStack {
     TaskStackCallbacks mCb;
 
     ArrayList<TaskGrouping> mGroups = new ArrayList<>();
-    HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<>();
+    ArrayMap<Integer, TaskGrouping> mAffinitiesGroups = new ArrayMap<>();
 
     public TaskStack() {
         // Ensure that we only show non-docked tasks
@@ -551,8 +549,8 @@ public class TaskStack {
      */
     public void setTasks(List<Task> tasks, boolean notifyStackChanges) {
         // Compute a has set for each of the tasks
-        HashMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
-        HashMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
+        ArrayMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
+        ArrayMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
 
         ArrayList<Task> newTasks = new ArrayList<>();
 
@@ -759,7 +757,7 @@ public class TaskStack {
      */
     public void createAffiliatedGroupings(Context context) {
         if (RecentsDebugFlags.Static.EnableSimulatedTaskGroups) {
-            HashMap<Task.TaskKey, Task> taskMap = new HashMap<Task.TaskKey, Task>();
+            ArrayMap<Task.TaskKey, Task> taskMap = new ArrayMap<>();
             // Sort all tasks by increasing firstActiveTime of the task
             ArrayList<Task> tasks = mStackTaskList.getTasks();
             Collections.sort(tasks, new Comparator<Task>() {
@@ -824,9 +822,10 @@ public class TaskStack {
             mStackTaskList.set(tasks);
         } else {
             // Create the task groups
-            HashMap<Task.TaskKey, Task> tasksMap = new HashMap<>();
+            ArrayMap<Task.TaskKey, Task> tasksMap = new ArrayMap<>();
             ArrayList<Task> tasks = mStackTaskList.getTasks();
             int taskCount = tasks.size();
+            tasksMap.ensureCapacity(taskCount);
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;
@@ -868,12 +867,12 @@ public class TaskStack {
      * Computes the components of tasks in this stack that have been removed as a result of a change
      * in the specified package.
      */
-    public HashSet<ComponentName> computeComponentsRemoved(String packageName, int userId) {
+    public ArraySet<ComponentName> computeComponentsRemoved(String packageName, int userId) {
         // Identify all the tasks that should be removed as a result of the package being removed.
         // Using a set to ensure that we callback once per unique component.
         SystemServicesProxy ssp = Recents.getSystemServices();
-        HashSet<ComponentName> existingComponents = new HashSet<>();
-        HashSet<ComponentName> removedComponents = new HashSet<>();
+        ArraySet<ComponentName> existingComponents = new ArraySet<>();
+        ArraySet<ComponentName> removedComponents = new ArraySet<>();
         ArrayList<Task.TaskKey> taskKeys = getTaskKeys();
         for (Task.TaskKey t : taskKeys) {
             // Skip if this doesn't apply to the current user
@@ -911,8 +910,8 @@ public class TaskStack {
     /**
      * Given a list of tasks, returns a map of each task's key to the task.
      */
-    private HashMap<Task.TaskKey, Task> createTaskKeyMapFromList(List<Task> tasks) {
-        HashMap<Task.TaskKey, Task> map = new HashMap<>();
+    private ArrayMap<Task.TaskKey, Task> createTaskKeyMapFromList(List<Task> tasks) {
+        ArrayMap<Task.TaskKey, Task> map = new ArrayMap<>(tasks.size());
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);

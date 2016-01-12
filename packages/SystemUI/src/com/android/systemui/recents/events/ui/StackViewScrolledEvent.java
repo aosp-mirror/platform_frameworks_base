@@ -16,16 +16,21 @@
 
 package com.android.systemui.recents.events.ui;
 
+import android.util.MutableInt;
 import com.android.systemui.recents.events.EventBus;
 
 /**
  * This is sent whenever a new scroll gesture happens on a stack view.
  */
-public class StackViewScrolledEvent extends EventBus.Event {
+public class StackViewScrolledEvent extends EventBus.ReusableEvent {
 
-    public final int yMovement;
+    public final MutableInt yMovement;
 
-    public StackViewScrolledEvent(int yMovement) {
-        this.yMovement = yMovement;
+    public StackViewScrolledEvent() {
+        yMovement = new MutableInt(0);
+    }
+
+    public void updateY(int y) {
+        yMovement.value = y;
     }
 }

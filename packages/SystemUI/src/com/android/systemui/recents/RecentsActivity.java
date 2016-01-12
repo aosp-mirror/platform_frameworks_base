@@ -585,6 +585,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     @Override
     public void onUserInteraction() {
+        // TODO: Prevent creating so many events here
         final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
         EventBus.getDefault().send(new UserInteractionEvent(debugFlags.isFastToggleRecentsEnabled()
                 && debugFlags.isFastToggleIndicatorEnabled()));

@@ -71,6 +71,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     // Used to calculate when a tap is outside a task view rectangle.
     final int mWindowTouchSlop;
 
+    private final StackViewScrolledEvent mStackViewScrolledEvent = new StackViewScrolledEvent();
     SwipeHelper mSwipeHelper;
     boolean mInterceptedBySwipeHelper;
 
@@ -207,7 +208,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     if (DEBUG) {
                         Log.d(TAG, "scroll: " + curScrollP);
                     }
-                    EventBus.getDefault().send(new StackViewScrolledEvent(y - mLastY));
+                    mStackViewScrolledEvent.updateY(y - mLastY);
+                    EventBus.getDefault().send(mStackViewScrolledEvent);
                 }
 
                 mLastY = y;

@@ -257,7 +257,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mTmpAnimators.clear();
         toTransform.applyToTaskView(this, mTmpAnimators, toAnimation, !config.fakeShadows);
         if (toAnimation.isImmediate()) {
-            setTaskProgress(toTransform.p);
+            if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
+                setTaskProgress(toTransform.p);
+            }
             if (toAnimation.listener != null) {
                 toAnimation.listener.onAnimationEnd(null);
             }

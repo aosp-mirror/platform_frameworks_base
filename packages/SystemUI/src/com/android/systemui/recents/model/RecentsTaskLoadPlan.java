@@ -25,7 +25,9 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
+
 import com.android.systemui.Prefs;
+import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -120,6 +122,8 @@ public class RecentsTaskLoadPlan {
             preloadRawTasks(isTopTaskHome);
         }
 
+        String dismissDescFormat = mContext.getString(
+                R.string.accessibility_recents_item_will_be_dismissed);
         long lastStackActiveTime = Prefs.getLong(mContext,
                 Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
         long newLastStackActiveTime = -1;
@@ -143,6 +147,7 @@ public class RecentsTaskLoadPlan {
             // Load the title, icon, and color
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
             String contentDescription = loader.getAndUpdateContentDescription(taskKey, title, res);
+            String dismissDescription = String.format(dismissDescFormat, contentDescription);
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
@@ -151,8 +156,8 @@ public class RecentsTaskLoadPlan {
 
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
-                    thumbnail, title, contentDescription, activityColor, !isStackTask,
-                    t.bounds, t.taskDescription);
+                    thumbnail, title, contentDescription, dismissDescription, activityColor,
+                    !isStackTask, t.bounds, t.taskDescription);
 
             allTasks.add(task);
         }

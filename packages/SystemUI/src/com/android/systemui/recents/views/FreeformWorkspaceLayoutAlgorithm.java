@@ -17,13 +17,12 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.ArrayMap;
 import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,7 +31,7 @@ import java.util.List;
 public class FreeformWorkspaceLayoutAlgorithm {
 
     // Optimization, allows for quick lookup of task -> rect
-    private HashMap<Task.TaskKey, RectF> mTaskRectMap = new HashMap<>();
+    private ArrayMap<Task.TaskKey, RectF> mTaskRectMap = new ArrayMap<>();
 
     private int mTaskPadding;
 
@@ -49,6 +48,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
     public void update(List<Task> freeformTasks, TaskStackLayoutAlgorithm stackLayout) {
         Collections.reverse(freeformTasks);
         mTaskRectMap.clear();
+        mTaskRectMap.ensureCapacity(freeformTasks.size());
 
         int numFreeformTasks = stackLayout.mNumFreeformTasks;
         if (!freeformTasks.isEmpty()) {

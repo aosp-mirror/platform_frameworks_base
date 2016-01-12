@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.animation.AnimationUtils;
@@ -37,9 +39,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * Used to describe a visible range that can be normalized to [0, 1].
@@ -272,7 +271,7 @@ public class TaskStackLayoutAlgorithm {
     int mMaxTranslationZ;
 
     // Optimization, allows for quick lookup of task -> index
-    private HashMap<Task.TaskKey, Integer> mTaskIndexMap = new HashMap<>();
+    private ArrayMap<Task.TaskKey, Integer> mTaskIndexMap = new ArrayMap<>();
 
     // The freeform workspace layout
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
@@ -375,7 +374,7 @@ public class TaskStackLayoutAlgorithm {
      * Computes the minimum and maximum scroll progress values and the progress values for each task
      * in the stack.
      */
-    void update(TaskStack stack, HashSet<Task> ignoreTasksSet) {
+    void update(TaskStack stack, ArraySet<Task> ignoreTasksSet) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Clear the progress map
@@ -410,6 +409,7 @@ public class TaskStackLayoutAlgorithm {
         // Put each of the tasks in the progress map at a fixed index (does not need to actually
         // map to a scroll position, just by index)
         int taskCount = stackTasks.size();
+        mTaskIndexMap.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             Task task = stackTasks.get(i);
             mTaskIndexMap.put(task.key, i);

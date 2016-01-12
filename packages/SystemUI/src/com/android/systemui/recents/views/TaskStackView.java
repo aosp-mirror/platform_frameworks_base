@@ -28,6 +28,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -76,8 +78,6 @@ import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -136,8 +136,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Rect mStackBounds = new Rect();
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
-    HashMap<Task, TaskView> mTmpTaskViewMap = new HashMap<>();
-    HashSet<Task> mTmpTaskSet = new HashSet<>();
+    ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();
+    ArraySet<Task> mTmpTaskSet = new ArraySet<>();
     List<TaskView> mTmpTaskViews = new ArrayList<>();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     LayoutInflater mInflater;
@@ -149,8 +149,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    mTaskViewsClipDirty = true;
-                    invalidate();
+                    if (!mTaskViewsClipDirty) {
+                        mTaskViewsClipDirty = true;
+                        invalidate();
+                    }
                 }
             };
 
@@ -350,7 +352,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private boolean updateStackTransforms(ArrayList<TaskViewTransform> taskTransforms,
             ArrayList<Task> tasks, float stackScroll,
-            int[] visibleRangeOut, HashSet<Task> ignoreTasksSet) {
+            int[] visibleRangeOut, ArraySet<Task> ignoreTasksSet) {
         int taskTransformCount = taskTransforms.size();
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
@@ -415,7 +417,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * they are initially picked up from the pool, when they will be placed in a suitable initial
      * position.
      */
-    private void bindTaskViewsWithStack(HashSet<Task> ignoreTasksSet) {
+    private void bindTaskViewsWithStack(ArraySet<Task> ignoreTasksSet) {
         final float stackScroll = mStackScroller.getStackScroll();
         final int[] visibleStackRange = mTmpVisibleRange;
 
@@ -425,10 +427,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 tasks, stackScroll, visibleStackRange, ignoreTasksSet);
 
         // Return all the invisible children to the pool
-        mTmpTaskViewMap.clear();
         final List<TaskView> taskViews = getTaskViews();
         final int taskViewCount = taskViews.size();
         int lastFocusedTaskIndex = -1;
+        mTmpTaskViewMap.clear();
+        mTmpTaskViewMap.ensureCapacity(tasks.size());
         for (int i = taskViewCount - 1; i >= 0; i--) {
             final TaskView tv = taskViews.get(i);
             final Task task = tv.getTask();
@@ -441,7 +444,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             if (task.isFreeformTask() ||
                     visibleStackRange[1] <= taskIndex && taskIndex <= visibleStackRange[0]) {
-                mTmpTaskViewMap.put(task, tv);
+                mTmpTaskViewMap.put(task.key, tv);
             } else {
                 if (mTouchExplorationEnabled) {
                     lastFocusedTaskIndex = taskIndex;
@@ -467,7 +470,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 continue;
             }
 
-            TaskView tv = mTmpTaskViewMap.get(task);
+            TaskView tv = mTmpTaskViewMap.get(task.key);
             if (tv == null) {
                 tv = mViewPool.pickUpViewFromPool(task, task);
                 if (task.isFreeformTask()) {
@@ -516,8 +519,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private void updateTaskViewsToLayout(TaskViewAnimation animation, Task... ignoreTasks) {
         // Keep track of the ignore tasks
-        HashSet<Task> ignoreTasksSet = mTmpTaskSet;
+        ArraySet<Task> ignoreTasksSet = mTmpTaskSet;
         ignoreTasksSet.clear();
+        ignoreTasksSet.ensureCapacity(ignoreTasks.length);
         Collections.addAll(ignoreTasksSet, ignoreTasks);
 
         // If we had a deferred animation, cancel that
@@ -626,8 +630,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     void updateLayout(boolean boundScrollToNewMinMax, Task... ignoreTasks) {
         // Keep track of the ingore tasks
-        HashSet<Task> ignoreTasksSet = mTmpTaskSet;
+        ArraySet<Task> ignoreTasksSet = mTmpTaskSet;
         ignoreTasksSet.clear();
+        ignoreTasksSet.ensureCapacity(ignoreTasks.length);
         Collections.addAll(ignoreTasksSet, ignoreTasks);
 
         // Compute the min and max scroll values
@@ -1355,7 +1360,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(PackagesChangedEvent event) {
         // Compute which components need to be removed
-        HashSet<ComponentName> removedComponents = mStack.computeComponentsRemoved(
+        ArraySet<ComponentName> removedComponents = mStack.computeComponentsRemoved(
                 event.packageName, event.userId);
 
         // For other tasks, just remove them directly if they no longer exist
@@ -1545,7 +1550,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(StackViewScrolledEvent event) {
-        mLayoutAlgorithm.updateFocusStateOnScroll(event.yMovement);
+        mLayoutAlgorithm.updateFocusStateOnScroll(event.yMovement.value);
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
