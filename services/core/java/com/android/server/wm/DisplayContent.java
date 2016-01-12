@@ -393,7 +393,7 @@ class DisplayContent {
                     }
                     mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
                 }
-                if (task.isDockedInEffect() && !task.isResizeable()) {
+                if (task.isTwoFingerScrollMode()) {
                     stack.getBounds(mTmpRect);
                     mNonResizeableRegion.op(mTmpRect, Region.Op.UNION);
                     break;

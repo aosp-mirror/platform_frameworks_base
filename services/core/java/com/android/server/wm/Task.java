@@ -571,6 +571,10 @@ class Task implements DimLayer.DimLayerUser {
         return inDockedWorkspace() || isResizeableByDockedStack();
     }
 
+    boolean isTwoFingerScrollMode() {
+        return isDockedInEffect() && !isResizeable();
+    }
+
     WindowState getTopVisibleAppMainWindow() {
         final AppWindowToken token = getTopVisibleAppToken();
         return token != null ? token.findMainWindow() : null;

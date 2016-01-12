@@ -130,7 +130,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             Configuration config = configs.get(task.mTaskId);
             if (config != null) {
                 Rect bounds = taskBounds.get(task.mTaskId);
-                if (!task.isResizeable() && task.isDockedInEffect()) {
+                if (task.isTwoFingerScrollMode()) {
                     // This is a non-resizeable task that's docked (or side-by-side to the docked
                     // stack). It might have been scrolled previously, and after the stack resizing,
                     // it might no longer fully cover the stack area.
