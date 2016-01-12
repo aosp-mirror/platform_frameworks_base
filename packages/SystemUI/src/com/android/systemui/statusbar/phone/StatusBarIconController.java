@@ -450,12 +450,13 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
 
     public static ArraySet<String> getIconBlacklist(String blackListStr) {
         ArraySet<String> ret = new ArraySet<String>();
-        if (blackListStr != null) {
-            String[] blacklist = blackListStr.split(",");
-            for (String slot : blacklist) {
-                if (!TextUtils.isEmpty(slot)) {
-                    ret.add(slot);
-                }
+        if (blackListStr == null) {
+            blackListStr = "rotate,headset";
+        }
+        String[] blacklist = blackListStr.split(",");
+        for (String slot : blacklist) {
+            if (!TextUtils.isEmpty(slot)) {
+                ret.add(slot);
             }
         }
         return ret;

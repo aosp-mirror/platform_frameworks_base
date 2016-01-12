@@ -16,8 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Context;
 import android.content.res.Configuration;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -78,7 +78,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             return;
         }
         state.value = rotationLocked;
-        final boolean portrait = isCurrentOrientationLockPortrait();
+        final boolean portrait = isCurrentOrientationLockPortrait(mController, mContext);
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
                     : R.string.quick_settings_rotation_locked_landscape_label;
@@ -94,11 +94,12 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                 R.string.accessibility_rotation_lock_off);
     }
 
-    private boolean isCurrentOrientationLockPortrait() {
-        int lockOrientation = mController.getRotationLockOrientation();
+    public static boolean isCurrentOrientationLockPortrait(RotationLockController controller,
+            Context context) {
+        int lockOrientation = controller.getRotationLockOrientation();
         if (lockOrientation == Configuration.ORIENTATION_UNDEFINED) {
             // Freely rotating device; use current rotation
-            return mContext.getResources().getConfiguration().orientation
+            return context.getResources().getConfiguration().orientation
                     != Configuration.ORIENTATION_LANDSCAPE;
         } else {
             return lockOrientation != Configuration.ORIENTATION_LANDSCAPE;
@@ -123,7 +124,8 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             int idWhenOff) {
         int stringID;
         if (locked) {
-            stringID = isCurrentOrientationLockPortrait() ? idWhenPortrait: idWhenLandscape;
+            stringID = isCurrentOrientationLockPortrait(mController, mContext) ? idWhenPortrait
+                    : idWhenLandscape;
         } else {
             stringID = idWhenOff;
         }

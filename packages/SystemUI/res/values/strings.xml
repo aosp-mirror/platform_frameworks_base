@@ -1315,4 +1315,22 @@
     <!-- SysUI Tuner: Switch to control volume up behavior [CHAR LIMIT=60] -->
     <string name="volume_up_silent">Exit do not disturb on volume up</string>
 
+    <!-- Name of the battery icon in status bar [CHAR LIMIT=30] -->
+    <string name="battery">Battery</string>
+
+    <!-- Name of the clock in status bar [CHAR LIMIT=30] -->
+    <string name="clock">Clock</string>
+
+    <!-- Name of the headset in status bar [CHAR LIMIT=30] -->
+    <string name="headset">Headset</string>
+
+    <!-- Accessibility description of headphones icon [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_headphones">Headphones connected</string>
+
+    <!-- Accessibility description of headset icon [CHAR LIMIT=NONE] -->
+    <string name="accessibility_status_bar_headset">Headset connected</string>
+
+    <!-- Explanation of the status bar section of the tuner [CHAR LIMIT=NONE] -->
+    <string name="tuner_status_bar_explanation">Enable or disable icons from being shown in the status bar.</string>
+
 </resources>
