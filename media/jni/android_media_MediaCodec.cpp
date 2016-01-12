@@ -85,6 +85,13 @@ static struct {
     jmethodID setNativeObjectLocked;
 } gPersistentSurfaceClassInfo;
 
+static struct {
+    jint Unencrypted;
+    jint AesCtr;
+    jint AesCbc;
+} gCryptoModes;
+
+
 struct fields_t {
     jfieldID context;
     jmethodID postEventFromNativeID;
@@ -94,6 +101,9 @@ struct fields_t {
     jfieldID cryptoInfoKeyID;
     jfieldID cryptoInfoIVID;
     jfieldID cryptoInfoModeID;
+    jfieldID cryptoInfoPatternID;
+    jfieldID patternEncryptBlocksID;
+    jfieldID patternSkipBlocksID;
 };
 
 static fields_t gFields;
@@ -325,11 +335,12 @@ status_t JMediaCodec::queueSecureInputBuffer(
         const uint8_t key[16],
         const uint8_t iv[16],
         CryptoPlugin::Mode mode,
+        const CryptoPlugin::Pattern &pattern,
         int64_t presentationTimeUs,
         uint32_t flags,
         AString *errorDetailMsg) {
     return mCodec->queueSecureInputBuffer(
-            index, offset, subSamples, numSubSamples, key, iv, mode,
+            index, offset, subSamples, numSubSamples, key, iv, mode, pattern,
             presentationTimeUs, flags, errorDetailMsg);
 }
 
@@ -1275,7 +1286,26 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
     jbyteArray ivObj =
         (jbyteArray)env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoIVID);
 
-    jint mode = env->GetIntField(cryptoInfoObj, gFields.cryptoInfoModeID);
+    jint jmode = env->GetIntField(cryptoInfoObj, gFields.cryptoInfoModeID);
+    enum CryptoPlugin::Mode mode;
+    if (jmode == gCryptoModes.Unencrypted) {
+        mode = CryptoPlugin::kMode_Unencrypted;
+    } else if (jmode == gCryptoModes.AesCtr) {
+        mode = CryptoPlugin::kMode_AES_CTR;
+    } else if (jmode == gCryptoModes.AesCbc) {
+        mode = CryptoPlugin::kMode_AES_CBC;
+    }  else {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return;
+    }
+
+    jobject patternObj = env->GetObjectField(cryptoInfoObj, gFields.cryptoInfoPatternID);
+
+    CryptoPlugin::Pattern pattern;
+    if (patternObj != NULL) {
+        pattern.mEncryptBlocks = env->GetIntField(patternObj, gFields.patternEncryptBlocksID);
+        pattern.mSkipBlocks = env->GetIntField(patternObj, gFields.patternSkipBlocksID);
+    }
 
     status_t err = OK;
 
@@ -1360,7 +1390,8 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
                 index, offset,
                 subSamples, numSubSamples,
                 (const uint8_t *)key, (const uint8_t *)iv,
-                (CryptoPlugin::Mode)mode,
+                mode,
+                pattern,
                 timestampUs,
                 flags,
                 &errorDetailMsg);
@@ -1658,6 +1689,22 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
 
     CHECK(gFields.postEventFromNativeID != NULL);
 
+    jfieldID field;
+    field = env->GetStaticFieldID(clazz.get(), "CRYPTO_MODE_UNENCRYPTED", "I");
+    CHECK(field != NULL);
+    gCryptoModes.Unencrypted =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "CRYPTO_MODE_AES_CTR", "I");
+    CHECK(field != NULL);
+    gCryptoModes.AesCtr =
+        env->GetStaticIntField(clazz.get(), field);
+
+    field = env->GetStaticFieldID(clazz.get(), "CRYPTO_MODE_AES_CBC", "I");
+    CHECK(field != NULL);
+    gCryptoModes.AesCbc =
+        env->GetStaticIntField(clazz.get(), field);
+
     clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo"));
     CHECK(clazz.get() != NULL);
 
@@ -1682,10 +1729,22 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     gFields.cryptoInfoModeID = env->GetFieldID(clazz.get(), "mode", "I");
     CHECK(gFields.cryptoInfoModeID != NULL);
 
+    gFields.cryptoInfoPatternID = env->GetFieldID(clazz.get(), "pattern",
+        "Landroid/media/MediaCodec$CryptoInfo$Pattern;");
+    CHECK(gFields.cryptoInfoPatternID != NULL);
+
+    clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo$Pattern"));
+    CHECK(clazz.get() != NULL);
+
+    gFields.patternEncryptBlocksID = env->GetFieldID(clazz.get(), "mEncryptBlocks", "I");
+    CHECK(gFields.patternEncryptBlocksID != NULL);
+
+    gFields.patternSkipBlocksID = env->GetFieldID(clazz.get(), "mSkipBlocks", "I");
+    CHECK(gFields.patternSkipBlocksID != NULL);
+
     clazz.reset(env->FindClass("android/media/MediaCodec$CryptoException"));
     CHECK(clazz.get() != NULL);
 
-    jfieldID field;
     field = env->GetStaticFieldID(clazz.get(), "ERROR_NO_KEY", "I");
     CHECK(field != NULL);
     gCryptoErrorCodes.cryptoErrorNoKey =

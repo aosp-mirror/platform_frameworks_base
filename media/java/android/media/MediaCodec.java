@@ -2175,8 +2175,6 @@ final public class MediaCodec {
             int offset, int size, long presentationTimeUs, int flags)
         throws CryptoException;
 
-    // The following mode constants MUST stay in sync with their equivalents
-    // in media/hardware/CryptoAPI.h !
     public static final int CRYPTO_MODE_UNENCRYPTED = 0;
     public static final int CRYPTO_MODE_AES_CTR     = 1;
     public static final int CRYPTO_MODE_AES_CBC     = 2;
