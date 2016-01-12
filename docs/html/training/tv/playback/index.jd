@@ -64,4 +64,7 @@ startpage=true
 
   <dt><b><a href="now-playing.html">Displaying a Now Playing Card</a></b></dt>
     <dd>Learn how to use a MediaSession to display a Now Playing card on the home screen.</dd>
+
+  <dt><b><a href="options.html">Enabling Background Playback</a></b></dt>
+    <dd>Learn how to continue playback when the user clicks on <strong>Home</strong>.</dd>
 </dl>
