@@ -27,6 +27,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.os.InstallerConnection.InstallerException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -166,12 +168,13 @@ final class PackageDexOptimizer {
                             | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                             | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                             | DEXOPT_BOOTCOMPLETE;
-                    final int ret = mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                            pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir, dexFlags);
-
-                    // Dex2oat might fail due to compiler / verifier errors.
-                    if (ret == 0) {
+                    try {
+                        mPackageManagerService.mInstaller.dexopt(path, sharedGid,
+                                pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir,
+                                dexFlags);
                         performedDexOpt = true;
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, "Failed to dexopt", e);
                     }
                 }
             }
@@ -210,8 +213,13 @@ final class PackageDexOptimizer {
         File codePath = new File(pkg.codePath);
         if (codePath.isDirectory()) {
             File oatDir = getOatDir(codePath);
-            mPackageManagerService.mInstaller.createOatDir(oatDir.getAbsolutePath(),
-                    dexInstructionSet);
+            try {
+                mPackageManagerService.mInstaller.createOatDir(oatDir.getAbsolutePath(),
+                        dexInstructionSet);
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to create oat dir", e);
+                return null;
+            }
             return oatDir.getAbsolutePath();
         }
         return null;

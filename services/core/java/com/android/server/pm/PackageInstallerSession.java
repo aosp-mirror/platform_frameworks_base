@@ -69,6 +69,7 @@ import libcore.io.Libcore;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -832,9 +833,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         throw new IOException("File: " + pathStr + " outside base: " + baseStr);
     }
 
-    private void createOatDirs(List<String> instructionSets, File fromDir) {
+    private void createOatDirs(List<String> instructionSets, File fromDir)
+            throws PackageManagerException {
         for (String instructionSet : instructionSets) {
-            mPm.mInstaller.createOatDir(fromDir.getAbsolutePath(), instructionSet);
+            try {
+                mPm.mInstaller.createOatDir(fromDir.getAbsolutePath(), instructionSet);
+            } catch (InstallerException e) {
+                throw PackageManagerException.from(e);
+            }
         }
     }
 
@@ -842,13 +848,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws IOException {
         for (File fromFile : fromFiles) {
             final String relativePath = getRelativePath(fromFile, fromDir);
-            final int ret = mPm.mInstaller.linkFile(relativePath, fromDir.getAbsolutePath(),
-                    toDir.getAbsolutePath());
-
-            if (ret < 0) {
-                // installd will log failure details.
+            try {
+                mPm.mInstaller.linkFile(relativePath, fromDir.getAbsolutePath(),
+                        toDir.getAbsolutePath());
+            } catch (InstallerException e) {
                 throw new IOException("failed linkOrCreateDir(" + relativePath + ", "
-                        + fromDir + ", " + toDir + ")");
+                        + fromDir + ", " + toDir + ")", e);
             }
         }
 
@@ -1041,7 +1046,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         if (stageDir != null) {
-            mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            try {
+                mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            } catch (InstallerException ignored) {
+            }
         }
         if (stageCid != null) {
             PackageHelper.destroySdDir(stageCid);

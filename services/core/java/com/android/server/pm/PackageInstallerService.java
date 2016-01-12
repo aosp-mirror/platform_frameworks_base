@@ -258,11 +258,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         for (File stage : unclaimedStages) {
             Slog.w(TAG, "Deleting orphan stage " + stage);
             synchronized (mPm.mInstallLock) {
-                if (stage.isDirectory()) {
-                    mPm.mInstaller.rmPackageDir(stage.getAbsolutePath());
-                } else {
-                    stage.delete();
-                }
+                mPm.removeCodePathLI(stage);
             }
         }
     }
