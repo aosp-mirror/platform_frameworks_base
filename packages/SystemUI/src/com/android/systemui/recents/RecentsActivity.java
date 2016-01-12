@@ -569,12 +569,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_FORWARD_DEL: {
-                EventBus.getDefault().send(new DismissFocusedTaskViewEvent());
+                if (event.getRepeatCount() <= 0) {
+                    EventBus.getDefault().send(new DismissFocusedTaskViewEvent());
 
-                // Keep track of deletions by keyboard
-                MetricsLogger.histogram(this, "overview_task_dismissed_source",
-                        Constants.Metrics.DismissSourceKeyboard);
-                return true;
+                    // Keep track of deletions by keyboard
+                    MetricsLogger.histogram(this, "overview_task_dismissed_source",
+                            Constants.Metrics.DismissSourceKeyboard);
+                    return true;
+                }
             }
             default:
                 break;
