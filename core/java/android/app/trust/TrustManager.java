@@ -16,21 +16,17 @@
 
 package android.app.trust;
 
+import com.android.internal.widget.LockPatternUtils;
+
 import android.Manifest;
-import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.SparseIntArray;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * See {@link com.android.server.trust.TrustManagerService}
@@ -157,6 +153,21 @@ public class TrustManager {
             }
         }
     }
+
+    /**
+     * @return whether {@userId} has enabled and configured trust agents. Ignores short-term
+     * unavailability of trust due to {@link LockPatternUtils.StrongAuthTracker}.
+     */
+    @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
+    public boolean isTrustUsuallyManaged(int userId) {
+        try {
+            return mService.isTrustUsuallyManaged(userId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+
 
     private void onError(Exception e) {
         Log.e(TAG, "Error while calling TrustManagerService", e);

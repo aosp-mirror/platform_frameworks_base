@@ -103,8 +103,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
                 return R.string.kg_prompt_reason_restart_pin;
             case PROMPT_REASON_TIMEOUT:
                 return R.string.kg_prompt_reason_timeout_pin;
-            default:
+            case PROMPT_REASON_NONE:
                 return 0;
+            default:
+                return R.string.kg_prompt_reason_timeout_pin;
         }
     }
 

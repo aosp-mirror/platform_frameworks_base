@@ -32,4 +32,5 @@ interface ITrustManager {
     void setDeviceLockedForUser(int userId, boolean locked);
     boolean isDeviceLocked(int userId);
     boolean isDeviceSecure(int userId);
+    boolean isTrustUsuallyManaged(int userId);
 }

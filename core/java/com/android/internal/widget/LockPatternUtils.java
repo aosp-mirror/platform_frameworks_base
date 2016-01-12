@@ -136,6 +136,7 @@ public class LockPatternUtils {
     private static final String LOCK_SCREEN_DEVICE_OWNER_INFO = "lockscreen.device_owner_info";
 
     private static final String ENABLED_TRUST_AGENTS = "lockscreen.enabledtrustagents";
+    private static final String IS_TRUST_USUALLY_MANAGED = "lockscreen.istrustusuallymanaged";
 
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
 
@@ -149,6 +150,30 @@ public class LockPatternUtils {
     private ILockSettings mLockSettingsService;
     private UserManager mUserManager;
 
+    /**
+     * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
+     *
+     * This returns the lazily-peristed value and should only be used by TrustManagerService.
+     */
+    public boolean isTrustUsuallyManaged(int userId) {
+        if (!(mLockSettingsService instanceof ILockSettings.Stub)) {
+            throw new IllegalStateException("May only be called by TrustManagerService. "
+                    + "Use TrustManager.isTrustUsuallyManaged()");
+        }
+        try {
+            return getLockSettings().getBoolean(IS_TRUST_USUALLY_MANAGED, false, userId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public void setTrustUsuallyManaged(boolean managed, int userId) {
+        try {
+            getLockSettings().setBoolean(IS_TRUST_USUALLY_MANAGED, managed, userId);
+        } catch (RemoteException e) {
+            // System dead.
+        }
+    }
 
     public static final class RequestThrottledException extends Exception {
         private int mTimeoutMs;
