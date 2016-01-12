@@ -335,12 +335,15 @@ public interface InputConnection {
      * but be careful to wait until the batch edit is over if one is
      * in progress.</p>
      *
-     * @param beforeLength The number of characters to be deleted before the
-     *        current cursor position.
-     * @param afterLength The number of characters to be deleted after the
-     *        current cursor position.
-     * @return true on success, false if the input connection is no longer
-     * valid.
+     * @param beforeLength The number of characters before the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code unit.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @return true on success, false if the input connection is no longer valid.
      */
     public boolean deleteSurroundingText(int beforeLength, int afterLength);
 
