@@ -2473,4 +2473,17 @@
   <java-symbol type="string" name="status_bar_alarm_clock" />
   <java-symbol type="string" name="status_bar_secure" />
   <java-symbol type="string" name="status_bar_clock" />
+
+  <!-- Locale picker -->
+  <java-symbol type="id" name="l10nWarn" />
+  <java-symbol type="id" name="locale_search_menu" />
+  <java-symbol type="layout" name="language_picker_item" />
+  <java-symbol type="layout" name="language_picker_section_header" />
+  <java-symbol type="menu" name="language_selection_list" />
+  <java-symbol type="string" name="country_selection_title" />
+  <java-symbol type="string" name="language_picker_section_all" />
+  <java-symbol type="string" name="language_picker_section_suggested" />
+  <java-symbol type="string" name="language_selection_title" />
+  <java-symbol type="string" name="search_language_hint" />
+
 </resources>

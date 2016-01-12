@@ -4146,4 +4146,22 @@
     <string name="user_creation_account_exists"><b><xliff:g id="app" example="Gmail">%1$s</xliff:g></b> is trying to add a new user, but the account <b><xliff:g id="account" example="foobar">%2$s</xliff:g></b> already exists on this device. Proceed anyway?</string>
     <!-- Message to user that app is trying to create user for a specified account. [CHAR LIMIT=none] -->
     <string name="user_creation_adding"><b><xliff:g id="app" example="Gmail">%1$s</xliff:g></b> is trying to add a new user for the account <b><xliff:g id="account" example="foobar">%2$s</xliff:g></b>. Proceed?</string>
+
+    <!-- Locale picker strings -->
+
+    <!-- Title for the language selection screen [CHAR LIMIT=25] -->
+    <string name="language_selection_title">Language preference</string>
+    <!-- Title for the region selection screen [CHAR LIMIT=25] -->
+    <string name="country_selection_title">Region preference</string>
+    <!-- Hint text in a search edit box (used to filter long language / country lists) [CHAR LIMIT=20] -->
+    <string name="search_language_hint">Type language name</string>
+
+    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <string name="language_picker_section_suggested">Suggested</string>
+    <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
+    <string name="language_picker_section_all">All languages</string>
+
+    <!-- Menu item in the locale menu  [CHAR LIMIT=30] -->
+    <string name="locale_search_menu">Search</string>
+
 </resources>
