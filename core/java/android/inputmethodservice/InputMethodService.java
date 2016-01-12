@@ -1258,6 +1258,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @CallSuper
     public boolean onEvaluateInputViewShown() {
+        if (mSettingsObserver == null) {
+            Log.w(TAG, "onEvaluateInputViewShown: mSettingsObserver must not be null here.");
+            return false;
+        }
         if (mSettingsObserver.shouldShowImeWithHardKeyboard()) {
             return true;
         }
