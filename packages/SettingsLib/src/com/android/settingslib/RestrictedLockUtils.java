@@ -215,6 +215,25 @@ public class RestrictedLockUtils {
         textView.setText(sb);
     }
 
+    /**
+     * Takes a {@link android.widget.TextView} and applies an alpha so that the text looks like
+     * disabled and appends a padlock to the text. This assumes that there are no
+     * ForegroundColorSpans and RestrictedLockImageSpans used on the TextView.
+     */
+    public static void setTextViewAsDisabledByAdmin(Context context,
+            TextView textView, boolean disabled) {
+        final SpannableStringBuilder sb = new SpannableStringBuilder(textView.getText());
+        removeExistingRestrictedSpans(sb);
+        if (disabled) {
+            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            final ImageSpan image = new RestrictedLockImageSpan(context);
+            sb.append(" ", image, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        textView.setText(sb);
+    }
+
     public static class EnforcedAdmin {
         public ComponentName component = null;
         public int userId = UserHandle.USER_NULL;
