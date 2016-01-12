@@ -71,7 +71,6 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     clipState = snapshot.mutateClipArea().serializeClip(allocator);
     LOG_ALWAYS_FATAL_IF(!clipState, "clipState required");
     clippedBounds = clipState->rect;
-    transform.mapRect(clippedBounds);
     clipSideFlags = OpClipSideFlags::Full;
 }
 
