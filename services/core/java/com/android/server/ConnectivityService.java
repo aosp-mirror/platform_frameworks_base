@@ -4848,6 +4848,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
+    public String getCaptivePortalServerUrl() {
+        return NetworkMonitor.getCaptivePortalServerUrl(mContext);
+    }
+
+    @Override
     public void startNattKeepalive(Network network, int intervalSeconds, Messenger messenger,
             IBinder binder, String srcAddr, int srcPort, String dstAddr) {
         enforceKeepalivePermission();

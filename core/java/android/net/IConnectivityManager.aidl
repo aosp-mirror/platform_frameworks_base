@@ -165,4 +165,6 @@ interface IConnectivityManager
             in IBinder binder, String srcAddr, int srcPort, String dstAddr);
 
     void stopKeepalive(in Network network, int slot);
+
+    String getCaptivePortalServerUrl();
 }
