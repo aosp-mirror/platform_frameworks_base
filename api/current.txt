@@ -28553,6 +28553,7 @@ package android.os {
     field public static final int RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY = 1; // 0x1
     field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
     field public static final deprecated int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
+    field public static final int SUSTAINED_PERFORMANCE_WAKE_LOCK = 256; // 0x100
   }
 
   public final class PowerManager.WakeLock {
