@@ -34,12 +34,10 @@ import java.util.concurrent.TimeUnit;
 
 @RealDeviceTest
 public class MtpManagerTest extends InstrumentationTestCase {
-
     private static final int TIMEOUT_MS = 1000;
     UsbManager mUsbManager;
     MtpManager mManager;
     UsbDevice mUsbDevice;
-    int mRequest;
 
     @Override
     public void setUp() throws Exception {
