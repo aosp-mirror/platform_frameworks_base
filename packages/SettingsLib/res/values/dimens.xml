@@ -31,4 +31,8 @@
     <dimen name="user_spinner_padding">4dp</dimen>
     <dimen name="user_spinner_padding_sides">20dp</dimen>
     <dimen name="user_spinner_item_height">56dp</dimen>
+
+    <!-- Lock icon for preferences locked by admin -->
+    <dimen name="restricted_lock_icon_size">16dp</dimen>
+    <dimen name="restricted_lock_icon_padding">4dp</dimen>
 </resources>
