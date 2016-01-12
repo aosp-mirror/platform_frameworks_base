@@ -20,13 +20,13 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Slog;
 
-import dalvik.system.VMRuntime;
-
 import com.android.internal.os.InstallerConnection;
+import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.server.SystemService;
+
+import dalvik.system.VMRuntime;
 
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -45,6 +45,11 @@ public final class Installer extends SystemService {
     public static final int DEXOPT_BOOTCOMPLETE = 1 << 4;
     /** Run the application with the JIT compiler */
     public static final int DEXOPT_USEJIT       = 1 << 5;
+
+    public static final int FLAG_DE_STORAGE = 1 << 0;
+    public static final int FLAG_CE_STORAGE = 1 << 1;
+    public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 2;
+    public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 3;
 
     private final InstallerConnection mInstaller;
 
@@ -67,423 +72,137 @@ public final class Installer extends SystemService {
         mInstaller.waitForConnection();
     }
 
-    private static String escapeNull(String arg) {
-        if (TextUtils.isEmpty(arg)) {
-            return "!";
-        } else {
-            if (arg.indexOf('\0') != -1 || arg.indexOf(' ') != -1) {
-                throw new IllegalArgumentException(arg);
-            }
-            return arg;
-        }
+    public void createAppData(String uuid, String pkgname, int userid, int flags, int appid,
+            String seinfo) throws InstallerException {
+        mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo);
     }
 
-    @Deprecated
-    public int install(String name, int uid, int gid, String seinfo) {
-        return install(null, name, uid, gid, seinfo);
+    public void restoreconAppData(String uuid, String pkgname, int userid, int flags, int appid,
+            String seinfo) throws InstallerException {
+        mInstaller.execute("restorecon_app_data", uuid, pkgname, userid, flags, appid,
+                seinfo);
     }
 
-    public int install(String uuid, String name, int uid, int gid, String seinfo) {
-        StringBuilder builder = new StringBuilder("install");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(' ');
-        builder.append(gid);
-        builder.append(' ');
-        builder.append(seinfo != null ? seinfo : "!");
-        return mInstaller.execute(builder.toString());
+    public void clearAppData(String uuid, String pkgname, int userid, int flags)
+            throws InstallerException {
+        mInstaller.execute("clear_app_data", uuid, pkgname, userid, flags);
     }
 
-    public int dexopt(String apkPath, int uid, String instructionSet,
-            int dexoptNeeded, int dexFlags) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        return mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags);
+    public void destroyAppData(String uuid, String pkgname, int userid, int flags)
+            throws InstallerException {
+        mInstaller.execute("destroy_app_data", uuid, pkgname, userid, flags);
     }
 
-    public int dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, @Nullable String outputPath, int dexFlags) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-        return mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
-                outputPath, dexFlags);
+    public void moveCompleteApp(String from_uuid, String to_uuid, String package_name,
+            String data_app_name, int appid, String seinfo) throws InstallerException {
+        mInstaller.execute("move_complete_app", from_uuid, to_uuid, package_name,
+                data_app_name, appid, seinfo);
     }
 
-    public int idmap(String targetApkPath, String overlayApkPath, int uid) {
-        StringBuilder builder = new StringBuilder("idmap");
-        builder.append(' ');
-        builder.append(targetApkPath);
-        builder.append(' ');
-        builder.append(overlayApkPath);
-        builder.append(' ');
-        builder.append(uid);
-        return mInstaller.execute(builder.toString());
-    }
-
-    public int movedex(String srcPath, String dstPath, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        StringBuilder builder = new StringBuilder("movedex");
-        builder.append(' ');
-        builder.append(srcPath);
-        builder.append(' ');
-        builder.append(dstPath);
-        builder.append(' ');
-        builder.append(instructionSet);
-        return mInstaller.execute(builder.toString());
-    }
-
-    public int rmdex(String codePath, String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        StringBuilder builder = new StringBuilder("rmdex");
-        builder.append(' ');
-        builder.append(codePath);
-        builder.append(' ');
-        builder.append(instructionSet);
-        return mInstaller.execute(builder.toString());
-    }
-
-    /**
-     * Removes packageDir or its subdirectory
-     */
-    public int rmPackageDir(String packageDir) {
-        StringBuilder builder = new StringBuilder("rmpackagedir");
-        builder.append(' ');
-        builder.append(packageDir);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int remove(String name, int userId) {
-        return remove(null, name, userId);
-    }
-
-    public int remove(String uuid, String name, int userId) {
-        StringBuilder builder = new StringBuilder("remove");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int fixUid(String name, int uid, int gid) {
-        return fixUid(null, name, uid, gid);
-    }
-
-    public int fixUid(String uuid, String name, int uid, int gid) {
-        StringBuilder builder = new StringBuilder("fixuid");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(' ');
-        builder.append(gid);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int deleteCacheFiles(String name, int userId) {
-        return deleteCacheFiles(null, name, userId);
-    }
-
-    public int deleteCacheFiles(String uuid, String name, int userId) {
-        StringBuilder builder = new StringBuilder("rmcache");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int deleteCodeCacheFiles(String name, int userId) {
-        return deleteCodeCacheFiles(null, name, userId);
-    }
-
-    public int deleteCodeCacheFiles(String uuid, String name, int userId) {
-        StringBuilder builder = new StringBuilder("rmcodecache");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int createUserData(String name, int uid, int userId, String seinfo) {
-        return createUserData(null, name, uid, userId, seinfo);
-    }
-
-    public int createUserData(String uuid, String name, int uid, int userId, String seinfo) {
-        StringBuilder builder = new StringBuilder("mkuserdata");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(' ');
-        builder.append(userId);
-        builder.append(' ');
-        builder.append(seinfo != null ? seinfo : "!");
-        return mInstaller.execute(builder.toString());
-    }
-
-    public int createUserConfig(int userId) {
-        StringBuilder builder = new StringBuilder("mkuserconfig");
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int removeUserDataDirs(int userId) {
-        return removeUserDataDirs(null, userId);
-    }
-
-    public int removeUserDataDirs(String uuid, int userId) {
-        StringBuilder builder = new StringBuilder("rmuser");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    public int copyCompleteApp(String fromUuid, String toUuid, String packageName,
-            String dataAppName, int appId, String seinfo) {
-        StringBuilder builder = new StringBuilder("cpcompleteapp");
-        builder.append(' ');
-        builder.append(escapeNull(fromUuid));
-        builder.append(' ');
-        builder.append(escapeNull(toUuid));
-        builder.append(' ');
-        builder.append(packageName);
-        builder.append(' ');
-        builder.append(dataAppName);
-        builder.append(' ');
-        builder.append(appId);
-        builder.append(' ');
-        builder.append(seinfo);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int clearUserData(String name, int userId) {
-        return clearUserData(null, name, userId);
-    }
-
-    public int clearUserData(String uuid, String name, int userId) {
-        StringBuilder builder = new StringBuilder("rmuserdata");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(name);
-        builder.append(' ');
-        builder.append(userId);
-        return mInstaller.execute(builder.toString());
-    }
-
-    public int markBootComplete(String instructionSet) {
-        if (!isValidInstructionSet(instructionSet)) {
-            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-            return -1;
-        }
-
-        StringBuilder builder = new StringBuilder("markbootcomplete");
-        builder.append(' ');
-        builder.append(instructionSet);
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int freeCache(long freeStorageSize) {
-        return freeCache(null, freeStorageSize);
-    }
-
-    public int freeCache(String uuid, long freeStorageSize) {
-        StringBuilder builder = new StringBuilder("freecache");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(String.valueOf(freeStorageSize));
-        return mInstaller.execute(builder.toString());
-    }
-
-    @Deprecated
-    public int getSizeInfo(String pkgName, int persona, String apkPath, String libDirPath,
-            String fwdLockApkPath, String asecPath, String[] instructionSets, PackageStats pStats) {
-        return getSizeInfo(null, pkgName, persona, apkPath, libDirPath, fwdLockApkPath, asecPath,
-                instructionSets, pStats);
-    }
-
-    public int getSizeInfo(String uuid, String pkgName, int persona, String apkPath,
+    public void getAppSize(String uuid, String pkgname, int userid, int flags, String apkPath,
             String libDirPath, String fwdLockApkPath, String asecPath, String[] instructionSets,
-            PackageStats pStats) {
+            PackageStats pStats) throws InstallerException {
         for (String instructionSet : instructionSets) {
-            if (!isValidInstructionSet(instructionSet)) {
-                Slog.e(TAG, "Invalid instruction set: " + instructionSet);
-                return -1;
-            }
+            assertValidInstructionSet(instructionSet);
         }
 
-        StringBuilder builder = new StringBuilder("getsize");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(persona);
-        builder.append(' ');
-        builder.append(apkPath);
-        builder.append(' ');
         // TODO: Extend getSizeInfo to look at the full subdirectory tree,
         // not just the first level.
-        builder.append(libDirPath != null ? libDirPath : "!");
-        builder.append(' ');
-        builder.append(fwdLockApkPath != null ? fwdLockApkPath : "!");
-        builder.append(' ');
-        builder.append(asecPath != null ? asecPath : "!");
-        builder.append(' ');
         // TODO: Extend getSizeInfo to look at *all* instrution sets, not
         // just the primary.
-        builder.append(instructionSets[0]);
-
-        String s = mInstaller.transact(builder.toString());
-        String res[] = s.split(" ");
+        final String rawRes = mInstaller.executeForResult("get_app_size", uuid, pkgname, userid,
+                flags, apkPath, libDirPath, fwdLockApkPath, asecPath, instructionSets[0]);
+        final String res[] = rawRes.split(" ");
 
         if ((res == null) || (res.length != 5)) {
-            return -1;
+            throw new InstallerException("Invalid size result: " + rawRes);
         }
         try {
             pStats.codeSize = Long.parseLong(res[1]);
             pStats.dataSize = Long.parseLong(res[2]);
             pStats.cacheSize = Long.parseLong(res[3]);
             pStats.externalCodeSize = Long.parseLong(res[4]);
-            return Integer.parseInt(res[0]);
         } catch (NumberFormatException e) {
-            return -1;
+            throw new InstallerException("Invalid size result: " + rawRes);
         }
     }
 
-    public int moveFiles() {
-        return mInstaller.execute("movefiles");
+    public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
+            int dexFlags) throws InstallerException {
+        assertValidInstructionSet(instructionSet);
+        mInstaller.dexopt(apkPath, uid, instructionSet, dexoptNeeded, dexFlags);
     }
 
-    @Deprecated
-    public int linkNativeLibraryDirectory(String dataPath, String nativeLibPath32, int userId) {
-        return linkNativeLibraryDirectory(null, dataPath, nativeLibPath32, userId);
+    public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+            int dexoptNeeded, @Nullable String outputPath, int dexFlags)
+                    throws InstallerException {
+        assertValidInstructionSet(instructionSet);
+        mInstaller.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded,
+                outputPath, dexFlags);
+    }
+
+    public void idmap(String targetApkPath, String overlayApkPath, int uid)
+            throws InstallerException {
+        mInstaller.execute("idmap", targetApkPath, overlayApkPath, uid);
+    }
+
+    public void rmdex(String codePath, String instructionSet) throws InstallerException {
+        assertValidInstructionSet(instructionSet);
+        mInstaller.execute("rmdex", codePath, instructionSet);
+    }
+
+    public void rmPackageDir(String packageDir) throws InstallerException {
+        mInstaller.execute("rmpackagedir", packageDir);
+    }
+
+    public void createUserConfig(int userid) throws InstallerException {
+        mInstaller.execute("mkuserconfig", userid);
+    }
+
+    public void removeUserDataDirs(String uuid, int userid) throws InstallerException {
+        mInstaller.execute("rmuser", uuid, userid);
+    }
+
+    public void markBootComplete(String instructionSet) throws InstallerException {
+        assertValidInstructionSet(instructionSet);
+        mInstaller.execute("markbootcomplete", instructionSet);
+    }
+
+    public void freeCache(String uuid, long freeStorageSize) throws InstallerException {
+        mInstaller.execute("freecache", uuid, freeStorageSize);
+    }
+
+    public void moveFiles() throws InstallerException {
+        mInstaller.execute("movefiles");
     }
 
     /**
-     * Links the 32 bit native library directory in an application's data directory to the
-     * real location for backward compatibility. Note that no such symlink is created for
-     * 64 bit shared libraries.
-     *
-     * @return -1 on error
+     * Links the 32 bit native library directory in an application's data
+     * directory to the real location for backward compatibility. Note that no
+     * such symlink is created for 64 bit shared libraries.
      */
-    public int linkNativeLibraryDirectory(String uuid, String dataPath, String nativeLibPath32,
-            int userId) {
-        if (dataPath == null) {
-            Slog.e(TAG, "linkNativeLibraryDirectory dataPath is null");
-            return -1;
-        } else if (nativeLibPath32 == null) {
-            Slog.e(TAG, "linkNativeLibraryDirectory nativeLibPath is null");
-            return -1;
-        }
-
-        StringBuilder builder = new StringBuilder("linklib");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(dataPath);
-        builder.append(' ');
-        builder.append(nativeLibPath32);
-        builder.append(' ');
-        builder.append(userId);
-
-        return mInstaller.execute(builder.toString());
+    public void linkNativeLibraryDirectory(String uuid, String dataPath, String nativeLibPath32,
+            int userId) throws InstallerException {
+        mInstaller.execute("linklib", uuid, dataPath, nativeLibPath32, userId);
     }
 
-    @Deprecated
-    public boolean restoreconData(String pkgName, String seinfo, int uid) {
-        return restoreconData(null, pkgName, seinfo, uid);
+    public void createOatDir(String oatDir, String dexInstructionSet)
+            throws InstallerException {
+        mInstaller.execute("createoatdir", oatDir, dexInstructionSet);
     }
 
-    public boolean restoreconData(String uuid, String pkgName, String seinfo, int uid) {
-        StringBuilder builder = new StringBuilder("restorecondata");
-        builder.append(' ');
-        builder.append(escapeNull(uuid));
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(seinfo != null ? seinfo : "!");
-        builder.append(' ');
-        builder.append(uid);
-        return (mInstaller.execute(builder.toString()) == 0);
+    public void linkFile(String relativePath, String fromBase, String toBase)
+            throws InstallerException {
+        mInstaller.execute("linkfile", relativePath, fromBase, toBase);
     }
 
-    public int createOatDir(String oatDir, String dexInstructionSet) {
-        StringBuilder builder = new StringBuilder("createoatdir");
-        builder.append(' ');
-        builder.append(oatDir);
-        builder.append(' ');
-        builder.append(dexInstructionSet);
-        return mInstaller.execute(builder.toString());
-    }
-
-
-    public int linkFile(String relativePath, String fromBase, String toBase) {
-        StringBuilder builder = new StringBuilder("linkfile");
-        builder.append(' ');
-        builder.append(relativePath);
-        builder.append(' ');
-        builder.append(fromBase);
-        builder.append(' ');
-        builder.append(toBase);
-        return mInstaller.execute(builder.toString());
-    }
-
-    /**
-     * Returns true iff. {@code instructionSet} is a valid instruction set.
-     */
-    private static boolean isValidInstructionSet(String instructionSet) {
-        if (instructionSet == null) {
-            return false;
-        }
-
+    private static void assertValidInstructionSet(String instructionSet)
+            throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {
-            if (instructionSet.equals(VMRuntime.getInstructionSet(abi))) {
-                return true;
+            if (VMRuntime.getInstructionSet(abi).equals(instructionSet)) {
+                return;
             }
         }
-
-        return false;
+        throw new InstallerException("Invalid instruction set: " + instructionSet);
     }
 }

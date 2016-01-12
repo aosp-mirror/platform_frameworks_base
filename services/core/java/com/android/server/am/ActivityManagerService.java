@@ -35,6 +35,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
+import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -6590,8 +6591,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             Process.establishZygoteConnectionForAbi(abi);
             final String instructionSet = VMRuntime.getInstructionSet(abi);
             if (!completedIsas.contains(instructionSet)) {
-                if (mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi)) != 0) {
-                    Slog.e(TAG, "Unable to mark boot complete for abi: " + abi);
+                try {
+                    mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
+                } catch (InstallerException e) {
+                    Slog.e(TAG, "Unable to mark boot complete for abi: " + abi, e);
                 }
                 completedIsas.add(instructionSet);
             }

@@ -81,6 +81,7 @@ import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -3668,7 +3669,7 @@ final class Settings {
             int userHandle) {
         String[] volumeUuids;
         String[] names;
-        int[] uids;
+        int[] appIds;
         String[] seinfos;
         int packagesCount;
         synchronized (mPackages) {
@@ -3676,7 +3677,7 @@ final class Settings {
             packagesCount = packages.size();
             volumeUuids = new String[packagesCount];
             names = new String[packagesCount];
-            uids = new int[packagesCount];
+            appIds = new int[packagesCount];
             seinfos = new String[packagesCount];
             Iterator<PackageSetting> packagesIterator = packages.iterator();
             for (int i = 0; i < packagesCount; i++) {
@@ -3690,7 +3691,7 @@ final class Settings {
                 // required args and call the installer after mPackages lock has been released
                 volumeUuids[i] = ps.volumeUuid;
                 names[i] = ps.name;
-                uids[i] = UserHandle.getUid(userHandle, ps.appId);
+                appIds[i] = ps.appId;
                 seinfos[i] = ps.pkg.applicationInfo.seinfo;
             }
         }
@@ -3698,7 +3699,14 @@ final class Settings {
             if (names[i] == null) {
                 continue;
             }
-            installer.createUserData(volumeUuids[i], names[i], uids[i], userHandle, seinfos[i]);
+            // TODO: triage flags!
+            final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+            try {
+                installer.createAppData(volumeUuids[i], names[i], userHandle, flags, appIds[i],
+                        seinfos[i]);
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to prepare app data", e);
+            }
         }
         synchronized (mPackages) {
             applyDefaultPreferredAppsLPw(service, userHandle);

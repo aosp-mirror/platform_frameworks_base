@@ -37,6 +37,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.webkit.WebViewFactory;
 
+import com.android.internal.os.InstallerConnection.InstallerException;
+
 import dalvik.system.DexFile;
 import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
@@ -502,8 +504,8 @@ public class ZygoteInit {
                             dexoptNeeded, 0 /*dexFlags*/);
                 }
             }
-        } catch (IOException ioe) {
-            throw new RuntimeException("Error starting system_server", ioe);
+        } catch (IOException | InstallerException e) {
+            throw new RuntimeException("Error starting system_server", e);
         } finally {
             installer.disconnect();
         }

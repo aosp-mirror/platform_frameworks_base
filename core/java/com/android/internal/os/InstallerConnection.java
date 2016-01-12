@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -29,6 +30,7 @@ import libcore.io.Streams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * Represents a connection to {@code installd}. Allows multiple connect and
@@ -61,6 +63,11 @@ public class InstallerConnection {
     }
 
     public synchronized String transact(String cmd) {
+        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
+            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
+                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
+        }
+
         if (!connect()) {
             Slog.e(TAG, "connection failed");
             return "-1";
@@ -96,44 +103,50 @@ public class InstallerConnection {
         }
     }
 
-    public int execute(String cmd) {
-        if (mWarnIfHeld != null && Thread.holdsLock(mWarnIfHeld)) {
-            Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName() + " is holding 0x"
-                    + Integer.toHexString(System.identityHashCode(mWarnIfHeld)), new Throwable());
-        }
-
-        String res = transact(cmd);
+    public void execute(String cmd, Object... args) throws InstallerException {
+        final String resRaw = executeForResult(cmd, args);
+        int res = -1;
         try {
-            return Integer.parseInt(res);
-        } catch (NumberFormatException ex) {
-            return -1;
+            res = Integer.parseInt(resRaw);
+        } catch (NumberFormatException ignored) {
+        }
+        if (res != 0) {
+            throw new InstallerException(
+                    "Failed to execute " + cmd + " " + Arrays.toString(args) + ": " + res);
         }
     }
 
-    public int dexopt(String apkPath, int uid, String instructionSet,
-            int dexoptNeeded, int dexFlags) {
-        return dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded,
-                null /*outputPath*/, dexFlags);
+    public String executeForResult(String cmd, Object... args)
+            throws InstallerException {
+        final StringBuilder builder = new StringBuilder(cmd);
+        for (Object arg : args) {
+            String escaped;
+            if (arg == null) {
+                escaped = "";
+            } else {
+                escaped = String.valueOf(arg);
+            }
+            if (escaped.indexOf('\0') != -1 || escaped.indexOf(' ') != -1 || "!".equals(escaped)) {
+                throw new InstallerException(
+                        "Invalid argument while executing " + cmd + " " + Arrays.toString(args));
+            }
+            if (TextUtils.isEmpty(escaped)) {
+                escaped = "!";
+            }
+            builder.append(' ').append(escaped);
+        }
+        return transact(builder.toString());
     }
 
-    public int dexopt(String apkPath, int uid, String pkgName, String instructionSet,
-            int dexoptNeeded, String outputPath, int dexFlags) {
-        StringBuilder builder = new StringBuilder("dexopt");
-        builder.append(' ');
-        builder.append(apkPath);
-        builder.append(' ');
-        builder.append(uid);
-        builder.append(' ');
-        builder.append(pkgName);
-        builder.append(' ');
-        builder.append(instructionSet);
-        builder.append(' ');
-        builder.append(dexoptNeeded);
-        builder.append(' ');
-        builder.append(outputPath != null ? outputPath : "!");
-        builder.append(' ');
-        builder.append(dexFlags);
-        return execute(builder.toString());
+    public void dexopt(String apkPath, int uid, String instructionSet, int dexoptNeeded,
+            int dexFlags) throws InstallerException {
+        dexopt(apkPath, uid, "*", instructionSet, dexoptNeeded, null /* outputPath */, dexFlags);
+    }
+
+    public void dexopt(String apkPath, int uid, String pkgName, String instructionSet,
+            int dexoptNeeded, String outputPath, int dexFlags) throws InstallerException {
+        execute("dexopt", apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
+                dexFlags);
     }
 
     private boolean connect() {
@@ -227,11 +240,19 @@ public class InstallerConnection {
 
     public void waitForConnection() {
         for (;;) {
-            if (execute("ping") >= 0) {
+            try {
+                execute("ping");
                 return;
+            } catch (InstallerException ignored) {
             }
             Slog.w(TAG, "installd not ready");
             SystemClock.sleep(1000);
+        }
+    }
+
+    public static class InstallerException extends Exception {
+        public InstallerException(String detailMessage) {
+            super(detailMessage);
         }
     }
 }
