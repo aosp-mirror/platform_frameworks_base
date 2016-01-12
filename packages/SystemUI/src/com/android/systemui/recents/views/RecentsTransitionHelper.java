@@ -289,7 +289,7 @@ public class RecentsTransitionHelper {
                     //       never happen)
                     specs.add(composeOffscreenAnimationSpec(t, offscreenTaskRect));
                 } else {
-                    layoutAlgorithm.getStackTransform(task, stackScroll, mTmpTransform, null);
+                    layoutAlgorithm.getStackTransform(t, stackScroll, mTmpTransform, null);
                     specs.add(composeAnimationSpec(tv, mTmpTransform, true /* addHeaderBitmap */));
                 }
             }
