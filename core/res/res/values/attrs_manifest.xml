@@ -429,6 +429,12 @@
          sets. -->
     <attr name="multiArch" format ="boolean" />
 
+    <!-- Specify abiOverride for multiArch application.
+         @hide
+         @SystemApi
+     -->
+    <attr name="abiOverride" />
+
     <!-- Specify whether a component is allowed to have multiple instances
          of itself running in different processes.  Use with the activity
          and provider tags.
