@@ -48,10 +48,10 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     const Rect& clipRect = clipState->rect;
     if (CC_UNLIKELY(clipRect.isEmpty() || !clippedBounds.intersects(clipRect))) {
         // Rejected based on either empty clip, or bounds not intersecting with clip
-        if (clipState) {
-            allocator.rewindIfLastAlloc(clipState);
-            clipState = nullptr;
-        }
+
+        // Note: we could rewind the clipState object in situations where the clipRect is empty,
+        // but *only* if the caching logic within ClipArea was aware of the rewind.
+        clipState = nullptr;
         clippedBounds.setEmpty();
     } else {
         // Not rejected! compute true clippedBounds and clipSideFlags
