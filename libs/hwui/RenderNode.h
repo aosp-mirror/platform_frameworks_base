@@ -47,11 +47,11 @@ class CanvasState;
 class DisplayListCanvas;
 class DisplayListOp;
 class OpenGLRenderer;
-class OpReorderer;
 class Rect;
 class SkiaShader;
 
 #if HWUI_NEW_OPS
+class FrameBuilder;
 class OffscreenBuffer;
 struct RenderNodeOp;
 typedef OffscreenBuffer layer_t;
@@ -87,7 +87,7 @@ class RenderNode;
  */
 class RenderNode : public VirtualLightRefBase {
 friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
-friend class FrameReorderer;
+friend class FrameBuilder;
 public:
     enum DirtyPropertyMask {
         GENERIC         = 1 << 1,

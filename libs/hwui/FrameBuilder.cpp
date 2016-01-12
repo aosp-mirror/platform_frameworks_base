@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "FrameReorderer.h"
+#include "FrameBuilder.h"
 
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
@@ -30,25 +30,25 @@
 namespace android {
 namespace uirenderer {
 
-FrameReorderer::FrameReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
         const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
 
-    mLayerReorderers.reserve(layers.entries().size());
+    mLayerBuilders.reserve(layers.entries().size());
     mLayerStack.reserve(layers.entries().size());
 
     // Prepare to defer Fbo0
-    auto fbo0 = mAllocator.create<LayerReorderer>(viewportWidth, viewportHeight, Rect(clip));
-    mLayerReorderers.push_back(fbo0);
+    auto fbo0 = mAllocator.create<LayerBuilder>(viewportWidth, viewportHeight, Rect(clip));
+    mLayerBuilders.push_back(fbo0);
     mLayerStack.push_back(0);
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
             lightCenter);
 
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
-    // updated in the order they're passed in (mLayerReorderers are issued to Renderer in reverse)
+    // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
         RenderNode* layerNode = layers.entries()[i].renderNode;
         const Rect& layerDamage = layers.entries()[i].damage;
@@ -78,11 +78,11 @@ FrameReorderer::FrameReorderer(const LayerUpdateQueue& layers, const SkRect& cli
     }
 }
 
-void FrameReorderer::onViewportInitialized() {}
+void FrameBuilder::onViewportInitialized() {}
 
-void FrameReorderer::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
+void FrameBuilder::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
 
-void FrameReorderer::deferNodePropsAndOps(RenderNode& node) {
+void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
     const RenderProperties& properties = node.properties();
     const Outline& outline = properties.getOutline();
     if (properties.getAlpha() <= 0
@@ -214,7 +214,7 @@ static size_t findNonNegativeIndex(const V& zTranslatedNodes) {
 }
 
 template <typename V>
-void FrameReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
+void FrameBuilder::defer3dChildren(ChildrenSelectMode mode, const V& zTranslatedNodes) {
     const int size = zTranslatedNodes.size();
     if (size == 0
             || (mode == ChildrenSelectMode::Negative&& zTranslatedNodes[0].key > 0.0f)
@@ -264,7 +264,7 @@ void FrameReorderer::defer3dChildren(ChildrenSelectMode mode, const V& zTranslat
     }
 }
 
-void FrameReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
+void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
     auto& node = *casterNodeOp.renderNode;
     auto& properties = node.properties();
 
@@ -320,7 +320,7 @@ void FrameReorderer::deferShadow(const RenderNodeOp& casterNodeOp) {
     }
 }
 
-void FrameReorderer::deferProjectedChildren(const RenderNode& renderNode) {
+void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
     const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
     int count = mCanvasState.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
@@ -353,15 +353,15 @@ void FrameReorderer::deferProjectedChildren(const RenderNode& renderNode) {
 }
 
 /**
- * Used to define a list of lambdas referencing private FrameReorderer::onXX::defer() methods.
+ * Used to define a list of lambdas referencing private FrameBuilder::onXX::defer() methods.
  *
  * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas.
- * E.g. a BitmapOp op then would be dispatched to FrameReorderer::onBitmapOp(const BitmapOp&)
+ * E.g. a BitmapOp op then would be dispatched to FrameBuilder::onBitmapOp(const BitmapOp&)
  */
 #define OP_RECEIVER(Type) \
-        [](FrameReorderer& reorderer, const RecordedOp& op) { reorderer.defer##Type(static_cast<const Type&>(op)); },
-void FrameReorderer::deferNodeOps(const RenderNode& renderNode) {
-    typedef void (*OpDispatcher) (FrameReorderer& reorderer, const RecordedOp& op);
+        [](FrameBuilder& frameBuilder, const RecordedOp& op) { frameBuilder.defer##Type(static_cast<const Type&>(op)); },
+void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
+    typedef void (*OpDispatcher) (FrameBuilder& frameBuilder, const RecordedOp& op);
     static OpDispatcher receivers[] = BUILD_DEFERRABLE_OP_LUT(OP_RECEIVER);
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
@@ -385,7 +385,7 @@ void FrameReorderer::deferNodeOps(const RenderNode& renderNode) {
     }
 }
 
-void FrameReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
+void FrameBuilder::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) return;
     int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
 
@@ -400,7 +400,7 @@ void FrameReorderer::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     mCanvasState.restoreToCount(count);
 }
 
-void FrameReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
+void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
     if (!op.skipInOrderDraw) {
         deferRenderNodeOpImpl(op);
     }
@@ -410,7 +410,7 @@ void FrameReorderer::deferRenderNodeOp(const RenderNodeOp& op) {
  * Defers an unmergeable, strokeable op, accounting correctly
  * for paint's style on the bounds being computed.
  */
-void FrameReorderer::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
+void FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
         BakedOpState::StrokeBehavior strokeBehavior) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
@@ -432,7 +432,7 @@ static batchid_t tessBatchId(const RecordedOp& op) {
             : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
 }
 
-void FrameReorderer::deferArcOp(const ArcOp& op) {
+void FrameBuilder::deferArcOp(const ArcOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
@@ -441,7 +441,7 @@ static bool hasMergeableClip(const BakedOpState& state) {
             || state.computedState.clipState->mode == ClipMode::Rectangle;
 }
 
-void FrameReorderer::deferBitmapOp(const BitmapOp& op) {
+void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -461,19 +461,19 @@ void FrameReorderer::deferBitmapOp(const BitmapOp& op) {
     }
 }
 
-void FrameReorderer::deferBitmapMeshOp(const BitmapMeshOp& op) {
+void FrameBuilder::deferBitmapMeshOp(const BitmapMeshOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void FrameReorderer::deferBitmapRectOp(const BitmapRectOp& op) {
+void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
-void FrameReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
+void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {
     // allocate a temporary oval op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
     float x = *(op.x);
@@ -488,22 +488,22 @@ void FrameReorderer::deferCirclePropsOp(const CirclePropsOp& op) {
     deferOvalOp(*resolvedOp);
 }
 
-void FrameReorderer::deferFunctorOp(const FunctorOp& op) {
+void FrameBuilder::deferFunctorOp(const FunctorOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Functor);
 }
 
-void FrameReorderer::deferLinesOp(const LinesOp& op) {
+void FrameBuilder::deferLinesOp(const LinesOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void FrameReorderer::deferOvalOp(const OvalOp& op) {
+void FrameBuilder::deferOvalOp(const OvalOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void FrameReorderer::deferPatchOp(const PatchOp& op) {
+void FrameBuilder::deferPatchOp(const PatchOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -521,24 +521,24 @@ void FrameReorderer::deferPatchOp(const PatchOp& op) {
     }
 }
 
-void FrameReorderer::deferPathOp(const PathOp& op) {
+void FrameBuilder::deferPathOp(const PathOp& op) {
     deferStrokeableOp(op, OpBatchType::Bitmap);
 }
 
-void FrameReorderer::deferPointsOp(const PointsOp& op) {
+void FrameBuilder::deferPointsOp(const PointsOp& op) {
     batchid_t batch = op.paint->isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices;
     deferStrokeableOp(op, batch, BakedOpState::StrokeBehavior::Forced);
 }
 
-void FrameReorderer::deferRectOp(const RectOp& op) {
+void FrameBuilder::deferRectOp(const RectOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void FrameReorderer::deferRoundRectOp(const RoundRectOp& op) {
+void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
     deferStrokeableOp(op, tessBatchId(op));
 }
 
-void FrameReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
+void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     // allocate a temporary round rect op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
     const RoundRectOp* resolvedOp = new (mAllocator) RoundRectOp(
@@ -549,7 +549,7 @@ void FrameReorderer::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     deferRoundRectOp(*resolvedOp);
 }
 
-void FrameReorderer::deferSimpleRectsOp(const SimpleRectsOp& op) {
+void FrameBuilder::deferSimpleRectsOp(const SimpleRectsOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
@@ -560,7 +560,7 @@ static batchid_t textBatchId(const SkPaint& paint) {
     return paint.getColor() == SK_ColorBLACK ? OpBatchType::Text : OpBatchType::ColorText;
 }
 
-void FrameReorderer::deferTextOp(const TextOp& op) {
+void FrameBuilder::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
@@ -575,19 +575,19 @@ void FrameReorderer::deferTextOp(const TextOp& op) {
     }
 }
 
-void FrameReorderer::deferTextOnPathOp(const TextOnPathOp& op) {
+void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
 }
 
-void FrameReorderer::deferTextureLayerOp(const TextureLayerOp& op) {
+void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::TextureLayer);
 }
 
-void FrameReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
+void FrameBuilder::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
         float contentTranslateX, float contentTranslateY,
         const Rect& repaintRect,
         const Vector3& lightCenter,
@@ -602,13 +602,13 @@ void FrameReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
             repaintRect.left, repaintRect.top, repaintRect.right, repaintRect.bottom);
 
     // create a new layer repaint, and push its index on the stack
-    mLayerStack.push_back(mLayerReorderers.size());
-    auto newFbo = mAllocator.create<LayerReorderer>(layerWidth, layerHeight,
+    mLayerStack.push_back(mLayerBuilders.size());
+    auto newFbo = mAllocator.create<LayerBuilder>(layerWidth, layerHeight,
             repaintRect, beginLayerOp, renderNode);
-    mLayerReorderers.push_back(newFbo);
+    mLayerBuilders.push_back(newFbo);
 }
 
-void FrameReorderer::restoreForLayer() {
+void FrameBuilder::restoreForLayer() {
     // restore canvas, and pop finished layer off of the stack
     mCanvasState.restore();
     mLayerStack.pop_back();
@@ -616,7 +616,7 @@ void FrameReorderer::restoreForLayer() {
 
 // TODO: defer time rejection (when bounds become empty) + tests
 // Option - just skip layers with no bounds at playback + defer?
-void FrameReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
+void FrameBuilder::deferBeginLayerOp(const BeginLayerOp& op) {
     uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
     uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
 
@@ -661,7 +661,7 @@ void FrameReorderer::deferBeginLayerOp(const BeginLayerOp& op) {
             &op, nullptr);
 }
 
-void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
+void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     const BeginLayerOp& beginLayerOp = *currentLayer().beginLayerOp;
     int finishedLayerIndex = mLayerStack.back();
 
@@ -674,7 +674,7 @@ void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
             beginLayerOp.localMatrix,
             beginLayerOp.localClip,
             beginLayerOp.paint,
-            &(mLayerReorderers[finishedLayerIndex]->offscreenBuffer));
+            &(mLayerBuilders[finishedLayerIndex]->offscreenBuffer));
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
     if (bakedOpState) {
@@ -684,12 +684,12 @@ void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
         // Layer won't be drawn - delete its drawing batches to prevent it from doing any work
         // TODO: need to prevent any render work from being done
         // - create layerop earlier for reject purposes?
-        mLayerReorderers[finishedLayerIndex]->clear();
+        mLayerBuilders[finishedLayerIndex]->clear();
         return;
     }
 }
 
-void FrameReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
+void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     Matrix4 boundsTransform(*(mCanvasState.currentSnapshot()->transform));
     boundsTransform.multiply(op.localMatrix);
 
@@ -724,7 +724,7 @@ void FrameReorderer::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op)
     currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
 }
 
-void FrameReorderer::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
+void FrameBuilder::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
     LOG_ALWAYS_FATAL_IF(currentLayer().activeUnclippedSaveLayers.empty(), "no layer to end!");
 
     BakedOpState* copyFromLayerOp = currentLayer().activeUnclippedSaveLayers.back();

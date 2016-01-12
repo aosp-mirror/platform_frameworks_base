@@ -19,7 +19,7 @@
 #include "BakedOpState.h"
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
-#include "FrameReorderer.h"
+#include "FrameBuilder.h"
 #include "LayerUpdateQueue.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
@@ -66,9 +66,9 @@ void BM_FrameBuilder_defer::Run(int iters) {
     auto nodes = createTestNodeList();
     StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+        FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                 nodes, sLightCenter);
-        MicroBench::DoNotOptimize(&reorderer);
+        MicroBench::DoNotOptimize(&frameBuilder);
     }
     StopBenchmarkTiming();
 }
@@ -84,11 +84,11 @@ void BM_FrameBuilder_deferAndRender::Run(int iters) {
 
         StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            FrameReorderer reorderer(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
+            FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
                     nodes, sLightCenter);
 
             BakedOpRenderer renderer(caches, renderState, true, lightInfo);
-            reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
+            frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             MicroBench::DoNotOptimize(&renderer);
         }
         StopBenchmarkTiming();
@@ -117,10 +117,10 @@ static void benchDeferScene(testing::Benchmark& benchmark, int iters, const char
     auto nodes = getSyncedSceneNodes(sceneName);
     benchmark.StartBenchmarkTiming();
     for (int i = 0; i < iters; i++) {
-        FrameReorderer reorderer(sEmptyLayerUpdateQueue,
+        FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                 SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                 nodes, sLightCenter);
-        MicroBench::DoNotOptimize(&reorderer);
+        MicroBench::DoNotOptimize(&frameBuilder);
     }
     benchmark.StopBenchmarkTiming();
 }
@@ -136,12 +136,12 @@ static void benchDeferAndRenderScene(testing::Benchmark& benchmark,
 
         benchmark.StartBenchmarkTiming();
         for (int i = 0; i < iters; i++) {
-            FrameReorderer reorderer(sEmptyLayerUpdateQueue,
+            FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
                     SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w, gDisplay.h,
                     nodes, sLightCenter);
 
             BakedOpRenderer renderer(caches, renderState, true, lightInfo);
-            reorderer.replayBakedOps<BakedOpDispatcher>(renderer);
+            frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
             MicroBench::DoNotOptimize(&renderer);
         }
         benchmark.StopBenchmarkTiming();

@@ -19,7 +19,7 @@
 #include "BakedOpState.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
-#include "LayerReorderer.h"
+#include "LayerBuilder.h"
 #include "RecordedOp.h"
 
 #include <vector>
@@ -42,7 +42,7 @@ class Rect;
  * Resolves final drawing state for each operation (including clip, alpha and matrix), and then
  * reorder and merge each op as it is resolved for drawing efficiency. Each layer of content (either
  * from the LayerUpdateQueue, or temporary layers created by saveLayer operations in the
- * draw stream) will create different reorder contexts, each in its own LayerReorderer.
+ * draw stream) will create different reorder contexts, each in its own LayerBuilder.
  *
  * Then the prepared or 'baked' drawing commands can be issued by calling the templated
  * replayBakedOps() function, which will dispatch them (including any created merged op collections)
@@ -52,13 +52,13 @@ class Rect;
  * This class is also the authoritative source for traversing RenderNodes, both for standard op
  * traversal within a DisplayList, and for out of order RenderNode traversal for Z and projection.
  */
-class FrameReorderer : public CanvasStateClient {
+class FrameBuilder : public CanvasStateClient {
 public:
-    FrameReorderer(const LayerUpdateQueue& layers, const SkRect& clip,
+    FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
 
-    virtual ~FrameReorderer() {}
+    virtual ~FrameBuilder() {}
 
     /**
      * replayBakedOps() is templated based on what class will receive ops being replayed.
@@ -98,8 +98,8 @@ public:
 
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
-        for (int i = mLayerReorderers.size() - 1; i >= 1; i--) {
-            LayerReorderer& layer = *(mLayerReorderers[i]);
+        for (int i = mLayerBuilders.size() - 1; i >= 1; i--) {
+            LayerBuilder& layer = *(mLayerBuilders[i]);
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
                 renderer.startRepaintLayer(layer.offscreenBuffer, layer.repaintRect);
@@ -112,14 +112,14 @@ public:
             }
         }
 
-        const LayerReorderer& fbo0 = *(mLayerReorderers[0]);
+        const LayerBuilder& fbo0 = *(mLayerBuilders[0]);
         renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
         fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
         renderer.endFrame(fbo0.repaintRect);
     }
 
     void dump() const {
-        for (auto&& layer : mLayerReorderers) {
+        for (auto&& layer : mLayerBuilders) {
             layer->dump();
         }
     }
@@ -143,7 +143,7 @@ private:
             const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
 
-    LayerReorderer& currentLayer() { return *(mLayerReorderers[mLayerStack.back()]); }
+    LayerBuilder& currentLayer() { return *(mLayerBuilders[mLayerStack.back()]); }
 
     BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
@@ -173,7 +173,7 @@ private:
             BakedOpState::StrokeBehavior strokeBehavior = BakedOpState::StrokeBehavior::StyleDefined);
 
     /**
-     * Declares all FrameReorderer::deferXXXXOp() methods for every RecordedOp type.
+     * Declares all FrameBuilder::deferXXXXOp() methods for every RecordedOp type.
      *
      * These private methods are called from within deferImpl to defer each individual op
      * type differently.
@@ -183,17 +183,17 @@ private:
 #undef X
 
     // List of every deferred layer's render state. Replayed in reverse order to render a frame.
-    std::vector<LayerReorderer*> mLayerReorderers;
+    std::vector<LayerBuilder*> mLayerBuilders;
 
     /*
-     * Stack of indices within mLayerReorderers representing currently active layers. If drawing
+     * Stack of indices within mLayerBuilders representing currently active layers. If drawing
      * layerA within a layerB, will contain, in order:
      *  - 0 (representing FBO 0, always present)
      *  - layerB's index
      *  - layerA's index
      *
-     * Note that this doesn't vector doesn't always map onto all values of mLayerReorderers. When a
-     * layer is finished deferring, it will still be represented in mLayerReorderers, but it's index
+     * Note that this doesn't vector doesn't always map onto all values of mLayerBuilders. When a
+     * layer is finished deferring, it will still be represented in mLayerBuilders, but it's index
      * won't be in mLayerStack. This is because it can be replayed, but can't have any more drawing
      * ops added to it.
     */
