@@ -67,17 +67,17 @@ typedef void (*MergedOpReceiver)(void*, const MergedBakedOpList& opList);
  * Stores the deferred render operations and state used to compute ordering
  * for a single FBO/layer.
  */
-class LayerReorderer {
+class LayerBuilder {
 // Prevent copy/assign because users may stash pointer to offscreenBuffer and viewportClip
-PREVENT_COPY_AND_ASSIGN(LayerReorderer);
+PREVENT_COPY_AND_ASSIGN(LayerBuilder);
 public:
-    // Create LayerReorderer for Fbo0
-    LayerReorderer(uint32_t width, uint32_t height, const Rect& repaintRect)
-            : LayerReorderer(width, height, repaintRect, nullptr, nullptr) {};
+    // Create LayerBuilder for Fbo0
+    LayerBuilder(uint32_t width, uint32_t height, const Rect& repaintRect)
+            : LayerBuilder(width, height, repaintRect, nullptr, nullptr) {};
 
-    // Create LayerReorderer for an offscreen layer, where beginLayerOp is present for a
+    // Create LayerBuilder for an offscreen layer, where beginLayerOp is present for a
     // saveLayer, renderNode is present for a HW layer.
-    LayerReorderer(uint32_t width, uint32_t height,
+    LayerBuilder(uint32_t width, uint32_t height,
             const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
 
     // iterate back toward target to see if anything drawn since should overlap the new op

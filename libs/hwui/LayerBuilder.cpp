@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "LayerReorderer.h"
+#include "LayerBuilder.h"
 
 #include "BakedOpState.h"
 #include "RenderNode.h"
@@ -202,7 +202,7 @@ private:
     int mClipSideFlags;
 };
 
-LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
+LayerBuilder::LayerBuilder(uint32_t width, uint32_t height,
         const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
         : width(width)
         , height(height)
@@ -214,7 +214,7 @@ LayerReorderer::LayerReorderer(uint32_t width, uint32_t height,
 
 // iterate back toward target to see if anything drawn since should overlap the new op
 // if no target, merging ops still iterate to find similar batch to insert after
-void LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
+void LayerBuilder::locateInsertIndex(int batchId, const Rect& clippedBounds,
         BatchBase** targetBatch, size_t* insertBatchIndex) const {
     for (int i = mBatches.size() - 1; i >= 0; i--) {
         BatchBase* overBatch = mBatches[i];
@@ -237,11 +237,11 @@ void LayerReorderer::locateInsertIndex(int batchId, const Rect& clippedBounds,
     }
 }
 
-void LayerReorderer::deferLayerClear(const Rect& rect) {
+void LayerBuilder::deferLayerClear(const Rect& rect) {
     mClearRects.push_back(rect);
 }
 
-void LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
+void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
     if (CC_UNLIKELY(!mClearRects.empty())) {
         const int vertCount = mClearRects.size() * 4;
         // put the verts in the frame allocator, since
@@ -273,7 +273,7 @@ void LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
     }
 }
 
-void LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
+void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId) {
     if (batchId != OpBatchType::CopyToLayer) {
         // if first op after one or more unclipped saveLayers, flush the layer clears
@@ -298,7 +298,7 @@ void LayerReorderer::deferUnmergeableOp(LinearAllocator& allocator,
     }
 }
 
-void LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
+void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
         BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
     if (batchId != OpBatchType::CopyToLayer) {
         // if first op after one or more unclipped saveLayers, flush the layer clears
@@ -330,7 +330,7 @@ void LayerReorderer::deferMergeableOp(LinearAllocator& allocator,
     }
 }
 
-void LayerReorderer::replayBakedOpsImpl(void* arg,
+void LayerBuilder::replayBakedOpsImpl(void* arg,
         BakedOpReceiver* unmergedReceivers, MergedOpReceiver* mergedReceivers) const {
     ATRACE_NAME("flush drawing commands");
     for (const BatchBase* batch : mBatches) {
@@ -353,8 +353,8 @@ void LayerReorderer::replayBakedOpsImpl(void* arg,
     }
 }
 
-void LayerReorderer::dump() const {
-    ALOGD("LayerReorderer %p, %ux%u buffer %p, blo %p, rn %p",
+void LayerBuilder::dump() const {
+    ALOGD("LayerBuilder %p, %ux%u buffer %p, blo %p, rn %p",
             this, width, height, offscreenBuffer, beginLayerOp, renderNode);
     for (const BatchBase* batch : mBatches) {
         batch->dump();
