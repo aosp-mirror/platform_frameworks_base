@@ -55,6 +55,14 @@ public class NotificationContentView extends FrameLayout {
     private final int mRoundRectRadius;
     private final boolean mRoundRectClippingEnabled;
     private final int mMinContractedHeight;
+    private final OnLayoutChangeListener mLayoutUpdater = new OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                int oldLeft,
+                int oldTop, int oldRight, int oldBottom) {
+            selectLayout(false /* animate */, false /* force */);
+        }
+    };
 
 
     private View mContractedChild;
@@ -235,10 +243,12 @@ public class NotificationContentView extends FrameLayout {
     public void setContractedChild(View child) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
+            mContractedChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mContractedChild);
         }
         addView(child);
         mContractedChild = child;
+        mContractedChild.addOnLayoutChangeListener(mLayoutUpdater);
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
@@ -248,10 +258,12 @@ public class NotificationContentView extends FrameLayout {
     public void setExpandedChild(View child) {
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
+            mExpandedChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mExpandedChild);
         }
         addView(child);
         mExpandedChild = child;
+        mExpandedChild.addOnLayoutChangeListener(mLayoutUpdater);
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
         updateRoundRectClipping();
@@ -260,10 +272,12 @@ public class NotificationContentView extends FrameLayout {
     public void setHeadsUpChild(View child) {
         if (mHeadsUpChild != null) {
             mHeadsUpChild.animate().cancel();
+            mHeadsUpChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mHeadsUpChild);
         }
         addView(child);
         mHeadsUpChild = child;
+        mHeadsUpChild.addOnLayoutChangeListener(mLayoutUpdater);
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
         updateRoundRectClipping();
@@ -483,8 +497,17 @@ public class NotificationContentView extends FrameLayout {
     public void setDark(boolean dark, boolean fade, long delay) {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
-        mContractedWrapper.setDark(dark && !mShowingLegacyBackground, fade, delay);
-        if (mSingleLineView != null) {
+        dark = dark && !mShowingLegacyBackground;
+        if (mVisibleType == VISIBLE_TYPE_CONTRACTED) {
+            mContractedWrapper.setDark(dark, fade, delay);
+        }
+        if (mVisibleType == VISIBLE_TYPE_EXPANDED) {
+            mExpandedWrapper.setDark(dark, fade, delay);
+        }
+        if (mVisibleType == VISIBLE_TYPE_HEADSUP) {
+            mHeadsUpWrapper.setDark(dark, fade, delay);
+        }
+        if (mSingleLineView != null && mVisibleType == VISIBLE_TYPE_SINGLELINE) {
             mSingleLineView.setDark(dark, fade, delay);
         }
     }
