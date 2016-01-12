@@ -545,19 +545,19 @@ void BakedOpDispatcher::onPatchOp(BakedOpRenderer& renderer, const PatchOp& op, 
             op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.patch);
 
     Texture* texture = entry ? entry->texture : renderer.caches().textureCache.get(op.bitmap);
-    if (!texture) return;
-    const AutoTexture autoCleanup(texture);
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
-            .setMeshPatchQuads(*mesh)
-            .setMeshTexturedUnitQuad(texture->uvMapper)
-            .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
-            .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
-                    Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
-            .build();
-    renderer.renderGlop(state, glop);
+    if (CC_LIKELY(texture)) {
+        const AutoTexture autoCleanup(texture);
+        Glop glop;
+        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                .setRoundRectClipState(state.roundRectClipState)
+                .setMeshPatchQuads(*mesh)
+                .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
+                .setTransform(state.computedState.transform, TransformFlags::None)
+                .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
+                        Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
+                .build();
+        renderer.renderGlop(state, glop);
+    }
 }
 
 void BakedOpDispatcher::onPathOp(BakedOpRenderer& renderer, const PathOp& op, const BakedOpState& state) {
