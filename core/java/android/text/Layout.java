@@ -1826,7 +1826,11 @@ public abstract class Layout {
             return ArrayUtils.emptyArray(type);
         }
 
-        return text.getSpans(start, end, type);
+        if(text instanceof SpannableStringBuilder) {
+            return ((SpannableStringBuilder) text).getSpans(start, end, type, false);
+        } else {
+            return text.getSpans(start, end, type);
+        }
     }
 
     private char getEllipsisChar(TextUtils.TruncateAt method) {
