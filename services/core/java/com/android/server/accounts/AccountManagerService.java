@@ -176,6 +176,7 @@ public class AccountManagerService
     private static final String[] ACCOUNT_TYPE_COUNT_PROJECTION =
             new String[] { ACCOUNTS_TYPE, ACCOUNTS_TYPE_COUNT};
     private static final Intent ACCOUNTS_CHANGED_INTENT;
+
     static {
         ACCOUNTS_CHANGED_INTENT = new Intent(AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION);
         ACCOUNTS_CHANGED_INTENT.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
@@ -2491,7 +2492,7 @@ public class AccountManagerService
             Bundle appInfo) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG,
-                    "finishSession: response "+ response
+                    "finishSession: response " + response
                             + ", expectActivityLaunch " + expectActivityLaunch
                             + ", caller's uid " + Binder.getCallingUid()
                             + ", pid " + Binder.getCallingPid());
@@ -2770,6 +2771,99 @@ public class AccountManagerService
                             + ", " + account
                             + ", authTokenType " + authTokenType
                             + ", loginOptions " + loginOptions;
+                }
+            }.bind();
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public void isCredentialsUpdateSuggested(
+            IAccountManagerResponse response,
+            final Account account,
+            final String statusToken) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG,
+                    "isCredentialsUpdateSuggested: " + account + ", response " + response
+                            + ", caller's uid " + Binder.getCallingUid()
+                            + ", pid " + Binder.getCallingPid());
+        }
+        if (response == null) {
+            throw new IllegalArgumentException("response is null");
+        }
+        if (account == null) {
+            throw new IllegalArgumentException("account is null");
+        }
+        if (TextUtils.isEmpty(statusToken)) {
+            throw new IllegalArgumentException("status token is empty");
+        }
+
+        int uid = Binder.getCallingUid();
+        // Only allow system to start session
+        if (!isSystemUid(uid)) {
+            String msg = String.format(
+                    "uid %s cannot stat add account session.",
+                    uid);
+            throw new SecurityException(msg);
+        }
+
+        int usrId = UserHandle.getCallingUserId();
+        long identityToken = clearCallingIdentity();
+        try {
+            UserAccounts accounts = getUserAccounts(usrId);
+            new Session(accounts, response, account.type, false /* expectActivityLaunch */,
+                    false /* stripAuthTokenFromResult */, account.name,
+                    false /* authDetailsRequired */) {
+                @Override
+                protected String toDebugString(long now) {
+                    return super.toDebugString(now) + ", isCredentialsUpdateSuggested"
+                            + ", " + account;
+                }
+
+                @Override
+                public void run() throws RemoteException {
+                    mAuthenticator.isCredentialsUpdateSuggested(this, account, statusToken);
+                }
+
+                @Override
+                public void onResult(Bundle result) {
+                    IAccountManagerResponse response = getResponseAndClose();
+                    if (response == null) {
+                        return;
+                    }
+
+                    if (result == null) {
+                        sendErrorResponse(
+                                response,
+                                AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                "null bundle");
+                        return;
+                    }
+
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, getClass().getSimpleName() + " calling onResult() on response "
+                                + response);
+                    }
+                    // Check to see if an error occurred. We know if an error occurred because all
+                    // error codes are greater than 0.
+                    if ((result.getInt(AccountManager.KEY_ERROR_CODE, -1) > 0)) {
+                        sendErrorResponse(response,
+                                result.getInt(AccountManager.KEY_ERROR_CODE),
+                                result.getString(AccountManager.KEY_ERROR_MESSAGE));
+                        return;
+                    }
+                    if (!result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)) {
+                        sendErrorResponse(
+                                response,
+                                AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                "no result in response");
+                        return;
+                    }
+                    final Bundle newResult = new Bundle();
+                    newResult.putBoolean(AccountManager.KEY_BOOLEAN_RESULT,
+                            result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false));
+                    sendResponse(response, newResult);
                 }
             }.bind();
         } finally {

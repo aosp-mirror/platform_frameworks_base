@@ -16,16 +16,16 @@
 
 package android.accounts;
 
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.text.TextUtils;
-import android.os.Binder;
-import android.os.IBinder;
-import android.content.pm.PackageManager;
-import android.content.Context;
-import android.content.Intent;
 import android.Manifest;
 import android.annotation.SystemApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -436,6 +436,7 @@ public abstract class AbstractAccountAuthenticator {
             }
         }
 
+        @Override
         public void finishSession(
                 IAccountAuthenticatorResponse response,
                 String accountType,
@@ -459,6 +460,24 @@ public abstract class AbstractAccountAuthenticator {
             } catch (Exception e) {
                 handleException(response, "finishSession", accountType, e);
 
+            }
+        }
+
+        @Override
+        public void isCredentialsUpdateSuggested(
+                IAccountAuthenticatorResponse response,
+                Account account,
+                String statusToken) throws RemoteException {
+            checkBinderPermission();
+            try {
+                final Bundle result = AbstractAccountAuthenticator.this
+                        .isCredentialsUpdateSuggested(
+                                new AccountAuthenticatorResponse(response), account, statusToken);
+                if (result != null) {
+                    response.onResult(result);
+                }
+            } catch (Exception e) {
+                handleException(response, "isCredentialsUpdateSuggested", account.toString(), e);
             }
         }
     }
@@ -873,7 +892,8 @@ public abstract class AbstractAccountAuthenticator {
      *         <li>{@link AccountManager#KEY_ERROR_CODE} and
      *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
      *         </ul>
-     * @throws NetworkErrorException
+     * @throws NetworkErrorException if the authenticator could not honor the request due to a
+     *             network error
      * @see #startAddAccountSession and #startUpdateCredentialsSession
      * @hide
      */
@@ -943,5 +963,33 @@ public abstract class AbstractAccountAuthenticator {
         }
         // Otherwise, session bundle was created by startAddAccountSession default implementation.
         return addAccount(response, accountType, authTokenType, requiredFeatures, sessionOptions);
+    }
+
+    /**
+     * Checks if update of the account credentials is suggested.
+     *
+     * @param response to send the result back to the AccountManager, will never be null.
+     * @param account the account to check, will never be null
+     * @param statusToken a String of token to check if update of credentials is suggested.
+     * @return a Bundle result or null if the result is to be returned via the response. The result
+     *         will contain either:
+     *         <ul>
+     *         <li>{@link AccountManager#KEY_BOOLEAN_RESULT}, true if update of account's
+     *         credentials is suggested, false otherwise
+     *         <li>{@link AccountManager#KEY_ERROR_CODE} and
+     *         {@link AccountManager#KEY_ERROR_MESSAGE} to indicate an error
+     *         </ul>
+     * @throws NetworkErrorException if the authenticator could not honor the request due to a
+     *             network error
+     * @hide
+     */
+    @SystemApi
+    public Bundle isCredentialsUpdateSuggested(
+            final AccountAuthenticatorResponse response,
+            Account account,
+            String statusToken) throws NetworkErrorException {
+        Bundle result = new Bundle();
+        result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+        return result;
     }
 }

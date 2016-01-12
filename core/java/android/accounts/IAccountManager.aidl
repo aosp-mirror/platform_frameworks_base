@@ -98,4 +98,8 @@ interface IAccountManager {
 
     /* Check if an account exists on any user on the device. */
     boolean someUserHasAccount(in Account account);
+
+    /* Check if credentials update is suggested */
+    void isCredentialsUpdateSuggested(in IAccountManagerResponse response, in Account account,
+        String statusToken);
 }

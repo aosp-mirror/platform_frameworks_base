@@ -16,6 +16,8 @@
 
 package android.accounts;
 
+import static android.Manifest.permission.GET_ACCOUNTS;
+
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
@@ -53,8 +55,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static android.Manifest.permission.GET_ACCOUNTS;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -2863,6 +2863,52 @@ public class AccountManager {
             @Override
             public void doWork() throws RemoteException {
                 mService.finishSession(mResponse, sessionBundle, activity != null, appInfo);
+            }
+        }.start();
+    }
+
+    /**
+     * Checks whether {@link #updateCredentials} or {@link #startUpdateCredentialsSession} should be
+     * called with respect to the specified account.
+     * <p>
+     * This method may be called from any thread, but the returned {@link AccountManagerFuture} must
+     * not be used on the main thread.
+     *
+     * @param account The {@link Account} to be checked whether {@link #updateCredentials} or
+     * {@link #startUpdateCredentialsSession} should be called
+     * @param statusToken a String of token to check account staus
+     * @param callback Callback to invoke when the request completes, null for no callback
+     * @param handler {@link Handler} identifying the callback thread, null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean, true if the credentials
+     *         of the account should be updated.
+     * @hide
+     */
+    @SystemApi
+    public AccountManagerFuture<Boolean> isCredentialsUpdateSuggested(
+            final Account account,
+            final String statusToken,
+            AccountManagerCallback<Boolean> callback,
+            Handler handler) {
+        if (account == null) {
+            throw new IllegalArgumentException("account is null");
+        }
+
+        if (TextUtils.isEmpty(statusToken)) {
+            throw new IllegalArgumentException("status token is empty");
+        }
+
+        return new Future2Task<Boolean>(handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.isCredentialsUpdateSuggested(
+                        mResponse,
+                        account,
+                        statusToken);
+            }
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
             }
         }.start();
     }

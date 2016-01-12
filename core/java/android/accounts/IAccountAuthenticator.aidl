@@ -104,4 +104,10 @@ oneway interface IAccountAuthenticator {
      */
     void finishSession(in IAccountAuthenticatorResponse response, String accountType,
         in Bundle sessionBundle);
+
+    /**
+     * Checks if the credentials of the provided account should be updated.
+     */
+    void isCredentialsUpdateSuggested(in IAccountAuthenticatorResponse response, in Account account,
+        String statusToken);
 }
