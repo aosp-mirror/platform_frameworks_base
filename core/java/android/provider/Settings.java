@@ -641,7 +641,7 @@ public final class Settings {
      * provided by the platform for applications to operate correctly in the various power
      * saving mode.  This is only for unusual applications that need to deeply control their own
      * execution, at the potential expense of the user's battery life.  Note that these applications
-     * greatly run the risk of showing to the user has how power consumers on their device.</p>
+     * greatly run the risk of showing to the user as high power consumers on their device.</p>
      * <p>
      * Input: The Intent's data URI must specify the application package name
      * to be shown, with the "package" scheme.  That is "package:com.my.app".
