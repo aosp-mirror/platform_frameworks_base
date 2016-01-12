@@ -199,9 +199,12 @@ TEST(BakedOpState, tryConstruct) {
 }
 
 TEST(BakedOpState, tryShadowOpConstruct) {
+    Matrix4 translate10x20;
+    translate10x20.loadTranslate(10, 20, 0);
+
     LinearAllocator allocator;
     {
-        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect()); // Note: empty clip
+        auto snapshot = TestUtils::makeSnapshot(translate10x20, Rect()); // Note: empty clip
         BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
         EXPECT_EQ(nullptr, bakedState) << "op should be rejected by clip, so not constructed";
@@ -209,11 +212,14 @@ TEST(BakedOpState, tryShadowOpConstruct) {
                 "since op is quick rejected based on snapshot clip";
     }
     {
-        auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 200));
+        auto snapshot = TestUtils::makeSnapshot(translate10x20, Rect(100, 200));
         BakedOpState* bakedState = BakedOpState::tryShadowOpConstruct(allocator, *snapshot, (ShadowOp*)0x1234);
 
         ASSERT_NE(nullptr, bakedState) << "NOT rejected by clip, so op should be constructed";
         EXPECT_LE(64u, allocator.usedSize()) << "relatively large alloc for non-rejected op";
+
+        EXPECT_MATRIX_APPROX_EQ(translate10x20, bakedState->computedState.transform);
+        EXPECT_EQ(Rect(100, 200), bakedState->computedState.clippedBounds);
     }
 }
 
