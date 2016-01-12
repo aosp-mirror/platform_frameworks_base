@@ -99,7 +99,7 @@ public:
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
         for (int i = mLayerReorderers.size() - 1; i >= 1; i--) {
-            LayerReorderer& layer = mLayerReorderers[i];
+            LayerReorderer& layer = *(mLayerReorderers[i]);
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
                 renderer.startRepaintLayer(layer.offscreenBuffer, layer.repaintRect);
@@ -112,7 +112,7 @@ public:
             }
         }
 
-        const LayerReorderer& fbo0 = mLayerReorderers[0];
+        const LayerReorderer& fbo0 = *(mLayerReorderers[0]);
         renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
         fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
         renderer.endFrame(fbo0.repaintRect);
@@ -120,7 +120,7 @@ public:
 
     void dump() const {
         for (auto&& layer : mLayerReorderers) {
-            layer.dump();
+            layer->dump();
         }
     }
 
@@ -143,7 +143,7 @@ private:
             const BeginLayerOp* beginLayerOp, RenderNode* renderNode);
     void restoreForLayer();
 
-    LayerReorderer& currentLayer() { return mLayerReorderers[mLayerStack.back()]; }
+    LayerReorderer& currentLayer() { return *(mLayerReorderers[mLayerStack.back()]); }
 
     BakedOpState* tryBakeOpState(const RecordedOp& recordedOp) {
         return BakedOpState::tryConstruct(mAllocator, *mCanvasState.writableSnapshot(), recordedOp);
@@ -183,7 +183,7 @@ private:
 #undef X
 
     // List of every deferred layer's render state. Replayed in reverse order to render a frame.
-    std::vector<LayerReorderer> mLayerReorderers;
+    std::vector<LayerReorderer*> mLayerReorderers;
 
     /*
      * Stack of indices within mLayerReorderers representing currently active layers. If drawing
