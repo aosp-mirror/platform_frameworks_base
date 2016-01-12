@@ -367,7 +367,7 @@ public class SystemServicesProxy {
     }
 
     /**
-     * @return whether there are any docked tasks.
+     * @return whether there are any docked tasks for the current user.
      */
     public boolean hasDockedTask() {
         if (mIam == null) return false;
@@ -375,6 +375,9 @@ public class SystemServicesProxy {
         ActivityManager.StackInfo stackInfo = null;
         try {
             stackInfo = mIam.getStackInfo(DOCKED_STACK_ID);
+            if (stackInfo != null && stackInfo.userId != getCurrentUser()) {
+                return false;
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
