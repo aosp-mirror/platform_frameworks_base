@@ -10902,9 +10902,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String dataAppName;
         final int appId;
         final String seinfo;
+        final int targetSdkVersion;
 
         public MoveInfo(int moveId, String fromUuid, String toUuid, String packageName,
-                String dataAppName, int appId, String seinfo) {
+                String dataAppName, int appId, String seinfo, int targetSdkVersion) {
             this.moveId = moveId;
             this.fromUuid = fromUuid;
             this.toUuid = toUuid;
@@ -10912,6 +10913,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.dataAppName = dataAppName;
             this.appId = appId;
             this.seinfo = seinfo;
+            this.targetSdkVersion = targetSdkVersion;
         }
     }
 
@@ -12034,7 +12036,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstaller) {
                 try {
                     mInstaller.moveCompleteApp(move.fromUuid, move.toUuid, move.packageName,
-                            move.dataAppName, move.appId, move.seinfo);
+                            move.dataAppName, move.appId, move.seinfo, move.targetSdkVersion);
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to move app", e);
                     return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
@@ -16991,7 +16993,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized (mInstallLock) {
             try {
                 mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                        appId, app.seinfo);
+                        appId, app.seinfo, app.targetSdkVersion);
             } catch (InstallerException e) {
                 if (app.isSystemApp()) {
                     logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
@@ -16999,7 +17001,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     destroyAppDataLI(volumeUuid, packageName, userId, flags);
                     try {
                         mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                                appId, app.seinfo);
+                                appId, app.seinfo, app.targetSdkVersion);
                         logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                     } catch (InstallerException e2) {
                         logCriticalInfo(Log.DEBUG, "Recovery failed!");
@@ -17073,6 +17075,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final int appId;
         final String seinfo;
         final String label;
+        final int targetSdkVersion;
 
         // reader
         synchronized (mPackages) {
@@ -17122,6 +17125,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             appId = UserHandle.getAppId(pkg.applicationInfo.uid);
             seinfo = pkg.applicationInfo.seinfo;
             label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
+            targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
         }
 
         // Now that we're guarded by frozen state, kill app during move
@@ -17254,7 +17258,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
             final String dataAppName = codeFile.getName();
             move = new MoveInfo(moveId, currentVolumeUuid, volumeUuid, packageName,
-                    dataAppName, appId, seinfo);
+                    dataAppName, appId, seinfo, targetSdkVersion);
         } else {
             move = null;
         }
