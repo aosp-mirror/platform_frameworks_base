@@ -3042,9 +3042,11 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.right_icon, View.GONE);
             contentView.setViewVisibility(R.id.title, View.GONE);
             contentView.setTextViewText(R.id.title, null);
+            contentView.setViewVisibility(R.id.text, View.GONE);
             contentView.setTextViewText(R.id.text, null);
             contentView.setViewVisibility(R.id.line3, View.GONE);
             contentView.setViewVisibility(R.id.text_line_1, View.GONE);
+            contentView.setTextViewText(R.id.text_line_1, null);
             contentView.setViewVisibility(R.id.progress, View.GONE);
         }
 
@@ -3093,11 +3095,11 @@ public class Notification implements Parcelable
             }
             boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
             if (ex.getCharSequence(EXTRA_TEXT) != null) {
-                contentView.setTextViewText(showProgress ? R.id.text_line_1 : R.id.text,
-                        processLegacyText(ex.getCharSequence(EXTRA_TEXT)));
-                if (showProgress) {
-                    contentView.setViewVisibility(R.id.text_line_1, View.VISIBLE);
-                }
+                int textId = showProgress ? com.android.internal.R.id.text_line_1
+                        : com.android.internal.R.id.text;
+                contentView.setTextViewText(textId, processLegacyText(
+                        ex.getCharSequence(EXTRA_TEXT)));
+                contentView.setViewVisibility(textId, View.VISIBLE);
                 showLine3 = !showProgress;
             }
             // We want to add badge to first line of text.
