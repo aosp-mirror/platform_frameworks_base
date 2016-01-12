@@ -23,7 +23,7 @@
     <ProgressBar
         android:id="@+id/progressbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/progress_bar_height"
         android:indeterminate="true"
         style="@style/TrimmedHorizontalProgressBar"
         android:visibility="gone"/>
