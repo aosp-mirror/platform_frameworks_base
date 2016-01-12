@@ -15,6 +15,9 @@
 -->
 
 <resources>
+    <dimen name="grid_container_padding">10dp</dimen>
+    <dimen name="list_container_padding">0dp</dimen>
+
     <dimen name="icon_size">40dp</dimen>
     <dimen name="root_icon_size">24dp</dimen>
     <dimen name="root_icon_margin">0dp</dimen>

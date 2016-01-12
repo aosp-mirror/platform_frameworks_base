@@ -18,10 +18,16 @@ package com.android.documentsui.dirlist;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
 import android.util.SparseArray;
 import android.view.ViewGroup;
+import android.widget.Space;
+
+import com.android.documentsui.R;
+import com.android.documentsui.State;
 
 import java.util.List;
 
@@ -220,6 +226,35 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
 
         public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * The most elegant transparent blank box that spans N rows ever conceived.
+     */
+    private static final class EmptyDocumentHolder extends DocumentHolder {
+        final int mVisibleHeight;
+
+        public EmptyDocumentHolder(Context context) {
+            super(context, new Space(context));
+
+            // Per UX spec, this puts a bigger gap between the folders and documents in the grid.
+            mVisibleHeight = context.getResources().getDimensionPixelSize(
+                    R.dimen.grid_item_margin);
+        }
+
+        public void bind(State state) {
+            bind(null, null, state);
+        }
+
+        @Override
+        public void bind(Cursor cursor, String modelId, State state) {
+            if (state.derivedMode == State.MODE_GRID) {
+                itemView.setMinimumHeight(mVisibleHeight);
+            } else {
+                itemView.setMinimumHeight(0);
+            }
+            return;
         }
     }
 }

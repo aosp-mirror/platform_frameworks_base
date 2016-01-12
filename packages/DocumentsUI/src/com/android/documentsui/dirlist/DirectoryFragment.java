@@ -601,11 +601,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }
 
-        mRecView.setLayoutManager(layout);
-        // TODO: Once b/23691541 is resolved, use a listener within MultiSelectManager instead of
-        // imperatively calling this function.
-        mSelectionManager.handleLayoutChanged();
+        int pad = getDirectoryPadding(mode);
+        mRecView.setPadding(pad, pad, pad, pad);
         // setting layout manager automatically invalidates existing ViewHolders.
+        mRecView.setLayoutManager(layout);
+        mSelectionManager.handleLayoutChanged();  // RecyclerView doesn't do this for us
         mIconHelper.setMode(mode);
     }
 
@@ -619,6 +619,20 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 (mRecView.getWidth() - viewPadding) / (cellWidth + cellMargin));
 
         return columnCount;
+    }
+
+    private int getDirectoryPadding(int mode) {
+        switch (mode) {
+            case MODE_GRID:
+                return getResources().getDimensionPixelSize(
+                        R.dimen.grid_container_padding);
+            case MODE_LIST:
+                return getResources().getDimensionPixelSize(
+                        R.dimen.list_container_padding);
+            case MODE_UNKNOWN:
+            default:
+                throw new IllegalArgumentException("Unsupported layout mode: " + mode);
+        }
     }
 
     @Override
