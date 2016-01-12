@@ -2722,7 +2722,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
             final boolean waitingVisible = mWaitingVisibleActivities.contains(s);
-            if (DEBUG_ALL) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
+            if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
             if (waitingVisible && nowVisible) {
                 mWaitingVisibleActivities.remove(s);
@@ -2732,12 +2732,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // so get rid of it.  Otherwise, we need to go through the
                     // normal flow and hide it once we determine that it is
                     // hidden by the activities in front of it.
-                    if (DEBUG_ALL) Slog.v(TAG, "Before stopping, can hide: " + s);
+                    if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
                     mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
             if ((!waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
-                if (DEBUG_ALL) Slog.v(TAG, "Ready to stop: " + s);
+                if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<>();
                 }

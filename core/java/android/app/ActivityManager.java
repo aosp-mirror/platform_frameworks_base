@@ -592,6 +592,14 @@ public class ActivityManager {
         public static boolean isAlwaysOnTop(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if the top task in the task is allowed to return home when finished and
+         * there are other tasks in the stack.
+         */
+        public static boolean allowTopTaskToReturnHome(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
     }
 
     /**
