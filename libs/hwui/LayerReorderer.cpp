@@ -53,7 +53,7 @@ public:
 
     void dump() const {
         ALOGD("    Batch %p, id %d, merging %d, count %d, bounds " RECT_STRING,
-                this, mBatchId, mMerging, mOps.size(), RECT_ARGS(mBounds));
+                this, mBatchId, mMerging, (int) mOps.size(), RECT_ARGS(mBounds));
     }
 protected:
     batchid_t mBatchId;

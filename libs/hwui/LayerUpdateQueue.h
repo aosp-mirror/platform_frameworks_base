@@ -42,7 +42,7 @@ public:
     LayerUpdateQueue() {}
     void enqueueLayerWithDamage(RenderNode* renderNode, Rect dirty);
     void clear();
-    const std::vector<Entry> entries() const { return mEntries; }
+    const std::vector<Entry>& entries() const { return mEntries; }
 private:
     std::vector<Entry> mEntries;
 };
