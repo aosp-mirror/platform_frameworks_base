@@ -19,6 +19,8 @@ package com.android.mtp;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.mtp.MtpConstants;
+import android.mtp.MtpEvent;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
@@ -83,6 +85,19 @@ public class MtpManagerTest extends InstrumentationTestCase {
         assertEquals(1, records.length);
         assertNotNull(records[0].operationsSupported);
         getInstrumentation().show(Arrays.toString(records[0].operationsSupported));
+    }
+
+    public void testEventObjectAdded() throws Exception {
+        while (true) {
+            getInstrumentation().show("Please take a photo by using connected MTP device.");
+            final CancellationSignal signal = new CancellationSignal();
+            MtpEvent event = mManager.readEvent(mUsbDevice.getDeviceId(), signal);
+            if (event.getEventCode() != MtpConstants.EVENT_OBJECT_ADDED) {
+                continue;
+            }
+            assertTrue(event.getObjectHandle() != 0);
+            break;
+        }
     }
 
     private Context getContext() {

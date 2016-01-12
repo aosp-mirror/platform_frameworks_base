@@ -98,6 +98,9 @@ static jfieldID field_objectInfo_keywords;
 
 // MtpEvent fields
 static jfieldID field_event_eventCode;
+static jfieldID field_event_parameter1;
+static jfieldID field_event_parameter2;
+static jfieldID field_event_parameter3;
 
 class JavaArrayWriter {
 public:
@@ -573,13 +576,17 @@ static jobject android_mtp_MtpDevice_reap_event_request(JNIEnv *env, jobject thi
         env->ThrowNew(clazz_io_exception, "");
         return NULL;
     }
-    const int eventCode = device->reapEventRequest(seq);
+    uint32_t parameters[3];
+    const int eventCode = device->reapEventRequest(seq, &parameters);
     if (eventCode <= 0) {
         env->ThrowNew(clazz_operation_canceled_exception, "");
         return NULL;
     }
     jobject result = env->NewObject(clazz_event, constructor_event);
     env->SetIntField(result, field_event_eventCode, eventCode);
+    env->SetIntField(result, field_event_parameter1, static_cast<jint>(parameters[0]));
+    env->SetIntField(result, field_event_parameter2, static_cast<jint>(parameters[1]));
+    env->SetIntField(result, field_event_parameter3, static_cast<jint>(parameters[2]));
     return result;
 }
 
@@ -830,6 +837,21 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
     field_event_eventCode = env->GetFieldID(clazz, "mEventCode", "I");
     if (field_event_eventCode == NULL) {
         ALOGE("Can't find MtpObjectInfo.mEventCode");
+        return -1;
+    }
+    field_event_parameter1 = env->GetFieldID(clazz, "mParameter1", "I");
+    if (field_event_parameter1 == NULL) {
+        ALOGE("Can't find MtpObjectInfo.mParameter1");
+        return -1;
+    }
+    field_event_parameter2 = env->GetFieldID(clazz, "mParameter2", "I");
+    if (field_event_parameter2 == NULL) {
+        ALOGE("Can't find MtpObjectInfo.mParameter2");
+        return -1;
+    }
+    field_event_parameter3 = env->GetFieldID(clazz, "mParameter3", "I");
+    if (field_event_parameter3 == NULL) {
+        ALOGE("Can't find MtpObjectInfo.mParameter3");
         return -1;
     }
     clazz_event = (jclass)env->NewGlobalRef(clazz);
