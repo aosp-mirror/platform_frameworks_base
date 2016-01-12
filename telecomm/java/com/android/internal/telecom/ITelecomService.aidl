@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.content.ComponentName;
+import android.telecom.ParcelableCallAnalytics;
 import android.telecom.PhoneAccountHandle;
 import android.net.Uri;
 import android.os.Bundle;
@@ -142,6 +143,11 @@ interface ITelecomService {
      * @see TelecomServiceImpl#getSystemDialerPackage
      */
     String getSystemDialerPackage();
+
+    /**
+    * @see TelecomServiceImpl#dumpCallAnalytics
+    */
+    List<ParcelableCallAnalytics> dumpCallAnalytics();
 
     //
     // Internal system apis relating to call management.

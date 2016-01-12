@@ -14,6 +14,7 @@
 
 package android.telecom;
 
+import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -1375,6 +1376,27 @@ public class TelecomManager {
                 Log.e(TAG, "Error enablePhoneAbbount", e);
             }
         }
+    }
+
+    /**
+     * Dumps telecom analytics for uploading.
+     *
+     * @return
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.DUMP)
+    public List<ParcelableCallAnalytics> dumpAnalytics() {
+        ITelecomService service = getTelecomService();
+        List<ParcelableCallAnalytics> result = null;
+        if (service != null) {
+            try {
+                result = service.dumpCallAnalytics();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error dumping call analytics", e);
+            }
+        }
+        return result;
     }
 
     private ITelecomService getTelecomService() {
