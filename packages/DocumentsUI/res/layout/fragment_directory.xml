@@ -27,7 +27,7 @@
         android:indeterminate="true"
         style="@style/TrimmedHorizontalProgressBar"
         android:visibility="gone"/>
-  
+
     <FrameLayout
         android:id="@+id/container_message_bar"
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone">
-        
+
         <TextView
             android:id="@+id/message"
             android:layout_width="wrap_content"
@@ -58,9 +58,9 @@
             android:layout_height="wrap_content"
             android:text="@string/button_retry"
             style="?android:attr/buttonBarPositiveButtonStyle" />
-        
+
     </LinearLayout>
-    
+
     <!-- This FrameLayout works around b/24189541 -->
     <FrameLayout
         android:layout_width="match_parent"
@@ -68,6 +68,7 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
+            android:background="@color/window_background"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
