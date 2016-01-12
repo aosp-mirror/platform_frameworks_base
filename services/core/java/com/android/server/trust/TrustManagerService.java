@@ -675,12 +675,12 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceSecure(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
-            if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
-                userId = resolveProfileParent(userId);
-            }
 
             long token = Binder.clearCallingIdentity();
             try {
+                if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+                    userId = resolveProfileParent(userId);
+                }
                 return mLockPatternUtils.isSecure(userId);
             } finally {
                 Binder.restoreCallingIdentity(token);

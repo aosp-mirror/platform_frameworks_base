@@ -893,7 +893,7 @@ public class LockPatternUtils {
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
         UserInfo info = getUserManager().getUserInfo(userHandle);
-        if (!info.isManagedProfile()) {
+        if (info == null || !info.isManagedProfile()) {
             return false;
         }
         return getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userHandle);
@@ -904,7 +904,7 @@ public class LockPatternUtils {
      */
     public boolean isSeparateProfileChallengeAllowed(int userHandle) {
         UserInfo info = getUserManager().getUserInfo(userHandle);
-        if (!info.isManagedProfile()) {
+        if (info == null || !info.isManagedProfile()) {
             return false;
         }
         return getDevicePolicyManager().isSeparateProfileChallengeAllowed(userHandle);
