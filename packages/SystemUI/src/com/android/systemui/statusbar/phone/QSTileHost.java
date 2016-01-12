@@ -27,6 +27,7 @@ import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
@@ -99,6 +100,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
+    private View mHeader;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
                       BluetoothController bluetooth, LocationController location,
@@ -133,6 +135,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         mServices = new TileServices(this, mLooper);
 
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
+    }
+
+    public void setHeaderView(View view) {
+        mHeader = view;
     }
 
     public PhoneStatusBar getPhoneStatusBar() {
@@ -171,6 +177,11 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     @Override
     public void warn(String message, Throwable t) {
         // already logged
+    }
+
+    public void animateExpandQS() {
+        // TODO: Better path to animated panel expansion.
+        mHeader.performClick();
     }
 
     @Override

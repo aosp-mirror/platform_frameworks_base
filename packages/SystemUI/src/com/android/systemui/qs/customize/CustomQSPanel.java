@@ -69,6 +69,11 @@ public class CustomQSPanel extends QSPanel {
     }
 
     @Override
+    protected void showDetail(boolean show, Record r) {
+        // No detail here.
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         // Don't allow the super to unregister the tunable.
     }

@@ -60,14 +60,8 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected void handleShowDetail(QSPanel.Record r, boolean show) {
-        if (show) {
-            mHeader.performClick();
-            mFullPanel.showDetail(show, r);
-        } else {
-            // Not sure how we would end up here...
-            super.handleShowDetail(r, show);
-        }
+    protected void showDetail(boolean show, Record r) {
+        // Do nothing, will be handled by the QSPanel.
     }
 
     @Override
