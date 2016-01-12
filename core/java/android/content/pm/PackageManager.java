@@ -4413,6 +4413,15 @@ public abstract class PackageManager {
         final PackageParser parser = new PackageParser();
         final File apkFile = new File(archiveFilePath);
         try {
+            if ((flags & (MATCH_ENCRYPTION_UNAWARE | MATCH_ENCRYPTION_AWARE)) != 0) {
+                // Caller expressed an explicit opinion about what encryption
+                // aware/unaware components they want to see, so fall through and
+                // give them what they want
+            } else {
+                // Caller expressed no opinion, so match everything
+                flags |= MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+            }
+
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
                 parser.collectCertificates(pkg, 0);
