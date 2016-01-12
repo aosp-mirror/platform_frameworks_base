@@ -249,6 +249,16 @@ interface IBackupTransport {
      */
     boolean isAppEligibleForBackup(in PackageInfo targetPackage, boolean isFullBackup);
 
+    /**
+     * Ask the transport about current quota for backup size of the package.
+     *
+     * @param packageName ID of package to provide the quota.
+     * @param isFullBackup If set, transport should return limit for full data backup, otherwise
+     *                     for key-value backup.
+     * @return Current limit on full data backup size in bytes.
+     */
+    long getBackupQuota(String packageName, boolean isFullBackup);
+
     // full restore stuff
 
     /**

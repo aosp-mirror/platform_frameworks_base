@@ -49,6 +49,7 @@ public class BackupTransport {
     public static final int TRANSPORT_PACKAGE_REJECTED = -1002;
     public static final int AGENT_ERROR = -1003;
     public static final int AGENT_UNKNOWN = -1004;
+    public static final int TRANSPORT_QUOTA_EXCEEDED = -1005;
 
     // Indicates that operation was initiated by user, not a scheduled one.
     // Transport should ignore its own moratoriums for call with this flag set.
@@ -494,6 +495,18 @@ public class BackupTransport {
         return true;
     }
 
+    /**
+     * Ask the transport about current quota for backup size of the package.
+     *
+     * @param packageName ID of package to provide the quota.
+     * @param isFullBackup If set, transport should return limit for full data backup, otherwise
+     *                     for key-value backup.
+     * @return Current limit on full data backup size in bytes.
+     */
+    public long getBackupQuota(String packageName, boolean isFullBackup) {
+        return Long.MAX_VALUE;
+    }
+
     // ------------------------------------------------------------------------------------
     // Full restore interfaces
 
@@ -674,6 +687,11 @@ public class BackupTransport {
         public boolean isAppEligibleForBackup(PackageInfo targetPackage, boolean isFullBackup)
                 throws RemoteException {
             return BackupTransport.this.isAppEligibleForBackup(targetPackage, isFullBackup);
+        }
+
+        @Override
+        public long getBackupQuota(String packageName, boolean isFullBackup) {
+            return BackupTransport.this.getBackupQuota(packageName, isFullBackup);
         }
 
         @Override

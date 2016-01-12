@@ -110,6 +110,16 @@ public class BackupManager {
             BackupTransport.TRANSPORT_PACKAGE_REJECTED;
 
     /**
+     * Returned when the transport reject the attempt to backup because
+     * backup data size exceeded current quota limit for this package.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int ERROR_TRANSPORT_QUOTA_EXCEEDED =
+            BackupTransport.TRANSPORT_QUOTA_EXCEEDED;
+
+    /**
      * The {@link BackupAgent} for the requested package failed for some reason
      * and didn't provide appropriate backup data.
      *
