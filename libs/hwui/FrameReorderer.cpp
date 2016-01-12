@@ -40,7 +40,8 @@ FrameReorderer::FrameReorderer(const LayerUpdateQueue& layers, const SkRect& cli
     mLayerStack.reserve(layers.entries().size());
 
     // Prepare to defer Fbo0
-    mLayerReorderers.emplace_back(viewportWidth, viewportHeight, Rect(clip));
+    auto fbo0 = mAllocator.create<LayerReorderer>(viewportWidth, viewportHeight, Rect(clip));
+    mLayerReorderers.push_back(fbo0);
     mLayerStack.push_back(0);
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
@@ -602,7 +603,9 @@ void FrameReorderer::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
 
     // create a new layer repaint, and push its index on the stack
     mLayerStack.push_back(mLayerReorderers.size());
-    mLayerReorderers.emplace_back(layerWidth, layerHeight, repaintRect, beginLayerOp, renderNode);
+    auto newFbo = mAllocator.create<LayerReorderer>(layerWidth, layerHeight,
+            repaintRect, beginLayerOp, renderNode);
+    mLayerReorderers.push_back(newFbo);
 }
 
 void FrameReorderer::restoreForLayer() {
@@ -671,7 +674,7 @@ void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
             beginLayerOp.localMatrix,
             beginLayerOp.localClip,
             beginLayerOp.paint,
-            &mLayerReorderers[finishedLayerIndex].offscreenBuffer);
+            &(mLayerReorderers[finishedLayerIndex]->offscreenBuffer));
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
     if (bakedOpState) {
@@ -681,7 +684,7 @@ void FrameReorderer::deferEndLayerOp(const EndLayerOp& /* ignored */) {
         // Layer won't be drawn - delete its drawing batches to prevent it from doing any work
         // TODO: need to prevent any render work from being done
         // - create layerop earlier for reject purposes?
-        mLayerReorderers[finishedLayerIndex].clear();
+        mLayerReorderers[finishedLayerIndex]->clear();
         return;
     }
 }

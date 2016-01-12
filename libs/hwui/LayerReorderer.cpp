@@ -269,8 +269,6 @@ void LayerReorderer::flushLayerClears(LinearAllocator& allocator) {
                 verts, vertCount);
         BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
                 &viewportClip, bounds, *op);
-
-
         deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
     }
 }

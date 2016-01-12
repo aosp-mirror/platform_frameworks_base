@@ -18,6 +18,7 @@
 
 #include "ClipArea.h"
 #include "Rect.h"
+#include "utils/Macros.h"
 
 #include <vector>
 #include <unordered_map>
@@ -67,6 +68,8 @@ typedef void (*MergedOpReceiver)(void*, const MergedBakedOpList& opList);
  * for a single FBO/layer.
  */
 class LayerReorderer {
+// Prevent copy/assign because users may stash pointer to offscreenBuffer and viewportClip
+PREVENT_COPY_AND_ASSIGN(LayerReorderer);
 public:
     // Create LayerReorderer for Fbo0
     LayerReorderer(uint32_t width, uint32_t height, const Rect& repaintRect)

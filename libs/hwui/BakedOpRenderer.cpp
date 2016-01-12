@@ -161,7 +161,7 @@ void BakedOpRenderer::setViewport(uint32_t width, uint32_t height) {
 }
 
 void BakedOpRenderer::clearColorBuffer(const Rect& rect) {
-    if (Rect(mRenderTarget.viewportWidth, mRenderTarget.viewportHeight).contains(rect)) {
+    if (rect.contains(Rect(mRenderTarget.viewportWidth, mRenderTarget.viewportHeight))) {
         // Full viewport is being cleared - disable scissor
         mRenderState.scissor().setEnabled(false);
     } else {
