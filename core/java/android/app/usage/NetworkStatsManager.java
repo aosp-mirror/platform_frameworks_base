@@ -40,16 +40,17 @@ import android.util.Log;
  * {@link #querySummaryForUser} <p />
  * {@link #querySummary} <p />
  * These queries aggregate network usage across the whole interval. Therefore there will be only one
- * bucket for a particular key and state combination. In case of the user-wide and device-wide
- * summaries a single bucket containing the totalised network usage is returned.
+ * bucket for a particular key and state and roaming combination. In case of the user-wide and
+ * device-wide summaries a single bucket containing the totalised network usage is returned.
  * <h3>
  * History queries
  * </h3>
  * {@link #queryDetailsForUid} <p />
  * {@link #queryDetails} <p />
- * These queries do not aggregate over time but do aggregate over state. Therefore there can be
- * multiple buckets for a particular key but all Bucket's state is going to be
- * {@link NetworkStats.Bucket#STATE_ALL}.
+ * These queries do not aggregate over time but do aggregate over state and roaming. Therefore there
+ * can be multiple buckets for a particular key but all Bucket's state is going to be
+ * {@link NetworkStats.Bucket#STATE_ALL} and all Bucket's roaming is going to be
+ * {@link NetworkStats.Bucket#ROAMING_ALL}.
  * <p />
  * <b>NOTE:</b> Accessing stats for apps other than the calling app requires the permission
  * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}, which is a system-level permission and
@@ -81,8 +82,8 @@ public class NetworkStatsManager {
      * Query network usage statistics summaries. Result is summarised data usage for the whole
      * device. Result is a single Bucket aggregated over time, state and uid. This means the
      * bucket's start and end timestamp are going to be the same as the 'startTime' and 'endTime'
-     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
-     * {@link NetworkStats.Bucket#UID_ALL}.
+     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
+     * {@link NetworkStats.Bucket#UID_ALL}, and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -114,8 +115,8 @@ public class NetworkStatsManager {
      * Query network usage statistics summaries. Result is summarised data usage for all uids
      * belonging to calling user. Result is a single Bucket aggregated over time, state and uid.
      * This means the bucket's start and end timestamp are going to be the same as the 'startTime'
-     * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
-     * {@link NetworkStats.Bucket#UID_ALL}.
+     * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
+     * {@link NetworkStats.Bucket#UID_ALL}, and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -146,7 +147,7 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
-     * end timestamps. Not aggregated over state or uid. This means buckets' start and end
+     * end timestamps. Not aggregated over state, uid, or roaming. This means buckets' start and end
      * timestamps are going to be the same as the 'startTime' and 'endTime' parameters, state and
      * uid are going to vary.
      *
@@ -179,7 +180,8 @@ public class NetworkStatsManager {
      * Query network usage statistics details. Only usable for uids belonging to calling user.
      * Result is aggregated over state but not aggregated over time. This means buckets' start and
      * end timestamps are going to be between 'startTime' and 'endTime' parameters, state is going
-     * to be {@link NetworkStats.Bucket#STATE_ALL} and uid the same as the 'uid' parameter.
+     * to be {@link NetworkStats.Bucket#STATE_ALL} and uid the same as the 'uid' parameter. roaming
+     * is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
@@ -215,6 +217,7 @@ public class NetworkStatsManager {
      * calling user. Result is aggregated over state but not aggregated over time or uid. This means
      * buckets' start and end timestamps are going to be between 'startTime' and 'endTime'
      * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid will vary.
+     * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.

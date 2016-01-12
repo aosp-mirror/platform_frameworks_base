@@ -61,7 +61,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 roaming = false;
             }
 
-            add(new NetworkIdentity(type, subType, subscriberId, networkId, false));
+            add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming));
         }
     }
 
@@ -75,6 +75,19 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             writeOptionalString(out, ident.getNetworkId());
             out.writeBoolean(ident.getRoaming());
         }
+    }
+
+    /** @return whether any {@link NetworkIdentity} in this set is considered roaming. */
+    public boolean isAnyMemberRoaming() {
+        if (isEmpty()) {
+            return false;
+        }
+        for (NetworkIdentity ident : this) {
+            if (ident.getRoaming()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void writeOptionalString(DataOutputStream out, String value) throws IOException {

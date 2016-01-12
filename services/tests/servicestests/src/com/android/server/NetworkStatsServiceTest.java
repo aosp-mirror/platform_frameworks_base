@@ -22,6 +22,9 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.ROAMING_ALL;
+import static android.net.NetworkStats.ROAMING_DEFAULT;
+import static android.net.NetworkStats.ROAMING_ROAMING;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
@@ -81,6 +84,8 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests for {@link NetworkStatsService}.
@@ -282,8 +287,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
         assertUidTotal(sTemplateWifi, UID_RED, 1024L, 8L, 512L, 4L, 10);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, 512L, 4L, 256L, 2L, 4);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, 512L, 4L, 256L, 2L, 6);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, ROAMING_DEFAULT, 512L, 4L, 256L, 2L, 4);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, ROAMING_DEFAULT, 512L, 4L, 256L, 2L,
+                6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
         verifyAndReset();
 
@@ -317,8 +323,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // after systemReady(), we should have historical stats loaded again
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
         assertUidTotal(sTemplateWifi, UID_RED, 1024L, 8L, 512L, 4L, 10);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, 512L, 4L, 256L, 2L, 4);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, 512L, 4L, 256L, 2L, 6);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, ROAMING_DEFAULT, 512L, 4L, 256L, 2L, 4);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, ROAMING_DEFAULT, 512L, 4L, 256L, 2L,
+                6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
         verifyAndReset();
 
@@ -670,16 +677,20 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(3, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, 10L, 1L, 10L, 1L, 1);
-        assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, 2048L, 16L, 1024L, 8L, 0);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 50L, 5L,
+                50L, 5L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 10L, 1L, 10L,
+                1L, 1);
+        assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 2048L, 16L,
+                1024L, 8L, 0);
 
         // now verify that recent history only contains one uid
         final long currentTime = currentTimeMillis();
         stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, currentTime - HOUR_IN_MILLIS, currentTime, true);
         assertEquals(1, stats.size());
-        assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, 1024L, 8L, 512L, 4L, 0);
+        assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 1024L, 8L,
+                512L, 4L, 0);
 
         verifyAndReset();
     }
@@ -742,10 +753,61 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         final NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(4, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, 128L, 2L, 128L, 2L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, 64L, 1L, 64L, 1L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, TAG_NONE, 32L, 2L, 32L, 2L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, 1L, 1L, 1L, 1L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 2L,
+                128L, 2L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 64L, 1L, 64L,
+                1L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, TAG_NONE, ROAMING_DEFAULT, 32L, 2L,
+                32L, 2L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, ROAMING_DEFAULT, 1L, 1L, 1L,
+                1L, 1);
+
+        verifyAndReset();
+    }
+
+    public void testRoaming() throws Exception {
+        // pretend that network comes online
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkState(buildMobile3gState(IMSI_1, true /* isRoaming */));
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
+
+        replay();
+        mService.forceUpdateIfaces();
+        verifyAndReset();
+
+        // Create some traffic
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        // Note that all traffic from NetworkManagementService is tagged as ROAMING_DEFAULT, because
+        // roaming isn't tracked at that layer. We layer it on top by inspecting the iface
+        // properties.
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 2L,
+                        128L, 2L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 64L, 1L, 64L,
+                        1L, 0L));
+        expectNetworkStatsPoll();
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+
+        // verify service recorded history
+        assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
+
+        // verify entire history present
+        final NetworkStats stats = mSession.getSummaryForAllUid(
+                sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertEquals(2, stats.size());
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 128L, 2L,
+                128L, 2L, 0);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_ROAMING, 64L, 1L, 64L,
+                1L, 0);
 
         verifyAndReset();
     }
@@ -805,17 +867,19 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // verify summary API
         final NetworkStats stats = mSession.getSummaryForNetwork(template, start, end);
-        assertValues(stats, IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes,
-                txPackets, operations);
+        assertValues(stats, IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, rxBytes,
+                rxPackets, txBytes, txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, long rxBytes, long rxPackets,
             long txBytes, long txPackets, int operations) throws Exception {
-        assertUidTotal(template, uid, SET_ALL, rxBytes, rxPackets, txBytes, txPackets, operations);
+        assertUidTotal(template, uid, SET_ALL, ROAMING_ALL, rxBytes, rxPackets, txBytes, txPackets,
+                operations);
     }
 
-    private void assertUidTotal(NetworkTemplate template, int uid, int set, long rxBytes,
-            long rxPackets, long txBytes, long txPackets, int operations) throws Exception {
+    private void assertUidTotal(NetworkTemplate template, int uid, int set, int roaming,
+            long rxBytes, long rxPackets, long txBytes, long txPackets, int operations)
+            throws Exception {
         // verify history API
         final NetworkStatsHistory history = mSession.getHistoryForUid(
                 template, uid, set, TAG_NONE, FIELD_ALL);
@@ -825,8 +889,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // verify summary API
         final NetworkStats stats = mSession.getSummaryForAllUid(
                 template, Long.MIN_VALUE, Long.MAX_VALUE, false);
-        assertValues(stats, IFACE_ALL, uid, set, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets,
-                operations);
+        assertValues(stats, IFACE_ALL, uid, set, TAG_NONE, roaming, rxBytes, rxPackets, txBytes,
+                txPackets, operations);
     }
 
     private void expectSystemReady() throws Exception {
@@ -933,18 +997,31 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private static void assertValues(NetworkStats stats, String iface, int uid, int set,
-            int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, int operations) {
+            int tag, int roaming, long rxBytes, long rxPackets, long txBytes, long txPackets,
+            int operations) {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
+        List<Integer> sets = new ArrayList<>();
         if (set == SET_DEFAULT || set == SET_ALL) {
-            final int i = stats.findIndex(iface, uid, SET_DEFAULT, tag);
-            if (i != -1) {
-                entry.add(stats.getValues(i, null));
-            }
+            sets.add(SET_DEFAULT);
         }
         if (set == SET_FOREGROUND || set == SET_ALL) {
-            final int i = stats.findIndex(iface, uid, SET_FOREGROUND, tag);
-            if (i != -1) {
-                entry.add(stats.getValues(i, null));
+            sets.add(SET_FOREGROUND);
+        }
+
+        List<Integer> roamings = new ArrayList<>();
+        if (roaming == ROAMING_DEFAULT || roaming == ROAMING_ALL) {
+            roamings.add(ROAMING_DEFAULT);
+        }
+        if (roaming == ROAMING_ROAMING || roaming == ROAMING_ALL) {
+            roamings.add(ROAMING_ROAMING);
+        }
+
+        for (int s : sets) {
+            for (int r : roamings) {
+                final int i = stats.findIndex(iface, uid, s, tag, r);
+                if (i != -1) {
+                    entry.add(stats.getValues(i, null));
+                }
             }
         }
 
@@ -974,9 +1051,14 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
+        return buildMobile3gState(subscriberId, false /* isRoaming */);
+    }
+
+    private static NetworkState buildMobile3gState(String subscriberId, boolean isRoaming) {
         final NetworkInfo info = new NetworkInfo(
                 TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UMTS, null, null);
         info.setDetailedState(DetailedState.CONNECTED, null, null);
+        info.setRoaming(isRoaming);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         return new NetworkState(info, prop, null, null, subscriberId, null);
