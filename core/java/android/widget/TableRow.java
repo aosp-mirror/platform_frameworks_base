@@ -98,7 +98,7 @@ public class TableRow extends LinearLayout {
      * {@hide}
      */
     void setColumnCollapsed(int columnIndex, boolean collapsed) {
-        View child = getVirtualChildAt(columnIndex);
+        final View child = getVirtualChildAt(columnIndex);
         if (child != null) {
             child.setVisibility(collapsed ? GONE : VISIBLE);
         }
