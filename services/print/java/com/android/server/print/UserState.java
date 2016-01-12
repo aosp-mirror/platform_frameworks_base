@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -336,7 +337,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mSpooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
     }
 
-    public List<PrintServiceInfo> getEnabledPrintServices() {
+    public @Nullable List<PrintServiceInfo> getEnabledPrintServices() {
         synchronized (mLock) {
             List<PrintServiceInfo> enabledServices = null;
             final int installedServiceCount = mInstalledServices.size();

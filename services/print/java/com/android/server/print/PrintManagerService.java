@@ -555,8 +555,14 @@ public final class PrintManagerService extends SystemService {
                         // to handle it as the change may affect ongoing print jobs.
                         UserState userState = getOrCreateUserStateLocked(getChangingUserId());
                         boolean stoppedSomePackages = false;
-                        Iterator<PrintServiceInfo> iterator = userState.getEnabledPrintServices()
-                                .iterator();
+
+                        List<PrintServiceInfo> enabledServices = userState
+                                .getEnabledPrintServices();
+                        if (enabledServices == null) {
+                            return false;
+                        }
+
+                        Iterator<PrintServiceInfo> iterator = enabledServices.iterator();
                         while (iterator.hasNext()) {
                             ComponentName componentName = iterator.next().getComponentName();
                             String componentPackage = componentName.getPackageName();
