@@ -681,16 +681,32 @@ public class TaskStack {
     }
 
     /**
-     * Returns the number of tasks in the active stack.
+     * Returns the number of stack and freeform tasks.
      */
-    public int getStackTaskCount() {
+    public int getTaskCount() {
         return mStackTaskList.size();
     }
 
     /**
-     * Returns the number of freeform tasks in the active stack.
+     * Returns the number of stack tasks.
      */
-    public int getStackTaskFreeformCount() {
+    public int getStackTaskCount() {
+        ArrayList<Task> tasks = mStackTaskList.getTasks();
+        int stackCount = 0;
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasks.get(i);
+            if (!task.isFreeformTask()) {
+                stackCount++;
+            }
+        }
+        return stackCount;
+    }
+
+    /**
+     * Returns the number of freeform tasks.
+     */
+    public int getFreeformTaskCount() {
         ArrayList<Task> tasks = mStackTaskList.getTasks();
         int freeformCount = 0;
         int taskCount = tasks.size();

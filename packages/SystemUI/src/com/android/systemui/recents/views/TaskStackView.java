@@ -456,7 +456,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Pick up all the newly visible children
         int lastVisStackIndex = isValidVisibleStackRange ? visibleStackRange[1] : 0;
-        for (int i = mStack.getStackTaskCount() - 1; i >= lastVisStackIndex; i--) {
+        for (int i = mStack.getTaskCount() - 1; i >= lastVisStackIndex; i--) {
             final Task task = tasks.get(i);
             final TaskViewTransform transform = mCurrentTaskTransforms.get(i);
 
@@ -674,8 +674,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private boolean setFocusedTask(int taskIndex, boolean scrollToTask,
             final boolean requestViewFocus, final boolean showTimerIndicator) {
         // Find the next task to focus
-        int newFocusedTaskIndex = mStack.getStackTaskCount() > 0 ?
-                Math.max(0, Math.min(mStack.getStackTaskCount() - 1, taskIndex)) : -1;
+        int newFocusedTaskIndex = mStack.getTaskCount() > 0 ?
+                Math.max(0, Math.min(mStack.getTaskCount() - 1, taskIndex)) : -1;
         final Task newFocusedTask = (newFocusedTaskIndex != -1) ?
                 mStack.getStackTasks().get(newFocusedTaskIndex) : null;
 
@@ -810,7 +810,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             } else {
                 // No restrictions, lets just move to the new task (looping forward/backwards if
                 // necessary)
-                int taskCount = mStack.getStackTaskCount();
+                int taskCount = mStack.getTaskCount();
                 newIndex = (newIndex + (forward ? -1 : 1) + taskCount) % taskCount;
             }
         } else {
@@ -863,7 +863,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             event.setToIndex(mStack.indexOfStackTask(frontMostTask.getTask()));
             event.setContentDescription(frontMostTask.getTask().title);
         }
-        event.setItemCount(mStack.getStackTaskCount());
+        event.setItemCount(mStack.getTaskCount());
         event.setScrollY(mStackScroller.mScroller.getCurrY());
         event.setMaxScrollY(mStackScroller.progressToScrollRange(mLayoutAlgorithm.mMaxScrollP));
     }
@@ -879,7 +879,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (focusedTaskIndex > 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             }
-            if (focusedTaskIndex < mStack.getStackTaskCount() - 1) {
+            if (focusedTaskIndex < mStack.getTaskCount() - 1) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
         }
@@ -1100,7 +1100,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // until after the enter-animation
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getStackTaskCount());
+        int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
         if (focusedTaskIndex != -1) {
             setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
                     false /* requestViewFocus */);
@@ -1186,11 +1186,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
             // Get the stack scroll of the task to anchor to (since we are removing something, the
             // front most task will be our anchor task)
-            Task anchorTask = null;
+            Task anchorTask = mStack.getStackFrontMostTask();
             float prevAnchorTaskScroll = 0;
-            boolean pullStackForward = stack.getStackTaskCount() > 0;
-            if (pullStackForward) {
-                anchorTask = mStack.getStackFrontMostTask();
+            if (anchorTask != null) {
                 prevAnchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
             }
 
@@ -1201,7 +1199,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // Since the max scroll progress is offset from the bottom of the stack, just scroll
                 // to ensure that the new front most task is now fully visible
                 mStackScroller.setStackScroll(mLayoutAlgorithm.mMaxScrollP);
-            } else if (pullStackForward) {
+            } else if (anchorTask != null) {
                 // Otherwise, offset the scroll by the movement of the anchor task
                 float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
                 float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
@@ -1238,11 +1236,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // If there are no remaining tasks, then just close recents
-        if (mStack.getStackTaskCount() == 0) {
-            boolean shouldFinishActivity = (mStack.getStackTaskCount() == 0);
-            if (shouldFinishActivity) {
-                EventBus.getDefault().send(new AllTaskViewsDismissedEvent());
-            }
+        if (mStack.getTaskCount() == 0) {
+            EventBus.getDefault().send(new AllTaskViewsDismissedEvent());
         }
     }
 
@@ -1558,7 +1553,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         mEnterAnimationComplete = true;
 
-        if (mStack.getStackTaskCount() > 0) {
+        if (mStack.getTaskCount() > 0) {
             // Start the task enter animations
             mAnimationHelper.startEnterAnimation(event.getAnimationTrigger());
 

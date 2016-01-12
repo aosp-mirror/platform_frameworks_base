@@ -19,7 +19,6 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -168,7 +167,7 @@ public class RecentsView extends FrameLayout {
         }
 
         // Update the top level view's visibilities
-        if (stack.getStackTaskCount() > 0) {
+        if (stack.getTaskCount() > 0) {
             hideEmptyView();
         } else {
             showEmptyView();

@@ -165,7 +165,7 @@ public class RecentsTransitionHelper {
             int taskIndexFromFront = 0;
             int taskIndex = stack.indexOfStackTask(task);
             if (taskIndex > -1) {
-                taskIndexFromFront = stack.getStackTaskCount() - taskIndex - 1;
+                taskIndexFromFront = stack.getTaskCount() - taskIndex - 1;
             }
             EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
         } else {

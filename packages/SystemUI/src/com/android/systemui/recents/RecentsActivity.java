@@ -192,13 +192,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.loadTasks(this, plan, loadOpts);
 
         TaskStack stack = plan.getTaskStack();
+        ArrayList<Task> tasks = stack.getStackTasks();
+        int taskCount = stack.getTaskCount();
         mRecentsView.setTaskStack(stack);
 
         // Mark the task that is the launch target
         int launchTaskIndexInStack = 0;
         if (launchState.launchedToTaskId != -1) {
-            ArrayList<Task> tasks = stack.getStackTasks();
-            int taskCount = tasks.size();
             for (int j = 0; j < taskCount; j++) {
                 Task t = tasks.get(j);
                 if (t.key.id == launchState.launchedToTaskId) {
@@ -210,9 +210,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         }
 
         // Animate the SystemUI scrims into view
-        boolean hasStatusBarScrim = stack.getStackTaskCount() > 0;
+        boolean hasStatusBarScrim = taskCount > 0;
         boolean animateStatusBarScrim = launchState.launchedFromHome;
-        boolean hasNavBarScrim = (stack.getStackTaskCount() > 0) && !config.hasTransposedNavBar;
+        boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
         boolean animateNavBarScrim = true;
         mScrimViews.prepareEnterRecentsAnimation(hasStatusBarScrim, animateStatusBarScrim,
                 hasNavBarScrim, animateNavBarScrim);
@@ -232,7 +232,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             MetricsLogger.count(this, "overview_source_home", 1);
         }
         // Keep track of the total stack task count
-        int taskCount = stack.getStackTaskCount();
         MetricsLogger.histogram(this, "overview_task_count", taskCount);
     }
 

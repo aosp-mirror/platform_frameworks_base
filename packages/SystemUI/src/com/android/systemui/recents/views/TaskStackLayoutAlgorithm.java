@@ -138,9 +138,8 @@ public class TaskStackLayoutAlgorithm {
         public static StackState getStackStateForStack(TaskStack stack) {
             SystemServicesProxy ssp = Recents.getSystemServices();
             boolean hasFreeformWorkspaces = ssp.hasFreeformWorkspaceSupport();
-            int taskCount = stack.getStackTaskCount();
-            int freeformCount = stack.getStackTaskFreeformCount();
-            int stackCount = taskCount - freeformCount;
+            int freeformCount = stack.getFreeformTaskCount();
+            int stackCount = stack.getStackTaskCount();
             if (hasFreeformWorkspaces && stackCount > 0 && freeformCount > 0) {
                 return SPLIT;
             } else if (hasFreeformWorkspaces && freeformCount > 0) {

@@ -97,7 +97,7 @@ public class TaskStackAnimationHelper {
         Task launchTargetTask = stack.getLaunchTarget();
 
         // Break early if there are no tasks
-        if (stack.getStackTaskCount() == 0) {
+        if (stack.getTaskCount() == 0) {
             return;
         }
 
@@ -159,7 +159,7 @@ public class TaskStackAnimationHelper {
         Task launchTargetTask = stack.getLaunchTarget();
 
         // Break early if there are no tasks
-        if (stack.getStackTaskCount() == 0) {
+        if (stack.getTaskCount() == 0) {
             return;
         }
 
@@ -229,7 +229,7 @@ public class TaskStackAnimationHelper {
         TaskStack stack = mStackView.getStack();
 
         // Break early if there are no tasks
-        if (stack.getStackTaskCount() == 0) {
+        if (stack.getTaskCount() == 0) {
             return;
         }
 

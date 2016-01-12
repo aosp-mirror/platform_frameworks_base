@@ -224,7 +224,7 @@ public class RecentsTaskLoadPlan {
     /** Returns whether there are any tasks in any stacks. */
     public boolean hasTasks() {
         if (mStack != null) {
-            return mStack.getStackTaskCount() > 0;
+            return mStack.getTaskCount() > 0;
         }
         return false;
     }

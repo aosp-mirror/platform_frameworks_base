@@ -372,7 +372,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
-            if (stack.getStackTaskCount() > 0) {
+            if (stack.getTaskCount() > 0) {
                 // We try and draw the thumbnail transition bitmap in parallel before
                 // toggle/show recents is called
                 preCacheThumbnailTransitionBitmapAsync(topTask, stack, mDummyStackView);
@@ -403,7 +403,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
-        if (focusedStack == null || focusedStack.getStackTaskCount() == 0) return;
+        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task
@@ -455,7 +455,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
-        if (focusedStack == null || focusedStack.getStackTaskCount() == 0) return;
+        if (focusedStack == null || focusedStack.getTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = ssp.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
@@ -845,7 +845,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             return;
         }
 
-        boolean hasRecentTasks = stack.getStackTaskCount() > 0;
+        boolean hasRecentTasks = stack.getTaskCount() > 0;
         boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
