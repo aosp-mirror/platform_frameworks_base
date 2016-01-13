@@ -48,7 +48,7 @@
             >
             <include layout="@layout/notification_template_part_line1"/>
             <include layout="@layout/notification_template_progress"/>
-            <include layout="@layout/notification_template_part_line3"/>
+            <include layout="@layout/notification_template_text"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/media_actions"

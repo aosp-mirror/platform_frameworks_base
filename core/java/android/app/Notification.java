@@ -3016,24 +3016,13 @@ public class Notification implements Parcelable
             return bitmap;
         }
 
-        private boolean addProfileBadge(RemoteViews contentView, int resId) {
+        private void bindProfileBadge(RemoteViews contentView) {
             Bitmap profileBadge = getProfileBadge();
 
-            contentView.setViewVisibility(R.id.profile_badge_large_template, View.GONE);
-            contentView.setViewVisibility(R.id.profile_badge_line3, View.GONE);
-
             if (profileBadge != null) {
-                contentView.setImageViewBitmap(resId, profileBadge);
-                contentView.setViewVisibility(resId, View.VISIBLE);
-
-                // Make sure Line 3 is visible. As badge will be here if there
-                // is no text to display.
-                if (resId == R.id.profile_badge_line3) {
-                    contentView.setViewVisibility(R.id.line3, View.VISIBLE);
-                }
-                return true;
+                contentView.setImageViewBitmap(R.id.profile_badge, profileBadge);
+                contentView.setViewVisibility(R.id.profile_badge, View.VISIBLE);
             }
-            return false;
         }
 
         private void resetStandardTemplate(RemoteViews contentView) {
@@ -3044,7 +3033,6 @@ public class Notification implements Parcelable
             contentView.setTextViewText(R.id.title, null);
             contentView.setViewVisibility(R.id.text, View.GONE);
             contentView.setTextViewText(R.id.text, null);
-            contentView.setViewVisibility(R.id.line3, View.GONE);
             contentView.setViewVisibility(R.id.text_line_1, View.GONE);
             contentView.setTextViewText(R.id.text_line_1, null);
             contentView.setViewVisibility(R.id.progress, View.GONE);
@@ -3064,11 +3052,13 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.sub_text_divider, View.GONE);
             contentView.setViewVisibility(R.id.content_info_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
+            contentView.setImageViewIcon(R.id.profile_badge, null);
+            contentView.setViewVisibility(R.id.profile_badge, View.GONE);
         }
 
         private void resetContentMargins(RemoteViews contentView) {
             contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-            contentView.setViewLayoutMarginEnd(R.id.line3, 0);
+            contentView.setViewLayoutMarginEnd(R.id.text, 0);
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
@@ -3083,7 +3073,6 @@ public class Notification implements Parcelable
 
             resetStandardTemplate(contentView);
 
-            boolean showLine3 = false;
             final Bundle ex = mN.extras;
 
             bindNotificationHeader(contentView);
@@ -3100,14 +3089,8 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(textId, processLegacyText(
                         ex.getCharSequence(EXTRA_TEXT)));
                 contentView.setViewVisibility(textId, View.VISIBLE);
-                showLine3 = !showProgress;
             }
-            // We want to add badge to first line of text.
-            if (addProfileBadge(contentView, R.id.profile_badge_line3)) {
-                showLine3 = true;
-            }
-            // Note getStandardView may hide line 3 again.
-            contentView.setViewVisibility(R.id.line3, showLine3 ? View.VISIBLE : View.GONE);
+
             setContentMinHeight(contentView, showProgress || mN.mLargeIcon != null);
 
             return contentView;
@@ -3159,7 +3142,7 @@ public class Notification implements Parcelable
                 int endMargin = mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_content_picture_margin);
                 contentView.setViewLayoutMarginEnd(R.id.line1, endMargin);
-                contentView.setViewLayoutMarginEnd(R.id.line3, endMargin);
+                contentView.setViewLayoutMarginEnd(R.id.text, endMargin);
                 contentView.setViewLayoutMarginEnd(R.id.progress, endMargin);
             }
         }
@@ -3172,6 +3155,7 @@ public class Notification implements Parcelable
             bindContentInfo(contentView);
             bindHeaderChronometerAndTime(contentView);
             bindExpandButton(contentView);
+            bindProfileBadge(contentView);
         }
 
         private void bindChildCountColor(RemoteViews contentView) {
@@ -3731,10 +3715,6 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.line1, View.VISIBLE);
             }
 
-            // Clear text in case we use the line to show the profile badge.
-            contentView.setTextViewText(com.android.internal.R.id.text, "");
-            contentView.setViewVisibility(com.android.internal.R.id.line3, View.GONE);
-
             return contentView;
         }
 
@@ -3941,7 +3921,7 @@ public class Notification implements Parcelable
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
             if (mSummaryTextSet) {
                 contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(mSummaryText));
-                contentView.setViewVisibility(R.id.line3, View.VISIBLE);
+                contentView.setViewVisibility(R.id.text, View.VISIBLE);
             }
             mBuilder.setContentMinHeight(contentView, mBuilder.mN.mLargeIcon != null);
 
@@ -3950,8 +3930,6 @@ public class Notification implements Parcelable
             }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
-
-            mBuilder.addProfileBadge(contentView, R.id.profile_badge_line3);
             return contentView;
         }
 
@@ -4085,9 +4063,6 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
             contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
-
-            mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
-
             contentView.setBoolean(R.id.big_text, "setHasImage", mBuilder.mN.mLargeIcon != null);
 
             return contentView;
@@ -4185,7 +4160,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public RemoteViews makeBigContentView() {
-            // Remove the content text so line3 disappears unless you have a summary
+            // Remove the content text so it disappears unless you have a summary
             // Nasty
             CharSequence oldBuilderContentText = mBuilder.mN.extras.getCharSequence(EXTRA_TEXT);
             mBuilder.getAllExtras().putCharSequence(EXTRA_TEXT, null);
@@ -4224,7 +4199,6 @@ public class Notification implements Parcelable
                 }
                 i++;
             }
-            mBuilder.addProfileBadge(contentView, R.id.profile_badge_large_template);
 
             handleInboxImageMargin(contentView, rowIds[0]);
 
@@ -4435,7 +4409,7 @@ public class Notification implements Parcelable
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.mLargeIcon != null) {
                 contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-                contentView.setViewLayoutMarginEnd(R.id.line3, 0);
+                contentView.setViewLayoutMarginEnd(R.id.text, 0);
             }
         }
 

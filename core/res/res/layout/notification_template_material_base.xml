@@ -34,7 +34,7 @@
         android:orientation="vertical"
         >
         <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_part_line3" />
+        <include layout="@layout/notification_template_text" />
     </LinearLayout>
     <FrameLayout
         android:layout_width="match_parent"

@@ -86,7 +86,6 @@
   <java-symbol type="id" name="left_icon" />
   <java-symbol type="id" name="leftSpacer" />
   <java-symbol type="id" name="line1" />
-  <java-symbol type="id" name="line3" />
   <java-symbol type="id" name="list_footer" />
   <java-symbol type="id" name="list_item" />
   <java-symbol type="id" name="listContainer" />
@@ -209,8 +208,7 @@
   <java-symbol type="id" name="pin_confirm_text" />
   <java-symbol type="id" name="pin_error_message" />
   <java-symbol type="id" name="timePickerLayout" />
-  <java-symbol type="id" name="profile_badge_large_template" />
-  <java-symbol type="id" name="profile_badge_line3" />
+  <java-symbol type="id" name="profile_badge" />
   <java-symbol type="id" name="transitionPosition" />
   <java-symbol type="id" name="selection_start_handle" />
   <java-symbol type="id" name="selection_end_handle" />

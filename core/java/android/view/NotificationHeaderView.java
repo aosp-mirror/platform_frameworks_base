@@ -25,6 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 
 /**
@@ -44,6 +46,7 @@ public class NotificationHeaderView extends LinearLayout {
     private ImageView mExpandButton;
     private View mIcon;
     private TextView mChildCount;
+    private View mProfileBadge;
     private int mIconColor;
     private int mOriginalNotificationColor;
     private boolean mGroupHeader;
@@ -76,6 +79,7 @@ public class NotificationHeaderView extends LinearLayout {
         mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mChildCount = (TextView) findViewById(com.android.internal.R.id.number_of_children);
+        mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
     }
 
     @Override
@@ -120,12 +124,29 @@ public class NotificationHeaderView extends LinearLayout {
             }
             totalWidth = givenWidth;
         }
+        if (mProfileBadge.getVisibility() != View.GONE) {
+            totalWidth = givenWidth;
+        }
         setMeasuredDimension(totalWidth, givenHeight);
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        if (mProfileBadge.getVisibility() != View.GONE) {
+            int paddingEnd = getPaddingEnd();
+            if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                mProfileBadge.layout(paddingEnd,
+                        mProfileBadge.getTop(),
+                        paddingEnd + mProfileBadge.getMeasuredWidth(),
+                        mProfileBadge.getBottom());
+            } else {
+                mProfileBadge.layout(getWidth() - paddingEnd - mProfileBadge.getMeasuredWidth(),
+                        mProfileBadge.getTop(),
+                        getWidth() - paddingEnd,
+                        mProfileBadge.getBottom());
+            }
+        }
         updateTouchListener();
     }
 

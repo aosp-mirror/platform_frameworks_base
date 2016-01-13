@@ -110,6 +110,25 @@ public class NotificationHeaderUtil {
                 sIconExtractor,
                 sGreyComparator,
                 mGreyApplicator));
+        mComparators.add(new HeaderProcessor(mRow,
+                com.android.internal.R.id.profile_badge,
+                null /* Extractor */,
+                new ViewComparator() {
+                    @Override
+                    public boolean compare(View parent, View child, Object parentData,
+                            Object childData) {
+                        return parent.getVisibility() == View.VISIBLE;
+                    }
+
+                    @Override
+                    public boolean isEmpty(View view) {
+                        if (view instanceof ImageView) {
+                            return ((ImageView) view).getDrawable() == null;
+                        }
+                        return false;
+                    }
+                },
+                sVisibilityApplicator));
         mComparators.add(HeaderProcessor.forTextView(mRow,
                 com.android.internal.R.id.app_name_text));
         mComparators.add(HeaderProcessor.forTextView(mRow,

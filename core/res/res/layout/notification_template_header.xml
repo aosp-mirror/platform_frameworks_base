@@ -127,5 +127,14 @@
         android:paddingTop="1dp"
         android:visibility="gone"
         />
+    <ImageView android:id="@+id/profile_badge"
+        android:layout_width="@dimen/notification_badge_size"
+        android:layout_height="@dimen/notification_badge_size"
+        android:layout_gravity="center"
+        android:layout_marginStart="4dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:contentDescription="@string/notification_work_profile_content_description"
+        />
 </NotificationHeaderView>
 
