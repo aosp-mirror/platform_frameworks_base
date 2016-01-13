@@ -24,6 +24,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
+import com.google.android.collect.Sets;
+
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.ComponentName;
@@ -45,6 +47,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Class for managing the recent tasks list.
@@ -186,6 +189,21 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 tr.removedFromRecents();
             }
         }
+    }
+
+    void onPackagesSuspendedChanged(String[] packages, boolean suspended, int userId) {
+        final Set<String> packageNames = Sets.newHashSet(packages);
+        for (int i = size() - 1; i >= 0; --i) {
+            final TaskRecord tr = get(i);
+            if (tr.realActivity != null
+                    && packageNames.contains(tr.realActivity.getPackageName())
+                    && tr.userId == userId
+                    && tr.realActivitySuspended != suspended) {
+               tr.realActivitySuspended = suspended;
+               notifyTaskPersisterLocked(tr, false);
+            }
+        }
+
     }
 
     /**
@@ -683,5 +701,4 @@ class RecentTasks extends ArrayList<TaskRecord> {
         // Let the caller know where we left off.
         return start + tmpSize;
     }
-
 }

@@ -9003,6 +9003,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
 
+                if (tr.realActivitySuspended) {
+                    if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Skipping, activity suspended: " + tr);
+                    continue;
+                }
+
                 // Return the entry if desired by the caller.  We always return
                 // the first entry, because callers always expect this to be the
                 // foreground app.  We may filter others if the caller has
@@ -17587,6 +17592,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 case Intent.ACTION_PACKAGE_CHANGED:
                 case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
                 case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+                case Intent.ACTION_PACKAGES_SUSPENDED:
+                case Intent.ACTION_PACKAGES_UNSUSPENDED:
                     // Handle special intents: if this broadcast is from the package
                     // manager about a package being removed, we need to remove all of
                     // its activities from the history stack.
@@ -17665,6 +17672,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
                                 }
+                            }
+                            break;
+                        case Intent.ACTION_PACKAGES_SUSPENDED:
+                        case Intent.ACTION_PACKAGES_UNSUSPENDED:
+                            final boolean suspended = Intent.ACTION_PACKAGES_SUSPENDED.equals(
+                                    intent.getAction());
+                            final String[] packageNames = intent.getStringArrayExtra(
+                                    Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                            final int userHandle = intent.getIntExtra(
+                                    Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+
+                            synchronized(ActivityManagerService.this) {
+                                mRecentTasks.onPackagesSuspendedChanged(
+                                        packageNames, suspended, userHandle);
                             }
                             break;
                     }

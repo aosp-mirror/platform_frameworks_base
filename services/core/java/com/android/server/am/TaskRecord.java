@@ -95,6 +95,7 @@ final class TaskRecord {
     private static final String TAG_INTENT = "intent";
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
     static final String ATTR_REALACTIVITY = "real_activity";
+    static final String ATTR_REALACTIVITY_SUSPENDED = "real_activity_suspended";
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
     private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
@@ -136,6 +137,8 @@ final class TaskRecord {
     int effectiveUid;       // The current effective uid of the identity of this task.
     ComponentName origActivity; // The non-alias activity component of the intent.
     ComponentName realActivity; // The actual activity component that started the task.
+    boolean realActivitySuspended; // True if the actual activity component that started the
+                                   // task is suspended.
     long firstActiveTime;   // First time this task was active.
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean inRecents;      // Actually in the recents list?
@@ -305,7 +308,7 @@ final class TaskRecord {
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            boolean resizeable, boolean privileged) {
+            boolean resizeable, boolean privileged, boolean realActivitySuspended) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -319,6 +322,7 @@ final class TaskRecord {
         voiceSession = null;
         voiceInteractor = null;
         realActivity = _realActivity;
+        realActivitySuspended = realActivitySuspended;
         origActivity = _origActivity;
         rootWasReset = _rootWasReset;
         isAvailable = true;
@@ -1027,6 +1031,7 @@ final class TaskRecord {
         if (realActivity != null) {
             out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
         }
+        out.attribute(null, ATTR_REALACTIVITY_SUSPENDED, String.valueOf(realActivitySuspended));
         if (origActivity != null) {
             out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
         }
@@ -1105,6 +1110,7 @@ final class TaskRecord {
         Intent affinityIntent = null;
         ArrayList<ActivityRecord> activities = new ArrayList<>();
         ComponentName realActivity = null;
+        boolean realActivitySuspended = false;
         ComponentName origActivity = null;
         String affinity = null;
         String rootAffinity = null;
@@ -1143,6 +1149,8 @@ final class TaskRecord {
                 if (taskId == INVALID_TASK_ID) taskId = Integer.valueOf(attrValue);
             } else if (ATTR_REALACTIVITY.equals(attrName)) {
                 realActivity = ComponentName.unflattenFromString(attrValue);
+            } else if (ATTR_REALACTIVITY_SUSPENDED.equals(attrName)) {
+                realActivitySuspended = Boolean.valueOf(attrValue);
             } else if (ATTR_ORIGACTIVITY.equals(attrName)) {
                 origActivity = ComponentName.unflattenFromString(attrValue);
             } else if (ATTR_AFFINITY.equals(attrName)) {
@@ -1253,7 +1261,8 @@ final class TaskRecord {
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
-                taskAffiliationColor, callingUid, callingPackage, resizeable, privileged);
+                taskAffiliationColor, callingUid, callingPackage, resizeable, privileged,
+                realActivitySuspended);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
