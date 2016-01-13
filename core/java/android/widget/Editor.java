@@ -82,6 +82,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.RenderNode;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnClickListener;
@@ -284,6 +285,9 @@ public class Editor {
     };
 
     boolean mIsInsertionActionModeStartPending = false;
+
+    private final SuggestionHelper mSuggestionHelper = new SuggestionHelper();
+    private SuggestionInfo[] mSuggestionInfosInContextMenu;
 
     Editor(TextView textView) {
         mTextView = textView;
@@ -2369,6 +2373,9 @@ public class Editor {
         if (offset == -1) {
             return;
         }
+        mPreserveDetachedSelection = true;
+        stopTextActionMode();
+        mPreserveDetachedSelection = false;
         final boolean isOnSelection = mTextView.hasSelection()
                 && offset >= mTextView.getSelectionStart() && offset <= mTextView.getSelectionEnd();
         if (!isOnSelection) {
@@ -2378,7 +2385,24 @@ public class Editor {
             Selection.setSelection((Spannable) mTextView.getText(), offset);
         }
 
-        // TODO: Add suggestions in the context menu.
+        if (shouldOfferToShowSuggestions()) {
+            if (mSuggestionInfosInContextMenu == null) {
+                mSuggestionInfosInContextMenu =
+                        new SuggestionInfo[SuggestionSpan.SUGGESTIONS_MAX_SIZE];
+                for (int i = 0; i < mSuggestionInfosInContextMenu.length; i++) {
+                    mSuggestionInfosInContextMenu[i] = new SuggestionInfo();
+                }
+            }
+            final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE, MENU_ITEM_ORDER_REPLACE,
+                    com.android.internal.R.string.replace);
+            mSuggestionHelper.getSuggestionInfo(mSuggestionInfosInContextMenu);
+            int i = 0;
+            for (final SuggestionInfo info : mSuggestionInfosInContextMenu) {
+                info.mSuggestionEnd = info.mText.length();
+                subMenu.add(Menu.NONE, Menu.NONE, i++, info.mText)
+                        .setOnMenuItemClickListener(mOnContextMenuReplaceItemClickListener);
+            }
+        }
 
         menu.add(Menu.NONE, TextView.ID_UNDO, MENU_ITEM_ORDER_UNDO,
                 com.android.internal.R.string.undo)
@@ -2422,6 +2446,61 @@ public class Editor {
         mPreserveDetachedSelection = true;
     }
 
+    private void replaceWithSuggestion(SuggestionInfo suggestionInfo, int spanStart, int spanEnd) {
+        final Editable editable = (Editable) mTextView.getText();
+        final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
+        // SuggestionSpans are removed by replace: save them before
+        SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
+                SuggestionSpan.class);
+        final int length = suggestionSpans.length;
+        int[] suggestionSpansStarts = new int[length];
+        int[] suggestionSpansEnds = new int[length];
+        int[] suggestionSpansFlags = new int[length];
+        for (int i = 0; i < length; i++) {
+            final SuggestionSpan suggestionSpan = suggestionSpans[i];
+            suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
+            suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
+            suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
+
+            // Remove potential misspelled flags
+            int suggestionSpanFlags = suggestionSpan.getFlags();
+            if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) != 0) {
+                suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
+                suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
+                suggestionSpan.setFlags(suggestionSpanFlags);
+            }
+        }
+
+        // Notify source IME of the suggestion pick. Do this before swapping texts.
+        suggestionInfo.mSuggestionSpan.notifySelection(
+                mTextView.getContext(), originalText, suggestionInfo.mSuggestionIndex);
+
+        // Swap text content between actual text and Suggestion span
+        final int suggestionStart = suggestionInfo.mSuggestionStart;
+        final int suggestionEnd = suggestionInfo.mSuggestionEnd;
+        final String suggestion = suggestionInfo.mText.subSequence(
+                suggestionStart, suggestionEnd).toString();
+        mTextView.replaceText_internal(spanStart, spanEnd, suggestion);
+
+        String[] suggestions = suggestionInfo.mSuggestionSpan.getSuggestions();
+        suggestions[suggestionInfo.mSuggestionIndex] = originalText;
+
+        // Restore previous SuggestionSpans
+        final int lengthDelta = suggestion.length() - (spanEnd - spanStart);
+        for (int i = 0; i < length; i++) {
+            // Only spans that include the modified region make sense after replacement
+            // Spans partially included in the replaced region are removed, there is no
+            // way to assign them a valid range after replacement
+            if (suggestionSpansStarts[i] <= spanStart && suggestionSpansEnds[i] >= spanEnd) {
+                mTextView.setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
+                        suggestionSpansEnds[i] + lengthDelta, suggestionSpansFlags[i]);
+            }
+        }
+        // Move cursor at the end of the replaced word
+        final int newCursorPosition = spanEnd + lengthDelta;
+        mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
+    }
+
     private final MenuItem.OnMenuItemClickListener mOnContextMenuItemClickListener =
             new MenuItem.OnMenuItemClickListener() {
         @Override
@@ -2430,6 +2509,31 @@ public class Editor {
                 return true;
             }
             return mTextView.onTextContextMenuItem(item.getItemId());
+        }
+    };
+
+    private final MenuItem.OnMenuItemClickListener mOnContextMenuReplaceItemClickListener =
+            new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            int index = item.getOrder();
+            if (index < 0 || index >= mSuggestionInfosInContextMenu.length) {
+                clear();
+                return false;
+            }
+            final Spannable spannable = (Spannable) mTextView.getText();
+            final SuggestionSpan suggestionSpan =
+                    mSuggestionInfosInContextMenu[index].mSuggestionSpan;
+            replaceWithSuggestion(mSuggestionInfosInContextMenu[index],
+                    spannable.getSpanStart(suggestionSpan), spannable.getSpanEnd(suggestionSpan));
+            clear();
+            return true;
+        }
+
+        private void clear() {
+            for (final SuggestionInfo info : mSuggestionInfosInContextMenu) {
+                info.clear();
+            }
         }
     };
 
@@ -2849,6 +2953,131 @@ public class Editor {
         }
     }
 
+    private static class SuggestionInfo {
+        // Range of actual suggestion within text
+        int mSuggestionStart, mSuggestionEnd;
+
+        // The SuggestionSpan that this TextView represents
+        @Nullable
+        SuggestionSpan mSuggestionSpan;
+
+        // The index of this suggestion inside suggestionSpan
+        int mSuggestionIndex;
+
+        final SpannableStringBuilder mText = new SpannableStringBuilder();
+
+        void clear() {
+            mSuggestionSpan = null;
+            mText.clear();
+        }
+    }
+
+    private class SuggestionHelper {
+        private final Comparator<SuggestionSpan> mSuggestionSpanComparator =
+                new SuggestionSpanComparator();
+        private final HashMap<SuggestionSpan, Integer> mSpansLengths =
+                new HashMap<SuggestionSpan, Integer>();
+
+        private class SuggestionSpanComparator implements Comparator<SuggestionSpan> {
+            public int compare(SuggestionSpan span1, SuggestionSpan span2) {
+                final int flag1 = span1.getFlags();
+                final int flag2 = span2.getFlags();
+                if (flag1 != flag2) {
+                    // The order here should match what is used in updateDrawState
+                    final boolean easy1 = (flag1 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
+                    final boolean easy2 = (flag2 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
+                    final boolean misspelled1 = (flag1 & SuggestionSpan.FLAG_MISSPELLED) != 0;
+                    final boolean misspelled2 = (flag2 & SuggestionSpan.FLAG_MISSPELLED) != 0;
+                    if (easy1 && !misspelled1) return -1;
+                    if (easy2 && !misspelled2) return 1;
+                    if (misspelled1) return -1;
+                    if (misspelled2) return 1;
+                }
+
+                return mSpansLengths.get(span1).intValue() - mSpansLengths.get(span2).intValue();
+            }
+        }
+
+        /**
+         * Returns the suggestion spans that cover the current cursor position. The suggestion
+         * spans are sorted according to the length of text that they are attached to.
+         */
+        private SuggestionSpan[] getSortedSuggestionSpans() {
+            int pos = mTextView.getSelectionStart();
+            Spannable spannable = (Spannable) mTextView.getText();
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
+
+            mSpansLengths.clear();
+            for (SuggestionSpan suggestionSpan : suggestionSpans) {
+                int start = spannable.getSpanStart(suggestionSpan);
+                int end = spannable.getSpanEnd(suggestionSpan);
+                mSpansLengths.put(suggestionSpan, Integer.valueOf(end - start));
+            }
+
+            // The suggestions are sorted according to their types (easy correction first, then
+            // misspelled) and to the length of the text that they cover (shorter first).
+            Arrays.sort(suggestionSpans, mSuggestionSpanComparator);
+            mSpansLengths.clear();
+
+            return suggestionSpans;
+        }
+
+        /**
+         * Gets the SuggestionInfo list that contains suggestion information at the current cursor
+         * position.
+         *
+         * @param suggestionInfos SuggestionInfo array the results will be set.
+         * @return the number of suggestions actually fetched.
+         */
+        public int getSuggestionInfo(SuggestionInfo[] suggestionInfos) {
+            final Spannable spannable = (Spannable) mTextView.getText();
+            final SuggestionSpan[] suggestionSpans = getSortedSuggestionSpans();
+            final int nbSpans = suggestionSpans.length;
+            if (nbSpans == 0) return 0;
+
+            int numberOfSuggestions = 0;
+            for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
+                final SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
+                final int spanStart = spannable.getSpanStart(suggestionSpan);
+                final int spanEnd = spannable.getSpanEnd(suggestionSpan);
+
+                final String[] suggestions = suggestionSpan.getSuggestions();
+                final int nbSuggestions = suggestions.length;
+                for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
+                    final String suggestion = suggestions[suggestionIndex];
+                    boolean suggestionIsDuplicate = false;
+                    for (int i = 0; i < numberOfSuggestions; i++) {
+                        if (suggestionInfos[i].mText.toString().equals(suggestion)) {
+                            final SuggestionSpan otherSuggestionSpan =
+                                    suggestionInfos[i].mSuggestionSpan;
+                            final int otherSpanStart = spannable.getSpanStart(otherSuggestionSpan);
+                            final int otherSpanEnd = spannable.getSpanEnd(otherSuggestionSpan);
+                            if (spanStart == otherSpanStart && spanEnd == otherSpanEnd) {
+                                suggestionIsDuplicate = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (suggestionIsDuplicate) {
+                        continue;
+                    }
+                    SuggestionInfo suggestionInfo = suggestionInfos[numberOfSuggestions];
+                    suggestionInfo.mSuggestionSpan = suggestionSpan;
+                    suggestionInfo.mSuggestionIndex = suggestionIndex;
+                    suggestionInfo.mSuggestionStart = 0;
+                    suggestionInfo.mSuggestionEnd = suggestion.length();
+                    suggestionInfo.mText.replace(0, suggestionInfo.mText.length(), suggestion);
+                    numberOfSuggestions++;
+                    if (numberOfSuggestions >= suggestionInfos.length) {
+                        return numberOfSuggestions;
+                    }
+                }
+            }
+            return numberOfSuggestions;
+        }
+    }
+
     @VisibleForTesting
     public class SuggestionsPopupWindow extends PinnedPopupWindow implements OnItemClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = SuggestionSpan.SUGGESTIONS_MAX_SIZE;
@@ -2862,8 +3091,6 @@ public class Editor {
         private boolean mCursorWasVisibleBeforeSuggestions;
         private boolean mIsShowingUp = false;
         private SuggestionAdapter mSuggestionsAdapter;
-        private final Comparator<SuggestionSpan> mSuggestionSpanComparator;
-        private final HashMap<SuggestionSpan, Integer> mSpansLengths;
         private final TextAppearanceSpan mHighlightSpan = new TextAppearanceSpan(
                 mTextView.getContext(), mTextView.mTextEditSuggestionHighlightStyle);
         private TextView mAddToDictionaryButton;
@@ -2895,8 +3122,6 @@ public class Editor {
 
         public SuggestionsPopupWindow() {
             mCursorWasVisibleBeforeSuggestions = mCursorVisible;
-            mSuggestionSpanComparator = new SuggestionSpanComparator();
-            mSpansLengths = new HashMap<SuggestionSpan, Integer>();
         }
 
         @Override
@@ -2987,24 +3212,6 @@ public class Editor {
             mIsShowingUp = false;
         }
 
-        private final class SuggestionInfo {
-            int suggestionStart, suggestionEnd; // range of actual suggestion within text
-
-            // the SuggestionSpan that this TextView represents
-            @Nullable
-            SuggestionSpan suggestionSpan;
-
-            int suggestionIndex; // the index of this suggestion inside suggestionSpan
-
-            @Nullable
-            final SpannableStringBuilder text = new SpannableStringBuilder();
-
-            void clear() {
-                suggestionSpan = null;
-                text.clear();
-            }
-        }
-
         private class SuggestionAdapter extends BaseAdapter {
             private LayoutInflater mInflater = (LayoutInflater) mTextView.getContext().
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -3034,53 +3241,9 @@ public class Editor {
                 }
 
                 final SuggestionInfo suggestionInfo = mSuggestionInfos[position];
-                textView.setText(suggestionInfo.text);
+                textView.setText(suggestionInfo.mText);
                 return textView;
             }
-        }
-
-        private class SuggestionSpanComparator implements Comparator<SuggestionSpan> {
-            public int compare(SuggestionSpan span1, SuggestionSpan span2) {
-                final int flag1 = span1.getFlags();
-                final int flag2 = span2.getFlags();
-                if (flag1 != flag2) {
-                    // The order here should match what is used in updateDrawState
-                    final boolean easy1 = (flag1 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
-                    final boolean easy2 = (flag2 & SuggestionSpan.FLAG_EASY_CORRECT) != 0;
-                    final boolean misspelled1 = (flag1 & SuggestionSpan.FLAG_MISSPELLED) != 0;
-                    final boolean misspelled2 = (flag2 & SuggestionSpan.FLAG_MISSPELLED) != 0;
-                    if (easy1 && !misspelled1) return -1;
-                    if (easy2 && !misspelled2) return 1;
-                    if (misspelled1) return -1;
-                    if (misspelled2) return 1;
-                }
-
-                return mSpansLengths.get(span1).intValue() - mSpansLengths.get(span2).intValue();
-            }
-        }
-
-        /**
-         * Returns the suggestion spans that cover the current cursor position. The suggestion
-         * spans are sorted according to the length of text that they are attached to.
-         */
-        private SuggestionSpan[] getSuggestionSpans() {
-            int pos = mTextView.getSelectionStart();
-            Spannable spannable = (Spannable) mTextView.getText();
-            SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
-
-            mSpansLengths.clear();
-            for (SuggestionSpan suggestionSpan : suggestionSpans) {
-                int start = spannable.getSpanStart(suggestionSpan);
-                int end = spannable.getSpanEnd(suggestionSpan);
-                mSpansLengths.put(suggestionSpan, Integer.valueOf(end - start));
-            }
-
-            // The suggestions are sorted according to their types (easy correction first, then
-            // misspelled) and to the length of the text that they cover (shorter first).
-            Arrays.sort(suggestionSpans, mSuggestionSpanComparator);
-            mSpansLengths.clear();
-
-            return suggestionSpans;
         }
 
         @VisibleForTesting
@@ -3166,66 +3329,26 @@ public class Editor {
 
         private boolean updateSuggestions() {
             Spannable spannable = (Spannable) mTextView.getText();
-            SuggestionSpan[] suggestionSpans = getSuggestionSpans();
+            mNumberOfSuggestions =
+                    mSuggestionHelper.getSuggestionInfo(mSuggestionInfos);
+            if (mNumberOfSuggestions == 0) {
+                return false;
+            }
 
-            final int nbSpans = suggestionSpans.length;
-            // Suggestions are shown after a delay: the underlying spans may have been removed
-            if (nbSpans == 0) return false;
-
-            mNumberOfSuggestions = 0;
             int spanUnionStart = mTextView.getText().length();
             int spanUnionEnd = 0;
 
             mMisspelledSpan = null;
-            int underlineColor = 0;
-
-            for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
-                SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
-                final int spanStart = spannable.getSpanStart(suggestionSpan);
-                final int spanEnd = spannable.getSpanEnd(suggestionSpan);
-                spanUnionStart = Math.min(spanStart, spanUnionStart);
-                spanUnionEnd = Math.max(spanEnd, spanUnionEnd);
-
+            for (int i = 0; i < mNumberOfSuggestions; i++) {
+                final SuggestionInfo suggestionInfo = mSuggestionInfos[i];
+                final SuggestionSpan suggestionSpan = suggestionInfo.mSuggestionSpan;
                 if ((suggestionSpan.getFlags() & SuggestionSpan.FLAG_MISSPELLED) != 0) {
                     mMisspelledSpan = suggestionSpan;
                 }
-
-                // The first span dictates the background color of the highlighted text
-                if (spanIndex == 0) underlineColor = suggestionSpan.getUnderlineColor();
-
-                String[] suggestions = suggestionSpan.getSuggestions();
-                int nbSuggestions = suggestions.length;
-                for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
-                    String suggestion = suggestions[suggestionIndex];
-
-                    boolean suggestionIsDuplicate = false;
-                    for (int i = 0; i < mNumberOfSuggestions; i++) {
-                        if (mSuggestionInfos[i].text.toString().equals(suggestion)) {
-                            SuggestionSpan otherSuggestionSpan = mSuggestionInfos[i].suggestionSpan;
-                            final int otherSpanStart = spannable.getSpanStart(otherSuggestionSpan);
-                            final int otherSpanEnd = spannable.getSpanEnd(otherSuggestionSpan);
-                            if (spanStart == otherSpanStart && spanEnd == otherSpanEnd) {
-                                suggestionIsDuplicate = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!suggestionIsDuplicate) {
-                        SuggestionInfo suggestionInfo = mSuggestionInfos[mNumberOfSuggestions];
-                        suggestionInfo.suggestionSpan = suggestionSpan;
-                        suggestionInfo.suggestionIndex = suggestionIndex;
-                        suggestionInfo.text.replace(0, suggestionInfo.text.length(), suggestion);
-
-                        mNumberOfSuggestions++;
-
-                        if (mNumberOfSuggestions == MAX_NUMBER_SUGGESTIONS) {
-                            // Also end outer for loop
-                            spanIndex = nbSpans;
-                            break;
-                        }
-                    }
-                }
+                final int spanStart = spannable.getSpanStart(suggestionSpan);
+                final int spanEnd = spannable.getSpanEnd(suggestionSpan);
+                spanUnionStart = Math.min(spanUnionStart, spanStart);
+                spanUnionEnd = Math.max(spanUnionEnd, spanEnd);
             }
 
             for (int i = 0; i < mNumberOfSuggestions; i++) {
@@ -3244,6 +3367,7 @@ public class Editor {
             mAddToDictionaryButton.setVisibility(addToDictionaryButtonVisibility);
 
             if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
+            final int underlineColor = mSuggestionInfos[0].mSuggestionSpan.getUnderlineColor();
             if (underlineColor == 0) {
                 // Fallback on the default highlight color when the first span does not provide one
                 mSuggestionRangeSpan.setBackgroundColor(mTextView.mHighlightColor);
@@ -3263,21 +3387,21 @@ public class Editor {
         private void highlightTextDifferences(SuggestionInfo suggestionInfo, int unionStart,
                 int unionEnd) {
             final Spannable text = (Spannable) mTextView.getText();
-            final int spanStart = text.getSpanStart(suggestionInfo.suggestionSpan);
-            final int spanEnd = text.getSpanEnd(suggestionInfo.suggestionSpan);
+            final int spanStart = text.getSpanStart(suggestionInfo.mSuggestionSpan);
+            final int spanEnd = text.getSpanEnd(suggestionInfo.mSuggestionSpan);
 
             // Adjust the start/end of the suggestion span
-            suggestionInfo.suggestionStart = spanStart - unionStart;
-            suggestionInfo.suggestionEnd = suggestionInfo.suggestionStart
-                    + suggestionInfo.text.length();
+            suggestionInfo.mSuggestionStart = spanStart - unionStart;
+            suggestionInfo.mSuggestionEnd = suggestionInfo.mSuggestionStart
+                    + suggestionInfo.mText.length();
 
-            suggestionInfo.text.setSpan(mHighlightSpan, 0, suggestionInfo.text.length(),
+            suggestionInfo.mText.setSpan(mHighlightSpan, 0, suggestionInfo.mText.length(),
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Add the text before and after the span.
             final String textAsString = text.toString();
-            suggestionInfo.text.insert(0, textAsString.substring(unionStart, spanStart));
-            suggestionInfo.text.append(textAsString.substring(spanEnd, unionEnd));
+            suggestionInfo.mText.insert(0, textAsString.substring(unionStart, spanStart));
+            suggestionInfo.mText.append(textAsString.substring(spanEnd, unionEnd));
         }
 
         @Override
@@ -3285,69 +3409,14 @@ public class Editor {
             Editable editable = (Editable) mTextView.getText();
             SuggestionInfo suggestionInfo = mSuggestionInfos[position];
 
-            final int spanStart = editable.getSpanStart(suggestionInfo.suggestionSpan);
-            final int spanEnd = editable.getSpanEnd(suggestionInfo.suggestionSpan);
+            final int spanStart = editable.getSpanStart(suggestionInfo.mSuggestionSpan);
+            final int spanEnd = editable.getSpanEnd(suggestionInfo.mSuggestionSpan);
             if (spanStart < 0 || spanEnd <= spanStart) {
                 // Span has been removed
                 hideWithCleanUp();
                 return;
             }
-
-            final String originalText = TextUtils.substring(editable, spanStart, spanEnd);
-
-            // SuggestionSpans are removed by replace: save them before
-            final SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
-                    SuggestionSpan.class);
-            final int length = suggestionSpans.length;
-            final int[] suggestionSpansStarts = new int[length];
-            final int[] suggestionSpansEnds = new int[length];
-            final int[] suggestionSpansFlags = new int[length];
-            for (int i = 0; i < length; i++) {
-                final SuggestionSpan suggestionSpan = suggestionSpans[i];
-                suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
-                suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
-                suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
-
-                // Remove potential misspelled flags
-                int suggestionSpanFlags = suggestionSpan.getFlags();
-                if ((suggestionSpanFlags & SuggestionSpan.FLAG_MISSPELLED) > 0) {
-                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_MISSPELLED;
-                    suggestionSpanFlags &= ~SuggestionSpan.FLAG_EASY_CORRECT;
-                    suggestionSpan.setFlags(suggestionSpanFlags);
-                }
-            }
-
-            final int suggestionStart = suggestionInfo.suggestionStart;
-            final int suggestionEnd = suggestionInfo.suggestionEnd;
-            final String suggestion = suggestionInfo.text.subSequence(
-                    suggestionStart, suggestionEnd).toString();
-            mTextView.replaceText_internal(spanStart, spanEnd, suggestion);
-
-            // Notify source IME of the suggestion pick. Do this before
-            // swaping texts.
-            suggestionInfo.suggestionSpan.notifySelection(
-                    mTextView.getContext(), originalText, suggestionInfo.suggestionIndex);
-
-            // Swap text content between actual text and Suggestion span
-            final String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
-            suggestions[suggestionInfo.suggestionIndex] = originalText;
-
-            // Restore previous SuggestionSpans
-            final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
-            for (int i = 0; i < length; i++) {
-                // Only spans that include the modified region make sense after replacement
-                // Spans partially included in the replaced region are removed, there is no
-                // way to assign them a valid range after replacement
-                if (suggestionSpansStarts[i] <= spanStart &&
-                        suggestionSpansEnds[i] >= spanEnd) {
-                    mTextView.setSpan_internal(suggestionSpans[i], suggestionSpansStarts[i],
-                            suggestionSpansEnds[i] + lengthDifference, suggestionSpansFlags[i]);
-                }
-            }
-
-            // Move cursor at the end of the replaced word
-            final int newCursorPosition = spanEnd + lengthDifference;
-            mTextView.setCursorPosition_internal(newCursorPosition, newCursorPosition);
+            replaceWithSuggestion(suggestionInfo, spanStart, spanEnd);
             hideWithCleanUp();
         }
     }
