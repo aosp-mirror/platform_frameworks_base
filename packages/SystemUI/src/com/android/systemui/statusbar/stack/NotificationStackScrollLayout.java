@@ -3124,7 +3124,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_GROUP_EXPANSION_CHANGED
-                StackStateAnimator.ANIMATION_DURATION_EXPAND_CLICKED,
+                StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_HEADS_UP_APPEAR
                 StackStateAnimator.ANIMATION_DURATION_HEADS_UP_APPEAR,

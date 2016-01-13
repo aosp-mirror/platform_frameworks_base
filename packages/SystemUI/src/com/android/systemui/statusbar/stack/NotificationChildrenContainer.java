@@ -403,31 +403,20 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     public void startAnimationToState(StackScrollState state, StackStateAnimator stateAnimator,
-            boolean withDelays, long baseDelay, long duration) {
+            long baseDelay, long duration) {
         int childCount = mChildren.size();
         ViewState tmpState = new ViewState();
-        int delayIndex = 0;
-        int maxAllowChildCount = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mChildren.get(i);
             StackViewState viewState = state.getViewStateForView(child);
-            int difference = Math.min(StackStateAnimator.DELAY_EFFECT_MAX_INDEX_DIFFERENCE_CHILDREN,
-                    delayIndex);
-            long delay = withDelays
-                    ? difference * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN
-                    : 0;
-            delay = (long) (delay * (mChildrenExpanded ? 1.0f : 0.5f) + baseDelay);
-            stateAnimator.startStackAnimations(child, viewState, state, -1, delay);
+            stateAnimator.startStackAnimations(child, viewState, state, -1, baseDelay);
 
             // layout the divider
             View divider = mDividers.get(i);
             tmpState.initFrom(divider);
             tmpState.yTranslation = viewState.yTranslation - mDividerHeight;
             tmpState.alpha = mChildrenExpanded && viewState.alpha != 0 ? 0.5f : 0;
-            stateAnimator.startViewAnimations(divider, tmpState, delay, duration);
-            if (i < maxAllowChildCount) {
-                delayIndex++;
-            }
+            stateAnimator.startViewAnimations(divider, tmpState, baseDelay, duration);
         }
         if (mGroupOverflowContainer != null) {
             stateAnimator.startViewAnimations(mGroupOverflowContainer, mGroupOverFlowState,

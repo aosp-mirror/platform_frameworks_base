@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * A transform state of a view.
@@ -92,7 +93,7 @@ public class TransformState {
         }
         transformedView.animate()
                 .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
-                .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
+                .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -146,7 +147,7 @@ public class TransformState {
         }
         transformedView.animate()
                 .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
-                .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
+                .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {

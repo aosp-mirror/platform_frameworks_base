@@ -43,17 +43,14 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_STANDARD = 360;
     public static final int ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
-    public static final int ANIMATION_DURATION_EXPAND_CLICKED = 360;
     public static final int ANIMATION_DURATION_DIMMED_ACTIVATED = 220;
     public static final int ANIMATION_DURATION_HEADS_UP_APPEAR = 650;
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 230;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
-    public static final int ANIMATION_DELAY_PER_ELEMENT_EXPAND_CHILDREN = 54;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
     public static final int ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
     public static final int ANIMATION_DELAY_PER_ELEMENT_DARK = 24;
     public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE = 2;
-    public static final int DELAY_EFFECT_MAX_INDEX_DIFFERENCE_CHILDREN = 3;
     public static final int ANIMATION_DELAY_HEADS_UP = 120;
 
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
@@ -263,8 +260,7 @@ public class StackStateAnimator {
                     delay + duration);
         } else if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            row.startChildAnimation(finalState, this, child == mChildExpandingView, delay,
-                    duration);
+            row.startChildAnimation(finalState, this, delay, duration);
         }
     }
 

@@ -371,9 +371,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void startChildAnimation(StackScrollState finalState,
-            StackStateAnimator stateAnimator, boolean withDelays, long delay, long duration) {
+            StackStateAnimator stateAnimator, long delay, long duration) {
         if (mIsSummaryWithChildren) {
-            mChildrenContainer.startAnimationToState(finalState, stateAnimator, withDelays, delay,
+            mChildrenContainer.startAnimationToState(finalState, stateAnimator, delay,
                     duration);
         }
     }
