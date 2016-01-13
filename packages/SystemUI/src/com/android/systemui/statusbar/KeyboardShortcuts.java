@@ -20,48 +20,90 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
-import android.view.Gravity;
+import android.os.Handler;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
+import android.view.KeyboardShortcutInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManager.KeyboardShortcutsReceiver;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+
+import java.util.List;
+
+import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static android.graphics.Color.TRANSPARENT;
+import static android.view.Gravity.TOP;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 
 /**
  * Contains functionality for handling keyboard shortcuts.
  */
 public class KeyboardShortcuts {
+    private static final String TAG = "KeyboardShortcuts";
+
     private Dialog mKeyboardShortcutsDialog;
 
     public KeyboardShortcuts() {}
 
-    public void toggleKeyboardShortcuts(Context context) {
+    public void toggleKeyboardShortcuts(final Context context) {
         if (mKeyboardShortcutsDialog == null) {
-            // Create dialog.
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            final View keyboardShortcutsView = inflater.inflate(
-                    R.layout.keyboard_shortcuts_view, null);
-
-            populateKeyboardShortcuts(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_wrapper));
-            dialogBuilder.setView(keyboardShortcutsView);
-            mKeyboardShortcutsDialog = dialogBuilder.create();
-            mKeyboardShortcutsDialog.setCanceledOnTouchOutside(true);
-
-            // Setup window.
-            Window keyboardShortcutsWindow = mKeyboardShortcutsDialog.getWindow();
-            keyboardShortcutsWindow.setType(
-                    WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
-            keyboardShortcutsWindow.setBackgroundDrawable(
-                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
-            keyboardShortcutsWindow.setGravity(Gravity.TOP);
-            mKeyboardShortcutsDialog.show();
+            Recents.getSystemServices().requestKeyboardShortcuts(context,
+                new KeyboardShortcutsReceiver() {
+                    @Override
+                    public void onKeyboardShortcutsReceived(
+                            final List<KeyboardShortcutGroup> result) {
+                        KeyboardShortcutGroup systemGroup = new KeyboardShortcutGroup(
+                            context.getString(R.string.keyboard_shortcut_group_system));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                            context.getString(R.string.keyboard_shortcut_group_system_home),
+                            '\u2386', KeyEvent.META_META_ON));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                            context.getString(R.string.keyboard_shortcut_group_system_back),
+                            '\u007F', KeyEvent.META_META_ON));
+                        systemGroup.addItem(new KeyboardShortcutInfo(
+                            context.getString(R.string.keyboard_shortcut_group_system_recents),
+                            '\u0009', KeyEvent.META_ALT_ON));
+                        result.add(systemGroup);
+                        Log.i(TAG, "Keyboard shortcuts received: " + String.valueOf(result));
+                        showKeyboardShortcutsDialog(context);
+                    }
+                });
         } else {
             dismissKeyboardShortcutsDialog();
         }
+    }
+
+    private void showKeyboardShortcutsDialog(Context context) {
+        // Create dialog.
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        final View keyboardShortcutsView = inflater.inflate(
+                R.layout.keyboard_shortcuts_view, null);
+
+        populateKeyboardShortcuts(keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_wrapper));
+        dialogBuilder.setView(keyboardShortcutsView);
+        mKeyboardShortcutsDialog = dialogBuilder.create();
+        mKeyboardShortcutsDialog.setCanceledOnTouchOutside(true);
+
+        // Setup window.
+        Window keyboardShortcutsWindow = mKeyboardShortcutsDialog.getWindow();
+        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
+        keyboardShortcutsWindow.setBackgroundDrawable(
+                new ColorDrawable(TRANSPARENT));
+        keyboardShortcutsWindow.setGravity(TOP);
+        keyboardShortcutsView.post(new Runnable() {
+            public void run() {
+                mKeyboardShortcutsDialog.show();
+            }
+        });
     }
 
     public void dismissKeyboardShortcutsDialog() {

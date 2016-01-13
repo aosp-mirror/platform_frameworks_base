@@ -17,6 +17,7 @@
 package com.android.internal.policy;
 
 import com.android.internal.R;
+import com.android.internal.policy.PhoneWindow.PanelFeatureState;
 import com.android.internal.policy.PhoneWindow.PhoneWindowMenuCallback;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.view.RootViewSurfaceTaker;
@@ -27,6 +28,8 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
 import com.android.internal.widget.FloatingToolbar;
+
+import java.util.List;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -48,6 +51,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.InputQueue;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,6 +89,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
 /** @hide */
 public class DecorView extends FrameLayout implements RootViewSurfaceTaker, WindowCallbacks {
@@ -1954,6 +1959,21 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         Resources res = getResources();
         mAvailableWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 res.getConfiguration().screenWidthDp, res.getDisplayMetrics());
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void requestKeyboardShortcuts(List<KeyboardShortcutGroup> list) {
+        final PanelFeatureState st = mWindow.getPanelState(FEATURE_OPTIONS_PANEL, false);
+        if (!mWindow.isDestroyed() && st != null && mWindow.getCallback() != null) {
+            try {
+                mWindow.getCallback().onProvideKeyboardShortcuts(list, st.menu);
+            } catch (AbstractMethodError e) {
+                // We run into this if the app is using supportlib.
+            }
+        }
     }
 
     private static class ColorViewState {

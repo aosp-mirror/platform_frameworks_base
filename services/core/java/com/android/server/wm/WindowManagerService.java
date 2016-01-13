@@ -119,6 +119,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -10267,6 +10268,14 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO(multi-display): The listener is registered on the default display only.
         getDefaultDisplayContentLocked().mDividerControllerLocked.registerDockedStackListener(
                 listener);
+    }
+
+    @Override
+    public void requestAppKeyboardShortcuts(IResultReceiver receiver) {
+        try {
+            getFocusedWindow().mClient.requestAppKeyboardShortcuts(receiver);
+        } catch (RemoteException e) {
+        }
     }
 
     private final class LocalService extends WindowManagerInternal {

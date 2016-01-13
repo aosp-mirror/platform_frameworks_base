@@ -42,6 +42,8 @@ import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.util.List;
+
 /**
  * Abstract base class for a top-level window look and behavior policy.  An
  * instance of this class should be used as the top-level view added to the
@@ -556,6 +558,15 @@ public abstract class Window {
          * @param mode The mode that was just finished.
          */
         public void onActionModeFinished(ActionMode mode);
+
+        /**
+         * Called when Keyboard Shortcuts are requested for the current window.
+         *
+         * @param data The data list to populate with shortcuts.
+         * @param menu The current menu, which may be null.
+         */
+        public void onProvideKeyboardShortcuts(
+                List<KeyboardShortcutGroup> data, @Nullable Menu menu);
     }
 
     /** @hide */

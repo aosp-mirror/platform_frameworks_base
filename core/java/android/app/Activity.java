@@ -62,6 +62,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -71,6 +72,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
@@ -78,23 +80,28 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
+import android.transition.Scene;
+import android.transition.TransitionManager;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SuperNotCalledException;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
+import android.view.KeyboardShortcutInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import com.android.internal.policy.PhoneWindow;
 import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -103,10 +110,17 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
 import android.view.Window;
+import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.Toolbar;
+
+import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.ToolbarActionBar;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -115,6 +129,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static java.lang.Character.MIN_VALUE;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -1592,6 +1608,30 @@ public class Activity extends ContextThemeWrapper
      * @param outContent The assist content to return.
      */
     public void onProvideAssistContent(AssistContent outContent) {
+    }
+
+    @Override
+    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
+        if (menu == null) {
+          return;
+        }
+        KeyboardShortcutGroup group = null;
+        int menuSize = menu.size();
+        for (int i = 0; i < menuSize; ++i) {
+            final MenuItem item = menu.getItem(i);
+            final CharSequence title = item.getTitle();
+            final char alphaShortcut = item.getAlphabeticShortcut();
+            if (title != null && alphaShortcut != MIN_VALUE) {
+                if (group == null) {
+                    group = new KeyboardShortcutGroup(null /* no label */);
+                }
+                group.addItem(new KeyboardShortcutInfo(
+                    title, alphaShortcut, KeyEvent.META_CTRL_ON));
+            }
+        }
+        if (group != null) {
+            data.add(group);
+        }
     }
 
     /**

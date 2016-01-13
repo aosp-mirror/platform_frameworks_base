@@ -3505,6 +3505,7 @@ package android.app {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public void onProvideAssistContent(android.app.assist.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
+    method public void onProvideKeyboardShortcuts(java.util.List<android.view.KeyboardShortcutGroup>, android.view.Menu);
     method public android.net.Uri onProvideReferrer();
     method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method protected void onRestart();
@@ -4189,6 +4190,7 @@ package android.app {
     method public void onPanelClosed(int, android.view.Menu);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public void onProvideKeyboardShortcuts(java.util.List<android.view.KeyboardShortcutGroup>, android.view.Menu);
     method public void onRestoreInstanceState(android.os.Bundle);
     method public android.os.Bundle onSaveInstanceState();
     method public boolean onSearchRequested(android.view.SearchEvent);
@@ -33516,6 +33518,7 @@ package android.service.dreams {
     method public boolean onMenuOpened(int, android.view.Menu);
     method public void onPanelClosed(int, android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public void onProvideKeyboardShortcuts(java.util.List<android.view.KeyboardShortcutGroup>, android.view.Menu);
     method public boolean onSearchRequested(android.view.SearchEvent);
     method public boolean onSearchRequested();
     method public void onWakeUp();
@@ -40406,6 +40409,27 @@ package android.view {
     method public void startTracking(android.view.KeyEvent, java.lang.Object);
   }
 
+  public final class KeyboardShortcutGroup implements android.os.Parcelable {
+    ctor public KeyboardShortcutGroup(java.lang.CharSequence, java.util.List<android.view.KeyboardShortcutInfo>);
+    ctor public KeyboardShortcutGroup(java.lang.CharSequence);
+    method public void addItem(android.view.KeyboardShortcutInfo);
+    method public int describeContents();
+    method public java.util.List<android.view.KeyboardShortcutInfo> getItems();
+    method public java.lang.CharSequence getLabel();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.KeyboardShortcutGroup> CREATOR;
+  }
+
+  public final class KeyboardShortcutInfo implements android.os.Parcelable {
+    ctor public KeyboardShortcutInfo(java.lang.CharSequence, char, int);
+    method public int describeContents();
+    method public char getBaseCharacter();
+    method public java.lang.CharSequence getLabel();
+    method public int getModifiers();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.KeyboardShortcutInfo> CREATOR;
+  }
+
   public abstract class LayoutInflater {
     ctor protected LayoutInflater(android.content.Context);
     ctor protected LayoutInflater(android.view.LayoutInflater, android.content.Context);
@@ -42407,6 +42431,7 @@ package android.view {
     method public abstract boolean onMenuOpened(int, android.view.Menu);
     method public abstract void onPanelClosed(int, android.view.Menu);
     method public abstract boolean onPreparePanel(int, android.view.View, android.view.Menu);
+    method public abstract void onProvideKeyboardShortcuts(java.util.List<android.view.KeyboardShortcutGroup>, android.view.Menu);
     method public abstract boolean onSearchRequested();
     method public abstract boolean onSearchRequested(android.view.SearchEvent);
     method public abstract void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);

@@ -17,6 +17,7 @@
 package android.view;
 
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -370,4 +371,11 @@ interface IWindowManager
      * @param alpha The translucency of the dim layer, between 0 and 1.
      */
     void setResizeDimLayer(boolean visible, int targetStackId, float alpha);
+
+    /**
+     * Requests Keyboard Shortcuts from the displayed window.
+     *
+     * @param receiver The receiver to deliver the results to.
+     */
+    void requestAppKeyboardShortcuts(IResultReceiver receiver);
 }

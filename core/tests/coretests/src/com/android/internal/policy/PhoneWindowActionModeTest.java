@@ -22,6 +22,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,6 +32,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
+
+import java.util.List;
 
 /**
  * Tests {@link PhoneWindow}'s {@link ActionMode} related methods.
@@ -288,6 +291,9 @@ public final class PhoneWindowActionModeTest
 
         @Override
         public void onActionModeFinished(ActionMode mode) {}
+
+        @Override
+        public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {}
     }
 
     private static final class MockActionModeCallback implements ActionMode.Callback {

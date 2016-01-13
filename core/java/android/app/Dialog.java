@@ -21,9 +21,8 @@ import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
-import android.annotation.StringRes;
-
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,11 +43,11 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.KeyboardShortcutGroup;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import com.android.internal.policy.PhoneWindow;
 import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -60,8 +59,10 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.R;
 import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.PhoneWindow;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * Base class for Dialogs.
@@ -1078,6 +1079,13 @@ public class Dialog implements DialogInterface, Window.Callback,
         if (mode == mActionMode) {
             mActionMode = null;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onProvideKeyboardShortcuts(List<KeyboardShortcutGroup> data, Menu menu) {
     }
 
     /**
