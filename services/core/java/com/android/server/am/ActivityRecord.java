@@ -171,7 +171,9 @@ final class ActivityRecord {
     boolean stopped;        // is activity pause finished?
     boolean delayedResume;  // not yet resumed because of stopped app switches?
     boolean finishing;      // activity in pending finish list?
-    boolean configDestroy;  // need to destroy due to config change?
+    boolean deferRelaunchUntilPaused;   // relaunch of activity is being deferred until pause is
+                                        // completed
+    boolean preserveWindowOnDeferredRelaunch; // activity windows are preserved on deferred relaunch
     int configChangeFlags;  // which config values have changed
     boolean keysPaused;     // has key dispatching been paused for it?
     int launchMode;         // the launch mode activity attribute.
@@ -184,9 +186,9 @@ final class ActivityRecord {
     boolean immersive;      // immersive mode (don't interrupt if possible)
     boolean forceNewConfig; // force re-create with new config next time
     int launchCount;        // count of launches since last state
-    long lastLaunchTime;    // time of last lauch of this activity
+    long lastLaunchTime;    // time of last launch of this activity
     boolean isVrActivity;   // is the activity running in VR mode?
-    ArrayList<ActivityContainer> mChildContainers = new ArrayList<ActivityContainer>();
+    ArrayList<ActivityContainer> mChildContainers = new ArrayList<>();
 
     String stringName;      // for caching of toString().
 
@@ -341,8 +343,8 @@ final class ActivityRecord {
                     else TimeUtils.formatDuration(lastVisibleTime, now, pw);
                     pw.println();
         }
-        if (configDestroy || configChangeFlags != 0) {
-            pw.print(prefix); pw.print("configDestroy="); pw.print(configDestroy);
+        if (deferRelaunchUntilPaused || configChangeFlags != 0) {
+            pw.print(prefix); pw.print("deferRelaunchUntilPaused="); pw.print(deferRelaunchUntilPaused);
                     pw.print(" configChangeFlags=");
                     pw.println(Integer.toHexString(configChangeFlags));
         }
@@ -551,7 +553,7 @@ final class ActivityRecord {
         stopped = false;
         delayedResume = false;
         finishing = false;
-        configDestroy = false;
+        deferRelaunchUntilPaused = false;
         keysPaused = false;
         inHistory = false;
         visible = false;

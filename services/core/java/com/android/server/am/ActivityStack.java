@@ -1088,7 +1088,7 @@ final class ActivityStack {
             if (r.finishing) {
                 r.clearOptionsLocked();
             } else {
-                if (r.configDestroy) {
+                if (r.deferRelaunchUntilPaused) {
                     destroyActivityLocked(r, true, "stop-config");
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 } else {
@@ -1114,14 +1114,11 @@ final class ActivityStack {
                     if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG_PAUSE,
                             "Complete pause, no longer waiting: " + prev);
                 }
-                if (prev.configDestroy) {
-                    // The previous is being paused because the configuration
-                    // is changing, which means it is actually stopping...
-                    // To juggle the fact that we are also starting a new
-                    // instance right now, we need to first completely stop
-                    // the current instance before starting the new one.
-                    if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Destroying after pause: " + prev);
-                    destroyActivityLocked(prev, true, "pause-config");
+                if (prev.deferRelaunchUntilPaused) {
+                    // Complete the deferred relaunch that was waiting for pause to complete.
+                    if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
+                    relaunchActivityLocked(prev, prev.configChangeFlags, false,
+                            prev.preserveWindowOnDeferredRelaunch);
                 } else if (wasStopping) {
                     // We are also stopping, the stop request must have gone soon after the pause.
                     // We can't clobber it, because the stop confirmation will not be handled.
@@ -2318,11 +2315,12 @@ final class ActivityStack {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
             if (!isHomeStack() && (fromHome || topTask() != task)) {
-                task.setTaskToReturnTo(fromHome
-                        ? lastStack.topTask() == null
-                                ? HOME_ACTIVITY_TYPE
-                                : lastStack.topTask().taskType
-                        : APPLICATION_ACTIVITY_TYPE);
+                int returnToType = APPLICATION_ACTIVITY_TYPE;
+                if (fromHome && StackId.allowTopTaskToReturnHome(mStackId)) {
+                    returnToType = lastStack.topTask() == null
+                            ? HOME_ACTIVITY_TYPE : lastStack.topTask().taskType;
+                }
+                task.setTaskToReturnTo(returnToType);
             }
         } else {
             task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
@@ -2972,7 +2970,7 @@ final class ActivityStack {
                 r.stopped = true;
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Stop failed; moving to STOPPED: " + r);
                 r.state = ActivityState.STOPPED;
-                if (r.configDestroy) {
+                if (r.deferRelaunchUntilPaused) {
                     destroyActivityLocked(r, true, "stop-except");
                 }
             }
@@ -3403,7 +3401,7 @@ final class ActivityStack {
         }
         mService.resetFocusedActivityIfNeededLocked(r);
 
-        r.configDestroy = false;
+        r.deferRelaunchUntilPaused = false;
         r.frozenBeforeDestroy = false;
 
         if (setState) {
@@ -4175,38 +4173,33 @@ final class ActivityStack {
             r.configChangeFlags |= changes;
             r.startFreezingScreenLocked(r.app, globalChanges);
             r.forceNewConfig = false;
+            preserveWindow &= isResizeOnlyChange(changes);
             if (r.app == null || r.app.thread == null) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + r);
                 destroyActivityLocked(r, true, "config");
             } else if (r.state == ActivityState.PAUSING) {
-                // A little annoying: we are waiting for this activity to
-                // finish pausing.  Let's not do anything now, but just
-                // flag that it needs to be restarted when done pausing.
+                // A little annoying: we are waiting for this activity to finish pausing. Let's not
+                // do anything now, but just flag that it needs to be restarted when done pausing.
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is skipping already pausing " + r);
-                r.configDestroy = true;
+                r.deferRelaunchUntilPaused = true;
+                r.preserveWindowOnDeferredRelaunch = preserveWindow;
                 return true;
             } else if (r.state == ActivityState.RESUMED) {
-                // Try to optimize this case: the configuration is changing
-                // and we need to restart the top, resumed activity.
-                // Instead of doing the normal handshaking, just say
+                // Try to optimize this case: the configuration is changing and we need to restart
+                // the top, resumed activity. Instead of doing the normal handshaking, just say
                 // "restart!".
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching resumed " + r);
-                relaunchActivityLocked(r, r.configChangeFlags, true,
-                        preserveWindow && isResizeOnlyChange(changes));
-                r.configChangeFlags = 0;
+                relaunchActivityLocked(r, r.configChangeFlags, true, preserveWindow);
             } else {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching non-resumed " + r);
-                relaunchActivityLocked(r, r.configChangeFlags, false,
-                        preserveWindow && isResizeOnlyChange(changes));
-                r.configChangeFlags = 0;
+                relaunchActivityLocked(r, r.configChangeFlags, false, preserveWindow);
             }
 
-            // All done...  tell the caller we weren't able to keep this
-            // activity around.
+            // All done...  tell the caller we weren't able to keep this activity around.
             return false;
         }
 
@@ -4298,6 +4291,7 @@ final class ActivityStack {
     private void relaunchActivityLocked(
             ActivityRecord r, int changes, boolean andResume, boolean preserveWindow) {
         if (mService.mSuppressResizeConfigChanges && preserveWindow) {
+            r.configChangeFlags = 0;
             return;
         }
 
@@ -4341,6 +4335,8 @@ final class ActivityStack {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             r.state = ActivityState.PAUSED;
         }
+
+        r.configChangeFlags = 0;
     }
 
     boolean willActivityBeVisibleLocked(IBinder token) {
