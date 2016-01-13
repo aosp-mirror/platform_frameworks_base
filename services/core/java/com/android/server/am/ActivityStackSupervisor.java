@@ -1673,7 +1673,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (task.mResizeable && options != null) {
             int stackId = options.getLaunchStackId();
             if (canUseActivityOptionsLaunchBounds(options, stackId)) {
-                Rect bounds = options.getLaunchBounds();
+                final Rect bounds = TaskRecord.validateBounds(options.getLaunchBounds());
                 task.updateOverrideConfiguration(bounds);
                 if (stackId == INVALID_STACK_ID) {
                     stackId = task.getLaunchStackId();
@@ -1841,6 +1841,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // can have the right fullscreen state.
             bounds = null;
         }
+        bounds = TaskRecord.validateBounds(bounds);
 
         mTmpBounds.clear();
         mTmpConfigs.clear();
@@ -1857,8 +1858,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     fitWithinBounds(tempRect2, bounds);
                     task.updateOverrideConfiguration(tempRect2);
                 } else {
-                    task.updateOverrideConfiguration(tempTaskBounds != null
-                            ? tempTaskBounds : bounds);
+                    task.updateOverrideConfiguration(
+                            tempTaskBounds != null ? tempTaskBounds : bounds);
                 }
             }
 
@@ -1973,6 +1974,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Nothing to do here...
             return true;
         }
+        bounds = TaskRecord.validateBounds(bounds);
 
         if (!mWindowManager.isValidTaskId(task.taskId)) {
             // Task doesn't exist in window manager yet (e.g. was restored from recents).

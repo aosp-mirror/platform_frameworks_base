@@ -4753,8 +4753,7 @@ final class ActivityStack {
     }
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
-        final Rect bounds = task.getLaunchBounds();
-        task.updateOverrideConfiguration(bounds);
+        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
@@ -4810,10 +4809,9 @@ final class ActivityStack {
     }
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
-        final Rect bounds = task.getLaunchBounds();
-        task.updateOverrideConfiguration(bounds);
+        final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
         mWindowManager.setAppTask(
-                r.appToken, task.taskId, mStackId, task.getLaunchBounds(), task.mOverrideConfig);
+                r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig);
         mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }

@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.util.EventLog;
@@ -89,6 +88,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
 
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
+    private boolean mUpdateBoundsAfterRotation = false;
 
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
@@ -239,6 +239,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
     }
 
     void updateDisplayInfo(Rect bounds) {
+        mUpdateBoundsAfterRotation = false;
         if (mDisplayContent != null) {
             for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
@@ -248,6 +249,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
             } else if (mFullscreen) {
                 setBounds(null);
             } else {
+                mUpdateBoundsAfterRotation = true;
                 mTmpRect2.set(mBounds);
                 final int newRotation = mDisplayContent.getDisplayInfo().rotation;
                 if (mRotation == newRotation) {
@@ -265,6 +267,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
      * yet.
      */
     void updateBoundsAfterRotation() {
+        if (!mUpdateBoundsAfterRotation) {
+            return;
+        }
+        mUpdateBoundsAfterRotation = false;
         final int newRotation = getDisplayInfo().rotation;
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
