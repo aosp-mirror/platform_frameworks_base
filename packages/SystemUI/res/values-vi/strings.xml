@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Áp dụng"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Xác nhận cài đặt"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Một số cài đặt màu có thể khiến thiết bị này không sử dụng được. Hãy nhấp vào OK để xác nhận các cài đặt màu này, nếu không những cài đặt này sẽ được đặt lại sau 10 giây."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Pin (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Trình tiết kiệm pin không khả dụng trong khi sạc"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Trình tiết kiệm pin"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Giảm hiệu suất và dữ liệu nền"</string>
 </resources>

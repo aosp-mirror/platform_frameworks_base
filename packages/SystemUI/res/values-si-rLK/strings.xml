@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"යොදන්න"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"සැකසීම් තහවුරු කරන්න"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"සමහර වර්ණ සැකසීම් මෙම උපාංගය භාවිත කළ නොහැකි තත්ත්වයට පත් කළ හැකිය. මෙම වර්ණ සැකසීම් තහවුරු කිරීමට හරි ක්ලික් කරන්න, නැතහොත් මෙම සැකසීම් තත්පර 10කට පසුව යළි සකසනු ඇත."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"බැටරිය (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ආරෝපණය අතරතුර බැටරි සුරැකුම ලබා ගත නොහැකිය."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"බැටරි සුරැකුම"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ක්‍රියාකාරිත්වය සහ පසුබිම් දත්ත අඩු කරන්න"</string>
 </resources>

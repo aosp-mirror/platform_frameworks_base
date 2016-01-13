@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Ilapat"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Kumpirmahin ang mga setting"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Maaaring hindi magamit ang device na ito dahil sa ilang setting ng kulay. I-click ang OK upang kumpirmahin ang mga setting ng kulay na ito, kung hindi ay mare-reset ang mga setting na ito pagkatapos ng 10 segundo."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Baterya (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Binabawasan ang pagganap at data sa background"</string>
 </resources>

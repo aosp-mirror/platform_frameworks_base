@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Alkalmaz"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Beállítások megerősítése"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Bizonyos színbeállítások használhatatlanná tehetik ezt az eszközt. A színbeállítás megerősítéséhez kattintson az OK lehetőségre, máskülönben a rendszer 10 másodpercen belül visszaáll a korábbira."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Akkumulátor (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akkumulátorkímélő mód"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
 </resources>

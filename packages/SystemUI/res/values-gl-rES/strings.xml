@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirmar configuración"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Algunhas opcións de configuración de cor poden facer que este dispositivo sexa inutilizable. Fai clic en Aceptar para confirmar esta configuración de cor; en caso contrario, a configuración restablecerase tras 10 segundos."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Batería (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A función aforro de batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Aforro de batería"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce o rendemento e os datos en segundo plano"</string>
 </resources>

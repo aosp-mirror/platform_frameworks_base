@@ -474,4 +474,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Zastosuj"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Potwierdź ustawienia"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Niektóre ustawienia kolorów mogą utrudniać korzystanie z urządzenia. Kliknij OK, by potwierdzić te ustawienia kolorów. Jeśli tego nie zrobisz, zostaną one zresetowane po 10 sekundach."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Bateria (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Oszczędzanie baterii nie jest dostępne podczas ładowania"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Oszczędzanie baterii"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Zmniejsza wydajność i ogranicza dane w tle"</string>
 </resources>

@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"వర్తింపజేయి"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"సెట్టింగ్‌లను నిర్ధారించండి"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"కొన్ని రంగు సెట్టింగ్‌ల వలన ఈ పరికరం ఉపయోగించలేని విధంగా అయిపోవచ్చు. ఈ రంగు సెట్టింగ్‌లను నిర్ధారించడానికి సరే క్లిక్ చేయండి లేదంటే ఈ సెట్టింగ్‌లు 10 సెకన్ల తర్వాత రీసెట్ చేయబడతాయి."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"బ్యాటరీ (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ఛార్జ్ అవుతున్న సమయంలో బ్యాటరీ సేవర్ అందుబాటులో ఉండదు"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"బ్యాటరీ సేవర్"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
 </resources>

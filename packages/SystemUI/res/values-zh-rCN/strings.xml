@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"应用"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"确认设置"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"部分颜色设置可能会导致此设备无法使用。请点击“确定”确认这些颜色设置，否则，系统将在 10 秒后重置这些设置。"</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"电池 (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充电过程中无法使用节电助手"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"节电助手"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"降低性能并限制后台流量"</string>
 </resources>

@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"套用"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"確認設定"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"部分顏色設定可能會造成這部裝置無法使用。請按一下 [確定] 來確認您要使用這類顏色設定，否則系統將在 10 秒後重設這些設定。"</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"電池 (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用節約耗電量模式"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"節約耗電量"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"降低效能並限制背景資料傳輸"</string>
 </resources>

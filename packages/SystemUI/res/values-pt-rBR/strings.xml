@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirmar configurações"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Algumas configurações de cor podem tornar o dispositivo inutilizável. Clique em \"OK\" para confirmar essas configurações de cor; caso contrário, essas configurações serão redefinidas após 10 segundos."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Bateria (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A Economia de bateria não fica disponível durante o carregamento"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economia de bateria"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduz o desempenho e os dados em segundo plano"</string>
 </resources>

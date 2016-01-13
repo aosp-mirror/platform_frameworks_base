@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Прилагане"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Потвърждаване на настройките"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Някои настройки за цветовете могат да направят това устройство неизползваемо. За да ги потвърдите, кликнете върху „OK“. В противен случай те ще бъдат нулирани след 10 секунди."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Батерия (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режимът за запазване на батерията не е налице при зареждане"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим за запазване на батерията"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Намалява ефективността и данните на заден план"</string>
 </resources>

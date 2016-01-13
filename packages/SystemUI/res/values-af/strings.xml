@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Pas toe"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Bevestig instellings"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Sommige kleurinstellings kan hierdie toestel onbruikbaar maak. Klik OK om hierdie kleurinstellings te bevestig; andersins sal hierdie instellings ná 10 sekondes teruggestel word."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Battery (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterybespaarder is nie beskikbaar wanneer gelaai word nie"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterybespaarder"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Verminder werkverrigting en agtergronddata"</string>
 </resources>

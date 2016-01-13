@@ -474,4 +474,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Taikyti"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Nustatymų patvirtinimas"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Dėl kai kurių spalvų nustatymų įrenginys gali būti netinkamas naudoti. Spustelėkite „Gerai“, kad patvirtintumėte šiuos spalvų nustatymus. Kitaip šie nustatymai bus nustatyti iš naujo po 10 sekundžių."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Akumuliatorius (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliatoriaus tausojimo priemonė"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
 </resources>

@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"લાગુ કરો"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"સેટિંગ્સની પુષ્ટિ કરો"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"કેટલીક રંગ સેટિંગ્સ આ ઉપકરણને બિનઉપયોગી બનાવી શકે છે. આ રંગ સેટિંગ્સની પુષ્ટિ કરવા માટે ઑકે ક્લિક કરો, અન્યથા 10 સેકંડ પછી આ સેટિંગ્સ ફરીથી સેટ થશે."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"બૅટરી (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ચાર્જિંગ દરમિયાન બૅટરી બચતકર્તા ઉપલબ્ધ નથી"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"બૅટરી બચતકર્તા"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"પ્રદર્શન અને પૃષ્ઠભૂમિ ડેટા ઘટાડે છે"</string>
 </resources>
