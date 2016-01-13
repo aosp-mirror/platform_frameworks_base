@@ -319,10 +319,30 @@
 
     <style name="TextAppearance.NotificationGuts">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/notification_guts_btn_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Header">
+        <item name="android:alpha">.38</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Secondary">
+        <item name="android:alpha">.54</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Primary">
+        <item name="android:alpha">.87</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextAppearance.NotificationGuts.Button">
+        <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:gravity">center</item>
+        <item name="android:textColor">@*android:color/material_deep_teal_500</item>
     </style>
 
 </resources>
