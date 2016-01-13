@@ -578,7 +578,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     node->setPropertyFieldsDirty(RenderNode::GENERIC);
 
 #if HWUI_NEW_OPS
-    LOG_ALWAYS_FATAL("unsupported");
+    // TODO: support buildLayer
 #else
     mCanvas->markLayersAsBuildLayers();
     mCanvas->flushLayerUpdates();
