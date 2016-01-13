@@ -116,7 +116,7 @@ final class TvInputHal implements Handler.Callback {
 
     public void close() {
         synchronized (mLock) {
-            if (mPtr != 0l) {
+            if (mPtr != 0L) {
                 nativeClose(mPtr);
             }
         }

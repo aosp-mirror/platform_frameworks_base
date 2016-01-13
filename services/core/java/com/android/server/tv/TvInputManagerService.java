@@ -465,7 +465,7 @@ public final class TvInputManagerService extends SystemService {
         try {
             context = mContext.createPackageContextAsUser("android", 0, user);
         } catch (NameNotFoundException e) {
-            Slog.e(TAG, "failed to create package contenxt as user " + user);
+            Slog.e(TAG, "failed to create package context as user " + user);
             context = mContext;
         }
         return context.getContentResolver();
