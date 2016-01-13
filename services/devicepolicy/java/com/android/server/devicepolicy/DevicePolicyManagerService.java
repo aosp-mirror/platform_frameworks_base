@@ -2237,6 +2237,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
             case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
             case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
                 return;
         }
         throw new IllegalArgumentException("Invalid quality constant: 0x"
@@ -3467,6 +3468,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             quality = getPasswordQuality(null, userHandle, false);
+            if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
+                quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+            }
             if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
                 int realQuality = LockPatternUtils.computePasswordQuality(password);
                 if (realQuality < quality
