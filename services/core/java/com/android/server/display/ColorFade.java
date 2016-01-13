@@ -587,16 +587,16 @@ final class ColorFade {
                     Slog.e(TAG, "Unable to create surface.", ex);
                     return false;
                 }
+
+                mSurfaceControl.setLayerStack(mDisplayLayerStack);
+                mSurfaceControl.setSize(mDisplayWidth, mDisplayHeight);
+                mSurface = new Surface();
+                mSurface.copyFrom(mSurfaceControl);
+
+                mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
+                        mDisplayId, mSurfaceControl);
+                mSurfaceLayout.onDisplayTransaction();
             }
-
-            mSurfaceControl.setLayerStack(mDisplayLayerStack);
-            mSurfaceControl.setSize(mDisplayWidth, mDisplayHeight);
-            mSurface = new Surface();
-            mSurface.copyFrom(mSurfaceControl);
-
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManagerInternal,
-                    mDisplayId, mSurfaceControl);
-            mSurfaceLayout.onDisplayTransaction();
         } finally {
             SurfaceControl.closeTransaction();
         }
