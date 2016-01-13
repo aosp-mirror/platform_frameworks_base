@@ -1385,9 +1385,10 @@ final class ActivityStack {
         final int focusedStackId = focusedStack.mStackId;
 
         if (mStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID) {
+                && hasVisibleBehindActivity() && focusedStackId == HOME_STACK_ID
+                && !focusedStack.topActivity().fullscreen) {
             // The fullscreen stack should be visible if it has a visible behind activity behind
-            // the home stack that will be translucent.
+            // the home stack that is translucent.
             return true;
         }
 
@@ -1507,8 +1508,7 @@ final class ActivityStack {
                 aboveTop = false;
                 // mLaunchingBehind: Activities launching behind are at the back of the task stack
                 // but must be drawn initially for the animation as though they were visible.
-                if ((!behindFullscreenActivity || r.mLaunchTaskBehind)
-                        && okToShowLocked(r)) {
+                if ((!behindFullscreenActivity || r.mLaunchTaskBehind) && okToShowLocked(r)) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                             "Make visible? " + r + " finishing=" + r.finishing
                             + " state=" + r.state);
@@ -1607,7 +1607,7 @@ final class ActivityStack {
         }
         // Now for any activities that aren't visible to the user, make sure they no longer are
         // keeping the screen frozen.
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r);
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
         try {
             setVisible(r, false);
             switch (r.state) {
@@ -3713,9 +3713,9 @@ final class ActivityStack {
     void releaseBackgroundResources(ActivityRecord r) {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            if (r == topRunningActivityLocked()) {
+            if (r == topRunningActivityLocked() && isStackVisibleLocked()) {
                 // Don't release the top activity if it has requested to run behind the next
-                // activity.
+                // activity and the stack is currently visible.
                 return;
             }
             if (DEBUG_STATES) Slog.d(TAG_STATES, "releaseBackgroundResources activtyDisplay=" +
