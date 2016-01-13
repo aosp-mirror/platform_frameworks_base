@@ -297,9 +297,9 @@ LOCAL_SRC_FILES += \
     tests/microbench/PathParserBench.cpp \
     tests/microbench/ShadowBench.cpp
 
-ifeq (true, $(HWUI_NEW_OPS))
-    LOCAL_SRC_FILES += \
-        tests/microbench/FrameBuilderBench.cpp
-endif
+# ifeq (true, $(HWUI_NEW_OPS))
+#     LOCAL_SRC_FILES += \
+#         tests/microbench/FrameBuilderBench.cpp
+# endif
 
 include $(BUILD_EXECUTABLE)
