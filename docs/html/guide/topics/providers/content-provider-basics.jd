@@ -407,7 +407,7 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 <!-- Constructing the query -->
 <h3 id="Query">Constructing the query</h3>
 <p>
-    The next step in retrieving data a provider is to construct a query. This first snippet
+    The next step in retrieving data from a provider is to construct a query. This first snippet
     defines some variables for accessing the User Dictionary Provider:
 </p>
 <pre class="prettyprint">
