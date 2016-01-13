@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kiểm soát thu phóng màn hình"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kiểm soát vị trí và mức thu phóng của màn hình."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Thực hiện cử chỉ"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Có thể nhấn, vuốt, chụm và thực hiện các cử chỉ khác."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"trở thành thanh trạng thái"</string>

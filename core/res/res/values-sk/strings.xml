@@ -258,6 +258,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ovládanie priblíženia obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte úroveň priblíženia/oddialenia obrazovky a umiestnenie"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"vydávanie sa za stavový riadok"</string>

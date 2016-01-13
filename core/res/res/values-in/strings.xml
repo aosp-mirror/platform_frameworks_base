@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Meliputi data pribadi seperti nomor kartu kredit dan sandi."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Mengontrol perbesaran layar"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Mengontrol tingkat zoom dan pemosisian layar."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Melakukan isyarat"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Dapat mengetuk, menggesek, mencubit, dan melakukan isyarat lainnya."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"nonaktifkan atau ubah bilah status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Mengizinkan apl menonaktifkan bilah status atau menambah dan menghapus ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"jadikan bilah status"</string>

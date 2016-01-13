@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ຮວມທັງຂໍ້ມູນສ່ວນໂຕເຊັ່ນ: ເລກບັດເຄຣດິດ ແລະລະຫັດຜ່ານ."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ຄວບຄຸມການຂະຫຍາຍຈໍສະແດງຜົນ"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ຄວບຄຸມລະດັບການຊູມ ແລະການວາງຕຳແໜ່ງຂອງຈໍສະແດງຜົນ."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ດຳເນີນທ່າທາງຕ່າງໆ"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ສາມາດແຕະ, ປັດນີ້ວມື, ຢິບນິ້ວມື ແລະ ດຳເນີນທ່າທາງອື່ນ."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>

@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclou dades personals com ara números de targetes de crèdit i contrasenyes."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controla l\'ampliació de la pantalla"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el nivell i el posicionament del zoom de la pantalla."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Utilitza gestos"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Pot tocar, lliscar, pessigar i utilitzar altres gestos."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"aparèixer a la barra d\'estat"</string>

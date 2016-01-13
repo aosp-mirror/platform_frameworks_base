@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर आणि संकेतशब्‍द यासारखा वैयक्तिक डेटा समाविष्‍ट करते."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन विस्तृतीकरण नियंत्रित करा"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शनाचा झूम स्तर आणि स्थिती निर्धारण नियंत्रित करा."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"जेश्चर करा"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"टॅप, स्वाइप, पिंच आणि इतर जेश्चर करू शकते."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्टेटस बार अक्षम करा किंवा सुधारित करा"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्टेटस बार अक्षम करण्यासाठी किंवा सिस्टीम चिन्हे जोडण्यासाठी आणि काढण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्टेटस बार होऊ द्या"</string>

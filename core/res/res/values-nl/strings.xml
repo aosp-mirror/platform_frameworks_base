@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Schermvergroting bedienen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Bedien het zoomniveau en de positionering van het scherm."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gebaren uitvoeren"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Kan tikken, vegen, samenknijpen en andere gebaren uitvoeren."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"statusbalk uitschakelen of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Hiermee kan de app de statusbalk uitschakelen of systeempictogrammen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"de statusbalk zijn"</string>

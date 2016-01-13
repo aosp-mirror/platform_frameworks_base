@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Incluye datos personales, como números de tarjeta de crédito y contraseñas."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlar la ampliación de pantalla"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controla el posicionamiento y el nivel de zoom de la pantalla."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Usar gestos"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Permite presionar, deslizar, pellizcar y usar otros gestos."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar o modificar la barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite que la aplicación inhabilite la barra de estado o que agregue y elimine íconos del sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"aparecer en la barra de estado"</string>

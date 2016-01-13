@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Ներառում է անձնական տվյալներ, ինչպիսիք են վարկային քարտերի համարները և գաղտնաբառերը:"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ցուցասարքի խոշորացման կառավարում"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ցուցասարքի մասշտաբավորման և դիրքավորման կառավարում:"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Կատարել ժեստեր"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Կարող է հպել, թերթել, պտղունցել և կատարել այլ ժեստեր:"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"անջատել կամ փոփոխել կարգավիճակի գոտին"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"լինել կարգավիճակի գոտի"</string>

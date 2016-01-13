@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包含个人数据，例如信用卡号和密码。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制显示内容放大功能"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控制显示内容的缩放级别和位置。"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"执行手势"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可执行点按、滑动、双指张合等手势。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"用作状态栏"</string>

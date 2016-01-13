@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"اطلاعات شخصی مانند شماره کارت اعتباری و گذرواژه‌ها را لحاظ می‌کند."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"کنترل درشت‌نمایی نمایشگر"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"سطح و موقعیت بزرگ‌نمایی نمایشگر را کنترل کنید."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"اجرای اشاره‌ها"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"می‌توانید ضربه بزنید، انگشتتان را تند بکشید، انگشتانتان را به هم نزدیک یا از هم دور کنید و اشاره‌های دیگری اجرا کنید."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"غیرفعال کردن یا تغییر نوار وضعیت"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"‏به برنامه اجازه می‎دهد تا نوار وضعیت را غیرفعال کند یا نمادهای سیستم را اضافه یا حذف کند."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"نوار وضعیت باشد"</string>

@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"រួម​បញ្ចូល​ទិន្នន័យ​ផ្ទាល់​ខ្លួន​ ដូចជា​លេខ​កាត​ឥណទាន និង​ពាក្យ​សម្ងាត់។"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"គ្រប់គ្រងការពង្រីកអេក្រង់"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"គ្រប់គ្រងការកំណត់ទីតាំង និងកម្រិតពង្រីករបស់អេក្រង់"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ធ្វើកាយវិការ"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"អាចប៉ះ អូស ច្បិច និងធ្វើកាយវិការផ្សេងទៀត"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ធ្វើជារបារស្ថានភាព"</string>

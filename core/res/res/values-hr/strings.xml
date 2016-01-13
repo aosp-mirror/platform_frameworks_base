@@ -257,6 +257,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Uključuje osobne podatke kao što su brojevi kreditnih kartica i zaporke."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrola uvećanja zaslona"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolira razinu zumiranja i položaj zaslona."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvođenje pokreta"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Može dodirnuti, prijeći prstom, spojiti prste i izvoditi druge pokrete."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogućavanje ili izmjena trake statusa"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikaciji omogućuje onemogućavanje trake statusa ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"biti traka statusa"</string>

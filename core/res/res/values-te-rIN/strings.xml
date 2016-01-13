@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"డిస్‌ప్లే మాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"డిస్‌ప్లే జూమ్ స్థాయి మరియు స్థానాన్ని నియంత్రిస్తుంది."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"సంజ్ఞలను చేయడం"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"స్థితి పట్టీగా ఉండటం"</string>

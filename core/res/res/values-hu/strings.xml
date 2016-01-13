@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Beleértve a személyes adatokat, például a hitelkártyaszámokat és jelszavakat."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"A kijelző nagyításának vezérlése"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"A kijelző nagyítási/kicsinyítési szintjének és pozíciójának vezérlése"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Kézmozdulatok végrehajtása"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Koppintás, ujjak gyors csúsztatása és összehúzása, illetve egyéb kézmozdulatok végrehajtása."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"állapotsor kikapcsolása vagy módosítása"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Lehetővé teszi az alkalmazás számára az állapotsor kikapcsolását, illetve rendszerikonok hozzáadását és eltávolítását."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"az állapotsor szerepének átvétele"</string>

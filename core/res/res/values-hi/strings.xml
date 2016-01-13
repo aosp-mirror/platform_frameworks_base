@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"क्रेडिट कार्ड नंबर और पासवर्ड जैसा व्यक्तिगत डेटा शामिल होता है."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन आवर्धन नियंत्रित करें"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शन का ज़ूम स्‍तर और स्‍थिति निर्धारण नियंत्रित करें."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"हावभाव निष्पादित करें"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"इस सेवा के द्वारा टैप किया जा सकता है, स्वाइप किया जा सकता है, पिंच किया जा सकता है और अन्य हावभाव निष्पादित किए जा सकते हैं."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्‍थिति बार अक्षम या बदलें"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ऐप्स  को स्थिति बार अक्षम करने या सिस्‍टम आइकन को जोड़ने या निकालने देता है."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"स्‍थिति बार होने दें"</string>
