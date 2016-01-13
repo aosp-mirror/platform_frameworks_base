@@ -409,22 +409,26 @@
     <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
     <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">true</bool>
 
-    <!-- Integer specifying the basic autojoin parameters -->
+    <!-- Integer specifying the basic Quality Network Selection parameters -->
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
-    <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">5</integer>
+    <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">40</integer>
     <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_high">16</integer>
     <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_low">10</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_threshold">-75</integer>
-    <integer translatable="false" name="config_wifi_framework_5GHz_preference_penalty_factor">2</integer>
-
+    <integer translatable="false" name="config_wifi_framework_RSSI_SCORE_OFFSET">85</integer>
+    <integer translatable="false" name="config_wifi_framework_RSSI_SCORE_SLOPE">4</integer>
+    <integer translatable="false" name="config_wifi_framework_SAME_BSSID_AWARD">24</integer>
+    <integer translatable="false" name="config_wifi_framework_LAST_SELECTION_AWARD">480</integer>
+    <integer translatable="false" name="config_wifi_framework_PASSPOINT_SECURITY_AWARD">40</integer>
+    <integer translatable="false" name="config_wifi_framework_SECURITY_AWARD">80</integer>
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-72</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-60</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-87</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-77</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-65</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-70</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-57</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-85</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-73</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-60</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
@@ -498,7 +502,7 @@
     <integer translatable="false" name="config_wifi_framework_network_black_list_min_time_milli">120000</integer>
 
     <!-- Integer indicating RSSI boost given to current network -->
-    <integer translatable="false" name="config_wifi_framework_current_network_boost">25</integer>
+    <integer translatable="false" name="config_wifi_framework_current_network_boost">16</integer>
 
     <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
     <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
