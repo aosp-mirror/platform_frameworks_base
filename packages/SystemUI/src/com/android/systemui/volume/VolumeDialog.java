@@ -27,6 +27,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -559,7 +560,13 @@ public class VolumeDialog {
                 : R.drawable.ic_volume_expand_animation;
         if (res == mExpandButtonRes) return;
         mExpandButtonRes = res;
-        mExpandButton.setImageResource(res);
+        if (hasTouchFeature()) {
+            mExpandButton.setImageResource(res);
+        } else {
+            // if there is no touch feature, show the volume ringer instead
+            mExpandButton.setImageResource(R.drawable.ic_volume_ringer);
+            mExpandButton.setBackgroundResource(0);  // remove gray background emphasis
+        }
         mExpandButton.setContentDescription(mContext.getString(mExpanded ?
                 R.string.accessibility_volume_collapse : R.string.accessibility_volume_expand));
     }
@@ -835,6 +842,11 @@ public class VolumeDialog {
             recheckH(null);
         }
         rescheduleTimeoutH();
+    }
+
+    private boolean hasTouchFeature() {
+        final PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
     }
 
     private final VolumeDialogController.Callbacks mControllerCallbackH
