@@ -328,7 +328,7 @@ content://user_dictionary/words
 </pre>
 <p>
     where the <code>user_dictionary</code> string is the provider's authority, and
-    <code>words</code> string is the table's path. The string
+    the <code>words</code> string is the table's path. The string
     <code>content://</code> (the <strong>scheme</strong>) is always present,
     and identifies this as a content URI.
 </p>
