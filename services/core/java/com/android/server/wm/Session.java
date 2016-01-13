@@ -200,6 +200,11 @@ final class Session extends IWindowSession.Stub
                 deferTransactionUntilFrame, outFrame);
     }
 
+    @Override
+    public void prepareToReplaceChildren(IBinder appToken) {
+        mService.setReplacingChildren(appToken);
+    }
+
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags,
             int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,

@@ -230,4 +230,9 @@ public final class BridgeWindowSession implements IWindowSession {
     public void pokeDrawLock(IBinder window) {
         // pass for now.
     }
+
+    @Override
+    public void prepareToReplaceChildren(IBinder appToken) {
+        // pass for now.
+    }
 }

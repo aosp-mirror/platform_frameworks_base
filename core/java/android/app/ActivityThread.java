@@ -4325,6 +4325,21 @@ public final class ActivityThread {
 
         r.activity.mChangingConfigurations = true;
 
+        // If we are preserving the main window across relaunches we would also like to preserve
+        // the children. However the client side view system does not support preserving
+        // the child views so we notify the window manager to expect these windows to
+        // be replaced and defer requests to destroy or hide them. This way we can achieve
+        // visual continuity. It's important that we do this here prior to pause and destroy
+        // as that is when we may hide or remove the child views.
+        try {
+            if (r.mPreserveWindow) {
+                WindowManagerGlobal.getWindowSession().prepareToReplaceChildren(r.token);
+            }
+        } catch (RemoteException e) {
+            // If the system process has died, it's game over for everyone.
+        }
+
+
         // Need to ensure state is saved.
         if (!r.paused) {
             performPauseActivity(r.token, false, r.isPreHoneycomb());
