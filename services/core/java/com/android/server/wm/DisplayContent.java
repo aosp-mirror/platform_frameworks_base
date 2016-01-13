@@ -222,6 +222,10 @@ class DisplayContent {
         out.set(left, top, left + width, top + height);
     }
 
+    void getContentRect(Rect out) {
+        out.set(mContentRect);
+    }
+
     /** Refer to {@link WindowManagerService#attachStack(int, int, boolean)} */
     void attachStack(TaskStack stack, boolean onTop) {
         if (stack.mStackId == HOME_STACK_ID) {

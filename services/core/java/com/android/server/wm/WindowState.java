@@ -1469,10 +1469,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void applyScrollIfNeeded() {
         final Task task = getTask();
-        if (task != null && task.isTwoFingerScrollMode()) {
-            task.getDimBounds(mTmpRect);
-            mXOffset = mTmpRect.left;
-            mYOffset = mTmpRect.top;
+        if (task != null) {
+            task.applyScrollToWindowIfNeeded(this);
         }
     }
 
