@@ -277,6 +277,8 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"ອັດຕະໂນມັດ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
+    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ປ່ຽນ​ເປັນ​ການ​ເຂົ້າ​ລະ​ຫັດ​ໄຟ​ລ໌"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ປ່ຽນ..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ໄຟ​ລ໌​ເຂົ້າ​ລະ​ຫັດ​ຮຽບ​ຮ້ອຍ​ແລ້ວ"</string>
@@ -293,4 +295,18 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ການ​ປັບ​ແຕ່ງ​ສີ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"​ຄຸນ​ສົມ​ບັດ​ນີ້​ກຳ​ລັງ​ຢູ່​ໃນ​ການ​ທົດ​ລອງ​ແລະ​ອາດ​ມີ​ຜົນ​ຕໍ່​ປະ​ສິດ​ທິ​ພາບ."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"ຖືກແທນໂດຍ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - ​ເຫຼືອປະ​ມານ <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈຶ່ງ​ຈະ​ເຕັມ"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ​ຈຶ່ງ​ຈະ​ເຕັມ​ໂດຍສາກ​ດ້ວຍ​ໄຟ AC"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ຈຶ່ງ​ຈະ​ເຕັມ​ໂດຍສາກ​ດ້ວຍ USB"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ​ຈຶ່ງ​ຈະ​ເຕັມ​ໂດຍ​ສາກ​ແບບ​ໄຮ້​ສາຍ"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"ບໍ່ຮູ້ຈັກ"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"ກຳລັງສາກໄຟ"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"ກຳ​​ລັງ​ສາກ​ຜ່ານ​ໝໍ້​ໄຟ"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"ກຳ​ລັງ​ສາກ​ຜ່ານ USB"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"ກຳ​ລັງ​ສາກ​ໄຮ້​ສາຍ"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"ບໍ່ໄດ້ສາກໄຟ"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ບໍ່ໄດ້ສາກໄຟ"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"ເຕັມ"</string>
 </resources>
