@@ -474,10 +474,12 @@ public class KeyguardViewMediator extends SystemUI {
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
 
+        @Override
         public void userActivity() {
             KeyguardViewMediator.this.userActivity();
         }
 
+        @Override
         public void keyguardDone(boolean strongAuth) {
             if (!mKeyguardDonePending) {
                 KeyguardViewMediator.this.keyguardDone(true /* authenticated */);
@@ -487,6 +489,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
         }
 
+        @Override
         public void keyguardDoneDrawing() {
             mHandler.sendEmptyMessage(KEYGUARD_DONE_DRAWING);
         }
@@ -1248,7 +1251,9 @@ public class KeyguardViewMediator extends SystemUI {
                 if (DEBUG) Log.d(TAG, "received DELAYED_KEYGUARD_ACTION with seq = "
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
                 synchronized (KeyguardViewMediator.this) {
-                    doKeyguardLocked(null);
+                    if (mDelayedShowingSequence == sequence) {
+                        doKeyguardLocked(null);
+                    }
                 }
             } else if (DELAYED_LOCK_PROFILE_ACTION.equals(intent.getAction())) {
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, 0);
@@ -1698,6 +1703,7 @@ public class KeyguardViewMediator extends SystemUI {
         mHandler.removeMessages(KEYGUARD_DONE_PENDING_TIMEOUT);
     }
 
+    @Override
     public void onBootCompleted() {
         mUpdateMonitor.dispatchBootCompleted();
         synchronized (this) {
