@@ -67,6 +67,7 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
+import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -1023,6 +1024,10 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)) {
                 mSystemServiceManager.startService(TvInputManagerService.class);
+            }
+
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+                mSystemServiceManager.startService(MediaResourceMonitorService.class);
             }
 
             if (!disableNonCoreServices) {

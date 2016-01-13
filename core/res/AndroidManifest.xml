@@ -385,6 +385,7 @@
     <protected-broadcast android:name="com.android.server.device_idle.STEP_LIGHT_IDLE_STATE" />
     <protected-broadcast android:name="com.android.server.Wifi.action.TOGGLE_PNO" />
     <protected-broadcast android:name="intent.action.ACTION_RF_BAND_INFO" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_RESOURCE_GRANTED" />
 
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED" />
     <protected-broadcast android:name="android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL" />
@@ -2827,6 +2828,12 @@
     @hide -->
     <permission android:name="android.permission.ACCESS_EPHEMERAL_APPS"
             android:protectionLevel="signature" />
+
+    <!-- Allows receiving the usage of media resource e.g. video/audio codec and
+         graphic memory.
+         @hide -->
+    <permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE"
+                android:protectionLevel="signature|privileged" />
 
     <application android:process="system"
                  android:persistent="true"

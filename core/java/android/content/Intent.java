@@ -3034,6 +3034,24 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
 
     /**
+     * Broadcast Action: Sent when media resource is granted.
+     * <p>
+     * {@link #EXTRA_PACKAGES} specifies the packages on the process holding the media resource
+     * granted.
+     * </p>
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     * <p class="note">
+     * This requires the RECEIVE_MEDIA_RESOURCE_USAGE permission.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String ACTION_MEDIA_RESOURCE_GRANTED =
+            "android.intent.action.MEDIA_RESOURCE_GRANTED";
+
+    /**
      * Activity Action: Allow the user to select and return one or more existing
      * documents. When invoked, the system will display the various
      * {@link DocumentsProvider} instances installed on the device, letting the
@@ -4077,6 +4095,34 @@ public class Intent implements Parcelable, Cloneable {
      * Optional boolean extra indicating whether quiet mode has been switched on or off.
      */
     public static final String EXTRA_QUIET_MODE = "android.intent.extra.QUIET_MODE";
+
+    /**
+     * Used as an int extra field in {@link android.content.Intent#ACTION_MEDIA_RESOURCE_GRANTED}
+     * intents to specify the resource type granted. Possible values are
+     * {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC} or
+     * {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_MEDIA_RESOURCE_TYPE =
+            "android.intent.extra.MEDIA_RESOURCE_TYPE";
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE}
+     * to represent that a video codec is allowed to use.
+     *
+     * @hide
+     */
+    public static final int EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC = 0;
+
+    /**
+     * Used as an int value for {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE}
+     * to represent that a audio codec is allowed to use.
+     *
+     * @hide
+     */
+    public static final int EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC = 1;
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Intent flags (see mFlags variable).
