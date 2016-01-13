@@ -3003,6 +3003,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         UserHandle.CURRENT_OR_SELF);
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+                || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+            if (mUseTvRouting) {
+                // On TVs volume keys never go to the foreground app.
+                dispatchDirectAudioEvent(event);
+                return -1;
+            }
         } else if (KeyEvent.isMetaKey(keyCode)) {
             if (down) {
                 mPendingMetaAction = true;
@@ -5084,10 +5092,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                if (mUseTvRouting) {
-                    // On TVs volume keys never go to the foreground app
-                    result &= ~ACTION_PASS_TO_USER;
-                }
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
                         if (interactive && !mScreenshotChordVolumeDownKeyTriggered
@@ -5147,19 +5151,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             break;
                         }
                     }
-
-                    if ((result & ACTION_PASS_TO_USER) == 0) {
-                        if (mUseTvRouting) {
-                            dispatchDirectAudioEvent(event);
-                        } else {
-                            // If we aren't passing to the user and no one else
-                            // handled it send it to the session manager to
-                            // figure out.
-                            MediaSessionLegacyHelper.getHelper(mContext)
-                                    .sendVolumeKeyEvent(event, true);
-                        }
-                        break;
-                    }
+                }
+                if (mUseTvRouting) {
+                    // On TVs, defer special key handlings to
+                    // {@link interceptKeyBeforeDispatching()}.
+                    result |= ACTION_PASS_TO_USER;
+                } else if ((result & ACTION_PASS_TO_USER) == 0) {
+                    // If we aren't passing to the user and no one else
+                    // handled it send it to the session manager to
+                    // figure out.
+                    MediaSessionLegacyHelper.getHelper(mContext)
+                            .sendVolumeKeyEvent(event, true);
                 }
                 break;
             }
