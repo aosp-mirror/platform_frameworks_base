@@ -115,7 +115,7 @@ within the activity's window and can respond to user interaction. For example, a
 button that initiates an action when the user touches it.</p>
 
 <p>Android provides a number of ready-made views that you can use to design and organize your
-layout. "Widgets" are views that provide a visual (and interactive) elements for the screen, such
+layout. "Widgets" are views that provide visual (and interactive) elements for the screen, such
 as a button, text field, checkbox, or just an image. "Layouts" are views derived from {@link
 android.view.ViewGroup} that provide a unique layout model for its child views, such as a linear
 layout, a grid layout, or relative layout. You can also subclass the {@link android.view.View} and
