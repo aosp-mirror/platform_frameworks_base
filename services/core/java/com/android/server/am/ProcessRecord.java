@@ -82,7 +82,9 @@ final class ProcessRecord {
     long lastStateTime;         // Last time setProcState changed
     long initialIdlePss;        // Initial memory pss of process for idle maintenance.
     long lastPss;               // Last computed memory pss.
+    long lastSwapPss;           // Last computed SwapPss.
     long lastCachedPss;         // Last computed pss when in cached state.
+    long lastCachedSwapPss;     // Last computed SwapPss when in cached state.
     int maxAdj;                 // Maximum OOM adjustment for this process
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
@@ -257,7 +259,9 @@ final class ProcessRecord {
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPss="); DebugUtils.printSizeValue(pw, lastPss*1024);
+                pw.print(" lastSwapPss="); DebugUtils.printSizeValue(pw, lastSwapPss*1024);
                 pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
+                pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw, lastCachedSwapPss*1024);
                 pw.println();
         pw.print(prefix); pw.print("cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);

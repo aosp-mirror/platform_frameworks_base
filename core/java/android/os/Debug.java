@@ -130,6 +130,9 @@ public final class Debug
         /** The dirty dalvik pages that have been swapped out. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikSwappedOut;
+        /** The dirty dalvik pages that have been swapped out, proportional. */
+        /** @hide We may want to expose this, eventually. */
+        public int dalvikSwappedOutPss;
 
         /** The proportional set size for the native heap. */
         public int nativePss;
@@ -149,6 +152,9 @@ public final class Debug
         /** The dirty native pages that have been swapped out. */
         /** @hide We may want to expose this, eventually. */
         public int nativeSwappedOut;
+        /** The dirty native pages that have been swapped out, proportional. */
+        /** @hide We may want to expose this, eventually. */
+        public int nativeSwappedOutPss;
 
         /** The proportional set size for everything else. */
         public int otherPss;
@@ -168,6 +174,13 @@ public final class Debug
         /** The dirty pages used by anyting else that have been swapped out. */
         /** @hide We may want to expose this, eventually. */
         public int otherSwappedOut;
+        /** The dirty pages used by anyting else that have been swapped out, proportional. */
+        /** @hide We may want to expose this, eventually. */
+        public int otherSwappedOutPss;
+
+        /** Whether the kernel reports proportional swap usage */
+        /** @hide */
+        public boolean hasSwappedOutPss;
 
         /** @hide */
         public static final int HEAP_UNKNOWN = 0;
@@ -235,7 +248,7 @@ public final class Debug
         public static final int NUM_DVK_STATS = 8;
 
         /** @hide */
-        public static final int NUM_CATEGORIES = 7;
+        public static final int NUM_CATEGORIES = 8;
 
         /** @hide */
         public static final int offsetPss = 0;
@@ -251,6 +264,8 @@ public final class Debug
         public static final int offsetSharedClean = 5;
         /** @hide */
         public static final int offsetSwappedOut = 6;
+        /** @hide */
+        public static final int offsetSwappedOutPss = 7;
 
         private int[] otherStats = new int[(NUM_OTHER_STATS+NUM_DVK_STATS)*NUM_CATEGORIES];
 
@@ -261,7 +276,7 @@ public final class Debug
          * Return total PSS memory usage in kB.
          */
         public int getTotalPss() {
-            return dalvikPss + nativePss + otherPss;
+            return dalvikPss + nativePss + otherPss + getTotalSwappedOutPss();
         }
 
         /**
@@ -274,7 +289,8 @@ public final class Debug
         }
 
         /**
-         * Return total PSS memory usage in kB.
+         * Return total PSS memory usage in kB mapping a file of one of the following extension:
+         * .so, .jar, .apk, .ttf, .dex, .odex, .oat, .art .
          */
         public int getTotalSwappablePss() {
             return dalvikSwappablePss + nativeSwappablePss + otherSwappablePss;
@@ -314,6 +330,14 @@ public final class Debug
          */
         public int getTotalSwappedOut() {
             return dalvikSwappedOut + nativeSwappedOut + otherSwappedOut;
+        }
+
+        /**
+         * Return total swapped out memory in kB, proportional.
+         * @hide
+         */
+        public int getTotalSwappedOutPss() {
+            return dalvikSwappedOutPss + nativeSwappedOutPss + otherSwappedOutPss;
         }
 
         /** @hide */
@@ -356,6 +380,11 @@ public final class Debug
         /** @hide */
         public int getOtherSwappedOut(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSwappedOut];
+        }
+
+        /** @hide */
+        public int getOtherSwappedOutPss(int which) {
+            return otherStats[which*NUM_CATEGORIES + offsetSwappedOutPss];
         }
 
         /** @hide */
@@ -632,10 +661,22 @@ public final class Debug
          *    know if the Swap memory is shared or private, so we don't know
          *    what to blame on the application and what on the system.
          *    For now, just lump all the Swap in one place.
+         *    For kernels reporting SwapPss {@link #getSummaryTotalSwapPss()}
+         *    will report the application proportional Swap.
          * @hide
          */
         public int getSummaryTotalSwap() {
             return getTotalSwappedOut();
+        }
+
+        /**
+         * Total proportional Swap in KB.
+         * Notes:
+         *  * Always 0 if {@link #hasSwappedOutPss} is false.
+         * @hide
+         */
+        public int getSummaryTotalSwapPss() {
+            return getTotalSwappedOutPss();
         }
 
         public int describeContents() {
@@ -664,6 +705,8 @@ public final class Debug
             dest.writeInt(otherPrivateClean);
             dest.writeInt(otherSharedClean);
             dest.writeInt(otherSwappedOut);
+            dest.writeInt(hasSwappedOutPss ? 1 : 0);
+            dest.writeInt(otherSwappedOutPss);
             dest.writeIntArray(otherStats);
         }
 
@@ -689,6 +732,8 @@ public final class Debug
             otherPrivateClean = source.readInt();
             otherSharedClean = source.readInt();
             otherSwappedOut = source.readInt();
+            hasSwappedOutPss = source.readInt() != 0;
+            otherSwappedOutPss = source.readInt();
             otherStats = source.createIntArray();
         }
 
@@ -1563,11 +1608,12 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Retrieves the PSS memory used by the process as given by the
-     * smaps.  Optionally supply a long array of 1 entry to also
-     * receive the uss of the process, and another array to also
-     * retrieve the separate memtrack size.  @hide
+     * smaps.  Optionally supply a long array of 2 entries to also
+     * receive the Uss and SwapPss of the process, and another array to also
+     * retrieve the separate memtrack size.
+     * @hide
      */
-    public static native long getPss(int pid, long[] outUss, long[] outMemtrack);
+    public static native long getPss(int pid, long[] outUssSwapPss, long[] outMemtrack);
 
     /** @hide */
     public static final int MEMINFO_TOTAL = 0;

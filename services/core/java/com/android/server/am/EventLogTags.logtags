@@ -100,6 +100,6 @@ option java_package com.android.server.am
 30045 am_pre_boot (User|1|5),(Package|3)
 
 # Report collection of global memory state
-30046 am_meminfo (CachedKb|2|2),(FreeKb|2|2),(ZramKb|2|2),(KernelKb|2|2),(NativeKb|2|2)
+30046 am_meminfo (Cached|2|2),(Free|2|2),(Zram|2|2),(Kernel|2|2),(Native|2|2)
 # Report collection of memory used by a process
-30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(PssKb|2|2),(UssKb|2|2)
+30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2)

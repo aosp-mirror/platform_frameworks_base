@@ -84,6 +84,7 @@ struct stat_fields {
     jfieldID privateClean_field;
     jfieldID sharedClean_field;
     jfieldID swappedOut_field;
+    jfieldID swappedOutPss_field;
 };
 
 struct stat_field_names {
@@ -94,20 +95,22 @@ struct stat_field_names {
     const char* privateClean_name;
     const char* sharedClean_name;
     const char* swappedOut_name;
+    const char* swappedOutPss_name;
 };
 
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
     { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty",
-        "otherPrivateClean", "otherSharedClean", "otherSwappedOut" },
+        "otherPrivateClean", "otherSharedClean", "otherSwappedOut", "otherSwappedOutPss" },
     { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty",
-        "dalvikPrivateClean", "dalvikSharedClean", "dalvikSwappedOut" },
+        "dalvikPrivateClean", "dalvikSharedClean", "dalvikSwappedOut", "dalvikSwappedOutPss" },
     { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty",
-        "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut" }
+        "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut", "nativeSwappedOutPss" }
 };
 
 jfieldID otherStats_field;
+jfieldID hasSwappedOutPss_field;
 
 static bool memtrackLoaded;
 
@@ -119,6 +122,7 @@ struct stats_t {
     int privateClean;
     int sharedClean;
     int swappedOut;
+    int swappedOutPss;
 };
 
 #define BINDER_STATS "/proc/binder/stats"
@@ -206,7 +210,7 @@ static int read_memtrack_memory(int pid, struct graphics_memory_pss* graphics_me
     return err;
 }
 
-static void read_mapinfo(FILE *fp, stats_t* stats)
+static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
 {
     char line[1024];
     int len, nameLen;
@@ -216,7 +220,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
-    unsigned swapped_out = 0;
+    unsigned swapped_out = 0, swapped_out_pss = 0;
     bool is_swappable = false;
     unsigned temp;
 
@@ -229,6 +233,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     int whichHeap = HEAP_UNKNOWN;
     int subHeap = HEAP_UNKNOWN;
     int prevHeap = HEAP_UNKNOWN;
+
+    *foundSwapPss = false;
 
     if(fgets(line, sizeof(line), fp) == 0) return;
 
@@ -340,6 +346,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
         private_clean = 0;
         private_dirty = 0;
         swapped_out = 0;
+        swapped_out_pss = 0;
 
         while (true) {
             if (fgets(line, 1024, fp) == 0) {
@@ -365,6 +372,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 /* referenced = temp; */
             } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
                 swapped_out = temp;
+            } else if (line[0] == 'S' && sscanf(line, "SwapPss: %d kB", &temp) == 1) {
+                *foundSwapPss = true;
+                swapped_out_pss = temp;
             } else if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d", &start, &end) == 2) {
                 // looks like a new mapping
                 // example: "10000000-10001000 ---p 10000000 00:00 0"
@@ -390,6 +400,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             stats[whichHeap].privateClean += private_clean;
             stats[whichHeap].sharedClean += shared_clean;
             stats[whichHeap].swappedOut += swapped_out;
+            stats[whichHeap].swappedOutPss += swapped_out_pss;
             if (whichHeap == HEAP_DALVIK || whichHeap == HEAP_DALVIK_OTHER) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
@@ -398,12 +409,13 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 stats[subHeap].privateClean += private_clean;
                 stats[subHeap].sharedClean += shared_clean;
                 stats[subHeap].swappedOut += swapped_out;
+                stats[subHeap].swappedOutPss += swapped_out_pss;
             }
         }
     }
 }
 
-static void load_maps(int pid, stats_t* stats)
+static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
 {
     char tmp[128];
     FILE *fp;
@@ -412,17 +424,18 @@ static void load_maps(int pid, stats_t* stats)
     fp = fopen(tmp, "r");
     if (fp == 0) return;
 
-    read_mapinfo(fp, stats);
+    read_mapinfo(fp, stats, foundSwapPss);
     fclose(fp);
 }
 
 static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         jint pid, jobject object)
 {
+    bool foundSwapPss;
     stats_t stats[_NUM_HEAP];
     memset(&stats, 0, sizeof(stats));
 
-    load_maps(pid, stats);
+    load_maps(pid, stats, &foundSwapPss);
 
     struct graphics_memory_pss graphics_mem;
     if (read_memtrack_memory(pid, &graphics_mem) == 0) {
@@ -442,6 +455,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         stats[HEAP_UNKNOWN].privateClean += stats[i].privateClean;
         stats[HEAP_UNKNOWN].sharedClean += stats[i].sharedClean;
         stats[HEAP_UNKNOWN].swappedOut += stats[i].swappedOut;
+        stats[HEAP_UNKNOWN].swappedOutPss += stats[i].swappedOutPss;
     }
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
@@ -452,9 +466,11 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         env->SetIntField(object, stat_fields[i].privateClean_field, stats[i].privateClean);
         env->SetIntField(object, stat_fields[i].sharedClean_field, stats[i].sharedClean);
         env->SetIntField(object, stat_fields[i].swappedOut_field, stats[i].swappedOut);
+        env->SetIntField(object, stat_fields[i].swappedOutPss_field, stats[i].swappedOutPss);
     }
 
 
+    env->SetBooleanField(object, hasSwappedOutPss_field, foundSwapPss);
     jintArray otherIntArray = (jintArray)env->GetObjectField(object, otherStats_field);
 
     jint* otherArray = (jint*)env->GetPrimitiveArrayCritical(otherIntArray, 0);
@@ -471,6 +487,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
         otherArray[j++] = stats[i].privateClean;
         otherArray[j++] = stats[i].sharedClean;
         otherArray[j++] = stats[i].swappedOut;
+        otherArray[j++] = stats[i].swappedOutPss;
     }
 
     env->ReleasePrimitiveArrayCritical(otherIntArray, otherArray, 0);
@@ -481,11 +498,12 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
-static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jlongArray outUss,
-        jlongArray outMemtrack)
+static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
+        jlongArray outUssSwapPss, jlongArray outMemtrack)
 {
     char line[1024];
     jlong pss = 0;
+    jlong swapPss = 0;
     jlong uss = 0;
     jlong memtrack = 0;
 
@@ -521,19 +539,31 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
                     }
                     uss += atoi(c);
                 }
+            } else if (line[0] == 'S' && strncmp(line, "SwapPss:", 8) == 0) {
+                char* c = line + 8;
+                jlong lSwapPss;
+                while (*c != 0 && (*c < '0' || *c > '9')) {
+                    c++;
+                }
+                lSwapPss = atoi(c);
+                swapPss += lSwapPss;
+                pss += lSwapPss; // Also in swap, those pages would be accounted as Pss without SWAP
             }
         }
 
         fclose(fp);
     }
 
-    if (outUss != NULL) {
-        if (env->GetArrayLength(outUss) >= 1) {
-            jlong* outUssArray = env->GetLongArrayElements(outUss, 0);
-            if (outUssArray != NULL) {
-                outUssArray[0] = uss;
+    if (outUssSwapPss != NULL) {
+        if (env->GetArrayLength(outUssSwapPss) >= 1) {
+            jlong* outUssSwapPssArray = env->GetLongArrayElements(outUssSwapPss, 0);
+            if (outUssSwapPssArray != NULL) {
+                outUssSwapPssArray[0] = uss;
+                if (env->GetArrayLength(outUssSwapPss) >= 2) {
+                    outUssSwapPssArray[1] = swapPss;
+                }
             }
-            env->ReleaseLongArrayElements(outUss, outUssArray, 0);
+            env->ReleaseLongArrayElements(outUssSwapPss, outUssSwapPssArray, 0);
         }
     }
 
@@ -1056,6 +1086,7 @@ int register_android_os_Debug(JNIEnv *env)
     }
 
     otherStats_field = env->GetFieldID(clazz, "otherStats", "[I");
+    hasSwappedOutPss_field = env->GetFieldID(clazz, "hasSwappedOutPss", "Z");
 
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         stat_fields[i].pss_field =
@@ -1072,6 +1103,8 @@ int register_android_os_Debug(JNIEnv *env)
                 env->GetFieldID(clazz, stat_field_names[i].sharedClean_name, "I");
         stat_fields[i].swappedOut_field =
                 env->GetFieldID(clazz, stat_field_names[i].swappedOut_name, "I");
+        stat_fields[i].swappedOutPss_field =
+                env->GetFieldID(clazz, stat_field_names[i].swappedOutPss_name, "I");
     }
 
     return jniRegisterNativeMethods(env, "android/os/Debug", gMethods, NELEM(gMethods));
