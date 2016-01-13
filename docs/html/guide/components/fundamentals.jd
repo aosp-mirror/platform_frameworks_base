@@ -369,7 +369,7 @@ declare an intent filter to respond to "send" intents (in order to send a new em
 </pre>
 
 <p>Then, if another app creates an intent with the {@link
-android.content.Intent#ACTION_SEND} action and pass it to {@link android.app.Activity#startActivity
+android.content.Intent#ACTION_SEND} action and passes it to {@link android.app.Activity#startActivity
 startActivity()}, the system may start your activity so the user can draft and send an
 email.</p>
 
