@@ -52,16 +52,10 @@ public class HybridNotificationViewManager {
 
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
             Notification notification) {
-        CharSequence titleText = resolveTitle(notification);
-        if (titleText == null) {
-            if (reusableView != null) {
-                mParent.removeView(reusableView);
-            }
-            return null;
-        }
         if (reusableView == null) {
             reusableView = inflateHybridView();
         }
+        CharSequence titleText = resolveTitle(notification);
         CharSequence contentText = resolveText(notification);
         reusableView.bind(titleText, contentText);
         return reusableView;
