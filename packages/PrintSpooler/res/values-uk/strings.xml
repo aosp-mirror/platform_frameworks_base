@@ -63,6 +63,7 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> – <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"Докладніше про цей принтер"</string>
+    <string name="print_services_disabled_toast" msgid="1205302482388937547">"Деякі служби друку вимкнено."</string>
     <string name="choose_print_service" msgid="3740309762324459694">"Вибрати службу друку"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Пошук принтерів"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"Немає служб друку"</string>
