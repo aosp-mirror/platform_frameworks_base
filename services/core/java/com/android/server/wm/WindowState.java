@@ -2284,10 +2284,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     void transformFromScreenToSurfaceSpace(Rect rect) {
          if (mHScale >= 0) {
-            rect.right = rect.left + (int)((rect.right - rect.left) / mHScale);
+            rect.left = (int) (rect.left / mHScale);
+            rect.right = (int) (rect.right / mHScale);
         }
         if (mVScale >= 0) {
-            rect.bottom = rect.top + (int)((rect.bottom - rect.top) / mVScale);
+            rect.top = (int) (rect.top / mVScale);
+            rect.bottom = (int) (rect.bottom / mVScale);
         }
     }
 
