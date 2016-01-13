@@ -186,7 +186,7 @@ import java.util.Set;
  *
  * <p>There are a variety of standard Intent action and category constants
  * defined in the Intent class, but applications can also define their own.
- * These strings use java style scoping, to ensure they are unique -- for
+ * These strings use Java-style scoping, to ensure they are unique -- for
  * example, the standard {@link #ACTION_VIEW} is called
  * "android.intent.action.VIEW".</p>
  *
