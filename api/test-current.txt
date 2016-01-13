@@ -49570,6 +49570,8 @@ package java.lang {
   public class InternalError extends java.lang.VirtualMachineError {
     ctor public InternalError();
     ctor public InternalError(java.lang.String);
+    ctor public InternalError(java.lang.String, java.lang.Throwable);
+    ctor public InternalError(java.lang.Throwable);
   }
 
   public class InterruptedException extends java.lang.Exception {
@@ -50342,6 +50344,8 @@ package java.lang {
   public abstract class VirtualMachineError extends java.lang.Error {
     ctor public VirtualMachineError();
     ctor public VirtualMachineError(java.lang.String);
+    ctor public VirtualMachineError(java.lang.String, java.lang.Throwable);
+    ctor public VirtualMachineError(java.lang.Throwable);
   }
 
   public final class Void {
@@ -54084,6 +54088,7 @@ package java.security.cert {
     method public static java.security.cert.CertPathBuilder getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException;
     method public static java.security.cert.CertPathBuilder getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException;
     method public final java.security.Provider getProvider();
+    method public final java.security.cert.CertPathChecker getRevocationChecker();
   }
 
   public class CertPathBuilderException extends java.security.GeneralSecurityException {
@@ -54101,6 +54106,13 @@ package java.security.cert {
   public abstract class CertPathBuilderSpi {
     ctor public CertPathBuilderSpi();
     method public abstract java.security.cert.CertPathBuilderResult engineBuild(java.security.cert.CertPathParameters) throws java.security.cert.CertPathBuilderException, java.security.InvalidAlgorithmParameterException;
+    method public java.security.cert.CertPathChecker engineGetRevocationChecker();
+  }
+
+  public abstract interface CertPathChecker {
+    method public abstract void check(java.security.cert.Certificate) throws java.security.cert.CertPathValidatorException;
+    method public abstract void init(boolean) throws java.security.cert.CertPathValidatorException;
+    method public abstract boolean isForwardCheckingSupported();
   }
 
   public abstract interface CertPathParameters implements java.lang.Cloneable {
@@ -54115,6 +54127,7 @@ package java.security.cert {
     method public static java.security.cert.CertPathValidator getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException;
     method public static java.security.cert.CertPathValidator getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException;
     method public final java.security.Provider getProvider();
+    method public final java.security.cert.CertPathChecker getRevocationChecker();
     method public final java.security.cert.CertPathValidatorResult validate(java.security.cert.CertPath, java.security.cert.CertPathParameters) throws java.security.cert.CertPathValidatorException, java.security.InvalidAlgorithmParameterException;
   }
 
@@ -54151,6 +54164,7 @@ package java.security.cert {
 
   public abstract class CertPathValidatorSpi {
     ctor public CertPathValidatorSpi();
+    method public java.security.cert.CertPathChecker engineGetRevocationChecker();
     method public abstract java.security.cert.CertPathValidatorResult engineValidate(java.security.cert.CertPath, java.security.cert.CertPathParameters) throws java.security.cert.CertPathValidatorException, java.security.InvalidAlgorithmParameterException;
   }
 
@@ -54309,9 +54323,10 @@ package java.security.cert {
     method public java.security.cert.CertPath getCertPath();
   }
 
-  public abstract class PKIXCertPathChecker implements java.lang.Cloneable {
+  public abstract class PKIXCertPathChecker implements java.security.cert.CertPathChecker java.lang.Cloneable {
     ctor protected PKIXCertPathChecker();
     method public abstract void check(java.security.cert.Certificate, java.util.Collection<java.lang.String>) throws java.security.cert.CertPathValidatorException;
+    method public void check(java.security.cert.Certificate) throws java.security.cert.CertPathValidatorException;
     method public java.lang.Object clone();
     method public abstract java.util.Set<java.lang.String> getSupportedExtensions();
     method public abstract void init(boolean) throws java.security.cert.CertPathValidatorException;
@@ -54369,6 +54384,30 @@ package java.security.cert {
     enum_constant public static final java.security.cert.PKIXReason NO_TRUST_ANCHOR;
     enum_constant public static final java.security.cert.PKIXReason PATH_TOO_LONG;
     enum_constant public static final java.security.cert.PKIXReason UNRECOGNIZED_CRIT_EXT;
+  }
+
+  public abstract class PKIXRevocationChecker extends java.security.cert.PKIXCertPathChecker {
+    ctor protected PKIXRevocationChecker();
+    method public java.util.List<java.security.cert.Extension> getOcspExtensions();
+    method public java.net.URI getOcspResponder();
+    method public java.security.cert.X509Certificate getOcspResponderCert();
+    method public java.util.Map<java.security.cert.X509Certificate, byte[]> getOcspResponses();
+    method public java.util.Set<java.security.cert.PKIXRevocationChecker.Option> getOptions();
+    method public abstract java.util.List<java.security.cert.CertPathValidatorException> getSoftFailExceptions();
+    method public void setOcspExtensions(java.util.List<java.security.cert.Extension>);
+    method public void setOcspResponder(java.net.URI);
+    method public void setOcspResponderCert(java.security.cert.X509Certificate);
+    method public void setOcspResponses(java.util.Map<java.security.cert.X509Certificate, byte[]>);
+    method public void setOptions(java.util.Set<java.security.cert.PKIXRevocationChecker.Option>);
+  }
+
+  public static final class PKIXRevocationChecker.Option extends java.lang.Enum {
+    method public static java.security.cert.PKIXRevocationChecker.Option valueOf(java.lang.String);
+    method public static final java.security.cert.PKIXRevocationChecker.Option[] values();
+    enum_constant public static final java.security.cert.PKIXRevocationChecker.Option NO_FALLBACK;
+    enum_constant public static final java.security.cert.PKIXRevocationChecker.Option ONLY_END_ENTITY;
+    enum_constant public static final java.security.cert.PKIXRevocationChecker.Option PREFER_CRLS;
+    enum_constant public static final java.security.cert.PKIXRevocationChecker.Option SOFT_FAIL;
   }
 
   public abstract interface PolicyNode {
@@ -54530,6 +54569,7 @@ package java.security.cert {
     method public javax.security.auth.x500.X500Principal getSubjectX500Principal();
     method public abstract byte[] getTBSCertificate() throws java.security.cert.CertificateEncodingException;
     method public abstract int getVersion();
+    method public void verify(java.security.PublicKey, java.security.Provider) throws java.security.cert.CertificateException, java.security.InvalidKeyException, java.security.NoSuchAlgorithmException, java.security.SignatureException;
   }
 
   public abstract interface X509Extension {
