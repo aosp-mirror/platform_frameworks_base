@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सकिन्छ"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"वस्तुस्थिति पट्टी हुन दिनुहोस्"</string>

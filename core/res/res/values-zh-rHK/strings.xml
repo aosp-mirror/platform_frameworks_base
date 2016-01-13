@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包括個人資料，如信用卡號碼和密碼。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控制顯示屏的放大功能"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控制顯示屏的縮放程度和位置。"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"執行手勢"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可以輕按、快速滑動和兩指縮放，並執行其他手勢。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或修改狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"成為狀態列"</string>

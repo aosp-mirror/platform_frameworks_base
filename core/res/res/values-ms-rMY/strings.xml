@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Termasuk data peribadi seperti nombor kad kredit dan kata laluan."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kawal pembesaran paparan"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kawal tahap zum dan kedudukan paparan."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Lakukan gerak isyarat"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Boleh ketik, leret, cubit dan laksanakan gerak isyarat lain."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"jadi bar status"</string>

@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Включва лични данни, като например номера на кредитни карти и пароли."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Управление на увеличението на дисплея"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Управление на нивото на мащаба и позиционирането на дисплея."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Извършване на жестове"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Можете да докосвате, да прекарвате пръст, да събирате пръсти и да извършвате други жестове."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"деактивиране или промяна на лентата на състоянието"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Разрешава на приложението да деактивира лентата на състоянието или да добавя и премахва системни икони."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"изпълняване на ролята на лента на състоянието"</string>

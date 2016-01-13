@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclut des données personnelles telles que les numéros de cartes de paiement et les mots de passe."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Contrôler l\'agrandissement de l\'écran"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Contrôler le niveau de zoom et le positionnement de l\'écran."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Effectuer des gestes"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Peut toucher, balayer, pincer et effectuer d\'autres gestes."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"désactiver ou modifier la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"servir de barre d\'état"</string>

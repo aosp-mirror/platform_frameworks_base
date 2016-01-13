@@ -258,6 +258,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obejmuje informacje osobiste, takie jak numery kart kredytowych i hasła."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Regulowanie powiększenia ekranu"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Regulowanie poziomu i obszaru powiększenia ekranu."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Obsługa gestów"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Obsługuje kliknięcia, przesunięcia, ściągnięcia palców i inne gesty."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"działanie jako pasek stanu"</string>

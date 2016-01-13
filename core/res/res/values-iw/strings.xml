@@ -258,6 +258,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"כולל נתונים אישיים כמו מספרי כרטיס אשראי וסיסמאות."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"שליטה בהגדלת התצוגה"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"קבע את המרחק מהתצוגה ואת מיקום התצוגה."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ביצוע תנועות"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"יכול להקיש, להחליק, לעשות תנועת צביטה ולבצע תנועות אחרות."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"להיות שורת הסטטוס"</string>

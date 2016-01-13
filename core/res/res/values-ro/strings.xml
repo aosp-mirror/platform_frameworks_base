@@ -257,6 +257,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Controlați mărirea pe afișaj"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlați nivelul de zoom și poziționarea afișajului."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Folosiți gesturi"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Se poate atinge, glisa, ciupi și se pot folosi alte gesturi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"dezactivare sau modificare bare de stare"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite aplicației să dezactiveze bara de stare sau să adauge și să elimine pictograme de sistem."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"să fie bara de stare"</string>

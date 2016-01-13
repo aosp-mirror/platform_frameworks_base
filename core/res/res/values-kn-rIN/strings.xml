@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್‌ಗಳಂತಹ ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ಪ್ರದರ್ಶನದ ವರ್ಧಕವನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ಪ್ರದರ್ಶನದ ಝೂಮ್ ಮಟ್ಟ ಮತ್ತು ಸ್ಥಾನ ನಿರ್ಧಾರವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಿ"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ಟ್ಯಾಪ್ ಮಾಡಬಹುದು, ಸ್ವೈಪ್ ಮಾಡಬಹುದು, ಪಿಂಚ್ ಮಾಡಬಹುದು ಮತ್ತು ಇತರ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಬಹುದು."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಮತ್ತು ಸಿಸ್ಟಂ ಐಕಾನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಾಗಿರಲು"</string>

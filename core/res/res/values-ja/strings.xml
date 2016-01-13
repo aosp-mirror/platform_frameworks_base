@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"クレジットカードの番号やパスワードなどの個人データが含まれます。"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"画面の拡大の制御"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"画面のズームレベルと位置を制御します。"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"操作の実行"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"タップ、スワイプ、ピンチ、その他の操作を行えます。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ステータスバーへの表示"</string>

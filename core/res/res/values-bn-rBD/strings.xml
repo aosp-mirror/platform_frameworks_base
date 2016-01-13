@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্রেডিট কার্ডের নম্বর ও পাসওয়ার্ডগুলির মতো ব্যক্তিগত তথ্য অন্তর্ভুক্ত করে৷"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"প্রদর্শনের বৃহত্তরীকরণ ব্যবস্থা নিয়ন্ত্রণ করুন"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং অবস্থান নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন করুন"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য অঙ্গভঙ্গির কাজগুলি সম্পাদন করতে পারবেন৷"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"স্থিতি দন্ড নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"অ্যাপ্লিকেশানকে স্থিতি দন্ড অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"স্থিতি দন্ডে থাকুন"</string>

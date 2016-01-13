@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Sisaldab isiklikke andmeid, nt krediitkaardi numbreid ja paroole."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Ekraani suurenduse juhtimine"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Saate juhtida ekraani suumitaset ja asendit."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Liigutuste tegemine"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Saate puudutada, pühkida, sõrmi kokku-lahku liigutada ja teisi liigutusi teha."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"keela või muuda olekuriba"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Võimaldab rakendusel keelata olekuriba või lisada ja eemaldada süsteemiikoone."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"olekuribana kuvamine"</string>

@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"May kasamang personal na data tulad ng mga numero ng credit card at password."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Kontrolin ang pag-magnify ng display"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Kontrolin ang antas ng pag-zoom at pagpoposisyon ng display."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Magsagawa ng mga galaw"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"May kakayahang mag-tap, mag-swipe, mag-pinch at magsagawa ng iba pang mga galaw."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"huwag paganahin o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pinapayagan ang app na huwag paganahin ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"maging status bar"</string>

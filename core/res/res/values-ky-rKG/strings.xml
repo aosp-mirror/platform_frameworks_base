@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредиттик карта номурлары жана сырсөздөр сыяктуу өздүк берилиштерди камтыйт."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Дисплейди чоңойтууну башкаруу"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Экрандагы сүрөттүн өлчөмүн өзгөртүү жана жайгаштыруу."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Жаңсоолорду аткаруу"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Таптап, серпип, чымчып жана башка жаңсоолорду аткара алат."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"абал тилкесин өчүрүү же өзгөртүү"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Колдонмого абал тилкесин өчүрүү же тутум сүрөтчөлөрүн кошуу же алып салуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"абал тилкесинин милдетин аткаруу"</string>

@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Kufaka phakathi idatha yomuntu siqu efana nezinombolo zekhadi lesikweletu namaphasiwedi."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Lawula ukulungiswa kwesibonisi"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Lawula ileveli yokusondeza yesibonisi nendawo."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Yenza ukuthinta"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Ingathepha, iswayiphe, incinze, futhi yenze okunye ukuthintwa."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"khubaza noma guqula ibha yomumo"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ivumela uhlelo lokusebenza ukuthi yenze umudwa ochaza ngesimo ukuthi ungasebenzi noma ukufaka noma ukukhipha izithonjana zohlelo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"yiba yibha yesimo"</string>

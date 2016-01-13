@@ -258,6 +258,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inajumuisha data binafsi kama vile nambari za kadi ya mkopo na manenosiri."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Dhibiti ukuzaji wa onyesho"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Dhibiti kiwango cha kukuza na nafasi cha onyesho."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Tekeleza ishara"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Unaweza kugonga, kutelezesha kidole, kubana na kutekeleza ishara zingine."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa ikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"kuwa sehemu ya arifa"</string>

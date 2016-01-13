@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит картын дугаар болон нууц үг зэрэг хувийн датаг агуулж байна."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Дэлгэцийн өсгөлтийг хянах"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Дэлгэцийн томруулах түвшин болон байршлыг хянах."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Зангах"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Товших, шудрах, жижигрүүлэх болон бусад зангааг хийх боломжтой."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"статусын хэсэг болох"</string>

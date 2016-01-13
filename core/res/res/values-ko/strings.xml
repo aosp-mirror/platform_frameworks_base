@@ -256,6 +256,8 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"신용카드 번호와 비밀번호 등의 개인 데이터를 포함합니다."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"디스플레이 배율 제어"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"디스플레이의 확대/축소 수준 및 위치를 제어합니다."</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"동작 실행"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"탭, 스와이프, 확대/축소 및 기타 동작을 실행할 수 있습니다."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"상태 표시줄에 위치"</string>
