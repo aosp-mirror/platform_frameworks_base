@@ -42,7 +42,7 @@ public:
     }
 
     static jlong CreateLightingFilter(JNIEnv* env, jobject, jint mul, jint add) {
-        return reinterpret_cast<jlong>(SkColorFilter::CreateLightingFilter(mul, add));
+        return reinterpret_cast<jlong>(SkColorMatrixFilter::CreateLightingFilter(mul, add));
     }
 
     static jlong CreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
