@@ -19,7 +19,6 @@ package com.android.shell;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
 import static com.android.shell.BugreportProgressService.EXTRA_ORIGINAL_INTENT;
 import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
-import static com.android.shell.BugreportProgressService.TAG;
 import static com.android.shell.BugreportProgressService.getFileExtra;
 
 import java.io.File;
@@ -37,6 +36,7 @@ import android.util.Log;
  * {@link Intent#ACTION_SEND_MULTIPLE}.
  */
 public class BugreportReceiver extends BroadcastReceiver {
+    private static final String TAG = "BugreportReceiver";
 
     /**
      * Always keep the newest 8 bugreport files; 4 reports and 4 screenshots are
@@ -74,7 +74,11 @@ public class BugreportReceiver extends BroadcastReceiver {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                FileUtils.deleteOlderFiles(bugreportFile.getParentFile(), minCount, minAge);
+                try {
+                    FileUtils.deleteOlderFiles(bugreportFile.getParentFile(), minCount, minAge);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "RuntimeException deleting old files", e);
+                }
                 result.finish();
                 return null;
             }
