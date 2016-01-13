@@ -30,6 +30,10 @@ When the user selects the card, the system opens the app.</p>
 <p>This lesson shows how to use the {@link android.media.session.MediaSession} class to implement
 the <em>Now Playing</em> card.</p>
 
+<img src="{@docRoot}images/training/tv/playback/now-playing-screen.png" />
+<p class="img-caption"><strong>Figure 1.</strong> Display a <em>Now Playing</em> card when playing
+media in the background.</p>
+
 <h2 id="session">Start a Media Session</h2>
 
 <p>Create a
