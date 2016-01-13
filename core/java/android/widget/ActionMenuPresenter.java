@@ -59,7 +59,6 @@ import java.util.List;
  */
 public class ActionMenuPresenter extends BaseMenuPresenter
         implements ActionProvider.SubUiVisibilityListener {
-    private static final String TAG = "ActionMenuPresenter";
     private static final int ITEM_ANIMATION_DURATION = 150;
     private static final boolean ACTIONBAR_ANIMATIONS_ENABLED = false;
 
@@ -87,20 +86,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     private OpenOverflowRunnable mPostedOpenRunnable;
     private ActionMenuPopupCallback mPopupCallback;
 
-    private final boolean mShowCascadingMenus;
-
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
 
     // These collections are used to store pre- and post-layout information for menu items,
     // which is used to determine appropriate animations to run for changed items.
-    private SparseArray<MenuItemLayoutInfo> mPreLayoutItems =
-            new SparseArray<MenuItemLayoutInfo>();
-    private SparseArray<MenuItemLayoutInfo> mPostLayoutItems =
-            new SparseArray<MenuItemLayoutInfo>();
+    private SparseArray<MenuItemLayoutInfo> mPreLayoutItems = new SparseArray<>();
+    private SparseArray<MenuItemLayoutInfo> mPostLayoutItems = new SparseArray<>();
 
     // The list of currently running animations on menu items.
-    private List<ItemAnimationInfo> mRunningItemAnimations = new ArrayList<ItemAnimationInfo>();
+    private List<ItemAnimationInfo> mRunningItemAnimations = new ArrayList<>();
     private ViewTreeObserver.OnPreDrawListener mItemAnimationPreDrawListener =
             new ViewTreeObserver.OnPreDrawListener() {
         @Override
@@ -130,9 +125,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     public ActionMenuPresenter(Context context) {
         super(context, com.android.internal.R.layout.action_menu_layout,
                 com.android.internal.R.layout.action_menu_item_layout);
-
-        mShowCascadingMenus = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableCascadingSubmenus);
     }
 
     @Override
@@ -845,8 +837,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     private class OverflowMenuButton extends ImageButton implements ActionMenuView.ActionMenuChildView {
-        private final float[] mTempPts = new float[2];
-
         public OverflowMenuButton(Context context) {
             super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
 
