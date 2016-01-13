@@ -63,6 +63,9 @@ class Task implements DimLayer.DimLayerUser {
     private Rect mBounds = new Rect();
     final Rect mPreparedFrozenBounds = new Rect();
 
+    private Rect mPreScrollBounds = new Rect();
+    private boolean mScrollValid;
+
     // Bounds used to calculate the insets.
     private final Rect mTempInsetBounds = new Rect();
 
@@ -127,12 +130,25 @@ class Task implements DimLayer.DimLayerUser {
         int yOffset = 0;
         if (dockSide != DOCKED_INVALID) {
             mStack.getBounds(mTmpRect);
-            displayContent.getLogicalDisplayRect(mTmpRect2);
 
             if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
+                // The toast was originally placed at the bottom and centered. To place it
+                // at the bottom-center of the stack, we offset it horizontally by the diff
+                // between the center of the stack bounds vs. the center of the screen.
+                displayContent.getLogicalDisplayRect(mTmpRect2);
                 xOffset = mTmpRect.centerX() - mTmpRect2.centerX();
             } else if (dockSide == DOCKED_TOP) {
+                // The toast was originally placed at the bottom and centered. To place it
+                // at the bottom center of the top stack, we offset it vertically by the diff
+                // between the bottom of the stack bounds vs. the bottom of the content rect.
+                //
+                // Note here we use the content rect instead of the display rect, as we want
+                // the toast's distance to the dock divider (when it's placed at the top half)
+                // to be the same as it's distance to the top of the navigation bar (when it's
+                // placed at the bottom).
+
                 // We don't adjust for DOCKED_BOTTOM case since it's already at the bottom.
+                displayContent.getContentRect(mTmpRect2);
                 yOffset = mTmpRect2.bottom - mTmpRect.bottom;
             }
             mService.mH.obtainMessage(
@@ -258,19 +274,23 @@ class Task implements DimLayer.DimLayerUser {
             // Can't set to fullscreen if we don't have a display to get bounds from...
             return BOUNDS_CHANGE_NONE;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
+        if (mPreScrollBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
             return BOUNDS_CHANGE_NONE;
         }
 
         int boundsChange = BOUNDS_CHANGE_NONE;
-        if (mBounds.left != bounds.left || mBounds.top != bounds.top) {
+        if (mPreScrollBounds.left != bounds.left || mPreScrollBounds.top != bounds.top) {
             boundsChange |= BOUNDS_CHANGE_POSITION;
         }
-        if (mBounds.width() != bounds.width() || mBounds.height() != bounds.height()) {
+        if (mPreScrollBounds.width() != bounds.width() || mPreScrollBounds.height() != bounds.height()) {
             boundsChange |= BOUNDS_CHANGE_SIZE;
         }
 
-        mBounds.set(bounds);
+
+        mPreScrollBounds.set(bounds);
+
+        resetScrollLocked();
+
         mRotation = rotation;
         if (displayContent != null) {
             displayContent.mDimLayerController.updateDimLayer(this);
@@ -331,6 +351,32 @@ class Task implements DimLayer.DimLayerUser {
         mPreparedFrozenBounds.set(mBounds);
     }
 
+    void resetScrollLocked() {
+        if (mScrollValid) {
+            mScrollValid = false;
+            applyScrollToAllWindows(0, 0);
+        }
+        mBounds.set(mPreScrollBounds);
+    }
+
+    void applyScrollToAllWindows(final int xOffset, final int yOffset) {
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                win.mXOffset = xOffset;
+                win.mYOffset = yOffset;
+            }
+        }
+    }
+
+    void applyScrollToWindowIfNeeded(final WindowState win) {
+        if (mScrollValid) {
+            win.mXOffset = mBounds.left;
+            win.mYOffset = mBounds.top;
+        }
+    }
+
     boolean scrollLocked(Rect bounds) {
         // shift the task bound if it doesn't fully cover the stack area
         mStack.getDimBounds(mTmpRect);
@@ -352,21 +398,17 @@ class Task implements DimLayer.DimLayerUser {
             }
         }
 
-        if (bounds.equals(mBounds)) {
+        // We can stop here if we're already scrolling and the scrolled bounds not changed.
+        if (mScrollValid && bounds.equals(mBounds)) {
             return false;
         }
+
         // Normal setBounds() does not allow non-null bounds for fullscreen apps.
         // We only change bounds for the scrolling case without change it size,
         // on resizing path we should still want the validation.
         mBounds.set(bounds);
-        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
-            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                final WindowState win = windows.get(winNdx);
-                win.mXOffset = bounds.left;
-                win.mYOffset = bounds.top;
-            }
-        }
+        mScrollValid = true;
+        applyScrollToAllWindows(bounds.left, bounds.top);
         return true;
     }
 
@@ -483,7 +525,7 @@ class Task implements DimLayer.DimLayerUser {
 
         // Device rotation changed. We don't want the task to move around on the screen when
         // this happens, so update the task bounds so it stays in the same place.
-        mTmpRect2.set(mBounds);
+        mTmpRect2.set(mPreScrollBounds);
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (setBounds(mTmpRect2, mOverrideConfig) != BOUNDS_CHANGE_NONE) {
             // Post message to inform activity manager of the bounds change simulating
@@ -492,7 +534,7 @@ class Task implements DimLayer.DimLayerUser {
             // are resizeable independently of their stack resizing.
             if (mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
                 mService.mH.sendMessage(mService.mH.obtainMessage(
-                        RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mBounds));
+                        RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mPreScrollBounds));
             }
         }
     }

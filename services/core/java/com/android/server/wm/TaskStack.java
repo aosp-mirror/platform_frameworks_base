@@ -136,8 +136,8 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     // it might no longer fully cover the stack area.
                     // Save the old bounds and re-apply the scroll. This adjusts the bounds to
                     // fit the new stack bounds.
-                    task.getBounds(mTmpRect);
                     task.setBounds(bounds, config);
+                    task.getBounds(mTmpRect);
                     task.scrollLocked(mTmpRect);
                 } else {
                     task.setBounds(bounds, config);
@@ -365,6 +365,10 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 "positionTask: task=" + task + " position=" + position);
         mTasks.add(position, task);
 
+        // If we are moving the task across stacks, the scroll is no longer valid.
+        if (task.mStack != this) {
+            task.resetScrollLocked();
+        }
         task.mStack = this;
         task.updateDisplayInfo(mDisplayContent);
         boolean toTop = position == mTasks.size() - 1;
