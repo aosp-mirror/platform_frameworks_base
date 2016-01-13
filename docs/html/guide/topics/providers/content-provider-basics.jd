@@ -346,8 +346,8 @@ Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);
 </p>
 <p class="note">
     <strong>Note:</strong> The {@link android.net.Uri} and {@link android.net.Uri.Builder} classes
-    contain convenience methods for constructing well-formed Uri objects from strings. The
-    {@link android.content.ContentUris} contains convenience methods for appending id values to
+    contain convenience methods for constructing well-formed URI objects from strings. The
+    {@link android.content.ContentUris} class contains convenience methods for appending id values to
     a URI. The previous snippet uses {@link android.content.ContentUris#withAppendedId
     withAppendedId()} to append an id to the UserDictionary content URI.
 </p>
