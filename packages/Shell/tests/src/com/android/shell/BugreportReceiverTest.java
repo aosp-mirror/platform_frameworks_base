@@ -65,6 +65,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
+import com.android.shell.BugreportProgressService;
 
 /**
  * Integration tests for {@link BugreportReceiver}.
@@ -89,6 +90,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     // Timeout for UI operations, in milliseconds.
     private static final int TIMEOUT = (int) BugreportProgressService.POLLING_FREQUENCY * 4;
 
+    // Timeout for when waiting for a screenshot to finish.
+    private static final int SAFE_SCREENSHOT_DELAY = SCREENSHOT_DELAY_SECONDS + 10;
+
     private static final String BUGREPORTS_DIR = "bugreports";
     private static final String BUGREPORT_FILE = "test_bugreport.txt";
     private static final String ZIP_FILE = "test_bugreport.zip";
@@ -109,6 +113,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String NO_NAME = null;
     private static final String NO_SCREENSHOT = null;
     private static final String NO_TITLE = null;
+    private static final Integer NO_PID = null;
 
     private String mDescription;
 
@@ -122,6 +127,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        Log.i(TAG, "#### setup() on " + getName());
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getTargetContext();
         mUiBot = new UiBot(UiDevice.getInstance(instrumentation), TIMEOUT);
@@ -164,13 +170,21 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, ZIP_FILE,
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 1, true);
 
         assertServiceNotRunning();
     }
 
     public void testProgress_takeExtraScreenshot() throws Exception {
+        takeExtraScreenshotTest(false);
+    }
+
+    public void testProgress_takeExtraScreenshotServiceDiesAfterScreenshotTaken() throws Exception {
+        takeExtraScreenshotTest(true);
+    }
+
+    private void takeExtraScreenshotTest(boolean serviceDies) throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
 
@@ -179,10 +193,45 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertScreenshotButtonEnabled(false);
         waitForScreenshotButtonEnabled(true);
 
-        Bundle extras =
-                sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, ZIP_FILE,
+        sendBugreportFinished(PID, mPlainTextPath, mScreenshotPath);
+
+        if (serviceDies) {
+            waitShareNotification();
+            killService();
+        }
+
+        Bundle extras = acceptBugreportAndGetSharedIntent();
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 2, true);
+
+        assertServiceNotRunning();
+    }
+
+    public void testScreenshotFinishesAfterBugreport() throws Exception {
+        screenshotFinishesAfterBugreportTest(false);
+    }
+
+    public void testScreenshotFinishesAfterBugreportAndServiceDiesBeforeSharing() throws Exception {
+        screenshotFinishesAfterBugreportTest(true);
+    }
+
+    private void screenshotFinishesAfterBugreportTest(boolean serviceDies) throws Exception {
+        resetProperties();
+
+        sendBugreportStarted(1000);
+        sendBugreportFinished(PID, mPlainTextPath, NO_SCREENSHOT);
+        waitShareNotification();
+
+        // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
+        Thread.sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
+
+        if (serviceDies) {
+            killService();
+        }
+
+        Bundle extras = acceptBugreportAndGetSharedIntent();
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, PID, ZIP_FILE,
+                NAME, NO_TITLE, NO_DESCRIPTION, 1, true);
 
         assertServiceNotRunning();
     }
@@ -227,7 +276,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
                 mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 1, true);
 
         assertServiceNotRunning();
@@ -266,7 +315,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID,
                 plainText? mPlainTextPath : mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 1, true);
 
         assertServiceNotRunning();
@@ -317,8 +366,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent();
-        assertActionSendMultiple(extras, BUGREPORT_FILE, BUGREPORT_CONTENT, PID, TITLE,
-                NAME, TITLE, mDescription, 1, waitScreenshot);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
+                NAME, TITLE, mDescription, 1, true);
 
         assertServiceNotRunning();
     }
@@ -328,7 +377,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
 
         // Send notification and click on share.
-        sendBugreportFinished(null, mPlainTextPath, null);
+        sendBugreportFinished(NO_PID, mPlainTextPath, null);
         acceptBugreport();
 
         // Handle the warning
@@ -348,6 +397,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Make sure it's hidden now.
         int newState = BugreportPrefs.getWarningState(mContext, BugreportPrefs.STATE_UNKNOWN);
         assertEquals("Didn't change state", BugreportPrefs.STATE_HIDE, newState);
+    }
+
+    public void testShareBugreportAfterServiceDies() throws Exception {
+        sendBugreportFinished(NO_PID, mPlainTextPath, NO_SCREENSHOT);
+        killService();
+        Bundle extras = acceptBugreportAndGetSharedIntent();
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
     public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
@@ -444,6 +500,13 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     /**
+     * Waits for the notification to share the finished bugreport.
+     */
+    private void waitShareNotification() {
+        mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title));
+    }
+
+    /**
      * Accepts the notification to share the finished bugreport.
      */
     private void acceptBugreport() {
@@ -512,7 +575,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             expectedNumberScreenshots ++; // Add screenshot received by dumpstate
         }
         int expectedSize = expectedNumberScreenshots + 1; // All screenshots plus the bugreport file
-        assertEquals("wrong number of attachments", expectedSize, attachments.size());
+        assertEquals("wrong number of attachments (" + attachments + ")",
+                expectedSize, attachments.size());
 
         // Need to interact through all attachments, since order is not guaranteed.
         Uri zipUri = null;
@@ -607,6 +671,15 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
     }
 
+    private void killService() {
+        waitForService(true);
+        Log.v(TAG, "Stopping service");
+        boolean stopped = mContext.stopService(new Intent(mContext, BugreportProgressService.class));
+        Log.d(TAG, "stopService returned " + stopped);
+        waitForService(false);
+        assertServiceNotRunning();  // Sanity check.
+    }
+
     private boolean isServiceRunning(String name) {
         ActivityManager manager = (ActivityManager) mContext
                 .getSystemService(Context.ACTIVITY_SERVICE);
@@ -616,6 +689,33 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             }
         }
         return false;
+    }
+
+    private void waitForService(boolean expectRunning) {
+        String service = BugreportProgressService.class.getName();
+        boolean actualRunning;
+        for (int i = 1; i <= 5; i++) {
+            actualRunning = isServiceRunning(service);
+            Log.d(TAG, "Attempt " + i + " to check status of service '"
+                    + service + "': expected=" + expectRunning + ", actual= " + actualRunning);
+            if (actualRunning == expectRunning) {
+                return;
+            }
+            try {
+                Thread.sleep(DateUtils.SECOND_IN_MILLIS);
+            } catch (InterruptedException e) {
+                Log.w(TAG, "thread interrupted");
+                Thread.currentThread().interrupt();
+            }
+        }
+        if (!expectRunning) {
+            // Typically happens when service is waiting for a screenshot to finish.
+            Log.w(TAG, "Service didn't stop; try to kill it again");
+            killService();
+            return;
+        }
+
+        fail("Service status didn't change to " + expectRunning);
     }
 
     private static void createTextFile(String path, String content) throws IOException {
@@ -669,7 +769,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private UiObject waitForScreenshotButtonEnabled(boolean expectedEnabled) throws Exception {
         UiObject screenshotButton = getScreenshotButton();
-        int maxAttempts = SCREENSHOT_DELAY_SECONDS + 5;
+        int maxAttempts = SAFE_SCREENSHOT_DELAY;
         int i = 0;
         do {
             boolean enabled = screenshotButton.isEnabled();

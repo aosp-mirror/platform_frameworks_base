@@ -65,6 +65,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.os.Vibrator;
@@ -108,7 +109,7 @@ import android.widget.Toast;
  * </ol>
  */
 public class BugreportProgressService extends Service {
-    static final String TAG = "Shell";
+    private static final String TAG = "BugreportProgressService";
     private static final boolean DEBUG = false;
 
     private static final String AUTHORITY = "com.android.shell";
@@ -137,6 +138,7 @@ public class BugreportProgressService extends Service {
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_ORIGINAL_INTENT = "android.intent.extra.ORIGINAL_INTENT";
+    static final String EXTRA_INFO = "android.intent.extra.INFO";
 
     private static final int MSG_SERVICE_COMMAND = 1;
     private static final int MSG_POLL = 2;
@@ -325,7 +327,7 @@ public class BugreportProgressService extends Service {
                     takeScreenshot(pid, true);
                     break;
                 case INTENT_BUGREPORT_SHARE:
-                    shareBugreport(pid);
+                    shareBugreport(pid, (BugreportInfo) intent.getParcelableExtra(EXTRA_INFO));
                     break;
                 case INTENT_BUGREPORT_CANCEL:
                     cancel(pid);
@@ -483,6 +485,7 @@ public class BugreportProgressService extends Service {
         if (mProcesses.indexOfKey(pid) < 0) {
             Log.w(TAG, "PID not watched: " + pid);
         } else {
+            Log.d(TAG, "Removing PID " + pid);
             mProcesses.remove(pid);
         }
         stopSelfWhenDone();
@@ -675,6 +678,11 @@ public class BugreportProgressService extends Service {
         final int msgId;
         if (taken) {
             info.addScreenshot(screenshotFile);
+            if (info.finished) {
+                Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
+                info.renameScreenshots(mScreenshotsDir);
+                sendBugreportNotification(mContext, info);
+            }
             msgId = R.string.bugreport_screenshot_taken;
         } else {
             // TODO: try again using Framework APIs instead of relying on screencap.
@@ -814,12 +822,13 @@ public class BugreportProgressService extends Service {
      * Shares the bugreport upon user's request by issuing a {@link Intent#ACTION_SEND_MULTIPLE}
      * intent, but issuing a warning dialog the first time.
      */
-    private void shareBugreport(int pid) {
-        final BugreportInfo info = getInfo(pid);
+    private void shareBugreport(int pid, BugreportInfo sharedInfo) {
+        BugreportInfo info = getInfo(pid);
         if (info == null) {
-            // Should not happen, so log if it does...
-            Log.e(TAG, "INTERNAL ERROR: no info for PID " + pid + ": " + mProcesses);
-            return;
+            // Service was terminated but notification persisted
+            info = sharedInfo;
+            Log.d(TAG, "shareBugreport(): no info for PID " + pid + " on managed processes ("
+                    + mProcesses + "), using info from intent instead (" + info + ")");
         }
 
         addDetailsToZipFile(info);
@@ -850,6 +859,7 @@ public class BugreportProgressService extends Service {
         shareIntent.setClass(context, BugreportProgressService.class);
         shareIntent.setAction(INTENT_BUGREPORT_SHARE);
         shareIntent.putExtra(EXTRA_PID, info.pid);
+        shareIntent.putExtra(EXTRA_INFO, info);
 
         final String title = context.getString(R.string.bugreport_finished_title);
         final Notification.Builder builder = new Notification.Builder(context)
@@ -919,6 +929,11 @@ public class BugreportProgressService extends Service {
      * description will be saved on {@code description.txt}.
      */
     private void addDetailsToZipFile(BugreportInfo info) {
+        if (info.bugreportFile == null) {
+            // One possible reason is a bug in the Parcelization code.
+            Log.e(TAG, "INTERNAL ERROR: no bugreportFile on " + info);
+            return;
+        }
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
         final File dir = info.bugreportFile.getParentFile();
@@ -1281,7 +1296,7 @@ public class BugreportProgressService extends Service {
     /**
      * Information about a bugreport process while its in progress.
      */
-    private static final class BugreportInfo {
+    private static final class BugreportInfo implements Parcelable {
         private final Context context;
 
         /**
@@ -1323,6 +1338,11 @@ public class BugreportProgressService extends Service {
          * Time of the last progress update.
          */
         long lastUpdate = System.currentTimeMillis();
+
+        /**
+         * Time of the last progress update when Parcel was created.
+         */
+        String formattedLastUpdate;
 
         /**
          * Path of the main bugreport file.
@@ -1403,6 +1423,11 @@ public class BugreportProgressService extends Service {
         }
 
         String getFormattedLastUpdate() {
+            if (context == null) {
+                // Restored from Parcel
+                return formattedLastUpdate == null ?
+                        Long.toString(lastUpdate) : formattedLastUpdate;
+            }
             return DateUtils.formatDateTime(context, lastUpdate,
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
         }
@@ -1416,5 +1441,74 @@ public class BugreportProgressService extends Service {
                     + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate();
         }
+
+        // Parcelable contract
+        protected BugreportInfo(Parcel in) {
+            context = null;
+            pid = in.readInt();
+            name = in.readString();
+            title = in.readString();
+            description = in.readString();
+            max = in.readInt();
+            progress = in.readInt();
+            lastUpdate = in.readLong();
+            formattedLastUpdate = in.readString();
+            bugreportFile = readFile(in);
+
+            int screenshotSize = in.readInt();
+            for (int i = 1; i <= screenshotSize; i++) {
+                  screenshotFiles.add(readFile(in));
+            }
+
+            finished = in.readInt() == 1;
+            screenshotCounter = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(pid);
+            dest.writeString(name);
+            dest.writeString(title);
+            dest.writeString(description);
+            dest.writeInt(max);
+            dest.writeInt(progress);
+            dest.writeLong(lastUpdate);
+            dest.writeString(getFormattedLastUpdate());
+            writeFile(dest, bugreportFile);
+
+            dest.writeInt(screenshotFiles.size());
+            for (File screenshotFile : screenshotFiles) {
+                writeFile(dest, screenshotFile);
+            }
+
+            dest.writeInt(finished ? 1 : 0);
+            dest.writeInt(screenshotCounter);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private void writeFile(Parcel dest, File file) {
+            dest.writeString(file == null ? null : file.getPath());
+        }
+
+        private File readFile(Parcel in) {
+            final String path = in.readString();
+            return path == null ? null : new File(path);
+        }
+
+        public static final Parcelable.Creator<BugreportInfo> CREATOR =
+                new Parcelable.Creator<BugreportInfo>() {
+            public BugreportInfo createFromParcel(Parcel source) {
+                return new BugreportInfo(source);
+            }
+
+            public BugreportInfo[] newArray(int size) {
+                return new BugreportInfo[size];
+            }
+        };
+
     }
 }
