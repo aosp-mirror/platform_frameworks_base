@@ -32,7 +32,7 @@ import java.util.List;
 
 /** This class provides a system service that monitors media resource usage. */
 public class MediaResourceMonitorService extends SystemService {
-    private static final String TAG = "MediaResourceMonitorService";
+    private static final String TAG = "MediaResourceMonitor";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String SERVICE_NAME = "media_resource_monitor";
