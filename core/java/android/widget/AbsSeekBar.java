@@ -142,6 +142,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
 
         applyThumbTint();
+        applyTickMarkTint();
 
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
     }
