@@ -16,18 +16,20 @@
 
 package android.widget;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
+import com.android.internal.R;
+import com.android.internal.view.menu.ShowableListMenu;
+
+import android.annotation.AttrRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.IntProperty;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -38,13 +40,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
-
-import com.android.internal.R;
-import com.android.internal.view.menu.ShowableListMenu;
-import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
-
-import java.util.Locale;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 /**
  * A ListPopupWindow anchors itself to a host view and displays a
@@ -109,8 +105,6 @@ public class ListPopupWindow implements ShowableListMenu {
 
     private boolean mModal;
 
-    private int mLayoutDirection;
-
     PopupWindow mPopup;
 
     /**
@@ -174,7 +168,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param context Context used for contained views.
      */
-    public ListPopupWindow(Context context) {
+    public ListPopupWindow(@NonNull Context context) {
         this(context, null, com.android.internal.R.attr.listPopupWindowStyle, 0);
     }
 
@@ -185,7 +179,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * @param context Context used for contained views.
      * @param attrs Attributes from inflating parent views used to style the popup.
      */
-    public ListPopupWindow(Context context, AttributeSet attrs) {
+    public ListPopupWindow(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.listPopupWindowStyle, 0);
     }
 
@@ -197,7 +191,8 @@ public class ListPopupWindow implements ShowableListMenu {
      * @param attrs Attributes from inflating parent views used to style the popup.
      * @param defStyleAttr Default style attribute to use for popup content.
      */
-    public ListPopupWindow(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ListPopupWindow(@NonNull Context context, @Nullable AttributeSet attrs,
+            @AttrRes int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
@@ -210,7 +205,8 @@ public class ListPopupWindow implements ShowableListMenu {
      * @param defStyleAttr Style attribute to read for default styling of popup content.
      * @param defStyleRes Style resource ID to use for default styling of popup content.
      */
-    public ListPopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ListPopupWindow(@NonNull Context context, @Nullable AttributeSet attrs,
+            @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         mContext = context;
         mHandler = new Handler(context.getMainLooper());
 
@@ -227,9 +223,6 @@ public class ListPopupWindow implements ShowableListMenu {
 
         mPopup = new PopupWindow(context, attrs, defStyleAttr, defStyleRes);
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-        // Set the default layout direction to match the default locale one
-        final Locale locale = mContext.getResources().getConfiguration().locale;
-        mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(locale);
     }
 
     /**
@@ -238,7 +231,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @param adapter The adapter to use to create this window's content.
      */
-    public void setAdapter(ListAdapter adapter) {
+    public void setAdapter(@Nullable ListAdapter adapter) {
         if (mObserver == null) {
             mObserver = new PopupDataSetObserver();
         } else if (mAdapter != null) {
@@ -371,7 +364,7 @@ public class ListPopupWindow implements ShowableListMenu {
     /**
      * @return The background drawable for the popup window.
      */
-    public Drawable getBackground() {
+    public @Nullable Drawable getBackground() {
         return mPopup.getBackground();
     }
 
@@ -380,7 +373,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param d A drawable to set as the background.
      */
-    public void setBackgroundDrawable(Drawable d) {
+    public void setBackgroundDrawable(@Nullable Drawable d) {
         mPopup.setBackgroundDrawable(d);
     }
 
@@ -389,7 +382,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param animationStyle Animation style to use.
      */
-    public void setAnimationStyle(int animationStyle) {
+    public void setAnimationStyle(@StyleRes int animationStyle) {
         mPopup.setAnimationStyle(animationStyle);
     }
 
@@ -399,7 +392,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @return Animation style that will be used.
      */
-    public int getAnimationStyle() {
+    public @StyleRes int getAnimationStyle() {
         return mPopup.getAnimationStyle();
     }
 
@@ -408,7 +401,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @return The popup's anchor view
      */
-    public View getAnchorView() {
+    public @Nullable View getAnchorView() {
         return mDropDownAnchorView;
     }
 
@@ -418,7 +411,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param anchor The view to use as an anchor.
      */
-    public void setAnchorView(View anchor) {
+    public void setAnchorView(@Nullable View anchor) {
         mDropDownAnchorView = anchor;
     }
 
@@ -537,7 +530,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @see ListView#setOnItemClickListener(android.widget.AdapterView.OnItemClickListener)
      */
-    public void setOnItemClickListener(AdapterView.OnItemClickListener clickListener) {
+    public void setOnItemClickListener(@Nullable AdapterView.OnItemClickListener clickListener) {
         mItemClickListener = clickListener;
     }
 
@@ -546,9 +539,9 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param selectedListener Listener to register.
      * 
-     * @see ListView#setOnItemSelectedListener(android.widget.AdapterView.OnItemSelectedListener)
+     * @see ListView#setOnItemSelectedListener(OnItemSelectedListener)
      */
-    public void setOnItemSelectedListener(AdapterView.OnItemSelectedListener selectedListener) {
+    public void setOnItemSelectedListener(@Nullable OnItemSelectedListener selectedListener) {
         mItemSelectedListener = selectedListener;
     }
 
@@ -558,7 +551,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @param prompt View to use as an informational prompt.
      */
-    public void setPromptView(View prompt) {
+    public void setPromptView(@Nullable View prompt) {
         boolean showing = isShowing();
         if (showing) {
             removePromptView();
@@ -686,7 +679,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @param listener Listener that will be notified when the popup is dismissed.
      */
-    public void setOnDismissListener(PopupWindow.OnDismissListener listener) {
+    public void setOnDismissListener(@Nullable PopupWindow.OnDismissListener listener) {
         mPopup.setOnDismissListener(listener);
     }
 
@@ -795,7 +788,7 @@ public class ListPopupWindow implements ShowableListMenu {
     /**
      * @return The currently selected item or null if the popup is not showing.
      */
-    public Object getSelectedItem() {
+    public @Nullable Object getSelectedItem() {
         if (!isShowing()) {
             return null;
         }
@@ -834,7 +827,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @see ListView#getSelectedView()
      */
-    public View getSelectedView() {
+    public @Nullable View getSelectedView() {
         if (!isShowing()) {
             return null;
         }
@@ -846,11 +839,11 @@ public class ListPopupWindow implements ShowableListMenu {
      * Only valid when {@link #isShowing()} == {@code true}.
      */
     @Override
-    public ListView getListView() {
+    public @Nullable ListView getListView() {
         return mDropDownList;
     }
 
-    DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
+    @NonNull DropDownListView createDropDownListView(Context context, boolean hijackFocus) {
         return new DropDownListView(context, hijackFocus);
     }
 
@@ -874,7 +867,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @see #setModal(boolean)
      */
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
         // when the drop down is shown, we drive it directly
         if (isShowing()) {
             // the key events are forwarded to the list in the drop down view
@@ -969,7 +962,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @see #setModal(boolean)
      */
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
         if (isShowing() && mDropDownList.getSelectedItemPosition() >= 0) {
             boolean consumed = mDropDownList.onKeyUp(keyCode, event);
             if (consumed && KeyEvent.isConfirmKey(keyCode)) {
@@ -993,7 +986,7 @@ public class ListPopupWindow implements ShowableListMenu {
      * 
      * @see #setModal(boolean)
      */
-    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+    public boolean onKeyPreIme(int keyCode, @NonNull KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && isShowing()) {
             // special case for the back key, we do not even try to send it
             // to the drop down list but instead, consume it immediately
@@ -1159,7 +1152,6 @@ public class ListPopupWindow implements ShowableListMenu {
 
             mPopup.setContentView(dropDownView);
         } else {
-            dropDownView = (ViewGroup) mPopup.getContentView();
             final View view = mPromptView;
             if (view != null) {
                 LinearLayout.LayoutParams hintParams =

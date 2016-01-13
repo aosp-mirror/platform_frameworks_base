@@ -53,12 +53,6 @@ public abstract class ForwardingListener
     /** Whether this listener is currently forwarding touch events. */
     private boolean mForwarding;
 
-    /**
-     * Whether forwarding was initiated by a long-press. If so, we won't
-     * force the window to dismiss when the touch stream ends.
-     */
-    private boolean mWasLongPress;
-
     /** The id of the first pointer down in the current event stream. */
     private int mActivePointerId;
 
@@ -172,7 +166,6 @@ public abstract class ForwardingListener
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
                 mActivePointerId = srcEvent.getPointerId(0);
-                mWasLongPress = false;
 
                 if (mDisallowIntercept == null) {
                     mDisallowIntercept = new DisallowIntercept();
@@ -243,7 +236,6 @@ public abstract class ForwardingListener
         e.recycle();
 
         mForwarding = true;
-        mWasLongPress = true;
     }
 
     /**

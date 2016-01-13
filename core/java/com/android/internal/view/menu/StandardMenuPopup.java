@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.internal.view.menu;
 
 import android.content.Context;
@@ -7,7 +23,6 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -30,7 +45,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         MenuPresenter, OnKeyListener {
 
     private final Context mContext;
-    private final LayoutInflater mInflater;
+
     private final MenuBuilder mMenu;
     private final MenuAdapter mAdapter;
     private final boolean mOverflowOnly;
@@ -79,8 +94,6 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     private Callback mPresenterCallback;
     private ViewTreeObserver mTreeObserver;
 
-    private ViewGroup mMeasureParent;
-
     /** Whether the popup has been dismissed. Once dismissed, it cannot be opened again. */
     private boolean mWasDismissed;
 
@@ -99,10 +112,10 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     public StandardMenuPopup(Context context, MenuBuilder menu, View anchorView, int popupStyleAttr,
             int popupStyleRes, boolean overflowOnly) {
         mContext = Preconditions.checkNotNull(context);
-        mInflater = LayoutInflater.from(context);
         mMenu = menu;
         mOverflowOnly = overflowOnly;
-        mAdapter = new MenuAdapter(menu, mInflater, mOverflowOnly);
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        mAdapter = new MenuAdapter(menu, inflater, mOverflowOnly);
         mPopupStyleAttr = popupStyleAttr;
         mPopupStyleRes = popupStyleRes;
 
@@ -155,8 +168,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         mPopup.setDropDownGravity(mDropDownGravity);
 
         if (!mHasContentWidth) {
-            mContentWidth = measureIndividualMenuWidth(
-                    mAdapter, mMeasureParent, mContext, mPopupMaxWidth);
+            mContentWidth = measureIndividualMenuWidth(mAdapter, null, mContext, mPopupMaxWidth);
             mHasContentWidth = true;
         }
 
@@ -177,7 +189,9 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
                             false);
             TextView titleView = (TextView) titleItemView.findViewById(
                     com.android.internal.R.id.title);
-            titleView.setText(mMenu.getHeaderTitle());
+            if (titleView != null) {
+                titleView.setText(mMenu.getHeaderTitle());
+            }
             titleItemView.setEnabled(false);
             listView.addHeaderView(titleItemView, null, false);
 
