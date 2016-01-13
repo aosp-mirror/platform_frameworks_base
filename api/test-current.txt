@@ -524,6 +524,7 @@ package android {
     field public static final int expandableListViewStyle = 16842863; // 0x101006f
     field public static final int expandableListViewWhiteStyle = 16843446; // 0x10102b6
     field public static final int exported = 16842768; // 0x1010010
+    field public static final int externalService = 16844047; // 0x101050f
     field public static final int extraTension = 16843371; // 0x101026b
     field public static final int extractNativeLibs = 16844010; // 0x10104ea
     field public static final int factor = 16843219; // 0x10101d3
