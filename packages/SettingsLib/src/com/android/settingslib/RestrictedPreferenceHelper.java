@@ -45,7 +45,7 @@ public class RestrictedPreferenceHelper {
     private EnforcedAdmin mEnforcedAdmin;
     private String mAttrUserRestriction = null;
 
-    RestrictedPreferenceHelper(Context context, Preference preference,
+    public RestrictedPreferenceHelper(Context context, Preference preference,
             AttributeSet attrs) {
         mContext = context;
         mPreference = preference;
@@ -54,21 +54,21 @@ public class RestrictedPreferenceHelper {
         mRestrictedPadlockPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.restricted_lock_icon_padding);
 
-        mAttrUserRestriction = attrs.getAttributeValue(
-                R.styleable.RestrictedPreference_userRestriction);
-        final TypedArray attributes = context.obtainStyledAttributes(attrs,
-                R.styleable.RestrictedPreference);
-        final TypedValue userRestriction =
-                attributes.peekValue(R.styleable.RestrictedPreference_userRestriction);
-        CharSequence data = null;
-        if (userRestriction != null && userRestriction.type == TypedValue.TYPE_STRING) {
-            if (userRestriction.resourceId != 0) {
-                data = context.getText(userRestriction.resourceId);
-            } else {
-                data = userRestriction.string;
+        if (attrs != null) {
+            final TypedArray attributes = context.obtainStyledAttributes(attrs,
+                    R.styleable.RestrictedPreference);
+            final TypedValue userRestriction =
+                    attributes.peekValue(R.styleable.RestrictedPreference_userRestriction);
+            CharSequence data = null;
+            if (userRestriction != null && userRestriction.type == TypedValue.TYPE_STRING) {
+                if (userRestriction.resourceId != 0) {
+                    data = context.getText(userRestriction.resourceId);
+                } else {
+                    data = userRestriction.string;
+                }
             }
+            mAttrUserRestriction = data == null ? null : data.toString();
         }
-        mAttrUserRestriction = data == null ? null : data.toString();
     }
 
     /**
@@ -100,7 +100,7 @@ public class RestrictedPreferenceHelper {
     /**
      * Disable / enable if we have been passed the restriction in the xml.
      */
-    protected void onAttachedToHierarchy() {
+    public void onAttachedToHierarchy() {
         if (mAttrUserRestriction != null) {
             checkRestrictionAndSetDisabled(mAttrUserRestriction, UserHandle.myUserId());
         }

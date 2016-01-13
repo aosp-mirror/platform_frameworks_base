@@ -79,6 +79,15 @@ public class RestrictedSwitchPreference extends SwitchPreference {
         mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled && isDisabledByAdmin()) {
+            mHelper.setDisabledByAdmin(null);
+            return;
+        }
+        super.setEnabled(enabled);
+    }
+
     public void setDisabledByAdmin(EnforcedAdmin admin) {
         if (mHelper.setDisabledByAdmin(admin)) {
             notifyChanged();
