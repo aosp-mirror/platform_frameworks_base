@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Tumia"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Thibitisha mipangilio"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Baadhi ya mipangilio ya rangi inaweza kufanya kifaa hiki kisitumike. Bofya Sawa ili uthibitishe mipangilio hii ya rangi, vinginevyo, mipangilio hii itajiweka upya baada ya sekunde 10."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Betri (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Kiokoa Betri hakipatikani unapochaji betri"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Kiokoa Betri"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Hupunguza data ya chini chini na utendaji"</string>
 </resources>

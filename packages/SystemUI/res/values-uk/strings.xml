@@ -474,4 +474,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Застосувати"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Підтвердити налаштування"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Деякі налаштування кольорів можуть зробити цей пристрій непридатним для використання. Натисніть OK, щоб підтвердити налаштування, інакше їх буде скинуто через 10 секунд."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Акумулятор (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим економії заряду акумулятора недоступний під час заряджання"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим економії заряду акумулятора"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Знижується продуктивність і обмежується обмін даними у фоновому режимі"</string>
 </resources>

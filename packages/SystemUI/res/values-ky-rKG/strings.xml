@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Колдонуу"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Жөндөөлөрдү ырастоо"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Айрым түс жөндөөлөрү бул түзмөктү колдонулгус кылып коюшу мүмкүн. Бул түс жөндөөлөрүн ырастоо үчүн OK баскычын чыкылдатыңыз, болбосо бул жөндөөлөр 10 секунддан кийин баштапкы абалына келтирилет."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Батарея (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Батареяны үнөмдөгүч кубаттоо учурунда иштебейт"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батареяны үнөмдөгүч"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Иштин майнаптуулугун начарлатып, фондук дайындарды чектейт"</string>
 </resources>

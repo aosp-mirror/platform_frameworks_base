@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Aplica"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirma la configuració"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Algunes opcions de configuració de color poden deixar el dispositiu inservible. Fes clic a D\'acord per confirmar la configuració de color; en cas contrari, la configuració es restablirà al cap de 10 segons."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Bateria (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
 </resources>

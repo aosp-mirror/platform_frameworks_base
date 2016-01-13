@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="6456385927409742437">"Akku ist schwach"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend. Der Energiesparmodus ist aktiviert."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB-Aufladung wird nicht unterstützt.\nVerwenden Sie das mitgelieferte Aufladegerät."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB-Aufladung wird nicht unterstützt.\nVerwende das mitgelieferte Aufladegerät."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Laden per USB wird nicht unterstützt."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Verwenden Sie nur das im Lieferumfang enthaltene Ladegerät."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Einstellungen"</string>
@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Übernehmen"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Einstellungen bestätigen"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Einige Farbeinstellungen können dazu führen, dass das Gerät nicht mehr genutzt werden kann. Klicke auf \"OK\", um diese Farbeinstellungen zu bestätigen. Anderenfalls werden diese Einstellungen in 10 Sekunden zurückgesetzt."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Akku (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Der Energiesparmodus ist beim Aufladen nicht verfügbar."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Energiesparmodus"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduzierung der Leistung und Hintergrunddaten"</string>
 </resources>

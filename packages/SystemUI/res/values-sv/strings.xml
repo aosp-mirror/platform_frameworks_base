@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Verkställ"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Bekräfta inställningarna"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Vissa färginställningar kan göra den här enheten oanvändbar. Klicka på OK om du vill bekräfta färginställningarna, annars återställs inställningarna efter 10 sekunder."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Batteri (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparläget är inte tillgängligt vid laddning"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparläge"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Minskar prestanda och bakgrundsdata"</string>
 </resources>

@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"ബാധകമാക്കുക"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ക്രമീകരണം സ്ഥിരീകരിക്കുക"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ചില വർണ്ണ ക്രമീകരണത്തിന് ഈ ഉപകരണത്തെ ഉപയോഗരഹിതമാക്കാനാകും. ഈ വർണ്ണ ക്രമീകരണം സ്ഥിരീകരിക്കുന്നതിന് ശരി എന്നതിൽ ക്ലിക്കുചെയ്യുക, അല്ലെങ്കിൽ 10 സെക്കൻഡിന് ശേഷം ഈ ക്രമീകരണം പുനഃക്രമീകരിക്കപ്പെടും."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"ബാറ്ററി (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി സേവർ ലഭ്യമല്ല"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ബാറ്ററി സേവർ"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
 </resources>

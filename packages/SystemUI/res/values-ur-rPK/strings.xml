@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"لاگو کریں"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ترتیبات کی توثیق کریں"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"رنگوں کی کچھ ترتیبات اس آلے کو ناقابل استعمال بنا سکتی ہیں۔ رنگوں کی ان ترتیبات کی توثیق کرنے کیلئے ٹھیک ہے پر کلک کریں، بصورت دیگر 10 سیکنڈ بعد یہ ترتیبات ری سیٹ ہو جائیں گی۔"</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"بیٹری (%%<xliff:g id="ID_1">%1$d</xliff:g>)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"چارجنگ کے دوران بیٹری سیور دستیاب نہیں ہے"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"بیٹری سیور"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
 </resources>

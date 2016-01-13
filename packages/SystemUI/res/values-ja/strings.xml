@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"適用"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"設定の確認"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"一部の色設定を適用すると、この端末を使用できなくなることがあります。この色設定を確認するには、[OK] をクリックしてください。確認しない場合、10 秒後に設定はリセットされます。"</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"バッテリー（<xliff:g id="ID_1">%1$d</xliff:g>%%）"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電中はバッテリー セーバーは利用できません"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"バッテリー セーバー"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"パフォーマンスとバックグラウンド データを制限します"</string>
 </resources>

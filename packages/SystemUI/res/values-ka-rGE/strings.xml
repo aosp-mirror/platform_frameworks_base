@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"გამოყენება"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"პარამეტრების დადასტურება"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ფერთა ზოგიერთ პარამეტრს ამ მოწყობილობასთან მუშაობის გართულება შეუძლია. ფერთა ამჟამინდელი პარამეტრების დასადასტურებლად, დააწკაპუნეთ „კარგი“-ზე. წინააღმდეგ შემთხვევაში, პარამეტრები 10 წამის შემდეგ ჩამოიყრება."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"ბატარეა (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ბატარეის დამზოგი დატენვისას მიწვდომელია"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ბატარეის დამზოგი"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ამცირებს წარმადობას და ფონურ მონაცემებს"</string>
 </resources>

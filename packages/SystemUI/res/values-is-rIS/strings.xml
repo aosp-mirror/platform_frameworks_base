@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Nota"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Staðfesta stillingar"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Sumar litastillingar kunna að bitna á notagildi tækisins. Veldu „Í lagi“ til að staðfesta þessar litastillingar, að öðrum kosti verða litirnir endurstilltir eftir tíu sekúndur."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Rafhlaða (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ekki er hægt að nota rafhlöðusparnað meðan á hleðslu stendur"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Rafhlöðusparnaður"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Dregur úr afköstum og bakgrunnsgögnum"</string>
 </resources>

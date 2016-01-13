@@ -473,4 +473,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Primijeni"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Potvrdite postavke"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Neke postavke boja mogu učiniti uređaj neupotrebljivim. Kliknite U redu da biste potvrdili postavke boja jer će se u suprotnom poništiti za 10 sekundi."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Baterija (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Štednja baterije nije dostupna tijekom punjenja"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Štednja baterije"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Smanjuje količinu rada i pozadinske podatke"</string>
 </resources>

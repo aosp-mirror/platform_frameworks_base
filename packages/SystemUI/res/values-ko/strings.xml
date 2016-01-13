@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"적용"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"설정 확인"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"일부 색상 설정으로 인해 이 기기를 사용하지 못할 수 있습니다. 확인을 클릭하여 이러한 색상 설정을 확인하지 않으면 10초 후에 설정이 초기화됩니다."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"배터리(<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"성능 및 백그라운드 데이터를 줄입니다."</string>
 </resources>

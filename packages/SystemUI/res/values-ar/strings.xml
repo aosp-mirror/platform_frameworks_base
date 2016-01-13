@@ -476,4 +476,8 @@
     <string name="color_apply" msgid="9212602012641034283">"تطبيق"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"تأكيد الإعدادات"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"يمكن أن تتسبب بعض إعدادات الألوان في تعطيل إمكانية استخدام الجهاز. يمكنك النقر على \"موافق\" لتأكيد إعدادات الألوان هذه، وإلا فستتم إعادة تعيين هذه الإعدادات بعد 10 ثوانٍ."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"البطارية (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"لخفض مستوى الأداء وبيانات الخلفية"</string>
 </resources>

@@ -472,4 +472,8 @@
     <string name="color_apply" msgid="9212602012641034283">"အသုံးပြုပါ"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ဆက်တင်များကို အတည်ပြုပါ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"အချို့သော အရောင်ဆက်တက်များက ဤကိရိယာကို သုံးမရအောင် လုပ်ပစ်နိုင်ပါသည်။ ဤအရောင် ဆက်တင်များကို အတည်ပြုရန် အိုကေကို နှိပ်ပါ၊ သို့မဟုတ် ဤဆက်တင်များကို ၁၀ စက္ကန့် အကြာတွင် ပြန်ညှိလိုက်ပါမည်။"</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"ဘက်ထရီ ( <xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"အားသွင်းနေချိန်မှာ Battery Saver ကို သုံးမရပါ"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Battery Saver"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"လုပ်ဆောင်မှု နှင့် နောက်ခံ ​ဒေတာကို လျော့နည်းစေပါသည်"</string>
 </resources>

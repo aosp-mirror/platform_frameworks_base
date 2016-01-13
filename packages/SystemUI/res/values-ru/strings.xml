@@ -474,4 +474,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Применить"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Подтвердите настройки"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Некоторые цветовые настройки могут затруднить работу с устройством. Чтобы применить выбранные параметры, нажмите \"ОК\". В противном случае они будут сброшены через 10 секунд."</string>
+    <string name="battery_panel_title" msgid="3476715163685592453">"Батарея (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим энергосбережения нельзя включить во время зарядки"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим энергосбережения"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Замедляет работу устройства и ограничивает фоновую передачу данных"</string>
 </resources>
