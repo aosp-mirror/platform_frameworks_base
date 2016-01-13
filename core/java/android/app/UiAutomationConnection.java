@@ -28,6 +28,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.view.IWindowManager;
 import android.view.InputEvent;
 import android.view.SurfaceControl;
@@ -167,9 +168,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+        int callingUserId = UserHandle.getCallingUserId();
         final long identity = Binder.clearCallingIdentity();
         try {
-            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            IBinder token = mAccessibilityManager.getWindowToken(windowId, callingUserId);
             if (token == null) {
                 return false;
             }
@@ -186,9 +188,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+        int callingUserId = UserHandle.getCallingUserId();
         final long identity = Binder.clearCallingIdentity();
         try {
-            IBinder token = mAccessibilityManager.getWindowToken(windowId);
+            IBinder token = mAccessibilityManager.getWindowToken(windowId, callingUserId);
             if (token == null) {
                 return null;
             }
