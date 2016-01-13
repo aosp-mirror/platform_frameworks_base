@@ -205,7 +205,7 @@ public class WifiSsid implements Parcelable {
         for (int i = 0; i < octets.size(); i++) {
             out += String.format(Locale.US, "%02x", ssidbytes[i]);
         }
-        return out;
+        return (octets.size() > 0) ? out : null;
     }
 
     /** Implement the Parcelable interface {@hide} */
