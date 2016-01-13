@@ -277,6 +277,8 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Αυτόματο"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Υλοποίηση WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ορισμός υλοποίησης WebView"</string>
+    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Μετατροπή σε κρυπτογράφηση αρχείου"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Μετατροπή…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Με κρυπτογράφηση αρχείου"</string>
@@ -293,4 +295,18 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Διόρθωση χρωμάτων"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Αυτή η λειτουργία είναι πειραματική και ενδεχομένως να επηρεάσει τις επιδόσεις."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Αντικαταστάθηκε από <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - απομένουν περίπου <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση με φορτιστή AC"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη φόρτιση μέσω USB"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> για πλήρη ασύρματη φόρτιση"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"Άγνωστο"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Φόρτιση"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Φόρτιση με AC"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Φόρτιση μέσω USB"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Ασύρματη φόρτιση"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"Δεν φορτίζει"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Δεν φορτίζει"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Πλήρης"</string>
 </resources>

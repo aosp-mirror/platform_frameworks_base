@@ -277,6 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"स्वयंचलित"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबदृश्य अंमलबजावणी सेट करा"</string>
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"निवडलेली WebView अंमलबजावणी अक्षम आहे आणि वापरण्यास सक्षम असणे आवश्यक आहे, आपण ती सक्षम करू इच्छिता?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फाईल कूटबद्धीकरणावर रूपांतरित करा"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करा..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फाईल आधीपासून कूटबद्ध केली"</string>
@@ -293,4 +294,18 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रंग सुधारणा"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"हे वैशिष्‍ट्य प्रायोगिक आहे आणि कदाचित कार्यप्रदर्शन प्रभावित करू शकते."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - अंदाजे. <xliff:g id="TIME">%2$s</xliff:g> शिल्लक"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पूर्ण होण्यात"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> AC वरून पूर्ण होण्यात"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> USB वरून पूर्ण होण्यात"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> वायरलेसवरून पूर्ण होण्यात"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज होत आहे"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC वर चार्ज करीत आहे"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB वरून चार्ज करीत आहे"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"वायरलेस वरून चार्ज करीत आहे"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज होत नाही"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज होत नाही"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"पूर्ण"</string>
 </resources>

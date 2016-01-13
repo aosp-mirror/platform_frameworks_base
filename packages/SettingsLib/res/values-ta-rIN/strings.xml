@@ -277,6 +277,8 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"தானியங்கு"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
+    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
+    <skip />
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"கோப்பு முறைமையாக்கத்திற்கு மாற்று"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"மாற்று…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ஏற்கனவே கோப்பு முறைமையாக்கப்பட்டது"</string>
@@ -293,4 +295,18 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
+    <string name="power_discharging_duration" msgid="1605929174734600590">"தோராயம்: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> உள்ளது"</string>
+    <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="2853265177761520490">"முழு சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_ac" msgid="3969186192576594254">"முழு AC சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"முழு USB சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration_wireless" msgid="1829295708243159464">"முழு வயர்லெஸ் சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஏற்றப்படுகிறது"</string>
+    <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC மூலம் சார்ஜாகிறது"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB மூலம் சார்ஜாகிறது"</string>
+    <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"வயர்லெஸில் சார்ஜாகிறது"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"சார்ஜ் செய்யப்படவில்லை"</string>
+    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"சார்ஜ் ஏறவில்லை"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
 </resources>
