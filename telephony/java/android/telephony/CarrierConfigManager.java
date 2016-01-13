@@ -473,8 +473,6 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
     /**
-<<<<<<< HEAD
-=======
      * Determine whether user can switch Wi-Fi preferred or Cellular preferred in calling preference.
      * Some operators support Wi-Fi Calling only, not VoLTE.
      * They don't need "Cellular preferred" option.
@@ -484,15 +482,6 @@ public class CarrierConfigManager {
     public static final String KEY_EDITABLE_WFC_MODE_BOOL = "editable_wfc_mode_bool";
 
     /**
-     * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
-     * non-zero value is specified, the UE shall wait for the specified amount of time before it
-     * sends out successive DTMF tones on the network.
-     * @hide
-     */
-    public static final String KEY_CDMA_DTMF_TONE_DELAY_INT = "cdma_dtmf_tone_delay_int";
-
-    /**
->>>>>>> 68514d5325d726ff830df8003f9715b1987f5f98
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -663,13 +652,9 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
-<<<<<<< HEAD
         sDefaults.putBoolean(BOOL_ALLOW_EMERGENCY_VIDEO_CALLS, false);
         sDefaults.putBoolean(BOOL_ALLOW_VIDEO_PAUSE, true);
-=======
         sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
-        sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
->>>>>>> 68514d5325d726ff830df8003f9715b1987f5f98
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
