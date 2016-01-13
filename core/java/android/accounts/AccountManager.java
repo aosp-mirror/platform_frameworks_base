@@ -19,6 +19,7 @@ package android.accounts;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -244,14 +245,18 @@ public class AccountManager {
      * Bundle key used for a {@link Bundle} in result from
      * {@link #startAddAccountSession} and friends which returns session data
      * for installing an account later.
+     * @hide
      */
+    @SystemApi
     public static final String KEY_ACCOUNT_SESSION_BUNDLE = "accountSessionBundle";
 
     /**
      * Bundle key used for the {@link String} account status token in result
      * from {@link #startAddAccountSession} and friends which returns
      * information about a particular account.
+     * @hide
      */
+    @SystemApi
     public static final String KEY_ACCOUNT_STATUS_TOKEN = "accountStatusToken";
 
     public static final String ACTION_AUTHENTICATOR_INTENT =
@@ -2667,7 +2672,9 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #finishSession
+     * @hide
      */
+    @SystemApi
     public AccountManagerFuture<Bundle> startAddAccountSession(
             final String accountType,
             final String authTokenType,
@@ -2749,7 +2756,9 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #finishSession
+     * @hide
      */
+    @SystemApi
     public AccountManagerFuture<Bundle> startUpdateCredentialsSession(
             final Account account,
             final String authTokenType,
@@ -2818,7 +2827,9 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #startAddAccountSession and #startUpdateCredentialsSession
+     * @hide
      */
+    @SystemApi
     public AccountManagerFuture<Bundle> finishSession(
             final Bundle sessionBundle,
             final Activity activity,

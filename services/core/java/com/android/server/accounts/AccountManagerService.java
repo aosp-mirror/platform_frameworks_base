@@ -2312,6 +2312,14 @@ public class AccountManagerService
         }
 
         final int uid = Binder.getCallingUid();
+        // Only allow system to start session
+        if (!isSystemUid(uid)) {
+            String msg = String.format(
+                    "uid %s cannot stat add account session.",
+                    uid);
+            throw new SecurityException(msg);
+        }
+
         final int userId = UserHandle.getUserId(uid);
         if (!canUserModifyAccounts(userId, uid)) {
             try {
@@ -2499,6 +2507,14 @@ public class AccountManagerService
         }
 
         final int uid = Binder.getCallingUid();
+        // Only allow system to finish session
+        if (!isSystemUid(uid)) {
+            String msg = String.format(
+                    "uid %s cannot finish session.",
+                    uid);
+            throw new SecurityException(msg);
+        }
+
         final int userId = UserHandle.getUserId(uid);
         if (!canUserModifyAccounts(userId, uid)) {
             sendErrorResponse(response,
@@ -2717,6 +2733,16 @@ public class AccountManagerService
         if (account == null) {
             throw new IllegalArgumentException("account is null");
         }
+
+        final int uid = Binder.getCallingUid();
+        // Only allow system to start session
+        if (!isSystemUid(uid)) {
+            String msg = String.format(
+                    "uid %s cannot start update credentials session.",
+                    uid);
+            throw new SecurityException(msg);
+        }
+
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
         try {

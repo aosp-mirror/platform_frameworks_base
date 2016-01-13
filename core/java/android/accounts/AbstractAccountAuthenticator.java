@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.Context;
 import android.content.Intent;
 import android.Manifest;
+import android.annotation.SystemApi;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -762,7 +763,9 @@ public abstract class AbstractAccountAuthenticator {
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
      * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
+     * @hide
      */
+    @SystemApi
     public Bundle startAddAccountSession(
             final AccountAuthenticatorResponse response,
             final String accountType,
@@ -818,7 +821,9 @@ public abstract class AbstractAccountAuthenticator {
      * @throws NetworkErrorException if the authenticator could not honor the
      *             request due to a network error
      * @see #finishSession(AccountAuthenticatorResponse, String, Bundle)
+     * @hide
      */
+    @SystemApi
     public Bundle startUpdateCredentialsSession(
             final AccountAuthenticatorResponse response,
             final Account account,
@@ -870,7 +875,9 @@ public abstract class AbstractAccountAuthenticator {
      *         </ul>
      * @throws NetworkErrorException
      * @see #startAddAccountSession and #startUpdateCredentialsSession
+     * @hide
      */
+    @SystemApi
     public Bundle finishSession(
             final AccountAuthenticatorResponse response,
             final String accountType,
