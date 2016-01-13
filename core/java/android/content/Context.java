@@ -329,6 +329,15 @@ public abstract class Context {
     public static final int BIND_NOT_VISIBLE = 0x40000000;
 
     /**
+     * Flag for {@link #bindService}: The service being bound is an
+     * {@link android.R.attr#isolatedProcess isolated},
+     * {@link android.R.attr#externalService external} service.  This binds the service into the
+     * calling application's package, rather than the package in which the service is declared.
+     * @hide
+     */
+    public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
+
+    /**
      * Returns an AssetManager instance for the application's package.
      * <p>
      * <strong>Note:</strong> Implementations of this method should return

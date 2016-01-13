@@ -1748,6 +1748,10 @@
         <attr name="isolatedProcess" format="boolean" />
         <attr name="singleUser" />
         <attr name="encryptionAware" />
+        <!-- @hide If the service is an {@link #isolatedProcess} service, this permits a client to
+             bind to the service as if it were running it its own package.  The service must also be
+             {@link #exported} if this flag is set. -->
+        <attr name="externalService" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an

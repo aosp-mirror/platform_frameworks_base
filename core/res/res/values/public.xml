@@ -2689,6 +2689,7 @@
     <public type="attr" name="tickMarkTint" />
     <public type="attr" name="tickMarkTintMode" />
     <public type="attr" name="canPerformGestures" />
+    <public type="attr" name="externalService" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />

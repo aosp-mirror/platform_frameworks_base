@@ -3886,6 +3886,11 @@ public class PackageParser {
             s.info.flags |= ServiceInfo.FLAG_ISOLATED_PROCESS;
         }
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_externalService,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_EXTERNAL_SERVICE;
+        }
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestService_singleUser,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_SINGLE_USER;
