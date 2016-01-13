@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
@@ -1386,17 +1387,20 @@ final class TaskRecord {
 
     /** Returns the bounds that should be used to launch this task. */
     Rect getLaunchBounds() {
-        final int stackId = stack.mStackId;
-
         // If we're over lockscreen, forget about stack bounds and use fullscreen.
         if (mService.mLockScreenShown == LOCK_SCREEN_SHOWN) {
             return null;
         }
 
-        if (stack == null
-                || stackId == HOME_STACK_ID
-                || stackId == FULLSCREEN_WORKSPACE_STACK_ID) {
-            return (mResizeable && stack != null) ? stack.mBounds : null;
+        if (stack == null) {
+            return null;
+        }
+
+        final int stackId = stack.mStackId;
+        if (stackId == HOME_STACK_ID
+                || stackId == FULLSCREEN_WORKSPACE_STACK_ID
+                || (stackId == DOCKED_STACK_ID && !mResizeable)) {
+            return mResizeable ? stack.mBounds : null;
         } else if (!StackId.persistTaskBounds(stackId)) {
             return stack.mBounds;
         }
