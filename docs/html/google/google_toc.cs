@@ -21,6 +21,9 @@
       <li><a href="<?cs var:toroot?>google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_promotions.html">
+              <span class="en">Promotions</span></a>
+      </li>
       <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>

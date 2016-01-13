@@ -328,7 +328,11 @@ subscriptions.</p>
 </p>
 
 <h3 id="getPurchases">The getPurchases() method</h3>
-<p>This method returns the current un-consumed products owned by the user. Table 5 lists the response data that is returned in the {@code Bundle}.</p>
+<p>This method returns the current un-consumed products owned by the user,
+  including both purchased items and items acquired by redeeming a promo code.
+  Table 5 lists the response data that is returned in the
+  {@link android.os.Bundle}.</p>
+
 <p class="table-caption" id="getpurchases-response-table">
 <strong>Table 6.</strong> Response data from a {@code getPurchases} request.</p>
 <table>
