@@ -1964,7 +1964,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                                 && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE)
                                 || (mPrinter.getCapabilities() == null
                                 && printer.getCapabilities() != null);
-                mPrinter.copyFrom(printer);
+                mPrinter = printer;
             }
 
             if (available) {
@@ -2394,7 +2394,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
             mPrinterAvailabilityDetector.updatePrinter(newPrinterState);
 
-            oldPrinterState.copyFrom(newPrinterState);
+            mCurrentPrinter = newPrinterState;
 
             if ((isActive && gotCapab) || (becameActive && hasCapab)) {
                 if (hasCapab && capabChanged) {
