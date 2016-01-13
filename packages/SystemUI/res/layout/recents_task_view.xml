@@ -37,7 +37,8 @@
             android:translationZ="4dp"
             android:contentDescription="@string/recents_lock_to_app_button_label"
             android:background="@drawable/recents_lock_to_task_button_bg"
-            android:visibility="invisible">
+            android:visibility="invisible"
+            android:alpha="0">
             <ImageView
                 android:layout_width="@dimen/recents_lock_to_app_icon_size"
                 android:layout_height="@dimen/recents_lock_to_app_icon_size"

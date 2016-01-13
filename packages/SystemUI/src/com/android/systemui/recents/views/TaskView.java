@@ -288,7 +288,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
         mActionButtonView.setScaleX(1f);
         mActionButtonView.setScaleY(1f);
-        mActionButtonView.setAlpha(1f);
+        mActionButtonView.setAlpha(0f);
         mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
     }
 
@@ -461,7 +461,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         .scaleY(1f)
                         .setDuration(fadeInDuration)
                         .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                        .withLayer()
                         .start();
             }
         } else {
@@ -500,7 +499,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                                 mActionButtonView.setVisibility(View.INVISIBLE);
                             }
                         })
-                        .withLayer()
                         .start();
             }
         } else {

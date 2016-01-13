@@ -228,11 +228,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     protected void onAttachedToWindow() {
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
-        mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
-                Settings.System.LOCK_TO_APP_ENABLED) != 0;
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
+        readSystemFlags();
         super.onAttachedToWindow();
     }
 
@@ -338,6 +335,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.resetTrigger();
         mStackScroller.reset();
         mLayoutAlgorithm.reset();
+        readSystemFlags();
         requestLayout();
     }
 
@@ -1665,5 +1663,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private boolean shouldShowHistoryButton() {
         return !mStack.getHistoricalTasks().isEmpty();
+    }
+
+    /**
+     * Reads current system flags related to accessibility and screen pinning.
+     */
+    private void readSystemFlags() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
+        mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
+                Settings.System.LOCK_TO_APP_ENABLED) != 0;
     }
 }
