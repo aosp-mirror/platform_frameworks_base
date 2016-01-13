@@ -22,8 +22,9 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 /**
- * @hide
- * Candidate for public API, see AudioManager.getActiveRecordConfiguration()
+ * The AudioRecordConfiguration class collects the information describing an audio recording
+ * session. This information is returned through the 
+ * {@link AudioManager#getActiveRecordConfigurations()} method.
  *
  */
 public class AudioRecordConfiguration implements Parcelable {
@@ -41,18 +42,22 @@ public class AudioRecordConfiguration implements Parcelable {
     }
 
     /**
-     * @return one of AudioSource.MIC, AudioSource.VOICE_UPLINK,
-     *       AudioSource.VOICE_DOWNLINK, AudioSource.VOICE_CALL,
-     *       AudioSource.CAMCORDER, AudioSource.VOICE_RECOGNITION,
-     *       AudioSource.VOICE_COMMUNICATION.
+     * Returns the audio source being used for the recording.
+     * @return one of {@link MediaRecorder.AudioSource#MIC},
+     *       {@link MediaRecorder.AudioSource#VOICE_UPLINK},
+     *       {@link MediaRecorder.AudioSource#VOICE_DOWNLINK},
+     *       {@link MediaRecorder.AudioSource#VOICE_CALL},
+     *       {@link MediaRecorder.AudioSource#CAMCORDER},
+     *       {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
+     *       {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
      */
     public int getClientAudioSource() { return mClientSource; }
 
     /**
-     * @return the session number of the recorder.
+     * Returns the session number of the recording, see {@link AudioRecord#getAudioSessionId()}.
+     * @return the session number.
      */
     public int getAudioSessionId() { return mSessionId; }
-
 
     public static final Parcelable.Creator<AudioRecordConfiguration> CREATOR
             = new Parcelable.Creator<AudioRecordConfiguration>() {

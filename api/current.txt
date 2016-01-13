@@ -19297,6 +19297,7 @@ package android.media {
     method public void adjustVolume(int, int);
     method public void dispatchMediaKeyEvent(android.view.KeyEvent);
     method public int generateAudioSessionId();
+    method public android.media.AudioRecordConfiguration[] getActiveRecordConfigurations();
     method public android.media.AudioDeviceInfo[] getDevices(int);
     method public int getMode();
     method public java.lang.String getParameters(java.lang.String);
@@ -19319,6 +19320,7 @@ package android.media {
     method public void playSoundEffect(int);
     method public void playSoundEffect(int, float);
     method public void registerAudioDeviceCallback(android.media.AudioDeviceCallback, android.os.Handler);
+    method public void registerAudioRecordingCallback(android.media.AudioManager.AudioRecordingCallback, android.os.Handler);
     method public deprecated void registerMediaButtonEventReceiver(android.content.ComponentName);
     method public deprecated void registerMediaButtonEventReceiver(android.app.PendingIntent);
     method public deprecated void registerRemoteControlClient(android.media.RemoteControlClient);
@@ -19342,6 +19344,7 @@ package android.media {
     method public void stopBluetoothSco();
     method public void unloadSoundEffects();
     method public void unregisterAudioDeviceCallback(android.media.AudioDeviceCallback);
+    method public void unregisterAudioRecordingCallback(android.media.AudioManager.AudioRecordingCallback);
     method public deprecated void unregisterMediaButtonEventReceiver(android.content.ComponentName);
     method public deprecated void unregisterMediaButtonEventReceiver(android.app.PendingIntent);
     method public deprecated void unregisterRemoteControlClient(android.media.RemoteControlClient);
@@ -19438,6 +19441,11 @@ package android.media {
     field public static final deprecated int VIBRATE_TYPE_RINGER = 0; // 0x0
   }
 
+  public static abstract class AudioManager.AudioRecordingCallback {
+    ctor public AudioManager.AudioRecordingCallback();
+    method public void onRecordConfigChanged();
+  }
+
   public static abstract interface AudioManager.OnAudioFocusChangeListener {
     method public abstract void onAudioFocusChange(int);
   }
@@ -19506,6 +19514,14 @@ package android.media {
 
   public static abstract interface AudioRecord.OnRoutingChangedListener {
     method public abstract void onRoutingChanged(android.media.AudioRecord);
+  }
+
+  public class AudioRecordConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAudioSessionId();
+    method public int getClientAudioSource();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.AudioRecordConfiguration> CREATOR;
   }
 
   public abstract interface AudioRouting {
