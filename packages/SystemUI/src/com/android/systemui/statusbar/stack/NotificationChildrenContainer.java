@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
@@ -170,8 +171,15 @@ public class NotificationChildrenContainer extends ViewGroup {
         mChildren.remove(row);
         removeView(row);
 
-        View divider = mDividers.remove(childIndex);
+        final View divider = mDividers.remove(childIndex);
         removeView(divider);
+        getOverlay().add(divider);
+        CrossFadeHelper.fadeOut(divider, new Runnable() {
+            @Override
+            public void run() {
+                getOverlay().remove(divider);
+            }
+        });
 
         row.setSystemChildExpanded(false);
         updateGroupOverflow();
