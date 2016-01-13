@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -62,7 +63,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     protected final H mHandler;
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
 
-    private Callback mCallback;
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     protected TState mState = newTileState();
     private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
@@ -119,8 +120,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     // safe to call from any thread
 
-    public void setCallback(Callback callback) {
-        mHandler.obtainMessage(H.SET_CALLBACK, callback).sendToTarget();
+    public void addCallback(Callback callback) {
+        mHandler.obtainMessage(H.ADD_CALLBACK, callback).sendToTarget();
     }
 
     public void click() {
@@ -177,8 +178,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     // call only on tile worker looper
 
-    private void handleSetCallback(Callback callback) {
-        mCallback = callback;
+    private void handleAddCallback(Callback callback) {
+        mCallbacks.add(callback);
         handleRefreshState(null);
     }
 
@@ -206,12 +207,14 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     private void handleStateChanged() {
         boolean delayAnnouncement = shouldAnnouncementBeDelayed();
-        if (mCallback != null) {
-            mCallback.onStateChanged(mState);
+        if (mCallbacks.size() != 0) {
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                mCallbacks.get(i).onStateChanged(mState);
+            }
             if (mAnnounceNextStateChange && !delayAnnouncement) {
                 String announcement = composeChangeAnnouncement();
                 if (announcement != null) {
-                    mCallback.onAnnouncementRequested(announcement);
+                    mCallbacks.get(0).onAnnouncementRequested(announcement);
                 }
             }
         }
@@ -227,20 +230,20 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     private void handleShowDetail(boolean show) {
-        if (mCallback != null) {
-            mCallback.onShowDetail(show);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onShowDetail(show);
         }
     }
 
     private void handleToggleStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onToggleStateChanged(state);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onToggleStateChanged(state);
         }
     }
 
     private void handleScanStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onScanStateChanged(state);
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            mCallbacks.get(i).onScanStateChanged(state);
         }
     }
 
@@ -250,11 +253,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     protected void handleDestroy() {
         setListening(false);
-        mCallback = null;
+        mCallbacks.clear();
     }
 
     protected final class H extends Handler {
-        private static final int SET_CALLBACK = 1;
+        private static final int ADD_CALLBACK = 1;
         private static final int CLICK = 2;
         private static final int SECONDARY_CLICK = 3;
         private static final int LONG_CLICK = 4;
@@ -274,9 +277,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public void handleMessage(Message msg) {
             String name = null;
             try {
-                if (msg.what == SET_CALLBACK) {
-                    name = "handleSetCallback";
-                    handleSetCallback((QSTile.Callback)msg.obj);
+                if (msg.what == ADD_CALLBACK) {
+                    name = "handleAddCallback";
+                    handleAddCallback((QSTile.Callback)msg.obj);
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
                     mAnnounceNextStateChange = true;
@@ -333,6 +336,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         void startRunnableDismissingKeyguard(Runnable runnable);
         void warn(String message, Throwable t);
         void collapsePanels();
+        void animateExpandQS();
         void openPanels();
         Looper getLooper();
         Context getContext();

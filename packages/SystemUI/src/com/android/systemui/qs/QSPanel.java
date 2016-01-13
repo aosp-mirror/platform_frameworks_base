@@ -329,16 +329,19 @@ public class QSPanel extends FrameLayout implements Tunable {
                     drawTile(r, state);
                 }
             }
+
             @Override
             public void onShowDetail(boolean show) {
                 QSPanel.this.showDetail(show, r);
             }
+
             @Override
             public void onToggleStateChanged(boolean state) {
                 if (mDetailRecord == r) {
                     fireToggleStateChanged(state);
                 }
             }
+
             @Override
             public void onScanStateChanged(boolean state) {
                 r.scanState = state;
@@ -352,7 +355,7 @@ public class QSPanel extends FrameLayout implements Tunable {
                 announceForAccessibility(announcement);
             }
         };
-        r.tile.setCallback(callback);
+        r.tile.addCallback(callback);
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -415,6 +418,9 @@ public class QSPanel extends FrameLayout implements Tunable {
     }
 
     protected void handleShowDetail(Record r, boolean show) {
+        if (show && !mExpanded) {
+            mHost.animateExpandQS();
+        }
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
         } else {

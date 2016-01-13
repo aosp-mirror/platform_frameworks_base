@@ -197,23 +197,16 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         }
     }
 
-    public void setupHost(QSTileHost host) {
-        final QSTileHost myHost = new QSTileHost(host.getContext(), host.getPhoneStatusBar(),
-                host.getBluetoothController(), host.getLocationController(),
-                host.getRotationLockController(), host.getNetworkController(),
-                host.getZenModeController(), host.getHotspotController(),
-                host.getCastController(), host.getFlashlightController(),
-                host.getUserSwitcherController(), host.getUserInfoController(),
-                host.getKeyguardMonitor(), host.getSecurityController(),
-                host.getBatteryController(), host.getIconController());
+    public void setupHost(final QSTileHost host) {
+        host.setHeaderView(this);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
-        mHeaderQsPanel.setHost(myHost);
+        mHeaderQsPanel.setHost(host);
         mHeaderQsPanel.setMaxTiles(5);
-        mHeaderQsPanel.setTiles(myHost.getTiles());
-        myHost.addCallback(new QSTile.Host.Callback() {
+        mHeaderQsPanel.setTiles(host.getTiles());
+        host.addCallback(new QSTile.Host.Callback() {
             @Override
             public void onTilesChanged() {
-                mHeaderQsPanel.setTiles(myHost.getTiles());
+                mHeaderQsPanel.setTiles(host.getTiles());
             }
         });
     }
