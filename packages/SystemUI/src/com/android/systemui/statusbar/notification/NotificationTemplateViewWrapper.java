@@ -25,7 +25,9 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
+import com.android.systemui.statusbar.ViewTransformationHelper;
 
 /**
  * Wraps a notification view inflated from a template.
@@ -41,6 +43,77 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(ctx, view);
+        mTransformationHelper.setCustomTransformation(
+                new ViewTransformationHelper.CustomTransformation() {
+                    @Override
+                    public boolean transformTo(TransformState ownState,
+                            TransformableView notification, final Runnable endRunnable) {
+                        if (!(notification instanceof HybridNotificationView)) {
+                            return false;
+                        }
+                        TransformState otherState = notification.getCurrentState(
+                                TRANSFORMING_VIEW_TITLE);
+                        CrossFadeHelper.fadeOut(mText, endRunnable);
+                        if (otherState != null) {
+                            int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
+                            int[] ownPosition = ownState.getLaidOutLocationOnScreen();
+                            mText.animate()
+                                    .translationY((otherStablePosition[1]
+                                            + otherState.getTransformedView().getHeight()
+                                            - ownPosition[1]) * 0.33f)
+                                    .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
+                                    .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                                    .withEndAction(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (endRunnable != null) {
+                                                endRunnable.run();
+                                            }
+                                            TransformState.setClippingDeactivated(mText,
+                                                    false);
+                                        }
+                                    });
+                            TransformState.setClippingDeactivated(mText, true);
+                            otherState.recycle();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public boolean transformFrom(TransformState ownState,
+                            TransformableView notification) {
+                        if (!(notification instanceof HybridNotificationView)) {
+                            return false;
+                        }
+                        TransformState otherState = notification.getCurrentState(
+                                TRANSFORMING_VIEW_TITLE);
+                        boolean isVisible = mText.getVisibility() == View.VISIBLE;
+                        CrossFadeHelper.fadeIn(mText);
+                        if (otherState != null) {
+                            int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
+                            int[] ownStablePosition = ownState.getLaidOutLocationOnScreen();
+                            if (!isVisible) {
+                                mText.setTranslationY((otherStablePosition[1]
+                                        + otherState.getTransformedView().getHeight()
+                                        - ownStablePosition[1]) * 0.33f);
+                            }
+                            mText.animate()
+                                    .translationY(0)
+                                    .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
+                                    .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                                    .withEndAction(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            TransformState.setClippingDeactivated(mText,
+                                                    false);
+                                        }
+                                    });
+                            TransformState.setClippingDeactivated(mText, true);
+                            otherState.recycle();
+                        }
+                        return true;
+                    }
+                }, TRANSFORMING_VIEW_TEXT);
     }
 
     private void resolveTemplateViews(StatusBarNotification notification) {

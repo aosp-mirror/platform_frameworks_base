@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
@@ -69,6 +70,36 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         mTextView = (TextView) findViewById(R.id.notification_text);
         mInvertHelper = new ViewInvertHelper(this, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
+        mTransformationHelper.setCustomTransformation(
+                new ViewTransformationHelper.CustomTransformation() {
+                    @Override
+                    public boolean transformTo(TransformState ownState, TransformableView notification,
+                            Runnable endRunnable) {
+                        // We want to transform to the same y location as the title
+                        TransformState otherState = notification.getCurrentState(
+                                TRANSFORMING_VIEW_TITLE);
+                        CrossFadeHelper.fadeOut(mTextView, endRunnable);
+                        if (otherState != null) {
+                            ownState.animateViewVerticalTo(otherState, endRunnable);
+                            otherState.recycle();
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public boolean transformFrom(TransformState ownState,
+                            TransformableView notification) {
+                        // We want to transform from the same y location as the title
+                        TransformState otherState = notification.getCurrentState(
+                                TRANSFORMING_VIEW_TITLE);
+                        CrossFadeHelper.fadeIn(mTextView);
+                        if (otherState != null) {
+                            ownState.animateViewVerticalFrom(otherState);
+                            otherState.recycle();
+                        }
+                        return true;
+                    }
+                }, TRANSFORMING_VIEW_TEXT);
         mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TITLE, mTitleView);
         mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TEXT, mTextView);
     }

@@ -56,7 +56,8 @@ public class CrossFadeHelper {
         view.animate()
                 .alpha(1f)
                 .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN);
+                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .withEndAction(null);
         if (view.hasOverlappingRendering()) {
             view.animate().withLayer();
         }

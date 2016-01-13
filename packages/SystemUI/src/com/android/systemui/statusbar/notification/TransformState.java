@@ -22,6 +22,8 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,10 +37,15 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 */
 public class TransformState {
 
-    private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
+    private static final int ANIMATE_X = 0x1;
+    private static final int ANIMATE_Y = 0x10;
+    private static final int ANIMATE_ALL = ANIMATE_X | ANIMATE_Y;
     private static final int CLIP_CLIPPING_SET = R.id.clip_children_set_tag;
     private static final int CLIP_CHILDREN_TAG = R.id.clip_children_tag;
     private static final int CLIP_TO_PADDING = R.id.clip_to_padding_tag;
+    public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
+
     protected View mTransformedView;
     private int[] mOwnPosition = new int[2];
 
@@ -59,15 +66,32 @@ public class TransformState {
         } else {
             CrossFadeHelper.fadeIn(mTransformedView);
         }
+        animateViewFrom(otherState);
+    }
+
+    public void animateViewFrom(TransformState otherState) {
+        animateViewFrom(otherState, ANIMATE_ALL);
+    }
+
+    public void animateViewVerticalFrom(TransformState otherState) {
+        animateViewFrom(otherState, ANIMATE_Y);
+    }
+
+    private void animateViewFrom(TransformState otherState, int animationFlags) {
         final View transformedView = mTransformedView;
         // lets animate the positions correctly
         int[] otherPosition = otherState.getLocationOnScreen();
         int[] ownStablePosition = getLaidOutLocationOnScreen();
-        mTransformedView.setTranslationX(otherPosition[0] - ownStablePosition[0]);
-        mTransformedView.setTranslationY(otherPosition[1] - ownStablePosition[1]);
-        mTransformedView.animate()
-                .translationX(0)
-                .translationY(0)
+        if ((animationFlags & ANIMATE_X) != 0) {
+            transformedView.setTranslationX(otherPosition[0] - ownStablePosition[0]);
+            transformedView.animate().translationX(0);
+        }
+        if ((animationFlags & ANIMATE_Y) != 0) {
+            transformedView.setTranslationY(otherPosition[1] - ownStablePosition[1]);
+            transformedView.animate().translationY(0);
+        }
+        transformedView.animate()
+                .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
                 .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
                 .withEndAction(new Runnable() {
                     @Override
@@ -75,7 +99,7 @@ public class TransformState {
                         setClippingDeactivated(transformedView, false);
                     }
                 });
-        setClippingDeactivated(mTransformedView, true);
+        setClippingDeactivated(transformedView, true);
     }
 
     /**
@@ -94,13 +118,34 @@ public class TransformState {
         } else {
             CrossFadeHelper.fadeOut(mTransformedView, endRunnable);
         }
+        animateViewTo(otherState, endRunnable);
+        return true;
+    }
+
+    public void animateViewTo(TransformState otherState, Runnable endRunnable) {
+        animateViewTo(otherState, endRunnable, ANIMATE_ALL);
+    }
+
+    public void animateViewVerticalTo(TransformState otherState, Runnable endRunnable) {
+        animateViewTo(otherState, endRunnable, ANIMATE_Y);
+    }
+
+    private void animateViewTo(TransformState otherState, final Runnable endRunnable,
+            int animationFlags) {
         // lets animate the positions correctly
         int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
         int[] ownPosition = getLaidOutLocationOnScreen();
         final View transformedView = mTransformedView;
-        mTransformedView.animate()
-                .translationX(otherStablePosition[0] - ownPosition[0])
-                .translationY(otherStablePosition[1] - ownPosition[1])
+        if ((animationFlags & ANIMATE_X) != 0) {
+            transformedView.animate()
+                    .translationX(otherStablePosition[0] - ownPosition[0]);
+        }
+        if ((animationFlags & ANIMATE_Y) != 0) {
+            transformedView.animate()
+                    .translationY(otherStablePosition[1] - ownPosition[1]);
+        }
+        transformedView.animate()
+                .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
                 .setDuration(CrossFadeHelper.ANIMATION_DURATION_LENGTH)
                 .withEndAction(new Runnable() {
                     @Override
@@ -111,11 +156,10 @@ public class TransformState {
                         setClippingDeactivated(transformedView, false);
                     }
                 });
-        setClippingDeactivated(mTransformedView, true);
-        return true;
+        setClippingDeactivated(transformedView, true);
     }
 
-    private void setClippingDeactivated(final View transformedView, boolean deactivated) {
+    public static void setClippingDeactivated(final View transformedView, boolean deactivated) {
         ViewGroup view = (ViewGroup) transformedView.getParent();
         while (true) {
             ArraySet<View> clipSet = (ArraySet<View>) view.getTag(CLIP_CLIPPING_SET);
@@ -167,14 +211,14 @@ public class TransformState {
         }
     }
 
-    private int[] getLaidOutLocationOnScreen() {
+    public int[] getLaidOutLocationOnScreen() {
         int[] location = getLocationOnScreen();
         location[0] -= mTransformedView.getTranslationX();
         location[1] -= mTransformedView.getTranslationY();
         return location;
     }
 
-    private int[] getLocationOnScreen() {
+    public int[] getLocationOnScreen() {
         mTransformedView.getLocationOnScreen(mOwnPosition);
         return mOwnPosition;
     }
@@ -239,5 +283,9 @@ public class TransformState {
             return instance;
         }
         return new TransformState();
+    }
+
+    public View getTransformedView() {
+        return mTransformedView;
     }
 }

@@ -35,6 +35,7 @@ public class ViewTransformationHelper implements TransformableView {
 
     private final Handler mHandler = new Handler();
     private ArrayMap<Integer, View> mTransformedViews = new ArrayMap<>();
+    private ArrayMap<Integer, CustomTransformation> mCustomTransformations = new ArrayMap<>();
 
     public void addTransformedView(int key, View transformedView) {
         mTransformedViews.put(key, transformedView);
@@ -42,6 +43,10 @@ public class ViewTransformationHelper implements TransformableView {
 
     public void reset() {
         mTransformedViews.clear();
+    }
+
+    public void setCustomTransformation(CustomTransformation transformation, int viewType) {
+        mCustomTransformations.put(viewType, transformation);
     }
 
     @Override
@@ -59,6 +64,13 @@ public class ViewTransformationHelper implements TransformableView {
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
+                CustomTransformation customTransformation = mCustomTransformations.get(viewType);
+                if (customTransformation != null && customTransformation.transformTo(
+                        ownState, notification, runnable)) {
+                    ownState.recycle();
+                    runnable = null;
+                    continue;
+                }
                 TransformState otherState = notification.getCurrentState(viewType);
                 if (otherState != null) {
                     boolean run = ownState.transformViewTo(otherState, runnable);
@@ -86,6 +98,12 @@ public class ViewTransformationHelper implements TransformableView {
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
+                CustomTransformation customTransformation = mCustomTransformations.get(viewType);
+                if (customTransformation != null && customTransformation.transformFrom(
+                        ownState, notification)) {
+                    ownState.recycle();
+                    continue;
+                }
                 TransformState otherState = notification.getCurrentState(viewType);
                 if (otherState != null) {
                     ownState.transformViewFrom(otherState);
@@ -153,5 +171,24 @@ public class ViewTransformationHelper implements TransformableView {
                 }
             }
         }
+    }
+
+    public interface CustomTransformation {
+        /**
+         * Transform a state to the given view
+         * @param ownState the state to transform
+         * @param notification the view to transform to
+         * @return whether a custom transformation is performed
+         */
+        boolean transformTo(TransformState ownState, TransformableView notification,
+                Runnable endRunnable);
+
+        /**
+         * Transform to this state from the given view
+         * @param ownState the state to transform to
+         * @param notification the view to transform from
+         * @return whether a custom transformation is performed
+         */
+        boolean transformFrom(TransformState ownState, TransformableView notification);
     }
 }
