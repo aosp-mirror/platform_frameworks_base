@@ -850,7 +850,7 @@ public abstract class Animation implements Cloneable {
             normalizedTime = currentTime < mStartTime ? 0.0f : 1.0f;
         }
 
-        final boolean expired = normalizedTime >= 1.0f;
+        final boolean expired = normalizedTime >= 1.0f || isCanceled();
         mMore = !expired;
 
         if (!mFillEnabled) normalizedTime = Math.max(Math.min(normalizedTime, 1.0f), 0.0f);
@@ -875,7 +875,7 @@ public abstract class Animation implements Cloneable {
         }
 
         if (expired) {
-            if (mRepeatCount == mRepeated) {
+            if (mRepeatCount == mRepeated || isCanceled()) {
                 if (!mEnded) {
                     mEnded = true;
                     guard.close();
@@ -903,6 +903,10 @@ public abstract class Animation implements Cloneable {
         }
 
         return mMore;
+    }
+
+    private boolean isCanceled() {
+        return mStartTime == Long.MIN_VALUE;
     }
 
     private void fireAnimationStart() {
