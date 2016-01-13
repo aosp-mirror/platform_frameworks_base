@@ -19,6 +19,7 @@ package android.view;
 import android.graphics.Point;
 import android.graphics.Rect;
 import com.android.internal.app.IAssistScreenshotReceiver;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -549,5 +550,9 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void setResizeDimLayer(boolean visible, int targetStackId, float alpha)
             throws RemoteException {
+    }
+
+    @Override
+    public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
     }
 }

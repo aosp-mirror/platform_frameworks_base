@@ -16,6 +16,8 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.internal.os.IResultReceiver;
+
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -92,6 +94,10 @@ public final class BridgeWindow implements IWindow {
 
     @Override
     public void dispatchWindowShown() {
+    }
+
+    @Override
+    public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
     }
 
     @Override
