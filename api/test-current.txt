@@ -33740,17 +33740,24 @@ package android.service.quicksettings {
     method public java.lang.CharSequence getContentDescription();
     method public android.graphics.drawable.Icon getIcon();
     method public java.lang.CharSequence getLabel();
+    method public int getState();
     method public void setContentDescription(java.lang.CharSequence);
     method public void setIcon(android.graphics.drawable.Icon);
     method public void setLabel(java.lang.CharSequence);
+    method public void setState(int);
     method public void updateTile();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.quicksettings.Tile> CREATOR;
+    field public static final int STATE_ACTIVE = 2; // 0x2
+    field public static final int STATE_INACTIVE = 1; // 0x1
+    field public static final int STATE_UNAVAILABLE = 0; // 0x0
   }
 
   public class TileService extends android.app.Service {
     ctor public TileService();
     method public final android.service.quicksettings.Tile getQsTile();
+    method public final boolean isLocked();
+    method public final boolean isSecure();
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onClick();
     method public void onStartListening();
@@ -33759,6 +33766,8 @@ package android.service.quicksettings {
     method public void onTileRemoved();
     method public static final void requestListeningState(android.content.Context, android.content.ComponentName);
     method public final void showDialog(android.app.Dialog);
+    method public final void startActivityAndCollapse(android.content.Intent);
+    method public final void unlockAndRun(java.lang.Runnable);
     field public static final java.lang.String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
     field public static final int TILE_MODE_ACTIVE = 2; // 0x2
     field public static final int TILE_MODE_PASSIVE = 1; // 0x1

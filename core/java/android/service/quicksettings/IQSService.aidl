@@ -27,5 +27,9 @@ interface IQSService {
     void updateStatusIcon(in Tile tile, in Icon icon,
             String contentDescription);
     void onShowDialog(in Tile tile);
+    void onStartActivity(in Tile tile);
     void setTileMode(in ComponentName component, int mode);
+    boolean isLocked();
+    boolean isSecure();
+    void startUnlockAndRun(in Tile tile);
 }

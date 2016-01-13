@@ -104,4 +104,14 @@ public class QSTileServiceWrapper {
             return false;
         }
     }
+
+    public boolean onUnlockComplete() {
+        try {
+            mService.onUnlockComplete();
+            return true;
+        } catch (Exception e) {
+            Log.d(TAG, "Caught exception from TileService", e);
+            return false;
+        }
+    }
 }

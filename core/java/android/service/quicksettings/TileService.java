@@ -118,6 +118,7 @@ public class TileService extends Service {
     private Tile mTile;
     private IBinder mToken;
     private IQSService mService;
+    private Runnable mUnlockRunnable;
 
     @Override
     public void onDestroy() {
@@ -199,6 +200,8 @@ public class TileService extends Service {
      * This will collapse the Quick Settings panel and show the dialog.
      *
      * @param dialog Dialog to show.
+     *
+     * @see #isLocked()
      */
     public final void showDialog(Dialog dialog) {
         dialog.getWindow().getAttributes().token = mToken;
@@ -206,6 +209,67 @@ public class TileService extends Service {
         dialog.show();
         try {
             mService.onShowDialog(mTile);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Prompts the user to unlock the device before executing the Runnable.
+     * <p>
+     * The user will be prompted for their current security method if applicable
+     * and if successful, runnable will be executed.  The Runnable will not be
+     * executed if the user fails to unlock the device or cancels the operation.
+     */
+    public final void unlockAndRun(Runnable runnable) {
+        mUnlockRunnable = runnable;
+        try {
+            mService.startUnlockAndRun(mTile);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Checks if the device is in a secure state.
+     *
+     * TileServices should detect when the device is secure and change their behavior
+     * accordingly.
+     *
+     * @return true if the device is secure.
+     */
+    public final boolean isSecure() {
+        try {
+            return mService.isSecure();
+        } catch (RemoteException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Checks if the lock screen is showing.
+     *
+     * When a device is locked, then {@link #showDialog} will not present a dialog, as it will
+     * be under the lock screen. If the behavior of the Tile is safe to do while locked,
+     * then the user should use {@link #startActivity} to launch an activity on top of the lock
+     * screen, otherwise the tile should use {@link #unlockAndRun(Runnable)} to give the
+     * user their security challenge.
+     *
+     * @return true if the device is locked.
+     */
+    public final boolean isLocked() {
+        try {
+            return mService.isLocked();
+        } catch (RemoteException e) {
+            return true;
+        }
+    }
+
+    /**
+     * Start an activity while collapsing the panel.
+     */
+    public final void startActivityAndCollapse(Intent intent) {
+        startActivity(intent);
+        try {
+            mService.onStartActivity(mTile);
         } catch (RemoteException e) {
         }
     }
@@ -258,6 +322,11 @@ public class TileService extends Service {
             public void onClick(IBinder wtoken) throws RemoteException {
                 mHandler.obtainMessage(H.MSG_TILE_CLICKED, wtoken).sendToTarget();
             }
+
+            @Override
+            public void onUnlockComplete() throws RemoteException{
+                mHandler.sendEmptyMessage(H.MSG_UNLOCK_COMPLETE);
+            }
         };
     }
 
@@ -269,6 +338,7 @@ public class TileService extends Service {
         private static final int MSG_TILE_REMOVED = 5;
         private static final int MSG_TILE_CLICKED = 6;
         private static final int MSG_SET_SERVICE = 7;
+        private static final int MSG_UNLOCK_COMPLETE = 8;
 
         public H(Looper looper) {
             super(looper);
@@ -322,6 +392,11 @@ public class TileService extends Service {
                 case MSG_TILE_CLICKED:
                     mToken = (IBinder) msg.obj;
                     TileService.this.onClick();
+                    break;
+                case MSG_UNLOCK_COMPLETE:
+                    if (mUnlockRunnable != null) {
+                        mUnlockRunnable.run();
+                    }
                     break;
             }
         }
