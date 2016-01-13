@@ -51,20 +51,25 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
     // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
     for (int i = layers.entries().size() - 1; i >= 0; i--) {
         RenderNode* layerNode = layers.entries()[i].renderNode;
-        const Rect& layerDamage = layers.entries()[i].damage;
-        layerNode->computeOrdering();
+        // only schedule repaint if node still on layer - possible it may have been
+        // removed during a dropped frame, but layers may still remain scheduled so
+        // as not to lose info on what portion is damaged
+        if (CC_LIKELY(layerNode->getLayer() != nullptr)) {
+            const Rect& layerDamage = layers.entries()[i].damage;
+            layerNode->computeOrdering();
 
-        // map current light center into RenderNode's coordinate space
-        Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
-        layerNode->getLayer()->inverseTransformInWindow.mapPoint3d(lightCenter);
+            // map current light center into RenderNode's coordinate space
+            Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
+            layerNode->getLayer()->inverseTransformInWindow.mapPoint3d(lightCenter);
 
-        saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0,
-                layerDamage, lightCenter, nullptr, layerNode);
+            saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0,
+                    layerDamage, lightCenter, nullptr, layerNode);
 
-        if (layerNode->getDisplayList()) {
-            deferNodeOps(*layerNode);
+            if (layerNode->getDisplayList()) {
+                deferNodeOps(*layerNode);
+            }
+            restoreForLayer();
         }
-        restoreForLayer();
     }
 
     // Defer Fbo0
