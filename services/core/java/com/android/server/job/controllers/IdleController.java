@@ -34,14 +34,13 @@ import com.android.server.job.StateChangedListener;
 public class IdleController extends StateController {
     private static final String TAG = "IdleController";
 
-    // Policy: we decide that we're "idle" if the device has been unused /
-    // screen off or dreaming for at least this long
-    private static final long INACTIVITY_IDLE_THRESHOLD = 71 * 60 * 1000; // millis; 71 min
-    private static final long IDLE_WINDOW_SLOP = 5 * 60 * 1000; // 5 minute window, to be nice
-
     private static final String ACTION_TRIGGER_IDLE =
             "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE";
 
+    // Policy: we decide that we're "idle" if the device has been unused /
+    // screen off or dreaming for at least this long
+    private long mInactivityIdleThreshold;
+    private long mIdleWindowSlop;
     final ArrayList<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
     IdlenessTracker mIdleTracker;
 
@@ -100,6 +99,10 @@ public class IdleController extends StateController {
      * significant state changes occur
      */
     private void initIdleStateTracking() {
+        mInactivityIdleThreshold = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_jobSchedulerInactivityIdleThreshold);
+        mIdleWindowSlop = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_jobSchedulerIdleWindowSlop);
         mIdleTracker = new IdlenessTracker();
         mIdleTracker.startTracking();
     }
@@ -168,14 +171,14 @@ public class IdleController extends StateController {
                 // alarm that will tell us when we have decided the device is
                 // truly idle.
                 final long nowElapsed = SystemClock.elapsedRealtime();
-                final long when = nowElapsed + INACTIVITY_IDLE_THRESHOLD;
+                final long when = nowElapsed + mInactivityIdleThreshold;
                 if (DEBUG) {
                     Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
                             + when);
                 }
                 mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        when, IDLE_WINDOW_SLOP, mIdleTriggerIntent);
+                        when, mIdleWindowSlop, mIdleTriggerIntent);
             } else if (action.equals(ACTION_TRIGGER_IDLE)) {
                 // idle time starts now. Do not set mIdle if screen is on.
                 if (!mIdle && !mScreenOn) {

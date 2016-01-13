@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.os.IMaintenanceActivityListener;
 import android.os.UserHandle;
 
 /** @hide */
@@ -37,4 +38,6 @@ interface IDeviceIdleController {
     void exitIdle(String reason);
     void downloadServiceActive(IBinder token);
     void downloadServiceInactive();
+    boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
+    void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
 }

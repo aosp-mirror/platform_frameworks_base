@@ -2421,4 +2421,10 @@
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
          etc. dialogs. -->
     <string translatable="false" name="config_appsNotReportingCrashes"></string>
+
+    <!-- Inactivity threshold (in milliseconds) used in JobScheduler. JobScheduler will consider
+         the device to be "idle" after being inactive for this long. -->
+    <integer name="config_jobSchedulerInactivityIdleThreshold">4260000</integer>
+    <!-- The alarm window (in milliseconds) that JobScheduler uses to enter the idle state -->
+    <integer name="config_jobSchedulerIdleWindowSlop">300000</integer>
 </resources>
