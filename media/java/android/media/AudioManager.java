@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -2158,36 +2159,73 @@ public class AudioManager {
     }
 
     /**
-     * Handler for audio focus events coming from the audio service.
+     * Handler for events (audio focus change, recording config change) coming from the
+     * audio service.
      */
-    private final FocusEventHandlerDelegate mAudioFocusEventHandlerDelegate =
-            new FocusEventHandlerDelegate();
+    private final ServiceEventHandlerDelegate mServiceEventHandlerDelegate =
+            new ServiceEventHandlerDelegate();
 
     /**
-     * Helper class to handle the forwarding of audio focus events to the appropriate listener
+     * Event types
      */
-    private class FocusEventHandlerDelegate {
+    private final static int MSSG_FOCUS_CHANGE = 0;
+    private final static int MSSG_RECORDING_CONFIG_CHANGE = 1;
+
+    /**
+     * Helper class to handle the forwarding of audio service events to the appropriate listener
+     */
+    private class ServiceEventHandlerDelegate {
         private final Handler mHandler;
 
-        FocusEventHandlerDelegate() {
+        ServiceEventHandlerDelegate() {
             Looper looper;
             if ((looper = Looper.myLooper()) == null) {
                 looper = Looper.getMainLooper();
             }
 
             if (looper != null) {
-                // implement the event handler delegate to receive audio focus events
+                // implement the event handler delegate to receive events from audio service
                 mHandler = new Handler(looper) {
                     @Override
                     public void handleMessage(Message msg) {
-                        OnAudioFocusChangeListener listener = null;
-                        synchronized(mFocusListenerLock) {
-                            listener = findFocusListener((String)msg.obj);
-                        }
-                        if (listener != null) {
-                            Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
-                                    + msg.what + ") for " + msg.obj);
-                            listener.onAudioFocusChange(msg.what);
+                        switch (msg.what) {
+                            case MSSG_FOCUS_CHANGE:
+                                OnAudioFocusChangeListener listener = null;
+                                synchronized(mFocusListenerLock) {
+                                    listener = findFocusListener((String)msg.obj);
+                                }
+                                if (listener != null) {
+                                    Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
+                                            + msg.what + ") for " + msg.obj);
+                                    listener.onAudioFocusChange(msg.arg1);
+                                }
+                                break;
+                            case MSSG_RECORDING_CONFIG_CHANGE:
+                                // optimizing for the case of a single callback
+                                AudioRecordingCallback singleCallback = null;
+                                ArrayList<AudioRecordingCallback> multipleCallbacks = null;
+                                synchronized(mRecordCallbackLock) {
+                                    if ((mRecordCallbackList != null)
+                                            && (mRecordCallbackList.size() != 0)) {
+                                        if (mRecordCallbackList.size() == 1) {
+                                            singleCallback = mRecordCallbackList.get(0);
+                                        } else {
+                                            multipleCallbacks =
+                                                    new ArrayList<AudioRecordingCallback>(
+                                                            mRecordCallbackList);
+                                        }
+                                    }
+                                }
+                                if (singleCallback != null) {
+                                    singleCallback.onRecordConfigChanged();
+                                } else if (multipleCallbacks != null) {
+                                    for (int i=0 ; i < multipleCallbacks.size() ; i++) {
+                                        multipleCallbacks.get(i).onRecordConfigChanged();
+                                    }
+                                }
+                                break;
+                            default:
+                                Log.e(TAG, "Unknown event " + msg.what);
                         }
                     }
                 };
@@ -2204,8 +2242,9 @@ public class AudioManager {
     private final IAudioFocusDispatcher mAudioFocusDispatcher = new IAudioFocusDispatcher.Stub() {
 
         public void dispatchAudioFocusChange(int focusChange, String id) {
-            Message m = mAudioFocusEventHandlerDelegate.getHandler().obtainMessage(focusChange, id);
-            mAudioFocusEventHandlerDelegate.getHandler().sendMessage(m);
+            final Message m = mServiceEventHandlerDelegate.getHandler().obtainMessage(
+                    MSSG_FOCUS_CHANGE/*what*/, focusChange/*arg1*/, 0/*arg2 ignored*/, id/*obj*/);
+            mServiceEventHandlerDelegate.getHandler().sendMessage(m);
         }
 
     };
@@ -2702,6 +2741,8 @@ public class AudioManager {
     }
 
 
+    //====================================================================
+    // Audio policy
     /**
      * @hide
      * Register the given {@link AudioPolicy}.
@@ -2753,6 +2794,131 @@ public class AudioManager {
         }
     }
 
+
+    //====================================================================
+    // Recording configuration
+    /**
+     * @hide
+     * candidate for public API
+     */
+    public static abstract class AudioRecordingCallback {
+        /**
+         * @hide
+         * candidate for public API
+         */
+        public void onRecordConfigChanged() {}
+    }
+
+    /**
+     * @hide
+     * candidate for public API
+     * @param non-null callback
+     */
+    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
+        }
+        synchronized(mRecordCallbackLock) {
+            // lazy initialization of the list of recording callbacks
+            if (mRecordCallbackList == null) {
+                mRecordCallbackList = new ArrayList<AudioRecordingCallback>();
+            }
+            final int oldCbCount = mRecordCallbackList.size();
+            if (!mRecordCallbackList.contains(cb)) {
+                mRecordCallbackList.add(cb);
+                final int newCbCount = mRecordCallbackList.size();
+                if ((oldCbCount == 0) && (newCbCount > 0)) {
+                    // register binder for callbacks
+                    final IAudioService service = getService();
+                    try {
+                        service.registerRecordingCallback(mRecCb);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Dead object in registerRecordingCallback", e);
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call registerAudioRecordingCallback() on a previously"
+                        + "registered callback");
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * candidate for public API
+     * @param non-null callback
+     */
+    public void unregisterAudioRecordingCallback(@NonNull AudioRecordingCallback cb) {
+        if (cb == null) {
+            throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
+        }
+        synchronized(mRecordCallbackLock) {
+            if (mRecordCallbackList == null) {
+                return;
+            }
+            final int oldCbCount = mRecordCallbackList.size();
+            if (mRecordCallbackList.remove(cb)) {
+                final int newCbCount = mRecordCallbackList.size();
+                if ((oldCbCount > 0) && (newCbCount == 0)) {
+                    // unregister binder for callbacks
+                    final IAudioService service = getService();
+                    try {
+                        service.unregisterRecordingCallback(mRecCb);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Dead object in unregisterRecordingCallback", e);
+                    }
+                }
+            } else {
+                Log.w(TAG, "attempt to call unregisterAudioRecordingCallback() on a callback"
+                        + " already unregistered or never registered");
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * candidate for public API
+     * @return a non-null array of recording configurations. An array of length 0 indicates there is
+     *     no recording active when queried.
+     */
+    public @NonNull AudioRecordConfiguration[] getActiveRecordConfigurations() {
+        final IAudioService service = getService();
+        try {
+            return service.getActiveRecordConfigurations();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to retrieve active record configurations", e);
+            return null;
+        }
+    }
+
+    /**
+     * constants for the recording events, to keep in sync
+     * with frameworks/av/include/media/AudioPolicy.h
+     */
+    /** @hide */
+    public final static int RECORD_CONFIG_EVENT_START = 1;
+    /** @hide */
+    public final static int RECORD_CONFIG_EVENT_STOP = 0;
+
+    /**
+     * All operations on this list are sync'd on mRecordCallbackLock.
+     * List is lazy-initialized in {@link #registerAudioRecordingCallback(AudioRecordingCallback)}.
+     * List can be null.
+     */
+    private List<AudioRecordingCallback> mRecordCallbackList;
+    private final Object mRecordCallbackLock = new Object();
+
+    private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
+
+        public void dispatchRecordingConfigChange() {
+            final Message m = mServiceEventHandlerDelegate.getHandler().obtainMessage(
+                    MSSG_RECORDING_CONFIG_CHANGE/*what*/);
+            mServiceEventHandlerDelegate.getHandler().sendMessage(m);
+        }
+
+    };
+
+    //=====================================================================
 
     /**
      *  @hide

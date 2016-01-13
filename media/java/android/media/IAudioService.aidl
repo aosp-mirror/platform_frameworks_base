@@ -20,9 +20,11 @@ import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.media.AudioAttributes;
+import android.media.AudioRecordConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
+import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
@@ -161,4 +163,10 @@ interface IAudioService {
     int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 
     void setVolumePolicy(in VolumePolicy policy);
+
+    void registerRecordingCallback(in IRecordingConfigDispatcher rcdb);
+
+    oneway void unregisterRecordingCallback(in IRecordingConfigDispatcher rcdb);
+
+    AudioRecordConfiguration[] getActiveRecordConfigurations();
 }
