@@ -176,6 +176,12 @@ public abstract class BaseActivity extends Activity {
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        mRoots.setOnCacheUpdateListener(null);
+        super.onDestroy();
+    }
+
     State buildDefaultState() {
         State state = new State();
 
@@ -518,7 +524,7 @@ public abstract class BaseActivity extends Activity {
 
         @Override
         protected void onPostExecute(DocumentInfo result) {
-            if (result != null) {
+            if (result != null && !isDestroyed()) {
                 openContainerDocument(result);
             }
         }
