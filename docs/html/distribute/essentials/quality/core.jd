@@ -746,11 +746,6 @@ data-cardsizes="6x3" data-maxresults="6">
     "http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=188189">
     Content Rating Guidelines</a>.
     </p>
-
-    <p style="margin-bottom:.25em;">
-    Especially, note that apps that request permission to use the device
-    location cannot be given the maturity level "Everyone".
-    </p>
   </td>
   <td>
     <a href="#gp">GP-1</a>
