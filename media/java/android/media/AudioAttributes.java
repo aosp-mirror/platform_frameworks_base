@@ -433,7 +433,8 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Sets the combination of flags.
-         * @param flags the {@link AudioAttributes#FLAG_AUDIBILITY_ENFORCED} flag.
+         * @param flags a combination of {@link AudioAttributes#FLAG_AUDIBILITY_ENFORCED},
+         *    {@link AudioAttributes#FLAG_HW_AV_SYNC}.
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
