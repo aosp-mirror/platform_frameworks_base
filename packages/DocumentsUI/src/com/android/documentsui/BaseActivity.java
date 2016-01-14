@@ -636,7 +636,7 @@ public abstract class BaseActivity extends Activity {
 
         @Override
         protected void onPostExecute(RootInfo homeRoot) {
-            if (homeRoot != null && mHome != null) {
+            if (homeRoot != null && mHome != null && !isDestroyed()) {
                 // Clear entire backstack and start in new root
                 mState.onRootChanged(homeRoot);
                 mSearchManager.update(homeRoot);
