@@ -86,8 +86,6 @@ public:
         mRegisteredContexts.erase(context);
     }
 
-    void requireGLContext();
-
     // TODO: This system is a little clunky feeling, this could use some
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
@@ -107,7 +105,6 @@ public:
 private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
-    void assertOnGLThread();
 
     RenderState(renderthread::RenderThread& thread);
     ~RenderState();
