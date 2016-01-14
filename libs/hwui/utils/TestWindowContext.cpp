@@ -18,6 +18,7 @@
 #include "AnimationContext.h"
 #include "DisplayListCanvas.h"
 #include "IContextFactory.h"
+#include "RecordingCanvas.h"
 #include "RenderNode.h"
 #include "SkTypes.h"
 #include "gui/BufferQueue.h"
@@ -88,9 +89,11 @@ public:
         mProxy->setup(mSize.width(), mSize.height(), 800.0f,
                              255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
-        mCanvas.reset(new
-            android::uirenderer::DisplayListCanvas(mSize.width(),
-                                                   mSize.height()));
+#if HWUI_NEW_OPS
+        mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));
+#else
+        mCanvas.reset(new android::uirenderer::DisplayListCanvas(mSize.width(), mSize.height()));
+#endif
     }
 
     SkCanvas* prepareToDraw() {
@@ -168,7 +171,11 @@ private:
 
     std::unique_ptr<android::uirenderer::RenderNode> mRootNode;
     std::unique_ptr<android::uirenderer::renderthread::RenderProxy> mProxy;
+#if HWUI_NEW_OPS
+    std::unique_ptr<android::uirenderer::RecordingCanvas> mCanvas;
+#else
     std::unique_ptr<android::uirenderer::DisplayListCanvas> mCanvas;
+#endif
     android::sp<android::IGraphicBufferProducer> mProducer;
     android::sp<android::IGraphicBufferConsumer> mConsumer;
     android::sp<android::CpuConsumer> mCpuConsumer;
