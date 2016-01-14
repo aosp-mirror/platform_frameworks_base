@@ -4795,11 +4795,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void getStackDockedModeBounds(int stackId, Rect bounds) {
+    public void getStackDockedModeBounds(
+            int stackId, Rect bounds, boolean ignoreVisibilityOnKeyguardShowing) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack != null) {
-                stack.getStackDockedModeBoundsLocked(bounds);
+                stack.getStackDockedModeBoundsLocked(bounds, ignoreVisibilityOnKeyguardShowing);
                 return;
             }
             bounds.setEmpty();
