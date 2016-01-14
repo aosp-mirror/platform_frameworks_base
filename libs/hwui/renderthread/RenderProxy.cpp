@@ -450,6 +450,11 @@ CREATE_BRIDGE2(dumpGraphicsMemory, int fd, RenderThread* thread) {
     } else {
         fprintf(file, "\nNo caches instance.\n");
     }
+#if HWUI_NEW_OPS
+    fprintf(file, "\nPipeline=FrameBuilder\n");
+#else
+    fprintf(file, "\nPipeline=OpenGLRenderer\n");
+#endif
     fflush(file);
     return nullptr;
 }
