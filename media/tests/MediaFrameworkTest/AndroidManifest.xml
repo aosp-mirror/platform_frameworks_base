@@ -34,50 +34,61 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:label="Camera2CtsActivity"
+                android:name="Camera2SurfaceViewActivity"
+                android:screenOrientation="landscape"
+                android:configChanges="keyboardHidden|orientation|screenSize">
+        </activity>
     </application>
 
     <instrumentation android:name=".CameraStressTestRunner"
-        android:targetPackage="com.android.mediaframeworktest"
-        android:label="Camera stress tests InstrumentationRunner">
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="Camera stress tests InstrumentationRunner">
+    </instrumentation>
+
+    <instrumentation android:name=".Camera2InstrumentationTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="Camera2 InstrumentationTestRunner">
     </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="MediaFramework tests InstrumentationRunner">
-     </instrumentation>
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="MediaFramework tests InstrumentationRunner">
+    </instrumentation>
 
-      <instrumentation android:name=".MediaFrameworkPerfTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="MediaFramework Performance tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".MediaFrameworkPerfTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="MediaFramework Performance tests InstrumentationRunner">
+    </instrumentation>
 
-     <instrumentation android:name=".MediaFrameworkUnitTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="MediaFramework unit tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".MediaFrameworkUnitTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="MediaFramework unit tests InstrumentationRunner">
+    </instrumentation>
 
-     <instrumentation android:name=".MediaRecorderStressTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="MediaRecorder stress tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".MediaRecorderStressTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="MediaRecorder stress tests InstrumentationRunner">
+    </instrumentation>
 
-      <instrumentation android:name=".MediaFrameworkPowerTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="Media Power tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".MediaFrameworkPowerTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="Media Power tests InstrumentationRunner">
+    </instrumentation>
 
-     <instrumentation android:name=".MediaPlayerStressTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="Media Power tests InstrumentationRunner">
-     </instrumentation>
+    <instrumentation android:name=".MediaPlayerStressTestRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="Media Power tests InstrumentationRunner">
+    </instrumentation>
 
     <instrumentation android:name=".MediaFrameworkIntegrationTestRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="MediaFramework integration tests InstrumentationRunner">
-     </instrumentation>
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="MediaFramework integration tests InstrumentationRunner">
+    </instrumentation>
 
-     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
-         android:targetPackage="com.android.mediaframeworktest"
-         android:label="media framework tests"/>
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+            android:targetPackage="com.android.mediaframeworktest"
+            android:label="media framework tests">
+    </instrumentation>
 
 </manifest>
