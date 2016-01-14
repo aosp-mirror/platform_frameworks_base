@@ -63,6 +63,7 @@ import android.os.SystemClock;
 import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
@@ -169,6 +170,58 @@ public class Vpn {
     }
 
     /**
+     * Configures an always-on VPN connection through a specific application.
+     * This connection is automatically granted and persisted after a reboot.
+     *
+     * <p>The designated package should exist and declare a {@link VpnService} in its
+     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
+     *    otherwise the call will fail.
+     *
+     * @param newPackage the package to designate as always-on VPN supplier.
+     */
+    public synchronized boolean setAlwaysOnPackage(String packageName) {
+        enforceControlPermissionOrInternalCaller();
+
+        // Disconnect current VPN.
+        prepareInternal(VpnConfig.LEGACY_VPN);
+
+        // Pre-authorize new always-on VPN package.
+        if (packageName != null) {
+            if (!setPackageAuthorization(packageName, true)) {
+                return false;
+            }
+        }
+
+        // Save the new package name in Settings.Secure.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ALWAYS_ON_VPN_APP, packageName, mUserHandle);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
+
+    /**
+     * @return the package name of the VPN controller responsible for always-on VPN,
+     *         or {@code null} if none is set or always-on VPN is controlled through
+     *         lockdown instead.
+     * @hide
+     */
+    public synchronized String getAlwaysOnPackage() {
+        enforceControlPermissionOrInternalCaller();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
      * Prepare for a VPN application. This method is designed to solve
      * race conditions. It first compares the current prepared package
      * with {@code oldPackage}. If they are the same, the prepared
@@ -270,14 +323,14 @@ public class Vpn {
     /**
      * Set whether a package has the ability to launch VPNs without user intervention.
      */
-    public void setPackageAuthorization(String packageName, boolean authorized) {
+    public boolean setPackageAuthorization(String packageName, boolean authorized) {
         // Check if the caller is authorized.
-        enforceControlPermission();
+        enforceControlPermissionOrInternalCaller();
 
         int uid = getAppUid(packageName, mUserHandle);
         if (uid == -1 || VpnConfig.LEGACY_VPN.equals(packageName)) {
             // Authorization for nonexistent packages (or fake ones) can't be updated.
-            return;
+            return false;
         }
 
         long token = Binder.clearCallingIdentity();
@@ -286,11 +339,13 @@ public class Vpn {
                     (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
             appOps.setMode(AppOpsManager.OP_ACTIVATE_VPN, uid, packageName,
                     authorized ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED);
+            return true;
         } catch (Exception e) {
             Log.wtf(TAG, "Failed to set app ops for package " + packageName + ", uid " + uid, e);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+        return false;
     }
 
     private boolean isVpnUserPreConsented(String packageName) {
@@ -741,6 +796,13 @@ public class Vpn {
 
     private void enforceControlPermission() {
         mContext.enforceCallingPermission(Manifest.permission.CONTROL_VPN, "Unauthorized Caller");
+    }
+
+    private void enforceControlPermissionOrInternalCaller() {
+        // Require caller to be either an application with CONTROL_VPN permission or a process
+        // in the system server.
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.CONTROL_VPN,
+                "Unauthorized Caller");
     }
 
     private class Connection implements ServiceConnection {

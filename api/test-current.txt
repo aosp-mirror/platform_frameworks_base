@@ -5783,6 +5783,7 @@ package android.app.admin {
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
     method public java.lang.String[] getAccountTypesWithManagementDisabled();
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
+    method public java.lang.String getAlwaysOnVpnPackage(android.content.ComponentName);
     method public android.os.Bundle getApplicationRestrictions(android.content.ComponentName, java.lang.String);
     method public java.lang.String getApplicationRestrictionsManagingPackage(android.content.ComponentName);
     method public boolean getAutoTimeRequired();
@@ -5847,6 +5848,7 @@ package android.app.admin {
     method public boolean removeUser(android.content.ComponentName, android.os.UserHandle);
     method public boolean resetPassword(java.lang.String, int);
     method public void setAccountManagementDisabled(android.content.ComponentName, java.lang.String, boolean);
+    method public boolean setAlwaysOnVpnPackage(android.content.ComponentName, java.lang.String);
     method public boolean setApplicationHidden(android.content.ComponentName, java.lang.String, boolean);
     method public void setApplicationRestrictions(android.content.ComponentName, java.lang.String, android.os.Bundle);
     method public void setApplicationRestrictionsManagingPackage(android.content.ComponentName, java.lang.String);
