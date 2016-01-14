@@ -22,25 +22,43 @@
 namespace aapt {
 
 static bool verifyManifest(IAaptContext* context, const Source& source, xml::Element* manifestEl) {
-    bool error = false;
-
     xml::Attribute* attr = manifestEl->findAttribute({}, u"package");
     if (!attr) {
         context->getDiagnostics()->error(DiagMessage(source.withLine(manifestEl->lineNumber))
                                          << "missing 'package' attribute");
-        error = true;
     } else if (ResourceUtils::isReference(attr->value)) {
         context->getDiagnostics()->error(DiagMessage(source.withLine(manifestEl->lineNumber))
                                          << "value for attribute 'package' must not be a "
                                             "reference");
-        error = true;
     } else if (!util::isJavaPackageName(attr->value)) {
         context->getDiagnostics()->error(DiagMessage(source.withLine(manifestEl->lineNumber))
                                          << "invalid package name '" << attr->value << "'");
-        error = true;
+    } else {
+        return true;
+    }
+    return false;
+}
+
+static bool includeVersionName(IAaptContext* context, const Source& source,
+                               const StringPiece16& versionName, xml::Element* manifestEl) {
+    if (manifestEl->findAttribute(xml::kSchemaAndroid, u"versionName")) {
+        return true;
     }
 
-    return !error;
+    manifestEl->attributes.push_back(xml::Attribute{
+            xml::kSchemaAndroid, u"versionName", versionName.toString() });
+    return true;
+}
+
+static bool includeVersionCode(IAaptContext* context, const Source& source,
+                               const StringPiece16& versionCode, xml::Element* manifestEl) {
+    if (manifestEl->findAttribute(xml::kSchemaAndroid, u"versionCode")) {
+        return true;
+    }
+
+    manifestEl->attributes.push_back(xml::Attribute{
+            xml::kSchemaAndroid, u"versionCode", versionCode.toString() });
+    return true;
 }
 
 static bool fixUsesSdk(IAaptContext* context, const Source& source, xml::Element* el,
@@ -62,6 +80,76 @@ static bool fixUsesSdk(IAaptContext* context, const Source& source, xml::Element
     return true;
 }
 
+class FullyQualifiedClassNameVisitor : public xml::Visitor {
+public:
+    using xml::Visitor::visit;
+
+    FullyQualifiedClassNameVisitor(const StringPiece16& package) : mPackage(package) {
+    }
+
+    void visit(xml::Element* el) override {
+        for (xml::Attribute& attr : el->attributes) {
+            if (Maybe<std::u16string> newValue =
+                    util::getFullyQualifiedClassName(mPackage, attr.value)) {
+                attr.value = std::move(newValue.value());
+            }
+        }
+
+        // Super implementation to iterate over the children.
+        xml::Visitor::visit(el);
+    }
+
+private:
+    StringPiece16 mPackage;
+};
+
+static bool renameManifestPackage(IAaptContext* context, const Source& source,
+                                  const StringPiece16& packageOverride, xml::Element* manifestEl) {
+    if (!util::isJavaPackageName(packageOverride)) {
+        context->getDiagnostics()->error(DiagMessage() << "invalid manifest package override '"
+                                         << packageOverride << "'");
+        return false;
+    }
+
+    xml::Attribute* attr = manifestEl->findAttribute({}, u"package");
+
+    // We've already verified that the manifest element is present, with a package name specified.
+    assert(attr);
+
+    std::u16string originalPackage = std::move(attr->value);
+    attr->value = packageOverride.toString();
+
+    FullyQualifiedClassNameVisitor visitor(originalPackage);
+    manifestEl->accept(&visitor);
+    return true;
+}
+
+static bool renameInstrumentationTargetPackage(IAaptContext* context, const Source& source,
+                                               const StringPiece16& packageOverride,
+                                               xml::Element* manifestEl) {
+    if (!util::isJavaPackageName(packageOverride)) {
+        context->getDiagnostics()->error(DiagMessage()
+                                         << "invalid instrumentation target package override '"
+                                         << packageOverride << "'");
+        return false;
+    }
+
+    xml::Element* instrumentationEl = manifestEl->findChild({}, u"instrumentation");
+    if (!instrumentationEl) {
+        // No error if there is no work to be done.
+        return true;
+    }
+
+    xml::Attribute* attr = instrumentationEl->findAttribute(xml::kSchemaAndroid, u"targetPackage");
+    if (!attr) {
+        // No error if there is no work to be done.
+        return true;
+    }
+
+    attr->value = packageOverride.toString();
+    return true;
+}
+
 bool ManifestFixer::consume(IAaptContext* context, xml::XmlResource* doc) {
     xml::Element* root = xml::findRootElement(doc->root.get());
     if (!root || !root->namespaceUri.empty() || root->name != u"manifest") {
@@ -72,6 +160,36 @@ bool ManifestFixer::consume(IAaptContext* context, xml::XmlResource* doc) {
 
     if (!verifyManifest(context, doc->file.source, root)) {
         return false;
+    }
+
+    if (mOptions.versionCodeDefault) {
+        if (!includeVersionCode(context, doc->file.source, mOptions.versionCodeDefault.value(),
+                                root)) {
+            return false;
+        }
+    }
+
+    if (mOptions.versionNameDefault) {
+        if (!includeVersionName(context, doc->file.source, mOptions.versionNameDefault.value(),
+                                root)) {
+            return false;
+        }
+    }
+
+    if (mOptions.renameManifestPackage) {
+        // Rename manifest package.
+        if (!renameManifestPackage(context, doc->file.source,
+                                   mOptions.renameManifestPackage.value(), root)) {
+            return false;
+        }
+    }
+
+    if (mOptions.renameInstrumentationTargetPackage) {
+        if (!renameInstrumentationTargetPackage(context, doc->file.source,
+                                                mOptions.renameInstrumentationTargetPackage.value(),
+                                                root)) {
+            return false;
+        }
     }
 
     bool foundUsesSdk = false;

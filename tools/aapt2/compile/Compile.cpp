@@ -117,7 +117,11 @@ static std::string buildIntermediateFilename(const ResourcePathData& data) {
     if (!data.configStr.empty()) {
         name << "-" << data.configStr;
     }
-    name << "_" << data.name << "." << data.extension << ".flat";
+    name << "_" << data.name;
+    if (!data.extension.empty()) {
+        name << "." << data.extension;
+    }
+    name << ".flat";
     return name.str();
 }
 
@@ -386,16 +390,26 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
     fileExportWriter.getChunkHeader()->size =
             util::hostToDevice32(buffer.size() + f.value().getDataLength());
 
-    if (writer->writeEntry(buffer)) {
-        if (writer->writeEntry(f.value().getDataPtr(), f.value().getDataLength())) {
-            if (writer->finishEntry()) {
-                return true;
-            }
+    if (!writer->writeEntry(buffer)) {
+        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
+        return false;
+    }
+
+    // Only write if we have something to write. This is because mmap fails with length of 0,
+    // but we still want to compile the file to get the resource ID.
+    if (f.value().getDataPtr() && f.value().getDataLength() > 0) {
+        if (!writer->writeEntry(f.value().getDataPtr(), f.value().getDataLength())) {
+            context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
+            return false;
         }
     }
 
-    context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-    return false;
+    if (!writer->finishEntry()) {
+        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
+        return false;
+    }
+
+    return true;
 }
 
 class CompileContext : public IAaptContext {

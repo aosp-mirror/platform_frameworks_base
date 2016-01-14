@@ -144,8 +144,7 @@ TEST(UtilTest, IsJavaPackageName) {
 
 TEST(UtilTest, FullyQualifiedClassName) {
     Maybe<std::u16string> res = util::getFullyQualifiedClassName(u"android", u"asdf");
-    AAPT_ASSERT_TRUE(res);
-    EXPECT_EQ(res.value(), u"android.asdf");
+    AAPT_ASSERT_FALSE(res);
 
     res = util::getFullyQualifiedClassName(u"android", u".asdf");
     AAPT_ASSERT_TRUE(res);

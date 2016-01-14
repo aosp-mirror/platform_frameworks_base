@@ -79,6 +79,21 @@ private:
     size_t mSize;
 };
 
+/**
+ * When mmap fails because the file has length 0, we use the EmptyData to simulate data of length 0.
+ */
+class EmptyData : public IData {
+public:
+    const void* data() const override {
+        static const uint8_t d = 0;
+        return &d;
+    }
+
+    size_t size() const override {
+        return 0u;
+    }
+};
+
 } // namespace io
 } // namespace aapt
 

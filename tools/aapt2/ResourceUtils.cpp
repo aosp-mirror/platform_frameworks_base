@@ -176,7 +176,7 @@ bool isAttributeReference(const StringPiece16& str) {
 /*
  * Style parent's are a bit different. We accept the following formats:
  *
- * @[[*]package:]style/<entry>
+ * @[[*]package:][style/]<entry>
  * ?[[*]package:]style/<entry>
  * <[*]package>:[style/]<entry>
  * [[*]package:style/]<entry>
@@ -213,14 +213,6 @@ Maybe<Reference> parseStyleParentReference(const StringPiece16& str, std::string
         if (!parsedType || *parsedType != ResourceType::kStyle) {
             std::stringstream err;
             err << "invalid resource type '" << typeStr << "' for parent of style";
-            *outError = err.str();
-            return {};
-        }
-    } else {
-        // No type was defined, this should not have a leading identifier.
-        if (hasLeadingIdentifiers) {
-            std::stringstream err;
-            err << "invalid parent reference '" << str << "'";
             *outError = err.str();
             return {};
         }
@@ -294,6 +286,12 @@ std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* flagAttr,
                                                     const StringPiece16& str) {
     android::Res_value flags = { };
     flags.dataType = android::Res_value::TYPE_INT_DEC;
+    flags.data = 0u;
+
+    if (util::trimWhitespace(str).empty()) {
+        // Empty string is a valid flag (0).
+        return util::make_unique<BinaryPrimitive>(flags);
+    }
 
     for (StringPiece16 part : util::tokenize(str, u'|')) {
         StringPiece16 trimmedPart = util::trimWhitespace(part);
@@ -386,12 +384,12 @@ std::unique_ptr<BinaryPrimitive> tryParseColor(const StringPiece16& str) {
 
 bool tryParseBool(const StringPiece16& str, bool* outValue) {
     StringPiece16 trimmedStr(util::trimWhitespace(str));
-    if (trimmedStr == u"true" || trimmedStr == u"TRUE") {
+    if (trimmedStr == u"true" || trimmedStr == u"TRUE" || trimmedStr == u"True") {
         if (outValue) {
             *outValue = true;
         }
         return true;
-    } else if (trimmedStr == u"false" || trimmedStr == u"FALSE") {
+    } else if (trimmedStr == u"false" || trimmedStr == u"FALSE" || trimmedStr == u"False") {
         if (outValue) {
             *outValue = false;
         }

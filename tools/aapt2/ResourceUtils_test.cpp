@@ -16,11 +16,33 @@
 
 #include "Resource.h"
 #include "ResourceUtils.h"
+#include "test/Builders.h"
 #include "test/Common.h"
 
 #include <gtest/gtest.h>
 
 namespace aapt {
+
+TEST(ResourceUtilsTest, ParseBool) {
+    bool val = false;
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"true", &val));
+    EXPECT_TRUE(val);
+
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"TRUE", &val));
+    EXPECT_TRUE(val);
+
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"True", &val));
+    EXPECT_TRUE(val);
+
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"false", &val));
+    EXPECT_FALSE(val);
+
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"FALSE", &val));
+    EXPECT_FALSE(val);
+
+    EXPECT_TRUE(ResourceUtils::tryParseBool(u"False", &val));
+    EXPECT_FALSE(val);
+}
 
 TEST(ResourceUtilsTest, ParseResourceName) {
     ResourceNameRef actual;
@@ -154,6 +176,10 @@ TEST(ResourceUtilsTest, ParseStyleParentReference) {
     AAPT_ASSERT_TRUE(ref);
     EXPECT_EQ(ref.value().name.value(), kAndroidStyleFooName);
 
+    ref = ResourceUtils::parseStyleParentReference(u"@android:foo", &errStr);
+    AAPT_ASSERT_TRUE(ref);
+    EXPECT_EQ(ref.value().name.value(), kAndroidStyleFooName);
+
     ref = ResourceUtils::parseStyleParentReference(u"foo", &errStr);
     AAPT_ASSERT_TRUE(ref);
     EXPECT_EQ(ref.value().name.value(), kStyleFooName);
@@ -162,6 +188,18 @@ TEST(ResourceUtilsTest, ParseStyleParentReference) {
     AAPT_ASSERT_TRUE(ref);
     EXPECT_EQ(ref.value().name.value(), kAndroidStyleFooName);
     EXPECT_TRUE(ref.value().privateReference);
+}
+
+TEST(ResourceUtilsTest, ParseEmptyFlag) {
+    std::unique_ptr<Attribute> attr = test::AttributeBuilder(false)
+            .setTypeMask(android::ResTable_map::TYPE_FLAGS)
+            .addItem(u"one", 0x01)
+            .addItem(u"two", 0x02)
+            .build();
+
+    std::unique_ptr<BinaryPrimitive> result = ResourceUtils::tryParseFlagSymbol(attr.get(), u"");
+    ASSERT_NE(nullptr, result);
+    EXPECT_EQ(0u, result->value.data);
 }
 
 } // namespace aapt

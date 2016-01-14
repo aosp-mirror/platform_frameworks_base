@@ -32,7 +32,10 @@ RegularFile::RegularFile(const Source& source) : mSource(source) {
 std::unique_ptr<IData> RegularFile::openAsData() {
     android::FileMap map;
     if (Maybe<android::FileMap> map = file::mmapPath(mSource.path, nullptr)) {
-        return util::make_unique<MmappedData>(std::move(map.value()));
+        if (map.value().getDataPtr() && map.value().getDataLength() > 0) {
+            return util::make_unique<MmappedData>(std::move(map.value()));
+        }
+        return util::make_unique<EmptyData>();
     }
     return {};
 }

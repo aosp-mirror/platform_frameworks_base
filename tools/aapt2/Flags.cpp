@@ -81,6 +81,8 @@ Flags& Flags::optionalSwitch(const StringPiece& name, const StringPiece& descrip
 }
 
 void Flags::usage(const StringPiece& command, std::ostream* out) {
+    constexpr size_t kWidth = 50;
+
     *out << command << " [options]";
     for (const Flag& flag : mFlags) {
         if (flag.required) {
@@ -100,11 +102,11 @@ void Flags::usage(const StringPiece& command, std::ostream* out) {
         // the first line) followed by the description line. This will make sure that multiline
         // descriptions are still right justified and aligned.
         for (StringPiece line : util::tokenize<char>(flag.description, '\n')) {
-            *out << " " << std::setw(30) << std::left << argLine << line << "\n";
+            *out << " " << std::setw(kWidth) << std::left << argLine << line << "\n";
             argLine = " ";
         }
     }
-    *out << " " << std::setw(30) << std::left << "-h" << "Displays this help menu\n";
+    *out << " " << std::setw(kWidth) << std::left << "-h" << "Displays this help menu\n";
     out->flush();
 }
 
