@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.AssistUtils;
@@ -240,6 +239,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import dalvik.system.VMRuntime;
+
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -7252,6 +7252,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (changed) {
                 updateOomAdjLocked();
             }
+        }
+    }
+
+    @Override
+    public boolean isAppForeground(int uid) throws RemoteException {
+        synchronized (this) {
+            UidRecord uidRec = mActiveUids.get(uid);
+            if (uidRec == null || uidRec.idle) {
+                return false;
+            }
+            return uidRec.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
         }
     }
 

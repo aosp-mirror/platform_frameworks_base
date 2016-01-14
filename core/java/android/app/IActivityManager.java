@@ -589,6 +589,8 @@ public interface IActivityManager extends IInterface {
 
     public void setVrMode(IBinder token, boolean enabled) throws RemoteException;
 
+    public boolean isAppForeground(int uid) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -960,4 +962,5 @@ public interface IActivityManager extends IInterface {
     int SET_VR_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 359;
     int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 360;
     int CLEAR_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 361;
+    int IS_APP_FOREGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 362;
 }
