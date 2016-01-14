@@ -52,7 +52,7 @@ Working With</a></li>
 <p>
   For a more general look at Android permissions, please see <a href=
   "{@docRoot}training/articles/user-data-overview.html">Permissions
-  and User Privacy</a>. For details on how to work with permissions in your code,
+  and User Data</a>. For details on how to work with permissions in your code,
   see <a href="{@docRoot}training/permissions/index.html">Working with System Permissions</a>.
   For best practices for working with unique identifiers, please see <a href=
   "{@docRoot}training/articles/user-data-ids.html">Best Practices for
@@ -113,9 +113,9 @@ with Android Permissions</h2>
 </p>
 
 <p>
-  <em><strong>Increased situational context</strong></em>: Users are be
+  <em><strong>Increased situational context</strong></em>: Users are
   prompted at runtime, in the context of your app, for permission to access the
-  functionality covered by those permission groups. Users are be more sensitive to
+  functionality covered by those permission groups. Users are more sensitive to
   the context in which the permission is requested, and if there’s a mismatch
   between what you are requesting and the purpose of your app, it's even
   more important to provide detailed explanation to the user as to why you’re

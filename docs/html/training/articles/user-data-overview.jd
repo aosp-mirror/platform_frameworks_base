@@ -1,4 +1,4 @@
-page.title=Permissions and User Privacy
+page.title=Permissions and User Data
 page.metaDescription=An overview of permissions on Android and how to manage them.
 page.tags="user data","permissions","identifiers"
 page.image=images/cards/card-user_2x.png
@@ -75,7 +75,7 @@ page.article=true
   at the group level and a <em><strong>single permission group</strong></em>
   corresponds to <em><strong>several permission declarations</strong></em> in
   the app manifest; for example, the SMS group includes both the
-  <code>READ_SMS</code> and the <code>WRITE_SMS</code> declarations.
+  <code>READ_SMS</code> and the <code>RECEIVE_SMS</code> declarations.
 </p>
 
 
@@ -99,7 +99,7 @@ page.article=true
   a request to grant permission for the whole group rather than the specific
   API call. For example, if you request the <code>MANAGE_ACOUNTS</code>
   permission, the user will be asked to grant access to the <em>Identity</em>
-  group which is composed of the <code>GET_ACCOUNTS</code>,
+  group (in API level 22 and lower), which is composed of the <code>GET_ACCOUNTS</code>,
   <code>READ_PROFILE</code>, and <code>WRITE_PROFILE</code> permissions, and
   all their associated methods.
 </p>

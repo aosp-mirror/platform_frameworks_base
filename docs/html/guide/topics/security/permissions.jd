@@ -334,7 +334,7 @@ to be as high as possible. You can see which permissions were added with each re
   If the device is running Android 6.0 (API level 23) and the app's <a href=
   "{@docRoot}guide/topics/manifest/uses-sdk-element.html#target"
   ><code>targetSdkVersion</code></a> is 23 or higher, the following system
-  behavior applies when you app requests a dangerous permission:
+  behavior applies when your app requests a dangerous permission:
 </p>
 
 <ul>

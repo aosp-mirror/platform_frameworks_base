@@ -68,7 +68,7 @@ page.article=true
 <p>
   For a general look at Android permissions, please see <a href=
   "{@docRoot}training/articles/user-data-overview.html">Permissions
-  and User Privacy</a>. For specific best practices for
+  and User Data</a>. For specific best practices for
   working with Android permissions, please see <a href=
   "{@docRoot}training/articles/user-data-permissions.html">Best Practices for
   App Permissions</a>.
@@ -488,7 +488,7 @@ controlling access means:
 
 <p>
   In general, user account identifiers can be considered unique (i.e., each
-  device/account combo has a unique ID). On the other hand, the less the unique
+  device/account combo has a unique ID). On the other hand, the less unique
   an identifier is within a population (e.g. of devices), the greater the
   privacy protection because it's less useful for tracking an individual user.
 </p>
@@ -671,7 +671,8 @@ non-repudiability</h3>
 </p>
 
 <p>
-  <strong>We Recommend</strong>: IMEI, IMSI, and Line1.
+  <strong>We Recommend</strong>: IMEI, IMSI, and Line1 (requires <code>PHONE</code>
+  permission group in Android 6.0 (API level 23) and higher).
 </p>
 
 <p>
