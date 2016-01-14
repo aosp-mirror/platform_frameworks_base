@@ -523,19 +523,25 @@ class Task implements DimLayer.DimLayerUser {
             return;
         }
 
-        // Device rotation changed. We don't want the task to move around on the screen when
-        // this happens, so update the task bounds so it stays in the same place.
+        // Device rotation changed.
+        // - Reset the bounds to the pre-scroll bounds as whatever scrolling was done is no longer
+        // valid.
+        // - Rotate the bounds and notify activity manager if the task can be resized independently
+        // from its stack. The stack will take care of task rotation for the other case.
         mTmpRect2.set(mPreScrollBounds);
+
+        if (!StackId.isTaskResizeAllowed(mStack.mStackId)) {
+            setBounds(mTmpRect2, mOverrideConfig);
+            return;
+        }
+
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (setBounds(mTmpRect2, mOverrideConfig) != BOUNDS_CHANGE_NONE) {
-            // Post message to inform activity manager of the bounds change simulating
-            // a one-way call. We do this to prevent a deadlock between window manager
-            // lock and activity manager lock been held. Only tasks within the freeform stack
-            // are resizeable independently of their stack resizing.
-            if (mStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-                mService.mH.sendMessage(mService.mH.obtainMessage(
-                        RESIZE_TASK, mTaskId, RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mPreScrollBounds));
-            }
+            // Post message to inform activity manager of the bounds change simulating a one-way
+            // call. We do this to prevent a deadlock between window manager lock and activity
+            // manager lock been held.
+            mService.mH.obtainMessage(RESIZE_TASK, mTaskId,
+                    RESIZE_MODE_SYSTEM_SCREEN_ROTATION, mPreScrollBounds).sendToTarget();
         }
     }
 
