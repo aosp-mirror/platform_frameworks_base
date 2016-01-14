@@ -85,6 +85,13 @@ public abstract class ConditionProviderService extends Service {
             "android.service.zen.automatic.configurationActivity";
 
     /**
+     * The name of the {@code meta-data} tag containing the maximum number of rule instances that
+     * can be created for this rule type. Omit or enter a value <= 0 to allow unlimited instances.
+     */
+    public static final String META_DATA_RULE_INSTANCE_LIMIT =
+            "android.service.zen.automatic.ruleInstanceLimit";
+
+    /**
      * A String rule id extra passed to {@link #META_DATA_CONFIGURATION_ACTIVITY}.
      */
     public static final String EXTRA_RULE_ID = "android.content.automatic.ruleId";

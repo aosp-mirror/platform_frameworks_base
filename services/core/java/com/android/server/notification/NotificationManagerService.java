@@ -1727,6 +1727,14 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public int getRuleInstanceCount(ComponentName owner) throws RemoteException {
+            Preconditions.checkNotNull(owner, "Owner is null");
+            enforceSystemOrSystemUI("getRuleInstanceCount");
+
+            return mZenModeHelper.getCurrentInstanceCount(owner);
+        }
+
+        @Override
         public void setInterruptionFilter(String pkg, int filter) throws RemoteException {
             enforcePolicyAccess(pkg, "setInterruptionFilter");
             final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);

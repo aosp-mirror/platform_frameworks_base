@@ -48,6 +48,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.service.notification.ConditionProviderService;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
@@ -201,7 +202,7 @@ public class ZenModeHelper {
             config.user = user;
         }
         synchronized (mConfig) {
-            setConfig(config, "onUserSwitched");
+            setConfigLocked(config, "onUserSwitched");
         }
         cleanUpZenRules();
     }
@@ -261,25 +262,34 @@ public class ZenModeHelper {
     }
 
     public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
-        if (!isValidOwner(automaticZenRule.getOwner())) {
-            throw new IllegalArgumentException("Owner is not a condition provider service");
+        if (!TextUtils.isEmpty(automaticZenRule.getId())) {
+            throw new IllegalArgumentException("Rule already exists");
         }
+        if (!isSystemRule(automaticZenRule)) {
+            ServiceInfo owner = getServiceInfo(automaticZenRule.getOwner());
+            if (owner == null) {
+                throw new IllegalArgumentException("Owner is not a condition provider service");
+            }
+
+            final int ruleInstanceLimit = owner.metaData.getInt(
+                    ConditionProviderService.META_DATA_RULE_INSTANCE_LIMIT, -1);
+            if (ruleInstanceLimit > 0 && ruleInstanceLimit
+                    < (getCurrentInstanceCount(automaticZenRule.getOwner()) + 1)) {
+                throw new IllegalArgumentException("Rule instance limit exceeded");
+            }
+        }
+
         ZenModeConfig newConfig;
         synchronized (mConfig) {
             if (mConfig == null) return null;
             if (DEBUG) {
-                Log.d(TAG,
-                        "addAutomaticZenRule zenRule= " + automaticZenRule + " reason=" + reason);
-            }
-            if (!TextUtils.isEmpty(automaticZenRule.getId())) {
-                throw new IllegalArgumentException("Rule already exists");
+                Log.d(TAG, "addAutomaticZenRule rule= " + automaticZenRule + " reason=" + reason);
             }
             newConfig = mConfig.copy();
-
             ZenRule rule = new ZenRule();
             populateZenRule(automaticZenRule, rule, true);
             newConfig.automaticRules.put(rule.id, rule);
-            if (setConfig(newConfig, reason, true)) {
+            if (setConfigLocked(newConfig, reason, true)) {
                 return createAutomaticZenRule(rule);
             } else {
                 return null;
@@ -309,7 +319,7 @@ public class ZenModeHelper {
             }
             populateZenRule(automaticZenRule, rule, false);
             newConfig.automaticRules.put(ruleId, rule);
-            return setConfig(newConfig, reason, true);
+            return setConfigLocked(newConfig, reason, true);
         }
     }
 
@@ -327,7 +337,7 @@ public class ZenModeHelper {
                 throw new SecurityException(
                         "Cannot delete rules not owned by your condition provider");
             }
-            return setConfig(newConfig, reason, true);
+            return setConfigLocked(newConfig, reason, true);
         }
     }
 
@@ -343,8 +353,20 @@ public class ZenModeHelper {
                     newConfig.automaticRules.removeAt(i);
                 }
             }
-            return setConfig(newConfig, reason, true);
+            return setConfigLocked(newConfig, reason, true);
         }
+    }
+
+    public int getCurrentInstanceCount(ComponentName owner) {
+        int count = 0;
+        synchronized (mConfig) {
+            for (ZenRule rule : mConfig.automaticRules.values()) {
+                if (rule.component != null && rule.component.equals(owner)) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     public boolean canManageAutomaticZenRule(ZenRule rule) {
@@ -368,13 +390,14 @@ public class ZenModeHelper {
         }
     }
 
-    public boolean isValidOwner(ComponentName owner) {
-        boolean foundOwner = false;
-        final PackageManager pm = mContext.getPackageManager();
+    private boolean isSystemRule(AutomaticZenRule rule) {
+        return ZenModeConfig.SYSTEM_AUTHORITY.equals(rule.getOwner().getPackageName());
+    }
+
+    private ServiceInfo getServiceInfo(ComponentName owner) {
         Intent queryIntent = new Intent();
         queryIntent.setComponent(owner);
-
-        List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
+        List<ResolveInfo> installedServices = mPm.queryIntentServicesAsUser(
                 queryIntent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
                 UserHandle.getCallingUserId());
@@ -383,12 +406,11 @@ public class ZenModeHelper {
                 ResolveInfo resolveInfo = installedServices.get(i);
                 ServiceInfo info = resolveInfo.serviceInfo;
                 if (mServiceConfig.bindPermission.equals(info.permission)) {
-                    foundOwner = true;
-                    break;
+                    return info;
                 }
             }
         }
-        return foundOwner;
+        return null;
     }
 
     private void populateZenRule(AutomaticZenRule automaticZenRule, ZenRule rule, boolean isNew) {
@@ -443,7 +465,7 @@ public class ZenModeHelper {
                 newRule.conditionId = conditionId;
                 newConfig.manualRule = newRule;
             }
-            setConfig(newConfig, reason, setRingerMode);
+            setConfigLocked(newConfig, reason, setRingerMode);
         }
     }
 
@@ -508,7 +530,7 @@ public class ZenModeHelper {
             }
             if (DEBUG) Log.d(TAG, "readXml");
             synchronized (mConfig) {
-                setConfig(config, "readXml");
+                setConfigLocked(config, "readXml");
             }
         }
     }
@@ -537,7 +559,7 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             final ZenModeConfig newConfig = mConfig.copy();
             newConfig.applyNotificationPolicy(policy);
-            setConfig(newConfig, "setNotificationPolicy");
+            setConfigLocked(newConfig, "setNotificationPolicy");
         }
     }
 
@@ -560,7 +582,7 @@ public class ZenModeHelper {
                     }
                 }
             }
-            setConfig(newConfig, "cleanUpZenRules");
+            setConfigLocked(newConfig, "cleanUpZenRules");
         }
     }
 
@@ -573,30 +595,30 @@ public class ZenModeHelper {
         }
     }
 
-    public boolean setConfig(ZenModeConfig config, String reason) {
-        return setConfig(config, reason, true /*setRingerMode*/);
+    public boolean setConfigLocked(ZenModeConfig config, String reason) {
+        return setConfigLocked(config, reason, true /*setRingerMode*/);
     }
 
     public void setConfigAsync(ZenModeConfig config, String reason) {
         mHandler.postSetConfig(config, reason);
     }
 
-    private boolean setConfig(ZenModeConfig config, String reason, boolean setRingerMode) {
+    private boolean setConfigLocked(ZenModeConfig config, String reason, boolean setRingerMode) {
         final long identity = Binder.clearCallingIdentity();
         try {
             if (config == null || !config.isValid()) {
-                Log.w(TAG, "Invalid config in setConfig; " + config);
+                Log.w(TAG, "Invalid config in setConfigLocked; " + config);
                 return false;
             }
             if (config.user != mUser) {
                 // simply store away for background users
                 mConfigs.put(config.user, config);
-                if (DEBUG) Log.d(TAG, "setConfig: store config for user " + config.user);
+                if (DEBUG) Log.d(TAG, "setConfigLocked: store config for user " + config.user);
                 return true;
             }
             mConditions.evaluateConfig(config, false /*processSubscriptions*/);  // may modify config
             mConfigs.put(config.user, config);
-            if (DEBUG) Log.d(TAG, "setConfig reason=" + reason, new Throwable());
+            if (DEBUG) Log.d(TAG, "setConfigLocked reason=" + reason, new Throwable());
             ZenLog.traceConfig(reason, mConfig, config);
             final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                     getNotificationPolicy(config));
@@ -1071,7 +1093,7 @@ public class ZenModeHelper {
                 case MSG_SET_CONFIG:
                     ConfigMessageData configData = (ConfigMessageData)msg.obj;
                     synchronized (mConfig) {
-                        setConfig(configData.config, configData.reason);
+                        setConfigLocked(configData.config, configData.reason);
                     }
                     break;
             }

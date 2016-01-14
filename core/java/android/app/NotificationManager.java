@@ -380,6 +380,18 @@ public class NotificationManager
     }
 
     /**
+     * @hide
+     */
+    public int getRuleInstanceCount(ComponentName owner) {
+        INotificationManager service = getService();
+        try {
+            return service.getRuleInstanceCount(owner);
+        } catch (RemoteException e) {
+        }
+        return 0;
+    }
+
+    /**
      * Returns AutomaticZenRules owned by the caller.
      *
      * <p>
