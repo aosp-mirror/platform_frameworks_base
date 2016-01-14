@@ -2085,6 +2085,36 @@ results."
 
   <li class="nav-section">
     <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/best-permissions-ids.html">
+      <span class="small">Best Practices for</span><br/>
+              Permissions &amp; Identifiers
+      </a>
+    </div>
+    <ul>
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/user-data-overview.html"
+           description=
+           "Overview of app permissions on Android and how they affect your users."
+          >Permissions and User Privacy</a>
+      </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/user-data-permissions.html"
+           description=
+           "How to manage permissions the right way for users."
+          >Best Practices for App Permissions</a>
+      </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/user-data-ids.html"
+           description=
+           "Unique identifiers available and how to choose the right one for your use case."
+          >Best Practices for Unique Identifiers</a>
+      </li>
+    </ul>
+  </li>
+  <!-- End Permissions and identifiers -->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/testing.html">
       <span class="small">Best Practices for</span><br/>
               Testing
