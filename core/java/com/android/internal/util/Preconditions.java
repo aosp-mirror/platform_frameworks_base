@@ -16,6 +16,10 @@
 
 package com.android.internal.util;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.text.TextUtils;
+
 import java.util.Collection;
 
 /**
@@ -31,6 +35,22 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that an string reference passed as a parameter to the calling
+     * method is not empty.
+     *
+     * @param string an string reference
+     * @return the string reference that was validated
+     * @throws IllegalArgumentException if {@code string} is empty
+     */
+    public static @NonNull String checkStringNotEmpty(final String string,
+            final Object errorMessage) {
+        if (TextUtils.isEmpty(string)) {
+            throw new IllegalArgumentException(String.valueOf(errorMessage));
+        }
+        return string;
+    }
+
+    /**
      * Ensures that an object reference passed as a parameter to the calling
      * method is not null.
      *
@@ -38,7 +58,7 @@ public class Preconditions {
      * @return the non-null reference that was validated
      * @throws NullPointerException if {@code reference} is null
      */
-    public static <T> T checkNotNull(final T reference) {
+    public static @NonNull <T> T checkNotNull(final T reference) {
         if (reference == null) {
             throw new NullPointerException();
         }
@@ -55,7 +75,7 @@ public class Preconditions {
      * @return the non-null reference that was validated
      * @throws NullPointerException if {@code reference} is null
      */
-    public static <T> T checkNotNull(final T reference, final Object errorMessage) {
+    public static @NonNull <T> T checkNotNull(final T reference, final Object errorMessage) {
         if (reference == null) {
             throw new NullPointerException(String.valueOf(errorMessage));
         }
@@ -95,7 +115,8 @@ public class Preconditions {
      * @return the validated numeric value
      * @throws IllegalArgumentException if {@code value} was negative
      */
-    public static int checkArgumentNonnegative(final int value, final String errorMessage) {
+    public static @IntRange(from = 0) int checkArgumentNonnegative(final int value,
+            final String errorMessage) {
         if (value < 0) {
             throw new IllegalArgumentException(errorMessage);
         }

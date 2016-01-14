@@ -33,6 +33,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -43,6 +45,9 @@ import java.lang.annotation.RetentionPolicy;
  * major components, printer properties such as name, id, status,
  * description and printer capabilities which describe the various
  * print modes a printer supports such as media sizes, margins, etc.
+ * <p>
+ * Once {@link PrinterInfo.Builder#build() built} the objects are immutable.
+ * </p>
  */
 public final class PrinterInfo implements Parcelable {
 
@@ -62,60 +67,41 @@ public final class PrinterInfo implements Parcelable {
     /** Printer status: the printer is not available. */
     public static final int STATUS_UNAVAILABLE = 3;
 
-    private PrinterId mId;
+    private final @NonNull PrinterId mId;
 
     /** Resource inside the printer's services's package to be used as an icon */
-    private int mIconResourceId;
+    private final int mIconResourceId;
 
     /** If a custom icon can be loaded for the printer */
-    private boolean mHasCustomPrinterIcon;
+    private final boolean mHasCustomPrinterIcon;
 
     /** The generation of the icon in the cache. */
-    private int mCustomPrinterIconGen;
+    private final int mCustomPrinterIconGen;
 
     /** Intent that launches the activity showing more information about the printer. */
-    private PendingIntent mInfoIntent;
+    private final @Nullable PendingIntent mInfoIntent;
 
-    private String mName;
+    private final @NonNull String mName;
 
-    private int mStatus;
+    private final @Status int mStatus;
 
-    private String mDescription;
+    private final @Nullable String mDescription;
 
-    private PrinterCapabilitiesInfo mCapabilities;
+    private final @Nullable PrinterCapabilitiesInfo mCapabilities;
 
-    private PrinterInfo() {
-        /* do nothing */
-    }
-
-    private PrinterInfo(PrinterInfo prototype) {
-        copyFrom(prototype);
-    }
-
-    /**
-     * @hide
-     */
-    public void copyFrom(PrinterInfo other) {
-        if (this == other) {
-            return;
-        }
-        mId = other.mId;
-        mName = other.mName;
-        mStatus = other.mStatus;
-        mDescription = other.mDescription;
-        if (other.mCapabilities != null) {
-            if (mCapabilities != null) {
-                mCapabilities.copyFrom(other.mCapabilities);
-            } else {
-                mCapabilities = new PrinterCapabilitiesInfo(other.mCapabilities);
-            }
-        } else {
-            mCapabilities = null;
-        }
-        mIconResourceId = other.mIconResourceId;
-        mHasCustomPrinterIcon = other.mHasCustomPrinterIcon;
-        mCustomPrinterIconGen = other.mCustomPrinterIconGen;
-        mInfoIntent = other.mInfoIntent;
+    private PrinterInfo(@NonNull PrinterId printerId, @NonNull String name, @Status int status,
+            int iconResourceId, boolean hasCustomPrinterIcon, String description,
+            PendingIntent infoIntent, PrinterCapabilitiesInfo capabilities,
+            int customPrinterIconGen) {
+        mId = printerId;
+        mName = name;
+        mStatus = status;
+        mIconResourceId = iconResourceId;
+        mHasCustomPrinterIcon = hasCustomPrinterIcon;
+        mDescription = description;
+        mInfoIntent = infoIntent;
+        mCapabilities = capabilities;
+        mCustomPrinterIconGen = customPrinterIconGen;
     }
 
     /**
@@ -180,7 +166,7 @@ public final class PrinterInfo implements Parcelable {
      *
      * @return The printer name.
      */
-    public @Nullable String getName() {
+    public @NonNull String getName() {
         return mName;
     }
 
@@ -227,10 +213,51 @@ public final class PrinterInfo implements Parcelable {
         return mCapabilities;
     }
 
+    /**
+     * Check if printerId is valid.
+     *
+     * @param printerId The printerId that might be valid
+     * @return The valid printerId
+     * @throws IllegalArgumentException if printerId is not valid.
+     */
+    private static @NonNull PrinterId checkPrinterId(PrinterId printerId) {
+        return Preconditions.checkNotNull(printerId, "printerId cannot be null.");
+    }
+
+    /**
+     * Check if status is valid.
+     *
+     * @param status The status that might be valid
+     * @return The valid status
+     * @throws IllegalArgumentException if status is not valid.
+     */
+    private static @Status int checkStatus(int status) {
+        if (!(status == STATUS_IDLE
+                || status == STATUS_BUSY
+                || status == STATUS_UNAVAILABLE)) {
+            throw new IllegalArgumentException("status is invalid.");
+        }
+
+        return status;
+    }
+
+    /**
+     * Check if name is valid.
+     *
+     * @param name The name that might be valid
+     * @return The valid name
+     * @throws IllegalArgumentException if name is not valid.
+     */
+    private static @NonNull String checkName(String name) {
+        return Preconditions.checkStringNotEmpty(name, "name cannot be empty.");
+    }
+
     private PrinterInfo(Parcel parcel) {
-        mId = parcel.readParcelable(null);
-        mName = parcel.readString();
-        mStatus = parcel.readInt();
+        // mName can be null due to unchecked set in Builder.setName and status can be invalid
+        // due to unchecked set in Builder.setStatus, hence we can only check mId for a valid state
+        mId = checkPrinterId((PrinterId) parcel.readParcelable(null));
+        mName = checkName(parcel.readString());
+        mStatus = checkStatus(parcel.readInt());
         mDescription = parcel.readString();
         mCapabilities = parcel.readParcelable(null);
         mIconResourceId = parcel.readInt();
@@ -261,8 +288,8 @@ public final class PrinterInfo implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((mId != null) ? mId.hashCode() : 0);
-        result = prime * result + ((mName != null) ? mName.hashCode() : 0);
+        result = prime * result + mId.hashCode();
+        result = prime * result + mName.hashCode();
         result = prime * result + mStatus;
         result = prime * result + ((mDescription != null) ? mDescription.hashCode() : 0);
         result = prime * result + ((mCapabilities != null) ? mCapabilities.hashCode() : 0);
@@ -282,15 +309,11 @@ public final class PrinterInfo implements Parcelable {
      * @hide
      */
     public boolean equalsIgnoringStatus(PrinterInfo other) {
-        if (mId == null) {
-            if (other.mId != null) {
-                return false;
-            }
-        } else if (!mId.equals(other.mId)) {
+        if (!mId.equals(other.mId)) {
             return false;
         }
-        if (!TextUtils.equals(mName, other.mName)) {
-            return false;
+        if (!mName.equals(other.mName)) {
+           return false;
         }
         if (!TextUtils.equals(mDescription, other.mDescription)) {
             return false;
@@ -363,7 +386,15 @@ public final class PrinterInfo implements Parcelable {
      * Builder for creating of a {@link PrinterInfo}.
      */
     public static final class Builder {
-        private final PrinterInfo mPrototype;
+        private @NonNull PrinterId mPrinterId;
+        private @NonNull String mName;
+        private @Status int mStatus;
+        private int mIconResourceId;
+        private boolean mHasCustomPrinterIcon;
+        private String mDescription;
+        private PendingIntent mInfoIntent;
+        private PrinterCapabilitiesInfo mCapabilities;
+        private int mCustomPrinterIconGen;
 
         /**
          * Constructor.
@@ -375,19 +406,9 @@ public final class PrinterInfo implements Parcelable {
          * printer name is empty or the status is not a valid one.
          */
         public Builder(@NonNull PrinterId printerId, @NonNull String name, @Status int status) {
-            if (printerId == null) {
-                throw new IllegalArgumentException("printerId cannot be null.");
-            }
-            if (TextUtils.isEmpty(name)) {
-                throw new IllegalArgumentException("name cannot be empty.");
-            }
-            if (!isValidStatus(status)) {
-                throw new IllegalArgumentException("status is invalid.");
-            }
-            mPrototype = new PrinterInfo();
-            mPrototype.mId = printerId;
-            mPrototype.mName = name;
-            mPrototype.mStatus = status;
+            mPrinterId = checkPrinterId(printerId);
+            mName = checkName(name);
+            mStatus = checkStatus(status);
         }
 
         /**
@@ -396,8 +417,15 @@ public final class PrinterInfo implements Parcelable {
          * @param other Other info from which to start building.
          */
         public Builder(@NonNull PrinterInfo other) {
-            mPrototype = new PrinterInfo();
-            mPrototype.copyFrom(other);
+            mPrinterId = other.mId;
+            mName = other.mName;
+            mStatus = other.mStatus;
+            mIconResourceId = other.mIconResourceId;
+            mHasCustomPrinterIcon = other.mHasCustomPrinterIcon;
+            mDescription = other.mDescription;
+            mInfoIntent = other.mInfoIntent;
+            mCapabilities = other.mCapabilities;
+            mCustomPrinterIconGen = other.mCustomPrinterIconGen;
         }
 
         /**
@@ -405,13 +433,12 @@ public final class PrinterInfo implements Parcelable {
          *
          * @param status The status.
          * @return This builder.
-         *
          * @see PrinterInfo#STATUS_IDLE
          * @see PrinterInfo#STATUS_BUSY
          * @see PrinterInfo#STATUS_UNAVAILABLE
          */
         public @NonNull Builder setStatus(@Status int status) {
-            mPrototype.mStatus = status;
+            mStatus = checkStatus(status);
             return this;
         }
 
@@ -424,7 +451,8 @@ public final class PrinterInfo implements Parcelable {
          * @see PrinterInfo.Builder#setHasCustomPrinterIcon
          */
         public @NonNull Builder setIconResourceId(@DrawableRes int iconResourceId) {
-            mPrototype.mIconResourceId = iconResourceId;
+            mIconResourceId = Preconditions.checkArgumentNonnegative(iconResourceId,
+                    "iconResourceId can't be negative");
             return this;
         }
 
@@ -442,7 +470,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public @NonNull Builder setHasCustomPrinterIcon() {
-            mPrototype.mHasCustomPrinterIcon = true;
+            mHasCustomPrinterIcon = true;
             return this;
         }
 
@@ -454,7 +482,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public @NonNull Builder setName(@NonNull String name) {
-            mPrototype.mName = name;
+            mName = checkName(name);
             return this;
         }
 
@@ -466,7 +494,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public @NonNull Builder setDescription(@NonNull String description) {
-            mPrototype.mDescription = description;
+            mDescription = description;
             return this;
         }
 
@@ -478,7 +506,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public @NonNull Builder setInfoIntent(@NonNull PendingIntent infoIntent) {
-            mPrototype.mInfoIntent = infoIntent;
+            mInfoIntent = infoIntent;
             return this;
         }
 
@@ -489,7 +517,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public @NonNull Builder setCapabilities(@NonNull PrinterCapabilitiesInfo capabilities) {
-            mPrototype.mCapabilities = capabilities;
+            mCapabilities = capabilities;
             return this;
         }
 
@@ -499,13 +527,9 @@ public final class PrinterInfo implements Parcelable {
          * @return A new {@link PrinterInfo}.
          */
         public @NonNull PrinterInfo build() {
-            return mPrototype;
-        }
-
-        private boolean isValidStatus(int status) {
-            return (status == STATUS_IDLE
-                    || status == STATUS_BUSY
-                    || status == STATUS_UNAVAILABLE);
+            return new PrinterInfo(mPrinterId, mName, mStatus, mIconResourceId,
+                    mHasCustomPrinterIcon, mDescription, mInfoIntent, mCapabilities,
+                    mCustomPrinterIconGen);
         }
 
         /**
@@ -517,7 +541,7 @@ public final class PrinterInfo implements Parcelable {
          * @hide
          */
         public @NonNull Builder incCustomPrinterIconGen() {
-            mPrototype.mCustomPrinterIconGen++;
+            mCustomPrinterIconGen++;
             return this;
         }
     }
