@@ -863,8 +863,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         private void throwIfPrinterIdTampered(ComponentName serviceName, PrinterId printerId) {
-            if (printerId == null || printerId.getServiceName() == null
-                    || !printerId.getServiceName().equals(serviceName)) {
+            if (printerId == null || !printerId.getServiceName().equals(serviceName)) {
                 throw new IllegalArgumentException("Invalid printer id: " + printerId);
             }
         }

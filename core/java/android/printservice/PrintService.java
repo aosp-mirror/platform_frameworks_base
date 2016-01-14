@@ -30,6 +30,8 @@ import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -346,6 +348,7 @@ public abstract class PrintService extends Service {
      */
     public final PrinterId generatePrinterId(String localId) {
         throwIfNotCalledOnMainThread();
+        localId = Preconditions.checkNotNull(localId, "localId cannot be null");
         return new PrinterId(new ComponentName(getPackageName(),
                 getClass().getName()), localId);
     }
