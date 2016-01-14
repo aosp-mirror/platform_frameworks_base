@@ -70,12 +70,10 @@ Policy &amp; Terms of Service</a>.</p>
 restrictions. Such services include:</p>
 
 <dl>
-  <dt>Eclipse Android Developer Tools Plugin</dt>
-    <dd>If you're developing apps with the Eclipse IDE, we offer a free plugin called the
-<a href="{@docRoot}tools/sdk/eclipse-adt.html">Android Developer Tools</a> (ADT) to speed up your
-development and debugging. Certain code within the ADT plugin and other packages available
-from the SDK Manager require that you agree to terms and conditions for use, reproduction and
-distribution upon installation.</dd>
+  <dt>Android Studio</dt>
+    <dd>Android Studio and other packages available from the SDK manager require that you agree
+to terms and conditions
+for use, reproduction and distribution upon installation.</dd>
 
   <dt>Google Play</dt>
     <dd>Google Play is a publicly available service through which you can distribute your apps for
