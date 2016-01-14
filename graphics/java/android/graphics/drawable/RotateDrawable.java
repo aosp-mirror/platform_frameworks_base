@@ -204,11 +204,13 @@ public class RotateDrawable extends DrawableWrapper {
 
     /**
      * Sets the X position around which the drawable is rotated.
+     * <p>
+     * If the X pivot is relative (as specified by
+     * {@link #setPivotXRelative(boolean)}), then the position represents a
+     * fraction of the drawable width. Otherwise, the position represents an
+     * absolute value in pixels.
      *
-     * @param pivotX X position around which to rotate. If the X pivot is
-     *            relative, the position represents a fraction of the drawable
-     *            width. Otherwise, the position represents an absolute value in
-     *            pixels.
+     * @param pivotX X position around which to rotate
      * @see #setPivotXRelative(boolean)
      * @attr ref android.R.styleable#RotateDrawable_pivotX
      */
@@ -254,11 +256,13 @@ public class RotateDrawable extends DrawableWrapper {
 
     /**
      * Sets the Y position around which the drawable is rotated.
+     * <p>
+     * If the Y pivot is relative (as specified by
+     * {@link #setPivotYRelative(boolean)}), then the position represents a
+     * fraction of the drawable height. Otherwise, the position represents an
+     * absolute value in pixels.
      *
-     * @param pivotY Y position around which to rotate. If the Y pivot is
-     *            relative, the position represents a fraction of the drawable
-     *            height. Otherwise, the position represents an absolute value
-     *            in pixels.
+     * @param pivotY Y position around which to rotate
      * @see #getPivotY()
      * @attr ref android.R.styleable#RotateDrawable_pivotY
      */
