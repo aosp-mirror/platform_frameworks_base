@@ -360,6 +360,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         updateDimFromTaskProgress();
     }
 
+    public TaskViewHeader getHeaderView() {
+        return mHeaderView;
+    }
+
     /** Returns the current task progress. */
     public float getTaskProgress() {
         return mTaskProgress;

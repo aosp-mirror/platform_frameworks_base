@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,17 +23,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.support.v4.graphics.ColorUtils;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 
@@ -51,12 +54,12 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
-
 /* The task bar view */
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
     private static final float HIGHLIGHT_LIGHTNESS_INCREMENT = 0.125f;
+    private static final long FOCUS_INDICATOR_INTERVAL_MS = 30;
 
     /**
      * A color drawable that draws a slight highlight at the top to help it stand out.
@@ -124,6 +127,7 @@ public class TaskViewHeader extends FrameLayout
     ImageView mIconView;
     TextView mTitleView;
     int mMoveTaskTargetStackId = INVALID_STACK_ID;
+    ProgressBar mFocusTimerIndicator;
 
     // Header drawables
     Rect mTaskViewRect = new Rect();
@@ -144,6 +148,10 @@ public class TaskViewHeader extends FrameLayout
 
     Interpolator mFastOutSlowInInterpolator;
     Interpolator mFastOutLinearInInterpolator;
+
+    long mFocusIndicatorProgress;
+    private CountDownTimer mFocusTimerCountDown;
+    long mFocusTimerDuration;
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -182,6 +190,7 @@ public class TaskViewHeader extends FrameLayout
         setBackground(mBackground);
         mDimLayerPaint.setColor(Color.argb(255, 0, 0, 0));
         mDimLayerPaint.setAntiAlias(true);
+        mFocusTimerDuration = res.getInteger(R.integer.recents_auto_advance_duration);
     }
 
     @Override
@@ -193,6 +202,7 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         mDismissButton.setOnClickListener(this);
         mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
+        mFocusTimerIndicator = (ProgressBar) findViewById(R.id.focus_timer_indicator);
 
         // Hide the backgrounds if they are ripple drawables
         if (mIconView.getBackground() instanceof RippleDrawable) {
@@ -268,6 +278,41 @@ public class TaskViewHeader extends FrameLayout
                 mCornerRadius, mCornerRadius, mDimLayerPaint);
     }
 
+    /** Starts the focus timer. */
+    public void startFocusTimerIndicator() {
+        mFocusTimerIndicator.setVisibility(View.VISIBLE);
+        mFocusTimerIndicator.setMax((int) mFocusTimerDuration);
+        if (mFocusTimerCountDown == null) {
+            mFocusTimerCountDown = new CountDownTimer(mFocusTimerDuration,
+                    FOCUS_INDICATOR_INTERVAL_MS) {
+                public void onTick(long millisUntilFinished) {
+                    mFocusTimerIndicator.setProgress((int) millisUntilFinished);
+                }
+
+                public void onFinish() {
+                    mFocusTimerIndicator.setProgress((int) mFocusTimerDuration);
+                }
+            }.start();
+        } else {
+            mFocusTimerCountDown.start();
+        }
+    }
+
+    /** Cancels the focus timer. */
+    public void cancelFocusTimerIndicator() {
+        if (mFocusTimerCountDown != null && mFocusTimerIndicator != null) {
+            mFocusTimerCountDown.cancel();
+            mFocusTimerIndicator.setProgress(0);
+            mFocusTimerIndicator.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    /** Returns the secondary color for a primary color. */
+    int getSecondaryColor(int primaryColor, boolean useLightOverlayColor) {
+        int overlayColor = useLightOverlayColor ? Color.WHITE : Color.BLACK;
+        return Utilities.getColorWithOverlay(primaryColor, overlayColor, 0.8f);
+    }
+
     /**
      * Sets the dim alpha, only used when we are not using hardware layers.
      * (see RecentsConfiguration.useHardwareLayers)
@@ -330,6 +375,11 @@ public class TaskViewHeader extends FrameLayout
             mMoveTaskButton.setOnClickListener(this);
         }
 
+        mFocusTimerIndicator.getProgressDrawable()
+                .setColorFilter(
+                        getSecondaryColor(t.colorPrimary, t.useLightOnPrimaryColor),
+                        PorterDuff.Mode.SRC_IN);
+
         // In accessibility, a single click on the focused app info button will show it
         if (ssp.isTouchExplorationEnabled()) {
             mIconView.setOnClickListener(this);
@@ -359,7 +409,10 @@ public class TaskViewHeader extends FrameLayout
         }
     }
 
-    /** Mark this task view that the user does has not interacted with the stack after a certain time. */
+    /**
+     * Mark this task view that the user does has not interacted with the stack after a certain
+     * time.
+     */
     void setNoUserInteractionState() {
         if (mDismissButton.getVisibility() != View.VISIBLE) {
             mDismissButton.animate().cancel();
@@ -368,7 +421,10 @@ public class TaskViewHeader extends FrameLayout
         }
     }
 
-    /** Resets the state tracking that the user has not interacted with the stack after a certain time. */
+    /**
+     * Resets the state tracking that the user has not interacted with the stack after a certain
+     * time.
+     */
     void resetNoUserInteractionState() {
         mDismissButton.setVisibility(View.INVISIBLE);
     }

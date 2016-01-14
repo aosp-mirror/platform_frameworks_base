@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -113,16 +113,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
     // The trigger to automatically launch the current task
-    private DozeTrigger mIterateTrigger = new DozeTrigger(500, new Runnable() {
-        @Override
-        public void run() {
-            dismissRecentsToFocusedTask();
-        }
-    });
+    private int mFocusTimerDuration;
+    private DozeTrigger mIterateTrigger;
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
-     * last activity launch state.  Generally we always launch home when we exit Recents rather than
+     * last activity launch state. Generally we always launch home when we exit Recents rather than
      * just finishing the activity since we don't know what is behind Recents in the task stack.
      */
     class FinishRecentsRunnable implements Runnable {
@@ -218,8 +214,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         boolean animateStatusBarScrim = launchState.launchedFromHome;
         boolean hasNavBarScrim = (stack.getStackTaskCount() > 0) && !config.hasTransposedNavBar;
         boolean animateNavBarScrim = true;
-        mScrimViews.prepareEnterRecentsAnimation(hasStatusBarScrim, animateStatusBarScrim, hasNavBarScrim,
-                animateNavBarScrim);
+        mScrimViews.prepareEnterRecentsAnimation(hasStatusBarScrim, animateStatusBarScrim,
+                hasNavBarScrim, animateNavBarScrim);
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
         if (launchState.launchedWithAltTab) {
@@ -356,6 +352,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+
+        mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
+        mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
+            @Override
+            public void run() {
+                dismissRecentsToFocusedTask();
+            }
+        });
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -543,7 +547,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                     if (backward) {
                         EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
                     } else {
-                        EventBus.getDefault().send(new FocusNextTaskViewEvent());
+                        EventBus.getDefault().send(
+                                new FocusNextTaskViewEvent(false /* showTimerIndicator */));
                     }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
 
@@ -555,7 +560,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_UP: {
-                EventBus.getDefault().send(new FocusNextTaskViewEvent());
+                EventBus.getDefault().send(
+                        new FocusNextTaskViewEvent(false /* showTimerIndicator */));
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_DOWN: {
@@ -579,7 +585,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     @Override
     public void onUserInteraction() {
-        EventBus.getDefault().send(new UserInteractionEvent());
+        final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        EventBus.getDefault().send(new UserInteractionEvent(debugFlags.isFastToggleRecentsEnabled()
+                && debugFlags.isFastToggleIndicatorEnabled()));
     }
 
     @Override
@@ -603,11 +611,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     public final void onBusEvent(IterateRecentsEvent event) {
         if (!dismissHistory()) {
+            final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+
             // Focus the next task
-            EventBus.getDefault().send(new FocusNextTaskViewEvent());
+            EventBus.getDefault().send(
+                    new FocusNextTaskViewEvent(debugFlags.isFastToggleRecentsEnabled()
+                            && debugFlags.isFastToggleIndicatorEnabled()));
 
             // Start dozing after the recents button is clicked
-            RecentsDebugFlags debugFlags = Recents.getDebugFlags();
             if (debugFlags.isFastToggleRecentsEnabled()) {
                 if (!mIterateTrigger.isDozing()) {
                     mIterateTrigger.startDozing();
@@ -701,7 +712,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         intent.setComponent(intent.resolveActivity(getPackageManager()));
         TaskStackBuilder.create(this)
                 .addNextIntentWithParentStack(intent).startActivities(null,
-                new UserHandle(event.task.key.userId));
+                        new UserHandle(event.task.key.userId));
 
         // Keep track of app-info invocations
         MetricsLogger.count(this, "overview_app_info", 1);
