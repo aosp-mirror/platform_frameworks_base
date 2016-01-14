@@ -32,6 +32,7 @@ import android.util.SparseArray;
 import com.android.internal.util.AsyncChannel;
 import com.android.server.ConnectivityService;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.ApfFilter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -163,6 +164,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Used by ConnectivityService to keep track of 464xlat.
     public Nat464Xlat clatd;
 
+    public ApfFilter apfFilter;
+
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc, NetworkRequest defaultRequest, ConnectivityService connService) {
@@ -175,6 +178,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         currentScore = score;
         networkMonitor = connService.createNetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
+        apfFilter.maybeInstall(connService, this);
     }
 
     /**
