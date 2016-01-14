@@ -10202,16 +10202,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true,
                 "setPackageSuspended for user " + userId);
 
+        // TODO: investigate and add more restrictions for suspending crucial packages.
+        if (isPackageDeviceAdmin(packageName, userId)) {
+            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
+                    + "\": has active device admin");
+            return false;
+        }
+
         long callingId = Binder.clearCallingIdentity();
         try {
             boolean changed = false;
             boolean success = false;
+            int appId = -1;
             synchronized (mPackages) {
                 final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                 if (pkgSetting != null) {
                     if (pkgSetting.getSuspended(userId) != suspended) {
                         pkgSetting.setSuspended(suspended, userId);
                         mSettings.writePackageRestrictionsLPr(userId);
+                        appId = pkgSetting.appId;
                         changed = true;
                     }
                     success = true;
@@ -10219,10 +10228,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (changed) {
-                // TODO:
-                // * maybe kill application if suspended
-                // * hide suspended app from recents
                 sendPackagesSuspendedForUser(new String[]{packageName}, userId, suspended);
+                if (suspended) {
+                    killApplication(packageName, UserHandle.getUid(userId, appId),
+                            "suspending package");
+                }
             }
             return success;
         } finally {

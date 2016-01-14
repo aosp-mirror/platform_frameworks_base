@@ -5,6 +5,7 @@ import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FLAG_ONLY_IF_NEEDED;
+import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
@@ -42,6 +43,7 @@ import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -224,6 +226,17 @@ class ActivityStarter {
                 Slog.w(TAG, "Unable to find app for caller " + caller
                         + " (pid=" + callingPid + ") when starting: "
                         + intent.toString());
+                err = ActivityManager.START_PERMISSION_DENIED;
+            }
+        }
+
+        if (aInfo != null) {
+            if ((aInfo.applicationInfo.flags & FLAG_SUSPENDED) != 0) {
+                Slog.w(TAG, "Application \"" + aInfo.applicationInfo.packageName
+                        + "\" is suspended. Refusing to start: " + intent.toString());
+                // TODO: show a dialog/activity informing the user that the application is suspended 
+                // and redirect the launch to it. Do not return START_PERMISSION_DENIED because 
+                // it is wrong.
                 err = ActivityManager.START_PERMISSION_DENIED;
             }
         }
