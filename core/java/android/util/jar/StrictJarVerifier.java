@@ -32,8 +32,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import android.util.ArraySet;
+import android.util.apk.ApkSignatureSchemeV2Verifier;
 import libcore.io.Base64;
 import sun.security.jca.Providers;
 import sun.security.pkcs.PKCS7;
@@ -351,6 +355,43 @@ class StrictJarVerifier {
             im.readEntries(entries, null);
         } catch (IOException e) {
             return;
+        }
+
+        // Check whether APK Signature Scheme v2 signature was stripped.
+        String apkSignatureSchemeIdList =
+                attributes.getValue(
+                        ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_NAME);
+        if (apkSignatureSchemeIdList != null) {
+            // This field contains a comma-separated list of APK signature scheme IDs which were
+            // used to sign this APK. If an ID is known to us, it means signatures of that scheme
+            // were stripped from the APK because otherwise we wouldn't have fallen back to
+            // verifying the APK using the JAR signature scheme.
+            boolean v2SignatureGenerated = false;
+            StringTokenizer tokenizer = new StringTokenizer(apkSignatureSchemeIdList, ",");
+            while (tokenizer.hasMoreTokens()) {
+                String idText = tokenizer.nextToken().trim();
+                if (idText.isEmpty()) {
+                    continue;
+                }
+                int id;
+                try {
+                    id = Integer.parseInt(idText);
+                } catch (Exception ignored) {
+                    continue;
+                }
+                if (id == ApkSignatureSchemeV2Verifier.SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID) {
+                    // This APK was supposed to be signed with APK Signature Scheme v2 but no such
+                    // signature was found.
+                    v2SignatureGenerated = true;
+                    break;
+                }
+            }
+
+            if (v2SignatureGenerated) {
+                throw new SecurityException(signatureFile + " indicates " + jarName + " is signed"
+                        + " using APK Signature Scheme v2, but no such signature was found."
+                        + " Signature stripped?");
+            }
         }
 
         // Do we actually have any signatures to look at?
