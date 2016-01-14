@@ -3043,7 +3043,7 @@ public class Intent implements Parcelable, Cloneable {
      * This is a protected intent that can only be sent by the system.
      * </p>
      * <p class="note">
-     * This requires the RECEIVE_MEDIA_RESOURCE_USAGE permission.
+     * This requires {@link android.Manifest.permission#RECEIVE_MEDIA_RESOURCE_USAGE} permission.
      * </p>
      *
      * @hide
@@ -4097,10 +4097,10 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_QUIET_MODE = "android.intent.extra.QUIET_MODE";
 
     /**
-     * Used as an int extra field in {@link android.content.Intent#ACTION_MEDIA_RESOURCE_GRANTED}
+     * Used as an int extra field in {@link #ACTION_MEDIA_RESOURCE_GRANTED}
      * intents to specify the resource type granted. Possible values are
-     * {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC} or
-     * {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC}.
+     * {@link #EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC} or
+     * {@link #EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC}.
      *
      * @hide
      */
@@ -4108,7 +4108,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.MEDIA_RESOURCE_TYPE";
 
     /**
-     * Used as an int value for {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE}
+     * Used as an int value for {@link #EXTRA_MEDIA_RESOURCE_TYPE}
      * to represent that a video codec is allowed to use.
      *
      * @hide
@@ -4116,7 +4116,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final int EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC = 0;
 
     /**
-     * Used as an int value for {@link android.content.Intent#EXTRA_MEDIA_RESOURCE_TYPE}
+     * Used as an int value for {@link #EXTRA_MEDIA_RESOURCE_TYPE}
      * to represent that a audio codec is allowed to use.
      *
      * @hide
