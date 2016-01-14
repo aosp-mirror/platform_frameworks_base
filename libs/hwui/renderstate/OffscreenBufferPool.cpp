@@ -34,29 +34,22 @@ namespace uirenderer {
 
 OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
         uint32_t viewportWidth, uint32_t viewportHeight)
-        : renderState(renderState)
+        : GpuMemoryTracker(GpuObjectType::OffscreenBuffer)
+        , renderState(renderState)
         , viewportWidth(viewportWidth)
         , viewportHeight(viewportHeight)
         , texture(caches) {
-    texture.width = computeIdealDimension(viewportWidth);
-    texture.height = computeIdealDimension(viewportHeight);
+    uint32_t width = computeIdealDimension(viewportWidth);
+    uint32_t height = computeIdealDimension(viewportHeight);
+    texture.resize(width, height, GL_RGBA);
     texture.blend = true;
-
-    caches.textureState().activateTexture(0);
-    glGenTextures(1, &texture.id);
-    caches.textureState().bindTexture(GL_TEXTURE_2D, texture.id);
-
-    texture.setWrap(GL_CLAMP_TO_EDGE, false, false, GL_TEXTURE_2D);
+    texture.setWrap(GL_CLAMP_TO_EDGE);
     // not setting filter on texture, since it's set when drawing, based on transform
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture.width, texture.height, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 }
 
 Rect OffscreenBuffer::getTextureCoordinates() {
-    const float texX = 1.0f / float(texture.width);
-    const float texY = 1.0f / float(texture.height);
+    const float texX = 1.0f / static_cast<float>(texture.width());
+    const float texY = 1.0f / static_cast<float>(texture.height());
     return Rect(0, viewportHeight * texY, viewportWidth * texX, 0);
 }
 
@@ -69,8 +62,8 @@ void OffscreenBuffer::updateMeshFromRegion() {
     size_t count;
     const android::Rect* rects = safeRegion.getArray(&count);
 
-    const float texX = 1.0f / float(texture.width);
-    const float texY = 1.0f / float(texture.height);
+    const float texX = 1.0f / float(texture.width());
+    const float texY = 1.0f / float(texture.height());
 
     FatVector<TextureVertex, 64> meshVector(count * 4); // uses heap if more than 64 vertices needed
     TextureVertex* mesh = &meshVector[0];
@@ -157,8 +150,8 @@ OffscreenBuffer* OffscreenBufferPool::get(RenderState& renderState,
 OffscreenBuffer* OffscreenBufferPool::resize(OffscreenBuffer* layer,
         const uint32_t width, const uint32_t height) {
     RenderState& renderState = layer->renderState;
-    if (layer->texture.width == OffscreenBuffer::computeIdealDimension(width)
-            && layer->texture.height == OffscreenBuffer::computeIdealDimension(height)) {
+    if (layer->texture.width() == OffscreenBuffer::computeIdealDimension(width)
+            && layer->texture.height() == OffscreenBuffer::computeIdealDimension(height)) {
         // resize in place
         layer->viewportWidth = width;
         layer->viewportHeight = height;

@@ -217,7 +217,7 @@ static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRender
             .setMeshTexturedUnitQuad(nullptr)
             .setFillShadowTexturePaint(*texture, textShadow.color, *op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
+            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width(), sy + texture->height()))
             .build();
     renderer.renderGlop(state, glop);
 }
@@ -337,7 +337,7 @@ static void renderConvexPath(BakedOpRenderer& renderer, const BakedOpState& stat
 
 static void renderPathTexture(BakedOpRenderer& renderer, const BakedOpState& state,
         PathTexture& texture, const RecordedOp& op) {
-    Rect dest(texture.width, texture.height);
+    Rect dest(texture.width(), texture.height());
     dest.translate(texture.left - texture.offset,
             texture.top - texture.offset);
     Glop glop;
@@ -399,7 +399,7 @@ void BakedOpDispatcher::onBitmapOp(BakedOpRenderer& renderer, const BitmapOp& op
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, op.paint, state.alpha)
             .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewMapUnitToRectSnap(Rect(texture->width, texture->height))
+            .setModelViewMapUnitToRectSnap(Rect(texture->width(), texture->height()))
             .build();
     renderer.renderGlop(state, glop);
 }
@@ -483,10 +483,10 @@ void BakedOpDispatcher::onBitmapRectOp(BakedOpRenderer& renderer, const BitmapRe
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    Rect uv(std::max(0.0f, op.src.left / texture->width),
-            std::max(0.0f, op.src.top / texture->height),
-            std::min(1.0f, op.src.right / texture->width),
-            std::min(1.0f, op.src.bottom / texture->height));
+    Rect uv(std::max(0.0f, op.src.left / texture->width()),
+            std::max(0.0f, op.src.top / texture->height()),
+            std::min(1.0f, op.src.right / texture->width()),
+            std::min(1.0f, op.src.bottom / texture->height()));
 
     const int textureFillFlags = (op.bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;

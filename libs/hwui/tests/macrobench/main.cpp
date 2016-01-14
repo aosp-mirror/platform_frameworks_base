@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
+#include <pthread.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>

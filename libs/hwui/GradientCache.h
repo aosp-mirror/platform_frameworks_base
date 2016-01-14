@@ -143,7 +143,8 @@ private:
     Texture* addLinearGradient(GradientCacheEntry& gradient,
             uint32_t* colors, float* positions, int count);
 
-    void generateTexture(uint32_t* colors, float* positions, Texture* texture);
+    void generateTexture(uint32_t* colors, float* positions,
+            const uint32_t width, const uint32_t height, Texture* texture);
 
     struct GradientInfo {
         uint32_t width;

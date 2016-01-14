@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-#include <utils/Log.h>
-
 #include "Caches.h"
 #include "Texture.h"
+#include "utils/TraceUtils.h"
+
+#include <utils/Log.h>
+
+#include <SkCanvas.h>
 
 namespace android {
 namespace uirenderer {
+
+static int bytesPerPixel(GLint glFormat) {
+    switch (glFormat) {
+    case GL_ALPHA:
+        return 1;
+    case GL_RGB:
+        return 3;
+    case GL_RGBA:
+    default:
+        return 4;
+    }
+}
 
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force,
         GLenum renderTarget) {
@@ -32,7 +47,7 @@ void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force
         mWrapT = wrapT;
 
         if (bindTexture) {
-            mCaches.textureState().bindTexture(renderTarget, id);
+            mCaches.textureState().bindTexture(renderTarget, mId);
         }
 
         glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
@@ -50,7 +65,7 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
         mMagFilter = mag;
 
         if (bindTexture) {
-            mCaches.textureState().bindTexture(renderTarget, id);
+            mCaches.textureState().bindTexture(renderTarget, mId);
         }
 
         if (mipMap && min == GL_LINEAR) min = GL_LINEAR_MIPMAP_LINEAR;
@@ -60,8 +75,189 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
     }
 }
 
-void Texture::deleteTexture() const {
-    mCaches.textureState().deleteTexture(id);
+void Texture::deleteTexture() {
+    mCaches.textureState().deleteTexture(mId);
+    mId = 0;
+}
+
+bool Texture::updateSize(uint32_t width, uint32_t height, GLint format) {
+    if (mWidth == width && mHeight == height && mFormat == format) {
+        return false;
+    }
+    mWidth = width;
+    mHeight = height;
+    mFormat = format;
+    notifySizeChanged(mWidth * mHeight * bytesPerPixel(mFormat));
+    return true;
+}
+
+void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
+        GLenum format, GLenum type, const void* pixels) {
+    bool needsAlloc = updateSize(width, height, internalformat);
+    if (!needsAlloc && !pixels) {
+        return;
+    }
+    mCaches.textureState().activateTexture(0);
+    if (!mId) {
+        glGenTextures(1, &mId);
+        needsAlloc = true;
+    }
+    mCaches.textureState().bindTexture(GL_TEXTURE_2D, mId);
+    if (needsAlloc) {
+        glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
+                format, type, pixels);
+    } else {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
+                format, type, pixels);
+    }
+}
+
+static void uploadToTexture(bool resize, GLenum format, GLenum type, GLsizei stride, GLsizei bpp,
+        GLsizei width, GLsizei height, const GLvoid * data) {
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, bpp);
+    const bool useStride = stride != width
+            && Caches::getInstance().extensions().hasUnpackRowLength();
+    if ((stride == width) || useStride) {
+        if (useStride) {
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+        }
+
+        if (resize) {
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, data);
+        } else {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
+        }
+
+        if (useStride) {
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        }
+    } else {
+        //  With OpenGL ES 2.0 we need to copy the bitmap in a temporary buffer
+        //  if the stride doesn't match the width
+
+        GLvoid * temp = (GLvoid *) malloc(width * height * bpp);
+        if (!temp) return;
+
+        uint8_t * pDst = (uint8_t *)temp;
+        uint8_t * pSrc = (uint8_t *)data;
+        for (GLsizei i = 0; i < height; i++) {
+            memcpy(pDst, pSrc, width * bpp);
+            pDst += width * bpp;
+            pSrc += stride * bpp;
+        }
+
+        if (resize) {
+            glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, temp);
+        } else {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, temp);
+        }
+
+        free(temp);
+    }
+}
+
+static void uploadSkBitmapToTexture(const SkBitmap& bitmap,
+        bool resize, GLenum format, GLenum type) {
+    uploadToTexture(resize, format, type, bitmap.rowBytesAsPixels(), bitmap.bytesPerPixel(),
+            bitmap.width(), bitmap.height(), bitmap.getPixels());
+}
+
+static void colorTypeToGlFormatAndType(SkColorType colorType,
+        GLint* outFormat, GLint* outType) {
+    switch (colorType) {
+    case kAlpha_8_SkColorType:
+        *outFormat = GL_ALPHA;
+        *outType = GL_UNSIGNED_BYTE;
+        break;
+    case kRGB_565_SkColorType:
+        *outFormat = GL_RGB;
+        *outType = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    // ARGB_4444 and Index_8 are both upconverted to RGBA_8888
+    case kARGB_4444_SkColorType:
+    case kIndex_8_SkColorType:
+    case kN32_SkColorType:
+        *outFormat = GL_RGBA;
+        *outType = GL_UNSIGNED_BYTE;
+        break;
+    default:
+        LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", colorType);
+        break;
+    }
+}
+
+void Texture::upload(const SkBitmap& bitmap) {
+    SkAutoLockPixels alp(bitmap);
+
+    if (!bitmap.readyToDraw()) {
+        ALOGE("Cannot generate texture from bitmap");
+        return;
+    }
+
+    ATRACE_FORMAT("Upload %ux%u Texture", bitmap.width(), bitmap.height());
+
+    // We could also enable mipmapping if both bitmap dimensions are powers
+    // of 2 but we'd have to deal with size changes. Let's keep this simple
+    const bool canMipMap = mCaches.extensions().hasNPot();
+
+    // If the texture had mipmap enabled but not anymore,
+    // force a glTexImage2D to discard the mipmap levels
+    bool needsAlloc = canMipMap && mipMap && !bitmap.hasHardwareMipMap();
+
+    if (!mId) {
+        glGenTextures(1, &mId);
+        needsAlloc = true;
+    }
+
+    GLint format, type;
+    colorTypeToGlFormatAndType(bitmap.colorType(), &format, &type);
+
+    if (updateSize(bitmap.width(), bitmap.height(), format)) {
+        needsAlloc = true;
+    }
+
+    blend = !bitmap.isOpaque();
+    mCaches.textureState().bindTexture(mId);
+
+    if (CC_UNLIKELY(bitmap.colorType() == kARGB_4444_SkColorType
+            || bitmap.colorType() == kIndex_8_SkColorType)) {
+        SkBitmap rgbaBitmap;
+        rgbaBitmap.allocPixels(SkImageInfo::MakeN32(mWidth, mHeight,
+                bitmap.alphaType()));
+        rgbaBitmap.eraseColor(0);
+
+        SkCanvas canvas(rgbaBitmap);
+        canvas.drawBitmap(bitmap, 0.0f, 0.0f, nullptr);
+
+        uploadSkBitmapToTexture(rgbaBitmap, needsAlloc, format, type);
+    } else {
+        uploadSkBitmapToTexture(bitmap, needsAlloc, format, type);
+    }
+
+    if (canMipMap) {
+        mipMap = bitmap.hasHardwareMipMap();
+        if (mipMap) {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+    }
+
+    if (mFirstFilter) {
+        setFilter(GL_NEAREST);
+    }
+
+    if (mFirstWrap) {
+        setWrap(GL_CLAMP_TO_EDGE);
+    }
+}
+
+void Texture::wrap(GLuint id, uint32_t width, uint32_t height, GLint format) {
+    mId = id;
+    mWidth = width;
+    mHeight = height;
+    mFormat = format;
+    // We're wrapping an existing texture, so don't double count this memory
+    notifySizeChanged(0);
 }
 
 }; // namespace uirenderer

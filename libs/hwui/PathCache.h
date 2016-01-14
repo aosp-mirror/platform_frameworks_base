@@ -61,13 +61,11 @@ class Caches;
  */
 struct PathTexture: public Texture {
     PathTexture(Caches& caches, float left, float top,
-            float offset, int width, int height, int generation)
+            float offset, int generation)
             : Texture(caches)
             , left(left)
             , top(top)
             , offset(offset) {
-        this->width = width;
-        this->height = height;
         this->generation = generation;
     }
     PathTexture(Caches& caches, int generation)

@@ -166,7 +166,8 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType a
         if (canCache) {
             texture = new Texture(Caches::getInstance());
             texture->bitmapSize = size;
-            Caches::getInstance().textureState().generateTexture(bitmap, texture, false);
+            texture->generation = bitmap->getGenerationID();
+            texture->upload(*bitmap);
 
             mSize += size;
             TEXTURE_LOGD("TextureCache::get: create texture(%p): name, size, mSize = %d, %d, %d",
@@ -179,7 +180,8 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType a
     } else if (!texture->isInUse && bitmap->getGenerationID() != texture->generation) {
         // Texture was in the cache but is dirty, re-upload
         // TODO: Re-adjust the cache size if the bitmap's dimensions have changed
-        Caches::getInstance().textureState().generateTexture(bitmap, texture, true);
+        texture->upload(*bitmap);
+        texture->generation = bitmap->getGenerationID();
     }
 
     return texture;
@@ -204,7 +206,8 @@ Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
         texture = new Texture(Caches::getInstance());
         texture->bitmapSize = size;
-        Caches::getInstance().textureState().generateTexture(bitmap, texture, false);
+        texture->upload(*bitmap);
+        texture->generation = bitmap->getGenerationID();
         texture->cleanup = true;
     }
 

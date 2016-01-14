@@ -185,7 +185,7 @@ void PathCache::operator()(PathDescription& entry, PathTexture*& texture) {
 
 void PathCache::removeTexture(PathTexture* texture) {
     if (texture) {
-        const uint32_t size = texture->width * texture->height;
+        const uint32_t size = texture->width() * texture->height();
 
         // If there is a pending task we must wait for it to return
         // before attempting our cleanup
@@ -209,9 +209,7 @@ void PathCache::removeTexture(PathTexture* texture) {
             ALOGD("Shape deleted, size = %d", size);
         }
 
-        if (texture->id) {
-            Caches::getInstance().textureState().deleteTexture(texture->id);
-        }
+        texture->deleteTexture();
         delete texture;
     }
 }
@@ -248,8 +246,7 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     drawPath(path, paint, bitmap, left, top, offset, width, height);
 
     PathTexture* texture = new PathTexture(Caches::getInstance(),
-            left, top, offset, width, height,
-            path->getGenerationID());
+            left, top, offset, path->getGenerationID());
     generateTexture(entry, &bitmap, texture);
 
     return texture;
@@ -262,7 +259,7 @@ void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
     // Note here that we upload to a texture even if it's bigger than mMaxSize.
     // Such an entry in mCache will only be temporary, since it will be evicted
     // immediately on trim, or on any other Path entering the cache.
-    uint32_t size = texture->width * texture->height;
+    uint32_t size = texture->width() * texture->height();
     mSize += size;
     PATH_LOGD("PathCache::get/create: name, size, mSize = %d, %d, %d",
             texture->id, size, mSize);
@@ -280,24 +277,8 @@ void PathCache::clear() {
 
 void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
     ATRACE_NAME("Upload Path Texture");
-    SkAutoLockPixels alp(bitmap);
-    if (!bitmap.readyToDraw()) {
-        ALOGE("Cannot generate texture from bitmap");
-        return;
-    }
-
-    glGenTextures(1, &texture->id);
-
-    Caches::getInstance().textureState().bindTexture(texture->id);
-    // Textures are Alpha8
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    texture->blend = true;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, texture->width, texture->height, 0,
-            GL_ALPHA, GL_UNSIGNED_BYTE, bitmap.getPixels());
-
+    texture->upload(bitmap);
     texture->setFilter(GL_LINEAR);
-    texture->setWrap(GL_CLAMP_TO_EDGE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,16 +301,12 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
     texture->left = left;
     texture->top = top;
     texture->offset = offset;
-    texture->width = width;
-    texture->height = height;
 
     if (width <= mMaxTextureSize && height <= mMaxTextureSize) {
         SkBitmap* bitmap = new SkBitmap();
         drawPath(&t->path, &t->paint, *bitmap, left, top, offset, width, height);
         t->setResult(bitmap);
     } else {
-        texture->width = 0;
-        texture->height = 0;
         t->setResult(nullptr);
     }
 }

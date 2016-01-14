@@ -187,13 +187,10 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs
         texture = new ShadowTexture(caches);
         texture->left = shadow.penX;
         texture->top = shadow.penY;
-        texture->width = shadow.width;
-        texture->height = shadow.height;
         texture->generation = 0;
         texture->blend = true;
 
         const uint32_t size = shadow.width * shadow.height;
-        texture->bitmapSize = size;
 
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
@@ -202,15 +199,11 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs
             }
         }
 
-        glGenTextures(1, &texture->id);
-
-        caches.textureState().bindTexture(texture->id);
         // Textures are Alpha8
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, texture->width, texture->height, 0,
+        texture->upload(GL_ALPHA, shadow.width, shadow.height,
                 GL_ALPHA, GL_UNSIGNED_BYTE, shadow.image);
-
         texture->setFilter(GL_LINEAR);
         texture->setWrap(GL_CLAMP_TO_EDGE);
 

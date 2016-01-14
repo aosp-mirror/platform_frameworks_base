@@ -53,6 +53,7 @@ hwui_src_files := \
     FrameInfoVisualizer.cpp \
     GammaFontRenderer.cpp \
     GlopBuilder.cpp \
+    GpuMemoryTracker.cpp \
     GradientCache.cpp \
     Image.cpp \
     Interpolator.cpp \
@@ -229,6 +230,7 @@ LOCAL_SRC_FILES += \
     tests/unit/DamageAccumulatorTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
+    tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/VectorDrawableTests.cpp \

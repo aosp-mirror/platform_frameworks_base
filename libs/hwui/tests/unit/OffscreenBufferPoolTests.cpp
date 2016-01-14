@@ -36,8 +36,8 @@ TEST(OffscreenBuffer, construct) {
         EXPECT_EQ(49u, layer.viewportWidth);
         EXPECT_EQ(149u, layer.viewportHeight);
 
-        EXPECT_EQ(64u, layer.texture.width);
-        EXPECT_EQ(192u, layer.texture.height);
+        EXPECT_EQ(64u, layer.texture.width());
+        EXPECT_EQ(192u, layer.texture.height());
 
         EXPECT_EQ(64u * 192u * 4u, layer.getSizeInBytes());
     });
@@ -100,8 +100,8 @@ TEST(OffscreenBufferPool, resize) {
         ASSERT_EQ(layer, pool.resize(layer, 60u, 55u));
         EXPECT_EQ(60u, layer->viewportWidth);
         EXPECT_EQ(55u, layer->viewportHeight);
-        EXPECT_EQ(64u, layer->texture.width);
-        EXPECT_EQ(64u, layer->texture.height);
+        EXPECT_EQ(64u, layer->texture.width());
+        EXPECT_EQ(64u, layer->texture.height());
 
         // resized to use different object in pool
         auto layer2 = pool.get(thread.renderState(), 128u, 128u);
@@ -110,8 +110,8 @@ TEST(OffscreenBufferPool, resize) {
         ASSERT_EQ(layer2, pool.resize(layer, 120u, 125u));
         EXPECT_EQ(120u, layer2->viewportWidth);
         EXPECT_EQ(125u, layer2->viewportHeight);
-        EXPECT_EQ(128u, layer2->texture.width);
-        EXPECT_EQ(128u, layer2->texture.height);
+        EXPECT_EQ(128u, layer2->texture.width());
+        EXPECT_EQ(128u, layer2->texture.height());
 
         // original allocation now only thing in pool
         EXPECT_EQ(1u, pool.getCount());

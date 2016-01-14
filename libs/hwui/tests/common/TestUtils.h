@@ -192,6 +192,10 @@ public:
         renderthread::RenderThread::getInstance().queueAndWait(&task);
     }
 
+    static bool isRenderThreadRunning() {
+        return renderthread::RenderThread::hasInstance();
+    }
+
     static SkColor interpolateColor(float fraction, SkColor start, SkColor end);
 
     static void drawTextToCanvas(TestCanvas* canvas, const char* text,

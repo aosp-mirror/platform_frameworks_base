@@ -25,6 +25,7 @@
 #include "Debug.h"
 
 #include <vector>
+#include <unordered_map>
 
 namespace android {
 namespace uirenderer {

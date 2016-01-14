@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <GpuMemoryTracker.h>
 #include "renderstate/RenderState.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
-
 #include <algorithm>
 
 namespace android {
@@ -40,6 +40,8 @@ RenderState::~RenderState() {
 void RenderState::onGLContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
+    GpuMemoryTracker::onGLContextCreated();
+
     mBlend = new Blend();
     mMeshState = new MeshState();
     mScissor = new Scissor();
@@ -106,6 +108,8 @@ void RenderState::onGLContextDestroyed() {
     mScissor = nullptr;
     delete mStencil;
     mStencil = nullptr;
+
+    GpuMemoryTracker::onGLContextDestroyed();
 }
 
 void RenderState::flush(Caches::FlushMode mode) {
@@ -310,7 +314,7 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
             texture.texture->setFilter(texture.filter, true, false, texture.target);
         }
 
-        mCaches->textureState().bindTexture(texture.target, texture.texture->id);
+        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
         meshState().enableTexCoordsVertexArray();
         meshState().bindTexCoordsVertexPointer(force, vertices.texCoord, vertices.stride);
 

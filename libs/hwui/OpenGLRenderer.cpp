@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <GpuMemoryTracker.h>
 #include "OpenGLRenderer.h"
 
 #include "DeferredDisplayList.h"
@@ -200,6 +201,7 @@ bool OpenGLRenderer::finish() {
 
 #if DEBUG_MEMORY_USAGE
         mCaches.dumpMemoryUsage();
+        GPUMemoryTracker::dump();
 #else
         if (Properties::debugLevel & kDebugMemory) {
             mCaches.dumpMemoryUsage();
@@ -1497,7 +1499,7 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
             .setMeshTexturedUnitQuad(texture->uvMapper)
             .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(),  TransformFlags::None)
-            .setModelViewMapUnitToRectSnap(Rect(texture->width, texture->height))
+            .setModelViewMapUnitToRectSnap(Rect(texture->width(), texture->height()))
             .build();
     renderGlop(glop);
 }
@@ -1601,10 +1603,10 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
-    Rect uv(std::max(0.0f, src.left / texture->width),
-            std::max(0.0f, src.top / texture->height),
-            std::min(1.0f, src.right / texture->width),
-            std::min(1.0f, src.bottom / texture->height));
+    Rect uv(std::max(0.0f, src.left / texture->width()),
+            std::max(0.0f, src.top / texture->height()),
+            std::min(1.0f, src.right / texture->width()),
+            std::min(1.0f, src.bottom / texture->height()));
 
     const int textureFillFlags = (bitmap->colorType() == kAlpha_8_SkColorType)
             ? TextureFillFlags::IsAlphaMaskTexture : TextureFillFlags::None;
@@ -1977,7 +1979,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
             .setMeshTexturedUnitQuad(nullptr)
             .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(),  TransformFlags::None)
-            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
+            .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width(), sy + texture->height()))
             .build();
     renderGlop(glop);
 }
@@ -2316,7 +2318,7 @@ Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
 
 void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
         const SkPaint* paint) {
-    if (quickRejectSetupScissor(x, y, x + texture->width, y + texture->height)) {
+    if (quickRejectSetupScissor(x, y, x + texture->width(), y + texture->height())) {
         return;
     }
 
@@ -2326,7 +2328,7 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
             .setMeshTexturedUnitQuad(nullptr)
             .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
             .setTransform(*currentSnapshot(),  TransformFlags::None)
-            .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
+            .setModelViewMapUnitToRect(Rect(x, y, x + texture->width(), y + texture->height()))
             .build();
     renderGlop(glop);
 }

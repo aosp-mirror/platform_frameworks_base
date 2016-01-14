@@ -57,7 +57,7 @@ static inline void bindUniformColor(int slot, FloatColor color) {
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->textureState().bindTexture(texture->id);
+    caches->textureState().bindTexture(texture->id());
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -219,8 +219,8 @@ bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& model
 
     outData->bitmapSampler = (*textureUnit)++;
 
-    const float width = outData->bitmapTexture->width;
-    const float height = outData->bitmapTexture->height;
+    const float width = outData->bitmapTexture->width();
+    const float height = outData->bitmapTexture->height();
 
     description->hasBitmap = true;
     if (!caches.extensions().hasNPot()
