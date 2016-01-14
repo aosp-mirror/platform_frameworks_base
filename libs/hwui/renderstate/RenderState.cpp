@@ -209,17 +209,6 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
     }
 }
 
-void RenderState::requireGLContext() {
-    assertOnGLThread();
-    LOG_ALWAYS_FATAL_IF(!mRenderThread.eglManager().hasEglContext(),
-            "No GL context!");
-}
-
-void RenderState::assertOnGLThread() {
-    pthread_t curr = pthread_self();
-    LOG_ALWAYS_FATAL_IF(!pthread_equal(mThreadId, curr), "Wrong thread!");
-}
-
 class DecStrongTask : public renderthread::RenderTask {
 public:
     DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
@@ -235,7 +224,11 @@ private:
 };
 
 void RenderState::postDecStrong(VirtualLightRefBase* object) {
-    mRenderThread.queue(new DecStrongTask(object));
+    if (pthread_equal(mThreadId, pthread_self())) {
+        object->decStrong(nullptr);
+    } else {
+        mRenderThread.queue(new DecStrongTask(object));
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

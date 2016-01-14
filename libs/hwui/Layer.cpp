@@ -56,7 +56,6 @@ Layer::~Layer() {
     SkSafeUnref(colorFilter);
 
     if (stencil || fbo || texture.mId) {
-        renderState.requireGLContext();
         removeFbo();
         texture.deleteTexture();
     }
