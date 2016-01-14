@@ -21,6 +21,8 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
+import com.android.internal.util.Preconditions;
+
 import java.io.IOException;
 
 /**
@@ -164,12 +166,14 @@ public final class MtpDevice {
      * of the data and speed of the devices.
      *
      * @param objectHandle handle of the object to read
-     * @param offset Start index of reading range.
-     * @param size Size of reading range.
+     * @param offset Start index of reading range. It must be a non-negative value at most
+     *     0xffffffff.
+     * @param size Size of reading range. It must be a non-negative value at most 0xffffffff. If
+     *     0xffffffff is specified, the method obtains the full bytes of object.
      * @param buffer Array to write data.
      * @return Size of bytes that are actually read.
      */
-    public int getPartialObject(int objectHandle, int offset, int size, byte[] buffer)
+    public long getPartialObject(int objectHandle, long offset, long size, byte[] buffer)
             throws IOException {
         return native_get_partial_object(objectHandle, offset, size, buffer);
     }
@@ -340,8 +344,8 @@ public final class MtpDevice {
     private native int[] native_get_object_handles(int storageId, int format, int objectHandle);
     private native MtpObjectInfo native_get_object_info(int objectHandle);
     private native byte[] native_get_object(int objectHandle, int objectSize);
-    private native int native_get_partial_object(
-            int objectHandle, int offset, int objectSize, byte[] buffer) throws IOException;
+    private native long native_get_partial_object(
+            int objectHandle, long offset, long objectSize, byte[] buffer) throws IOException;
     private native byte[] native_get_thumbnail(int objectHandle);
     private native boolean native_delete_object(int objectHandle);
     private native long native_get_parent(int objectHandle);
