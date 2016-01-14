@@ -24,6 +24,8 @@ LOCAL_MODULE_TAGS := tests
 featureOf := FeatureSplitBase
 featureAfter := FeatureSplit1
 
+LOCAL_APK_LIBRARIES := $(featureOf)
+
 featureOfApk := $(call intermediates-dir-for,APPS,$(featureOf))/package.apk
 featureAfterApk := $(call intermediates-dir-for,APPS,$(featureAfter))/package.apk
 localRStamp := $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),,COMMON)/src/R.stamp
@@ -31,5 +33,6 @@ $(localRStamp): $(featureOfApk) $(featureAfterApk)
 
 LOCAL_AAPT_FLAGS := --feature-of $(featureOfApk)
 LOCAL_AAPT_FLAGS += --feature-after $(featureAfterApk)
+LOCAL_AAPT_FLAGS += --custom-package com.android.test.split.feature.two
 
 include $(BUILD_PACKAGE)

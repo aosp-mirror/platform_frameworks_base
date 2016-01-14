@@ -15,6 +15,7 @@
 -->
 
 <resources>
+    <string name="feature_string">Feature1</string>
     <item type="id" name="test_id2"/>
     <integer name="test_integer2">200</integer>
     <color name="test_color2">#00ff00</color>
