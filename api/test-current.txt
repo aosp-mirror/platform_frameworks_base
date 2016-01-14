@@ -38222,7 +38222,8 @@ package android.text.style {
     ctor public SuggestionSpan(android.os.Parcel);
     method public int describeContents();
     method public int getFlags();
-    method public java.lang.String getLocale();
+    method public deprecated java.lang.String getLocale();
+    method public java.util.Locale getLocaleObject();
     method public int getSpanTypeId();
     method public java.lang.String[] getSuggestions();
     method public void setFlags(int);
