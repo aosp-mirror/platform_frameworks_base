@@ -16,6 +16,7 @@
 
 package com.android.documentsui.services;
 
+import static android.os.SystemClock.elapsedRealtime;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.EXTRA_STACK;
 import static com.android.documentsui.Shared.asArrayList;
@@ -29,6 +30,7 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_DE
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Parcelable;
@@ -51,6 +53,10 @@ public final class FileOperations {
     private static final String TAG = "FileOperations";
 
     private FileOperations() {}
+
+    public static String createJobId() {
+        return String.valueOf(elapsedRealtime());
+    }
 
     /**
      * Tries to start the activity. Returns the job id.
@@ -78,7 +84,7 @@ public final class FileOperations {
      *
      * @param context Context for the intent.
      * @param jobId The id of the job to cancel.
-     *     Use {@link FileOperationService#createJobId} if you don't have one handy.
+     *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @param dstStack The copy destination stack.
      */
@@ -97,13 +103,13 @@ public final class FileOperations {
      *
      * @param context Context for the intent.
      * @param jobId A unique jobid for this job.
-     *     Use {@link FileOperationService#createJobId} if you don't have one handy.
+     *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @param destination The copy destination stack.
      */
     public static String copy(
             Activity activity, List<DocumentInfo> srcDocs, DocumentStack destination) {
-        String jobId = FileOperationService.createJobId();
+        String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'copy' operation id: " + jobId);
 
         Intent intent = createBaseIntent(OPERATION_COPY, activity, jobId, srcDocs, destination);
@@ -120,13 +126,13 @@ public final class FileOperations {
      * Starts the service for a move operation.
      *
      * @param jobId A unique jobid for this job.
-     *     Use {@link FileOperationService#createJobId} if you don't have one handy.
+     *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @param destination The move destination stack.
      */
     public static String move(
             Activity activity, List<DocumentInfo> srcDocs, DocumentStack destination) {
-        String jobId = FileOperationService.createJobId();
+        String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'move' operation id: " + jobId);
 
         Intent intent = createBaseIntent(OPERATION_MOVE, activity, jobId, srcDocs, destination);
@@ -143,13 +149,13 @@ public final class FileOperations {
      * Starts the service for a move operation.
      *
      * @param jobId A unique jobid for this job.
-     *     Use {@link FileOperationService#createJobId} if you don't have one handy.
+     *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @return Id of the job.
      */
     public static String delete(
             Activity activity, List<DocumentInfo> srcDocs, DocumentStack location) {
-        String jobId = FileOperationService.createJobId();
+        String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id: " + jobId);
 
         Intent intent = createBaseIntent(OPERATION_DELETE, activity, jobId, srcDocs, location);
@@ -162,15 +168,15 @@ public final class FileOperations {
      * Starts the service for a move operation.
      *
      * @param jobId A unique jobid for this job.
-     *     Use {@link FileOperationService#createJobId} if you don't have one handy.
+     *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @return Id of the job.
      */
     public static Intent createBaseIntent(
-            @OpType int operationType, Activity activity, String jobId,
+            @OpType int operationType, Context context, String jobId,
             List<DocumentInfo> srcDocs, DocumentStack localeStack) {
 
-        Intent intent = new Intent(activity, FileOperationService.class);
+        Intent intent = new Intent(context, FileOperationService.class);
         intent.putExtra(EXTRA_JOB_ID, jobId);
         intent.putParcelableArrayListExtra(
                 EXTRA_SRC_LIST, asArrayList(srcDocs));
