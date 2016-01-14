@@ -19,32 +19,33 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Typeface;
 import android.util.MathUtils;
-import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
-    private static final Typeface CONDENSED = Typeface.create("sans-serif-condensed",
-            Typeface.NORMAL);
-
     protected final Context mContext;
+    private QSIconView mIconView;
     private final int mTileSpacingPx;
     private int mTilePaddingTopPx;
 
     private TextView mLabel;
+    private ImageView mPadLock;
 
     public QSTileView(Context context, QSIconView icon) {
         super(context, icon);
 
         mContext = context;
+        mIconView = icon;
         final Resources res = context.getResources();
         mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
+
         setClipChildren(false);
 
         setClickable(true);
@@ -76,16 +77,10 @@ public class QSTileView extends QSTileBaseView {
 
     private void createLabel() {
         final Resources res = mContext.getResources();
-        mLabel = new TextView(mContext);
-        mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
-        mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
-        mLabel.setMinLines(2);
-        mLabel.setPadding(0, 0, 0, 0);
-        mLabel.setTypeface(CONDENSED);
-        mLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
-        mLabel.setClickable(false);
-        addView(mLabel);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
+        mLabel = (TextView) view.findViewById(R.id.tile_label);
+        mPadLock = (ImageView) view.findViewById(R.id.restricted_padlock);
+        addView(view);
     }
 
     public void init(OnClickListener clickPrimary, OnLongClickListener longClick) {
@@ -96,5 +91,7 @@ public class QSTileView extends QSTileBaseView {
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         mLabel.setText(state.label);
+        mLabel.setEnabled(!state.disabledByPolicy);
+        mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
     }
 }

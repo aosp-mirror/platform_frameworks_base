@@ -866,7 +866,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardMonitor = new KeyguardMonitor(mContext);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
-                    mHandler);
+                    mHandler, this);
             if (mUserSwitcherController.useFullscreenUserSwitcher()) {
                 mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
                         (ViewStub) mStatusBarWindow.findViewById(

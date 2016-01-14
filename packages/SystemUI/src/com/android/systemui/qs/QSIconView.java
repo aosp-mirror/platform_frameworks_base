@@ -81,7 +81,11 @@ public class QSIconView extends ViewGroup {
                 }
             }
         }
-
+        if (state.disabledByPolicy) {
+            iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
+        } else {
+            iv.clearColorFilter();
+        }
     }
 
     protected int getIconMeasureMode() {
