@@ -111,6 +111,7 @@ public class NotificationContentView extends FrameLayout {
     private boolean mBeforeN;
     private boolean mExpandable;
     private boolean mClipToActualHeight = true;
+    private ExpandableNotificationRow mContainingNotification;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -468,7 +469,8 @@ public class NotificationContentView extends FrameLayout {
     private int calculateVisibleType() {
         boolean noExpandedChild = mExpandedChild == null;
 
-        if (!noExpandedChild && mContentHeight == mExpandedChild.getHeight()) {
+        int viewHeight = Math.min(mContentHeight, mContainingNotification.getIntrinsicHeight());
+        if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
         if (mIsChildInGroup && !isGroupExpanded()) {
@@ -476,13 +478,13 @@ public class NotificationContentView extends FrameLayout {
         }
 
         if (mIsHeadsUp && mHeadsUpChild != null) {
-            if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
+            if (viewHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (mContentHeight <= mContractedChild.getHeight() || noExpandedChild) {
+            if (viewHeight <= mContractedChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
@@ -665,5 +667,13 @@ public class NotificationContentView extends FrameLayout {
             header = mHeadsUpWrapper.getNotificationHeader();
         }
         return header;
+    }
+
+    public void setContainingNotification(ExpandableNotificationRow containingNotification) {
+        mContainingNotification = containingNotification;
+    }
+
+    public void requestSelectLayout(boolean needsAnimation) {
+        selectLayout(needsAnimation, false);
     }
 }

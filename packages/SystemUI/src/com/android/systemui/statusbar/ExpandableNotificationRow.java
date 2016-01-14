@@ -551,8 +551,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
+        mPublicLayout.setContainingNotification(this);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
         mPrivateLayout.setExpandClickListener(mExpandClickListener);
+        mPrivateLayout.setContainingNotification(this);
         mPublicLayout.setExpandClickListener(mExpandClickListener);
         mGutsStub = (ViewStub) findViewById(R.id.notification_guts_stub);
         mGutsStub.setOnInflateListener(new ViewStub.OnInflateListener() {
@@ -858,6 +860,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (intrinsicBefore != getIntrinsicHeight()) {
             notifyHeightChanged(false  /* needsAnimation */);
         }
+    }
+
+    @Override
+    public void notifyHeightChanged(boolean needsAnimation) {
+        super.notifyHeightChanged(needsAnimation);
+        getShowingLayout().requestSelectLayout(needsAnimation || isUserLocked());
     }
 
     public void setSensitive(boolean sensitive) {
