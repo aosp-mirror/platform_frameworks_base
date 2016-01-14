@@ -523,7 +523,10 @@ public:
     }
 
     bool processFile(const std::string& path, bool override) {
-        if (util::stringEndsWith<char>(path, ".flata")) {
+        if (util::stringEndsWith<char>(path, ".flata") ||
+                util::stringEndsWith<char>(path, ".jar") ||
+                util::stringEndsWith<char>(path, ".jack") ||
+                util::stringEndsWith<char>(path, ".zip")) {
             return mergeArchive(path, override);
         }
 
