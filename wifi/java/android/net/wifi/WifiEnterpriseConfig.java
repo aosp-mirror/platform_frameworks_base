@@ -15,12 +15,14 @@
  */
 package android.net.wifi;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.security.Credentials;
 import android.text.TextUtils;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -72,6 +74,13 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String KEYSTORE_URI = "keystore://";
 
     /**
+     * String representing the keystore URI used for wpa_supplicant,
+     * Unlike #KEYSTORE_URI, this supports a list of space-delimited aliases
+     * @hide
+     */
+    public static final String KEYSTORES_URI = "keystores://";
+
+    /**
      * String to set the engine value to when it should be enabled.
      * @hide
      */
@@ -103,6 +112,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String PLMN_KEY            = "plmn";
     /** @hide */
     public static final String PHASE1_KEY          = "phase1";
+    /** @hide */
+    public static final String CA_CERT_ALIAS_DELIMITER = " ";
 
     /** {@hide} */
     public static final String ENABLE_TLS_1_2 = "\"tls_disable_tlsv1_2=0\"";
@@ -113,7 +124,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     //By default, we enable TLS1.2. However, due to a known bug on some radius, we may disable it to
     // fall back to TLS 1.1.
     private boolean mTls12Enable =  true;
-    private X509Certificate mCaCert;
+    private X509Certificate[] mCaCerts;
     private PrivateKey mClientPrivateKey;
     private X509Certificate mClientCertificate;
 
@@ -145,7 +156,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             dest.writeString(entry.getValue());
         }
 
-        writeCertificate(dest, mCaCert);
+        writeCertificates(dest, mCaCerts);
 
         if (mClientPrivateKey != null) {
             String algorithm = mClientPrivateKey.getAlgorithm();
@@ -159,6 +170,17 @@ public class WifiEnterpriseConfig implements Parcelable {
 
         writeCertificate(dest, mClientCertificate);
         dest.writeInt(mTls12Enable ? 1: 0);
+    }
+
+    private void writeCertificates(Parcel dest, X509Certificate[] cert) {
+        if (cert != null && cert.length != 0) {
+            dest.writeInt(cert.length);
+            for (int i = 0; i < cert.length; i++) {
+                writeCertificate(dest, cert[i]);
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     private void writeCertificate(Parcel dest, X509Certificate cert) {
@@ -186,7 +208,7 @@ public class WifiEnterpriseConfig implements Parcelable {
                         enterpriseConfig.mFields.put(key, value);
                     }
 
-                    enterpriseConfig.mCaCert = readCertificate(in);
+                    enterpriseConfig.mCaCerts = readCertificates(in);
 
                     PrivateKey userKey = null;
                     int len = in.readInt();
@@ -208,6 +230,18 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mClientCertificate = readCertificate(in);
                     enterpriseConfig.mTls12Enable = (in.readInt() == 1);
                     return enterpriseConfig;
+                }
+
+                private X509Certificate[] readCertificates(Parcel in) {
+                    X509Certificate[] certs = null;
+                    int len = in.readInt();
+                    if (len > 0) {
+                        certs = new X509Certificate[len];
+                        for (int i = 0; i < len; i++) {
+                            certs[i] = readCertificate(in);
+                        }
+                    }
+                    return certs;
                 }
 
                 private X509Certificate readCertificate(Parcel in) {
@@ -430,6 +464,36 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
+     * Encode a CA certificate alias so it does not contain illegal character.
+     * @hide
+     */
+    public static String encodeCaCertificateAlias(String alias) {
+        byte[] bytes = alias.getBytes(StandardCharsets.UTF_8);
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte o : bytes) {
+            sb.append(String.format("%02x", o & 0xFF));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Decode a previously-encoded CA certificate alias.
+     * @hide
+     */
+    public static String decodeCaCertificateAlias(String alias) {
+        byte[] data = new byte[alias.length() >> 1];
+        for (int n = 0, position = 0; n < alias.length(); n += 2, position++) {
+            data[position] = (byte) Integer.parseInt(alias.substring(n,  n + 2), 16);
+        }
+        try {
+            return new String(data, StandardCharsets.UTF_8);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return alias;
+        }
+    }
+
+    /**
      * Set CA certificate alias.
      *
      * <p> See the {@link android.security.KeyChain} for details on installing or choosing
@@ -443,12 +507,67 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
+     * Set CA certificate aliases. When creating installing the corresponding certificate to
+     * the keystore, please use alias encoded by {@link #encodeCaCertificateAlias(String)}.
+     *
+     * <p> See the {@link android.security.KeyChain} for details on installing or choosing
+     * a certificate.
+     * </p>
+     * @param aliases identifies the certificate
+     * @hide
+     */
+    public void setCaCertificateAliases(@Nullable String[] aliases) {
+        if (aliases == null) {
+            setFieldValue(CA_CERT_KEY, null, CA_CERT_PREFIX);
+        } else if (aliases.length == 1) {
+            // Backwards compatibility: use the original cert prefix if setting only one alias.
+            setCaCertificateAlias(aliases[0]);
+        } else {
+            // Use KEYSTORES_URI which supports multiple aliases.
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < aliases.length; i++) {
+                if (i > 0) {
+                    sb.append(CA_CERT_ALIAS_DELIMITER);
+                }
+                sb.append(encodeCaCertificateAlias(Credentials.CA_CERTIFICATE + aliases[i]));
+            }
+            setFieldValue(CA_CERT_KEY, sb.toString(), KEYSTORES_URI);
+        }
+    }
+
+    /**
      * Get CA certificate alias
      * @return alias to the CA certificate
      * @hide
      */
     public String getCaCertificateAlias() {
         return getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX);
+    }
+
+    /**
+     * Get CA certificate aliases
+     * @return alias to the CA certificate
+     * @hide
+     */
+    @Nullable public String[] getCaCertificateAliases() {
+        String value = getFieldValue(CA_CERT_KEY, "");
+        if (value.startsWith(CA_CERT_PREFIX)) {
+            // Backwards compatibility: parse the original alias prefix.
+            return new String[] {getFieldValue(CA_CERT_KEY, CA_CERT_PREFIX)};
+        } else if (value.startsWith(KEYSTORES_URI)) {
+            String values = value.substring(KEYSTORES_URI.length());
+
+            String[] aliases = TextUtils.split(values, CA_CERT_ALIAS_DELIMITER);
+            for (int i = 0; i < aliases.length; i++) {
+                aliases[i] = decodeCaCertificateAlias(aliases[i]);
+                if (aliases[i].startsWith(Credentials.CA_CERTIFICATE)) {
+                    aliases[i] = aliases[i].substring(Credentials.CA_CERTIFICATE.length());
+                }
+            }
+            return aliases.length != 0 ? aliases : null;
+        } else {
+            return TextUtils.isEmpty(value) ? null : new String[] {value};
+        }
     }
 
     /**
@@ -462,31 +581,76 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @param cert X.509 CA certificate
      * @throws IllegalArgumentException if not a CA certificate
      */
-    public void setCaCertificate(X509Certificate cert) {
+    public void setCaCertificate(@Nullable X509Certificate cert) {
         if (cert != null) {
             if (cert.getBasicConstraints() >= 0) {
-                mCaCert = cert;
+                mCaCerts = new X509Certificate[] {cert};
             } else {
                 throw new IllegalArgumentException("Not a CA certificate");
             }
         } else {
-            mCaCert = null;
+            mCaCerts = null;
         }
     }
 
     /**
-     * Get CA certificate
+     * Get CA certificate. If multiple CA certificates are configured previously,
+     * return the first one.
      * @return X.509 CA certificate
      */
-    public X509Certificate getCaCertificate() {
-        return mCaCert;
+    @Nullable public X509Certificate getCaCertificate() {
+        if (mCaCerts != null && mCaCerts.length > 0) {
+            return mCaCerts[0];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Specify a list of X.509 certificates that identifies the server. The validation
+     * passes if the CA of server certificate matches one of the given certificates.
+
+     * <p>Default names are automatically assigned to the certificates and used
+     * with this configuration. The framework takes care of installing the
+     * certificates when the config is saved and removing the certificates when
+     * the config is removed.
+     *
+     * @param certs X.509 CA certificates
+     * @throws IllegalArgumentException if any of the provided certificates is
+     *     not a CA certificate
+     */
+    public void setCaCertificates(@Nullable X509Certificate[] certs) {
+        if (certs != null) {
+            X509Certificate[] newCerts = new X509Certificate[certs.length];
+            for (int i = 0; i < certs.length; i++) {
+                if (certs[i].getBasicConstraints() >= 0) {
+                    newCerts[i] = certs[i];
+                } else {
+                    throw new IllegalArgumentException("Not a CA certificate");
+                }
+            }
+            mCaCerts = newCerts;
+        } else {
+            mCaCerts = null;
+        }
+    }
+
+    /**
+     * Get CA certificates.
+     */
+    @Nullable public X509Certificate[] getCaCertificates() {
+        if (mCaCerts != null || mCaCerts.length > 0) {
+            return mCaCerts;
+        } else {
+            return null;
+        }
     }
 
     /**
      * @hide
      */
     public void resetCaCertificate() {
-        mCaCert = null;
+        mCaCerts = null;
     }
 
     /** Set Client certificate alias.

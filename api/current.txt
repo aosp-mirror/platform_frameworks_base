@@ -19218,6 +19218,7 @@ package android.net.wifi {
     method public java.lang.String getAltSubjectMatch();
     method public java.lang.String getAnonymousIdentity();
     method public java.security.cert.X509Certificate getCaCertificate();
+    method public java.security.cert.X509Certificate[] getCaCertificates();
     method public java.security.cert.X509Certificate getClientCertificate();
     method public java.lang.String getDomainSuffixMatch();
     method public int getEapMethod();
@@ -19230,6 +19231,7 @@ package android.net.wifi {
     method public void setAltSubjectMatch(java.lang.String);
     method public void setAnonymousIdentity(java.lang.String);
     method public void setCaCertificate(java.security.cert.X509Certificate);
+    method public void setCaCertificates(java.security.cert.X509Certificate[]);
     method public void setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate);
     method public void setDomainSuffixMatch(java.lang.String);
     method public void setEapMethod(int);
