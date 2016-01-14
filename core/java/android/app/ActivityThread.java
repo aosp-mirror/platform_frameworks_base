@@ -4724,12 +4724,6 @@ public final class ActivityThread {
             return;
         }
         final ApplicationInfo appInfo = loadedApk.getApplicationInfo();
-        if (isSharingRuntime(appInfo)) {
-            // If sharing is enabled we do not have a unique application
-            // in a process and therefore cannot rely on the package
-            // name inside the runtime.
-            return;
-        }
         final List<String> codePaths = new ArrayList<>();
         if ((appInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
             codePaths.add(appInfo.sourceDir);
@@ -4770,37 +4764,6 @@ public final class ActivityThread {
 
         VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), appInfo.dataDir,
                 codePaths.toArray(new String[codePaths.size()]));
-    }
-
-    /*
-     * Two possible indications that this package could be
-     * sharing its runtime with other packages:
-     *
-     * 1) the sharedUserId attribute is set in the manifest,
-     *    indicating a request to share a VM with other
-     *    packages with the same sharedUserId.
-     *
-     * 2) the application element of the manifest has an
-     *    attribute specifying a non-default process name,
-     *    indicating the desire to run in another packages VM.
-     */
-    private static boolean isSharingRuntime(ApplicationInfo appInfo) {
-        IPackageManager pm = getPackageManager();
-        android.content.pm.PackageInfo pi = null;
-        try {
-            pi = pm.getPackageInfo(appInfo.packageName, 0, UserHandle.myUserId());
-        } catch (RemoteException e) {
-        }
-        if (pi != null) {
-            boolean sharedUserIdSet = (pi.sharedUserId != null);
-            boolean processNameNotDefault = (pi.applicationInfo != null) &&
-                    !appInfo.packageName.equals(pi.applicationInfo.processName);
-            boolean sharable = sharedUserIdSet || processNameNotDefault;
-            return sharable;
-        }
-        // We couldn't get information for the package. Be pessimistic and assume
-        // it's sharing the runtime.
-        return true;
     }
 
     private void updateDefaultDensity() {
