@@ -62,6 +62,7 @@ public class DividerSnapAlgorithm {
 
     private final SnapTarget mDismissStartTarget;
     private final SnapTarget mDismissEndTarget;
+    private final SnapTarget mMiddleTarget;
 
     public DividerSnapAlgorithm(Resources res, float minFlingVelocityPxPerSecond,
             int displayWidth, int displayHeight, int dividerSize, boolean isHorizontalDivision,
@@ -80,6 +81,7 @@ public class DividerSnapAlgorithm {
         mLastSplitTarget = mTargets.get(mTargets.size() - 2);
         mDismissStartTarget = mTargets.get(0);
         mDismissEndTarget = mTargets.get(mTargets.size() - 1);
+        mMiddleTarget = mTargets.get(mTargets.size() / 2);
     }
 
     public SnapTarget calculateSnapTarget(int position, float velocity) {
@@ -213,6 +215,10 @@ public class DividerSnapAlgorithm {
                 : mDisplayWidth - mInsets.right;
         mTargets.add(new SnapTarget(start + (end - start) / 2 - mDividerSize / 2,
                 SnapTarget.FLAG_NONE));
+    }
+
+    public SnapTarget getMiddleTarget() {
+        return mMiddleTarget;
     }
 
     /**

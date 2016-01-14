@@ -1179,8 +1179,12 @@ final class ActivityStack {
             prev.cpuTimeAtResume = 0; // reset it
         }
 
-        // Notfiy when the task stack has changed
-        mService.notifyTaskStackChangedLocked();
+        // Notify when the task stack has changed, but only if visibilities changed (not just
+        // focus).
+        if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause) {
+            mService.notifyTaskStackChangedLocked();
+            mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
+        }
     }
 
     private void addToStopping(ActivityRecord r) {
@@ -1257,6 +1261,7 @@ final class ActivityStack {
             ActivityContainer container = containers.get(containerNdx);
             container.setVisible(visible);
         }
+        mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
     // Find the first visible activity above the passed activity and if it is translucent return it

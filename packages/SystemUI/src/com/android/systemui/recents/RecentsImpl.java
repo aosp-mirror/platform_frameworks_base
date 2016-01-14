@@ -110,9 +110,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
         /** Preloads the next task */
         public void run() {
-            // TODO: Temporarily skip this if multi stack is enabled
-            /*
-            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 SystemServicesProxy ssp = Recents.getSystemServices();
@@ -134,7 +132,6 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
                 launchOpts.onlyLoadPausedActivities = true;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
-            */
         }
     }
 

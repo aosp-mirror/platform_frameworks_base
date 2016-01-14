@@ -399,6 +399,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     private final FindTaskResult mTmpFindTaskResult = new FindTaskResult();
 
     /**
+     * Used to keep track whether app visibilities got changed since the last pause. Useful to
+     * determine whether to invoke the task stack change listener after pausing.
+     */
+    boolean mAppVisibilitiesChangedSinceLastPause;
+
+    /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
      */
