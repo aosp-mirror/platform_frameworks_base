@@ -249,6 +249,9 @@ final class UserController {
             if (uss.state == UserState.STATE_RUNNING_LOCKED) {
                 uss.setState(UserState.STATE_RUNNING);
 
+                // Give user manager a chance to prepare app storage
+                mUserManager.onBeforeUnlockUser(userId);
+
                 mHandler.sendMessage(mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0));
 
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
@@ -651,7 +654,8 @@ final class UserController {
                 }
 
                 if (uss.state == UserState.STATE_BOOTING) {
-                    // Let user manager propagate user restrictions to other services.
+                    // Give user manager a chance to propagate user restrictions
+                    // to other services and prepare app storage
                     getUserManager().onBeforeStartUser(userId);
 
                     // Booting up a new user, need to tell system services about it.

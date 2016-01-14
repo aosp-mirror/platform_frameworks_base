@@ -46,7 +46,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
-import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
@@ -192,7 +191,6 @@ import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.StructStat;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -234,6 +232,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.pm.Installer.StorageFlags;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
@@ -316,6 +315,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_EPHEMERAL = false;
     private static final boolean DEBUG_TRIAGED_MISSING = false;
+    private static final boolean DEBUG_APP_DATA = false;
 
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
@@ -517,9 +517,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // If mac_permissions.xml was found for seinfo labeling.
     boolean mFoundPolicyFile;
-
-    // If a recursive restorecon of /data/data/<pkg> is needed.
-    private boolean mShouldRestoreconData = SELinuxMMAC.shouldRestorecon();
 
     private final EphemeralApplicationRegistry mEphemeralApplicationRegistry;
 
@@ -1750,7 +1747,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         @Override
         public void onVolumeForgotten(String fsUuid) {
             if (TextUtils.isEmpty(fsUuid)) {
-                Slog.w(TAG, "Forgetting internal storage is probably a mistake; ignoring");
+                Slog.e(TAG, "Forgetting internal storage is probably a mistake; ignoring");
                 return;
             }
 
@@ -2341,6 +2338,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                     primeDomainVerificationsLPw(user.id);
                 }
             }
+
+            // Prepare storage for system user really early during boot,
+            // since core system apps like SettingsProvider and SystemUI
+            // can't wait for user to start
+            final int flags;
+            if (StorageManager.isFileBasedEncryptionEnabled()) {
+                flags = Installer.FLAG_DE_STORAGE;
+            } else {
+                flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
+            }
+            reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM, flags);
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
@@ -6719,23 +6727,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private void createDataDirsLI(String volumeUuid, String packageName, int uid, String seinfo)
-            throws PackageManagerException {
-        // TODO: triage flags as part of 26466827
-        final int appId = UserHandle.getAppId(uid);
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
-
-        try {
-            final int[] users = sUserManager.getUserIds();
-            for (int user : users) {
-                mInstaller.createAppData(volumeUuid, packageName, user, flags, appId, seinfo);
-            }
-        } catch (InstallerException e) {
-            throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                    "Failed to prepare data directory", e);
-        }
-    }
-
     private boolean removeDataDirsLI(String volumeUuid, String packageName) {
         // TODO: triage flags as part of 26466827
         final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
@@ -6762,6 +6753,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         } else {
             codePath.delete();
+        }
+    }
+
+    void destroyAppDataLI(String volumeUuid, String packageName, int userId, int flags) {
+        try {
+            mInstaller.destroyAppData(volumeUuid, packageName, userId, flags);
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to destroy app data", e);
+        }
+    }
+
+    void restoreconAppDataLI(String volumeUuid, String packageName, int userId, int flags,
+            int appId, String seinfo) {
+        try {
+            mInstaller.restoreconAppData(volumeUuid, packageName, userId, flags, appId, seinfo);
+        } catch (InstallerException e) {
+            Slog.e(TAG, "Failed to restorecon for " + packageName + ": " + e);
         }
     }
 
@@ -7274,104 +7282,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.uid);
 
         if (pkg != mPlatformPackage) {
-            // This is a normal package, need to make its data directory.
-            final File dataPath = Environment.getDataUserCredentialEncryptedPackageDirectory(
-                    pkg.volumeUuid, UserHandle.USER_SYSTEM, pkg.packageName);
-
-            // TOOD: switch to ensure various directories
-
-            boolean uidError = false;
-            if (dataPath.exists()) {
-                int currentUid = 0;
-                try {
-                    StructStat stat = Os.stat(dataPath.getPath());
-                    currentUid = stat.st_uid;
-                } catch (ErrnoException e) {
-                    Slog.e(TAG, "Couldn't stat path " + dataPath.getPath(), e);
-                }
-
-                // If we have mismatched owners for the data path, we have a problem.
-                if (currentUid != pkg.applicationInfo.uid) {
-                    boolean recovered = false;
-                    if (((parseFlags & PackageParser.PARSE_IS_SYSTEM) != 0
-                            || (scanFlags & SCAN_BOOTING) != 0)) {
-                        // If this is a system app, we can at least delete its
-                        // current data so the application will still work.
-                        boolean res = removeDataDirsLI(pkg.volumeUuid, pkgName);
-                        if (res) {
-                            // TODO: Kill the processes first
-                            // Old data gone!
-                            String prefix = (parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0
-                                    ? "System package " : "Third party package ";
-                            String msg = prefix + pkg.packageName
-                                    + " has changed from uid: "
-                                    + currentUid + " to "
-                                    + pkg.applicationInfo.uid + "; old data erased";
-                            reportSettingsProblem(Log.WARN, msg);
-                            recovered = true;
-                        }
-                        if (!recovered) {
-                            mHasSystemUidErrors = true;
-                        }
-                    } else {
-                        // If we allow this install to proceed, we will be broken.
-                        // Abort, abort!
-                        throw new PackageManagerException(INSTALL_FAILED_UID_CHANGED,
-                                "Expected data to be owned by UID " + pkg.applicationInfo.uid
-                                        + " but found " + currentUid);
-                    }
-                    if (!recovered) {
-                        pkg.applicationInfo.dataDir = "/mismatched_uid/settings_"
-                            + pkg.applicationInfo.uid + "/fs_"
-                            + currentUid;
-                        pkg.applicationInfo.nativeLibraryDir = pkg.applicationInfo.dataDir;
-                        pkg.applicationInfo.nativeLibraryRootDir = pkg.applicationInfo.dataDir;
-                        String msg = "Package " + pkg.packageName
-                                + " has mismatched uid: "
-                                + currentUid + " on disk, "
-                                + pkg.applicationInfo.uid + " in settings";
-                        // writer
-                        synchronized (mPackages) {
-                            mSettings.mReadMessages.append(msg);
-                            mSettings.mReadMessages.append('\n');
-                            uidError = true;
-                            if (!pkgSetting.uidError) {
-                                reportSettingsProblem(Log.ERROR, msg);
-                            }
-                        }
-                    }
-                }
-
-                // Ensure that directories are prepared
-                createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
-                        pkg.applicationInfo.seinfo);
-
-                if (mShouldRestoreconData) {
-                    Slog.i(TAG, "SELinux relabeling of " + pkg.packageName + " issued.");
-                    // TODO: extend this to restorecon over all users
-                    final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
-                    // TODO: triage flags as part of 26466827
-                    final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
-                    try {
-                        mInstaller.restoreconAppData(pkg.volumeUuid, pkg.packageName,
-                                UserHandle.USER_SYSTEM, flags, appId, pkg.applicationInfo.seinfo);
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Failed to restorecon " + pkg.packageName, e);
-                    }
-                }
-            } else {
-                if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
-                        Log.v(TAG, "Want this data dir: " + dataPath);
-                }
-                createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,
-                        pkg.applicationInfo.seinfo);
-            }
-
             // Get all of our default paths setup
             pkg.applicationInfo.initForUser(UserHandle.USER_SYSTEM);
-
-            pkgSetting.uidError = uidError;
         }
 
         final String path = scanFile.getPath();
@@ -7403,49 +7315,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // ABIs we determined during compilation, but the path will depend on the final
             // package path (after the rename away from the stage path).
             setNativeLibraryPaths(pkg);
-        }
-
-        if (DEBUG_INSTALL) Slog.i(TAG, "Linking native library dir for " + path);
-        final int[] userIds = sUserManager.getUserIds();
-        synchronized (mInstallLock) {
-            // Make sure all user data directories are ready to roll; we're okay
-            // if they already exist
-            if (!TextUtils.isEmpty(pkg.volumeUuid)) {
-                for (int userId : userIds) {
-                    if (userId != UserHandle.USER_SYSTEM) {
-                        // TODO: triage flags as part of 26466827
-                        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
-                        final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
-                        try {
-                            mInstaller.createAppData(pkg.volumeUuid, pkg.packageName, userId,
-                                    flags, appId, pkg.applicationInfo.seinfo);
-                        } catch (InstallerException e) {
-                            throw PackageManagerException.from(e);
-                        }
-                    }
-                }
-            }
-
-            // Create a native library symlink only if we have native libraries
-            // and if the native libraries are 32 bit libraries. We do not provide
-            // this symlink for 64 bit libraries.
-            if (pkg.applicationInfo.primaryCpuAbi != null &&
-                    !VMRuntime.is64BitAbi(pkg.applicationInfo.primaryCpuAbi)) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "linkNativeLib");
-                try {
-                    final String nativeLibPath = pkg.applicationInfo.nativeLibraryDir;
-                    for (int userId : userIds) {
-                        try {
-                            mInstaller.linkNativeLibraryDirectory(pkg.volumeUuid, pkg.packageName,
-                                    nativeLibPath, userId);
-                        } catch (InstallerException e) {
-                            throw PackageManagerException.from(e);
-                        }
-                    }
-                } finally {
-                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                }
-            }
         }
 
         // This is a special case for the "system" package, where the ABI is
@@ -10228,21 +10097,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkgSetting.setInstalled(true, userId);
                     pkgSetting.setHidden(false, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
+                    if (pkgSetting.pkg != null) {
+                        prepareAppDataAfterInstall(pkgSetting.pkg);
+                    }
                     installed = true;
                 }
             }
 
             if (installed) {
-                synchronized (mInstallLock) {
-                    final int flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
-                    try {
-                        mInstaller.createAppData(pkgSetting.volumeUuid, packageName, userId, flags,
-                                pkgSetting.appId, pkgSetting.pkg.applicationInfo.seinfo);
-                    } catch (InstallerException e) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
             }
         } finally {
@@ -12368,6 +12230,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     System.currentTimeMillis(), user);
 
             updateSettingsLI(newPackage, installerPackageName, volumeUuid, null, null, res, user);
+            prepareAppDataAfterInstall(newPackage);
+
             // delete the partially installed application. the data directory will have to be
             // restored if it was already existing
             if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
@@ -12524,6 +12388,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
                 updateSettingsLI(newPackage, installerPackageName, volumeUuid, allUsers,
                         perUserInstalled, res, user);
+                prepareAppDataAfterInstall(newPackage);
                 updatedSettings = true;
             } catch (PackageManagerException e) {
                 res.setError("Package couldn't be installed in " + pkg.codePath, e);
@@ -12655,6 +12520,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 updateSettingsLI(newPackage, installerPackageName, volumeUuid, allUsers,
                         perUserInstalled, res, user);
+                prepareAppDataAfterInstall(newPackage);
                 updatedSettings = true;
             }
 
@@ -13691,6 +13557,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Failed to restore system package " + newPs.name + ": " + e.getMessage());
             return false;
         }
+
+        prepareAppDataAfterInstall(newPkg);
 
         // writer
         synchronized (mPackages) {
@@ -16179,10 +16047,6 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     public void scanAvailableAsecs() {
         updateExternalMediaStatusInner(true, false, false);
-        if (mShouldRestoreconData) {
-            SELinuxMMAC.setRestoreconDone();
-            mShouldRestoreconData = false;
-        }
     }
 
     /*
@@ -16503,22 +16367,31 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void loadPrivatePackagesInner(VolumeInfo vol) {
+        final String volumeUuid = vol.fsUuid;
+        if (TextUtils.isEmpty(volumeUuid)) {
+            Slog.e(TAG, "Loading internal storage is probably a mistake; ignoring");
+            return;
+        }
+
         final ArrayList<ApplicationInfo> loaded = new ArrayList<>();
         final int parseFlags = mDefParseFlags | PackageParser.PARSE_EXTERNAL_STORAGE;
 
         final VersionInfo ver;
         final List<PackageSetting> packages;
         synchronized (mPackages) {
-            ver = mSettings.findOrCreateVersion(vol.fsUuid);
-            packages = mSettings.getVolumePackagesLPr(vol.fsUuid);
+            ver = mSettings.findOrCreateVersion(volumeUuid);
+            packages = mSettings.getVolumePackagesLPr(volumeUuid);
         }
 
+        // TODO: introduce a new concept similar to "frozen" to prevent these
+        // apps from being launched until after data has been fully reconciled
         for (PackageSetting ps : packages) {
             synchronized (mInstallLock) {
                 final PackageParser.Package pkg;
                 try {
                     pkg = scanPackageTracedLI(ps.codePath, parseFlags, SCAN_INITIAL, 0, null);
                     loaded.add(pkg.applicationInfo);
+
                 } catch (PackageManagerException e) {
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
                 }
@@ -16529,14 +16402,27 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
+        // Reconcile app data for all started/unlocked users
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        for (UserInfo user : um.getUsers()) {
+            if (um.isUserUnlocked(user.id)) {
+                reconcileAppsData(volumeUuid, user.id,
+                        Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE);
+            } else if (um.isUserRunning(user.id)) {
+                reconcileAppsData(volumeUuid, user.id, Installer.FLAG_DE_STORAGE);
+            } else {
+                continue;
+            }
+        }
+
         synchronized (mPackages) {
             int updateFlags = UPDATE_PERMISSIONS_ALL;
             if (ver.sdkVersion != mSdkVersion) {
                 logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
-                        + mSdkVersion + "; regranting permissions for " + vol.fsUuid);
+                        + mSdkVersion + "; regranting permissions for " + volumeUuid);
                 updateFlags |= UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL;
             }
-            updatePermissionsLPw(null, null, vol.fsUuid, updateFlags);
+            updatePermissionsLPw(null, null, volumeUuid, updateFlags);
 
             // Yay, everything is now upgraded
             ver.forceCurrent();
@@ -16558,10 +16444,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void unloadPrivatePackagesInner(VolumeInfo vol) {
+        final String volumeUuid = vol.fsUuid;
+        if (TextUtils.isEmpty(volumeUuid)) {
+            Slog.e(TAG, "Unloading internal storage is probably a mistake; ignoring");
+            return;
+        }
+
         final ArrayList<ApplicationInfo> unloaded = new ArrayList<>();
         synchronized (mInstallLock) {
         synchronized (mPackages) {
-            final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(vol.fsUuid);
+            final List<PackageSetting> packages = mSettings.getVolumePackagesLPr(volumeUuid);
             for (PackageSetting ps : packages) {
                 if (ps.pkg == null) continue;
 
@@ -16645,6 +16537,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private void assertPackageKnown(String volumeUuid, String packageName)
+            throws PackageManagerException {
+        synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                throw new PackageManagerException("Package " + packageName + " is unknown");
+            } else if (!TextUtils.equals(volumeUuid, ps.volumeUuid)) {
+                throw new PackageManagerException(
+                        "Package " + packageName + " found on unknown volume " + volumeUuid
+                                + "; expected volume " + ps.volumeUuid);
+            }
+        }
+    }
+
+    private void assertPackageKnownAndInstalled(String volumeUuid, String packageName, int userId)
+            throws PackageManagerException {
+        synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                throw new PackageManagerException("Package " + packageName + " is unknown");
+            } else if (!TextUtils.equals(volumeUuid, ps.volumeUuid)) {
+                throw new PackageManagerException(
+                        "Package " + packageName + " found on unknown volume " + volumeUuid
+                                + "; expected volume " + ps.volumeUuid);
+            } else if (!ps.getInstalled(userId)) {
+                throw new PackageManagerException(
+                        "Package " + packageName + " not installed for user " + userId);
+            }
+        }
+    }
+
     /**
      * Examine all apps present on given mounted volume, and destroy apps that
      * aren't expected, either due to uninstallation or reinstallation on
@@ -16661,37 +16584,223 @@ public class PackageManagerService extends IPackageManager.Stub {
                 continue;
             }
 
-            boolean destroyApp = false;
-            String packageName = null;
             try {
                 final PackageLite pkg = PackageParser.parsePackageLite(file,
                         PackageParser.PARSE_MUST_BE_APK);
-                packageName = pkg.packageName;
+                assertPackageKnown(volumeUuid, pkg.packageName);
 
-                synchronized (mPackages) {
-                    final PackageSetting ps = mSettings.mPackages.get(packageName);
-                    if (ps == null) {
-                        logCriticalInfo(Log.WARN, "Destroying " + packageName + " on + "
-                                + volumeUuid + " because we found no install record");
-                        destroyApp = true;
-                    } else if (!TextUtils.equals(volumeUuid, ps.volumeUuid)) {
-                        logCriticalInfo(Log.WARN, "Destroying " + packageName + " on "
-                                + volumeUuid + " because we expected it on " + ps.volumeUuid);
-                        destroyApp = true;
-                    }
+            } catch (PackageParserException | PackageManagerException e) {
+                logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
+                synchronized (mInstallLock) {
+                    removeCodePathLI(file);
                 }
+            }
+        }
+    }
 
-            } catch (PackageParserException e) {
-                logCriticalInfo(Log.WARN, "Destroying " + file + " due to parse failure: " + e);
-                destroyApp = true;
+    /**
+     * Reconcile all app data for the given user.
+     * <p>
+     * Verifies that directories exist and that ownership and labeling is
+     * correct for all installed apps on all mounted volumes.
+     */
+    void reconcileAppsData(int userId, @StorageFlags int flags) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+            final String volumeUuid = vol.getFsUuid();
+            reconcileAppsData(volumeUuid, userId, flags);
+        }
+    }
+
+    /**
+     * Reconcile all app data on given mounted volume.
+     * <p>
+     * Destroys app data that isn't expected, either due to uninstallation or
+     * reinstallation on another volume.
+     * <p>
+     * Verifies that directories exist and that ownership and labeling is
+     * correct for all installed apps.
+     */
+    private void reconcileAppsData(String volumeUuid, int userId, @StorageFlags int flags) {
+        Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
+                + Integer.toHexString(flags));
+
+        final File ceDir = Environment.getDataUserCredentialEncryptedDirectory(volumeUuid, userId);
+        final File deDir = Environment.getDataUserDeviceEncryptedDirectory(volumeUuid, userId);
+
+        boolean restoreconNeeded = false;
+
+        // First look for stale data that doesn't belong, and check if things
+        // have changed since we did our last restorecon
+        if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+            if (!isUserKeyUnlocked(userId)) {
+                throw new RuntimeException(
+                        "Yikes, someone asked us to reconcile CE storage while " + userId
+                                + " was still locked; this would have caused massive data loss!");
             }
 
-            if (destroyApp) {
-                synchronized (mInstallLock) {
-                    if (packageName != null) {
-                        removeDataDirsLI(volumeUuid, packageName);
+            restoreconNeeded |= SELinuxMMAC.isRestoreconNeeded(ceDir);
+
+            final File[] files = FileUtils.listFilesOrEmpty(ceDir);
+            for (File file : files) {
+                final String packageName = file.getName();
+                try {
+                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                } catch (PackageManagerException e) {
+                    logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
+                    synchronized (mInstallLock) {
+                        destroyAppDataLI(volumeUuid, packageName, userId,
+                                Installer.FLAG_CE_STORAGE);
                     }
-                    removeCodePathLI(file);
+                }
+            }
+        }
+        if ((flags & Installer.FLAG_DE_STORAGE) != 0) {
+            restoreconNeeded |= SELinuxMMAC.isRestoreconNeeded(deDir);
+
+            final File[] files = FileUtils.listFilesOrEmpty(deDir);
+            for (File file : files) {
+                final String packageName = file.getName();
+                try {
+                    assertPackageKnownAndInstalled(volumeUuid, packageName, userId);
+                } catch (PackageManagerException e) {
+                    logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
+                    synchronized (mInstallLock) {
+                        destroyAppDataLI(volumeUuid, packageName, userId,
+                                Installer.FLAG_DE_STORAGE);
+                    }
+                }
+            }
+        }
+
+        // Ensure that data directories are ready to roll for all packages
+        // installed for this volume and user
+        final List<PackageSetting> packages;
+        synchronized (mPackages) {
+            packages = mSettings.getVolumePackagesLPr(volumeUuid);
+        }
+        int preparedCount = 0;
+        for (PackageSetting ps : packages) {
+            final String packageName = ps.name;
+            if (ps.pkg == null) {
+                Slog.w(TAG, "Odd, missing scanned package " + packageName);
+                // TODO: might be due to legacy ASEC apps; we should circle back
+                // and reconcile again once they're scanned
+                continue;
+            }
+
+            if (ps.getInstalled(userId)) {
+                prepareAppData(volumeUuid, userId, flags, ps.pkg, restoreconNeeded);
+                preparedCount++;
+            }
+        }
+
+        if (restoreconNeeded) {
+            if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+                SELinuxMMAC.setRestoreconDone(ceDir);
+            }
+            if ((flags & Installer.FLAG_DE_STORAGE) != 0) {
+                SELinuxMMAC.setRestoreconDone(deDir);
+            }
+        }
+
+        Slog.v(TAG, "reconcileAppsData finished " + preparedCount
+                + " packages; restoreconNeeded was " + restoreconNeeded);
+    }
+
+    /**
+     * Prepare app data for the given app just after it was installed or
+     * upgraded. This method carefully only touches users that it's installed
+     * for, and it forces a restorecon to handle any seinfo changes.
+     * <p>
+     * Verifies that directories exist and that ownership and labeling is
+     * correct for all installed apps. If there is an ownership mismatch, it
+     * will try recovering system apps by wiping data; third-party app data is
+     * left intact.
+     */
+    private void prepareAppDataAfterInstall(PackageParser.Package pkg) {
+        final PackageSetting ps;
+        synchronized (mPackages) {
+            ps = mSettings.mPackages.get(pkg.packageName);
+        }
+
+        final UserManager um = mContext.getSystemService(UserManager.class);
+        for (UserInfo user : um.getUsers()) {
+            final int flags;
+            if (um.isUserUnlocked(user.id)) {
+                flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
+            } else if (um.isUserRunning(user.id)) {
+                flags = Installer.FLAG_DE_STORAGE;
+            } else {
+                continue;
+            }
+
+            if (ps.getInstalled(user.id)) {
+                // Whenever an app changes, force a restorecon of its data
+                // TODO: when user data is locked, mark that we're still dirty
+                prepareAppData(pkg.volumeUuid, user.id, flags, pkg, true);
+            }
+        }
+    }
+
+    /**
+     * Prepare app data for the given app.
+     * <p>
+     * Verifies that directories exist and that ownership and labeling is
+     * correct for all installed apps. If there is an ownership mismatch, this
+     * will try recovering system apps by wiping data; third-party app data is
+     * left intact.
+     */
+    private void prepareAppData(String volumeUuid, int userId, @StorageFlags int flags,
+            PackageParser.Package pkg, boolean restoreconNeeded) {
+        if (DEBUG_APP_DATA) {
+            Slog.v(TAG, "prepareAppData for " + pkg.packageName + " u" + userId + " 0x"
+                    + Integer.toHexString(flags) + (restoreconNeeded ? " restoreconNeeded" : ""));
+        }
+
+        final String packageName = pkg.packageName;
+        final ApplicationInfo app = pkg.applicationInfo;
+        final int appId = UserHandle.getAppId(app.uid);
+
+        Preconditions.checkNotNull(app.seinfo);
+
+        synchronized (mInstallLock) {
+            try {
+                mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+                        appId, app.seinfo);
+            } catch (InstallerException e) {
+                if (app.isSystemApp()) {
+                    logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
+                            + ", but trying to recover: " + e);
+                    destroyAppDataLI(volumeUuid, packageName, userId, flags);
+                    try {
+                        mInstaller.createAppData(volumeUuid, packageName, userId, flags,
+                                appId, app.seinfo);
+                        logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
+                    } catch (InstallerException e2) {
+                        logCriticalInfo(Log.DEBUG, "Recovery failed!");
+                    }
+                } else {
+                    Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
+                }
+            }
+
+            if (restoreconNeeded) {
+                restoreconAppDataLI(volumeUuid, packageName, userId, flags, appId, app.seinfo);
+            }
+
+            if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+                // Create a native library symlink only if we have native libraries
+                // and if the native libraries are 32 bit libraries. We do not provide
+                // this symlink for 64 bit libraries.
+                if (app.primaryCpuAbi != null && !VMRuntime.is64BitAbi(app.primaryCpuAbi)) {
+                    final String nativeLibPath = app.nativeLibraryDir;
+                    try {
+                        mInstaller.linkNativeLibraryDirectory(volumeUuid, packageName,
+                                nativeLibPath, userId);
+                    } catch (InstallerException e) {
+                        Slog.e(TAG, "Failed to link native for " + packageName + ": " + e);
+                    }
                 }
             }
         }

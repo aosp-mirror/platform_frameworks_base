@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageStats;
@@ -27,6 +28,9 @@ import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public final class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -46,8 +50,17 @@ public final class Installer extends SystemService {
     /** Run the application with the JIT compiler */
     public static final int DEXOPT_USEJIT       = 1 << 5;
 
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_DE_STORAGE,
+            FLAG_CE_STORAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StorageFlags {}
+
     public static final int FLAG_DE_STORAGE = 1 << 0;
     public static final int FLAG_CE_STORAGE = 1 << 1;
+
     public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 2;
     public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 3;
 

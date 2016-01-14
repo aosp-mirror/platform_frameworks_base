@@ -75,6 +75,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.pm.Installer.StorageFlags;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -2394,12 +2395,25 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Called right before a user starts.  This will not be called for the system user.
+     * Called right before a user is started. This gives us a chance to prepare
+     * app storage and apply any user restrictions.
      */
     public void onBeforeStartUser(int userId) {
-        synchronized (mRestrictionsLock) {
-            applyUserRestrictionsLR(userId);
+        mPm.reconcileAppsData(userId, Installer.FLAG_DE_STORAGE);
+
+        if (userId != UserHandle.USER_SYSTEM) {
+            synchronized (mRestrictionsLock) {
+                applyUserRestrictionsLR(userId);
+            }
         }
+    }
+
+    /**
+     * Called right before a user is unlocked. This gives us a chance to prepare
+     * app storage.
+     */
+    public void onBeforeUnlockUser(int userId) {
+        mPm.reconcileAppsData(userId, Installer.FLAG_CE_STORAGE);
     }
 
     /**
