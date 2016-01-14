@@ -541,6 +541,8 @@ import java.util.Set;
  *     <li> {@link #ACTION_PACKAGE_REMOVED}
  *     <li> {@link #ACTION_PACKAGE_RESTARTED}
  *     <li> {@link #ACTION_PACKAGE_DATA_CLEARED}
+ *     <li> {@link #ACTION_PACKAGES_SUSPENDED}
+ *     <li> {@link #ACTION_PACKAGES_UNSUSPENDED}
  *     <li> {@link #ACTION_UID_REMOVED}
  *     <li> {@link #ACTION_BATTERY_CHANGED}
  *     <li> {@link #ACTION_POWER_CONNECTED}
@@ -2117,6 +2119,30 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
+    /**
+     * Broadcast Action: Packages have been suspended.
+     * <p>Includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been suspended
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. It is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGES_SUSPENDED = "android.intent.action.PACKAGES_SUSPENDED";
+    /**
+     * Broadcast Action: Packages have been unsuspended.
+     * <p>Includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHANGED_PACKAGE_LIST} is the set of packages which have been unsuspended
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. It is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGES_UNSUSPENDED = "android.intent.action.PACKAGES_UNSUSPENDED";
     /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.
@@ -3950,7 +3976,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * This field is part of
      * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_AVAILABLE},
-     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE}
+     * {@link android.content.Intent#ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE},
+     * {@link android.content.Intent#ACTION_PACKAGES_SUSPENDED},
+     * {@link android.content.Intent#ACTION_PACKAGES_UNSUSPENDED}
      * and contains a string array of all of the components that have changed.
      */
     public static final String EXTRA_CHANGED_PACKAGE_LIST =

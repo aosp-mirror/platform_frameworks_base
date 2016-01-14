@@ -10079,6 +10079,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         info.sendBroadcast(false, false, false);
     }
 
+    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended) {
+        if (pkgList.length > 0) {
+            Bundle extras = new Bundle(1);
+            extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
+
+            sendPackageBroadcast(
+                    suspended ? Intent.ACTION_PACKAGES_SUSPENDED
+                            : Intent.ACTION_PACKAGES_UNSUSPENDED,
+                    null, extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null, null,
+                    new int[] {userId});
+        }
+    }
+
     /**
      * Returns true if application is not found or there was an error. Otherwise it returns
      * the hidden state of the package for the given user.
@@ -10167,23 +10180,27 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         long callingId = Binder.clearCallingIdentity();
         try {
+            boolean changed = false;
+            boolean success = false;
             synchronized (mPackages) {
                 final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                 if (pkgSetting != null) {
                     if (pkgSetting.getSuspended(userId) != suspended) {
                         pkgSetting.setSuspended(suspended, userId);
                         mSettings.writePackageRestrictionsLPr(userId);
+                        changed = true;
                     }
-
-                    // TODO:
-                    // * broadcast a PACKAGE_(UN)SUSPENDED intent for launchers to pick up
-                    // * remove app from recents (kill app it if it is running)
-                    // * erase existing notifications for this app
-                    return true;
+                    success = true;
                 }
-
-                return false;
             }
+
+            if (changed) {
+                // TODO:
+                // * maybe kill application if suspended
+                // * hide suspended app from recents
+                sendPackagesSuspendedForUser(new String[]{packageName}, userId, suspended);
+            }
+            return success;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
