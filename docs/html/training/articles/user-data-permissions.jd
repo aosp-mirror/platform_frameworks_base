@@ -168,7 +168,7 @@ access with realtime user requests</h3>
   If your requirement for access to user data is infrequent &mdash; in other
   words, it's not unacceptably disruptive for the user to be presented with a
   runtime dialogue each time you need to access data &mdash; you can use an
-  <em>intent based request</em>. Android provides system intents that
+  <em>intent based request</em>. Android provides some system intents that
   applications can use without requiring permissions because the user chooses
   what, if anything, to share with the app at the time the intent based request
   is issued.
