@@ -2095,7 +2095,7 @@ results."
         <a href="<?cs var:toroot ?>training/articles/user-data-overview.html"
            description=
            "Overview of app permissions on Android and how they affect your users."
-          >Permissions and User Privacy</a>
+          >Permissions and User Data</a>
       </li>
       <li>
         <a href="<?cs var:toroot ?>training/articles/user-data-permissions.html"
