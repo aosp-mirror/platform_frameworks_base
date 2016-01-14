@@ -10216,7 +10216,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         long callingId = Binder.clearCallingIdentity();
         try {
-            boolean sendAdded = false;
+            boolean installed = false;
 
             // writer
             synchronized (mPackages) {
@@ -10228,11 +10228,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkgSetting.setInstalled(true, userId);
                     pkgSetting.setHidden(false, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
-                    sendAdded = true;
+                    installed = true;
                 }
             }
 
-            if (sendAdded) {
+            if (installed) {
+                synchronized (mInstallLock) {
+                    final int flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
+                    try {
+                        mInstaller.createAppData(pkgSetting.volumeUuid, packageName, userId, flags,
+                                pkgSetting.appId, pkgSetting.pkg.applicationInfo.seinfo);
+                    } catch (InstallerException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
             }
         } finally {
