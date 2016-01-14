@@ -116,6 +116,8 @@ TEST(OffscreenBufferPool, resize) {
         // original allocation now only thing in pool
         EXPECT_EQ(1u, pool.getCount());
         EXPECT_EQ(layer->getSizeInBytes(), pool.getSize());
+
+        pool.putOrDelete(layer2);
     });
 }
 
