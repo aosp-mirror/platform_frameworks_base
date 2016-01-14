@@ -715,7 +715,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     @Override
-    public IBinder getWindowToken(int windowId) {
+    public IBinder getWindowToken(int windowId, int userId) {
         mSecurityPolicy.enforceCallingPermission(
                 Manifest.permission.RETRIEVE_WINDOW_TOKEN,
                 GET_WINDOW_TOKEN);
@@ -724,8 +724,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             // share the accessibility state of the parent. The call below
             // performs the current profile parent resolution.
             final int resolvedUserId = mSecurityPolicy
-                    .resolveCallingUserIdEnforcingPermissionsLocked(
-                            UserHandle.getCallingUserId());
+                    .resolveCallingUserIdEnforcingPermissionsLocked(userId);
             if (resolvedUserId != mCurrentUserId) {
                 return null;
             }
