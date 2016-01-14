@@ -135,7 +135,8 @@ public class StubProvider extends DocumentsProvider {
             final RootInfo info = entry.getValue();
             final RowBuilder row = result.newRow();
             row.add(Root.COLUMN_ROOT_ID, id);
-            row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD);
+            row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD
+                    | Root.FLAG_SUPPORTS_SEARCH);
             row.add(Root.COLUMN_TITLE, id);
             row.add(Root.COLUMN_DOCUMENT_ID, info.document.documentId);
             row.add(Root.COLUMN_AVAILABLE_BYTES, info.getRemainingCapacity());
@@ -266,6 +267,29 @@ public class StubProvider extends DocumentsProvider {
             throws FileNotFoundException {
         final MatrixCursor result = new MatrixCursor(projection != null ? projection
                 : DEFAULT_DOCUMENT_PROJECTION);
+        return result;
+    }
+
+    @Override
+    public Cursor querySearchDocuments(String rootId, String query, String[] projection)
+            throws FileNotFoundException {
+
+        StubDocument parentDocument = mRoots.get(rootId).document;
+        if (parentDocument == null || parentDocument.file.isFile()) {
+            throw new FileNotFoundException();
+        }
+
+        final MatrixCursor result = new MatrixCursor(
+                projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION);
+
+        for (File file : parentDocument.file.listFiles()) {
+            if (file.getName().toLowerCase().contains(query)) {
+                StubDocument document = mStorage.get(getDocumentIdForFile(file));
+                if (document != null) {
+                    includeDocument(result, document);
+                }
+            }
+        }
         return result;
     }
 

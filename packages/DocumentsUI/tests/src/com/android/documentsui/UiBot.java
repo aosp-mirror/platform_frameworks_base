@@ -187,4 +187,41 @@ class UiBot {
         mDevice.wait(Until.findObject(selector), mTimeout);
         return mDevice.findObject(selector);
     }
+
+    private UiObject findObject(String resourceId) {
+        final UiSelector object = new UiSelector().resourceId(resourceId);
+        return mDevice.findObject(object);
+    }
+
+    private UiObject findObject(String parentResourceId, String childResourceId) {
+        final UiSelector selector = new UiSelector()
+                .resourceId(parentResourceId)
+                .childSelector(new UiSelector().resourceId(childResourceId));
+        return mDevice.findObject(selector);
+    }
+
+    UiObject findDocumentsList() {
+        return findObject(
+                "com.android.documentsui:id/container_directory",
+                "com.android.documentsui:id/list");
+    }
+
+    UiObject findSearchView() {
+        return findObject("com.android.documentsui:id/menu_search");
+    }
+
+    UiObject findSearchViewTextField() {
+        return findObject("com.android.documentsui:id/menu_search", "android:id/search_src_text");
+    }
+
+    UiObject findSearchViewIcon() {
+        return findObject("com.android.documentsui:id/menu_search", "android:id/search_button");
+    }
+
+    UiObject findMessageTextView() {
+        return findObject(
+                "com.android.documentsui:id/container_directory",
+                "com.android.documentsui:id/message");
+    }
+
 }
