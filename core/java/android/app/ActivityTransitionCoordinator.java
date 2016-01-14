@@ -894,7 +894,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             final View decor = getDecor();
             if (decor != null) {
                 final ViewRootImpl viewRoot = decor.getViewRootImpl();
-                viewRoot.setPausedForTransition(false);
+                if (viewRoot != null) {
+                    viewRoot.setPausedForTransition(false);
+                }
             }
             onTransitionsComplete();
         }
