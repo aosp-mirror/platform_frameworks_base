@@ -5803,6 +5803,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         @Override
+        public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+            return getTarget().deleteSurroundingTextInCodePoints(beforeLength, afterLength);
+        }
+
+        @Override
         public boolean setComposingText(CharSequence text, int newCursorPosition) {
             return getTarget().setComposingText(text, newCursorPosition);
         }

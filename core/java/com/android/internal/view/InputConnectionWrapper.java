@@ -400,10 +400,19 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
     }
-    
+
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         try {
             mIInputContext.deleteSurroundingText(beforeLength, afterLength);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+        try {
+            mIInputContext.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
             return true;
         } catch (RemoteException e) {
             return false;

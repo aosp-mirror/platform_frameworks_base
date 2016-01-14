@@ -43334,6 +43334,7 @@ package android.view.inputmethod {
     method public boolean commitCorrection(android.view.inputmethod.CorrectionInfo);
     method public boolean commitText(java.lang.CharSequence, int);
     method public boolean deleteSurroundingText(int, int);
+    method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
     method public boolean finishComposingText();
     method public static int getComposingSpanEnd(android.text.Spannable);
@@ -43499,6 +43500,7 @@ package android.view.inputmethod {
     method public abstract boolean commitCorrection(android.view.inputmethod.CorrectionInfo);
     method public abstract boolean commitText(java.lang.CharSequence, int);
     method public abstract boolean deleteSurroundingText(int, int);
+    method public abstract boolean deleteSurroundingTextInCodePoints(int, int);
     method public abstract boolean endBatchEdit();
     method public abstract boolean finishComposingText();
     method public abstract int getCursorCapsMode(int);
@@ -43529,6 +43531,7 @@ package android.view.inputmethod {
     method public boolean commitCorrection(android.view.inputmethod.CorrectionInfo);
     method public boolean commitText(java.lang.CharSequence, int);
     method public boolean deleteSurroundingText(int, int);
+    method public boolean deleteSurroundingTextInCodePoints(int, int);
     method public boolean endBatchEdit();
     method public boolean finishComposingText();
     method public int getCursorCapsMode(int);
