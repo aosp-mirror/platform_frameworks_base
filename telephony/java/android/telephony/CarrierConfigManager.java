@@ -456,6 +456,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
 
+    /**
+     * Boolean indicating if intent for emergency call state changes should be broadcast
+     * @hide
+     */
+    public static final String KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL =
+            "broadcast_emergency_call_state_changes_bool";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -579,6 +586,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
+        sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
