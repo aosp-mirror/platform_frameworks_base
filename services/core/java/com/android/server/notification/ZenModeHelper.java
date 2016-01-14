@@ -27,7 +27,10 @@ import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
@@ -45,7 +48,6 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.service.notification.IConditionListener;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
@@ -91,6 +93,7 @@ public class ZenModeHelper {
     private final ZenModeConditions mConditions;
     private final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
     private final Metrics mMetrics = new Metrics();
+    private final ConditionProviders.Config mServiceConfig;
 
     private int mZenMode;
     private int mUser = UserHandle.USER_SYSTEM;
@@ -113,6 +116,7 @@ public class ZenModeHelper {
         mSettingsObserver.observe();
         mFiltering = new ZenModeFiltering(mContext);
         mConditions = new ZenModeConditions(this, conditionProviders);
+        mServiceConfig = conditionProviders.getConfig();
     }
 
     public Looper getLooper() {
@@ -257,6 +261,9 @@ public class ZenModeHelper {
     }
 
     public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
+        if (!isValidOwner(automaticZenRule.getOwner())) {
+            throw new IllegalArgumentException("Owner is not a condition provider service");
+        }
         ZenModeConfig newConfig;
         synchronized (mConfig) {
             if (mConfig == null) return null;
@@ -359,6 +366,29 @@ public class ZenModeHelper {
             }
             return false;
         }
+    }
+
+    public boolean isValidOwner(ComponentName owner) {
+        boolean foundOwner = false;
+        final PackageManager pm = mContext.getPackageManager();
+        Intent queryIntent = new Intent();
+        queryIntent.setComponent(owner);
+
+        List<ResolveInfo> installedServices = pm.queryIntentServicesAsUser(
+                queryIntent,
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                UserHandle.getCallingUserId());
+        if (installedServices != null) {
+            for (int i = 0, count = installedServices.size(); i < count; i++) {
+                ResolveInfo resolveInfo = installedServices.get(i);
+                ServiceInfo info = resolveInfo.serviceInfo;
+                if (mServiceConfig.bindPermission.equals(info.permission)) {
+                    foundOwner = true;
+                    break;
+                }
+            }
+        }
+        return foundOwner;
     }
 
     private void populateZenRule(AutomaticZenRule automaticZenRule, ZenRule rule, boolean isNew) {
