@@ -19,6 +19,10 @@
 #include "DeferredLayerUpdater.h"
 #include "LayerRenderer.h"
 
+#include <unistd.h>
+#include <signal.h>
+#include <setjmp.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -119,6 +123,42 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
         glyphs.push_back(autoCache.getCache()->unicharToGlyph(unichar));
     }
     canvas->drawTextOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
+}
+
+static void defaultCrashHandler() {
+    fprintf(stderr, "RenderThread crashed!");
+}
+
+static jmp_buf gErrJmpBuff;
+static std::function<void()> gCrashHandler = defaultCrashHandler;
+
+static void signalHandler(int sig) {
+    longjmp(gErrJmpBuff, 1);
+}
+
+void TestUtils::setRenderThreadCrashHandler(std::function<void()> crashHandler) {
+    gCrashHandler = crashHandler;
+}
+
+void TestUtils::TestTask::run() {
+    struct sigaction act;
+    memset(&act, 0, sizeof(act));
+    act.sa_handler = signalHandler;
+
+    if (setjmp(gErrJmpBuff)) {
+        gCrashHandler();
+        return;
+    }
+
+    sigaction(SIGABRT, &act, nullptr);
+
+
+    // RenderState only valid once RenderThread is running, so queried here
+    RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
+
+    renderState.onGLContextCreated();
+    rtCallback(renderthread::RenderThread::getInstance());
+    renderState.onGLContextDestroyed();
 }
 
 } /* namespace uirenderer */

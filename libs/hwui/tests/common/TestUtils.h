@@ -173,19 +173,14 @@ public:
 
     typedef std::function<void(renderthread::RenderThread& thread)> RtCallback;
 
+    static void setRenderThreadCrashHandler(std::function<void()> crashHandler);
+
     class TestTask : public renderthread::RenderTask {
     public:
         TestTask(RtCallback rtCallback)
                 : rtCallback(rtCallback) {}
         virtual ~TestTask() {}
-        virtual void run() override {
-            // RenderState only valid once RenderThread is running, so queried here
-            RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
-
-            renderState.onGLContextCreated();
-            rtCallback(renderthread::RenderThread::getInstance());
-            renderState.onGLContextDestroyed();
-        };
+        virtual void run() override;
         RtCallback rtCallback;
     };
 

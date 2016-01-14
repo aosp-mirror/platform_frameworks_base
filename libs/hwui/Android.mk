@@ -225,6 +225,7 @@ LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
+    tests/unit/CrashHandlerInjector.cpp \
     tests/unit/DamageAccumulatorTests.cpp \
     tests/unit/DeviceInfoTests.cpp \
     tests/unit/FatVectorTests.cpp \
