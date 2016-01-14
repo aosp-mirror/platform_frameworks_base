@@ -409,6 +409,20 @@ public final class ContactsContract {
                 "directories_enterprise");
 
         /**
+         * Access file provided by remote directory. It allows both personal and work remote
+         * directory, but not local and invisible diretory.
+         *
+         * It's supported only by a few specific places for referring to contact pictures in the
+         * remote directory. Contact picture URIs, e.g.
+         * {@link PhoneLookup#ENTERPRISE_CONTENT_FILTER_URI}, may contain this kind of URI.
+         *
+         * @hide
+         */
+        public static final Uri ENTERPRISE_FILE_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "directory_file_enterprise");
+
+
+        /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
          * contact directories.
          */
