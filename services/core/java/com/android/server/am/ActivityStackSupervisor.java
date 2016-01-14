@@ -692,6 +692,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
+    boolean isFocusedUserLockedProfile() {
+        final int userId = mFocusedStack.topRunningActivityLocked().userId;
+        return userId != UserHandle.myUserId()
+                && mService.mUserController.shouldConfirmCredentials(userId);
+    }
+
     void setNextTaskIdForUserLocked(int taskId, int userId) {
         final int currentTaskId = mCurTaskIdForUser.get(userId, -1);
         if (taskId > currentTaskId) {

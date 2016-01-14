@@ -11265,9 +11265,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + android.Manifest.permission.DEVICE_POWER);
         }
 
+        final int user = UserHandle.myUserId();
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
+                if (!shown && mStackSupervisor.isFocusedUserLockedProfile()) {
+                    startHomeActivityLocked(user, "setLockScreenShown");
+                }
                 if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
                 mLockScreenShown = shown ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
                 updateSleepIfNeededLocked();
