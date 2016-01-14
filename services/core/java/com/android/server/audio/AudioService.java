@@ -689,6 +689,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
         intentFilter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -3164,57 +3165,18 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         public void onServiceDisconnected(int profile) {
-            ArraySet<String> toRemove = null;
+
             switch (profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mConnectedDevices) {
-                    synchronized (mA2dpAvrcpLock) {
-                        // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
-                        for (int i = 0; i < mConnectedDevices.size(); i++) {
-                            DeviceListSpec deviceSpec = mConnectedDevices.valueAt(i);
-                            if (deviceSpec.mDeviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                                toRemove = toRemove != null ? toRemove : new ArraySet<String>();
-                                toRemove.add(deviceSpec.mDeviceAddress);
-                            }
-                        }
-                        if (toRemove != null) {
-                            int delay = checkSendBecomingNoisyIntent(
-                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                0);
-                            for (int i = 0; i < toRemove.size(); i++) {
-                                makeA2dpDeviceUnavailableLater(toRemove.valueAt(i), delay);
-                            }
-                        }
-                    }
-                }
+                disconnectA2dp();
                 break;
 
             case BluetoothProfile.A2DP_SINK:
-                synchronized (mConnectedDevices) {
-                    // Disconnect ALL DEVICE_IN_BLUETOOTH_A2DP devices
-                    for(int i = 0; i < mConnectedDevices.size(); i++) {
-                        DeviceListSpec deviceSpec = mConnectedDevices.valueAt(i);
-                        if (deviceSpec.mDeviceType == AudioSystem.DEVICE_IN_BLUETOOTH_A2DP) {
-                            toRemove = toRemove != null ? toRemove : new ArraySet<String>();
-                            toRemove.add(deviceSpec.mDeviceAddress);
-                        }
-                    }
-                    if (toRemove != null) {
-                        for (int i = 0; i < toRemove.size(); i++) {
-                            makeA2dpSrcUnavailable(toRemove.valueAt(i));
-                        }
-                    }
-                }
+                disconnectA2dpSink();
                 break;
 
             case BluetoothProfile.HEADSET:
-                synchronized (mScoClients) {
-                    if (mBluetoothHeadsetDevice != null) {
-                        setBtScoDeviceConnectionState(mBluetoothHeadsetDevice,
-                                BluetoothProfile.STATE_DISCONNECTED);
-                    }
-                    mBluetoothHeadset = null;
-                }
+                disconnectHeadset();
                 break;
 
             default:
@@ -3222,6 +3184,65 @@ public class AudioService extends IAudioService.Stub {
             }
         }
     };
+
+    void disconnectAllBluetoothProfiles() {
+        disconnectA2dp();
+        disconnectA2dpSink();
+        disconnectHeadset();
+    }
+
+    void disconnectA2dp() {
+        synchronized (mConnectedDevices) {
+            synchronized (mA2dpAvrcpLock) {
+                ArraySet<String> toRemove = null;
+                // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
+                for (int i = 0; i < mConnectedDevices.size(); i++) {
+                    DeviceListSpec deviceSpec = mConnectedDevices.valueAt(i);
+                    if (deviceSpec.mDeviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                        toRemove = toRemove != null ? toRemove : new ArraySet<String>();
+                        toRemove.add(deviceSpec.mDeviceAddress);
+                    }
+                }
+                if (toRemove != null) {
+                    int delay = checkSendBecomingNoisyIntent(
+                                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                        0);
+                    for (int i = 0; i < toRemove.size(); i++) {
+                        makeA2dpDeviceUnavailableLater(toRemove.valueAt(i), delay);
+                    }
+                }
+            }
+        }
+    }
+
+    void disconnectA2dpSink() {
+        synchronized (mConnectedDevices) {
+            ArraySet<String> toRemove = null;
+            // Disconnect ALL DEVICE_IN_BLUETOOTH_A2DP devices
+            for(int i = 0; i < mConnectedDevices.size(); i++) {
+                DeviceListSpec deviceSpec = mConnectedDevices.valueAt(i);
+                if (deviceSpec.mDeviceType == AudioSystem.DEVICE_IN_BLUETOOTH_A2DP) {
+                    toRemove = toRemove != null ? toRemove : new ArraySet<String>();
+                    toRemove.add(deviceSpec.mDeviceAddress);
+                }
+            }
+            if (toRemove != null) {
+                for (int i = 0; i < toRemove.size(); i++) {
+                    makeA2dpSrcUnavailable(toRemove.valueAt(i));
+                }
+            }
+        }
+    }
+
+    void disconnectHeadset() {
+        synchronized (mScoClients) {
+            if (mBluetoothHeadsetDevice != null) {
+                setBtScoDeviceConnectionState(mBluetoothHeadsetDevice,
+                        BluetoothProfile.STATE_DISCONNECTED);
+            }
+            mBluetoothHeadset = null;
+        }
+    }
 
     private void onCheckMusicActive(String caller) {
         synchronized (mSafeMediaVolumeState) {
@@ -5228,6 +5249,12 @@ public class AudioService extends IAudioService.Stub {
                 int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 UserManagerService.getInstance().setUserRestriction(
                         UserManager.DISALLOW_RECORD_AUDIO, false, userId);
+            } else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+                if (state == BluetoothAdapter.STATE_OFF ||
+                        state == BluetoothAdapter.STATE_TURNING_OFF) {
+                    disconnectAllBluetoothProfiles();
+                }
             }
         }
     } // end class AudioServiceBroadcastReceiver
