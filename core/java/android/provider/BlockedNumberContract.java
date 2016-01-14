@@ -104,12 +104,6 @@ public class BlockedNumberContract {
          * <p>TYPE: String</p>
          */
         public static final String COLUMN_E164_NUMBER = "e164_number";
-
-        /** @hide */
-        public static final String COLUMN_INDEX_STRIPPED = "index_stripped";
-
-        /** @hide */
-        public static final String COLUMN_INDEX_E164 = "index_e164";
     }
 
     /** @hide */
