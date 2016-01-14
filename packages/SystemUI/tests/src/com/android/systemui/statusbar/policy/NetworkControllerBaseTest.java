@@ -33,7 +33,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
-import com.android.settingslib.net.MobileDataController;
+import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
@@ -96,7 +96,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mCallbackHandler = mock(CallbackHandler.class);
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(MobileDataController.class),
+                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
                 mMockSubDefaults);
         setupNetworkController();
 
@@ -137,7 +137,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
               = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                         mConfig, Looper.getMainLooper(), mCallbackHandler,
                         mock(AccessPointControllerImpl.class),
-                        mock(MobileDataController.class), mMockSubDefaults);
+                        mock(DataUsageController.class), mMockSubDefaults);
 
       setupNetworkController();
 
