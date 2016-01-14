@@ -1061,6 +1061,11 @@ public class Paint {
      * @return       shader
      */
     public Shader setShader(Shader shader) {
+        // If mShader changes, cached value of native shader aren't valid, since
+        // old shader's pointer may be reused by another shader allocation later
+        if (mShader != shader) {
+            mNativeShader = -1;
+        }
         // Defer setting the shader natively until getNativeInstance() is called
         mShader = shader;
         return shader;
