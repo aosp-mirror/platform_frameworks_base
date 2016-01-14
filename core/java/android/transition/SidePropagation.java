@@ -16,6 +16,7 @@
 package android.transition;
 
 import android.graphics.Rect;
+import android.transition.Slide.GravityFlag;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ public class SidePropagation extends VisibilityPropagation {
      *             {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT},
      *             {@link Gravity#BOTTOM}, {@link Gravity#START}, or {@link Gravity#END}.
      */
-    public void setSide(int side) {
+    public void setSide(@GravityFlag int side) {
         mSide = side;
     }
 

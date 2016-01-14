@@ -17,6 +17,7 @@
 package android.animation;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
@@ -25,6 +26,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -233,6 +236,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * Public constants
      */
+
+    /** @hide */
+    @IntDef({RESTART, REVERSE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RepeatMode {}
 
     /**
      * When the animation reaches the end and <code>repeatCount</code> is INFINITE
@@ -807,7 +815,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      *
      * @param value {@link #RESTART} or {@link #REVERSE}
      */
-    public void setRepeatMode(int value) {
+    public void setRepeatMode(@RepeatMode int value) {
         mRepeatMode = value;
     }
 
@@ -816,6 +824,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      *
      * @return either one of {@link #REVERSE} or {@link #RESTART}
      */
+    @RepeatMode
     public int getRepeatMode() {
         return mRepeatMode;
     }

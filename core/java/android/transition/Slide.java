@@ -17,6 +17,7 @@ package android.transition;
 
 import android.animation.Animator;
 import android.animation.TimeInterpolator;
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -26,6 +27,9 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import com.android.internal.R;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -42,7 +46,12 @@ public class Slide extends Visibility {
     private static final TimeInterpolator sAccelerate = new AccelerateInterpolator();
     private static final String PROPNAME_SCREEN_POSITION = "android:slide:screenPosition";
     private CalculateSlide mSlideCalculator = sCalculateBottom;
-    private int mSlideEdge = Gravity.BOTTOM;
+    private @GravityFlag int mSlideEdge = Gravity.BOTTOM;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Gravity.LEFT, Gravity.TOP, Gravity.RIGHT, Gravity.BOTTOM, Gravity.START, Gravity.END})
+    public @interface GravityFlag {}
 
     private interface CalculateSlide {
 
@@ -176,7 +185,7 @@ public class Slide extends Visibility {
      *                  {@link android.view.Gravity#START}, {@link android.view.Gravity#END}.
      * @attr ref android.R.styleable#Slide_slideEdge
      */
-    public void setSlideEdge(int slideEdge) {
+    public void setSlideEdge(@GravityFlag int slideEdge) {
         switch (slideEdge) {
             case Gravity.LEFT:
                 mSlideCalculator = sCalculateLeft;
@@ -214,6 +223,7 @@ public class Slide extends Visibility {
      *         {@link android.view.Gravity#START}, {@link android.view.Gravity#END}.
      * @attr ref android.R.styleable#Slide_slideEdge
      */
+    @GravityFlag
     public int getSlideEdge() {
         return mSlideEdge;
     }
