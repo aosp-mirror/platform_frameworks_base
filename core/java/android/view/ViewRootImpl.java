@@ -3401,10 +3401,15 @@ public final class ViewRootImpl implements ViewParent,
 
                     mPendingBackDropFrame.set(mWinFrame);
 
-                    if (mView != null) {
-                        forceLayout(mView);
+                    // Suppress layouts during resizing - a correct layout will happen when resizing
+                    // is done, and this just increases system load.
+                    boolean suppress = mDragResizing && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER;
+                    if (!suppress) {
+                        if (mView != null) {
+                            forceLayout(mView);
+                        }
+                        requestLayout();
                     }
-                    requestLayout();
                 }
                 break;
             case MSG_WINDOW_FOCUS_CHANGED: {
