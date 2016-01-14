@@ -407,8 +407,9 @@ void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
     float canvasScaleY = 1.0f;
     if (mCanvasMatrix.getSkewX() == 0 && mCanvasMatrix.getSkewY() == 0) {
         // Only use the scale value when there's no skew or rotation in the canvas matrix.
-        canvasScaleX = mCanvasMatrix.getScaleX();
-        canvasScaleY = mCanvasMatrix.getScaleY();
+        // TODO: Add a cts test for drawing VD on a canvas with negative scaling factors.
+        canvasScaleX = fabs(mCanvasMatrix.getScaleX());
+        canvasScaleY = fabs(mCanvasMatrix.getScaleY());
     }
     int scaledWidth = (int) (mBounds.width() * canvasScaleX);
     int scaledHeight = (int) (mBounds.height() * canvasScaleY);
