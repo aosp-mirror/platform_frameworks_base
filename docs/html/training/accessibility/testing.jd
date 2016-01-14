@@ -1,11 +1,13 @@
 page.title=Accessibility Testing Checklist
-parent.title=Testing
-parent.link=index.html
+page.tags=testing,accessibility
+
+trainingnavtop=true
+startpage=true
 @jd:body
 
-<div id="qv-wrapper">
-  <div id="qv">
-  <h2>In this document</h2>
+<div id="tb-wrapper">
+  <div id="tb">
+  <h2>Checklist sections</h2>
   <ol>
     <li><a href="#goals">Testing Goals</a></li>
     <li><a href="#requirements">Testing Requirements</a></li>
@@ -20,7 +22,7 @@ parent.link=index.html
     </li>
   </ol>
 
-  <h2>See Also</h2>
+  <h2>You should also read</h2>
     <ol>
       <li>
         <a href="{@docRoot}guide/topics/ui/accessibility/checklist.html">
