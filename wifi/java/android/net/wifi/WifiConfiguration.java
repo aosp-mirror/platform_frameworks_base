@@ -24,6 +24,7 @@ import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -324,6 +325,13 @@ public class WifiConfiguration implements Parcelable {
      * passpoint credential will be considered valid
      */
     public long[] roamingConsortiumIds;
+
+    /**
+     * @hide
+     * This network configuration is visible to and usable by other users on the
+     * same device.
+     */
+    public boolean shared;
 
     /**
      * @hide
@@ -1103,6 +1111,7 @@ public class WifiConfiguration implements Parcelable {
         mIpConfiguration = new IpConfiguration();
         lastUpdateUid = -1;
         creatorUid = -1;
+        shared = true;
     }
 
     /**
@@ -1488,6 +1497,9 @@ public class WifiConfiguration implements Parcelable {
             key = mCachedConfigKey;
         } else if (providerFriendlyName != null) {
             key = FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+            if (!shared) {
+                key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
+            }
         } else {
             if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
                 key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
@@ -1499,6 +1511,9 @@ public class WifiConfiguration implements Parcelable {
             } else {
                 key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
             }
+            if (!shared) {
+                key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
+            }
             mCachedConfigKey = key;
         }
         return key;
@@ -1509,27 +1524,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public String configKey() {
         return configKey(false);
-    }
-
-    /** @hide
-     * return the config key string based on a scan result
-     */
-    static public String configKey(ScanResult result) {
-        String key = "\"" + result.SSID + "\"";
-
-        if (result.capabilities.contains("WEP")) {
-            key = key + "-WEP";
-        }
-
-        if (result.capabilities.contains("PSK")) {
-            key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_PSK];
-        }
-
-        if (result.capabilities.contains("EAP")) {
-            key = key + "-" + KeyMgmt.strings[KeyMgmt.WPA_EAP];
-        }
-
-        return key;
     }
 
     /** @hide */
@@ -1591,6 +1585,11 @@ public class WifiConfiguration implements Parcelable {
     /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
+    }
+
+    /** @hide */
+    public boolean isVisibleToUser(int userId) {
+        return shared || (UserHandle.getUserId(creatorUid) == userId);
     }
 
     /** copy constructor {@hide} */
@@ -1676,6 +1675,7 @@ public class WifiConfiguration implements Parcelable {
             noInternetAccessExpected = source.noInternetAccessExpected;
             creationTime = source.creationTime;
             updateTime = source.updateTime;
+            shared = source.shared;
         }
     }
 
@@ -1747,6 +1747,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
+        dest.writeInt(shared ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1814,6 +1815,7 @@ public class WifiConfiguration implements Parcelable {
                 config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
+                config.shared = in.readInt() != 0;
                 return config;
             }
 
