@@ -425,7 +425,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     /** Original bounds of the task if applicable, otherwise fullscreen rect. */
-    public void getBounds(Rect out) {
+    void getBounds(Rect out) {
         if (useCurrentBounds()) {
             // No need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
@@ -433,9 +433,8 @@ class Task implements DimLayer.DimLayerUser {
             return;
         }
 
-        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
-        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
-        // system.
+        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack is
+        // not currently visible. Go ahead a represent it as fullscreen to the rest of the system.
         mStack.getDisplayContent().getLogicalDisplayRect(out);
     }
 

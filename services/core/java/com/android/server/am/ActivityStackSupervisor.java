@@ -1940,7 +1940,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // static stacks need to be adjusted so they don't overlap with the docked stack.
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
-                mWindowManager.getStackDockedModeBounds(HOME_STACK_ID, tempRect);
+                mWindowManager.getStackDockedModeBounds(
+                        HOME_STACK_ID, tempRect, true /* ignoreVisibilityOnKeyguardShowing */);
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     if (StackId.isResizeableByDockedStack(i)) {
                         ActivityStack otherStack = getStack(i);
