@@ -166,6 +166,14 @@ final class ActivityStack {
         DESTROYED
     }
 
+    // Stack is not considered visible.
+    static final int STACK_INVISIBLE = 0;
+    // Stack is considered visible
+    static final int STACK_VISIBLE = 1;
+    // Stack is considered visible, but only becuase it has activity that is visible behind other
+    // activities and there is a specific combination of stacks.
+    static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
+
     final ActivityManagerService mService;
     final WindowManagerService mWindowManager;
     private final RecentTasks mRecentTasks;
@@ -1321,7 +1329,8 @@ final class ActivityStack {
         if (stacks != null) {
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 ActivityStack stack = stacks.get(i);
-                if (stack != this && stack.isFocusable() && stack.isStackVisibleLocked()) {
+                if (stack != this && stack.isFocusable()
+                        && stack.getStackVisibilityLocked() != STACK_INVISIBLE) {
                     return stack;
                 }
             }
@@ -1363,14 +1372,17 @@ final class ActivityStack {
         return true;
     }
 
-    /** Returns true if the stack is considered visible. */
-    boolean isStackVisibleLocked() {
+    /**
+     * Returns stack's visibility: {@link #STACK_INVISIBLE}, {@link #STACK_VISIBLE} or
+     * {@link #STACK_VISIBLE_ACTIVITY_BEHIND}.
+     */
+    int getStackVisibilityLocked() {
         if (!isAttached()) {
-            return false;
+            return STACK_INVISIBLE;
         }
 
         if (mStackSupervisor.isFrontStack(this) || mStackSupervisor.isFocusedStack(this)) {
-            return true;
+            return STACK_VISIBLE;
         }
 
         final int stackIndex = mStacks.indexOf(this);
@@ -1378,12 +1390,12 @@ final class ActivityStack {
         if (stackIndex == mStacks.size() - 1) {
             Slog.wtf(TAG,
                     "Stack=" + this + " isn't front stack but is at the top of the stack list");
-            return false;
+            return STACK_INVISIBLE;
         }
 
         final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
         if (isLockscreenShown && !StackId.isAllowedOverLockscreen(mStackId)) {
-            return false;
+            return STACK_INVISIBLE;
         }
 
         final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
@@ -1394,17 +1406,18 @@ final class ActivityStack {
                 && !focusedStack.topActivity().fullscreen) {
             // The fullscreen stack should be visible if it has a visible behind activity behind
             // the home stack that is translucent.
-            return true;
+            return STACK_VISIBLE_ACTIVITY_BEHIND;
         }
 
         if (mStackId == DOCKED_STACK_ID) {
             // Docked stack is always visible, except in the case where the home activity
             // is the top running activity in the focused home stack.
             if (focusedStackId != HOME_STACK_ID) {
-                return true;
+                return STACK_VISIBLE;
             }
             ActivityRecord topHomeActivity = focusedStack.topRunningActivityLocked();
-            return topHomeActivity == null || !topHomeActivity.isHomeActivity();
+            return topHomeActivity == null || !topHomeActivity.isHomeActivity() ?
+                    STACK_VISIBLE : STACK_INVISIBLE;
         }
 
         // Find the first stack below focused stack that actually got something visible.
@@ -1416,7 +1429,7 @@ final class ActivityStack {
         if ((focusedStackId == DOCKED_STACK_ID || focusedStackId == PINNED_STACK_ID)
                 && stackIndex == belowFocusedIndex) {
             // Stacks directly behind the docked or pinned stack are always visible.
-            return true;
+            return STACK_VISIBLE;
         }
 
         if (focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
@@ -1425,7 +1438,7 @@ final class ActivityStack {
             // visible so they can act as a backdrop to the translucent activity.
             // For example, dialog activities
             if (stackIndex == belowFocusedIndex) {
-                return true;
+                return STACK_VISIBLE;
             }
             if (belowFocusedIndex >= 0) {
                 final ActivityStack stack = mStacks.get(belowFocusedIndex);
@@ -1433,14 +1446,14 @@ final class ActivityStack {
                         && stackIndex == (belowFocusedIndex - 1)) {
                     // The stack behind the docked or pinned stack is also visible so we can have a
                     // complete backdrop to the translucent activity when the docked stack is up.
-                    return true;
+                    return STACK_VISIBLE;
                 }
             }
         }
 
         if (StackId.isStaticStack(mStackId)) {
             // Visibility of any static stack should have been determined by the conditions above.
-            return false;
+            return STACK_INVISIBLE;
         }
 
         for (int i = stackIndex + 1; i < mStacks.size(); i++) {
@@ -1452,15 +1465,15 @@ final class ActivityStack {
 
             if (!StackId.isDynamicStacksVisibleBehindAllowed(stack.mStackId)) {
                 // These stacks can't have any dynamic stacks visible behind them.
-                return false;
+                return STACK_INVISIBLE;
             }
 
             if (!hasTranslucentActivity(stack)) {
-                return false;
+                return STACK_INVISIBLE;
             }
         }
 
-        return true;
+        return STACK_VISIBLE;
     }
 
     final int rankTaskLayers(int baseLayer) {
@@ -1493,14 +1506,16 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = top != null;
-        final boolean stackInvisible = !isStackVisibleLocked();
+        final int stackVisibility = getStackVisibilityLocked();
+        final boolean stackInvisible = stackVisibility != STACK_VISIBLE;
+        final boolean stackVisibleBehind = stackVisibility == STACK_VISIBLE_ACTIVITY_BEHIND;
         boolean behindFullscreenActivity = stackInvisible;
         boolean resumeNextActivity = isFocusable() && (isInStackLocked(starting) == null);
-
+        boolean behindTranslucentActivity = false;
+        final ActivityRecord visibleBehind = getVisibleBehindActivity();
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
-
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.finishing) {
@@ -1513,10 +1528,13 @@ final class ActivityStack {
                 aboveTop = false;
                 // mLaunchingBehind: Activities launching behind are at the back of the task stack
                 // but must be drawn initially for the animation as though they were visible.
-                if ((!behindFullscreenActivity || r.mLaunchTaskBehind) && okToShowLocked(r)) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                            "Make visible? " + r + " finishing=" + r.finishing
-                            + " state=" + r.state);
+                final boolean activityVisibleBehind =
+                        (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
+                final boolean isVisible = (!behindFullscreenActivity || r.mLaunchTaskBehind
+                        || activityVisibleBehind) && okToShowLocked(r);
+                if (isVisible) {
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
+                            + " finishing=" + r.finishing + " state=" + r.state);
                     // First: if this is not the current activity being started, make
                     // sure it matches the current configuration.
                     if (r != starting) {
@@ -1545,15 +1563,23 @@ final class ActivityStack {
                     configChanges |= r.configChangeFlags;
                     behindFullscreenActivity = updateBehindFullscreen(stackInvisible,
                             behindFullscreenActivity, task, r);
+                    if (behindFullscreenActivity && !r.fullscreen) {
+                        behindTranslucentActivity = true;
+                    }
                 } else {
-                    makeInvisible(stackInvisible, behindFullscreenActivity, r);
+                    if (DEBUG_VISIBILITY || true) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
+                            + " finishing=" + r.finishing + " state=" + r.state + " stackInvisible="
+                            + stackInvisible + " behindFullscreenActivity="
+                            + behindFullscreenActivity + " mLaunchTaskBehind="
+                            + r.mLaunchTaskBehind);
+                    makeInvisible(r, visibleBehind);
                 }
             }
             if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
                 // The visibility of tasks and the activities they contain in freeform stack are
                 // determined individually unlike other stacks where the visibility or fullscreen
                 // status of an activity in a previous task affects other.
-                behindFullscreenActivity = stackInvisible;
+                behindFullscreenActivity = stackVisibility == STACK_INVISIBLE;
             }
         }
 
@@ -1601,11 +1627,7 @@ final class ActivityStack {
         return false;
     }
 
-    private void makeInvisible(boolean stackInvisible, boolean behindFullscreenActivity,
-            ActivityRecord r) {
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r + " finishing="
-                + r.finishing + " state=" + r.state + " stackInvisible=" + stackInvisible
-                + " behindFullscreenActivity=" + behindFullscreenActivity);
+    private void makeInvisible(ActivityRecord r, ActivityRecord visibleBehind) {
         if (!r.visible) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + r);
             return;
@@ -1631,7 +1653,7 @@ final class ActivityStack {
                 case PAUSED:
                     // This case created for transitioning activities from
                     // translucent to opaque {@link Activity#convertToOpaque}.
-                    if (getVisibleBehindActivity() == r) {
+                    if (visibleBehind == r) {
                         releaseBackgroundResources(r);
                     } else {
                         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
@@ -1653,16 +1675,16 @@ final class ActivityStack {
     private boolean updateBehindFullscreen(boolean stackInvisible, boolean behindFullscreenActivity,
             TaskRecord task, ActivityRecord r) {
         if (r.fullscreen) {
-            // At this point, nothing else needs to be shown in this task.
-            behindFullscreenActivity = true;
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
                     + " stackInvisible=" + stackInvisible
                     + " behindFullscreenActivity=" + behindFullscreenActivity);
-        } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
+            // At this point, nothing else needs to be shown in this task.
             behindFullscreenActivity = true;
+        } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
                     + " stackInvisible=" + stackInvisible
                     + " behindFullscreenActivity=" + behindFullscreenActivity);
+            behindFullscreenActivity = true;
         }
         return behindFullscreenActivity;
     }
@@ -3718,7 +3740,7 @@ final class ActivityStack {
     void releaseBackgroundResources(ActivityRecord r) {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            if (r == topRunningActivityLocked() && isStackVisibleLocked()) {
+            if (r == topRunningActivityLocked() && getStackVisibilityLocked() == STACK_VISIBLE) {
                 // Don't release the top activity if it has requested to run behind the next
                 // activity and the stack is currently visible.
                 return;

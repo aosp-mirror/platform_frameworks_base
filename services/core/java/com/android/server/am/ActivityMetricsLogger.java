@@ -5,6 +5,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 
 import android.app.ActivityManager.StackId;
 import android.content.Context;
@@ -51,7 +52,7 @@ class ActivityMetricsLogger {
         mLastLogTimeSecs = now;
 
         ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-        if (stack != null && stack.isStackVisibleLocked()) {
+        if (stack != null && stack.getStackVisibilityLocked() != STACK_INVISIBLE) {
             mWindowState = WINDOW_STATE_SIDE_BY_SIDE;
             return;
         }
