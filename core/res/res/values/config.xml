@@ -413,7 +413,10 @@
     <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
     <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">true</bool>
 
-    <!-- Integer specifying the basic Quality Network Selection parameters -->
+    <!-- Boolean indicating whether or not wifi should turn off when emergency call is made -->
+    <bool translatable="false" name="config_wifi_turn_off_during_emergency_call">false</bool>
+
+    <!-- Integer specifying the basic autojoin parameters -->
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_threshold">-65</integer>
     <integer translatable="false" name="config_wifi_framework_5GHz_preference_boost_factor">40</integer>
     <integer translatable="false" name="config_wifi_framework_current_association_hysteresis_high">16</integer>
