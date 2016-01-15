@@ -34,32 +34,58 @@
 
 namespace {
 
-// Maximum number of bytes to write in one request.
+// The numbers came from sdcard.c.
+// Maximum number of bytes to write/read in one request/one reply.
 constexpr size_t MAX_WRITE = 256 * 1024;
+constexpr size_t MAX_READ = 128 * 1024;
+
 constexpr size_t NUM_MAX_HANDLES = 1024;
 
 // Largest possible request.
 // The request size is bounded by the maximum size of a FUSE_WRITE request
 // because it has the largest possible data payload.
 constexpr size_t MAX_REQUEST_SIZE = sizeof(struct fuse_in_header) +
-        sizeof(struct fuse_write_in) + MAX_WRITE;
+        sizeof(struct fuse_write_in) + std::max(MAX_WRITE, MAX_READ);
 
 static jclass app_fuse_class;
 static jmethodID app_fuse_get_file_size;
 static jmethodID app_fuse_get_object_bytes;
 
+// NOTE:
+// FuseRequest and FuseResponse shares the same buffer to save memory usage, so the handlers must
+// not access input buffer after writing data to output buffer.
 struct FuseRequest {
     char buffer[MAX_REQUEST_SIZE];
     FuseRequest() {}
     const struct fuse_in_header& header() const {
         return *(const struct fuse_in_header*) buffer;
     }
-    const void* data() const {
+    void* data() {
         return (buffer + sizeof(struct fuse_in_header));
     }
     size_t data_length() const {
         return header().len - sizeof(struct fuse_in_header);
     }
+};
+
+template<typename T>
+class FuseResponse {
+   size_t size_;
+   T* const buffer_;
+public:
+   FuseResponse(void* buffer) : size_(0), buffer_(static_cast<T*>(buffer)) {}
+
+   void prepare_buffer(size_t size = sizeof(T)) {
+       memset(buffer_, 0, size);
+       size_ = size;
+   }
+
+   void set_size(size_t size) {
+       size_ = size;
+   }
+
+   size_t size() const { return size_; }
+   T* data() const { return buffer_; }
 };
 
 class ScopedFd {
@@ -76,7 +102,7 @@ public:
 };
 
 /**
- * The class is used to access AppFuse class in Java from fuse handlers.
+ * Fuse implementation consists of handlers parsing FUSE commands.
  */
 class AppFuse {
     JNIEnv* env_;
@@ -90,9 +116,9 @@ public:
     AppFuse(JNIEnv* env, jobject self) :
         env_(env), self_(self), handle_counter_(0) {}
 
-    bool handle_fuse_request(int fd, const FuseRequest& req) {
-        ALOGV("Request op=%d", req.header().opcode);
-        switch (req.header().opcode) {
+    bool handle_fuse_request(int fd, FuseRequest* req) {
+        ALOGV("Request op=%d", req->header().opcode);
+        switch (req->header().opcode) {
             // TODO: Handle more operations that are enough to provide seekable
             // FD.
             case FUSE_LOOKUP:
@@ -110,20 +136,20 @@ public:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_open);
                 return true;
             case FUSE_READ:
-                invoke_handler(fd, req, &AppFuse::handle_fuse_read, 8192);
+                invoke_handler(fd, req, &AppFuse::handle_fuse_read);
                 return true;
             case FUSE_RELEASE:
-                invoke_handler(fd, req, &AppFuse::handle_fuse_release, 0);
+                invoke_handler(fd, req, &AppFuse::handle_fuse_release);
                 return true;
             case FUSE_FLUSH:
-                invoke_handler(fd, req, &AppFuse::handle_fuse_flush, 0);
+                invoke_handler(fd, req, &AppFuse::handle_fuse_flush);
                 return true;
             default: {
                 ALOGV("NOTIMPL op=%d uniq=%" PRIx64 " nid=%" PRIx64 "\n",
-                      req.header().opcode,
-                      req.header().unique,
-                      req.header().nodeid);
-                fuse_reply(fd, req.header().unique, -ENOSYS, NULL, 0);
+                      req->header().opcode,
+                      req->header().unique,
+                      req->header().nodeid);
+                fuse_reply(fd, req->header().unique, -ENOSYS, NULL, 0);
                 return true;
             }
         }
@@ -132,8 +158,7 @@ public:
 private:
     int handle_fuse_lookup(const fuse_in_header& header,
                            const char* name,
-                           fuse_entry_out* out,
-                           uint32_t* /*unused*/) {
+                           FuseResponse<fuse_entry_out>* out) {
         if (header.nodeid != 1) {
             return -ENOENT;
         }
@@ -148,19 +173,19 @@ private:
             return -ENOENT;
         }
 
-        out->nodeid = n;
-        out->attr_valid = 10;
-        out->entry_valid = 10;
-        out->attr.ino = n;
-        out->attr.mode = S_IFREG | 0777;
-        out->attr.size = size;
+        out->prepare_buffer();
+        out->data()->nodeid = n;
+        out->data()->attr_valid = 10;
+        out->data()->entry_valid = 10;
+        out->data()->attr.ino = n;
+        out->data()->attr.mode = S_IFREG | 0777;
+        out->data()->attr.size = size;
         return 0;
     }
 
     int handle_fuse_init(const fuse_in_header&,
                          const fuse_init_in* in,
-                         fuse_init_out* out,
-                         uint32_t* reply_size) {
+                         FuseResponse<fuse_init_out>* out) {
         // Kernel 2.6.16 is the first stable kernel with struct fuse_init_out
         // defined (fuse version 7.6). The structure is the same from 7.6 through
         // 7.22. Beginning with 7.23, the structure increased in size and added
@@ -172,50 +197,58 @@ private:
             return -1;
         }
 
+        // Before writing |out|, we need to copy data from |in|.
+        const uint32_t minor = in->minor;
+        const uint32_t max_readahead = in->max_readahead;
+
         // We limit ourselves to 15 because we don't handle BATCH_FORGET yet
-        out->minor = std::min(in->minor, 15u);
+        size_t response_size = sizeof(fuse_init_out);
 #if defined(FUSE_COMPAT_22_INIT_OUT_SIZE)
         // FUSE_KERNEL_VERSION >= 23.
 
         // If the kernel only works on minor revs older than or equal to 22,
         // then use the older structure size since this code only uses the 7.22
         // version of the structure.
-        if (in->minor <= 22) {
-            *reply_size = FUSE_COMPAT_22_INIT_OUT_SIZE;
+        if (minor <= 22) {
+            response_size = FUSE_COMPAT_22_INIT_OUT_SIZE;
         }
-#else
-        // Don't drop this line to prevent an 'unused' compile error.
-        *reply_size = sizeof(fuse_init_out);
 #endif
-
-        out->major = FUSE_KERNEL_VERSION;
-        out->max_readahead = in->max_readahead;
-        out->flags = FUSE_ATOMIC_O_TRUNC | FUSE_BIG_WRITES;
-        out->max_background = 32;
-        out->congestion_threshold = 32;
-        out->max_write = MAX_WRITE;
+        out->prepare_buffer(response_size);
+        out->data()->major = FUSE_KERNEL_VERSION;
+        out->data()->minor = std::min(minor, 15u);
+        out->data()->max_readahead = max_readahead;
+        out->data()->flags = FUSE_ATOMIC_O_TRUNC | FUSE_BIG_WRITES;
+        out->data()->max_background = 32;
+        out->data()->congestion_threshold = 32;
+        out->data()->max_write = MAX_WRITE;
 
         return 0;
     }
 
     int handle_fuse_getattr(const fuse_in_header& header,
                             const fuse_getattr_in* /* in */,
-                            fuse_attr_out* out,
-                            uint32_t* /*unused*/) {
-        if (header.nodeid != 1) {
-            return -ENOENT;
+                            FuseResponse<fuse_attr_out>* out) {
+        out->prepare_buffer();
+        out->data()->attr_valid = 10;
+        out->data()->attr.ino = header.nodeid;
+        if (header.nodeid == 1) {
+            out->data()->attr.mode = S_IFDIR | 0777;
+            out->data()->attr.size = 0;
+        } else {
+            int64_t size = get_file_size(header.nodeid);
+            if (size < 0) {
+                return -ENOENT;
+            }
+            out->data()->attr.mode = S_IFREG | 0777;
+            out->data()->attr.size = size;
         }
-        out->attr_valid = 1000 * 60 * 10;
-        out->attr.ino = header.nodeid;
-        out->attr.mode = S_IFDIR | 0777;
-        out->attr.size = 0;
+
         return 0;
     }
 
     int handle_fuse_open(const fuse_in_header& header,
                          const fuse_open_in* /* in */,
-                         fuse_open_out* out,
-                         uint32_t* /*unused*/) {
+                         FuseResponse<fuse_open_out>* out) {
         if (handles_.size() >= NUM_MAX_HANDLES) {
             // Too many open files.
             return -EMFILE;
@@ -224,68 +257,66 @@ private:
         do {
            handle = handle_counter_++;
         } while (handles_.count(handle) != 0);
-
         handles_.insert(std::make_pair(handle, header.nodeid));
-        out->fh = handle;
+
+        out->prepare_buffer();
+        out->data()->fh = handle;
         return 0;
     }
 
     int handle_fuse_read(const fuse_in_header& /* header */,
                          const fuse_read_in* in,
-                         void* out,
-                         uint32_t* reply_size) {
+                         FuseResponse<void>* out) {
+        if (in->size > MAX_READ) {
+            return -EINVAL;
+        }
         const std::map<uint32_t, uint64_t>::iterator it = handles_.find(in->fh);
         if (it == handles_.end()) {
             return -EBADF;
         }
-        const int64_t result = get_object_bytes(
-                it->second,
-                in->offset,
-                in->size,
-                out);
+        uint64_t offset = in->offset;
+        uint32_t size = in->size;
+
+        // Overwrite the size after writing data.
+        out->prepare_buffer(0);
+        const int64_t result = get_object_bytes(it->second, offset, size, out->data());
         if (result < 0) {
             return -EIO;
         }
-        *reply_size = static_cast<size_t>(result);
+        out->set_size(result);
         return 0;
     }
 
     int handle_fuse_release(const fuse_in_header& /* header */,
                             const fuse_release_in* in,
-                            void* /* out */,
-                            uint32_t* /* reply_size */) {
+                            FuseResponse<void>* /* out */) {
         handles_.erase(in->fh);
         return 0;
     }
 
     int handle_fuse_flush(const fuse_in_header& /* header */,
                           const void* /* in */,
-                          void* /* out */,
-                          uint32_t* /* reply_size */) {
+                          FuseResponse<void>* /* out */) {
         return 0;
     }
 
     template <typename T, typename S>
     void invoke_handler(int fd,
-                        const FuseRequest& request,
+                        FuseRequest* request,
                         int (AppFuse::*handler)(const fuse_in_header&,
                                                 const T*,
-                                                S*,
-                                                uint32_t*),
-                        uint32_t reply_size = sizeof(S)) {
-        char reply_data[reply_size];
-        memset(reply_data, 0, reply_size);
+                                                FuseResponse<S>*)) {
+        FuseResponse<S> response(request->data());
         const int reply_code = (this->*handler)(
-                request.header(),
-                static_cast<const T*>(request.data()),
-                reinterpret_cast<S*>(reply_data),
-                &reply_size);
+                request->header(),
+                static_cast<const T*>(request->data()),
+                &response);
         fuse_reply(
                 fd,
-                request.header().unique,
+                request->header().unique,
                 reply_code,
-                reply_data,
-                reply_size);
+                request->data(),
+                response.size());
     }
 
     int64_t get_file_size(int inode) {
@@ -378,7 +409,7 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
             continue;
         }
 
-        if (!appfuse.handle_fuse_request(fd, request)) {
+        if (!appfuse.handle_fuse_request(fd, &request)) {
             return JNI_TRUE;
         }
     }
