@@ -87,22 +87,10 @@ public abstract class WindowOrientationListener {
         mHandler = handler;
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_DEVICE_ORIENTATION);
 
-        mSensorType = context.getResources().getString(
-                com.android.internal.R.string.config_orientationSensorType);
-        if (!TextUtils.isEmpty(mSensorType)) {
-            List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-            final int N = sensors.size();
-            for (int i = 0; i < N; i++) {
-                Sensor sensor = sensors.get(i);
-                if (mSensorType.equals(sensor.getStringType())) {
-                    mSensor = sensor;
-                    break;
-                }
-            }
-            if (mSensor != null) {
-                mOrientationJudge = new OrientationSensorJudge();
-            }
+        if (mSensor != null) {
+            mOrientationJudge = new OrientationSensorJudge();
         }
 
         if (mOrientationJudge == null) {
