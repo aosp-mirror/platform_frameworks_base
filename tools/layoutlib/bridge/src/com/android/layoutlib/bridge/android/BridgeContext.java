@@ -196,7 +196,12 @@ public final class BridgeContext extends Context {
 
         mRenderResources = renderResources;
         mConfig = config;
-        mAssets = new BridgeAssetManager();
+        AssetManager systemAssetManager = AssetManager.getSystem();
+        if (systemAssetManager instanceof BridgeAssetManager) {
+            mAssets = (BridgeAssetManager) systemAssetManager;
+        } else {
+            throw new AssertionError("Creating BridgeContext without initializing Bridge");
+        }
         mAssets.setAssetRepository(assets);
 
         mApplicationInfo = new ApplicationInfo();
