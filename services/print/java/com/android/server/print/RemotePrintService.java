@@ -409,7 +409,7 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    public void startPrinterStateTracking(PrinterId printerId) {
+    public void startPrinterStateTracking(@NonNull PrinterId printerId) {
         mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_STATE_TRACKING,
                 printerId).sendToTarget();
     }
@@ -420,7 +420,7 @@ final class RemotePrintService implements DeathRecipient {
      * @param printerId the id of the printer the icon should be loaded for
      * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
      */
-    public void requestCustomPrinterIcon(PrinterId printerId) {
+    public void requestCustomPrinterIcon(@NonNull PrinterId printerId) {
         try {
             if (isBound()) {
                 mPrintService.requestCustomPrinterIcon(printerId);
@@ -430,7 +430,7 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    private void handleStartPrinterStateTracking(final PrinterId printerId) {
+    private void handleStartPrinterStateTracking(final @NonNull PrinterId printerId) {
         throwIfDestroyed();
         // Take a note we are tracking the printer.
         if (mTrackedPrinterList == null) {

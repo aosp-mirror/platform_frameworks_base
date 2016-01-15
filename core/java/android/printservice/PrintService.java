@@ -16,6 +16,7 @@
 
 package android.printservice;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
 import android.content.ComponentName;
@@ -346,7 +347,7 @@ public abstract class PrintService extends Service {
      * @param localId A locally unique id in the context of your print service.
      * @return Global printer id.
      */
-    public final PrinterId generatePrinterId(String localId) {
+    public @NonNull final PrinterId generatePrinterId(String localId) {
         throwIfNotCalledOnMainThread();
         localId = Preconditions.checkNotNull(localId, "localId cannot be null");
         return new PrinterId(new ComponentName(getPackageName(),

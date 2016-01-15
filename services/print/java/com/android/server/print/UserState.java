@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -176,8 +177,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     @SuppressWarnings("deprecation")
-    public Bundle print(String printJobName, IPrintDocumentAdapter adapter,
-            PrintAttributes attributes, String packageName, int appId) {
+    public Bundle print(@NonNull String printJobName, @NonNull IPrintDocumentAdapter adapter,
+            @Nullable PrintAttributes attributes, @NonNull String packageName, int appId) {
         // Create print job place holder.
         final PrintJobInfo printJob = new PrintJobInfo();
         printJob.setId(new PrintJobId());
@@ -267,7 +268,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         return new ArrayList<PrintJobInfo>(result.values());
     }
 
-    public PrintJobInfo getPrintJobInfo(PrintJobId printJobId, int appId) {
+    public PrintJobInfo getPrintJobInfo(@NonNull PrintJobId printJobId, int appId) {
         PrintJobInfo printJob = mPrintJobForAppCache.getPrintJob(printJobId, appId);
         if (printJob == null) {
             printJob = mSpooler.getPrintJobInfo(printJobId, appId);
@@ -290,7 +291,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
      *         not yet available
      * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
      */
-    public Icon getCustomPrinterIcon(PrinterId printerId) {
+    public @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
         Icon icon = mSpooler.getCustomPrinterIcon(printerId);
 
         if (icon == null) {
@@ -303,7 +304,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         return icon;
     }
 
-    public void cancelPrintJob(PrintJobId printJobId, int appId) {
+    public void cancelPrintJob(@NonNull PrintJobId printJobId, int appId) {
         PrintJobInfo printJobInfo = mSpooler.getPrintJobInfo(printJobId, appId);
         if (printJobInfo == null) {
             return;
@@ -313,15 +314,19 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mSpooler.setPrintJobCancelling(printJobId, true);
 
         if (printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
-            ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
-            RemotePrintService printService = null;
-            synchronized (mLock) {
-                printService = mActiveServices.get(printServiceName);
+            PrinterId printerId = printJobInfo.getPrinterId();
+
+            if (printerId != null) {
+                ComponentName printServiceName = printerId.getServiceName();
+                RemotePrintService printService = null;
+                synchronized (mLock) {
+                    printService = mActiveServices.get(printServiceName);
+                }
+                if (printService == null) {
+                    return;
+                }
+                printService.onRequestCancelPrintJob(printJobInfo);
             }
-            if (printService == null) {
-                return;
-            }
-            printService.onRequestCancelPrintJob(printJobInfo);
         } else {
             // If the print job is failed we do not need cooperation
             // from the print service.
@@ -329,7 +334,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void restartPrintJob(PrintJobId printJobId, int appId) {
+    public void restartPrintJob(@NonNull PrintJobId printJobId, int appId) {
         PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, appId);
         if (printJobInfo == null || printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
             return;
@@ -363,7 +368,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void createPrinterDiscoverySession(IPrinterDiscoveryObserver observer) {
+    public void createPrinterDiscoverySession(@NonNull IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
 
@@ -386,7 +391,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void destroyPrinterDiscoverySession(IPrinterDiscoveryObserver observer) {
+    public void destroyPrinterDiscoverySession(@NonNull IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             // Already destroyed - nothing to do.
             if (mPrinterDiscoverySession == null) {
@@ -397,8 +402,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer,
-            List<PrinterId> printerIds) {
+    public void startPrinterDiscovery(@NonNull IPrinterDiscoveryObserver observer,
+            @Nullable List<PrinterId> printerIds) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             // No services - nothing to do.
@@ -415,7 +420,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void stopPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+    public void stopPrinterDiscovery(@NonNull IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             // No services - nothing to do.
@@ -431,7 +436,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void validatePrinters(List<PrinterId> printerIds) {
+    public void validatePrinters(@NonNull List<PrinterId> printerIds) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             // No services - nothing to do.
@@ -447,7 +452,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void startPrinterStateTracking(PrinterId printerId) {
+    public void startPrinterStateTracking(@NonNull PrinterId printerId) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             // No services - nothing to do.
@@ -479,7 +484,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void addPrintJobStateChangeListener(IPrintJobStateChangeListener listener,
+    public void addPrintJobStateChangeListener(@NonNull IPrintJobStateChangeListener listener,
             int appId) throws RemoteException {
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -497,7 +502,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
-    public void removePrintJobStateChangeListener(IPrintJobStateChangeListener listener) {
+    public void removePrintJobStateChangeListener(@NonNull IPrintJobStateChangeListener listener) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             if (mPrintJobStateChangeListenerRecords == null) {
@@ -613,7 +618,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mDestroyed = true;
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String prefix) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String prefix) {
         pw.append(prefix).append("user state ").append(String.valueOf(mUserId)).append(":");
         pw.println();
 
@@ -991,10 +996,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     }
 
     private abstract class PrintJobStateChangeListenerRecord implements DeathRecipient {
-        final IPrintJobStateChangeListener listener;
+        @NonNull final IPrintJobStateChangeListener listener;
         final int appId;
 
-        public PrintJobStateChangeListenerRecord(IPrintJobStateChangeListener listener,
+        public PrintJobStateChangeListenerRecord(@NonNull IPrintJobStateChangeListener listener,
                 int appId) throws RemoteException {
             this.listener = listener;
             this.appId = appId;
@@ -1043,7 +1048,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     .sendToTarget();
         }
 
-        public void addObserverLocked(IPrinterDiscoveryObserver observer) {
+        public void addObserverLocked(@NonNull IPrinterDiscoveryObserver observer) {
             // Add the observer.
             mDiscoveryObservers.register(observer);
 
@@ -1058,7 +1063,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
         }
 
-        public void removeObserverLocked(IPrinterDiscoveryObserver observer) {
+        public void removeObserverLocked(@NonNull IPrinterDiscoveryObserver observer) {
             // Remove the observer.
             mDiscoveryObservers.unregister(observer);
             // No one else observing - then kill it.
@@ -1067,8 +1072,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
         }
 
-        public final void startPrinterDiscoveryLocked(IPrinterDiscoveryObserver observer,
-                List<PrinterId> priorityList) {
+        public final void startPrinterDiscoveryLocked(@NonNull IPrinterDiscoveryObserver observer,
+                @Nullable List<PrinterId> priorityList) {
             if (mIsDestroyed) {
                 Log.w(LOG_TAG, "Not starting dicovery - session destroyed");
                 return;
@@ -1101,7 +1106,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     .sendToTarget();
         }
 
-        public final void stopPrinterDiscoveryLocked(IPrinterDiscoveryObserver observer) {
+        public final void stopPrinterDiscoveryLocked(@NonNull IPrinterDiscoveryObserver observer) {
             if (mIsDestroyed) {
                 Log.w(LOG_TAG, "Not stopping dicovery - session destroyed");
                 return;
@@ -1121,7 +1126,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                     .sendToTarget();
         }
 
-        public void validatePrintersLocked(List<PrinterId> printerIds) {
+        public void validatePrintersLocked(@NonNull List<PrinterId> printerIds) {
             if (mIsDestroyed) {
                 Log.w(LOG_TAG, "Not validating pritners - session destroyed");
                 return;
@@ -1135,13 +1140,15 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 ComponentName serviceName = null;
                 while (iterator.hasNext()) {
                     PrinterId printerId = iterator.next();
-                    if (updateList.isEmpty()) {
-                        updateList.add(printerId);
-                        serviceName = printerId.getServiceName();
-                        iterator.remove();
-                    } else if (printerId.getServiceName().equals(serviceName)) {
-                        updateList.add(printerId);
-                        iterator.remove();
+                    if (printerId != null) {
+                        if (updateList.isEmpty()) {
+                            updateList.add(printerId);
+                            serviceName = printerId.getServiceName();
+                            iterator.remove();
+                        } else if (printerId.getServiceName().equals(serviceName)) {
+                            updateList.add(printerId);
+                            iterator.remove();
+                        }
                     }
                 }
                 // Schedule a notification of the service.
@@ -1157,7 +1164,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             }
         }
 
-        public final void startPrinterStateTrackingLocked(PrinterId printerId) {
+        public final void startPrinterStateTrackingLocked(@NonNull PrinterId printerId) {
             if (mIsDestroyed) {
                 Log.w(LOG_TAG, "Not starting printer state tracking - session destroyed");
                 return;
@@ -1500,8 +1507,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
             service.validatePrinters(printerIds);
         }
 
-        private void handleStartPrinterStateTracking(RemotePrintService service,
-                PrinterId printerId) {
+        private void handleStartPrinterStateTracking(@NonNull RemotePrintService service,
+                @NonNull PrinterId printerId) {
             service.startPrinterStateTracking(printerId);
         }
 

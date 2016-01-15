@@ -42,6 +42,23 @@ public class Preconditions {
      * @return the string reference that was validated
      * @throws IllegalArgumentException if {@code string} is empty
      */
+    public static @NonNull String checkStringNotEmpty(final String string) {
+        if (TextUtils.isEmpty(string)) {
+            throw new IllegalArgumentException();
+        }
+        return string;
+    }
+
+    /**
+     * Ensures that an string reference passed as a parameter to the calling
+     * method is not empty.
+     *
+     * @param string an string reference
+     * @param errorMessage the exception message to use if the check fails; will
+     *     be converted to a string using {@link String#valueOf(Object)}
+     * @return the string reference that was validated
+     * @throws IllegalArgumentException if {@code string} is empty
+     */
     public static @NonNull String checkStringNotEmpty(final String string,
             final Object errorMessage) {
         if (TextUtils.isEmpty(string)) {
@@ -301,8 +318,8 @@ public class Preconditions {
      *
      * @throws NullPointerException if the {@code value} or any of its elements were {@code null}
      */
-    public static <T> Collection<T> checkCollectionElementsNotNull(final Collection<T> value,
-            final String valueName) {
+    public static @NonNull <C extends Collection<T>, T> C checkCollectionElementsNotNull(
+            final C value, final String valueName) {
         if (value == null) {
             throw new NullPointerException(valueName + " must not be null");
         }

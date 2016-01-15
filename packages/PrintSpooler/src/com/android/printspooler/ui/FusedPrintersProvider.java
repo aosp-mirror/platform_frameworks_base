@@ -16,6 +16,7 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Loader;
@@ -452,7 +453,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         return mPersistenceManager.mReadHistoryCompleted;
     }
 
-    public void setTrackedPrinter(PrinterId printerId) {
+    public void setTrackedPrinter(@Nullable PrinterId printerId) {
         if (isStarted() && mDiscoverySession != null
                 && mDiscoverySession.isPrinterDiscoveryStarted()) {
             if (mTrackedPrinter != null) {

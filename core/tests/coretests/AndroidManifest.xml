@@ -1294,6 +1294,26 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.print.PrintTestActivity"/>
+
+        <service
+            android:name="android.print.mockservice.MockPrintService"
+            android:permission="android.permission.BIND_PRINT_SERVICE">
+            <intent-filter>
+                <action android:name="android.printservice.PrintService" />
+            </intent-filter>
+            <meta-data
+               android:name="android.printservice"
+               android:resource="@xml/printservice">
+            </meta-data>
+        </service>
+
+        <activity
+            android:name="android.print.mockservice.SettingsActivity"
+            android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
+            android:exported="true">
+        </activity>
+
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
