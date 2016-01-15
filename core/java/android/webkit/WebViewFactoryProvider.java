@@ -103,15 +103,6 @@ public interface WebViewFactoryProvider {
     CookieManager getCookieManager();
 
     /**
-     * Gets the TokenBindingService instance for this WebView implementation. The
-     * implementation must return the same instance on subsequent calls.
-     *
-     * @return the TokenBindingService instance
-     * @hide
-     */
-    TokenBindingService getTokenBindingService();
-
-    /**
      * Gets the singleton WebIconDatabase instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
      *
