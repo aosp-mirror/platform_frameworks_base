@@ -60,6 +60,27 @@ static jlong Shader_setLocalMatrix(JNIEnv* env, jobject o, jlong shaderHandle, j
     // as all the data needed is contained within the newly created LocalMatrixShader.
     SkASSERT(shaderHandle);
     SkAutoTUnref<SkShader> currentShader(reinterpret_cast<SkShader*>(shaderHandle));
+
+    // Attempt to peel off an existing proxy shader and get the proxy's matrix. If
+    // the proxy existed and it's matrix equals the desired matrix then just return
+    // the proxy, otherwise replace it with a new proxy containing the desired matrix.
+    //
+    // refAsALocalMatrixShader(): if the shader contains a proxy then it unwraps the proxy
+    //                            returning both the underlying shader and the proxy's matrix.
+    // newWithLocalMatrix(): will return a proxy shader that wraps the provided shader and
+    //                       concats the provided local matrix with the shader's matrix.
+    //
+    // WARNING: This proxy replacement only behaves like a setter because the Java
+    //          API enforces that all local matrices are set using this call and
+    //          not passed to the constructor of the Shader.
+    SkMatrix proxyMatrix;
+    SkAutoTUnref<SkShader> baseShader(currentShader->refAsALocalMatrixShader(&proxyMatrix));
+    if (baseShader.get()) {
+        if (proxyMatrix == *matrix) {
+            return reinterpret_cast<jlong>(currentShader.detach());
+        }
+        return reinterpret_cast<jlong>(baseShader->newWithLocalMatrix(*matrix));
+    }
     return reinterpret_cast<jlong>(currentShader->newWithLocalMatrix(*matrix));
 }
 
