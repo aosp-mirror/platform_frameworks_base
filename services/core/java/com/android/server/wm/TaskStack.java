@@ -105,12 +105,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
         return mTasks;
     }
 
-    void resizeWindows() {
-        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            mTasks.get(taskNdx).resizeWindows();
-        }
-    }
-
     /**
      * Set the bounds of the stack and its containing tasks.
      * @param stackBounds New stack bounds. Passing in null sets the bounds to fullscreen.
@@ -137,11 +131,11 @@ public class TaskStack implements DimLayer.DimLayerUser {
                     // it might no longer fully cover the stack area.
                     // Save the old bounds and re-apply the scroll. This adjusts the bounds to
                     // fit the new stack bounds.
-                    task.setBounds(bounds, config);
+                    task.resizeLocked(bounds, config, false /* forced */);
                     task.getBounds(mTmpRect);
                     task.scrollLocked(mTmpRect);
                 } else {
-                    task.setBounds(bounds, config);
+                    task.resizeLocked(bounds, config, false /* forced */);
                     task.setTempInsetBounds(
                             taskTempInsetBounds != null ? taskTempInsetBounds.get(task.mTaskId)
                                     : null);

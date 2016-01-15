@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
+import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
@@ -55,6 +56,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
     private Context mContext;
+    private NavigationBarView mNavigationBarView;
     private boolean mIsVertical;
     private boolean mIsRTL;
 
@@ -63,6 +65,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private final int mMinFlingVelocity;
     private int mTouchDownX;
     private int mTouchDownY;
+    private boolean mDownOnRecents;
     private VelocityTracker mVelocityTracker;
 
     private boolean mDockWindowEnabled;
@@ -79,9 +82,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         TunerService.get(context).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
     }
 
-    public void setComponents(RecentsComponent recentsComponent, Divider divider) {
+    public void setComponents(RecentsComponent recentsComponent, Divider divider,
+            NavigationBarView navigationBarView) {
         mRecentsComponent = recentsComponent;
         mDivider = divider;
+        mNavigationBarView = navigationBarView;
     }
 
     public void setBarState(boolean isVertical, boolean isRTL) {
@@ -157,6 +162,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mDockWindowTouchSlopExceeded = false;
         mTouchDownX = (int) event.getX();
         mTouchDownY = (int) event.getY();
+        View recentsButton = mNavigationBarView.getRecentsButton();
+        mDownOnRecents = mTouchDownX >= recentsButton.getLeft()
+                && mTouchDownX <= recentsButton.getRight()
+                && mTouchDownY >= recentsButton.getTop()
+                && mTouchDownY <= recentsButton.getBottom();
     }
 
     private boolean handleDragActionMoveEvent(MotionEvent event) {
@@ -172,8 +182,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             boolean touchSlopExceeded = !mIsVertical
                     ? yDiff > mScrollTouchSlop && yDiff > xDiff
                     : xDiff > mScrollTouchSlop && xDiff > yDiff;
-            if (touchSlopExceeded && mDivider.getView().getWindowManagerProxy().getDockSide()
-                    == DOCKED_INVALID) {
+            if (mDownOnRecents && touchSlopExceeded
+                    && mDivider.getView().getWindowManagerProxy().getDockSide() == DOCKED_INVALID) {
                 Rect initialBounds = null;
                 int dragMode = calculateDragMode();
                 int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;

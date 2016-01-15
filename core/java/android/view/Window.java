@@ -2120,4 +2120,10 @@ public abstract class Window {
      * @hide
      */
     public abstract void onMultiWindowModeChanged();
+
+    /**
+     * Called when the activity just relaunched.
+     * @hide
+     */
+    public abstract void reportActivityRelaunched();
 }

@@ -81,6 +81,8 @@ interface IWindowSession {
      * so complex relayout of the window should not happen based on them.
      * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
      * treat as real display. Example of such area is a chin in some models of wearable devices.
+     * @param outBackdropFrame Rect which is used draw the resizing background during a resize
+     * operation.
      * @param outConfiguration New configuration of window, if it is now
      * becoming visible and the global configuration has changed since it
      * was last displayed.
@@ -93,7 +95,8 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Configuration outConfig, out Surface outSurface);
+            out Rect outOutsets, out Rect outBackdropFrame, out Configuration outConfig,
+            out Surface outSurface);
 
     /**
      *  Position a window relative to it's parent (attached) window without triggering

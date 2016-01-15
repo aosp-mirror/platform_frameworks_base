@@ -67,6 +67,7 @@ class AppWindowToken extends WindowToken {
     // Whether we're performing an entering animation with a saved surface.
     boolean mAnimatingWithSavedSurface;
 
+
     Task mTask;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -477,6 +478,15 @@ class AppWindowToken extends WindowToken {
      */
     void unfreezeBounds() {
         mFrozenBounds.remove();
+        for (int i = windows.size() - 1; i >= 0; i--) {
+            final WindowState win = windows.get(i);
+            win.mLayoutNeeded = true;
+            win.setDisplayLayoutNeeded();
+            if (!service.mResizingWindows.contains(win)) {
+                service.mResizingWindows.add(win);
+            }
+        }
+        service.mWindowPlacerLocked.performSurfacePlacement();
     }
 
     @Override

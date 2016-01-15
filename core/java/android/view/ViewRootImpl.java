@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
@@ -144,6 +145,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     static final int MAX_TRACKBALL_DELAY = 250;
 
+    private static final int RESIZE_MODE_FREEFORM = 0;
+    private static final int RESIZE_MODE_DOCKED_DIVIDER = 1;
+
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList();
@@ -228,8 +232,10 @@ public final class ViewRootImpl implements ViewParent,
     boolean mIsAnimating;
 
     private boolean mDragResizing;
+    private int mResizeMode;
     private int mCanvasOffsetX;
     private int mCanvasOffsetY;
+    private boolean mActivityRelaunched;
 
     CompatibilityInfo.Translator mTranslator;
 
@@ -1592,11 +1598,16 @@ public final class ViewRootImpl implements ViewParent,
                         frame.width() < desiredWindowWidth && frame.width() != mWidth)
                 || (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT &&
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
-        windowShouldResize |= mDragResizing;
+        windowShouldResize |= mDragResizing && mResizeMode == RESIZE_MODE_FREEFORM;
 
         // If the backdrop frame doesn't equal to a frame, we are starting a resize operation, so
         // force it to be resized.
         windowShouldResize |= !mPendingBackDropFrame.equals(mWinFrame);
+
+        // If the activity was just relaunched, it might have unfrozen the task bounds (while
+        // relaunching), so we need to force a call into window manager to pick up the latest
+        // bounds.
+        windowShouldResize |= mActivityRelaunched;
 
         // Determine whether to compute insets.
         // If there are no inset listeners remaining then we may still need to compute
@@ -1786,11 +1797,17 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                final boolean dragResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING) != 0;
+                final boolean freeformResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
+                final boolean dockedResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
+                final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
                         startDragResizing(mPendingBackDropFrame);
+                        mResizeMode = freeformResizing
+                                ? RESIZE_MODE_FREEFORM
+                                : RESIZE_MODE_DOCKED_DIVIDER;
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();
@@ -1937,29 +1954,7 @@ public final class ViewRootImpl implements ViewParent,
             // in the attach info. We translate only the window frame since on window move
             // the window manager tells us only for the new frame but the insets are the
             // same and we do not want to translate them more than once.
-
-            // TODO: Well, we are checking whether the frame has changed similarly
-            // to how this is done for the insets. This is however incorrect since
-            // the insets and the frame are translated. For example, the old frame
-            // was (1, 1 - 1, 1) and was translated to say (2, 2 - 2, 2), now the new
-            // reported frame is (2, 2 - 2, 2) which implies no change but this is not
-            // true since we are comparing a not translated value to a translated one.
-            // This scenario is rare but we may want to fix that.
-
-            final boolean windowMoved = (mAttachInfo.mWindowLeft != frame.left
-                    || mAttachInfo.mWindowTop != frame.top);
-            if (windowMoved) {
-                if (mTranslator != null) {
-                    mTranslator.translateRectInScreenToAppWinFrame(frame);
-                }
-                mAttachInfo.mWindowLeft = frame.left;
-                mAttachInfo.mWindowTop = frame.top;
-
-                // Update the light position for the new window offsets.
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    mAttachInfo.mHardwareRenderer.setLightCenter(mAttachInfo);
-                }
-            }
+            maybeHandleWindowMove(frame);
         }
 
         final boolean didLayout = layoutRequested && (!mStopped || mReportNextDraw);
@@ -2074,6 +2069,7 @@ public final class ViewRootImpl implements ViewParent,
         mFirst = false;
         mWillDrawSoon = false;
         mNewSurfaceNeeded = false;
+        mActivityRelaunched = false;
         mViewVisibility = viewVisibility;
         mHadWindowFocus = hasWindowFocus;
 
@@ -2123,6 +2119,31 @@ public final class ViewRootImpl implements ViewParent,
         mIsInTraversal = false;
     }
 
+    private void maybeHandleWindowMove(Rect frame) {
+
+        // TODO: Well, we are checking whether the frame has changed similarly
+        // to how this is done for the insets. This is however incorrect since
+        // the insets and the frame are translated. For example, the old frame
+        // was (1, 1 - 1, 1) and was translated to say (2, 2 - 2, 2), now the new
+        // reported frame is (2, 2 - 2, 2) which implies no change but this is not
+        // true since we are comparing a not translated value to a translated one.
+        // This scenario is rare but we may want to fix that.
+
+        final boolean windowMoved = mAttachInfo.mWindowLeft != frame.left
+                || mAttachInfo.mWindowTop != frame.top;
+        if (windowMoved) {
+            if (mTranslator != null) {
+                mTranslator.translateRectInScreenToAppWinFrame(frame);
+            }
+            mAttachInfo.mWindowLeft = frame.left;
+            mAttachInfo.mWindowTop = frame.top;
+
+            // Update the light position for the new window offsets.
+            if (mAttachInfo.mHardwareRenderer != null) {
+                mAttachInfo.mHardwareRenderer.setLightCenter(mAttachInfo);
+            }
+        }
+    }
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
         Log.e(mTag, "OutOfResourcesException initializing HW surface", e);
         try {
@@ -3384,10 +3405,19 @@ public final class ViewRootImpl implements ViewParent,
 
                     mPendingBackDropFrame.set(mWinFrame);
 
-                    if (mView != null) {
-                        forceLayout(mView);
+                    // Suppress layouts during resizing - a correct layout will happen when resizing
+                    // is done, and this just increases system load.
+                    boolean isDockedDivider = mWindowAttributes.type == TYPE_DOCK_DIVIDER;
+                    boolean suppress = (mDragResizing && mResizeMode == RESIZE_MODE_DOCKED_DIVIDER)
+                            || isDockedDivider;
+                    if (!suppress) {
+                        if (mView != null) {
+                            forceLayout(mView);
+                        }
+                        requestLayout();
+                    } else {
+                        maybeHandleWindowMove(mWinFrame);
                     }
-                    requestLayout();
                 }
                 break;
             case MSG_WINDOW_FOCUS_CHANGED: {
@@ -5500,7 +5530,8 @@ public final class ViewRootImpl implements ViewParent,
                 (int) (mView.getMeasuredHeight() * appScale + 0.5f),
                 viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
-                mPendingStableInsets, mPendingOutsets, mPendingConfiguration, mSurface);
+                mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingConfiguration,
+                mSurface);
         //Log.d(mTag, "<<<<<< BACK FROM relayout");
         if (restore) {
             params.restore();
@@ -7023,6 +7054,15 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowCallbacks.get(i).onRequestDraw(mReportNextDraw);
             }
         }
+    }
+
+    /**
+     * Tells this instance that its corresponding activity has just relaunched. In this case, we
+     * need to force a relayout of the window to make sure we get the correct bounds from window
+     * manager.
+     */
+    public void reportActivityRelaunched() {
+        mActivityRelaunched = true;
     }
 
     /**

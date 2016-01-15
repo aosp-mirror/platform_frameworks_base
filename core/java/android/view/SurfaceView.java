@@ -107,6 +107,7 @@ public class SurfaceView extends View {
     final Rect mContentInsets = new Rect();
     final Rect mStableInsets = new Rect();
     final Rect mOutsets = new Rect();
+    final Rect mBackdropFrame = new Rect();
     final Configuration mConfiguration = new Configuration();
 
     static final int KEEP_SCREEN_ON_MSG = 1;
@@ -529,8 +530,8 @@ public class SurfaceView extends View {
                             visible ? VISIBLE : GONE,
                             WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY,
                             mWinFrame, mOverscanInsets, mContentInsets,
-                            mVisibleInsets, mStableInsets, mOutsets, mConfiguration,
-                            mNewSurface);
+                            mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
+                            mConfiguration, mNewSurface);
                     if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                         reportDrawNeeded = true;
                     }
