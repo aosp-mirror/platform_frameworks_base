@@ -1868,7 +1868,10 @@ void ResTable_config::swapHtoD() {
     }
 
     // The language & region are equal, so compare the scripts and variants.
-    int script = memcmp(l.localeScript, r.localeScript, sizeof(l.localeScript));
+    const char emptyScript[sizeof(l.localeScript)] = {'\0', '\0', '\0', '\0'};
+    const char *lScript = l.localeScriptWasProvided ? l.localeScript : emptyScript;
+    const char *rScript = r.localeScriptWasProvided ? r.localeScript : emptyScript;
+    int script = memcmp(lScript, rScript, sizeof(l.localeScript));
     if (script) {
         return script;
     }
@@ -2012,10 +2015,10 @@ int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
     // scripts since it seems more useful to do so. We will consider
     // "en-US-POSIX" to be more specific than "en-Latn-US".
 
-    const int score = ((localeScript[0] != 0) ? 1 : 0) +
+    const int score = (localeScriptWasProvided ? 1 : 0) +
         ((localeVariant[0] != 0) ? 2 : 0);
 
-    const int oScore = ((o.localeScript[0] != 0) ? 1 : 0) +
+    const int oScore = (o.localeScriptWasProvided ? 1 : 0) +
         ((o.localeVariant[0] != 0) ? 2 : 0);
 
     return score - oScore;
@@ -2165,6 +2168,63 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
     return false;
 }
 
+bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
+        const ResTable_config* requested) const {
+    if (requested->locale == 0) {
+        // The request doesn't have a locale, so no resource is better
+        // than the other.
+        return false;
+    }
+
+    if (locale == 0 && o.locale == 0) {
+        // The locales parts of both resources are empty, so no one is better
+        // than the other.
+        return false;
+    }
+
+    // Non-matching locales have been filtered out, so both resources
+    // match the requested locale.
+    //
+    // Because of the locale-related checks in match() and the checks, we know
+    // that:
+    // 1) The resource languages are either empty or match the request;
+    // and
+    // 2) If the request's script is known, the resource scripts are either
+    //    unknown or match the request.
+
+    if (language[0] != o.language[0]) {
+        // The languages of the two resources are not the same. We can only
+        // assume that one of the two resources matched the request because one
+        // doesn't have a language and the other has a matching language.
+        return (language[0] != 0);
+    }
+
+    // If we are here, both the resources have the same non-empty language as
+    // the request.
+    //
+    // Because the languages are the same, computeScript() always
+    // returns a non-empty script for languages it knows about, and we have passed
+    // the script checks in match(), the scripts are either all unknown or are
+    // all the same. So we can't gain anything by checking the scripts. We need
+    // to check the region and variant.
+
+    // See if any of the regions is better than the other
+    const int region_comparison = localeDataCompareRegions(
+            country, o.country,
+            language, localeScript, requested->country);
+    if (region_comparison != 0) {
+        return (region_comparison > 0);
+    }
+
+    // The regions are the same. Try the variant.
+    if (requested->localeVariant[0] != '\0'
+            && strncmp(localeVariant, requested->localeVariant, sizeof(localeVariant)) == 0) {
+        return (strncmp(o.localeVariant, requested->localeVariant, sizeof(localeVariant)) != 0);
+    }
+
+    return false;
+}
+
 bool ResTable_config::isBetterThan(const ResTable_config& o,
         const ResTable_config* requested) const {
     if (requested) {
@@ -2178,26 +2238,8 @@ bool ResTable_config::isBetterThan(const ResTable_config& o,
             }
         }
 
-        if (locale || o.locale) {
-            if ((language[0] != o.language[0]) && requested->language[0]) {
-                return (language[0]);
-            }
-
-            if ((country[0] != o.country[0]) && requested->country[0]) {
-                return (country[0]);
-            }
-        }
-
-        if (localeScript[0] || o.localeScript[0]) {
-            if (localeScript[0] != o.localeScript[0] && requested->localeScript[0]) {
-                return localeScript[0];
-            }
-        }
-
-        if (localeVariant[0] || o.localeVariant[0]) {
-            if (localeVariant[0] != o.localeVariant[0] && requested->localeVariant[0]) {
-                return localeVariant[0];
-            }
+        if (isLocaleBetterThan(o, requested)) {
+            return true;
         }
 
         if (screenLayout || o.screenLayout) {
@@ -2445,20 +2487,33 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         }
     }
     if (locale != 0) {
-        // Don't consider the script & variants when deciding matches.
+        // Don't consider country and variants when deciding matches.
+        // (Theoretically, the variant can also affect the script. For
+        // example, "ar-alalc97" probably implies the Latin script, but since
+        // CLDR doesn't support getting likely scripts for that, we'll assume
+        // the variant doesn't change the script.)
         //
-        // If we two configs differ only in their script or language, they
-        // can be weeded out in the isMoreSpecificThan test.
-        if (language[0] != 0
-            && (language[0] != settings.language[0]
-                || language[1] != settings.language[1])) {
+        // If two configs differ only in their country and variant,
+        // they can be weeded out in the isMoreSpecificThan test.
+        if (language[0] != settings.language[0] || language[1] != settings.language[1]) {
             return false;
         }
 
-        if (country[0] != 0
-            && (country[0] != settings.country[0]
-                || country[1] != settings.country[1])) {
-            return false;
+        // For backward compatibility and supporting private-use locales, we
+        // fall back to old behavior if we couldn't determine the script for
+        // either of the desired locale or the provided locale.
+        if (localeScript[0] == '\0' || localeScript[1] == '\0') {
+            if (country[0] != '\0'
+                && (country[0] != settings.country[0]
+                    || country[1] != settings.country[1])) {
+                return false;
+            }
+        } else {
+            // But if we could determine the scripts, they should be the same
+            // for the locales to match.
+            if (memcmp(localeScript, settings.localeScript, sizeof(localeScript)) != 0) {
+                return false;
+            }
         }
     }
 
@@ -2587,7 +2642,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
         return;
     }
 
-    if (!localeScript[0] && !localeVariant[0]) {
+    if (!localeScriptWasProvided && !localeVariant[0]) {
         // Legacy format.
         if (out.size() > 0) {
             out.append("-");
@@ -2605,7 +2660,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
         return;
     }
 
-    // We are writing the modified bcp47 tag.
+    // We are writing the modified BCP 47 tag.
     // It starts with 'b+' and uses '+' as a separator.
 
     if (out.size() > 0) {
@@ -2617,7 +2672,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
     size_t len = unpackLanguage(buf);
     out.append(buf, len);
 
-    if (localeScript[0]) {
+    if (localeScriptWasProvided) {
         out.append("+");
         out.append(localeScript, sizeof(localeScript));
     }
@@ -2630,7 +2685,7 @@ void ResTable_config::appendDirLocale(String8& out) const {
 
     if (localeVariant[0]) {
         out.append("+");
-        out.append(localeVariant, sizeof(localeVariant));
+        out.append(localeVariant, strnlen(localeVariant, sizeof(localeVariant)));
     }
 }
 
@@ -2648,7 +2703,7 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
         charsWritten += unpackLanguage(str);
     }
 
-    if (localeScript[0]) {
+    if (localeScriptWasProvided) {
         if (charsWritten) {
             str[charsWritten++] = '-';
         }
@@ -2682,11 +2737,16 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
            config->language[0] ? config->packRegion(start) : config->packLanguage(start);
            break;
        case 4:
-           config->localeScript[0] = toupper(start[0]);
-           for (size_t i = 1; i < 4; ++i) {
-               config->localeScript[i] = tolower(start[i]);
+           if ('0' <= start[0] && start[0] <= '9') {
+               // this is a variant, so fall through
+           } else {
+               config->localeScript[0] = toupper(start[0]);
+               for (size_t i = 1; i < 4; ++i) {
+                   config->localeScript[i] = tolower(start[i]);
+               }
+               config->localeScriptWasProvided = true;
+               break;
            }
-           break;
        case 5:
        case 6:
        case 7:
@@ -2704,6 +2764,7 @@ void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
 
 void ResTable_config::setBcp47Locale(const char* in) {
     locale = 0;
+    localeScriptWasProvided = false;
     memset(localeScript, 0, sizeof(localeScript));
     memset(localeVariant, 0, sizeof(localeVariant));
 
@@ -2720,6 +2781,9 @@ void ResTable_config::setBcp47Locale(const char* in) {
 
     const size_t size = in + strlen(in) - start;
     assignLocaleComponent(this, start, size);
+    if (localeScript[0] == '\0') {
+        computeScript();
+    };
 }
 
 String8 ResTable_config::toString() const {

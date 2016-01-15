@@ -21,6 +21,7 @@
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
 #include <androidfw/Asset.h>
+#include <androidfw/LocaleData.h>
 #include <utils/ByteOrder.h>
 #include <utils/Errors.h>
 #include <utils/String16.h>
@@ -1127,8 +1128,9 @@ struct ResTable_config
     // configuration. (eg. Hant, Latn, etc.). Interpreted in conjunction with
     // the locale field.
     char localeScript[4];
+    bool localeScriptWasProvided;
 
-    // A single BCP-47 variant subtag. Will vary in length between 5 and 8
+    // A single BCP-47 variant subtag. Will vary in length between 4 and 8
     // chars. Interpreted in conjunction with the locale field.
     char localeVariant[8];
 
@@ -1228,8 +1230,13 @@ struct ResTable_config
 
     inline void clearLocale() {
         locale = 0;
+        localeScriptWasProvided = false;
         memset(localeScript, 0, sizeof(localeScript));
         memset(localeVariant, 0, sizeof(localeVariant));
+    }
+
+    inline void computeScript() {
+        localeDataComputeScript(localeScript, language, country);
     }
 
     // Get the 2 or 3 letter language code of this configuration. Trailing
@@ -1254,6 +1261,12 @@ struct ResTable_config
     // with respect to their locales, a negative integer if |o| is more specific
     // and 0 if they're equally specific.
     int isLocaleMoreSpecificThan(const ResTable_config &o) const;
+
+    // Return true if 'this' is a better locale match than 'o' for the
+    // 'requested' configuration. Similar to isBetterThan(), this assumes that
+    // match() has already been used to remove any configurations that don't
+    // match the requested configuration at all.
+    bool isLocaleBetterThan(const ResTable_config& o, const ResTable_config* requested) const;
 
     String8 toString() const;
 };
