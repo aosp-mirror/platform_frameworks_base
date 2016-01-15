@@ -16,14 +16,21 @@
 
 package com.android.server.job;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
-import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
+import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.app.job.IJobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -47,7 +54,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.AppIdleController;
@@ -57,15 +63,6 @@ import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.TimeController;
-
-import libcore.util.EmptyArray;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Responsible for taking jobs representing work to be performed by a client app, and determining
@@ -130,7 +127,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     final ArrayList<JobStatus> mPendingJobs = new ArrayList<>();
 
-    int[] mStartedUsers = EmptyArray.INT;
+    final ArrayList<Integer> mStartedUsers = new ArrayList<>();
 
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
@@ -161,9 +158,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            Slog.d(TAG, "Receieved: " + action);
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+            Slog.d(TAG, "Receieved: " + intent.getAction());
+            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                 // If this is an outright uninstall rather than the first half of an
                 // app update sequence, cancel the jobs associated with the app.
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -173,21 +169,18 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     cancelJobsForUid(uidRemoved, true);
                 }
-            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
+            } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DEBUG) {
                     Slog.d(TAG, "Removing jobs for user: " + userId);
                 }
                 cancelJobsForUser(userId);
-            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(action)
-                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)) {
+            } else if (PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())
+                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(intent.getAction())) {
                 updateIdleMode(mPowerManager != null
                         ? (mPowerManager.isDeviceIdleMode()
-                                || mPowerManager.isLightDeviceIdleMode())
+                        || mPowerManager.isLightDeviceIdleMode())
                         : false);
-            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
-                // Kick off pending jobs for any apps that re-appeared
-                mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
         }
     };
@@ -209,20 +202,14 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStartUser(int userHandle) {
-        mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
-        // Let's kick any outstanding jobs for this user.
-        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
-    }
-
-    @Override
-    public void onUnlockUser(int userHandle) {
+        mStartedUsers.add(userHandle);
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
     public void onStopUser(int userHandle) {
-        mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
+        mStartedUsers.remove(Integer.valueOf(userHandle));
     }
 
     /**
@@ -329,7 +316,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // Remove from pending queue.
             mPendingJobs.remove(cancelled);
             // Cancel if running.
-            stopJobOnServiceContextLocked(cancelled);
+            stopJobOnServiceContextLocked(cancelled, JobParameters.REASON_CANCELED);
             reportActive();
         }
     }
@@ -357,7 +344,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         JobServiceContext jsc = mActiveServices.get(i);
                         final JobStatus executing = jsc.getRunningJob();
                         if (executing != null) {
-                            jsc.cancelExecutingJob();
+                            jsc.cancelExecutingJob(JobParameters.REASON_DEVICE_IDLE);
                         }
                     }
                 } else {
@@ -382,7 +369,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mPendingJobs.size() <= 0) {
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
-                if (!jsc.isAvailable()) {
+                if (jsc.getRunningJob() != null) {
                     active = true;
                     break;
                 }
@@ -429,24 +416,17 @@ public class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            // Register for package removals and user removals.
+            // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
             filter.addDataScheme("package");
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
-
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
             userFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             userFilter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, userFilter, null, null);
-
-            final IntentFilter storageFilter = new IntentFilter();
-            storageFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
-            getContext().registerReceiverAsUser(
-                    mBroadcastReceiver, UserHandle.ALL, storageFilter, null, null);
-
-            mPowerManager = getContext().getSystemService(PowerManager.class);
+            mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
             try {
                 ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
                         ActivityManager.UID_OBSERVER_IDLE);
@@ -526,12 +506,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         return removed;
     }
 
-    private boolean stopJobOnServiceContextLocked(JobStatus job) {
+    private boolean stopJobOnServiceContextLocked(JobStatus job, int reason) {
         for (int i=0; i<mActiveServices.size(); i++) {
             JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus executing = jsc.getRunningJob();
             if (executing != null && executing.matches(job.getUid(), job.getJobId())) {
-                jsc.cancelExecutingJob();
+                jsc.cancelExecutingJob(reason);
                 return true;
             }
         }
@@ -731,6 +711,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         private void queueReadyJobsForExecutionLockedH() {
             ArraySet<JobStatus> jobs = mJobs.getJobs();
+            mPendingJobs.clear();
             if (DEBUG) {
                 Slog.d(TAG, "queuing all ready jobs for execution:");
             }
@@ -741,8 +722,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "    queued " + job.toShortString());
                     }
                     mPendingJobs.add(job);
-                } else if (isReadyToBeCancelledLocked(job)) {
-                    stopJobOnServiceContextLocked(job);
+                } else if (areJobConstraintsNotSatisfied(job)) {
+                    stopJobOnServiceContextLocked(job,
+                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
                 }
             }
             if (DEBUG) {
@@ -765,8 +747,9 @@ public class JobSchedulerService extends com.android.server.SystemService
          * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
          */
         private void maybeQueueReadyJobsForExecutionLockedH() {
+            mPendingJobs.clear();
             int chargingCount = 0;
-            int idleCount = 0;
+            int idleCount =  0;
             int backoffCount = 0;
             int connectivityCount = 0;
             List<JobStatus> runnableJobs = null;
@@ -801,8 +784,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                         runnableJobs = new ArrayList<>();
                     }
                     runnableJobs.add(job);
-                } else if (isReadyToBeCancelledLocked(job)) {
-                    stopJobOnServiceContextLocked(job);
+                } else if (areJobConstraintsNotSatisfied(job)) {
+                    stopJobOnServiceContextLocked(job,
+                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
                 }
             }
             if (backoffCount > 0 ||
@@ -821,11 +805,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
                 }
             }
-            if (DEBUG) {
-                Slog.d(TAG, "idle=" + idleCount + " connectivity=" +
-                connectivityCount + " charging=" + chargingCount + " tot=" +
-                        runnableJobs.size());
-            }
         }
 
         /**
@@ -834,31 +813,18 @@ public class JobSchedulerService extends com.android.server.SystemService
          *      - It's not pending.
          *      - It's not already running on a JSC.
          *      - The user that requested the job is running.
-         *      - The component is enabled and runnable.
          */
         private boolean isReadyToBeExecutedLocked(JobStatus job) {
             final boolean jobReady = job.isReady();
             final boolean jobPending = mPendingJobs.contains(job);
             final boolean jobActive = isCurrentlyActiveLocked(job);
-
-            final int userId = job.getUserId();
-            final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
-            final boolean componentPresent;
-            try {
-                componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
-                        job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        userId) != null);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
-
+            final boolean userRunning = mStartedUsers.contains(job.getUserId());
             if (DEBUG) {
                 Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
                         + " ready=" + jobReady + " pending=" + jobPending
-                        + " active=" + jobActive + " userStarted=" + userStarted
-                        + " componentPresent=" + componentPresent);
+                        + " active=" + jobActive + " userRunning=" + userRunning);
             }
-            return userStarted && componentPresent && jobReady && !jobPending && !jobActive;
+            return userRunning && jobReady && !jobPending && !jobActive;
         }
 
         /**
@@ -866,7 +832,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          *      - It's not ready
          *      - It's running on a JSC.
          */
-        private boolean isReadyToBeCancelledLocked(JobStatus job) {
+        private boolean areJobConstraintsNotSatisfied(JobStatus job) {
             return !job.isReady() && isCurrentlyActiveLocked(job);
         }
 
@@ -881,43 +847,118 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // If device is idle, we will not schedule jobs to run.
                     return;
                 }
-                Iterator<JobStatus> it = mPendingJobs.iterator();
                 if (DEBUG) {
                     Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
                 }
-                while (it.hasNext()) {
-                    JobStatus nextPending = it.next();
-                    JobServiceContext availableContext = null;
-                    for (int i=0; i<mActiveServices.size(); i++) {
-                        JobServiceContext jsc = mActiveServices.get(i);
-                        final JobStatus running = jsc.getRunningJob();
-                        if (running != null && running.matches(nextPending.getUid(),
-                                nextPending.getJobId())) {
-                            // Already running this job for this uId, skip.
-                            availableContext = null;
-                            break;
-                        }
-                        if (jsc.isAvailable()) {
-                            availableContext = jsc;
-                        }
-                    }
-                    if (availableContext != null) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "About to run job "
-                                    + nextPending.getJob().getService().toString());
-                        }
-                        if (!availableContext.executeRunnableJob(nextPending)) {
-                            if (DEBUG) {
-                                Slog.d(TAG, "Error executing " + nextPending);
-                            }
-                            mJobs.remove(nextPending);
-                        }
-                        it.remove();
-                    }
-                }
+                assignJobsToContextsH();
                 reportActive();
             }
         }
+    }
+
+    /**
+     * Takes jobs from pending queue and runs them on available contexts.
+     * If no contexts are available, preempts lower priority jobs to
+     * run higher priority ones.
+     * Lock on mJobs before calling this function.
+     */
+    private void assignJobsToContextsH() {
+        if (DEBUG) {
+            Slog.d(TAG, printPendingQueue());
+        }
+
+        // This array essentially stores the state of mActiveServices array.
+        // ith index stores the job present on the ith JobServiceContext.
+        // We manipulate this array until we arrive at what jobs should be running on
+        // what JobServiceContext.
+        JobStatus[] contextIdToJobMap = new JobStatus[MAX_JOB_CONTEXTS_COUNT];
+        // Indicates whether we need to act on this jobContext id
+        boolean[] act = new boolean[MAX_JOB_CONTEXTS_COUNT];
+        int[] preferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
+        for (int i=0; i<mActiveServices.size(); i++) {
+            contextIdToJobMap[i] = mActiveServices.get(i).getRunningJob();
+            preferredUidForContext[i] = mActiveServices.get(i).getPreferredUid();
+        }
+        if (DEBUG) {
+            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs initial"));
+        }
+        Iterator<JobStatus> it = mPendingJobs.iterator();
+        while (it.hasNext()) {
+            JobStatus nextPending = it.next();
+
+            // If job is already running, go to next job.
+            int jobRunningContext = findJobContextIdFromMap(nextPending, contextIdToJobMap);
+            if (jobRunningContext != -1) {
+                continue;
+            }
+
+            // Find a context for nextPending. The context should be available OR
+            // it should have lowest priority among all running jobs
+            // (sharing the same Uid as nextPending)
+            int minPriority = Integer.MAX_VALUE;
+            int minPriorityContextId = -1;
+            for (int i=0; i<mActiveServices.size(); i++) {
+                JobStatus job = contextIdToJobMap[i];
+                int preferredUid = preferredUidForContext[i];
+                if (job == null && (preferredUid == nextPending.getUid() ||
+                        preferredUid == JobServiceContext.NO_PREFERRED_UID) ) {
+                    minPriorityContextId = i;
+                    break;
+                }
+                if (job.getUid() != nextPending.getUid()) {
+                    continue;
+                }
+                if (job.getPriority() >= nextPending.getPriority()) {
+                    continue;
+                }
+                if (minPriority > nextPending.getPriority()) {
+                    minPriority = nextPending.getPriority();
+                    minPriorityContextId = i;
+                }
+            }
+            if (minPriorityContextId != -1) {
+                contextIdToJobMap[minPriorityContextId] = nextPending;
+                act[minPriorityContextId] = true;
+            }
+        }
+        if (DEBUG) {
+            Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs final"));
+        }
+        for (int i=0; i<mActiveServices.size(); i++) {
+            boolean preservePreferredUid = false;
+            if (act[i]) {
+                JobStatus js = mActiveServices.get(i).getRunningJob();
+                if (js != null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "preempting job: " + mActiveServices.get(i).getRunningJob());
+                    }
+                    // preferredUid will be set to uid of currently running job.
+                    mActiveServices.get(i).preemptExecutingJob();
+                    preservePreferredUid = true;
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "About to run job on context "
+                                + String.valueOf(i) + ", job: " + contextIdToJobMap[i]);
+                    }
+                    if (!mActiveServices.get(i).executeRunnableJob(contextIdToJobMap[i])) {
+                        Slog.d(TAG, "Error executing " + contextIdToJobMap[i]);
+                    }
+                    mPendingJobs.remove(contextIdToJobMap[i]);
+                }
+            }
+            if (!preservePreferredUid) {
+                mActiveServices.get(i).clearPreferredUid();
+            }
+        }
+    }
+
+    int findJobContextIdFromMap(JobStatus jobStatus, JobStatus[] map) {
+        for (int i=0; i<map.length; i++) {
+            if (map[i] != null && map[i].matches(jobStatus.getUid(), jobStatus.getJobId())) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -936,8 +977,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final IPackageManager pm = AppGlobals.getPackageManager();
             final ComponentName service = job.getService();
             try {
-                ServiceInfo si = pm.getServiceInfo(service,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(uid));
+                ServiceInfo si = pm.getServiceInfo(service, 0, UserHandle.getUserId(uid));
                 if (si == null) {
                     throw new IllegalArgumentException("No such service " + service);
                 }
@@ -1050,12 +1090,41 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Binder.restoreCallingIdentity(identityToken);
             }
         }
+    };
+
+    private String printContextIdToJobMap(JobStatus[] map, String initial) {
+        StringBuilder s = new StringBuilder(initial + ": ");
+        for (int i=0; i<map.length; i++) {
+            s.append("(")
+                    .append(map[i] == null? -1: map[i].getJobId())
+                    .append(map[i] == null? -1: map[i].getUid())
+                    .append(")" );
+        }
+        return s.toString();
+    }
+
+    private String printPendingQueue() {
+        StringBuilder s = new StringBuilder("Pending queue: ");
+        Iterator<JobStatus> it = mPendingJobs.iterator();
+        while (it.hasNext()) {
+            JobStatus js = it.next();
+            s.append("(")
+                    .append(js.getJob().getId())
+                    .append(", ")
+                    .append(js.getUid())
+                    .append(") ");
+        }
+        return s.toString();
     }
 
     void dumpInternal(PrintWriter pw) {
         final long now = SystemClock.elapsedRealtime();
         synchronized (mJobs) {
-            pw.println("Started users: " + Arrays.toString(mStartedUsers));
+            pw.print("Started users: ");
+            for (int i=0; i<mStartedUsers.size(); i++) {
+                pw.print("u" + mStartedUsers.get(i) + " ");
+            }
+            pw.println();
             pw.println("Registered jobs:");
             if (mJobs.size() > 0) {
                 ArraySet<JobStatus> jobs = mJobs.getJobs();
@@ -1071,15 +1140,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mControllers.get(i).dumpControllerState(pw);
             }
             pw.println();
-            pw.println("Pending:");
-            for (int i=0; i<mPendingJobs.size(); i++) {
-                pw.println(mPendingJobs.get(i).hashCode());
-            }
+            pw.println(printPendingQueue());
             pw.println();
             pw.println("Active jobs:");
             for (int i=0; i<mActiveServices.size(); i++) {
                 JobServiceContext jsc = mActiveServices.get(i);
-                if (jsc.isAvailable()) {
+                if (jsc.getRunningJob() == null) {
                     continue;
                 } else {
                     final long timeout = jsc.getTimeoutElapsed();

@@ -91,6 +91,7 @@ public class JobInfo implements Parcelable {
     private final long flexMillis;
     private final long initialBackoffMillis;
     private final int backoffPolicy;
+    private final int priority;
 
     /**
      * Unique job id associated with this class. This is assigned to your job by the scheduler.
@@ -111,6 +112,11 @@ public class JobInfo implements Parcelable {
      */
     public ComponentName getService() {
         return service;
+    }
+
+    /** @hide */
+    public int getPriority() {
+        return priority;
     }
 
     /**
@@ -237,6 +243,7 @@ public class JobInfo implements Parcelable {
         backoffPolicy = in.readInt();
         hasEarlyConstraint = in.readInt() == 1;
         hasLateConstraint = in.readInt() == 1;
+        priority = in.readInt();
     }
 
     private JobInfo(JobInfo.Builder b) {
@@ -256,6 +263,7 @@ public class JobInfo implements Parcelable {
         backoffPolicy = b.mBackoffPolicy;
         hasEarlyConstraint = b.mHasEarlyConstraint;
         hasLateConstraint = b.mHasLateConstraint;
+        priority = b.mPriority;
     }
 
     @Override
@@ -281,6 +289,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(backoffPolicy);
         out.writeInt(hasEarlyConstraint ? 1 : 0);
         out.writeInt(hasLateConstraint ? 1 : 0);
+        out.writeInt(priority);
     }
 
     public static final Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
@@ -305,6 +314,7 @@ public class JobInfo implements Parcelable {
         private int mJobId;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
         private ComponentName mJobService;
+        private int mPriority;
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
@@ -335,6 +345,14 @@ public class JobInfo implements Parcelable {
         public Builder(int jobId, ComponentName jobService) {
             mJobService = jobService;
             mJobId = jobId;
+        }
+
+        /**
+         * @hide
+         */
+        public Builder setPriority(int priority) {
+            mPriority = priority;
+            return this;
         }
 
         /**

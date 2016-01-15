@@ -165,6 +165,10 @@ public class JobStatus {
     public PersistableBundle getExtras() {
         return job.getExtras();
     }
+    
+    public int getPriority() {
+        return job.getPriority();
+    }
 
     public boolean hasConnectivityConstraint() {
         return job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY;
