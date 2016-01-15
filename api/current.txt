@@ -19402,9 +19402,10 @@ package android.media {
     method public abstract void onAudioFocusChange(int);
   }
 
-  public class AudioRecord {
+  public class AudioRecord implements android.media.AudioRouting {
     ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
-    method public void addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler);
+    method public deprecated void addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler);
+    method public void addOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method public int getAudioFormat();
     method public int getAudioSessionId();
     method public int getAudioSource();
@@ -19428,7 +19429,8 @@ package android.media {
     method public int read(java.nio.ByteBuffer, int);
     method public int read(java.nio.ByteBuffer, int, int);
     method public void release();
-    method public void removeOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener);
+    method public deprecated void removeOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener);
+    method public void removeOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener);
     method public int setNotificationMarkerPosition(int);
     method public int setPositionNotificationPeriod(int);
     method public boolean setPreferredDevice(android.media.AudioDeviceInfo);
@@ -19466,17 +19468,29 @@ package android.media {
     method public abstract void onRoutingChanged(android.media.AudioRecord);
   }
 
+  public abstract interface AudioRouting {
+    method public abstract void addOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
+    method public abstract android.media.AudioDeviceInfo getPreferredDevice();
+    method public abstract void removeOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener);
+    method public abstract boolean setPreferredDevice(android.media.AudioDeviceInfo);
+  }
+
+  public static abstract interface AudioRouting.OnRoutingChangedListener {
+    method public abstract void onRoutingChanged(android.media.AudioRouting);
+  }
+
   public final class AudioTimestamp {
     ctor public AudioTimestamp();
     field public long framePosition;
     field public long nanoTime;
   }
 
-  public class AudioTrack {
+  public class AudioTrack implements android.media.AudioRouting {
     ctor public AudioTrack(int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(int, int, int, int, int, int, int) throws java.lang.IllegalArgumentException;
     ctor public AudioTrack(android.media.AudioAttributes, android.media.AudioFormat, int, int, int) throws java.lang.IllegalArgumentException;
-    method public void addOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener, android.os.Handler);
+    method public deprecated void addOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener, android.os.Handler);
+    method public void addOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method public int attachAuxEffect(int);
     method public void flush();
     method public int getAudioFormat();
@@ -19506,7 +19520,8 @@ package android.media {
     method public void play() throws java.lang.IllegalStateException;
     method public void release();
     method public int reloadStaticData();
-    method public void removeOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener);
+    method public deprecated void removeOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener);
+    method public void removeOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener);
     method public int setAuxEffectSendLevel(float);
     method public int setLoopPoints(int, int, int);
     method public int setNotificationMarkerPosition(int);
@@ -19559,8 +19574,8 @@ package android.media {
     method public abstract void onPeriodicNotification(android.media.AudioTrack);
   }
 
-  public static abstract interface AudioTrack.OnRoutingChangedListener {
-    method public abstract void onRoutingChanged(android.media.AudioTrack);
+  public static abstract deprecated interface AudioTrack.OnRoutingChangedListener {
+    method public abstract deprecated void onRoutingChanged(android.media.AudioTrack);
   }
 
   public class CamcorderProfile {
