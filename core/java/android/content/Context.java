@@ -2460,6 +2460,7 @@ public abstract class Context {
             NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
+            WIFI_NAN_SERVICE,
             WIFI_PASSPOINT_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
@@ -2920,6 +2921,17 @@ public abstract class Context {
      * @see android.net.wifi.p2p.WifiP2pManager
      */
     public static final String WIFI_P2P_SERVICE = "wifip2p";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.net.wifi.nan.WifiNanManager} for handling management of
+     * Wi-Fi NAN discovery and connections.
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.nan.WifiNanManager
+     * @hide PROPOSED_NAN_API
+     */
+    public static final String WIFI_NAN_SERVICE = "wifinan";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
