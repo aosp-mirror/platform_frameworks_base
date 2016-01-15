@@ -5475,7 +5475,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 killPackageProcessesLocked(packageName, appId, userId,
-                        ProcessList.SERVICE_ADJ, false, true, true, false, true, "kill background");
+                        ProcessList.SERVICE_ADJ, false, true, true, false, "kill background");
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -5777,7 +5777,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean killPackageProcessesLocked(String packageName, int appId,
             int userId, int minOomAdj, boolean callerWillRestart, boolean allowRestart,
-            boolean doit, boolean evenPersistent, boolean killPackageApp, String reason) {
+            boolean doit, boolean evenPersistent, String reason) {
         ArrayList<ProcessRecord> procs = new ArrayList<>();
 
         // Remove all processes this package may have touched: all with the
@@ -5826,7 +5826,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (userId != UserHandle.USER_ALL && app.userId != userId) {
                         continue;
                     }
-                    if ((!killPackageApp || !app.pkgList.containsKey(packageName)) && !isDep) {
+                    if (!app.pkgList.containsKey(packageName) && !isDep) {
                         continue;
                     }
                 }
@@ -5992,7 +5992,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         boolean didSomething = killPackageProcessesLocked(packageName, appId, userId,
-                ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent, true,
+                ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
@@ -12113,7 +12113,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long identity = Binder.clearCallingIdentity();
             try {
                 killPackageProcessesLocked(null, appId, userId,
-                        ProcessList.PERSISTENT_PROC_ADJ, false, true, true, true, true,
+                        ProcessList.PERSISTENT_PROC_ADJ, false, true, true, true,
                         reason != null ? reason : "kill uid");
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -21175,7 +21175,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void killPackageDependents(String packageName, int userId) {
         enforceCallingPermission(android.Manifest.permission.KILL_UID, "killPackageDependents()");
         if (packageName == null) {
-            throw new NullPointerException("Cannot kill the dependents of a package without its name.");
+            throw new NullPointerException(
+                    "Cannot kill the dependents of a package without its name.");
         }
 
         long callingId = Binder.clearCallingIdentity();
@@ -21186,12 +21187,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         } catch (RemoteException e) {
         }
         if (pkgUid == -1) {
-            throw new IllegalArgumentException("Cannot kill dependents of non-existing package " + packageName);
+            throw new IllegalArgumentException(
+                    "Cannot kill dependents of non-existing package " + packageName);
         }
         try {
             synchronized(this) {
                 killPackageProcessesLocked(packageName, UserHandle.getAppId(pkgUid), userId,
-                        ProcessList.FOREGROUND_APP_ADJ, false, true, true, false, false,
+                        ProcessList.FOREGROUND_APP_ADJ, false, true, true, false,
                         "dep: " + packageName);
             }
         } finally {
