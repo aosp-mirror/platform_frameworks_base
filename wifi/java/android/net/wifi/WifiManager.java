@@ -1007,7 +1007,7 @@ public class WifiManager {
 
     /**
      * @return true if this adapter supports Neighbour Awareness Network APIs
-     * @hide
+     * @hide PROPOSED_NAN_API
      */
     public boolean isNanSupported() {
         return isFeatureSupported(WIFI_FEATURE_NAN);

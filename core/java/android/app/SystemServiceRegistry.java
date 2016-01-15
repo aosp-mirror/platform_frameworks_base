@@ -78,6 +78,8 @@ import android.net.wifi.IWifiScanner;
 import android.net.wifi.RttManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiScanner;
+import android.net.wifi.nan.IWifiNanManager;
+import android.net.wifi.nan.WifiNanManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.passpoint.IWifiPasspointManager;
@@ -497,6 +499,18 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.WIFI_P2P_SERVICE);
                 IWifiP2pManager service = IWifiP2pManager.Stub.asInterface(b);
                 return new WifiP2pManager(service);
+            }});
+
+        registerService(Context.WIFI_NAN_SERVICE, WifiNanManager.class,
+                new StaticServiceFetcher<WifiNanManager>() {
+            @Override
+            public WifiNanManager createService() {
+                IBinder b = ServiceManager.getService(Context.WIFI_NAN_SERVICE);
+                IWifiNanManager service = IWifiNanManager.Stub.asInterface(b);
+                if (service == null) {
+                    return null;
+                }
+                return new WifiNanManager(service);
             }});
 
         registerService(Context.WIFI_SCANNING_SERVICE, WifiScanner.class,
