@@ -160,7 +160,7 @@ it in your manifest with the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#agent">{@code
 android:backupAgent}</a> attribute in the <a
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-&lt;application&gt;}</a> tag.</p>
+<application>}</a> tag.</p>
 
 <p>For example:</p>
 
@@ -205,8 +205,8 @@ declare the Backup Service Key in your Android manifest.</p>
 <p>To get your Backup Service Key, <a
 href="http://code.google.com/android/backup/signup.html">register for Android Backup Service</a>.
 When you register, you will be provided a Backup Service Key and the appropriate {@code
-&lt;meta-data&gt;} XML code for your Android manifest file, which you must include as a child of the
-{@code &lt;application&gt;} element. For example:</p>
+<meta-data>} XML code for your Android manifest file, which you must include as a child of the
+{@code <application>} element. For example:</p>
 
 <pre>
 &lt;application android:label="MyApplication"
@@ -231,7 +231,7 @@ using a different transport, some devices might not support backup at all, and t
 your application to know what transport is used on the device. However, if you implement backup for
 your application, you should always include a Backup Service Key for Android Backup Service so
 your application can perform backup when the device uses the Android Backup Service transport. If
-the device does not use Android Backup Service, then the {@code &lt;meta-data&gt;} element with the
+the device does not use Android Backup Service, then the {@code <meta-data>} element with the
 Backup Service Key is ignored.</p>
 
 

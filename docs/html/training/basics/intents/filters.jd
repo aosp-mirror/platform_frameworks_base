@@ -32,9 +32,9 @@ interest to support the {@link android.content.Intent#ACTION_SEND} intent so use
 "share" action from another app and launch your app to perform the action.</p>
 
 <p>To allow other apps to start your activity, you need to add an <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 element in your manifest file for the corresponding <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a> element.</p>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element.</p>
 
 <p>When your app is installed on a device, the system identifies your intent
 filters and adds the information to an internal catalog of intents supported by all installed apps.
@@ -59,14 +59,14 @@ an intent filter fulfills the following criteria of the {@link android.content.I
     <dd>A string naming the action to perform. Usually one of the platform-defined values such
 as {@link android.content.Intent#ACTION_SEND} or {@link android.content.Intent#ACTION_VIEW}.
     <p>Specify this in your intent filter with the <a
-href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action>}</a> element.
+href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a> element.
 The value you specify in this element must be the full string name for the action, instead of the
 API constant (see the examples below).</p></dd>
 
   <dt>Data</dt>
     <dd>A description of the data associated with the intent.
     <p>Specify this in your intent filter with the <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a> element. Using one
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> element. Using one
 or more attributes in this element, you can specify just the MIME type, just a URI prefix,
 just a URI scheme, or a combination of these and others that indicate the data type
 accepted.</p>
@@ -81,13 +81,13 @@ to the user gesture or location from which it's started. There are several diffe
 supported by the system, but most are rarely used. However, all implicit intents are defined with
 {@link android.content.Intent#CATEGORY_DEFAULT} by default.
     <p>Specify this in your intent filter with the <a
-href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category>}</a>
+href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>
 element.</p></dd>
 </dl>
 
 <p>In your intent filter, you can declare which criteria your activity accepts
 by declaring each of them with corresponding XML elements nested in the <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 element.</p>
 
 <p>For example, here's an activity with an intent filter that handles the {@link
@@ -106,11 +106,11 @@ android.content.Intent#ACTION_SEND} intent when the data type is either text or 
 
 <p>Each incoming intent specifies only one action and one data type, but it's OK to declare multiple
 instances of the <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action>}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category>}</a>, and <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data>}</a> elements in each
+<action>}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a>, and <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a> elements in each
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter>}</a>.</p>
+<intent-filter>}</a>.</p>
 
 <p>If any two pairs of action and data are mutually exclusive in
 their behaviors, you should create separate intent filters to specify which actions are acceptable

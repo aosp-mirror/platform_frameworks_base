@@ -149,7 +149,7 @@ ponto de entrada principal da interface do usuário do aplicativo.</p>
 na raiz do diretório do seu projeto.</p>
 
 <p>A principal atividade do aplicativo deve ser declarada no manifesto com um <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> que inclui a ação {@link
+<intent-filter>}</a> que inclui a ação {@link
 android.content.Intent#ACTION_MAIN MAIN} e categoria
 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER}. Por exemplo:</p> 
 

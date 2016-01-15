@@ -2315,7 +2315,7 @@ public class WifiManager {
      * is idle.
      * <p>
      * Any application using a WifiLock must request the {@code android.permission.WAKE_LOCK}
-     * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
+     * permission in an {@code <uses-permission>} element of the application's manifest.
      */
     public class WifiLock {
         private String mTag;

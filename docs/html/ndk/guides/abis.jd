@@ -418,8 +418,8 @@ libraries on filepaths inside the APK matching the following pattern:</p>
 /lib/&lt;abi&gt;/lib&lt;name&gt;.so
 </pre>
 
-<p>Here, {@code &lt;abi&gt;} is one of the ABI names listed under <a href="#sa">Supported ABIs</a>,
-and {@code &lt;name&gt;} is the name of the library as you defined it for the {@code LOCAL_MODULE}
+<p>Here, {@code <abi>} is one of the ABI names listed under <a href="#sa">Supported ABIs</a>,
+and {@code <name>} is the name of the library as you defined it for the {@code LOCAL_MODULE}
 variable in the <a href="{@docRoot}ndk/guides/android_mk.html">{@code Android.mk}</a> file. Since
 APK files are just zip files, it is trivial to open them and confirm that the shared native
 libraries are where they belong.</p>
@@ -488,7 +488,7 @@ lib/&lt;secondary-abi&gt;/lib&lt;name&gt;.so
 
 <p>When it finds the libraries that it's looking for, the package manager
 copies them to <code>/lib/lib&lt;name&gt;.so</code>, under the application's
-{@code data} directory ({@code data/data/&lt;package_name&gt;/lib/}).</p>
+{@code data} directory ({@code data/data/<package_name>/lib/}).</p>
 
 <p>If there is no shared-object file at all, the application builds and installs, but crashes at
 runtime.</p>

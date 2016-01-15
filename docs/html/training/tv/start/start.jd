@@ -233,7 +233,7 @@ supported by Android TV.</p>
 <p>
   The Android SDK includes support libraries that are intended for use with TV apps. These
   libraries provide APIs and user interface widgets for use on TV devices. The libraries are
-  located in the {@code &lt;sdk&gt;/extras/android/support/} directory. Here is a list of the
+  located in the {@code <sdk>/extras/android/support/} directory. Here is a list of the
   libraries and their general purpose:
 </p>
 

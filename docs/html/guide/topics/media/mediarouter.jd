@@ -95,7 +95,7 @@ page.tags="mediarouter","cast","chromecast","wireless display","miracast"
   {@link android.support.v7.media.MediaRouteProvider} and distributing it as an application.
   For more information on implementing a media route provider, see the {@link
   android.support.v7.media.MediaRouteProvider} reference documentation and the v7-mediarouter
-  support library sample {@code &lt;sdk&gt;/extras/android/compatibility/v7/mediarouter}.
+  support library sample {@code <sdk>/extras/android/compatibility/v7/mediarouter}.
 </p>
 
 
@@ -540,7 +540,7 @@ private void updateRemotePlayer(RouteInfo route) {
   multiple media items for playback and management of the media queue. For a comprehensive sample
   implementation of these features, see {@code SampleMediaRouterActivity} and its associated
   classes in the v7 mediarouter support library sample
-  {@code &lt;sdk&gt;/extras/android/compatibility/v7/mediarouter}.
+  {@code <sdk>/extras/android/compatibility/v7/mediarouter}.
 </p>
 
 <p>

@@ -29,10 +29,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * on the UI thread.
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;UiThread
- *  public abstract void setText(&#64;NonNull String text) { ... }
- * }</pre>
+ *  public abstract void setText(@NonNull String text) { ... }
+ * </code></pre>
  *
  * {@hide}
  */

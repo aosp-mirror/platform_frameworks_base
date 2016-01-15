@@ -58,21 +58,21 @@ Independence</a>, your application should work well on larger screens such as ta
 might discover that your application can't scale up well or perhaps you've decided to publish two
 versions of your application for different screen configurations. In such a case, you can use the <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element to manage the distribution of your application based on
+<compatible-screens>}</a> element to manage the distribution of your application based on
 combinations of screen size and density. External services such as Google Play use this
 information to apply filtering to your application, so that only devices that have a screen
 configuration with which you declare compatibility can download your application.</p>
 
 <p>The <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element must contain one or more {@code &lt;screen&gt;} elements. Each
-{@code &lt;screen&gt;} element specifies a screen configuration with which your application is
+<compatible-screens>}</a> element must contain one or more {@code <screen>} elements. Each
+{@code <screen>} element specifies a screen configuration with which your application is
 compatible, using both the {@code android:screenSize} and {@code android:screenDensity} attributes.
-Each {@code &lt;screen&gt;} element <strong>must include both attributes</strong> to specify an
+Each {@code <screen>} element <strong>must include both attributes</strong> to specify an
 individual screen configuration&mdash;if either attribute is missing, then the element is invalid
 (external services such as Google Play will ignore it).</p>
 
 <p>For example, if your application is compatible with only small and normal size screens,
-regardless of screen density, you must specify eight different {@code &lt;screen&gt;} elements,
+regardless of screen density, you must specify eight different {@code <screen>} elements,
 because each screen size has four density configurations. You must declare each one of
 these; any combination of size and density that you do <em>not</em> specify is considered a screen
 configuration with which your application is <em>not</em> compatible. Here's what the manifest
@@ -101,10 +101,10 @@ entry looks like if your application is compatible with only small and normal sc
 
 <p class="note"><strong>Note:</strong> Although you can also use the <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> element for the reverse scenario (when your application is not
+<compatible-screens>}</a> element for the reverse scenario (when your application is not
 compatible with smaller screens), it's easier if you instead use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> as discussed in the next section, because it doesn't require you
+<supports-screens>}</a> as discussed in the next section, because it doesn't require you
 to specify each screen density your application supports.</p>
 
 
@@ -116,7 +116,7 @@ to specify each screen density your application supports.</p>
 large screen) or you need time to optimize it for smaller screens, you can prevent small-screen
 devices from downloading your app by using the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> manifest element.</p>
+<supports-screens>}</a> manifest element.</p>
 
 <p>For example, if you want your application to be available only to tablet devices, you can declare
 the element in your manifest like this:</p>
@@ -172,7 +172,7 @@ Tools for Managing Screen Sizes</a>.</p>
 
 <p class="caution"><strong>Caution:</strong> If you use the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> element for the reverse scenario (when your application is not compatible
+<supports-screens>}</a> element for the reverse scenario (when your application is not compatible
 with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
 external services such as Google Play <strong>do not</strong> apply filtering. Your application
 will still be available to larger screens, but when it runs, it will not resize to fit the screen.
@@ -181,16 +181,16 @@ href="{@docRoot}guide/practices/screen-compat-mode.html">Screen Compatibility Mo
 information). If you want
 to prevent your application from being downloaded on larger screens, use <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a>, as discussed in the previous section about <a
+<compatible-screens>}</a>, as discussed in the previous section about <a
 href="#FilteringHandsetApps">Declaring an App is Only for Handsets</a>.</p>
 
 <p>Remember, you should strive to make your application available to as many devices as possible by
 applying all necessary techniques for <a
 href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a>. You should
 use <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens>}</a> or <a
+<compatible-screens>}</a> or <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> only when you cannot provide compatibility on all screen configurations
+<supports-screens>}</a> only when you cannot provide compatibility on all screen configurations
 or you have decided to provide different versions of your application for different sets of screen
 configurations.</p>
 

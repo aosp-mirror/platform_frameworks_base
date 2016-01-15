@@ -133,7 +133,7 @@ page.image=images/cards/card-api-overview_16-9_2x.png
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>Windows에서는 {@code telnet 127.0.0.1 &lt;emulator-id&gt;}에 뒤이어 {@code finger touch &lt;finger_id&gt;}를 실행해야 할 수도 있습니다.
+<p>Windows에서는 {@code telnet 127.0.0.1 <emulator-id>}에 뒤이어 {@code finger touch <finger_id>}를 실행해야 할 수도 있습니다.
 
 </p>
 </li>
@@ -191,7 +191,7 @@ adb -e emu finger touch &lt;finger_id&gt;
 &lt;/service&gt;
 </pre>
 
-<p>{@code ChooserTargetService}에 노출하고자 하는 액티비티마다 {@code &lt;meta-data&gt;} 요소를 하나씩 추가하고, 앱 매니페스트에 {@code "android.service.chooser.chooser_target_service"} 이름을 추가합니다.
+<p>{@code ChooserTargetService}에 노출하고자 하는 액티비티마다 {@code <meta-data>} 요소를 하나씩 추가하고, 앱 매니페스트에 {@code "android.service.chooser.chooser_target_service"} 이름을 추가합니다.
 
 
 </p>

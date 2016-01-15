@@ -842,7 +842,7 @@ public class Time {
      * the given time.
      *
      * <p>
-     * Equivalent to {@code Time.compare(this, that) &lt; 0}. See
+     * Equivalent to {@code Time.compare(this, that) < 0}. See
      * {@link #compare(Time, Time)} for details.
      *
      * @param that a given Time object to compare against
@@ -858,7 +858,7 @@ public class Time {
      * the given time.
      *
      * <p>
-     * Equivalent to {@code Time.compare(this, that) &gt; 0}. See
+     * Equivalent to {@code Time.compare(this, that) > 0}. See
      * {@link #compare(Time, Time)} for details.
      *
      * @param that a given Time object to compare against

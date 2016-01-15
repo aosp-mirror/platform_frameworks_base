@@ -315,7 +315,7 @@ screens&mdash;specifically, whether your application runs in <a
 href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a>.</p>
     <p>To declare the screen sizes your application supports, you should include the
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element in your manifest file.</p>
+<supports-screens>}</a> element in your manifest file.</p>
   </li>
 
   <li><strong>Provide different layouts for different screen sizes</strong>
@@ -328,7 +328,7 @@ you might need to adjust sizes so that everything can fit on the screen.</p>
 <code>small</code>, <code>normal</code>, <code>large</code>, and <code>xlarge</code>. For
 example, layouts for an extra-large screen should go in {@code layout-xlarge/}.</p>
     <p>Beginning with Android 3.2 (API level 13), the above size groups are deprecated and you
-should instead use the {@code sw&lt;N&gt;dp} configuration qualifier to define the smallest
+should instead use the {@code sw<N>dp} configuration qualifier to define the smallest
 available width required by your layout resources. For example, if your multi-pane tablet layout
 requires at least 600dp of screen width, you should place it in {@code layout-sw600dp/}. Using the
 new techniques for declaring layout resources is discussed further in the section about <a
@@ -429,15 +429,15 @@ project and specifies the configuration for which the resources inside are desig
 <p>To use a configuration qualifier:</p>
 <ol>
   <li>Create a new directory in your project's {@code res/} directory and name it using the
-format: <nobr>{@code &lt;resources_name&gt;-&lt;qualifier&gt;}</nobr>
+format: <nobr>{@code <resources_name>-<qualifier>}</nobr>
     <ul>
-      <li>{@code &lt;resources_name&gt;} is the standard resource name (such as {@code drawable} or
+      <li>{@code <resources_name>} is the standard resource name (such as {@code drawable} or
 {@code layout}).</li>
-      <li>{@code &lt;qualifier&gt;} is a configuration qualifier from table 1, below, specifying the
+      <li>{@code <qualifier>} is a configuration qualifier from table 1, below, specifying the
 screen configuration for which these resources are to be used (such as {@code hdpi} or {@code
 xlarge}).</li>
     </ul>
-    <p>You can use more than one {@code &lt;qualifier&gt;} at a time&mdash;simply separate each
+    <p>You can use more than one {@code <qualifier>} at a time&mdash;simply separate each
 qualifier with a dash.</p>
   </li>
   <li>Save the appropriate configuration-specific resources in this new directory. The resource
@@ -759,7 +759,7 @@ the space available for your layout and you must account for it in your design.<
 screen area. Specifically, the device's smallestWidth is the shortest of the screen's available
 height and width (you may also think of it as the "smallest possible width" for the screen). You can
 use this qualifier to ensure that, regardless of the screen's current orientation, your
-application's has at least {@code &lt;N&gt;} dps of width available for its UI.</p>
+application's has at least {@code <N>} dps of width available for its UI.</p>
         <p>For example, if your layout requires that its smallest dimension of screen area be at
 least 600 dp at all times, then you can use this qualifier to create the layout resources, {@code
 res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
@@ -868,8 +868,8 @@ res/layout-sw720dp/main_activity.xml   # For 10” tablets (720dp wide and bigge
 </pre>
 
 <p>Notice that the previous two sets of example resources use the "smallest width" qualifier, {@code
-sw&lt;N&gt;dp}, which specifies the smallest of the screen's two sides, regardless of the
-device's current orientation. Thus, using {@code sw&lt;N&gt;dp} is a simple way to specify the
+sw<N>dp}, which specifies the smallest of the screen's two sides, regardless of the
+device's current orientation. Thus, using {@code sw<N>dp} is a simple way to specify the
 overall screen size available for your layout by ignoring the screen's orientation.</p>
 
 <p>However, in some cases, what might be
@@ -883,13 +883,13 @@ res/layout/main_activity.xml         # For handsets (smaller than 600dp availabl
 res/layout-w600dp/main_activity.xml  # Multi-pane (any screen with 600dp available width or more)
 </pre>
 
-<p>Notice that the second set is using the "available width" qualifier, {@code w&lt;N&gt;dp}. This
+<p>Notice that the second set is using the "available width" qualifier, {@code w<N>dp}. This
 way, one device may actually use both layouts, depending on the orientation of the screen (if
 the available width is at least 600dp in one orientation and less than 600dp in the other
 orientation).</p>
 
 <p>If the available height is a concern for you, then you can do the same using the {@code
-h&lt;N&gt;dp} qualifier. Or, even combine the {@code w&lt;N&gt;dp} and {@code h&lt;N&gt;dp}
+h<N>dp} qualifier. Or, even combine the {@code w<N>dp} and {@code h<N>dp}
 qualifiers if you need to be really specific.</p>
 
 
@@ -1287,7 +1287,7 @@ the AVD Manager to create the AVDs and launch them with a graphical interface.</
 
 <p>To launch the Android SDK Manager, execute the {@code
 SDK Manager.exe} from your Android SDK directory (on Windows only) or execute {@code android} from
-the {@code &lt;sdk&gt;/tools/} directory (on all platforms). Figure 6 shows the AVD
+the {@code <sdk>/tools/} directory (on all platforms). Figure 6 shows the AVD
 Manager with a selection of AVDs, for testing various screen configurations.</p>
 
 <p>Table 3 shows the various emulator skins that are available in the Android SDK, which you can use

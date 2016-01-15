@@ -90,8 +90,8 @@ public class MainActivity extends ActionBarActivity { ... }
   </li>
   <li>In your manifest file, update either the <a
   href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-  &lt;application>}</a> element or individual
-  <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;activity>}</a>
+  <application>}</a> element or individual
+  <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <activity>}</a>
   elements to use one of the {@link android.support.v7.appcompat.R.style#Theme_AppCompat
   Theme.AppCompat} themes. For example:
   <pre>&lt;activity android:theme="@style/Theme.AppCompat.Light" ... ></pre>

@@ -383,7 +383,7 @@ you will update this method later and won't be using that layout.</p>
 
 <li>In your manifest file, <code>AndroidManifest.xml</code>, within the <code>Application</code>
 element, add the
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a> element
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
 for your {@code DisplayMessageActivity} class, as follows:
 
 <pre>
@@ -412,7 +412,7 @@ Android 4.1 (API level 16) and higher. You can provide the same navigation behav
 older versions of Android by using the
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a> and adding
 the <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
-&lt;meta-data>}</a> element as shown here.</p>
+<meta-data>}</a> element as shown here.</p>
 
 <p class="note"><strong>Note:</strong> Your Android SDK should already include
 the latest Android Support Library, which you installed during the

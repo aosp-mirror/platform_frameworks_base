@@ -791,7 +791,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
         <li>Updated build tools to allow use of RenderScript on older versions of Android
          using new features in the
          <a href="{@docRoot}tools/support-library/features.html#v8">Support Library</a>.</li>
-        <li>Moved the Systrace tool to the {@code &gt;sdk&lt;/platform-tools/} directory. </li>
+        <li>Moved the Systrace tool to the {@code <sdk>/platform-tools/} directory. </li>
         <li>Modified <a href="{@docRoot}tools/help/gltracer.html">Tracer for OpenGL ES</a> to
           support OpenGL ES 3.0.</li>
         <li>Lint

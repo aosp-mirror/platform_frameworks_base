@@ -133,8 +133,8 @@ Ejemplo de diálogo de huella dactilar</a>.</p>
 <pre class="no-prettyprint">
 adb -e emu finger touch &lt;finger_id&gt;
 </pre>
-<p>En Windows, posiblemente tenga que ejecutar {@code telnet 127.0.0.1 &lt;emulator-id&gt;} seguido de
-  {@code finger touch &lt;finger_id&gt;}.
+<p>En Windows, posiblemente tenga que ejecutar {@code telnet 127.0.0.1 <emulator-id>} seguido de
+  {@code finger touch <finger_id>}.
 </p>
 </li>
 </ol>
@@ -192,7 +192,7 @@ Clase {@code chooser.ChooserTargetService}. Declare su
 </pre>
 
 <p>Para cada actividad que desee exponer a {@code ChooserTargetService}, agregue un elemento
-{@code &lt;meta-data&gt;} con el nombre
+{@code <meta-data>} con el nombre
 {@code "android.service.chooser.chooser_target_service"} en el manifiesto de su aplicación.
 </p>
 

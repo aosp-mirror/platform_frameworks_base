@@ -303,7 +303,7 @@ public abstract class RecognitionService extends Service {
          * The service should call this method when recognition results are ready.
          * 
          * @param results the recognition results. To retrieve the results in {@code
-         *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
+         *        ArrayList<String>} format use {@link Bundle#getStringArrayList(String)} with
          *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
          */
         public void results(Bundle results) throws RemoteException {

@@ -190,7 +190,7 @@ for you. This technique should be considered a last resort when you must avoid r
 configuration change and is not recommended for most applications.</p>
 
 <p>To declare that your activity handles a configuration change, edit the appropriate <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element in
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element in
 your manifest file to include the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#config">{@code
 android:configChanges}</a> attribute with a value that represents the configuration you want to

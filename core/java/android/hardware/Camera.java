@@ -2882,8 +2882,7 @@ public class Camera {
          * <var>y</var> for the Y plane and row <var>c</var> for the U and V
          * planes:
          *
-         * {@code
-         * <pre>
+         * <pre>{@code
          * yStride   = (int) ceil(width / 16.0) * 16;
          * uvStride  = (int) ceil( (yStride / 2) / 16.0) * 16;
          * ySize     = yStride * height;
@@ -2891,8 +2890,9 @@ public class Camera {
          * yRowIndex = yStride * y;
          * uRowIndex = ySize + uvSize + uvStride * c;
          * vRowIndex = ySize + uvStride * c;
-         * size      = ySize + uvSize * 2;</pre>
+         * size      = ySize + uvSize * 2;
          * }
+         *</pre>
          *
          * @param pixel_format the desired preview picture format, defined by
          *   one of the {@link android.graphics.ImageFormat} constants.  (E.g.,

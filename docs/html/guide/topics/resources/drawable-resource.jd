@@ -139,11 +139,11 @@ Drawable drawable = res.{@link android.content.res.Resources#getDrawable(int) ge
 <p>An XML bitmap is a resource defined in XML that points to a bitmap file. The effect is an alias for a
 raw bitmap file. The XML can specify additional properties for the bitmap such as dithering and tiling.</p>
 
-<p class="note"><strong>Note:</strong> You can use a {@code &lt;bitmap&gt;} element as a child of
-an {@code &lt;item&gt;} element. For
+<p class="note"><strong>Note:</strong> You can use a {@code <bitmap>} element as a child of
+an {@code <item>} element. For
 example, when creating a <a href="#StateList">state list</a> or <a href="#LayerList">layer list</a>,
 you can exclude the {@code android:drawable}
-attribute from an {@code &lt;item&gt;} element and nest a {@code &lt;bitmap&gt;} inside it
+attribute from an {@code <item>} element and nest a {@code <bitmap>} inside it
 that defines the drawable item.</p>
 
 <dl class="xml">
@@ -448,8 +448,8 @@ screen).</dd>
 that manages an array of other drawables. Each drawable in the list is drawn in the order of the
 list&mdash;the last drawable in the list is drawn on top.</p>
 
-<p>Each drawable is represented by an {@code &lt;item&gt;} element inside a single {@code
-&lt;layer-list&gt;} element.</p>
+<p>Each drawable is represented by an {@code <item>} element inside a single {@code
+<layer-list>} element.</p>
 
 <dl class="xml">
 
@@ -492,7 +492,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 
   <dt id="layerlist-element"><code>&lt;layer-list&gt;</code></dt>
     <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
-&lt;item>} elements.
+<item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>
@@ -502,7 +502,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
     </dd>
   <dt id="layerlist-item-element"><code>&lt;item&gt;</code></dt>
     <dd>Defines a drawable to place in the layer drawable, in a position defined by its attributes.
-Must be a child of a <code>&lt;selector&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
+Must be a child of a <code>&lt;selector&gt;</code> element. Accepts child {@code <bitmap>}
 elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
@@ -528,15 +528,15 @@ View.findViewById()} or {@link android.app.Activity#findViewById(int) Activity.f
       <p>All drawable items are scaled to fit the size of the containing View, by default. Thus,
 placing your images in a layer list at different positions might increase the size of the View and
 some images scale as appropriate. To avoid
-scaling items in the list, use a {@code &lt;bitmap&gt;} element inside the {@code
-&lt;item&gt;} element to specify the drawable and define the gravity to something that does not
-scale, such as {@code "center"}. For example, the following {@code &lt;item&gt;} defines an item
+scaling items in the list, use a {@code <bitmap>} element inside the {@code
+<item>} element to specify the drawable and define the gravity to something that does not
+scale, such as {@code "center"}. For example, the following {@code <item>} defines an item
 that scales to fit its container View:</p>
 <pre>
 &lt;item android:drawable="@drawable/image" /&gt;
 </pre>
 
-<p>To avoid scaling, the following example uses a {@code &lt;bitmap&gt;} element with centered
+<p>To avoid scaling, the following example uses a {@code <bitmap>} element with centered
 gravity:</p>
 <pre>
 &lt;item&gt;
@@ -569,7 +569,7 @@ gravity:</p>
     &lt;/item&gt;
 &lt;/layer-list&gt;
 </pre>
-<p>Notice that this example uses a nested {@code &lt;bitmap&gt;} element to define the drawable
+<p>Notice that this example uses a nested {@code <bitmap>} element to define the drawable
 resource for each item with a "center" gravity. This ensures that none of the images are scaled to
 fit the size of the container, due to resizing caused by the offset images.</p>
 
@@ -611,7 +611,7 @@ or niether) and, using a state list drawable, you can provide a different backgr
 state.</p>
 
 <p>You can describe the state list in an XML file. Each graphic is represented by an {@code
-&lt;item>} element inside a single {@code &lt;selector>} element. Each {@code &lt;item>}
+<item>} element inside a single {@code <selector>} element. Each {@code <item>}
 uses various attributes to describe the state in which it should be used as the graphic for the
 drawable.</p>
 
@@ -666,7 +666,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 
   <dt id="selector-element"><code>&lt;selector&gt;</code></dt>
     <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
-&lt;item>} elements.
+<item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>
@@ -828,7 +828,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
 <dl class="tag-list">
 
   <dt id="levellist-element"><code>&lt;level-list&gt;</code></dt>
-  <dd>This must be the root element. Contains one or more {@code &lt;item&gt;} elements.
+  <dd>This must be the root element. Contains one or more {@code <item>} elements.
     <p class="caps">attributes:</p>
     <dl class="atn-list">
       <dt><code>xmlns:android</code></dt>
@@ -895,8 +895,8 @@ android.widget.ImageView#setImageLevel(int) setImageLevel()}.</p>
 <p>A {@link android.graphics.drawable.TransitionDrawable} is a drawable object
 that can cross-fade between the two drawable resources.</p>
 
-<p>Each drawable is represented by an {@code &lt;item&gt;} element inside a single {@code
-&lt;transition&gt;} element. No more than two items are supported. To transition forward, call
+<p>Each drawable is represented by an {@code <item>} element inside a single {@code
+<transition>} element. No more than two items are supported. To transition forward, call
 {@link android.graphics.drawable.TransitionDrawable#startTransition(int) startTransition()}. To
 transition backward, call {@link android.graphics.drawable.TransitionDrawable#reverseTransition(int)
 reverseTransition()}.</p>
@@ -942,7 +942,7 @@ xmlns:android="http://schemas.android.com/apk/res/android" &gt;
 
   <dt id="transition-element"><code>&lt;transition&gt;</code></dt>
     <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
-&lt;item>} elements.
+<item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>
@@ -952,7 +952,7 @@ xmlns:android="http://schemas.android.com/apk/res/android" &gt;
     </dd>
   <dt id="transition-item-element"><code>&lt;item&gt;</code></dt>
     <dd>Defines a drawable to use as part of the drawable transition.
-Must be a child of a <code>&lt;transition&gt;</code> element. Accepts child {@code &lt;bitmap&gt;}
+Must be a child of a <code>&lt;transition&gt;</code> element. Accepts child {@code <bitmap>}
 elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
@@ -1516,7 +1516,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
                 <td>An oval shape that fits the dimensions of the containing View.</td></tr>
             <tr><td>{@code "line"}</td>
                 <td>A horizontal line that spans the width of the containing View. This
-                shape requires the {@code &lt;stroke>} element to define the width of the
+                shape requires the {@code <stroke>} element to define the width of the
                 line.</td></tr>
             <tr><td>{@code "ring"}</td>
                 <td>A ring shape.</td></tr>

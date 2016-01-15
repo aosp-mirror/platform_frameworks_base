@@ -72,7 +72,7 @@ validator, such as the one available at
 
 
 <li>Use viewport meta data to properly resize your web page
-  <p>In your document {@code &lt;head&gt;}, you should provide meta data that specifies how you
+  <p>In your document {@code <head>}, you should provide meta data that specifies how you
 want the browser's viewport to render your web page. For example, your viewport meta data can
 specify the height and width for the browser's viewport, the initial web page scale and even the
 target screen density.</p>
@@ -89,7 +89,7 @@ href="{@docRoot}guide/webapps/targeting.html">Targeting Screens from Web Apps</a
   <p>Because mobile devices typically have a connection speed far slower than a desktop
 computer, you should make your web pages load as fast as possible. One way to speed it up is to
 avoid loading extra files such as stylesheets and script files in the {@code
-&lt;head&gt;}. Instead, provide your CSS and JavaScript directly in the &lt;head&gt; (or
+<head>}. Instead, provide your CSS and JavaScript directly in the &lt;head&gt; (or
 at the end of the &lt;body&gt;, for scripts that you don't need until the page is loaded).
 Alternatively, you should optimize the size and speed of your files by compressing them with tools
 like <a href="http://code.google.com/p/minify/">Minify</a>.</p>

@@ -83,7 +83,7 @@ while Twitter uses "com.twitter.android.auth.login."</p>
 <p>In order to get a list of accounts on the device, your app needs the {@link
 android.Manifest.permission#GET_ACCOUNTS}
 permission. Add a <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
-&lt;uses-permission&gt;}</a> tag in your manifest file to request
+<uses-permission>}</a> tag in your manifest file to request
 this permission:</p>
 
 <pre>

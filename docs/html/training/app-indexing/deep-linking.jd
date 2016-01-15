@@ -32,13 +32,13 @@ trainingnavtop=true
 <p>To create a deep link to your app content, add an intent filter that
   contains these elements and attribute values in your manifest:</p>
 <dl>
-<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a></dt>
 <dd>Specify the {@link android.content.Intent#ACTION_VIEW} intent action so
   that the intent filter can be reached from Google Search.</dd>
-<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a></dt>
-<dd>Add one or more <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> tags, where each tag represents a URI format that resolves to the activity. At minimum, the <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> tag must include the <a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">{@code android:scheme}</a> attribute.
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a></dt>
+<dd>Add one or more <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> tags, where each tag represents a URI format that resolves to the activity. At minimum, the <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> tag must include the <a href="{@docRoot}guide/topics/manifest/data-element.html#scheme">{@code android:scheme}</a> attribute.
 <p>You can add additional attributes to further refine the type of URI that the activity accepts. For example, you might have multiple activities that accept similar URIs, but which differ simply based on the path name. In this case, use the <a href="{@docRoot}guide/topics/manifest/data-element.html#path">{@code android:path}</a> attribute or its variants ({@code pathPattern} or {@code pathPrefix}) to differentiate which activity the system should open for different URI paths.</p></dd>
-<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a></dt>
 <dd>Include the {@link android.content.Intent#CATEGORY_BROWSABLE BROWSABLE}
 category. The {@link android.content.Intent#CATEGORY_BROWSABLE BROWSABLE}
 category is required in order for the intent filter to be accessible from a web

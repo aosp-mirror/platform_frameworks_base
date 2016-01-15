@@ -48,13 +48,13 @@ import java.util.List;
  * {@code InCallService} implementation intends to replace the built-in in-call UI.
  * <pre>
  * {@code
- * &lt;service android:name="your.package.YourInCallServiceImplementation"
- *          android:permission="android.permission.BIND_IN_CALL_SERVICE"&gt;
- *      &lt;meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" /&gt;
- *      &lt;intent-filter&gt;
- *          &lt;action android:name="android.telecom.InCallService"/&gt;
- *      &lt;/intent-filter&gt;
- * &lt;/service&gt;
+ * <service android:name="your.package.YourInCallServiceImplementation"
+ *          android:permission="android.permission.BIND_IN_CALL_SERVICE">
+ *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" />
+ *      <intent-filter>
+ *          <action android:name="android.telecom.InCallService"/>
+ *      </intent-filter>
+ * </service>
  * }
  * </pre>
  */

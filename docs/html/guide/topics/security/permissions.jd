@@ -452,7 +452,7 @@ methods.</p>
     <dd>Information about how requesting some permissions will implicitly restrict your app
     to devices that include the corresponding hardware or software feature.</dd>
     <dt><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code
-    &lt;uses-permission>}</a></dt>
+    <uses-permission>}</a></dt>
     <dd>API reference for the manifest tag that declare's your app's required system permissions.
     </dd>
     <dt>{@link android.Manifest.permission}</dt>

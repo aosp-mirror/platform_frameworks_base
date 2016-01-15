@@ -22,9 +22,9 @@ page.title=ndk-gdb
 
 <ul>
 <li>Build your app using the {@code ndk-build} script. The {@code ndk-gdb} script
-does not support using the legacy {@code make APP=&lt;name&gt;} method to build.</p></li>
+does not support using the legacy {@code make APP=<name>} method to build.</p></li>
 <li>Enable app debugging in your {@code AndroidManifest.xml} file by including an
-{@code &lt;application&gt;} element that sets the {@code android:debuggable} attribute to {@code
+{@code <application>} element that sets the {@code android:debuggable} attribute to {@code
 true}.</li>
 <li>Build your app to run on Android 2.2 (Android API level 8) or higher.</li>
 <li>Debug on a device or emulator running Android 2.2 or higher. For debugging purposes, the target
@@ -59,7 +59,7 @@ messages.</p>
 <p>Next, {@code ndk-gdb} displays a normal GDB prompt.</p>
 
 <p>You interact with {@code ndk-gdb} in the same way as you would with GNU GDB. For example, you can
-use {@code b &lt;location&gt;} to set breakpoints, and {@code c} (for "continue") to
+use {@code b <location>} to set breakpoints, and {@code c} (for "continue") to
 resume execution. For a comprehensive list of commands, see the
 <a href="http://www.gnu.org/software/gdb/">GDB manual.</a></p>
 
@@ -78,7 +78,7 @@ debuggable.</li>
 
 <p>By default, {@code ndk-gdb} searches for an already-running application process, and displays an
 error if it doesn't find one. You can, however, use the {@code --start} or
-{@code --launch=&lt;name&gt;} option to automatically start your activity before the debugging
+{@code --launch=<name>} option to automatically start your activity before the debugging
 session. For more information, see <a href="#opt">Options</a>.</p>
 
 
@@ -117,13 +117,13 @@ your app on the target device. You can override this default behavior by using {
 explicitly launch the application on the target device before the debugging session.</p></td>
 
 <p>Starting {@code ndk-gdb} with this option specified launches the first launchable activity listed
-in your application manifest. Use {@code --launch=&lt;name&gt;} to start the next launchable
+in your application manifest. Use {@code --launch=<name>} to start the next launchable
 activity. To dump the list of launchable activities, run {@code --launch-list} from the command
 line.</p>
 </tr>
 
 <tr>
-<td>{@code --launch=&lt;name&gt;}</td>
+<td>{@code --launch=<name>}</td>
 <td><p>This option is similar to {@code --start}, except that it allows you to start a specific
  activity from your application. This feature is only useful if your manifest defines multiple
  launchable activities.</p></td>
@@ -136,20 +136,20 @@ line.</p>
 </tr>
 
 <tr>
-<td>{@code --project=&lt;path&gt;}</td>
+<td>{@code --project=<path>}</td>
 <td>This option specifies the app project directory. It is useful if you want to launch the
  script without first having to change to the project directory.</p></td>
 </tr>
 
 <tr>
-<td>{@code --port=&lt;port&gt;}</td>
+<td>{@code --port=<port>}</td>
 <td> <p>By default, {@code ndk-gdb} uses local TCP port 5039 to communicate with the app it
  is debugging on the target device. Using a different port allows you to natively debug programs
  running on different devices or emulators connected to the same host machine.</p></td>
 </tr>
 
 <tr>
-<td>{@code --adb=&lt;file&gt;}</td>
+<td>{@code --adb=<file>}</td>
 <td><p>This option specifies the <a href="{@docRoot}tools/help/adb.html">adb</a>
 tool executable. It is only necessary if you have not set your path to include that executable.</p>
 </td>
@@ -159,7 +159,7 @@ tool executable. It is only necessary if you have not set your path to include t
 <td>
 <li>{@code -d}</li>
 <li>{@code -e}</li>
-<li>{@code -s &lt;serial&gt;}</li></td>
+<li>{@code -s <serial>}</li></td>
 <td><p>These flags are similar to the adb commands with the same names. Set these flags if you have
 several devices or emulators connected to your host machine. Their meanings are as follows:</p>
 <dl>
@@ -167,8 +167,8 @@ several devices or emulators connected to your host machine. Their meanings are 
    <dd>Connect to a single physical device.</dd>
    <dt>{@code -e}</dt>
    <dd>Connect to a single emulator device.</dd>
-   <dt>{@code -s &lt;serial&gt;}</dt>
-   <dd>Connect to a specific device or emulator. Here, {@code &lt;serial&gt;} is the device's name
+   <dt>{@code -s <serial>}</dt>
+   <dd>Connect to a specific device or emulator. Here, {@code <serial>} is the device's name
    as listed by the {@code adb devices} command.</dd>
 </dl>
 
@@ -178,11 +178,11 @@ device, without the need for a specific option.</p></td>
 
 <tr>
 <td>
-<li>{@code --exec=&lt;file&gt;}</li>
-<li>{@code -x &lt;file&gt;}</li>
+<li>{@code --exec=<file>}</li>
+<li>{@code -x <file>}</li>
 </td>
 <td><p>This option tells {@code ndk-gdb} to run the GDB initialization commands found in
-{@code &lt;file&gt;} after connecting to the process it is debugging. This is a useful feature if
+{@code <file>} after connecting to the process it is debugging. This is a useful feature if
 you want to do something repeatedly, such as setting up a list of breakpoints, and then resuming
 execution automatically.</p></td>
 </tr>
@@ -200,7 +200,7 @@ execution automatically.</p></td>
 </tr>
 
 <tr>
-<td>{@code --gnumake-flag=&lt;flag&gt;}</td>
+<td>{@code --gnumake-flag=<flag>}</td>
 <td><p>This option is an extra flag (or flags) to pass to the
 {@code ndk-build} system when
 querying it for project information. You can use multiple instances of this option in the

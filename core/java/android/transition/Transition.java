@@ -2052,18 +2052,18 @@ public abstract class Transition implements Cloneable {
      *     attributed with the fully-described class name. For example:</p>
      * <pre>
      * {@code
-     * &lt;changeBounds>
-     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
-     * &lt;/changeBounds>
+     * <changeBounds>
+     *     <pathMotion class="my.app.transition.MyPathMotion"/>
+     * </changeBounds>
      * }
      * </pre>
      * <p>or</p>
      * <pre>
      * {@code
-     * &lt;changeBounds>
-     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     * <changeBounds>
+     *   <arcMotion android:minimumHorizontalAngle="15"
      *     android:minimumVerticalAngle="0" android:maximumAngle="90"/>
-     * &lt;/changeBounds>
+     * </changeBounds>
      * }
      * </pre>
      *
@@ -2090,20 +2090,18 @@ public abstract class Transition implements Cloneable {
      *     the built-in tags <code>arcMotion</code> or <code>patternPathMotion</code> or it can
      *     be a custom PathMotion using <code>pathMotion</code> with the <code>class</code>
      *     attributed with the fully-described class name. For example:</p>
-     * <pre>
-     * {@code
-     * &lt;changeBounds>
-     *     &lt;pathMotion class="my.app.transition.MyPathMotion"/>
-     * &lt;/changeBounds>}
+     * <pre>{@code
+     * <changeBounds>
+     *     <pathMotion class="my.app.transition.MyPathMotion"/>
+     * </changeBounds>}
      * </pre>
      * <p>or</p>
-     * <pre>
-     * {@code
-     * &lt;changeBounds>
-     *   &lt;arcMotion android:minimumHorizontalAngle="15"
+     * <pre>{@code
+     * <changeBounds>
+     *   <arcMotion android:minimumHorizontalAngle="15"
      *              android:minimumVerticalAngle="0"
      *              android:maximumAngle="90"/>
-     * &lt;/changeBounds>}
+     * </changeBounds>}
      * </pre>
      *
      * @return The algorithm object used to interpolate along two dimensions.

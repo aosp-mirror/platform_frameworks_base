@@ -30,7 +30,7 @@ parent.link=activities.html
   <li><a href="{@docRoot}design/patterns/navigation.html">Android Design:
 Navigation</a></li>
   <li><a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;} manifest
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>} manifest
 element</a></li>
   <li><a href="{@docRoot}guide/components/recents.html">Overview Screen</a></li>
 </ol>
@@ -221,12 +221,12 @@ instance on top of the back stack); or, you want your back stack to be cleared o
 activities except for the root activity when the user leaves the task.</p>
 
 <p>You can do these things and more, with attributes in the
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 manifest element and with flags in the intent that you pass to
 {@link android.app.Activity#startActivity startActivity()}.</p>
 
 <p>In this regard, the principal <a href="{@docRoot}guide/topics/manifest/activity-element.html">
-{@code &lt;activity&gt;}</a> attributes you can use are:</p>
+{@code <activity>}</a> attributes you can use are:</p>
 
 <ul class="nolist">
   <li><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">
@@ -295,7 +295,7 @@ for an intent cannot be defined in the manifest.</p>
 
 <p>When declaring an activity in your manifest file, you can specify how the activity should
 associate with a task using the <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element's <a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
 launchMode}</a> attribute.</p>
 
@@ -351,7 +351,7 @@ any activities started by this one open in a separate task.</dd>
 
 <p>As another example, the Android Browser application declares that the web browser activity should
 always open in its own task&mdash;by specifying the {@code singleTask} launch mode in the <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element.
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element.
 This means that if your application issues an
 intent to open the Android Browser, its activity is <em>not</em> placed in the same
 task as your application. Instead, either a new task starts for the Browser or, if the Browser
@@ -440,14 +440,14 @@ assigned different task affinities.</p>
 
 <p>You can modify the affinity for any given activity with the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a> attribute
-of the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+of the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element.</p>
 
 <p>The <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#aff">{@code taskAffinity}</a>
 attribute takes a string value, which must be unique from the default package name
 declared in the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">
-{@code &lt;manifest&gt;}
+{@code <manifest>}
 </a> element, because the system uses that name to identify the default task
 affinity for the application.</p>
 

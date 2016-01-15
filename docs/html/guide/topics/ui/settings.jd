@@ -186,7 +186,7 @@ provides an easy-to-read structure that's simple to update. Also, your app's set
 generally pre-determined, although you can still modify the collection at runtime.</p>
 
 <p>Each {@link android.preference.Preference} subclass can be declared with an XML element that
-matches the class name, such as {@code &lt;CheckBoxPreference>}.</p>
+matches the class name, such as {@code <CheckBoxPreference>}.</p>
 
 <p>You must save the XML file in the {@code res/xml/} directory. Although you can name the file
 anything you want, it's traditionally named {@code preferences.xml}. You usually need only one file,
@@ -197,7 +197,7 @@ instances of {@link android.preference.PreferenceScreen}.</p>
 settings, then you need separate XML files for each fragment.</p>
 
 <p>The root node for the XML file must be a {@link android.preference.PreferenceScreen
-&lt;PreferenceScreen&gt;} element. Within this element is where you add each {@link
+<PreferenceScreen>} element. Within this element is where you add each {@link
 android.preference.Preference}. Each child you add within the
 {@link android.preference.PreferenceScreen &lt;PreferenceScreen&gt;} element appears as a single
 item in the list of settings.</p>
@@ -234,7 +234,7 @@ android.content.SharedPreferences}.
   <p>The only instances in which this attribute is <em>not required</em> is when the preference is a
 {@link android.preference.PreferenceCategory} or {@link android.preference.PreferenceScreen}, or the
 preference specifies an {@link android.content.Intent} to invoke (with an <a
-href="#Intents">{@code &lt;intent&gt;}</a> element) or a {@link android.app.Fragment} to display (with an <a
+href="#Intents">{@code <intent>}</a> element) or a {@link android.app.Fragment} to display (with an <a
 href="{@docRoot}reference/android/preference/Preference.html#attr_android:fragment">{@code
 android:fragment}</a> attribute).</p>
   </dd>
@@ -323,7 +323,7 @@ android.preference.PreferenceScreen}.</p>
 
 <img src="{@docRoot}images/ui/settings/settings-subscreen.png" alt="" />
 <p class="img-caption"><strong>Figure 3.</strong> Setting subscreens. The {@code
-&lt;PreferenceScreen>} element
+<PreferenceScreen>} element
 creates an item that, when selected, opens a separate list to display the nested settings.</p>
 
 <p>For example:</p>
@@ -360,8 +360,8 @@ creates an item that, when selected, opens a separate list to display the nested
 
 <p>In some cases, you might want a preference item to open a different activity instead of a
 settings screen, such as a web browser to view a web page. To invoke an {@link
-android.content.Intent} when the user selects a preference item, add an {@code &lt;intent&gt;}
-element as a child of the corresponding {@code &lt;Preference&gt;} element.</p>
+android.content.Intent} when the user selects a preference item, add an {@code <intent>}
+element as a child of the corresponding {@code <Preference>} element.</p>
 
 <p>For example, here's how you can use a preference item to open a web page:</p>
 
@@ -577,7 +577,7 @@ preference headers</a>).</p>
 <img src="{@docRoot}images/ui/settings/settings-headers-tablet.png" alt="" />
 <p class="img-caption"><strong>Figure 4.</strong> Two-pane layout with headers. <br/><b>1.</b> The
 headers are defined with an XML headers file. <br/><b>2.</b> Each group of settings is defined by a
-{@link android.preference.PreferenceFragment} that's specified by a {@code &lt;header>} element in
+{@link android.preference.PreferenceFragment} that's specified by a {@code <header>} element in
 the headers file.</p>
 
 <img src="{@docRoot}images/ui/settings/settings-headers-handset.png" alt="" />
@@ -588,8 +588,8 @@ headers.</p>
 
 <h3 id="CreateHeaders" style="clear:left">Creating the headers file</h3>
 
-<p>Each group of settings in your list of headers is specified by a single {@code &lt;header>}
-element inside a root {@code &lt;preference-headers>} element. For example:</p>
+<p>Each group of settings in your list of headers is specified by a single {@code <header>}
+element inside a root {@code <preference-headers>} element. For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
@@ -611,7 +611,7 @@ element inside a root {@code &lt;preference-headers>} element. For example:</p>
 <p>With the {@code android:fragment} attribute, each header declares an instance of {@link
 android.preference.PreferenceFragment} that should open when the user selects the header.</p>
 
-<p>The {@code &lt;extras>} element allows you to pass key-value pairs to the fragment in a {@link
+<p>The {@code <extras>} element allows you to pass key-value pairs to the fragment in a {@link
 android.os.Bundle}. The fragment can retrieve the arguments by calling {@link
 android.app.Fragment#getArguments()}. You might pass arguments to the fragment for a variety of
 reasons, but one good reason is to reuse the same subclass of {@link
@@ -619,7 +619,7 @@ android.preference.PreferenceFragment} for each group and use the argument to sp
 preferences XML file the fragment should load.</p>
 
 <p>For example, here's a fragment that can be reused for multiple settings groups, when each
-header defines an {@code &lt;extra>} argument with the {@code "settings"} key:</p>
+header defines an {@code <extra>} argument with the {@code "settings"} key:</p>
 
 <pre>
 public static class SettingsFragment extends PreferenceFragment {
@@ -717,7 +717,7 @@ Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 &lt;/PreferenceScreen>
 </pre>
 
-<p>Because support for {@code &lt;preference-headers>} was added in Android 3.0, the system calls
+<p>Because support for {@code <preference-headers>} was added in Android 3.0, the system calls
 {@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} in your {@link
 android.preference.PreferenceActivity} only when running on Androd 3.0 or higher. In order to load
 the "legacy" headers file ({@code preference_headers_legacy.xml}), you must check the Android
@@ -747,7 +747,7 @@ public void onBuildHeaders(List&lt;Header> target) {
 
 <p>The only thing left to do is handle the {@link android.content.Intent} that's passed into the
 activity to identify which preference file to load. So retrieve the intent's action and compare it
-to known action strings that you've used in the preference XML's {@code &lt;intent>} tags:</p>
+to known action strings that you've used in the preference XML's {@code <intent>} tags:</p>
 
 <pre>
 final static String ACTION_PREFS_ONE = "com.example.prefs.PREFS_ONE";

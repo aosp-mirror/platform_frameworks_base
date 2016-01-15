@@ -118,7 +118,7 @@ import java.util.ArrayList;
  *     }
  * }</pre>
  *
- * <p>To add a progress bar to a layout file, you can use the {@code &lt;ProgressBar&gt;} element.
+ * <p>To add a progress bar to a layout file, you can use the {@code <ProgressBar>} element.
  * By default, the progress bar is a spinning wheel (an indeterminate indicator). To change to a
  * horizontal progress bar, apply the {@link android.R.style#Widget_ProgressBar_Horizontal
  * Widget.ProgressBar.Horizontal} style, like so:</p>

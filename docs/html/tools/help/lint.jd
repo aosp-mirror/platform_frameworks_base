@@ -154,7 +154,7 @@ You can create an HTML report for the issues that {@code lint} detects. For exam
 <td rowspan="4">Help</td>
 <td><nobr><code>--help</code></nobr></td>
 <td>List the command-line arguments supported by the {@code lint} tool.</td>
-<td>Use {@code --help &lt;topic&gt;} to see help information for a specific topic, such as "suppress".</td>
+<td>Use {@code --help <topic>} to see help information for a specific topic, such as "suppress".</td>
 </tr>
 
 <tr>
@@ -166,7 +166,7 @@ You can create an HTML report for the issues that {@code lint} detects. For exam
 <tr>
 <td><nobr><code>--show</code></nobr></td>
 <td>List the ID and verbose description for issues that can be checked by {@code lint}</td>
-<td>Use {@code --show &lt;ids&gt;} to see descriptions for a specific list of {@code lint} issue IDs.</td>
+<td>Use {@code --show <ids>} to see descriptions for a specific list of {@code lint} issue IDs.</td>
 </tr>
 
 <tr>

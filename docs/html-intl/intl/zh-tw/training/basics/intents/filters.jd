@@ -31,7 +31,7 @@ trainingnavtop=true
 
 </p>
 
-<p>若要允許其他應用程式啟動您的應用行為顯示，需要在您的宣示說明檔案中針對對應的 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> 元素新增 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素。
+<p>若要允許其他應用程式啟動您的應用行為顯示，需要在您的宣示說明檔案中針對對應的 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> 元素新增 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 元素。
 </p>
 
 <p>若您的應用程式安裝在裝置上，系統會識別您的意圖篩選器，並將資訊新增至安裝的所有應用程式都支援的意圖內部目錄中。在應用程式使用隱含意圖呼叫 {@link android.app.Activity#startActivity
@@ -56,13 +56,13 @@ startActivity()} 或 {@link android.app.Activity#startActivityForResult startAct
   <dt>行為</dt>
     <dd>對要執行的行為進行命名的字串。通常是平台所定義值 (例如 {@link android.content.Intent#ACTION_SEND} 或 {@link android.content.Intent#ACTION_VIEW}) 的其中之一。
 
-    <p>請在您的意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 元素指定此項目。在此元素中指定的值必須是行為的完整字串名稱，而非 API 常數 (請參閱以下範例)。
+    <p>請在您的意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a> 元素指定此項目。在此元素中指定的值必須是行為的完整字串名稱，而非 API 常數 (請參閱以下範例)。
 
 </p></dd>
 
   <dt>資料</dt>
     <dd>對意圖所關聯資料的描述。
-    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 元素指定此項目。在此元素中使用一或多個屬性，您可以僅指定 MIME 類型、URI 首碼、URI 配置，或指定這些項目的組合，以及表示所接受資料類型的其他項目。
+    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> 元素指定此項目。在此元素中使用一或多個屬性，您可以僅指定 MIME 類型、URI 首碼、URI 配置，或指定這些項目的組合，以及表示所接受資料類型的其他項目。
 
 
 </p>
@@ -76,11 +76,11 @@ startActivity()} 或 {@link android.app.Activity#startActivityForResult startAct
 系統支援多種不同的類別，但大多數類別很少使用。
 然而依預設，所有隱含意圖都與 {@link android.content.Intent#CATEGORY_DEFAULT} 一併定義。
 
-    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> 元素指定此項目。
+    <p>請在意圖篩選器中使用 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a> 元素指定此項目。
 </p></dd>
 </dl>
 
-<p>在意圖篩選器中，您可以宣告每個條件以及 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 元素中巢套的對應 XML 元素，以宣告應用行為顯示所接受的條件。
+<p>在意圖篩選器中，您可以宣告每個條件以及 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 元素中巢套的對應 XML 元素，以宣告應用行為顯示所接受的條件。
 
 </p>
 
@@ -99,10 +99,10 @@ android.content.Intent#ACTION_SEND} 意圖：</p>
 </pre>
 
 <p>傳入的每項意圖只會指定一項行為與一種資料類型，但是在每個 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> 中，可以宣告 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> 與 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> 元素的多個執行個體。
+<intent-filter>}</a> 中，可以宣告 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+<action>}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a> 與 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a> 元素的多個執行個體。
 
 </p>
 

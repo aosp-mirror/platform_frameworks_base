@@ -166,18 +166,18 @@ new Activity.</p>
 
 <p>To make your daydream available to the system, declare your {@link
 android.service.dreams.DreamService} with a <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service>}</a> element
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element
 in your manifest file. You must then include an intent filter with the action {@code
 "android.service.dreams.DreamService"}. For example:</p>
 
 <pre>
 &lt;service android:name=".MyDream" android:exported="true"
-    android:icon="@drawable/dream_icon" android:label="@string/dream_label" >
-    &lt;intent-filter>
-        &lt;action android:name="android.service.dreams.DreamService" />
-        &lt;category android:name="android.intent.category.DEFAULT" />
-    &lt;/intent-filter>
-&lt;/service>
+    android:icon="@drawable/dream_icon" android:label="@string/dream_label" &gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.service.dreams.DreamService" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service&gt;
 </pre>
 
 <p>There are some other useful methods in {@link android.service.dreams.DreamService}
@@ -255,7 +255,7 @@ android.media.MediaRouter#getSelectedRoute MediaRouter.getSelectedRoute()} as me
 secondary screens, you can apply
 a different theme by specifying the {@link
 android.R.attr#presentationTheme android:presentationTheme} attribute in the <a
-href="{@docRoot}guide/topics/resources/style-resource.html">{@code &lt;style>}</a> that you’ve
+href="{@docRoot}guide/topics/resources/style-resource.html">{@code <style>}</a> that you’ve
 applied to your application or activity.</p>
 
 <p>Keep in mind that screens connected to the user’s device often have a larger screen size and
@@ -294,8 +294,8 @@ screen, add the {@code keyguard} value:</p>
 <pre>
 &lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     ...
-    android:widgetCategory="keyguard|home_screen">
-&lt;/appwidget-provider>
+    android:widgetCategory="keyguard|home_screen"&gt;
+&lt;/appwidget-provider&gt;
 </pre>
 
 <p>You should also specify an initial layout for your app widget when on the lock screen with
@@ -399,7 +399,7 @@ transform layout orientation to support languages that use right-to-left (RTL) U
 direction, such as Arabic and Hebrew.</p>
 
 <p>To begin supporting RTL layouts in your app, set the {@link android.R.attr#supportsRtl
-android:supportsRtl} attribute to the {@code &lt;application>} element in your manifest file
+android:supportsRtl} attribute to the {@code <application>} element in your manifest file
 and set it {@code “true"}. Once you enable this, the system will enable various RTL APIs to
 display your app with RTL layouts. For instance, the action bar will show the icon and title
 on the right side and action buttons on the left, and any layouts you’ve created with the
@@ -483,7 +483,7 @@ transaction.add(R.id.video_fragment, videoFragment).commit();
 fragment designs on Android 1.6 and higher.</p>
 
 <p><strong>Note:</strong> You cannot inflate a layout into a fragment when that layout
-includes a {@code &lt;fragment>}. Nested fragments are only supported when added to a
+includes a {@code <fragment>}. Nested fragments are only supported when added to a
 fragment dynamically.</p>
 
 

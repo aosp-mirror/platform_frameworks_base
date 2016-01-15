@@ -457,9 +457,9 @@ public final class KeyChain {
      * KeyFactory keyFactory =
      *     KeyFactory.getInstance(key.getAlgorithm(), "AndroidKeyStore");
      * KeyInfo keyInfo = keyFactory.getKeySpec(key, KeyInfo.class);
-     * if (keyInfo.isInsideSecureHardware()) &#123;
+     * if (keyInfo.isInsideSecureHardware()) {
      *     // The key is bound to the secure hardware of this Android
-     * &#125;}</pre>
+     * }}</pre>
      */
     @Deprecated
     public static boolean isBoundKeyAlgorithm(

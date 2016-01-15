@@ -112,10 +112,10 @@ src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0%7CGL%203.1&chf=bg%2Cs%
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element. You can also use the <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a> element to declare the GL compression formats that your application
+<supports-gl-texture>}</a> element to declare the GL compression formats that your application
 uses.</p>
 
 

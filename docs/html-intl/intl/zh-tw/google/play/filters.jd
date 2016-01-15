@@ -208,14 +208,14 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 <table>
   <tr><th>宣示說明元素</th><th>摘要</th></tr>
   <tr>
-    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a></nobr></td>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code <compatible-screens>}</a></nobr></td>
     <td>
-      <p>若裝置螢幕大小與密度不符合元素中的{@code &lt;compatible-screens&gt;}任何螢幕組態 (由 {@code &lt;screen&gt;} 元素宣告)，Google Play 會對應用程式進行篩選。</p>
-      <p class="caution"><strong>注意：</strong>通常，<strong>您不應使用此宣示說明元素</strong>。若使用此元素，會將您未列出的螢幕大小與密度的所有組合排除在外，從而大幅減少您應用程式可能擁有的使用者。您應改為針對未使用替代資源說明的螢幕組態，使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a> 宣示說明元素 (如<a href="#table1">表 1</a> 所述) 啟用螢幕相容性模式。</p>
+      <p>若裝置螢幕大小與密度不符合元素中的{@code <compatible-screens>}任何螢幕組態 (由 {@code <screen>} 元素宣告)，Google Play 會對應用程式進行篩選。</p>
+      <p class="caution"><strong>注意：</strong>通常，<strong>您不應使用此宣示說明元素</strong>。若使用此元素，會將您未列出的螢幕大小與密度的所有組合排除在外，從而大幅減少您應用程式可能擁有的使用者。您應改為針對未使用替代資源說明的螢幕組態，使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code <supports-screens>}</a> 宣示說明元素 (如<a href="#table1">表 1</a> 所述) 啟用螢幕相容性模式。</p>
     </td>
   </tr>
   <tr>
-    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a></nobr></td>
+    <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code <supports-gl-texture>}</a></nobr></td>
     <td>
       <p>除非裝置支援應用程式所支援的一或多個 GL 材質壓縮格式，否則 Google Play 會對應用程式進行篩選。 </p>
     </td>
@@ -249,11 +249,11 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-featur
 
 <p>目前，只有在每個 APK 根據以下組態提供不同的篩選器時，Google Play 才允許您針對同一應用程式發行多個 APK：</p>
 <ul>
-  <li>OpenGL 材質壓縮格式 <p>透過使用 <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code &lt;supports-gl-texture&gt;}</a>元素。</p>
+  <li>OpenGL 材質壓縮格式 <p>透過使用 <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code <supports-gl-texture>}</a>元素。</p>
   </li>
-  <li>螢幕大小 (以及可選的螢幕密度) <p>透過使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code &lt;supports-screens&gt;}</a>或<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code &lt;compatible-screens&gt;}</a> 元素。</p>
+  <li>螢幕大小 (以及可選的螢幕密度) <p>透過使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code <supports-screens>}</a>或<a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code <compatible-screens>}</a> 元素。</p>
   </li>
-  <li>API 層級 <p>透過使用 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>元素。</p>
+  <li>API 層級 <p>透過使用 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>元素。</p>
   </li>
   <li>CPU 架構 (ABI) <p>透過納入使用 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a> (針對諸如 ARM EABI v7 或 x86 等特定 CPU 架構) 而建置的原生資源庫。</p>
   </li>

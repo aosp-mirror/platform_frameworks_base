@@ -909,9 +909,9 @@ spelling suggestions as {@link android.view.textservice.SuggestionsInfo} objects
 
 <p>Applications with a spell checker service must declare the {@link
 android.Manifest.permission#BIND_TEXT_SERVICE} permission as required by the service.
-The service must also declare an intent filter with {@code &lt;action
+The service must also declare an intent filter with {@code <action
 android:name="android.service.textservice.SpellCheckerService" />} as the intent’s action and should
-include a {@code &lt;meta-data&gt;} element that declares configuration information for the spell
+include a {@code <meta-data>} element that declares configuration information for the spell
 checker. </p>
 
 <p>See the sample <a href="{@docRoot}resources/samples/SpellChecker/SampleSpellCheckerService/index.html">
@@ -997,12 +997,12 @@ declaration an intent filter for the {@link android.content.Intent#ACTION_MANAGE
 action. For example:</p>
 
 <pre>
-&lt;activity android:name="DataPreferences" android:label="@string/title_preferences">
-    &lt;intent-filter>
-       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-       &lt;category android:name="android.intent.category.DEFAULT" />
-    &lt;/intent-filter>
-&lt;/activity>
+&lt;activity android:name="DataPreferences" android:label="@string/title_preferences"&gt;
+    &lt;intent-filter&gt;
+       &lt;action android:name="android.intent.action.MANAGE_NETWORK_USAGE" /&gt;
+       &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
 </pre>
 
 <p>This intent filter indicates to the system that this is the activity that controls your
@@ -1054,7 +1054,7 @@ users must manually enable it in the system settings.</p>
 <p>Applications that manage the device restrictions can now disable the camera using {@link
 android.app.admin.DevicePolicyManager#setCameraDisabled setCameraDisabled()} and the {@link
 android.app.admin.DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} property (applied with a {@code
-&lt;disable-camera /&gt;} element in the policy configuration file).</p>
+<disable-camera />} element in the policy configuration file).</p>
 
 
 <h4>Certificate management</h4>
@@ -1120,10 +1120,10 @@ a narrow screen, so the system will place more of them into the overflow menu. H
 allows you to enable “split action bar" so that more action items can appear on the screen in a
 separate bar at the bottom of the screen. To enable split action bar, add {@link
 android.R.attr#uiOptions android:uiOptions} with {@code "splitActionBarWhenNarrow"} to either your
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 tag or
 individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> tags
+<activity>}</a> tags
 in your manifest file. When enabled, the system will add an additional bar at the bottom of the
 screen for all action items when the screen is narrow (no action items will appear in the primary
 action bar).</p>
@@ -1166,7 +1166,7 @@ in the action view for faster access to sharing with that app.</p>
 
 <p>To declare an action provider for an action item, include the {@code android:actionProviderClass}
 attribute in the <a href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code
-&lt;item&gt;}</a> element for your activity’s options menu, with the class name of the action
+<item>}</a> element for your activity’s options menu, with the class name of the action
 provider as the value. For example:</p>
 
 <pre>
@@ -1208,7 +1208,7 @@ visible).</p>
 <p>To declare that an action item that contains an action view be collapsible, include the {@code
 “collapseActionView"} flag in the {@code android:showAsAction} attribute for the <a
 href="{@docRoot}guide/topics/resources/menu-resource.html#item-element">{@code
-&lt;item&gt;}</a> element in the menu’s XML file.</p>
+<item>}</a> element in the menu’s XML file.</p>
 
 <p>To receive callbacks when an action view switches between expanded and collapsed, register an
 instance of {@link android.view.MenuItem.OnActionExpandListener} with the respective {@link
@@ -1560,8 +1560,8 @@ scrolling, and overall better performance and response to user interaction.</p>
 <p>If necessary, you can manually disable hardware acceleration with the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#hwaccel">{@code hardwareAccelerated}</a>
 attribute for individual <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> elements or the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+<activity>}</a> elements or the <a
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element. You can alternatively disable hardware acceleration for individual views by calling {@link
 android.view.View#setLayerType setLayerType(LAYER_TYPE_SOFTWARE)}.</p>
 
@@ -1759,7 +1759,7 @@ distinguish between a 5" device and a 7" device, which would both traditionally 
 href="http://android-developers.blogspot.com/2011/07/new-tools-for-managing-screen-sizes.html">
 New Tools for Managing Screen Sizes</a>.</li>
       <li>New constants for <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> to
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> to
 declare landscape or portrait screen orientation requirements.</li>
       <li>The device "screen size" configuration now changes during a screen orientation
 change. If your app targets API level 13 or higher, you must handle the {@code "screenSize"}
@@ -1787,7 +1787,7 @@ application is compatible with the system, prior to installing the application. 
 application against an Android platform that supports API level {@sdkPlatformApiLevel} or
 higher. Depending on your needs, you might also need to add an
 <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code> attribute to the
-<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a>
 element.</p>
 
 <p>For more information, read <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API

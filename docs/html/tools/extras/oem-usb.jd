@@ -86,7 +86,7 @@ process.</p>
   <li>Select <strong>Browse my computer for driver software</strong> and click
     <strong>Next</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+Driver is located in {@code <sdk>\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to install the driver.</li>
 </ol>
 
@@ -109,7 +109,7 @@ driver:</p>
 <strong>Search removable media</strong>; and check <strong>Include this location in the
 search</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
+Driver is located in {@code <sdk>\extras\google\usb_driver\}.)</li>
   <li>Click <strong>Next</strong> to upgrade the driver.</li>
 </ol>
 
@@ -127,7 +127,7 @@ Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.)</li>
   <li>Select <strong>I don't have the disk. Show me other options</strong>.</li>
   <li>Select <strong>Browse my computer for driver software</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
+Driver is located in {@code <sdk>\extras\google\usb_driver\}.) As long as you specified the
 exact location of the 
     installation package, you may leave <strong>Include subfolders</strong> checked or
   unchecked&mdash;it doesn't matter.</li>
@@ -152,7 +152,7 @@ driver:</p>
   search for the driver
     software. Select <strong>Browse my computer for driver software</strong>.</li>
   <li>Click <strong>Browse</strong> and locate the USB driver folder. (The Google USB
-Driver is located in {@code &lt;sdk&gt;\extras\google\usb_driver\}.) As long as you specified the
+Driver is located in {@code <sdk>\extras\google\usb_driver\}.) As long as you specified the
 exact location of the
     installation package, you may leave <strong>Include subfolders</strong> checked or
     unchecked&mdash;it doesn't matter.</li>

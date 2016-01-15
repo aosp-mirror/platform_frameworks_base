@@ -148,7 +148,7 @@ Menu. See <a href="menu-resource.html">Menu Resource</a>.</td>
     <td><code>raw/</code></td>
     <td><p>Arbitrary files to save in their raw form. To open these resources with a raw
 {@link java.io.InputStream}, call {@link android.content.res.Resources#openRawResource(int)
-Resources.openRawResource()} with the resource ID, which is {@code R.raw.<em>filename</em>}.</p>
+Resources.openRawResource()} with the resource ID, which is <code>R.raw.<em>filename</em></code>.</p>
       <p>However, if you need access to original file names and file hierarchy, you might consider
 saving some resources in the {@code
 assets/} directory (instead of {@code res/raw/}). Files in {@code assets/} are not given a
@@ -160,9 +160,9 @@ resource ID, so you can read them only using {@link android.content.res.AssetMan
     <td><p>XML files that contain simple values, such as strings, integers, and colors.</p>
       <p>Whereas XML resource files in other {@code res/} subdirectories define a single resource
 based on the XML filename, files in the {@code values/} directory describe multiple resources.
-For a file in this directory, each child of the {@code &lt;resources&gt;} element defines a single
-resource. For example, a {@code &lt;string&gt;} element creates an
-{@code R.string} resource and a  {@code &lt;color&gt;} element creates an {@code R.color}
+For a file in this directory, each child of the {@code <resources>} element defines a single
+resource. For example, a {@code <string>} element creates an
+{@code R.string} resource and a  {@code <color>} element creates an {@code R.color}
 resource.</p>
       <p>Because each resource is defined with its own XML element, you can name the file
 whatever you want and place different resource types in one file. However, for clarity, you might
@@ -229,15 +229,15 @@ resources for your application.</p>
 
 <p>To specify configuration-specific alternatives for a set of resources:</p>
 <ol>
-  <li>Create a new directory in {@code res/} named in the form {@code
-<em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em>}.
+  <li>Create a new directory in {@code res/} named in the form
+  <code><em>&lt;resources_name&gt;</em>-<em>&lt;config_qualifier&gt;</em></code>.
     <ul>
-      <li><em>{@code &lt;resources_name&gt;}</em> is the directory name of the corresponding default
+      <li><em>{@code <resources_name>}</em> is the directory name of the corresponding default
 resources (defined in table 1).</li>
-      <li><em>{@code &lt;qualifier&gt;}</em> is a name that specifies an individual configuration
+      <li><em>{@code <qualifier>}</em> is a name that specifies an individual configuration
 for which these resources are to be used (defined in table 2).</li>
     </ul>
-    <p>You can append more than one <em>{@code &lt;qualifier&gt;}</em>. Separate each
+    <p>You can append more than one <em>{@code <qualifier>}</em>. Separate each
 one with a dash.</p>
     <p class="caution"><strong>Caution:</strong> When appending multiple qualifiers, you must
 place them in the same order in which they are listed in table 2. If the qualifiers are ordered
@@ -384,7 +384,7 @@ res/
 screen area. Specifically, the device's smallestWidth is the shortest of the screen's available
 height and width (you may also think of it as the "smallest possible width" for the screen). You can
 use this qualifier to ensure that, regardless of the screen's current orientation, your
-application has at least {@code &lt;N&gt;} dps of width available for its UI.</p>
+application has at least {@code <N>} dps of width available for its UI.</p>
         <p>For example, if your layout requires that its smallest dimension of screen area be at
 least 600 dp at all times, then you can use this qualifer to create the layout resources, {@code
 res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
@@ -899,13 +899,13 @@ not true. Instead, you can save the image that's used for both as {@code icon_ca
 name other than {@code icon.png}) and put
 it in the default {@code res/drawable/} directory. Then create an {@code icon.xml} file in {@code
 res/drawable-en-rCA/} and {@code res/drawable-fr-rCA/} that refers to the {@code icon_ca.png}
-resource using the {@code &lt;bitmap&gt;} element. This allows you to store just one version of the
+resource using the {@code <bitmap>} element. This allows you to store just one version of the
 PNG file and two small XML files that point to it. (An example XML file is shown below.)</p>
 
 
 <h4>Drawable</h4>
 
-<p>To create an alias to an existing drawable, use the {@code &lt;bitmap&gt;} element.
+<p>To create an alias to an existing drawable, use the {@code <bitmap>} element.
 For example:</p>
 
 <pre>
@@ -922,8 +922,8 @@ R.drawable.icon_ca} resource (which is saved in {@code res/drawable/}).</p>
 
 <h4>Layout</h4>
 
-<p>To create an alias to an existing layout, use the {@code &lt;include&gt;}
-element, wrapped in a {@code &lt;merge&gt;}. For example:</p>
+<p>To create an alias to an existing layout, use the {@code <include>}
+element, wrapped in a {@code <merge>}. For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>

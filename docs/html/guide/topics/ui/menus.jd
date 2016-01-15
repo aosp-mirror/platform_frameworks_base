@@ -141,7 +141,7 @@ directory and build the menu with the following elements:</p>
 element may contain a nested <code>&lt;menu></code> element in order to create a submenu.</dd>
     
   <dt><code>&lt;group></code></dt>
-    <dd>An optional, invisible container for {@code &lt;item&gt;} elements. It allows you to
+    <dd>An optional, invisible container for {@code <item>} elements. It allows you to
 categorize menu items so they share properties such as active state and visibility. For more
 information, see the section about <a href="#groups">Creating Menu Groups</a>.</dd>
 </dl>
@@ -181,8 +181,8 @@ href="{@docRoot}guide/topics/ui/actionbar.html">action bar</a>.</dd>
 For information about all the supported attributes, see the <a
 href="{@docRoot}guide/topics/resources/menu-resource.html">Menu Resource</a> document.</p>
 
-<p>You can add a submenu to an item in any menu (except a submenu) by adding a {@code &lt;menu&gt;}
-element as the child of an {@code &lt;item&gt;}. Submenus are useful when your application has a lot
+<p>You can add a submenu to an item in any menu (except a submenu) by adding a {@code <menu>}
+element as the child of an {@code <item>}. Submenus are useful when your application has a lot
 of functions that can be organized into topics, like items in a PC application's menu bar (File,
 Edit, View, etc.). For example:</p>
 
@@ -239,7 +239,7 @@ places all items in the action overflow, which the user can reveal with the acti
 the right side of the action bar (or by pressing the device <em>Menu</em> button, if available). To
 enable
 quick access to important actions, you can promote a few items to appear in the action bar by adding
-{@code android:showAsAction="ifRoom"} to the corresponding {@code &lt;item&gt;} elements (see figure
+{@code android:showAsAction="ifRoom"} to the corresponding {@code <item>} elements (see figure
 2). <p>For more information about action items and other action bar behaviors, see the <a
 href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> guide. </p>
 <p class="note"><strong>Note:</strong> Even if you're <em>not</em> developing for Android 3.0 or
@@ -260,7 +260,7 @@ subclass or a {@link android.app.Fragment} subclass. If both your activity and f
 declare items for the options menu, they are combined in the UI. The activity's items appear
 first, followed by those of each fragment in the order in which each fragment is added to the
 activity. If necessary, you can re-order the menu items with the {@code android:orderInCategory}
-attribute in each {@code &lt;item&gt;} you need to move.</p>
+attribute in each {@code <item>} you need to move.</p>
 
 <p>To specify the options menu for an activity, override {@link
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} (fragments provide their
@@ -833,7 +833,7 @@ setGroupEnabled()}</li>
 android.view.Menu#setGroupCheckable(int,boolean,boolean) setGroupCheckable()}</li>
 </ul>
 
-<p>You can create a group by nesting {@code &lt;item&gt;} elements inside a {@code &lt;group&gt;}
+<p>You can create a group by nesting {@code <item>} elements inside a {@code <group>}
 element in your menu resource or by specifying a group ID with the {@link
 android.view.Menu#add(int,int,int,int) add()} method.</p>
 
@@ -882,8 +882,8 @@ you must manually indicate the checked state by swapping the icon and/or text
 each time the state changes.</p>
 
 <p>You can define the checkable behavior for individual menu items using the {@code
-android:checkable} attribute in the {@code &lt;item&gt;} element, or for an entire group with
-the {@code android:checkableBehavior} attribute in the {@code &lt;group&gt;} element. For
+android:checkable} attribute in the {@code <item>} element, or for an entire group with
+the {@code android:checkableBehavior} attribute in the {@code <group>} element. For
 example, all items in this menu group are checkable with a radio button:</p>
 
 <pre>
@@ -909,7 +909,7 @@ example, all items in this menu group are checkable with a radio button:</p>
 </dl>
 
 <p>You can apply a default checked state to an item using the {@code android:checked} attribute in
-the {@code &lt;item&gt;} element and change it in code with the {@link
+the {@code <item>} element and change it in code with the {@link
 android.view.MenuItem#setChecked(boolean) setChecked()} method.</p>
 
 <p>When a checkable item is selected, the system calls your respective item-selected callback method

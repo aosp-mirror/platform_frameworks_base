@@ -31,7 +31,7 @@ trainingnavtop=true
 
 </p>
 
-<p>他のアプリからアクティビティを開始できるようにするには、対応する <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>要素のマニフェスト ファイルに <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素を追加する必要があります。
+<p>他のアプリからアクティビティを開始できるようにするには、対応する <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>要素のマニフェスト ファイルに <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 要素を追加する必要があります。
 </p>
 
 <p>アプリが端末にインストールされている場合、システムはインテント フィルタを識別し、インストールされているすべてのアプリでサポートされるインテントの内部カタログに情報を追加します。アプリが暗黙的インテントを使って {@link android.app.Activity#startActivity
@@ -56,13 +56,13 @@ startActivity()} または {@link android.app.Activity#startActivityForResult st
   <dt>アクション</dt>
     <dd>実行するアクション名を表す文字列。通常、
 {@link android.content.Intent#ACTION_SEND} や {@link android.content.Intent#ACTION_VIEW} などのプラットフォームに定義された値のいずれか。
-    <p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 要素を使用してインテント フィルタでこれを指定します。この要素で指定した値は、API 定数ではなく、アクションの完全な文字列名（下記の例を参照）である必要があります。
+    <p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a> 要素を使用してインテント フィルタでこれを指定します。この要素で指定した値は、API 定数ではなく、アクションの完全な文字列名（下記の例を参照）である必要があります。
 
 </p></dd>
 
   <dt>データ</dt>
     <dd>インテントに関連するデータの詳細。
-    <p><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 要素を使用して、インテント フィルタでこれを指定します。この要素で 1 つ以上の属性を
+    <p><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> 要素を使用して、インテント フィルタでこれを指定します。この要素で 1 つ以上の属性を
 使用して、MIME タイプのみ、URI 接頭辞のみ、URI スキームのみ、またはこれらと受け入れられるデータ タイプを示すその他の項目の組み合わせを指定することができます。
 
 </p>
@@ -76,11 +76,11 @@ startActivity()} または {@link android.app.Activity#startActivityForResult st
 システムでサポートされているいくつかの異なるカテゴリがありますが、大抵のカテゴリはほとんど使用されません。
 しかし、すべての暗黙的インテントは、デフォルトでは
 {@link android.content.Intent#CATEGORY_DEFAULT} を使用して定義されています。
-    <p><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a>
+    <p><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>
 要素を使用して、インテント フィルタでこれを指定します。</p></dd>
 </dl>
 
-<p>インテント フィルタでは、それぞれの基準を<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 要素内でネストした対応する XML 要素を使用して宣言することによって、アクティビティが受け入れる基準を宣言することができます。
+<p>インテント フィルタでは、それぞれの基準を<a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 要素内でネストした対応する XML 要素を使用して宣言することによって、アクティビティが受け入れる基準を宣言することができます。
 
 </p>
 
@@ -100,10 +100,10 @@ android.content.Intent#ACTION_SEND} インテントを処理するインテン�
 
 <p>受信するインテントはそれぞれ 1 つのアクションと 1 つのデータ タイプのみを指定しますが、各
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> 内で <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a>、<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> 要素の複数のインスタンスを宣言することもできます。
+<intent-filter>}</a> 内で <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+<action>}</a>、<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a>、<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a> 要素の複数のインスタンスを宣言することもできます。
 </p>
 
 <p>アクションとデータのいずれか 2 つのペアが、各自の動作において相互に排他的である場合は、別のインテント フィルタを作成して、どのデータ タイプと組み合わされたときにとのアクションが受け入れられるかを指定する必要があります。

@@ -20,7 +20,7 @@ parent.link=manifest-intro.html
 <dt>description:</dt>
 <dd itemprop="description">A name-value pair for an item of additional, arbitrary data that can
 be supplied to the parent component.  A component element can contain any 
-number of {@code &lt;meta-data&gt;} subelements.  The values from all of
+number of {@code <meta-data>} subelements.  The values from all of
 them are collected in a single {@link android.os.Bundle} object and made 
 available to the component as the 
 {@link android.content.pm.PackageItemInfo#metaData 
@@ -45,7 +45,7 @@ the numeric ID of the resource, not the value stored in the resource:
 
 <p>
 It is highly recommended that you avoid supplying related data as 
-multiple separate {@code &lt;meta-data&gt;} entries. Instead, if you 
+multiple separate {@code <meta-data>} entries. Instead, if you
 have complex data to associate with a component, store it as a resource and 
 use the {@code resource} attribute to inform the component of its ID.
 </p></dd>

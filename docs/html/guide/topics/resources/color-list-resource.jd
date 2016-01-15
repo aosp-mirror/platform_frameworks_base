@@ -20,7 +20,7 @@ android.widget.Button} widget can exist in one of several different states (pres
 or niether) and, using a color state list, you can provide a different color during each state.</p>
 
 <p>You can describe the state list in an XML file. Each color is defined in an {@code
-&lt;item>} element inside a single {@code &lt;selector>} element. Each {@code &lt;item>}
+<item>} element inside a single {@code <selector>} element. Each {@code <item>}
 uses various attributes to describe the state in which it should be used.</p>
 
 <p>During each state change, the state list is traversed top to bottom and the first item that
@@ -69,7 +69,7 @@ In XML: <code>@[<em>package</em>:]color/<em>filename</em></code>
 
   <dt id="selector-element"><code>&lt;selector&gt;</code></dt>
     <dd><strong>Required.</strong> This must be the root element. Contains one or more {@code
-&lt;item>} elements.
+<item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>xmlns:android</code></dt>

@@ -152,7 +152,7 @@ at the root of your project directory.</p>
 
 <p>The main activity for your app must be declared in the manifest with an <a
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter>}</a> that includes the {@link
+<intent-filter>}</a> that includes the {@link
 android.content.Intent#ACTION_MAIN MAIN} action and
 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} category. For example:</p> 
 

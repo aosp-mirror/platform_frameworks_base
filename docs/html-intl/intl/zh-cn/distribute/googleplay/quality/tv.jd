@@ -320,7 +320,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
       如果应用使用游戏手柄作为主要输入方法，则要通过
-<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>清单文件标记来声明相应的要求。
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>清单文件标记来声明相应的要求。
       （<a href="{@docRoot}training/tv/games/index.html#gamepad">了解方法</a>）
     </p>
   </td>

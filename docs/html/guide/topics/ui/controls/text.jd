@@ -36,7 +36,7 @@ addition to typing, text fields allow for a variety of other activities, such as
 (cut, copy, paste) and data look-up via auto-completion.</p>
 
 <p>You can add a text field to you layout with the {@link android.widget.EditText} object. You
-should usually do so in your XML layout with a {@code &lt;EditText&gt;} element.</p>
+should usually do so in your XML layout with a {@code <EditText>} element.</p>
 
 <img src="{@docRoot}images/ui/edittext-noextract.png" alt="" />
 

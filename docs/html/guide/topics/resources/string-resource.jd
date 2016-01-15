@@ -28,13 +28,13 @@ as an XML layout).</p>
 <p class="note"><strong>Note:</strong> A string is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). So, you can
 combine string resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;string>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <string>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
@@ -125,13 +125,13 @@ android.content.Context#getText(int)} will retain any rich text styling applied 
 <p class="note"><strong>Note:</strong> A string array is a simple resource that is referenced
 using the value provided in the {@code name} attribute (not the name of the XML file). As
 such, you can combine string array resources with other simple resources in the one XML file,
-under one {@code &lt;resources>} element.</p>
+under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;string-array>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <string-array>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
@@ -164,7 +164,7 @@ In Java: <code>R.array.<em>string_array_name</em></code>
       <p>No attributes.</p>
     </dd>
   <dt id="string-array-element"><code>&lt;string-array&gt;</code></dt>
-    <dd>Defines an array of strings. Contains one or more {@code &lt;item>} elements.
+    <dd>Defines an array of strings. Contains one or more {@code <item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>name</code></dt>
@@ -175,7 +175,7 @@ ID to reference the array.</dd>
     </dd>
   <dt id="string-array-item-element"><code>&lt;item&gt;</code></dt>
     <dd>A string, which can include styling tags. The value can be a reference to another
-string resource. Must be a child of a {@code &lt;string-array&gt;} element. Beware that you
+string resource. Must be a child of a {@code <string-array>} element. Beware that you
 must escape apostrophes and
 quotation marks. See <a href="#FormattingAndStyling">Formatting and Styling</a>, below, for
 information about to properly style and format your strings.
@@ -252,13 +252,13 @@ in keeping with your application.
 <p class="note"><strong>Note:</strong> A plurals collection is a simple resource that is
 referenced using the value provided in the {@code name} attribute (not the name of the XML
 file). As such, you can combine plurals resources with other simple resources in the one
-XML file, under one {@code &lt;resources>} element.</p>
+XML file, under one {@code <resources>} element.</p>
 
 <dl class="xml">
 
 <dt>file location:</dt>
 <dd><code>res/values/<em>filename</em>.xml</code><br/>
-The filename is arbitrary. The {@code &lt;plurals>} element's {@code name} will be used as the
+The filename is arbitrary. The {@code <plurals>} element's {@code name} will be used as the
 resource ID.</dd>
 
 <dt>resource reference:</dt>
@@ -291,7 +291,7 @@ In Java: <code>R.plurals.<em>plural_name</em></code>
     </dd>
   <dt id="plurals-element"><code>&lt;plurals&gt;</code></dt>
     <dd>A collection of strings, of which, one string is provided depending on the amount of
-something. Contains one or more {@code &lt;item>} elements.
+something. Contains one or more {@code <item>} elements.
       <p class="caps">attributes:</p>
       <dl class="atn-list">
         <dt><code>name</code></dt>
@@ -302,7 +302,7 @@ resource ID.</dd>
     </dd>
   <dt id="plurals-item-element"><code>&lt;item&gt;</code></dt>
     <dd>A plural or singular string. The value can be a reference to another
-string resource. Must be a child of a {@code &lt;plurals&gt;} element. Beware that you must
+string resource. Must be a child of a {@code <plurals>} element. Beware that you must
 escape apostrophes and quotation marks. See <a href="#FormattingAndStyling">Formatting and
 Styling</a>, below, for information about to properly style and format your strings.
       <p class="caps">attributes:</p>
@@ -465,9 +465,9 @@ java.lang.Object...)">format</a>(res.getString(R.string.welcome_messages), usern
 </pre>
 <p>Supported HTML elements include:</p>
 <ul>
-  <li>{@code &lt;b>} for <b>bold</b> text.</li>
-  <li>{@code &lt;i>} for <i>italic</i> text.</li>
-  <li>{@code &lt;u>} for <u>underline</u> text.</li>
+  <li>{@code <b>} for <b>bold</b> text.</li>
+  <li>{@code <i>} for <i>italic</i> text.</li>
+  <li>{@code <u>} for <u>underline</u> text.</li>
 </ul>
 
 <p>Sometimes you may want to create a styled text resource that is also used as a format
@@ -486,8 +486,8 @@ after the formatting takes place. For example:</p>
   &lt;string name="welcome_messages"&gt;Hello, %1$s! You have &amp;lt;b>%2$d new messages&amp;lt;/b>.&lt;/string>
 &lt;/resources&gt;
 </pre>
-<p>In this formatted string, a {@code &lt;b>} element is added. Notice that the opening bracket is
-HTML-escaped, using the {@code &amp;lt;} notation.</p>
+<p>In this formatted string, a {@code <b>} element is added. Notice that the opening bracket is
+HTML-escaped, using the {@code &lt;} notation.</p>
   </li>
   <li>Then format the string as usual, but also call {@link android.text.Html#fromHtml} to
 convert the HTML text into styled text:

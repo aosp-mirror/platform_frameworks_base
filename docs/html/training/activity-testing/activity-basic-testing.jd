@@ -55,13 +55,13 @@ want to test, but suffixed with <strong>“Test”</strong>.</p>
    <li>In the Package Explorer, right-click on the {@code /src} directory for
 your test project and select <strong>New &gt; Package</strong>.</li>
    <li>Set the <strong>Name</strong> field to
-{@code &lt;your_app_package_name&gt;.tests} (for example,
+{@code <your_app_package_name>.tests} (for example,
 {@code com.example.android.testingfun.tests}) and click
 <strong>Finish</strong>.</li>
    <li>Right-click on the test package you created, and select
 <strong>New &gt; Class</strong>.</li>
     <li>Set the <strong>Name</strong> field to
-{@code &lt;your_app_activity_name&gt;Test} (for example,
+{@code <your_app_activity_name>Test} (for example,
 {@code MyFirstTestActivityTest}) and click <strong>Finish</strong>.</li>
 </ol>
 
