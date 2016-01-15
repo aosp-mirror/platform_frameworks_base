@@ -45,9 +45,15 @@ public:
      * Position agnostic shadow lighting info. Used with all shadow ops in scene.
      */
     struct LightInfo {
-        float lightRadius = 0;
-        uint8_t ambientShadowAlpha = 0;
-        uint8_t spotShadowAlpha = 0;
+        LightInfo() : LightInfo(0, 0, 0) {}
+        LightInfo(float lightRadius, uint8_t ambientShadowAlpha,
+                uint8_t spotShadowAlpha)
+                : lightRadius(lightRadius)
+                , ambientShadowAlpha(ambientShadowAlpha)
+                , spotShadowAlpha(spotShadowAlpha) {}
+        float lightRadius;
+        uint8_t ambientShadowAlpha;
+        uint8_t spotShadowAlpha;
     };
 
     BakedOpRenderer(Caches& caches, RenderState& renderState, bool opaque, const LightInfo& lightInfo)

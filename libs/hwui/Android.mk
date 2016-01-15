@@ -233,6 +233,7 @@ LOCAL_SRC_FILES += \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
+    tests/unit/LeakCheckTests.cpp \
     tests/unit/VectorDrawableTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/StringUtilsTests.cpp
@@ -300,9 +301,9 @@ LOCAL_SRC_FILES += \
     tests/microbench/PathParserBench.cpp \
     tests/microbench/ShadowBench.cpp
 
-# ifeq (true, $(HWUI_NEW_OPS))
-#     LOCAL_SRC_FILES += \
-#         tests/microbench/FrameBuilderBench.cpp
-# endif
+ifeq (true, $(HWUI_NEW_OPS))
+    LOCAL_SRC_FILES += \
+        tests/microbench/FrameBuilderBench.cpp
+endif
 
 include $(BUILD_EXECUTABLE)

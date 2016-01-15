@@ -32,13 +32,6 @@ namespace uirenderer {
 const LayerUpdateQueue sEmptyLayerUpdateQueue;
 const Vector3 sLightCenter = {100, 100, 100};
 
-static std::vector<sp<RenderNode>> createSyncedNodeList(sp<RenderNode>& node) {
-    TestUtils::syncHierarchyPropertiesAndDisplayList(node);
-    std::vector<sp<RenderNode>> vec;
-    vec.emplace_back(node);
-    return vec;
-}
-
 /**
  * Virtual class implemented by each test to redirect static operation / state transitions to
  * virtual methods.
@@ -139,7 +132,7 @@ TEST(FrameBuilder, simple) {
         canvas.drawBitmap(bitmap, 10, 10, nullptr);
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SimpleTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex()); // 2 ops + start + end
@@ -165,7 +158,7 @@ TEST(FrameBuilder, simpleStroke) {
         canvas.drawPoint(50, 50, strokedPaint);
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 200), 100, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SimpleStrokeTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
@@ -180,7 +173,7 @@ TEST(FrameBuilder, simpleRejection) {
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
@@ -215,7 +208,7 @@ TEST(FrameBuilder, simpleBatching) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SimpleBatchingTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
@@ -256,7 +249,7 @@ TEST(FrameBuilder, clippedMerging) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     ClippedMergingTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -284,7 +277,7 @@ TEST(FrameBuilder, textMerging) {
         TestUtils::drawTextToCanvas(&canvas, "Test string1", paint, 100, 100); // not clipped
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     TextMergingTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex()) << "Expect 2 ops";
@@ -315,7 +308,7 @@ TEST(FrameBuilder, textStrikethrough) {
         }
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 2000), 200, 2000,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     TextStrikethroughTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2 * LOOPS, renderer.getIndex())
@@ -349,7 +342,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     TextureLayerTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex());
@@ -394,7 +387,7 @@ TEST(FrameBuilder, renderNode) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(parent), sLightCenter);
+            TestUtils::createSyncedNodeList(parent), sLightCenter);
     RenderNodeTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
 }
@@ -418,7 +411,7 @@ TEST(FrameBuilder, clipped) {
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue,
             SkRect::MakeLTRB(10, 20, 30, 40), // clip to small area, should see in receiver
-            200, 200, createSyncedNodeList(node), sLightCenter);
+            200, 200, TestUtils::createSyncedNodeList(node), sLightCenter);
     ClippedTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
 }
@@ -460,7 +453,7 @@ TEST(FrameBuilder, saveLayer_simple) {
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SaveLayerSimpleTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -532,7 +525,7 @@ TEST(FrameBuilder, saveLayer_nested) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(800, 800), 800, 800,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SaveLayerNestedTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
@@ -552,7 +545,7 @@ TEST(FrameBuilder, saveLayer_contentRejection) {
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
 
     FailRenderer renderer;
     // should see no ops, even within the layer, since the layer should be rejected
@@ -590,12 +583,12 @@ TEST(FrameBuilder, saveLayerUnclipped_simple) {
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SkCanvas::SaveFlags)(0));
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedSimpleTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -649,7 +642,7 @@ TEST(FrameBuilder, saveLayerUnclipped_mergedClears) {
         canvas.restoreToCount(restoreTo);
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedMergedClearsTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex())
@@ -711,7 +704,7 @@ TEST(FrameBuilder, saveLayerUnclipped_complex) {
         canvas.restore();
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(600, 600), 600, 600,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     SaveLayerUnclippedComplexTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(12, renderer.getIndex());
@@ -762,7 +755,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_simple) {
     OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
     *layerHandle = &layer;
 
-    auto syncedNodeList = createSyncedNodeList(node);
+    auto syncedNodeList = TestUtils::createSyncedNodeList(node);
 
     // only enqueue partial damage
     LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
@@ -863,7 +856,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
     OffscreenBuffer parentLayer(renderThread.renderState(), Caches::getInstance(), 200, 200);
     *(parent->getLayerHandle()) = &parentLayer;
 
-    auto syncedList = createSyncedNodeList(parent);
+    auto syncedList = TestUtils::createSyncedNodeList(parent);
 
     LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(child.get(), Rect(100, 100));
@@ -919,7 +912,7 @@ TEST(FrameBuilder, zReorder) {
         drawOrderedNode(&canvas, 9, -10.0f); // in reorder=false at this point, so played inorder
     });
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
-            createSyncedNodeList(parent), sLightCenter);
+            TestUtils::createSyncedNodeList(parent), sLightCenter);
     ZReorderTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(10, renderer.getIndex());
@@ -1002,7 +995,7 @@ TEST(FrameBuilder, projectionReorder) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 100, 100,
-            createSyncedNodeList(parent), sLightCenter);
+            TestUtils::createSyncedNodeList(parent), sLightCenter);
     ProjectionReorderTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(3, renderer.getIndex());
@@ -1045,7 +1038,7 @@ TEST(FrameBuilder, shadow) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(parent), sLightCenter);
+            TestUtils::createSyncedNodeList(parent), sLightCenter);
     ShadowTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(2, renderer.getIndex());
@@ -1086,7 +1079,7 @@ TEST(FrameBuilder, shadowSaveLayer) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(parent), (Vector3) { 100, 100, 100 });
+            TestUtils::createSyncedNodeList(parent), (Vector3) { 100, 100, 100 });
     ShadowSaveLayerTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(5, renderer.getIndex());
@@ -1132,7 +1125,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowHwLayer) {
     layer.setWindowTransform(windowTransform);
     *layerHandle = &layer;
 
-    auto syncedList = createSyncedNodeList(parent);
+    auto syncedList = TestUtils::createSyncedNodeList(parent);
     LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
     layerUpdateQueue.enqueueLayerWithDamage(parent.get(), Rect(100, 100));
     FrameBuilder frameBuilder(layerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
@@ -1165,7 +1158,7 @@ TEST(FrameBuilder, shadowLayering) {
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            createSyncedNodeList(parent), sLightCenter);
+            TestUtils::createSyncedNodeList(parent), sLightCenter);
     ShadowLayeringTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(4, renderer.getIndex());
@@ -1193,7 +1186,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
     });
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
-            createSyncedNodeList(node), sLightCenter);
+            TestUtils::createSyncedNodeList(node), sLightCenter);
     PropertyTestRenderer renderer(opValidateCallback);
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(1, renderer.getIndex()) << "Should have seen one op";
@@ -1332,7 +1325,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
         paint.setColor(SK_ColorWHITE);
         canvas.drawRect(0, 0, 10000, 10000, paint);
     });
-    auto nodes = createSyncedNodeList(node); // sync before querying height
+    auto nodes = TestUtils::createSyncedNodeList(node); // sync before querying height
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200, nodes, sLightCenter);
     SaveLayerAlphaClipTestRenderer renderer(outObservedData);
