@@ -19,18 +19,10 @@ package android.widget;
 
 import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.util.IntProperty;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.TextView;
-import android.widget.ListView;
-
 
 /**
  * Wrapper class for a ListView. This wrapper can hijack the focus to
@@ -41,26 +33,6 @@ import android.widget.ListView;
  * @hide
  */
 public class DropDownListView extends ListView {
-    /** Duration in milliseconds of the drag-to-open click animation. */
-    private static final long CLICK_ANIM_DURATION = 150;
-
-    /** Target alpha value for drag-to-open click animation. */
-    private static final int CLICK_ANIM_ALPHA = 0x80;
-
-    /** Wrapper around Drawable's <code>alpha</code> property. */
-    private static final IntProperty<Drawable> DRAWABLE_ALPHA =
-            new IntProperty<Drawable>("alpha") {
-                @Override
-                public void setValue(Drawable object, int value) {
-                    object.setAlpha(value);
-                }
-
-                @Override
-                public Integer get(Drawable object) {
-                    return object.getAlpha();
-                }
-            };
-
     /*
      * WARNING: This is a workaround for a touch mode issue.
      *
@@ -99,9 +71,6 @@ public class DropDownListView extends ListView {
     /** Whether to force drawing of the pressed state selector. */
     private boolean mDrawsInPressedState;
 
-    /** Current drag-to-open click animation, if any. */
-    private Animator mClickAnimation;
-
     /** Helper for drag-to-open auto scrolling. */
     private AbsListViewAutoScroller mScrollHelper;
 
@@ -110,7 +79,7 @@ public class DropDownListView extends ListView {
      *
      * @param context this view's context
      */
-    public DropDownListView(Context context, boolean hijackFocus) {
+    public DropDownListView(@NonNull Context context, boolean hijackFocus) {
         this(context, hijackFocus, com.android.internal.R.attr.dropDownListViewStyle);
     }
 
@@ -119,7 +88,7 @@ public class DropDownListView extends ListView {
      *
      * @param context this view's context
      */
-    public DropDownListView(Context context, boolean hijackFocus, int defStyleAttr) {
+    public DropDownListView(@NonNull Context context, boolean hijackFocus, int defStyleAttr) {
         super(context, null, defStyleAttr);
         mHijackFocus = hijackFocus;
         // TODO: Add an API to control this
@@ -132,7 +101,7 @@ public class DropDownListView extends ListView {
     }
 
     @Override
-    public boolean onHoverEvent(MotionEvent ev) {
+    public boolean onHoverEvent(@NonNull MotionEvent ev) {
         // Allow the super class to handle hover state management first.
         final boolean handled = super.onHoverEvent(ev);
 
@@ -169,7 +138,7 @@ public class DropDownListView extends ListView {
      * @param activePointerId id of the pointer that activated forwarding
      * @return whether the event was handled
      */
-    public boolean onForwardedEvent(MotionEvent event, int activePointerId) {
+    public boolean onForwardedEvent(@NonNull MotionEvent event, int activePointerId) {
         boolean handledEvent = true;
         boolean clearPressedItem = false;
 
@@ -201,7 +170,8 @@ public class DropDownListView extends ListView {
                 handledEvent = true;
 
                 if (actionMasked == MotionEvent.ACTION_UP) {
-                    clickPressedItem(child, position);
+                    final long id = getItemIdAtPosition(position);
+                    performItemClick(child, position, id);
                 }
                 break;
         }
@@ -234,30 +204,6 @@ public class DropDownListView extends ListView {
         this.mListSelectionHidden = listSelectionHidden;
     }
 
-    /**
-     * Starts an alpha animation on the selector. When the animation ends,
-     * the list performs a click on the item.
-     */
-    private void clickPressedItem(final View child, final int position) {
-        final long id = getItemIdAtPosition(position);
-        final Animator anim = ObjectAnimator.ofInt(
-                mSelector, DRAWABLE_ALPHA, 0xFF, CLICK_ANIM_ALPHA, 0xFF);
-        anim.setDuration(CLICK_ANIM_DURATION);
-        anim.setInterpolator(new AccelerateDecelerateInterpolator());
-        anim.addListener(new AnimatorListenerAdapter() {
-                @Override
-            public void onAnimationEnd(Animator animation) {
-                performItemClick(child, position, id);
-            }
-        });
-        anim.start();
-
-        if (mClickAnimation != null) {
-            mClickAnimation.cancel();
-        }
-        mClickAnimation = anim;
-    }
-
     private void clearPressedItem() {
         mDrawsInPressedState = false;
         setPressed(false);
@@ -267,14 +213,9 @@ public class DropDownListView extends ListView {
         if (motionView != null) {
             motionView.setPressed(false);
         }
-
-        if (mClickAnimation != null) {
-            mClickAnimation.cancel();
-            mClickAnimation = null;
-        }
     }
 
-    private void setPressedItem(View child, int position, float x, float y) {
+    private void setPressedItem(@NonNull View child, int position, float x, float y) {
         mDrawsInPressedState = true;
 
         // Ordering is essential. First, update the container's pressed state.
@@ -311,11 +252,6 @@ public class DropDownListView extends ListView {
         // Refresh the drawable state to reflect the new pressed state,
         // which will also update the selector state.
         refreshDrawableState();
-
-        if (mClickAnimation != null) {
-            mClickAnimation.cancel();
-            mClickAnimation = null;
-        }
     }
 
     @Override
