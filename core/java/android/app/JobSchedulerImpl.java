@@ -46,6 +46,15 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
+    public int scheduleAsPackage(JobInfo job, String packageName, int userId) {
+        try {
+            return mBinder.scheduleAsPackage(job, packageName, userId);
+        } catch (RemoteException e) {
+            return JobScheduler.RESULT_FAILURE;
+        }
+    }
+
+    @Override
     public void cancel(int jobId) {
         try {
             mBinder.cancel(jobId);

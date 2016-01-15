@@ -24,6 +24,7 @@ import android.app.job.JobInfo;
   */
 interface IJobScheduler {
     int schedule(in JobInfo job);
+    int scheduleAsPackage(in JobInfo job, String packageName, int userId);
     void cancel(int jobId);
     void cancelAll();
     List<JobInfo> getAllPendingJobs();
