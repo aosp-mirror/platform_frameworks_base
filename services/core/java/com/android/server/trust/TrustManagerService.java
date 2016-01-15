@@ -778,6 +778,7 @@ public class TrustManagerService extends SystemService {
 
         @Override
         public void setDeviceLockedForUser(int userId, boolean value) {
+            enforceReportPermission();
             mHandler.obtainMessage(MSG_SET_DEVICE_LOCKED, value ? 1 : 0, userId)
                     .sendToTarget();
         }

@@ -16,7 +16,9 @@
 
 package android.app.trust;
 
+import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.RequiresPermission;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -54,9 +56,12 @@ public class TrustManager {
      * Changes the lock status for the given user. This is only applicable to Managed Profiles,
      * other users should be handled by Keyguard.
      *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
      * @param userId The id for the user to be locked/unlocked.
      * @param locked The value for that user's locked state.
      */
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
     public void setDeviceLockedForUser(int userId, boolean locked) {
         try {
             mService.setDeviceLockedForUser(userId, locked);
