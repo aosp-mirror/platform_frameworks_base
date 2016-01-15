@@ -774,9 +774,12 @@ static jobject Bitmap_copyAshmem(JNIEnv* env, jobject, jlong srcHandle) {
     return ret;
 }
 
-static void Bitmap_destructor(JNIEnv* env, jobject, jlong bitmapHandle) {
-    LocalScopedBitmap bitmap(bitmapHandle);
+static void Bitmap_destruct(Bitmap* bitmap) {
     bitmap->detachFromJava();
+}
+
+static jlong Bitmap_getNativeFinalizer(JNIEnv*, jobject) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Bitmap_destruct));
 }
 
 static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
@@ -1357,7 +1360,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copy },
     {   "nativeCopyAshmem",         "(J)Landroid/graphics/Bitmap;",
         (void*)Bitmap_copyAshmem },
-    {   "nativeDestructor",         "(J)V", (void*)Bitmap_destructor },
+    {   "nativeGetNativeFinalizer", "()J", (void*)Bitmap_getNativeFinalizer },
     {   "nativeRecycle",            "(J)Z", (void*)Bitmap_recycle },
     {   "nativeReconfigure",        "(JIIIIZ)V", (void*)Bitmap_reconfigure },
     {   "nativeCompress",           "(JIILjava/io/OutputStream;[B)Z",

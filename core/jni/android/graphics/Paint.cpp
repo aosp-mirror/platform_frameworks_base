@@ -76,9 +76,12 @@ namespace PaintGlue {
         AFTER, AT_OR_AFTER, BEFORE, AT_OR_BEFORE, AT
     };
 
-    static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        delete obj;
+    static void deletePaint(Paint* paint) {
+        delete paint;
+    }
+
+    static jlong getNativeFinalizer(JNIEnv*, jobject) {
+        return static_cast<jlong>(reinterpret_cast<uintptr_t>(&deletePaint));
     }
 
     static jlong init(JNIEnv* env, jobject) {
@@ -863,7 +866,7 @@ namespace PaintGlue {
 }; // namespace PaintGlue
 
 static const JNINativeMethod methods[] = {
-    {"nFinalizer", "(J)V", (void*) PaintGlue::finalizer},
+    {"nGetNativeFinalizer", "()J", (void*) PaintGlue::getNativeFinalizer},
     {"nInit","()J", (void*) PaintGlue::init},
     {"nInitWithPaint","(J)J", (void*) PaintGlue::initWithPaint},
 
