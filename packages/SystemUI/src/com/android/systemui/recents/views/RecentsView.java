@@ -93,12 +93,6 @@ public class RecentsView extends FrameLayout {
 
     private RecentsTransitionHelper mTransitionHelper;
     private RecentsViewTouchHandler mTouchHandler;
-    private TaskStack.DockState[] mVisibleDockStates = {
-            TaskStack.DockState.LEFT,
-            TaskStack.DockState.TOP,
-            TaskStack.DockState.RIGHT,
-            TaskStack.DockState.BOTTOM,
-    };
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mFastOutLinearInInterpolator;
@@ -435,8 +429,9 @@ public class RecentsView extends FrameLayout {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        for (int i = mVisibleDockStates.length - 1; i >= 0; i--) {
-            Drawable d = mVisibleDockStates[i].viewState.dockAreaOverlay;
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
             if (d.getAlpha() > 0) {
                 d.draw(canvas);
             }
@@ -445,8 +440,9 @@ public class RecentsView extends FrameLayout {
 
     @Override
     protected boolean verifyDrawable(Drawable who) {
-        for (int i = mVisibleDockStates.length - 1; i >= 0; i--) {
-            Drawable d = mVisibleDockStates[i].viewState.dockAreaOverlay;
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
             if (d == who) {
                 return true;
             }
@@ -674,7 +670,9 @@ public class RecentsView extends FrameLayout {
         if (newDockStates != null) {
             Collections.addAll(newDockStatesSet, newDockStates);
         }
-        for (TaskStack.DockState dockState : mVisibleDockStates) {
+        ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
+        for (int i = visDockStates.size() - 1; i >= 0; i--) {
+            TaskStack.DockState dockState = visDockStates.get(i);
             TaskStack.DockState.ViewState viewState = dockState.viewState;
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it

@@ -71,6 +71,7 @@ public class RecentsViewTouchHandler {
 
     private DropTarget mLastDropTarget;
     private ArrayList<DropTarget> mDropTargets = new ArrayList<>();
+    private ArrayList<TaskStack.DockState> mVisibleDockStates = new ArrayList<>();
 
     public RecentsViewTouchHandler(RecentsView rv) {
         mRv = rv;
@@ -95,6 +96,13 @@ public class RecentsViewTouchHandler {
                 (config.isLargeScreen ? DockRegion.TABLET_LANDSCAPE : DockRegion.PHONE_LANDSCAPE) :
                 (config.isLargeScreen ? DockRegion.TABLET_PORTRAIT : DockRegion.PHONE_PORTRAIT);
         return dockStates;
+    }
+
+    /**
+     * Returns the set of visible dock states for this current drag.
+     */
+    public ArrayList<TaskStack.DockState> getVisibleDockStates() {
+        return mVisibleDockStates;
     }
 
     /** Touch preprocessing for handling below */
@@ -130,11 +138,13 @@ public class RecentsViewTouchHandler {
         mTaskView.setTranslationX(x);
         mTaskView.setTranslationY(y);
 
-        if (!ssp.hasDockedTask()) {
+        mVisibleDockStates.clear();
+        if (!ssp.hasDockedTask() && mRv.getTaskStack().getTaskCount() > 1) {
             // Add the dock state drop targets (these take priority)
             TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
             for (TaskStack.DockState dockState : dockStates) {
                 registerDropTargetForCurrentDrag(dockState);
+                mVisibleDockStates.add(dockState);
             }
         }
 
