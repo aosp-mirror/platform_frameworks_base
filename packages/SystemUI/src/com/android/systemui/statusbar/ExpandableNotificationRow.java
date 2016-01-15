@@ -25,8 +25,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Chronometer;
@@ -1111,6 +1113,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setExpansionLogger(ExpansionLogger logger, String key) {
         mLogger = logger;
         mLoggingKey = key;
+    }
+
+    @Override
+    protected boolean disallowSingleClick(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        NotificationHeaderView header = getNotificationHeader();
+        if (header != null) {
+            return header.isInTouchRect(x, y);
+        }
+        return super.disallowSingleClick(event);
     }
 
     private void logExpansionEvent(boolean userAction, boolean wasExpanded) {

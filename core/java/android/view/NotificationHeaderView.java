@@ -335,4 +335,11 @@ public class NotificationHeaderView extends LinearLayout {
     public boolean hasOverlappingRendering() {
         return false;
     }
+
+    public boolean isInTouchRect(float x, float y) {
+        if (mExpandClickListener == null) {
+            return false;
+        }
+        return mTouchListener.isInside(x, y);
+    }
 }

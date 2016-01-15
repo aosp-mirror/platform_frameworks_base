@@ -176,25 +176,30 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     };
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (mDimmed && !mActivated) {
-            return handleTouchEventDimmed(event);
-        } else {
-            return super.dispatchTouchEvent(event);
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (mDimmed && !mActivated
+                && ev.getActionMasked() == MotionEvent.ACTION_DOWN && disallowSingleClick(ev)) {
+            return true;
         }
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    protected boolean disallowSingleClick(MotionEvent ev) {
+        return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
-        if (mDimmed && mActivated) {
+        if (mDimmed) {
+            boolean wasActivated = mActivated;
             result = handleTouchEventDimmed(event);
+            if (wasActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
+                mFalsingManager.onNotificationDoubleTap();
+                removeCallbacks(mTapTimeoutRunnable);
+            }
         } else {
             result = super.onTouchEvent(event);
-        }
-        if (mActivated && result && event.getAction() == MotionEvent.ACTION_UP) {
-            mFalsingManager.onNotificationDoubleTap();
-            removeCallbacks(mTapTimeoutRunnable);
         }
         return result;
     }
