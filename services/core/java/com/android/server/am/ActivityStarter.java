@@ -60,6 +60,7 @@ import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -1701,7 +1702,7 @@ class ActivityStarter {
             // and if yes, we will launch into that stack. If not, we just put the new
             // activity into parent's stack, because we can't find a better place.
             final ActivityStack stack = mSupervisor.getStack(DOCKED_STACK_ID);
-            if (stack != null && !stack.isStackVisibleLocked()) {
+            if (stack != null && stack.getStackVisibilityLocked() == STACK_INVISIBLE) {
                 // There is a docked stack, but it isn't visible, so we can't launch into that.
                 return null;
             } else {
