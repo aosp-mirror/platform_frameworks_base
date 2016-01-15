@@ -31,8 +31,8 @@ trainingnavtop=true
 "공유" 작업을 시작하고 이 작업을 수행하기 위해 여러분 자신의 앱을 시작할 수 있도록
 {@link android.content.Intent#ACTION_SEND} 인텐트를 지원하는 것이 좋습니다.</p>
 
-<p>다른 앱이 자신의 액티비티를 시작할 수 있도록 하기 위해서는 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
-요소에 상응하는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 요소를 매니페스트 파일에 추가해야 합니다.</p>
+<p>다른 앱이 자신의 액티비티를 시작할 수 있도록 하기 위해서는 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
+요소에 상응하는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 요소를 매니페스트 파일에 추가해야 합니다.</p>
 
 <p>앱이 기기에 설치되면 시스템이 인텐트
 필터를 식별한 후 설치된 모든 앱에서 지원되는 인텐트의 내부 카탈로그에 해당 정보를 추가합니다.
@@ -56,13 +56,13 @@ startActivity()} 또는 {@link android.app.Activity#startActivityForResult start
   <dt>작업</dt>
     <dd>수행할 작업의 이름을 지정하는 문자열입니다. 일반적으로, 플랫폼에서 정의하는 값 중
 하나입니다(예: {@link android.content.Intent#ACTION_SEND} 또는 {@link android.content.Intent#ACTION_VIEW}).
-    <p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action&gt;}</a> 요소를 사용하여 인텐트 필터에 지정합니다.
+    <p><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a> 요소를 사용하여 인텐트 필터에 지정합니다.
 이 요소에 지정하는 값은 API 상수 대신
 작업의 전체 문자열 이름이어야 합니다(다음 예제 참조).</p></dd>
 
   <dt>데이터</dt>
     <dd>인텐트와 관련된 데이터에 대한 설명입니다.
-    <p><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data&gt;}</a> 요소를 사용하여 인텐트 필터에 지정합니다. 이 요소에서
+    <p><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> 요소를 사용하여 인텐트 필터에 지정합니다. 이 요소에서
 하나 이상의 특성을 사용하여 MIME 유형, URI 접두사, URI 스키마, 또는
 이들의 조합 그리고 수락된 데이터 유형을 나타내는 다른 요소들을 지정할 수
 있습니다.</p>
@@ -76,12 +76,12 @@ startActivity()} 또는 {@link android.app.Activity#startActivityForResult start
 관련되어 있습니다. 시스템이 지원하는 카테고리는
 여러 가지가 있지만 대부분은 거의 사용되지 않습니다. 하지만 모든 암묵적인 인텐트는 기본적으로
 {@link android.content.Intent#CATEGORY_DEFAULT}로 정의됩니다.
-    <p><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category&gt;}</a> 요소를 사용하여 인텐트 필터에
+    <p><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a> 요소를 사용하여 인텐트 필터에
 지정합니다.</p></dd>
 </dl>
 
 <p>인텐트 필터에서 액티비티가 허용하는 기준을 선언할 수 있습니다.
-이는 이러한 기준 각각을 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a> 요소 내에 해당 XML 요소를 중첩하여 선언하면
+이는 이러한 기준 각각을 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a> 요소 내에 해당 XML 요소를 중첩하여 선언하면
 가능합니다.</p>
 
 <p>예를 들어, 다음은 데이터 유형이 텍스트 또는 이미지인 경우 {@link
@@ -100,10 +100,10 @@ android.content.Intent#ACTION_SEND} 인텐트를 처리하는 인텐트 필터�
 
 <p>수신되는 인텐트는 각각 하나의 작업 및 하나의 데이터 유형만 지정합니다. 하지만
 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> 각각에 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> 및 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a>에 대한 여러
+<intent-filter>}</a> 각각에 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
+<action>}</a>, <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
+<category>}</a> 및 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
+<data>}</a>에 대한 여러
 인스턴스를 선언해도 문제가 되지는 않습니다.</p>
 
 <p>작업 및 데이터의 두 쌍이 상호 배타적으로

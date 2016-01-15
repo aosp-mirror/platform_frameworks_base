@@ -319,7 +319,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      앱이 게임 컨트롤러를 기본 입력 방법으로 사용하는 경우 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 매니페스트 태그로 적합한 요구사항을 선언합니다.
+      앱이 게임 컨트롤러를 기본 입력 방법으로 사용하는 경우 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 매니페스트 태그로 적합한 요구사항을 선언합니다.
 
       (<a href="{@docRoot}training/tv/games/index.html#gamepad">방법 알아보기</a>)
     </p>

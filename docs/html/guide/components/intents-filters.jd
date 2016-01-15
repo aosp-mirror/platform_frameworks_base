@@ -455,7 +455,7 @@ dialog title.</p>
 
 <p>To advertise which implicit intents your app can receive, declare one or more intent filters for
 each of your app components with an <a href=
-"{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter&gt;}</a>
+"{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 element in your <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a>.
 Each intent filter specifies the type of intents it accepts based on the intent's action,
 data, and category. The system will deliver an implicit intent to your app component only if the
@@ -471,23 +471,23 @@ it inspects the {@link android.content.Intent} and decides how to behave based o
 in the {@link android.content.Intent} (such as to show the editor controls or not).</p>
 
 <p>Each intent filter is defined by an <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>
 element in the app's manifest file, nested in the corresponding app component (such
-as an <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a>
+as an <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element). Inside the <a
-href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code &lt;intent-filter>}</a>,
+href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code <intent-filter>}</a>,
 you can specify the type of intents to accept using one or more
 of these three elements:</p>
 
 <dl>
-<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action>}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a></dt>
   <dd>Declares the intent action accepted, in the {@code name} attribute. The value
   must be the literal string value of an action, not the class constant.</dd>
-<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a></dt>
   <dd>Declares the type of data accepted, using one or more attributes that specify various
   aspects of the data URI (<code>scheme</code>, <code>host</code>, <code>port</code>,
   <code>path</code>, etc.) and MIME type.</dd>
-<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category>}</a></dt>
+<dt><a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a></dt>
   <dd>Declares the intent category accepted, in the {@code name} attribute. The value
   must be the literal string value of an action, not the class constant.
 
@@ -516,9 +516,9 @@ of these three elements:</p>
 </pre>
 
 <p>It's okay to create a filter that includes more than one instance of
-<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code &lt;action>}</a>,
-<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a>, or
-<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code &lt;category>}</a>.
+<a href="{@docRoot}guide/topics/manifest/action-element.html">{@code <action>}</a>,
+<a href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a>, or
+<a href="{@docRoot}guide/topics/manifest/category-element.html">{@code <category>}</a>.
 If you do, you simply need to be certain that the component can handle any and all combinations
 of those filter elements.</p>
 
@@ -607,9 +607,9 @@ opens when the user initially launches the app with the launcher icon:</p>
   indicates this is the main entry point and does not expect any intent data.</li>
   <li>The {@link android.content.Intent#CATEGORY_LAUNCHER} category indicates that this activity's
   icon should be placed in the system's app launcher. If the <a
-  href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a> element
+  href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
   does not specify an icon with {@code icon}, then the system uses the icon from the <a
-  href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
+  href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
   element.</li>
 </ul>
 <p>These two must be paired together in order for the activity to appear in the app launcher.</p>
@@ -715,7 +715,7 @@ in terms of how the intent filter is declared in an app's manifest file.</p>
 
 <p>To specify accepted intent actions, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a> elements.  For example:</p>
+<action>}</a> elements.  For example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -739,7 +739,7 @@ contains at least one action).</p>
 
 <p>To specify accepted intent categories, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> elements.  For example:</p>
+<category>}</a> elements.  For example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -762,7 +762,7 @@ android.content.Context#startActivity startActivity()} and {@link
 android.app.Activity#startActivityForResult startActivityForResult()}.
 So if you want your activity to receive implicit intents, it must
 include a category for {@code "android.intent.category.DEFAULT"} in its intent filters (as
-shown in the previous {@code &lt;intent-filter>} example.</p>
+shown in the previous {@code <intent-filter>} example.</p>
 
 
 
@@ -770,7 +770,7 @@ shown in the previous {@code &lt;intent-filter>} example.</p>
 
 <p>To specify accepted intent data, an intent filter can declare zero or more
 <a href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> elements.  For example:</p>
+<data>}</a> elements.  For example:</p>
 
 <pre>
 &lt;intent-filter&gt;
@@ -786,7 +786,7 @@ attributes &mdash; {@code scheme}, {@code host}, {@code port},
 and {@code path} &mdash; for each part of the URI:
 </p>
 
-<p style="margin-left: 2em">{@code &lt;scheme>://&lt;host>:&lt;port>/&lt;path>}</p>
+<p style="margin-left: 2em">{@code <scheme>://<host>:<port>/<path>}</p>
 
 <p>
 For example:
@@ -799,7 +799,7 @@ the port is {@code 200}, and the path is {@code folder/subfolder/etc}.
 </p>
 
 <p>Each of these attributes is optional in a <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a> element,
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> element,
 but there are linear dependencies:</p>
 <ul>
   <li>If a scheme is not specified, the host is ignored.</li>
@@ -851,7 +851,7 @@ that components are able to get local data from a file or content provider.
 Therefore, their filters can list just a data type and do not need to explicitly
 name the {@code content:} and {@code file:} schemes.
 This is a typical case.  A <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a> element
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a> element
 like the following, for example, tells Android that the component can get image data from a content
 provider and display it:
 </p>
@@ -870,7 +870,7 @@ specify a data type but not a URI are perhaps the most common.
 <p>
 Another common configuration is filters with a scheme and a data type.  For
 example, a <a
-href="{@docRoot}guide/topics/manifest/data-element.html">{@code &lt;data>}</a>
+href="{@docRoot}guide/topics/manifest/data-element.html">{@code <data>}</a>
 element like the following tells Android that
 the component can retrieve video data from the network in order to perform the action:
 </p>

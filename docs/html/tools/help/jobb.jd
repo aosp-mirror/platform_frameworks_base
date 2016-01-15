@@ -44,31 +44,31 @@ $ jobb -d /temp/obb-output/ -o my-app-assets.obb -k secret-key
     <th>Description</th>
   </tr>
   <tr>
-    <td>{@code -d &lt;directory&gt;}</td>
+    <td>{@code -d <directory>}</td>
     <td>Set the input directory for creating an OBB file, or the output directory when extracting
       ({@code -dump}) an existing file. When creating an OBB file, the contents of the specified
       directory and all its sub-directories are included in the OBB file system.
     </td>
   </tr>
   <tr>
-    <td>{@code -o &lt;filename&gt;}</td>
+    <td>{@code -o <filename>}</td>
     <td>Specify the filename for the OBB file. This parameter is required when
     creating an OBB and extracting (dumping) its contents.</td>
   </tr>
   <tr>
-    <td>{@code -pn &lt;package&gt;}</td>
+    <td>{@code -pn <package>}</td>
     <td>Specify the package name for the application that mounts the OBB file, which corresponds
     to the {@code package} value specified in your application's manifest. This parameter is
     required when creating an OBB file.</td>
   </tr>
   <tr>
-    <td>{@code -pv &lt;version&gt;}</td>
+    <td>{@code -pv <version>}</td>
     <td>Set the minimum version for the application that can mount the OBB file, which corresponds
     to the {@code android:versionCode} value in your application's manifest. This parameter is
     required when creating an OBB file.</td>
   </tr>
   <tr>
-    <td>{@code -k &lt;key&gt;}</td>
+    <td>{@code -k <key>}</td>
     <td>Specify a password for encrypting a new OBB file or decrypting an existing, encypted
       OBB file.</td>
   </tr>
@@ -80,13 +80,13 @@ $ jobb -d /temp/obb-output/ -o my-app-assets.obb -k secret-key
       overlay OBB file replace files that have the same path.</td>
   </tr>
   <tr>
-    <td style="white-space: nowrap">{@code -dump &lt;filename&gt;}</td>
+    <td style="white-space: nowrap">{@code -dump <filename>}</td>
     <td><p>Extract the contents of the specified OBB file. When using this option, you must also
-      specify the output directory for the contents using the {@code -d &lt;directory&gt;}
+      specify the output directory for the contents using the {@code -d <directory>}
       parameter.</p>
 
       <p class="note"><strong>Note:</strong> When dumping an existing OBB file, you can omit the
-      {@code -d &lt;directory&gt;} parameter to get a listing of the directories inside the file,
+      {@code -d <directory>} parameter to get a listing of the directories inside the file,
       without extracting the contents.</p>
     </td>
   </tr>

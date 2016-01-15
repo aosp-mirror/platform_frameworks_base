@@ -82,9 +82,9 @@ public class ActivityManager {
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
-     * &lt;meta-data>}</a> name for a 'home' Activity that declares a package that is to be
+     * <meta-data>}</a> name for a 'home' Activity that declares a package that is to be
      * uninstalled in lieu of the declaring one.  The package named here must be
-     * signed with the same certificate as the one declaring the {@code &lt;meta-data>}.
+     * signed with the same certificate as the one declaring the {@code <meta-data>}.
      */
     public static final String META_HOME_ALTERNATE = "android.app.home.alternate";
 

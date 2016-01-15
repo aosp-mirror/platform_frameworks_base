@@ -424,8 +424,8 @@ display action items on a narrow screen and also leave room for navigation and t
 at the top.</p>
 
 <p>To enable split action bar, simply add {@code uiOptions="splitActionBarWhenNarrow"} to your
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> or
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> or
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 manifest element.</p>
 
 

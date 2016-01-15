@@ -774,7 +774,7 @@ myasmfilter bar.S $OBJS_DIR/bar.S
 
 <h3 id="npfm">NDK-provided function macros</h2>
 <p>This section explains GNU Make function macros that the NDK provides. Use
-{@code $(call &lt;function&gt;)} to evaluate them; they return textual information.</p>
+{@code $(call <function>)} to evaluate them; they return textual information.</p>
 
 <h4>my-dir</h4>
 
@@ -870,6 +870,6 @@ the module. A typical example is as follows: </p>
 $(call import-module,&lt;name&gt;)
 </pre>
 
-<p>In this example, the build system looks for the module tagged {@code &lt;name&gt;} in the list of
+<p>In this example, the build system looks for the module tagged {@code <name>} in the list of
 directories referenced that your {@code NDK_MODULE_PATH} environment variable references, and
 includes its {@code Android.mk} file automatically for you.</p>

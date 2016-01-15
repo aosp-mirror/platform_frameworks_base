@@ -96,7 +96,7 @@ import android.util.Log;
  * </table>
  * <p>
  * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
- * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
+ * permission in an {@code <uses-permission>} element of the application's manifest.
  * </p>
  */
 public final class PowerManager {
@@ -1004,7 +1004,7 @@ public final class PowerManager {
      * to have the device stay on.
      * <p>
      * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
-     * permission in an {@code &lt;uses-permission&gt;} element of the application's manifest.
+     * permission in an {@code <uses-permission>} element of the application's manifest.
      * Obtain a wake lock by calling {@link PowerManager#newWakeLock(int, String)}.
      * </p><p>
      * Call {@link #acquire()} to acquire the wake lock and force the device to stay

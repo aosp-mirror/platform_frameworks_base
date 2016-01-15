@@ -29,10 +29,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * on the main thread.
  * <p>
  * Example:
- * <pre>{@code
+ * <pre><code>
  *  &#64;MainThread
  *  public void deliverResult(D data) { ... }
- * }</pre>
+ * </code></pre>
  *
  * {@hide}
  */

@@ -92,7 +92,7 @@ import java.util.Map;
  * </pre>
  * <p>See {@link android.content.Intent} for more information.</p>
  *
- * <p>To provide a WebView in your own Activity, include a {@code &lt;WebView&gt;} in your layout,
+ * <p>To provide a WebView in your own Activity, include a {@code <WebView>} in your layout,
  * or set the entire Activity window as a WebView during {@link
  * android.app.Activity#onCreate(Bundle) onCreate()}:</p>
  * <pre class="prettyprint">

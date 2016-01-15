@@ -481,7 +481,7 @@ in their application manifests, to inform external entities such as Google
 Play of required hardware and software capabilities. You declare these
 and other feature constants in <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
-&lt;uses-feature&gt;}</a> manifest elements.
+<uses-feature>}</a> manifest elements.
 
 <p>Google Play filters applications based on their <code>&lt;uses-feature&gt;</code> attributes, to ensure that they are available only to devices on which their requirements are met. </p>
 

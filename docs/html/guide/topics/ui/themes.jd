@@ -77,13 +77,13 @@ font.</p>
 directory of your project. The name of the XML file is arbitrary, but it must use the
 {@code .xml} extension and be saved in the {@code res/values/} folder.</p>
 
-<p>The root node of the XML file must be {@code &lt;resources&gt;}.</p>
+<p>The root node of the XML file must be {@code <resources>}.</p>
 
-<p>For each style you want to create, add a {@code &lt;style>} element to the file
+<p>For each style you want to create, add a {@code <style>} element to the file
 with a {@code name} that uniquely identifies the style (this attribute is required).
-Then add an {@code &lt;item>} element for each property of that style, with a
+Then add an {@code <item>} element for each property of that style, with a
 {@code name} that declares the style property and a value to go with it (this attribute
-is required). The value for the {@code &lt;item>} can
+is required). The value for the {@code <item>} can
 be a keyword string, a hex color, a reference to another resource type, or other value
 depending on the style property.
 Here's an example file with a single style:</p>
@@ -100,12 +100,12 @@ Here's an example file with a single style:</p>
 &lt;/resources&gt;
 </pre>
 
-<p>Each child of the {@code &lt;resources>} element is converted into an application resource
-object at compile-time, which can be referenced by the value in the {@code &lt;style>} element's
+<p>Each child of the {@code <resources>} element is converted into an application resource
+object at compile-time, which can be referenced by the value in the {@code <style>} element's
 {@code name} attribute. This example style can be referenced from an XML layout as
 {@code @style/CodeFont} (as demonstrated in the introduction above).</p>
 
-<p>The <code>parent</code> attribute in the {@code &lt;style>} element is optional and
+<p>The <code>parent</code> attribute in the {@code <style>} element is optional and
 specifies the resource ID of another style from which this style should inherit
 properties. You can then override the inherited style properties if you want to.</p>
 
@@ -117,7 +117,7 @@ for a single View or as an application theme is discussed later.</p>
 
 <h3 id="Inheritance">Inheritance</h3>
 
-<p>The {@code parent} attribute in the {@code &lt;style>} element lets you specify a style
+<p>The {@code parent} attribute in the {@code <style>} element lets you specify a style
 from which your style should inherit properties.
 You can use this to inherit properties from an existing style and
 then define only the properties that you want to change or add. You can
@@ -144,7 +144,7 @@ you can author the new style like this:</p>
     &lt;/style&gt;
 </pre>
 
-<p>Notice that there is no {@code parent} attribute in the {@code &lt;style&gt;} tag, but because
+<p>Notice that there is no {@code parent} attribute in the {@code <style>} tag, but because
 the {@code name} attribute begins with the {@code CodeFont} style name (which
 is a style that you have created), this style inherits all style properties from that style. This
 style then overrides the {@code android:textColor} property to make the text red. You can
@@ -170,7 +170,7 @@ use the {@code parent} attribute.</p>
 <h3 id="Properties">Style Properties</h3>
 
 <p>Now that you understand how a style is defined, you need to learn what kind
-of style properties&mdash;defined by the {@code &lt;item>} element&mdash;are available.
+of style properties&mdash;defined by the {@code <item>} element&mdash;are available.
 You're probably familiar with some already, such as {@link android.R.attr#layout_width} and
 {@link android.R.attr#textColor}. Of course, there are many more style properties you can use.</p>
 
@@ -184,7 +184,7 @@ href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{
 android:inputType}</a>, so where you might normally place the <a
 href="{@docRoot}reference/android/widget/TextView.html#attr_android:inputType">{@code
 android:inputType}</a>
-attribute in an {@code &lt;EditText>} element, like this:</p>
+attribute in an {@code <EditText>} element, like this:</p>
 <pre>
 &lt;EditText
     android:inputType="number"
@@ -226,8 +226,8 @@ a theme to an Activity or application. See the next section for information abou
 style as a theme.</p>
 
 <p class="note"><strong>Note:</strong> Don't forget to prefix the property names in each
-{@code &lt;item&gt;} element with the <code>android:</code> namespace. For example:
-{@code &lt;item name="android:inputType">}.</p>
+{@code <item>} element with the <code>android:</code> namespace. For example:
+{@code <item name="android:inputType">}.</p>
 
 
 

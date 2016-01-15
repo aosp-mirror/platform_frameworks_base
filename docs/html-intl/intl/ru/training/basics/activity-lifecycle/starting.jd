@@ -149,7 +149,7 @@ android.app.Activity#onCreate onCreate()} для {@link android.app.Activity} в
 который находится в корневом каталоге вашего проекта.</p>
 
 <p>Основная операция приложения должна декларироваться в манифесте с помощью фильтра <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a>, включающего действие {@link
+<intent-filter>}</a>, включающего действие {@link
 android.content.Intent#ACTION_MAIN MAIN} и категорию
 {@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER}. Например:</p> 
 

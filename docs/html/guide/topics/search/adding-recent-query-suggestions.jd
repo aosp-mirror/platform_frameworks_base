@@ -154,7 +154,7 @@ searchable configuration). For example:</p>
 
 <p>To configure the system to use your suggestions provider, you need to add
 the {@code android:searchSuggestAuthority} and {@code android:searchSuggestSelection} attributes to
-the {@code &lt;searchable&gt;} element in your searchable configuration file. For example:</p>
+the {@code <searchable>} element in your searchable configuration file. For example:</p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>

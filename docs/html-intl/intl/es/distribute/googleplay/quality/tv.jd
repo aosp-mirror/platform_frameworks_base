@@ -320,7 +320,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
       Si la aplicación utiliza un controlador para juegos como su método de entrada principal, debe declarar el requisito
- correspondiente con la etiqueta del manifiesto <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>.
+ correspondiente con la etiqueta del manifiesto <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>.
       (<a href="{@docRoot}training/tv/games/index.html#gamepad">Obtén más información</a>)
     </p>
   </td>

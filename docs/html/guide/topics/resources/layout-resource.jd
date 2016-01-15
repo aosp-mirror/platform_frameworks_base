@@ -54,7 +54,7 @@ In XML: <code>@[<em>package</em>:]layout/<em>filename</em></code>
 </pre>
 <p class="note"><strong>Note:</strong> The root element can be either a
 {@link android.view.ViewGroup}, a {@link android.view.View}, or a <a
-href="#merge-element">{@code &lt;merge&gt;}</a> element, but there must be only
+href="#merge-element">{@code <merge>}</a> element, but there must be only
 one root element and it must contain the {@code xmlns:android} attribute with the {@code android}
 namespace as shown.</p>
 </dd>

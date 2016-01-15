@@ -1218,7 +1218,7 @@ area.</li>
                 (<a href="https://android-review.googlesource.com/#/c/46821">Change 46821</a>)</li>
               <li>Modified {@code wchar.h} to not redefine {@code WCHAR_MAX} and
                 {@code WCHAR_MIN}</li>
-              <li>Fixed {@code &lt;inttypes.h&gt;} declaration for pointer-related {@code PRI} and
+              <li>Fixed {@code <inttypes.h>} declaration for pointer-related {@code PRI} and
                 {@code SCN} macros. (<a href="http://b.android.com/57218">Issue 57218</a>)</li>
               <li>Changed the {@code sys/cdefs.h} header so that {@code __WCHAR_TYPE__} is 32-bit
                 for API levels less than 9, which means that {@code wchat_t} is 32-bit for all
@@ -1367,7 +1367,7 @@ return
             (<a href="http://b.android.com/52909">Issue 52909</a>)</li>
           <li>Fixed a GCC 4.7 segfault.
             (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55245">GCC Issue</a>)</li>
-          <li>Fixed {@code &lt;chrono&gt;} clock resolution and enabled {@code steady_clock}.
+          <li>Fixed {@code <chrono>} clock resolution and enabled {@code steady_clock}.
             (<a href="http://b.android.com/39680">Issue 39680</a>)</li>
           <li>Fixed toolchain to enable {@code _GLIBCXX_HAS_GTHREADS} for GCC 4.7 libstdc++.
             (<a href="http://b.android.com/41770">Issue 41770</a>,
@@ -1387,7 +1387,7 @@ return
             (<a href="https://android-review.googlesource.com/#/c/52134">Change 52134</a>)</li>
           <li>Fixed Clang 3.1 internal compiler error when using Eigen library.
             (<a href="http://b.android.com/41246">Issue 41246</a>)</li>
-          <li>Fixed Clang 3.1 internal compiler error including {@code &lt;chrono&gt;} in C++11
+          <li>Fixed Clang 3.1 internal compiler error including {@code <chrono>} in C++11
 mode.
             (<a href="http://b.android.com/39600">Issue 39600</a>)</li>
           <li>Fixed Clang 3.1 internal compiler error when generating object code for a method
@@ -1484,7 +1484,7 @@ contain
             (<a href="http://b.android.com/52805">Issue 52805</a>)</li>
           <li>Enabled {@code FUTEX} system call in GNU libstdc++.</li>
           <li>Updated {@code ndk-build} so that it  no longer copies prebuilt static library to
-            a project's {@code obj/local/&lt;abi&gt;/} directory.
+            a project's {@code obj/local/<abi>/} directory.
             (<a href="http://b.android.com/40302">Issue 40302</a>)</li>
           <li>Removed {@code __ARM_ARCH_5*__} from ARM {@code toolchains/*/setup.mk} script.
             (<a href="http://b.android.com/21132">Issue 21132</a>)</li>
@@ -1723,8 +1723,8 @@ s.html</a></li>
                 add this environment variable setting to {@code Application.mk}.</li>
               <li>For standalone builds, add {@code --llvm-version=3.1} to
                 {@code make-standalone-toolchain.sh} and replace {@code CC} and {@code CXX} in your
-                makefile with {@code &lt;tool-path&gt;/bin/clang} and
-                {@code &lt;tool-path&gt;/bin/clang++}. See {@code STANDALONE-TOOLCHAIN.html} for
+                makefile with {@code <tool-path>/bin/clang} and
+                {@code <tool-path>/bin/clang++}. See {@code STANDALONE-TOOLCHAIN.html} for
                 details.</li>
             </ul>
             <p class="note"><strong>Note:</strong> This feature is experimental. Please try it and
@@ -1915,12 +1915,12 @@ passing
               <li>Removed unimplemented functions in {@code malloc.h}.</li>
               <li>Fixed {@code stdint.h} defintion of {@code uint64_t} for ANSI compilers.
               (<a href="http://b.android.com/1952">Issue 1952</a>)</li>
-              <li>Fixed preprocessor macros in {@code &lt;arch&gt;/include/machine/*}.</li>
+              <li>Fixed preprocessor macros in {@code <arch>/include/machine/*}.</li>
               <li>Replaced {@code link.h} for MIPS with new version supporting all platforms.</li>
               <li>Removed {@code linux-unistd.h}</li>
               <li>Move GLibc-specific macros {@code LONG_LONG_MIN}, {@code LONG_LONG_MAX} and
-              {@code ULONG_LONG_MAX} from {@code &lt;pthread.h&gt;} to {@code
-&lt;limits.h&gt;}.</li>
+              {@code ULONG_LONG_MAX} from {@code <pthread.h>} to {@code
+<limits.h>}.</li>
             </ul>
           </li>
           <li>Fixed a buffer overflow in {@code ndk-stack-parser}.</li>
@@ -2177,8 +2177,8 @@ the {@code tests} project underneath it can compile.</li>
           <li>Changed locations of binaries:
             <ul>
               <li>Moved {@code gdbserver} from
-{@code toolchain/&lt;arch-os-ver&gt;/prebuilt/gdbserver} to
-{@code prebuilt/android-&lt;arch&gt;/gdbserver/gdbserver}.</li>
+{@code toolchain/<arch-os-ver>/prebuilt/gdbserver} to
+{@code prebuilt/android-<arch>/gdbserver/gdbserver}.</li>
               <li>Renamed x86 toolchain prefix from {@code i686-android-linux-} to
 {@code i686-linux-android-}.</li>
               <li>Moved {@code sources/cxx-stl/gnu-libstdc++/include} and {@code lib} to
@@ -2262,7 +2262,7 @@ is compiled for the device's CPU architecture.</p>
       <dd>
         <ul>
           <li>Fixed a typo in GAbi++ implementation where the result of {@code
-          dynamic_cast&lt;D&gt;(b)} of base class object {@code b} to derived class {@code D} is
+          dynamic_cast<D>(b)} of base class object {@code b} to derived class {@code D} is
           incorrectly adjusted in the opposite direction from the base class.
           (<a href="http://b.android.com/28721">Issue 28721</a>)
           </li>

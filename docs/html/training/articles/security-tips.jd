@@ -197,7 +197,7 @@ using external storage (which requires permission), store data
 on the internal storage.</p>
 
 <p>In addition to requesting permissions, your application can use the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html">{@code &lt;permissions>}</a>
+href="{@docRoot}guide/topics/manifest/permission-element.html">{@code <permissions>}</a>
 to protect IPC that is security sensitive and will be exposed to other
 applications, such as a {@link android.content.ContentProvider}.
 In general, we recommend using access controls
@@ -537,7 +537,7 @@ mechanism.</p>
 If your IPC mechanism is not intended for use by other applications, set the
 {@code android:exported} attribute to {@code "false"} in the component's manifest element,
 such as for the <a
-href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code &lt;service&gt;}</a>
+href="{@docRoot}guide/topics/manifest/service-element.html#exported">{@code <service>}</a>
 element.  This is useful for applications that consist of multiple processes
 within the same UID, or if you decide late in development that you do not
 actually want to expose functionality as IPC but you don’t want to rewrite
@@ -545,7 +545,7 @@ the code.</p>
 
 <p>If your IPC is intended to be accessible to other applications, you can
 apply a security policy by using the <a
-href="{@docRoot}guide/topics/manifest/permission-element.html">{@code &lt;permission>}</a>
+href="{@docRoot}guide/topics/manifest/permission-element.html">{@code <permission>}</a>
 element. If IPC is between your own separate apps that are signed with the same key,
 it is preferable to use {@code "signature"} level permission in the <a
 href="{@docRoot}guide/topics/manifest/permission-element.html#plevel">{@code

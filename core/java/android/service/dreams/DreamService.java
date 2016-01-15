@@ -98,7 +98,7 @@ import com.android.internal.util.DumpUtils.Dump;
  * &lt;/service>
  * </pre>
  *
- * <p>If specified with the {@code &lt;meta-data&gt;} element,
+ * <p>If specified with the {@code <meta-data>} element,
  * additional information for the dream is defined using the
  * {@link android.R.styleable#Dream &lt;dream&gt;} element in a separate XML file.
  * Currently, the only addtional

@@ -204,7 +204,7 @@ unexpectedly when used in a restricted profile.</p>
 app depends on account information that's sensitive, specify the <a
 href="{@docRoot}guide/topics/manifest/application-element.html#requiredAccountType">{@code
 android:requiredAccountType}</a> attribute in your manifest's <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application>}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element.</p>
 
 <p>If you’d like to allow restricted profiles to continue using your app even though they can’t
@@ -298,10 +298,10 @@ three options:</p>
 
 <li><strong>Allow access to the owner’s accounts from a restricted profile.</strong>
 <p>To get access to an account from a restricted profile, you must add the <a href="{@docRoot}guide/topics/manifest/application-element.html#restrictedAccountType">{@code android:restrictedAccountType}</a> attribute to the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application></a> tag:</p>
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> tag:</p>
 <pre>
 &lt;application ...
-    android:restrictedAccountType="com.example.account.type" >
+    android:restrictedAccountType="com.example.account.type" &gt;
 </pre>
 
 <p class="caution"><strong>Caution:</strong> Enabling this attribute provides your
@@ -341,10 +341,10 @@ your app depends on sensitive personal information in an account (and because re
 currently cannot add new accounts), add
 the <a href="{@docRoot}guide/topics/manifest/application-element.html#requiredAccountType">{@code
 android:requiredAccountType}</a> attribute to the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application></a> tag:</p>
+href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> tag:</p>
 <pre>
 &lt;application ...
-    android:requiredAccountType="com.example.account.type" >
+    android:requiredAccountType="com.example.account.type" &gt;
 </pre>
 <p>For example, the Gmail app uses this attribute to disable itself for restricted profiles,
 because the owner's personal email should not be available to restricted profiles.</p>
@@ -363,10 +363,10 @@ peripherals such as heart rate monitors and pedometers.</p>
 
 <p>Because Bluetooth LE is a hardware feature that is not available on all
 Android-powered devices, you must declare in your manifest file a <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element for {@code "android.hardware.bluetooth_le"}:</p>
 <pre>
-&lt;uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+&lt;uses-feature android:name="android.hardware.bluetooth_le" android:required="true" /&gt;
 </pre>
 
 <p>If you're already familiar with Android's Classic Bluetooth APIs, notice that using the
@@ -592,13 +592,13 @@ provided in OpenGL ES 3.0 includes:</p>
 
 <p>The Java interface for OpenGL ES 3.0 on Android is provided with {@link android.opengl.GLES30}.
 When using OpenGL ES 3.0, be sure that you declare it in your manifest file with the
-<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature></a>
+<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">&lt;uses-feature&gt;</a>
 tag and the {@code android:glEsVersion} attribute. For example:</p>
 <pre>
-&lt;manifest>
-    &lt;uses-feature android:glEsVersion="0x00030000" />
+&lt;manifest&gt;
+    &lt;uses-feature android:glEsVersion="0x00030000" /&gt;
     ...
-&lt;/manifest>
+&lt;/manifest&gt;
 </pre>
 
 <p>And remember to specify the OpenGL ES context by calling {@link
@@ -740,7 +740,7 @@ function toggleOpticalImages(mouseover) {
 <p style="clear:left">To align the views based on their optical bounds, set the {@code android:layoutMode} attribute to {@code "opticalBounds"} in one of the parent layouts. For example:</p>
 
 <pre>
-&lt;LinearLayout android:layoutMode="opticalBounds" ... >
+&lt;LinearLayout android:layoutMode="opticalBounds" ... &gt;
 </pre>
 
 
@@ -818,7 +818,7 @@ for you app layout. Overscan mode is determined by the {@link android.view.Windo
 <h3 id="Orientation">Screen orientation</h3>
 
 <p>The <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a>
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 tag's <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code screenOrientation}</a>
 attribute now supports additional values to honor the user's preference for auto-rotation:</p>
@@ -1110,7 +1110,7 @@ hardware, you can check at runtime if hardware-backed storage is available by ca
 <h3 id="ManifestFeatures">Declarable required features</h3>
 
 <p>The following values are now supported in the <a
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature>}</a>
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element so you can ensure that your app is installed only on devices that provide the features
 your app needs.</p>
 
@@ -1120,7 +1120,7 @@ your app needs.</p>
 include a Home screen or similar location where users can embed app widgets.
 Example:
 <pre>
-&lt;uses-feature android:name="android.software.app_widgets" android:required="true" />
+&lt;uses-feature android:name="android.software.app_widgets" android:required="true" /&gt;
 </pre>
 </dd>
 
@@ -1129,7 +1129,7 @@ Example:
 devices that support third-party Home screen apps.
 Example:
 <pre>
-&lt;uses-feature android:name="android.software.home_screen" android:required="true" />
+&lt;uses-feature android:name="android.software.home_screen" android:required="true" /&gt;
 </pre>
 </dd>
 
@@ -1139,7 +1139,7 @@ android.inputmethodservice.InputMethodService}) and should be installed only on 
 support third-party input methods.
 Example:
 <pre>
-&lt;uses-feature android:name="android.software.input_methods" android:required="true" />
+&lt;uses-feature android:name="android.software.input_methods" android:required="true" /&gt;
 </pre>
 </dd>
 
@@ -1148,7 +1148,7 @@ Example:
 that are capable of communicating with other devices via Bluetooth Low Energy.
 Example:
 <pre>
-&lt;uses-feature android:name="android.software.bluetooth_le" android:required="true" />
+&lt;uses-feature android:name="android.software.bluetooth_le" android:required="true" /&gt;
 </pre>
 </dd>
 </dl>
@@ -1156,7 +1156,7 @@ Example:
 
 <h3 id="ManifestPermissions">User permissions</h3>
 <p>The following values are now supported in the <a
-href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code &lt;uses-permission>}</a>
+href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a>
 to declare the
 permissions your app requires in order to access certain APIs.</p>
 

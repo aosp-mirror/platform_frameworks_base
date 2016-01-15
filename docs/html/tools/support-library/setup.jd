@@ -72,7 +72,7 @@ Android Support Library selected.</p>
 
 <p>After downloading, the tool installs the Support Library files to your existing Android SDK
   directory. The library files are located in the following subdirectory of your SDK:
-  {@code &lt;sdk&gt;/extras/android/support/} directory.</p>
+  {@code <sdk>/extras/android/support/} directory.</p>
 
 
 <h2 id="choosing">Choosing Support Libraries</h2>
@@ -115,7 +115,7 @@ Android Support Library selected.</p>
       using the <a href="#download">SDK Manager</a>.</li>
     <li>Create a {@code libs/} directory in the root of your application project.</li>
     <li>Copy the JAR file from your Android SDK installation directory (e.g.,
-      {@code &lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar}) into your
+      {@code <sdk>/extras/android/support/v4/android-support-v4.jar}) into your
       application's project {@code libs/} directory.
     <li>Right click the JAR file and select <strong>Build Path &gt; Add to Build Path</strong>.
       </li>
@@ -333,9 +333,9 @@ APIs. The code is included in the download from the SDK Manager and is placed in
 SDK installation directory, as listed below:</p>
 
 <ul>
-  <li>4v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support4Demos/}</li>
-  <li>7v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support7Demos/}</li>
-  <li>13v Samples: {@code &lt;sdk&gt;/extras/android/support/samples/Support13Demos/}</li>
-  <li>App Navigation: {@code &lt;sdk&gt;/extras/android/support/samples/SupportAppNavigation/}</li>
+  <li>4v Samples: {@code <sdk>/extras/android/support/samples/Support4Demos/}</li>
+  <li>7v Samples: {@code <sdk>/extras/android/support/samples/Support7Demos/}</li>
+  <li>13v Samples: {@code <sdk>/extras/android/support/samples/Support13Demos/}</li>
+  <li>App Navigation: {@code <sdk>/extras/android/support/samples/SupportAppNavigation/}</li>
 </ul>
 

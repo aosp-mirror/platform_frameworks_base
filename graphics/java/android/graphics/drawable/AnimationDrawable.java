@@ -40,8 +40,8 @@ import android.util.AttributeSet;
  * animation.
  * <p>
  * An AnimationDrawable defined in XML consists of a single
- * {@code &lt;animation-list&gt;} element and a series of nested
- * {@code &lt;item&gt;} tags. Each item defines a frame of the animation. See
+ * {@code <animation-list>} element and a series of nested
+ * {@code <item>} tags. Each item defines a frame of the animation. See
  * the example below.
  * <p>
  * spin_animation.xml file in res/drawable/ folder:

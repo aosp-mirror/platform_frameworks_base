@@ -31,7 +31,7 @@ operations or a rich communications API that can be called by other
 applications.
 
 <p>
-All services must be represented by {@code &lt;service&gt;} elements in 
+All services must be represented by {@code <service>} elements in
 the manifest file.  Any that are not declared there will not be seen 
 by the system and will never be run.
 </p></dd>
@@ -47,7 +47,7 @@ is "{@code true}".
 The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> element has its own 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including services.  The 
-<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code &lt;service&gt;} 
+<code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and {@code <service>}
 attributes must both be "{@code true}" (as they both
 are by default) for the service to be enabled.  If either is 
 "{@code false}", the service is disabled; it cannot be instantiated.

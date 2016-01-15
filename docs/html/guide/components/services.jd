@@ -189,9 +189,9 @@ it from other application components.</p>
 manifest file.</p>
 
 <p>To declare your service, add a <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element
 as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element. For example:</p>
 
 <pre>
@@ -205,11 +205,11 @@ element. For example:</p>
 </pre>
 
 <p>See the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element
 reference for more information about declaring your service in the manifest.</p>
 
 <p>There are other attributes you can include in the <a
-href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element to
+href="{@docRoot}guide/topics/manifest/service-element.html">{@code <service>}</a> element to
 define properties such as permissions required to start the service and the process in
 which the service should run. The <a
 href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>

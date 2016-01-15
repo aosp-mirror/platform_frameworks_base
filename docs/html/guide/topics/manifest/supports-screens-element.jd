@@ -38,7 +38,7 @@ layout resources</a>. For instance, you might want to modify the layout of an ac
 when it is on a tablet compared to when running on a handset device.</p>
 
 <p>However, if your application does not work well when resized to fit different screen sizes, you
-can use the attributes of the {@code &lt;supports-screens&gt;} element to control whether your
+can use the attributes of the {@code <supports-screens>} element to control whether your
 application should be distributed to smaller screens or have its UI scaled up ("zoomed") to fit
 larger screens using the system's <a
 href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a>. When you
@@ -152,7 +152,7 @@ orientation.</p>
 not need to use this attribute. Otherwise, you should use a value for this attribute that
 matches the smallest value used by your application for the <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">
-smallest screen width qualifier</a> ({@code sw&lt;N&gt;dp}).</p>
+smallest screen width qualifier</a> ({@code sw<N>dp}).</p>
 
   <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
 attribute, so it does not affect how your application behaves at runtime. Instead, it is used

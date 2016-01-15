@@ -78,8 +78,8 @@ When your page is rendered in a {@link android.webkit.WebView}, it does not use 
 with {@link android.webkit.WebSettings#setUseWideViewPort setUseWideViewPort()}.</p>
 
 <p>You can define properties of the viewport for your web page, such as the width and initial zoom
-level, using the {@code &lt;meta name="viewport" ...>} tag in your document
-{@code &lt;head&gt;}.</p>
+level, using the {@code <meta name="viewport" ...>} tag in your document
+{@code <head>}.</p>
 
 <p>The following syntax shows all of the
 supported viewport properties and the types of values accepted by each one:</p>
@@ -96,7 +96,7 @@ supported viewport properties and the types of values accepted by each one:</p>
           " /&gt;
 </pre>
 
-<p>For example, the following {@code &lt;meta&gt;} tag specifies that the viewport width
+<p>For example, the following {@code <meta>} tag specifies that the viewport width
 should exactly match the device screen's width and that the ability to zoom should be disabled:</p>
 
 <pre>

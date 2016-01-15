@@ -329,23 +329,23 @@ utilizar estos filtros</strong>.</p>
   <tr><th>Elemento del manifiesto</th><th>Resumen:</th></tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a></nobr></td>
+<compatible-screens>}</a></nobr></td>
     <td>
       <p>Google Play filtra la aplicación si el tamaño de pantalla del dispositivo no coincide con
- ninguna de las configuraciones de pantalla (declaradas por un elemento {@code &lt;screen&gt;}) en el elemento {@code
-&lt;compatible-screens&gt;}.</p>
+ ninguna de las configuraciones de pantalla (declaradas por un elemento {@code <screen>}) en el elemento {@code
+<compatible-screens>}.</p>
       <p class="caution"><strong>Advertencia:</strong> Normalmente, <strong>no deberías usar este elemento
  del manifiesto</strong>. El uso de este elemento puede reducir
  notablemente la base de usuarios potenciales para tu aplicación, al excluir todas las combinaciones de tamaño de pantalla
  y densidad que no indicaste. En su lugar, debes usar el elemento del manifiesto <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> (descrito anteriormente en la <a href="#table1">tabla
+<supports-screens>}</a> (descrito anteriormente en la <a href="#table1">tabla
 1</a>) para habilitar el modo de compatibilidad de pantalla para las configuraciones de pantalla que no abarcaste
  con recursos adicionales.</p>
     </td>
   </tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a></nobr></td>
+<supports-gl-texture>}</a></nobr></td>
     <td>
       <p>Google Play filtrará la aplicación a menos que uno o más de los formatos de compresión
  de texturas GL compatibles con la aplicación también sean compatibles con el dispositivo. </p>
@@ -408,16 +408,16 @@ Licencias de aplicaciones</a>. Consulta <a href="{@docRoot}google/play/licensing
 <ul>
   <li>Formatos de compresión de texturas OpenGL
     <p>Mediante el uso del elemento <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a>.</p>
+<supports-gl-texture>}</a>.</p>
   </li>
   <li>Tamaño de pantalla (y, opcionalmente, densidad de la pantalla)
     <p>Mediante el uso del elemento <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> o <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a>.</p>
+<supports-screens>}</a> o <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+<compatible-screens>}</a>.</p>
   </li>
   <li>Nivel de API
     <p>Mediante el uso del elemento <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a>.</p>
+<uses-sdk>}</a>.</p>
   </li>
   <li>Arquitectura de CPU (ABI)
     <p>Mediante la inclusión de bibliotecas nativas creadas con el <a href="{@docRoot}tools/sdk/ndk/index.html">NDK de

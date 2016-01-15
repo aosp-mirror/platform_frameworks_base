@@ -68,7 +68,7 @@ by pressing the <em>Back</em> button.</p>
 android.view.ViewGroup} inside the activity's view hierarchy and the fragment defines its own view
 layout.
 You can insert a fragment into your activity layout by declaring the fragment in the activity's
-layout file, as a {@code &lt;fragment&gt;} element, or from your application code by adding it to an
+layout file, as a {@code <fragment>} element, or from your application code by adding it to an
 existing {@link android.view.ViewGroup}. However, a fragment is not required to be a part of the
 activity layout; you may also use a fragment without its own UI as an invisible worker for the
 activity.</p>
@@ -290,13 +290,13 @@ file for an activity with two fragments:</p>
             android:layout_height="match_parent" /&gt;
 &lt;/LinearLayout&gt;
 </pre>
-  <p>The {@code android:name} attribute in the {@code &lt;fragment&gt;} specifies the {@link
+  <p>The {@code android:name} attribute in the {@code <fragment>} specifies the {@link
 android.app.Fragment} class to instantiate in the layout.</p>
 
 <p>When the system creates this activity layout, it instantiates each fragment specified in the
 layout and calls the {@link android.app.Fragment#onCreateView onCreateView()} method for each one,
 to retrieve each fragment's layout. The system inserts the {@link android.view.View} returned by the
-fragment directly in place of the {@code &lt;fragment&gt;} element.</p>
+fragment directly in place of the {@code <fragment>} element.</p>
 
 <div class="note">
   <p><strong>Note:</strong> Each fragment requires a unique identifier that

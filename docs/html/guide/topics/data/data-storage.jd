@@ -190,8 +190,8 @@ read()}.</li>
 
 <p class="note"><strong>Tip:</strong> If you want to save a static file in your application at
 compile time, save the file in your project <code>res/raw/</code> directory. You can open it with
-{@link android.content.res.Resources#openRawResource(int) openRawResource()}, passing the {@code
-R.raw.<em>&lt;filename&gt;</em>} resource ID. This method returns an {@link java.io.InputStream}
+{@link android.content.res.Resources#openRawResource(int) openRawResource()}, passing the
+<code>R.raw.<em>&lt;filename&gt;</em></code> resource ID. This method returns an {@link java.io.InputStream}
 that you can use to read the file (but you cannot write to the original file).
 </p>
 

@@ -49,7 +49,7 @@ The <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html#enabled">enabled</a></code> attribute that applies to all 
 application components, including broadcast receivers.  The 
 <code><a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a></code> and
-{@code &lt;receiver&gt;} attributes must both be "{@code true}" for 
+{@code <receiver>} attributes must both be "{@code true}" for
 the broadcast receiver to be enabled.  If either is "{@code false}", it is
 disabled; it cannot be instantiated.
 </p></dd>

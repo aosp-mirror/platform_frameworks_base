@@ -629,7 +629,7 @@
          specified, it will run in the current preferred orientation
          of the screen.
          <p>This attribute is supported by the <a
-            href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a>
+            href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
             element. -->
     <attr name="screenOrientation">
         <!-- No preference specified: let the system decide the best
@@ -914,8 +914,8 @@
         <enum name="preferExternal" value="2" />
     </attr>
 
-    <!-- Extra options for an activity's UI. Applies to either the {@code &lt;activity&gt;} or
-         {@code &lt;application&gt;} tag. If specified on the {@code &lt;application&gt;}
+    <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
+         {@code <application>} tag. If specified on the {@code <application>}
          tag these will be considered defaults for all activities in the
          application. -->
     <attr name="uiOptions">

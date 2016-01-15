@@ -329,7 +329,7 @@ Intent オブジェクトでは、対象とするコンポーネントを明示�
 <p style="margin-left: 2em">{@code FLAG_ACTIVITY_NEW_TASK} <br/>{@code FLAG_ACTIVITY_CLEAR_TOP} <br/>{@code FLAG_ACTIVITY_RESET_TASK_IF_NEEDED} <br/>{@code FLAG_ACTIVITY_SINGLE_TOP}</p>
 
 <p>
-また、主に使用する {@code &lt;activity&gt;} 属性は以下のとおりです:
+また、主に使用する {@code <activity>} 属性は以下のとおりです:
   
 <p style="margin-left: 2em">{@code taskAffinity} <br/>{@code launchMode} <br/>{@code allowTaskReparenting} <br/>{@code clearTaskOnLaunch} <br/>{@code alwaysRetainTaskState} <br/>{@code finishOnTaskLaunch}</p>
 
@@ -341,7 +341,7 @@ Intent オブジェクトでは、対象とするコンポーネントを明示�
 <h3 id="afftask">親和性と新しいタスク</h3>
 
 <p>
-デフォルトでは、アプリケーション内のすべてのアクティビティは相互に親和性があり、すべてのアクティビティができる限り同じタスクに属そうとします。<i></i>ただし、{@code &lt;activity&gt;} 要素の {@code taskAffinity} 属性を使用して、アクティビティごとに個別の親和性を設定することもできます。つまり、別々のアプリケーションで定義されているアクティビティで親和性を共有したり、同じアプリケーションで定義されているアクティビティに別々の親和性を割り当てたりできるということです。親和性が作用する状況は 2 つあります。1 つはアクティビティを起動する Intent オブジェクトに {@code FLAG_ACTIVITY_NEW_TASK} フラグが含まれている場合、もう 1 つはアクティビティの {@code allowTaskReparenting} 属性が "{@code true}" に設定されている場合です。 
+デフォルトでは、アプリケーション内のすべてのアクティビティは相互に親和性があり、すべてのアクティビティができる限り同じタスクに属そうとします。<i></i>ただし、{@code <activity>} 要素の {@code taskAffinity} 属性を使用して、アクティビティごとに個別の親和性を設定することもできます。つまり、別々のアプリケーションで定義されているアクティビティで親和性を共有したり、同じアプリケーションで定義されているアクティビティに別々の親和性を割り当てたりできるということです。親和性が作用する状況は 2 つあります。1 つはアクティビティを起動する Intent オブジェクトに {@code FLAG_ACTIVITY_NEW_TASK} フラグが含まれている場合、もう 1 つはアクティビティの {@code allowTaskReparenting} 属性が "{@code true}" に設定されている場合です。
 </p>
 
 <dl>
@@ -361,7 +361,7 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskR
 <h3 id="lmodes">起動モード</h3>
 
 <p>
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code> 属性の {@code &lt;activity&gt;} 要素には、以下の 4 種類の起動モードを割り当てることができます:
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">launchMode</a></code> 属性の {@code <activity>} 要素には、以下の 4 種類の起動モードを割り当てることができます:
 </p>
 
 <p style="margin-left: 2em">"{@code standard}"（デフォルト モード）<br>"{@code singleTop}"<br>"{@code singleTask}"<br>"{@code singleInstance}"</p>
@@ -470,7 +470,7 @@ android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP FLAG_ACTIVITY_CLEAR_TOP}</code> �
 </p> 
 
 <p>
-ユーザーがアクティビティに戻ることができるようにしない場合は、{@code &lt;activity&gt;} 要素の {@code finishOnTaskLaunch} を "{@code true}" に設定します。詳しくは、<a href="#clearstack">スタックのクリア</a>をご覧ください。
+ユーザーがアクティビティに戻ることができるようにしない場合は、{@code <activity>} 要素の {@code finishOnTaskLaunch} を "{@code true}" に設定します。詳しくは、<a href="#clearstack">スタックのクリア</a>をご覧ください。
 </p>
 
 
@@ -488,7 +488,7 @@ Android では、最初のアプリケーション コンポーネントを実�
 <h3 id="procs">プロセス</h3>
 
 <p>
-コンポーネントを実行するプロセスは、マニフェスト ファイルで管理します。コンポーネントの各要素（{@code &lt;activity&gt;}、{@code &lt;service&gt;}、{@code &lt;receiver&gt;}、および {@code &lt;provider&gt;}）には {@code process} 属性があり、そのコンポーネントをどのプロセスで実行すべきかを指定できるようになっています。これらの属性の設定によって、それぞれのコンポーネントを専用のプロセスで実行したり、一部のコンポーネントだけでプロセスを共有したりできます。また、別々のアプリケーションのコンポーネントが、同じプロセスで実行されるように設定することもできます。この場合は、それらのアプリケーションが同じ Linux ユーザー ID を共有し、同じ認証機関によって署名されている必要があります。{@code &lt;application&gt;} 要素にも {@code process} 属性があり、すべてのコンポーネントに適用されるデフォルト値を設定できます。
+コンポーネントを実行するプロセスは、マニフェスト ファイルで管理します。コンポーネントの各要素（{@code <activity>}、{@code <service>}、{@code <receiver>}、および {@code <provider>}）には {@code process} 属性があり、そのコンポーネントをどのプロセスで実行すべきかを指定できるようになっています。これらの属性の設定によって、それぞれのコンポーネントを専用のプロセスで実行したり、一部のコンポーネントだけでプロセスを共有したりできます。また、別々のアプリケーションのコンポーネントが、同じプロセスで実行されるように設定することもできます。この場合は、それらのアプリケーションが同じ Linux ユーザー ID を共有し、同じ認証機関によって署名されている必要があります。{@code <application>} 要素にも {@code process} 属性があり、すべてのコンポーネントに適用されるデフォルト値を設定できます。
 </p>
 
 <p>

@@ -180,12 +180,12 @@ these steps: </p>
 
 <ol>
   <li>Launch the Android SDK Manager (available under the Eclipse <strong>Window</strong>
-menu or by executing {@code &lt;sdk>/tools/android sdk}).</li>
+menu or by executing {@code <sdk>/tools/android sdk}).</li>
   <li>Select and download <strong>Google APIs</strong> for the Android version you'd like to target
 (must be Android 2.2 or higher).</li>
   <li>When the download is complete, open the AVD Manager (available under the Eclipse
 <strong>Window</strong>
-menu or by executing {@code &lt;sdk>/tools/android avd}).</li>
+menu or by executing {@code <sdk>/tools/android avd}).</li>
   <li>Click
 <strong>New</strong> and set the configuration details for the new AVD. </li>
   <li>In the dialog that appears, assign a descriptive name to the AVD and then

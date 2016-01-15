@@ -150,7 +150,7 @@ android.app.Activity#onCreate onCreate()} 메서드를
 
 <p>앱의 메인 액티비티는 {@link
 android.content.Intent#ACTION_MAIN MAIN} 작업 및{@link android.content.Intent#CATEGORY_LAUNCHER LAUNCHER} 카테고리를 포함하는 <a href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a>와 함께
+<intent-filter>}</a>와 함께
 매니페스트 파일에 선언되어야 합니다. 예를 들면 다음과 같습니다.</p> 
 
 <pre>

@@ -62,7 +62,7 @@ widget, available in the
 a separate page (a separate tab) in the layout.</p>
 
 <p>To set up your layout with {@link android.support.v4.view.ViewPager}, add a
-{@code &lt;ViewPager>} element to your XML layout. For example, if each page in the swipe view
+{@code <ViewPager>} element to your XML layout. For example, if each page in the swipe view
 should consume the entire layout, then your layout looks like this:</p>
 
 <pre>

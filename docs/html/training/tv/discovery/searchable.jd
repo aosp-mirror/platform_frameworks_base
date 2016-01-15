@@ -238,7 +238,7 @@ the rows you have designated for suggestions.</p>
 
 <p>In your manifest file, the content provider receives special treatment. Rather than getting
 tagged as an activity, it is described as a
-<a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code &lt;provider&gt;}</a>. The
+<a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code <provider>}</a>. The
 provider includes the {@code android:searchSuggestAuthority} attribute to tell the system the
 namespace of your content provider. Also, you must set its {@code android:exported} attribute to
 {@code "true"} so that the Android global search can use the results returned from it.</p>
@@ -257,7 +257,7 @@ the <a href="{@docRoot}guide/topics/search/searchable-config.html#searchSuggestA
 {@code android:searchSuggestAuthority}</a> attribute to tell the system the namespace of your
 content provider. This must match the string value you specify in the
 <a href="{@docRoot}guide/topics/manifest/provider-element.html#auth">{@code android:authorities}</a>
-attribute of the <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code &lt;provider&gt;}
+attribute of the <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code <provider>}
 </a> element in your {@code AndroidManifest.xml} file.</p>
 
 The <a href="{@docRoot}guide/topics/search/searchable-config.html">{@code searchable.xml}</a> file
@@ -339,7 +339,7 @@ activity which handles the {@link android.content.Intent#ACTION_SEARCH} intent l
 <a href="{@docRoot}guide/topics/search/searchable-config.html">{@code searchable.xml}</a> file.
 To <a href="{@docRoot}guide/topics/search/search-dialog.html">use the global search dialog</a>,
 the manifest must describe which activity should receive search queries. The manifest must also
-describe the <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code &lt;provider&gt;}
+describe the <a href="{@docRoot}guide/topics/manifest/provider-element.html">{@code <provider>}
 </a>element, exactly as it is described in the <a href="{@docRoot}guide/topics/search/searchable-config.html">
 {@code searchable.xml}</a> file.</p>
 

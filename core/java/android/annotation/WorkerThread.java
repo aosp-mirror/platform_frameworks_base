@@ -29,10 +29,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * on a worker thread.
  * <p>
  * Example:
- * <pre>{@code
- *  (&#64;WorkerThread
+ * <pre><code>
+ *  &#64;WorkerThread
  *  protected abstract FilterResults performFiltering(CharSequence constraint);
- * }</pre>
+ * </code></pre>
  *
  * {@hide}
  */

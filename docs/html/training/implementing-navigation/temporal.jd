@@ -80,15 +80,15 @@ activity by specifying the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute
 in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity>}</a> element. This allows the system to facilitate navigation patterns
+<activity>}</a> element. This allows the system to facilitate navigation patterns
 because it can determine the logical <em>Back</em> or <em>Up</em> navigation path with this
 information.</p>
 
 <p>If your app supports Android 4.0 and lower, include the
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a> with your app and
-add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a>
+add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element inside the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity>}</a>. Then specify the parent activity as the value
+<activity>}</a>. Then specify the parent activity as the value
 for {@code android.support.PARENT_ACTIVITY}, matching the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute.</p>
@@ -165,7 +165,7 @@ method to work,
 you must declare the logical parent of each activity in your manifest file, using the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute (and corresponding <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a> element)
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a> element)
 as described above.</p>
 
 

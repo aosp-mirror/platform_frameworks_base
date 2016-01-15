@@ -33,7 +33,7 @@ please see themes_device_defaults.xml.
     <!-- Material theme (dark version).
          <p>If you want to ensure that your
          app consistently uses the Material theme at all times, you must explicitly declare it in your
-         manifest. For example, {@code &lt;application android:theme="@style/Theme.Material"&gt;}.
+         manifest. For example, {@code <application android:theme="@style/Theme.Material">}.
 
          <p>Styles used by the Material theme are named using the convention Type.Material.Etc
          (for example, {@code Widget.Material.Button} and {@code

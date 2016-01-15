@@ -329,23 +329,23 @@ Google Play 然后根据
   <tr><th>清单文件元素</th><th>摘要</th></tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a></nobr></td>
+<compatible-screens>}</a></nobr></td>
     <td>
       <p>如果设备屏幕尺寸和密度不符合
  {@code
-&lt;compatible-screens&gt;} 元素中的任何屏幕配置（由{@code &lt;screen&gt;} 元素声明），则 Google Play 会将该应用筛选掉。</p>
+<compatible-screens>} 元素中的任何屏幕配置（由{@code <screen>} 元素声明），则 Google Play 会将该应用筛选掉。</p>
       <p class="caution"><strong>注意：</strong>正常情况下，<strong>不能使用此清单文件元素</strong>。
 使用此元素可能会显著减少应用的潜在用户群，因为排除了您未列出的所有屏幕尺寸和密度组合。
 
 应当改用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> 清单文件元素（上面<a href="#table1">表
+<supports-screens>}</a> 清单文件元素（上面<a href="#table1">表
 1</a> 所述），通过替代资源为您没有考虑的屏幕配置启用屏幕兼容模式。
 </p>
     </td>
   </tr>
   <tr>
     <td><nobr><a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a></nobr></td>
+<supports-gl-texture>}</a></nobr></td>
     <td>
       <p>除非应用所支持的一种或多种 GL 纹理压缩格式也受到设备支持，否则 Google Play 将应用筛选掉。
  </p>
@@ -408,16 +408,16 @@ APK 文件的大小。
 <ul>
   <li>OpenGL 纹理压缩格式
     <p>使用 <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a> 元素。</p>
+<supports-gl-texture>}</a> 元素。</p>
   </li>
   <li>屏幕尺寸（以及可选的屏幕密度）
     <p>使用 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> 或 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> 元素。</p>
+<supports-screens>}</a> 或 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+<compatible-screens>}</a> 元素。</p>
   </li>
   <li>API 级别
     <p>使用 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code
-&lt;uses-sdk&gt;}</a> 元素。</p>
+<uses-sdk>}</a> 元素。</p>
   </li>
   <li>CPU 架构 (ABI)
     <p>包括针对特定 CPU 架构（例如 ARM EABI v7 或 x86）的、通过 <a href="{@docRoot}tools/sdk/ndk/index.html">Android

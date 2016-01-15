@@ -72,20 +72,20 @@ adb shell am start -a android.intent.action.VIEW
 <td><code>
 start [options] &lt;INTENT>
 </code></td>
-<td>Start an {@link android.app.Activity} specified by {@code &lt;INTENT>}. <p>See the
+<td>Start an {@link android.app.Activity} specified by {@code <INTENT>}. <p>See the
 <a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
 <p>Options are:
 <ul>
     <li>{@code -D}: Enable debugging.
     <li>{@code -W}: Wait for launch to complete.
-    <li>{@code --start-profiler &lt;FILE>}: Start profiler and send results to {@code &lt;FILE>}.
-    <li>{@code -P &lt;FILE>}: Like <code>--start-profiler</code>,
+    <li>{@code --start-profiler <FILE>}: Start profiler and send results to {@code <FILE>}.
+    <li>{@code -P <FILE>}: Like <code>--start-profiler</code>,
         but profiling stops when the app goes idle.
-    <li>{@code -R}: Repeat the activity launch {@code &lt;COUNT>} times.  Prior to each repeat,
+    <li>{@code -R}: Repeat the activity launch {@code <COUNT>} times.  Prior to each repeat,
         the top activity will be finished.
     <li>{@code -S}: Force stop the target app before starting the activity.
     <li>{@code --opengl-trace}: Enable tracing of OpenGL functions.
-    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+    <li>{@code --user <USER_ID> | current}: Specify which user to run as; if not
         specified, then run as the current user.
 </ul>
 </td>
@@ -95,11 +95,11 @@ start [options] &lt;INTENT>
 <td><code>
 startservice [options] &lt;INTENT>
 </code></td>
-<td>Start the {@link android.app.Service} specified by {@code &lt;INTENT>}. <p>See the
+<td>Start the {@link android.app.Service} specified by {@code <INTENT>}. <p>See the
 <a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
 <p>Options are:
 <ul>
-    <li>{@code --user &lt;USER_ID> | current}: Specify which user to run as; if not
+    <li>{@code --user <USER_ID> | current}: Specify which user to run as; if not
         specified, then run as the current user.
 </ul>
 </td>
@@ -109,7 +109,7 @@ startservice [options] &lt;INTENT>
 <td><code>
 force-stop &lt;PACKAGE>
 </code></td>
-<td>Force stop everything associated with {@code &lt;PACKAGE>} (the app's package name).
+<td>Force stop everything associated with {@code <PACKAGE>} (the app's package name).
 </td>
 </tr>
 
@@ -117,13 +117,13 @@ force-stop &lt;PACKAGE>
 <td><code>
 kill  [options] &lt;PACKAGE>
 </code></td>
-<td> Kill all processes associated with {@code &lt;PACKAGE>}
+<td> Kill all processes associated with {@code <PACKAGE>}
   (the app's package name).  This command kills only
   processes that are safe to kill and that will not impact the user
   experience.
   <p>Options are:
   <ul>
-      <li>{@code --user &lt;USER_ID> | all | current}: Specify user whose processes to kill;
+      <li>{@code --user <USER_ID> | all | current}: Specify user whose processes to kill;
         all users if not specified.
   </ul>
 </td>
@@ -145,7 +145,7 @@ broadcast [options] &lt;INTENT>
 <a href="#IntentSpec">Specification for &lt;INTENT> arguments</a>.
 <p>Options are:
 <ul>
-    <li>{@code [--user &lt;USER_ID> | all | current]}: Specify which user to send to; if not
+    <li>{@code [--user <USER_ID> | all | current]}: Specify which user to send to; if not
         specified then send to all users.
 </ul>
 </td>
@@ -156,24 +156,24 @@ broadcast [options] &lt;INTENT>
 instrument [options] &lt;COMPONENT>
 </code></td>
 <td>Start monitoring with an {@link android.app.Instrumentation} instance.
-  Typically the target {@code &lt;COMPONENT>}
-  is the form {@code &lt;TEST_PACKAGE>/&lt;RUNNER_CLASS>}.  <p>Options are:
+  Typically the target {@code <COMPONENT>}
+  is the form {@code <TEST_PACKAGE>/<RUNNER_CLASS>}.  <p>Options are:
 <ul>
     <li>{@code -r}: Print raw results (otherwise decode
-        {@code &lt;REPORT_KEY_STREAMRESULT>}).  Use with
+        {@code <REPORT_KEY_STREAMRESULT>}).  Use with
         {@code [-e perf true]} to generate raw output for performance measurements.
 
-    <li>{@code -e &lt;NAME> &lt;VALUE>}: Set argument {@code &lt;NAME>} to {@code &lt;VALUE>}.
+    <li>{@code -e <NAME> <VALUE>}: Set argument {@code <NAME>} to {@code <VALUE>}.
         For test runners a common form is {@code
-        -e &lt;testrunner_flag> &lt;value>[,&lt;value>...]}.
+        -e <testrunner_flag> <value>[,<value>...]}.
 
-    <li>{@code -p &lt;FILE>}: Write profiling data to {@code &lt;FILE>}.
+    <li>{@code -p <FILE>}: Write profiling data to {@code <FILE>}.
 
     <li>{@code -w}: Wait for instrumentation to finish before returning.  Required for
         test runners.
 
     <li>{@code --no-window-animation}: Turn off window animations while running.
-    <li>{@code --user &lt;USER_ID> | current}: Specify which user instrumentation runs in;
+    <li>{@code --user <USER_ID> | current}: Specify which user instrumentation runs in;
         current user if not specified.
 </ul>
 
@@ -184,7 +184,7 @@ instrument [options] &lt;COMPONENT>
 <td><code>
 profile start &lt;PROCESS> &lt;FILE>
 </code></td>
-<td>Start profiler on {@code &lt;PROCESS>}, write results to {@code &lt;FILE>}.
+<td>Start profiler on {@code <PROCESS>}, write results to {@code <FILE>}.
 </td>
 </tr>
 
@@ -192,7 +192,7 @@ profile start &lt;PROCESS> &lt;FILE>
 <td><code>
 profile stop &lt;PROCESS>
 </code></td>
-<td>Stop profiler on {@code &lt;PROCESS>}.
+<td>Stop profiler on {@code <PROCESS>}.
 </td>
 </tr>
 
@@ -200,9 +200,9 @@ profile stop &lt;PROCESS>
 <td style="white-space:nowrap"><code>
 dumpheap [options] &lt;PROCESS> &lt;FILE>
 </code></td>
-<td>Dump the heap of {@code &lt;PROCESS>}, write to {@code &lt;FILE>}. <p>Options are:
+<td>Dump the heap of {@code <PROCESS>}, write to {@code <FILE>}. <p>Options are:
 <ul>
-    <li>{@code --user [&lt;USER_ID>|current]}: When supplying a process name,
+    <li>{@code --user [<USER_ID>|current]}: When supplying a process name,
         specify user of process to dump; uses current user if not specified.
     <li>{@code -n}: Dump native heap instead of managed heap.
 </ul>
@@ -213,7 +213,7 @@ dumpheap [options] &lt;PROCESS> &lt;FILE>
 <td><code>
 set-debug-app [options] &lt;PACKAGE>
 </code></td>
-<td>Set application {@code &lt;PACKAGE>} to debug.  <p>Options are:
+<td>Set application {@code <PACKAGE>} to debug.  <p>Options are:
 <ul>
     <li>{@code -w}: Wait for debugger when application starts.
     <li>{@code --persistent}: Retain this value.
@@ -245,7 +245,7 @@ monitor [options]
 screen-compat [on|off] &lt;PACKAGE>
 </code></td>
 <td>Control <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
-compatibility</a> mode of {@code &lt;PACKAGE>}.</p>
+compatibility</a> mode of {@code <PACKAGE>}.</p>
 </td>
 </tr>
 
@@ -300,65 +300,65 @@ return false">Specification for &lt;INTENT> arguments</a></h3>
 
 <div class="intents" style="display:none">
 
-<p>For activity manager commands that take a {@code &lt;INTENT>} argument, you can
+<p>For activity manager commands that take a {@code <INTENT>} argument, you can
 specify the intent with the following options:</p>
 
 <dl>
-  <dt>{@code -a &lt;ACTION>}</dt>
+  <dt>{@code -a <ACTION>}</dt>
       <dd>Specify the intent action, such as "android.intent.action.VIEW".
       You can declare this only once.
 
-  <dt>{@code -d &lt;DATA_URI>}</dt>
+  <dt>{@code -d <DATA_URI>}</dt>
       <dd>Specify the intent data URI, such as "content://contacts/people/1".
       You can declare this only once.
 
-  <dt>{@code -t &lt;MIME_TYPE>}</dt>
+  <dt>{@code -t <MIME_TYPE>}</dt>
       <dd>Specify the intent MIME type, such as "image/png".
       You can declare this only once.
 
-  <dt>{@code -c &lt;CATEGORY>}</dt>
+  <dt>{@code -c <CATEGORY>}</dt>
       <dd>Specify an intent category, such as "android.intent.category.APP_CONTACTS".
 
-  <dt>{@code -n &lt;COMPONENT>}</dt>
+  <dt>{@code -n <COMPONENT>}</dt>
       <dd>Specify the component name with package name prefix to create an explicit intent, such
       as "com.example.app/.ExampleActivity".
 
-  <dt>{@code -f &lt;FLAGS>}</dt>
+  <dt>{@code -f <FLAGS>}</dt>
       <dd>Add flags to the intent, as supported by {@link
         android.content.Intent#setFlags setFlags()}.
 
-  <dt>{@code --esn &lt;EXTRA_KEY>}</dt>
+  <dt>{@code --esn <EXTRA_KEY>}</dt>
       <dd>Add a null extra. This option is not supported for URI intents.
 
-  <dt>{@code -e|--es &lt;EXTRA_KEY> &lt;EXTRA_STRING_VALUE>}</dt>
+  <dt>{@code -e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE>}</dt>
       <dd>Add string data as a key-value pair.
 
-  <dt>{@code --ez &lt;EXTRA_KEY> &lt;EXTRA_BOOLEAN_VALUE>}</dt>
+  <dt>{@code --ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE>}</dt>
       <dd>Add boolean data as a key-value pair.
 
-  <dt>{@code --ei &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>}</dt>
+  <dt>{@code --ei <EXTRA_KEY> <EXTRA_INT_VALUE>}</dt>
       <dd>Add integer data as a key-value pair.
 
-  <dt>{@code --el &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>}</dt>
+  <dt>{@code --el <EXTRA_KEY> <EXTRA_LONG_VALUE>}</dt>
       <dd>Add long data as a key-value pair.
 
-  <dt>{@code --ef &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>}</dt>
+  <dt>{@code --ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE>}</dt>
       <dd>Add float data as a key-value pair.
 
-  <dt>{@code --eu &lt;EXTRA_KEY> &lt;EXTRA_URI_VALUE>}</dt>
+  <dt>{@code --eu <EXTRA_KEY> <EXTRA_URI_VALUE>}</dt>
       <dd>Add URI data as a key-value pair.
 
-  <dt>{@code --ecn &lt;EXTRA_KEY> &lt;EXTRA_COMPONENT_NAME_VALUE>}</dt>
+  <dt>{@code --ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>}</dt>
       <dd>Add a component name, which is converted and passed as
       a {@link android.content.ComponentName} object.
 
-  <dt>{@code --eia &lt;EXTRA_KEY> &lt;EXTRA_INT_VALUE>[,&lt;EXTRA_INT_VALUE...]}</dt>
+  <dt>{@code --eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]}</dt>
       <dd>Add an array of integers.
 
-  <dt>{@code --ela &lt;EXTRA_KEY> &lt;EXTRA_LONG_VALUE>[,&lt;EXTRA_LONG_VALUE...]}</dt>
+  <dt>{@code --ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]}</dt>
       <dd>Add an array of longs.
 
-  <dt>{@code --efa &lt;EXTRA_KEY> &lt;EXTRA_FLOAT_VALUE>[,&lt;EXTRA_FLOAT_VALUE...]}</dt>
+  <dt>{@code --efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]}</dt>
       <dd>Add an array of floats.
 
   <dt>{@code --grant-read-uri-permission}</dt>
@@ -430,7 +430,7 @@ specify the intent with the following options:</p>
   <dt>{@code --selector}</dt>
       <dd>Requires the use of {@code -d} and {@code -t} options to set the intent data and type.
 
-  <dt>{@code &lt;URI> &lt;COMPONENT> &lt;PACKAGE>}</dt>
+  <dt>{@code <URI> <COMPONENT> <PACKAGE>}</dt>
       <dd>You can directly specify a URI, package name, and component name when not qualified
       by one of the above options. When an argument is unqualified, the tool assumes the argument
       is a URI if it contains a ":" (colon); it assumes the argument is a component name if it
@@ -475,7 +475,7 @@ adb shell pm uninstall com.example.MyApp
 list packages [options] &lt;FILTER>
 </code></td>
 <td>Prints all packages, optionally only
-  those whose package name contains the text in {@code &lt;FILTER>}.  <p>Options:
+  those whose package name contains the text in {@code <FILTER>}.  <p>Options:
 <ul>
     <li>{@code -f}: See their associated file.
     <li>{@code -d}: Filter to only show disabled packages.
@@ -484,7 +484,7 @@ list packages [options] &lt;FILTER>
     <li>{@code -3}: Filter to only show third party packages.
     <li>{@code -i}: See the installer for the packages.
     <li>{@code -u}: Also include uninstalled packages.
-    <li>{@code --user &lt;USER_ID>}: The user space to query.
+    <li>{@code --user <USER_ID>}: The user space to query.
 </ul>
 </td>
 </tr>
@@ -502,7 +502,7 @@ list permission-groups
 list permissions [options] &lt;GROUP>
 </code></td>
 <td>Prints all known permissions, optionally only
-  those in {@code &lt;GROUP>}.  <p>Options:
+  those in {@code <GROUP>}.  <p>Options:
 <ul>
     <li>{@code -g}: Organize by group.
     <li>{@code -f}: Print all information.
@@ -520,7 +520,7 @@ list instrumentation
 <td>List all test packages.  <p>Options:
   <ul>
     <li>{@code -f}: List the APK file for the test package.
-    <li>{@code &lt;TARGET_PACKAGE>}: List test packages for only this app.
+    <li>{@code <TARGET_PACKAGE>}: List test packages for only this app.
   </ul>
 </td>
 </tr>
@@ -553,7 +553,7 @@ list users
 <td><code>
 path &lt;PACKAGE>
 </code></td>
-<td>Print the path to the APK of the given {@code &lt;PACKAGE>}.
+<td>Print the path to the APK of the given {@code <PACKAGE>}.
 </td>
 </tr>
 
@@ -561,12 +561,12 @@ path &lt;PACKAGE>
 <td><code>
 install [options]  &lt;PATH>
 </code></td>
-<td>Installs a package (specified by {@code &lt;PATH>}) to the system.  <p>Options:
+<td>Installs a package (specified by {@code <PATH>}) to the system.  <p>Options:
   <ul>
     <li>{@code -l}: Install the package with forward lock.
     <li>{@code -r}: Reinstall an exisiting app, keeping its data.
     <li>{@code -t}: Allow test APKs to be installed.
-    <li>{@code -i &lt;INSTALLER_PACKAGE_NAME>}: Specify the installer package name.
+    <li>{@code -i <INSTALLER_PACKAGE_NAME>}: Specify the installer package name.
     <li>{@code -s}: Install package on the shared mass storage (such as sdcard).
     <li>{@code -f}: Install package on the internal system memory.
     <li>{@code -d}: Allow version code downgrade.
@@ -615,7 +615,7 @@ disable-user [options] &lt;PACKAGE_OR_COMPONENT>
 </code></td>
 <td><p>Options:
   <ul>
-    <li>{@code --user &lt;USER_ID>}: The user to disable.
+    <li>{@code --user <USER_ID>}: The user to disable.
   </ul>
 </td>
 </tr>
@@ -688,7 +688,7 @@ trim-caches &lt;DESIRED_FREE_SPACE>
 <td><code>
 create-user &lt;USER_NAME>
 </code></td>
-<td>Create a new user with the given {@code &lt;USER_NAME>},
+<td>Create a new user with the given {@code <USER_NAME>},
   printing the new user identifier of the user.
 </td>
 </tr>
@@ -697,7 +697,7 @@ create-user &lt;USER_NAME>
 <td><code>
 remove-user &lt;USER_ID>
 </code></td>
-<td>Remove the user with the given {@code &lt;USER_IDENTIFIER>},
+<td>Remove the user with the given {@code <USER_IDENTIFIER>},
   deleting all data associated with that user
 </td>
 </tr>

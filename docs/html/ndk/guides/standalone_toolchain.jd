@@ -43,27 +43,27 @@ shows.</p>
   </tr>
   <tr>
     <td>ARM-based</td>
-    <td>{@code arm-linux-androideabi-&lt;gcc-version&gt;}</td>
+    <td>{@code arm-linux-androideabi-<gcc-version>}</td>
   </tr>
   <tr>
     <td>x86-based</td>
-    <td>{@code x86-&lt;gcc-version&gt;}</td>
+    <td>{@code x86-<gcc-version>}</td>
   </tr>
   <tr>
     <td>MIPS-based</td>
-    <td>{@code mipsel-linux-android-&lt;gcc-version&gt;}</td>
+    <td>{@code mipsel-linux-android-<gcc-version>}</td>
   </tr>
   <tr>
     <td>ARM64-based</td>
-    <td>{@code aarch64-linux-android-&lt;gcc-version&gt;}</td>
+    <td>{@code aarch64-linux-android-<gcc-version>}</td>
   </tr>
   <tr>
     <td>X86-64-based</td>
-    <td>{@code x86_64-&lt;gcc-version&gt;}</td>
+    <td>{@code x86_64-<gcc-version>}</td>
   </tr>
   <tr>
     <td>MIPS64-based</td>
-    <td>{@code mips64el-linux-android--&lt;gcc-version&gt;}</td>
+    <td>{@code mips64el-linux-android--<gcc-version>}</td>
   </tr>
 </table>
 
@@ -184,7 +184,7 @@ architecture.</p>
 you can install them in any location, or even move them if you need to.</p>
 
 <p>By default, the build system uses the 32-bit, ARM-based GCC 4.8 toolchain. You can specify a
-different value, however, by specifying {@code --arch=&lt;toolchain&gt;} as an option.
+different value, however, by specifying {@code --arch=<toolchain>} as an option.
 Table 3 shows the values to use for other toolchains:
 
 <p class="table-caption" id="table3">
@@ -216,8 +216,8 @@ Table 3 shows the values to use for other toolchains:
   </tr>
 </table>
 
-<p>Alternatively, you can use the {@code --toolchain=&lt;toolchain&gt;} option. Table 4 shows the
-values you can specify for {@code &lt;toolchain&gt;}:</p>
+<p>Alternatively, you can use the {@code --toolchain=<toolchain>} option. Table 4 shows the
+values you can specify for {@code <toolchain>}:</p>
 
 <p class="table-caption" id="table4">
   <strong>Table 4.</strong> Toolchains and corresponding values, using {@code --toolchain}.</p>
@@ -296,7 +296,7 @@ example:
 line.</p>
 
 <p class="note"><strong>Note: </strong>Instead of specifying a specific version, you can also
-use {@code &lt;version&gt;}, which defaults
+use {@code <version>}, which defaults
 to the highest available version of Clang.</p>
 
 <p>By default, the build system builds for a 32-bit host toolchain. You can specify a 64-bit
@@ -344,7 +344,7 @@ export CXX=arm-linux-androideabi-g++  # or export CXX=clang++
 </pre>
 
 <p>Note that if you omit the {@code -install-dir} option, the {@code make-standalone-toolchain.sh}
-shell script creates a tarball in {@code tmp/ndk/&lt;toolchain-name&gt;.tar.bz2}. This tarball makes
+shell script creates a tarball in {@code tmp/ndk/<toolchain-name>.tar.bz2}. This tarball makes
 it easy to archive, as well as to redistribute the binaries.</p>
 
 <p>This standalone toolchain provides an additional benefit, as well, in that it contains a working
@@ -354,7 +354,7 @@ copy of a C++ STL library, with working exceptions and RTTI support.</p>
 
 <h2 id="wwc">Working with Clang</h2>
 <p>You can install Clang binaries in the standalone installation by using the
-{@code --llvm-version=&lt;version&gt;} option. {@code &lt;version&gt;} is a LLVM/Clang version
+{@code --llvm-version=<version>} option. {@code <version>} is a LLVM/Clang version
 number, such as {@code 3.5} or {@code 3.6}. For example:
 
 <pre class="no-pretty-print">
@@ -368,7 +368,7 @@ build/tools/make-standalone-toolchain.sh \
 assembler, linker, headers, libraries, and C++ STL implementation.</p>
 
 <p>This operation also installs two scripts, named {@code clang} and {@code clang++}, under
-{@code &lt;install-dir&gt;/bin/@}. These scripts invoke the real {@code clang} binary with default
+{@code <install-dir>/bin/@}. These scripts invoke the real {@code clang} binary with default
 target architecture flags. In other words, they should work without any modification, and you should
 be able to use them in your own builds by just setting the {@code CC} and {@code CXX} environment
 variables to point to them.</p>
@@ -534,7 +534,7 @@ arm-linux-androideabi-g++ .... -lsupc++
 <h3>C++ STL support</h3>
 <p>The standalone toolchain includes a copy of a C++ Standard Template Library implementation. This
 implementation is either for GNU libstdc++, STLport, or libc++, depending on what you specify for the
-{@code --stl=&lt;name&gt;} option described previously. To use this implementation of STL, you need
+{@code --stl=<name>} option described previously. To use this implementation of STL, you need
 to link your project with the proper library:</p>
 
 <ul>

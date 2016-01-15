@@ -28,24 +28,24 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
  * multiple constants can be combined.
  * <p>
  * Example:
- * <pre>{@code
- *  &#64;Retention(CLASS)
- *  &#64;IntDef(&#123;NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS&#125;)
- *  public &#64;interface NavigationMode &#123;&#125;
+ * <pre><code>
+ *  &#64;Retention(SOURCE)
+ *  &#64;IntDef({NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
+ *  public @interface NavigationMode {}
  *  public static final int NAVIGATION_MODE_STANDARD = 0;
  *  public static final int NAVIGATION_MODE_LIST = 1;
  *  public static final int NAVIGATION_MODE_TABS = 2;
  *  ...
- *  public abstract void setNavigationMode(&#64;NavigationMode int mode);
+ *  public abstract void setNavigationMode(@NavigationMode int mode);
  *  &#64;NavigationMode
  *  public abstract int getNavigationMode();
- * }</pre>
+ * </code></pre>
  * For a flag, set the flag attribute:
- * <pre>{@code
+ * <pre><code>
  *  &#64;IntDef(
  *      flag = true
- *      value = &#123;NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS&#125;)
- * }</pre>
+ *      value = {NAVIGATION_MODE_STANDARD, NAVIGATION_MODE_LIST, NAVIGATION_MODE_TABS})
+ * </code></pre>
  *
  * @hide
  */

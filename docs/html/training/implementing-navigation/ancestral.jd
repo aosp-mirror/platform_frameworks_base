@@ -65,14 +65,14 @@ the manifest file.</p>
 activity by specifying the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute
-in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity>}</a>
+in the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a>
 element.</p>
 
 <p>If your app supports Android 4.0 and lower, include the
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a> with your app and
-add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a>
+add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a>
 element inside the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity>}</a>. Then specify the parent activity as the value
+<activity>}</a>. Then specify the parent activity as the value
 for {@code android.support.PARENT_ACTIVITY}, matching the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute.</p>
@@ -140,14 +140,14 @@ android.app.Activity#onNewIntent onNewIntent()} call:</p>
 <ul>
     <li>If the parent activity has launch mode <a
     href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
-    &lt;singleTop>}</a>, or the <code>up</code> intent contains {@link
+    <singleTop>}</a>, or the <code>up</code> intent contains {@link
     android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}, the parent activity is
     brought to the top of the stack, and receives the intent through its
     {@link android.app.Activity#onNewIntent onNewIntent()} method.</li>
 
     <li>If the parent activity has launch mode <a
     href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code
-    &lt;standard>}</a>, and the <code>up</code> intent does not contain
+    <standard>}</a>, and the <code>up</code> intent does not contain
     {@link android.content.Intent#FLAG_ACTIVITY_CLEAR_TOP}, the parent activity
     is popped off the stack, and a new instance of that activity is created on
     top of the stack to receive the intent.</li>
@@ -226,5 +226,5 @@ method to work,
 you must declare the logical parent of each activity in your manifest file, using the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html#parent">{@code
 android:parentActivityName}</a> attribute (and corresponding <a
-href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a> element)
+href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code <meta-data>}</a> element)
 as described above.</p>

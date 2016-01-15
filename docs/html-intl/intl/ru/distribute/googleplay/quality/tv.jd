@@ -320,7 +320,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
   <td>
     <p style="margin-bottom:.5em;">
       Если приложение использует игровой контроллер в качестве основного устройства ввода,
- это требование должно быть задекларировано в теге манифеста <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>.
+ это требование должно быть задекларировано в теге манифеста <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>.
       (<a href="{@docRoot}training/tv/games/index.html#gamepad">См. как это сделать</a>)
     </p>
   </td>

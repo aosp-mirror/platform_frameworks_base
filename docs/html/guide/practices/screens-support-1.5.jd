@@ -38,7 +38,7 @@ configurations and added APIs that allow applications to control how they operat
 screens, using alternative resources for different screen configurations.</p>
 
 <p>If your manifest file includes the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element,
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element,
 with the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
 attribute set to {@code "3"} or lower, and does <em>not</em> include the <a
@@ -87,7 +87,7 @@ devices and multiple screens. </li>
   <li>Extend compatibility for Android 1.6 (and higher) devices by adding <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element.
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element.
 Set the value of <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to <code>"4"</code>. This allows your application to "inherit" the
 platform's multiple screens support, even though it is technically using an earlier version of the

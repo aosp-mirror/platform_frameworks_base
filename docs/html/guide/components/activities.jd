@@ -141,9 +141,9 @@ href="{@docRoot}guide/topics/ui/index.html">User Interface</a> documentation.</p
 
 <p>You must declare your activity in the manifest file in order for it to
 be accessible to the system. To declare your activity, open your manifest file and add an <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
 as a child of the <a
-href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
+href="{@docRoot}guide/topics/manifest/application-element.html">{@code <application>}</a>
 element. For example:</p>
 
 <pre>
@@ -166,16 +166,16 @@ href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.h
 That Cannot Change</a>).</p>
 
 <p>See the <a
-href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
+href="{@docRoot}guide/topics/manifest/activity-element.html">{@code <activity>}</a> element
 reference for more information about declaring your activity in the manifest.</p>
 
 
 <h4>Using intent filters</h4>
 
 <p>An <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
-&lt;activity&gt;}</a> element can also specify various intent filters&mdash;using the <a
+<activity>}</a> element can also specify various intent filters&mdash;using the <a
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> element&mdash;in order to declare how other application components may
+<intent-filter>}</a> element&mdash;in order to declare how other application components may
 activate it.</p>
 
 <p>When you create a new application using the Android SDK tools, the stub activity
@@ -193,9 +193,9 @@ looks like this:</p>
 </pre>
 
 <p>The <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a> element specifies that this is the "main" entry point to the application. The <a
+<action>}</a> element specifies that this is the "main" entry point to the application. The <a
 href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> element specifies that this activity should be listed in the
+<category>}</a> element specifies that this activity should be listed in the
 system's application launcher (to allow users to launch this activity).</p>
 
 <p>If you intend for your application to be self-contained and not allow other applications to
@@ -208,13 +208,13 @@ start them yourself using explicit intents (as discussed in the following sectio
 other applications (and your own), then you must define additional intent filters for your
 activity. For each type of intent to which you want to respond, you must include an <a
 href="{@docRoot}guide/topics/manifest/intent-filter-element.html">{@code
-&lt;intent-filter&gt;}</a> that includes an
+<intent-filter>}</a> that includes an
 <a href="{@docRoot}guide/topics/manifest/action-element.html">{@code
-&lt;action&gt;}</a> element and, optionally, a <a
+<action>}</a> element and, optionally, a <a
 href="{@docRoot}guide/topics/manifest/category-element.html">{@code
-&lt;category&gt;}</a> element and/or a <a
+<category>}</a> element and/or a <a
 href="{@docRoot}guide/topics/manifest/data-element.html">{@code
-&lt;data&gt;}</a> element. These elements specify the type of intent to which your activity can
+<data>}</a> element. These elements specify the type of intent to which your activity can
 respond.</p>
 
 <p>For more information about how your activities can respond to intents, see the <a

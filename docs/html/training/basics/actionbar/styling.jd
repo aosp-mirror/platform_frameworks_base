@@ -75,8 +75,8 @@ appcompat.R.attr} properties&mdash;the context for these properties is actually
 <p>You can apply these themes to your entire app or to individual activities by
 declaring them in your manifest file with the {@code android:theme} attribute
 for the <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code
-&lt;application>}</a> element or individual
-<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;activity>}</a>
+<application>}</a> element or individual
+<a href="{@docRoot}guide/topics/manifest/application-element.html">{@code <activity>}</a>
 elements.</p>
 
 <p>For example:</p>

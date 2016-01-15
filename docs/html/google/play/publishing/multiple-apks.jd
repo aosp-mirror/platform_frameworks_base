@@ -204,7 +204,7 @@ device characteristics:</p>
   <li><strong>OpenGL texture compression formats</strong>
     <p>This is based on your manifest file's <a
 href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
-&lt;supports-gl-texture&gt;}</a> element(s).</p>
+<supports-gl-texture>}</a> element(s).</p>
     <p>For example, when developing a game that uses OpenGL ES, you can provide one APK for
 devices that support ATI texture compression and a separate APK for devices
 that support PowerVR compression (among many others).</p>
@@ -214,11 +214,11 @@ that support PowerVR compression (among many others).</p>
   <li><strong>Screen size (and, optionally, screen density)</strong>
     <p>This is based on your manifest file's <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> <em>or</em> <a
+<supports-screens>}</a> <em>or</em> <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> element. You should never use both elements and you should use only
+<compatible-screens>}</a> element. You should never use both elements and you should use only
 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> when possible.</p>
+<supports-screens>}</a> when possible.</p>
     <p>For example, you can provide one APK that supports small and normal size screens and another
 APK that supports large and xlarge screens.</p>
 
@@ -230,7 +230,7 @@ Screens</a> so that your application is flexible and can adapt to all screen con
 with a single APK.</p>
     <p class="caution"><strong>Caution:</strong> By default, all screen size attributes in the <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> element are "true" if you do not declare them otherwise. However,
+<supports-screens>}</a> element are "true" if you do not declare them otherwise. However,
 because the {@code android:xlargeScreens} attribute was added in Android 2.3 (API level
 9), Google Play will assume that it is "false" if your application does not set either <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
@@ -239,9 +239,9 @@ href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> to "9" or higher.</p>
     <p class="caution"><strong>Caution:</strong> You should not combine both <a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens&gt;}</a> and <a
+<supports-screens>}</a> and <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
-&lt;compatible-screens&gt;}</a> elements in your manifest file. Using both increases the chances
+<compatible-screens>}</a> elements in your manifest file. Using both increases the chances
 that you'll introduce an error due to conflicts between them. For help deciding which to use, read
 <a href="{@docRoot}guide/practices/screens-distribution.html">Distributing to Specific Screens</a>.
 If you can't avoid using both, be aware that for any conflicts in agreement between a given size,
@@ -251,7 +251,7 @@ If you can't avoid using both, be aware that for any conflicts in agreement betw
 
   <li><strong>Device feature sets</strong>
     <p>This is based on your manifest file's <a 
-href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a> 
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>
 element(s).</p>
     <p>For example, you can provide one APK for devices that support multitouch and another
 APK for devices that do not support multitouch. See 
@@ -262,7 +262,7 @@ Reference</a> for a list of features supported by the platform.</p>
 
   <li><strong>API level</strong>
     <p>This is based on your manifest file's <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element.
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code <uses-sdk>}</a> element.
 You
 can use both the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
 android:minSdkVersion}</a> and <a
@@ -312,7 +312,7 @@ publish multiple APKs if the above listed filters are the same for each APK (but
 based on other characteristics in the manifest or APK). For
 example, you cannot provide different APKs that differ purely on the <a
 href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">{@code
-&lt;uses-configuration&gt;}</a> characteristics.</p>
+<uses-configuration>}</a> characteristics.</p>
 
 
 

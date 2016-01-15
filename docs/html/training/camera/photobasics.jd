@@ -58,7 +58,7 @@ for you.</p>
 its visibility on Google Play to devices that have a camera.  To advertise
 that your application depends on having a camera, put a <a
 href="{@docRoot}guide/topics/manifest/uses-feature-element.html"> {@code
-&lt;uses-feature&gt;}</a> tag in your manifest file:</p>
+<uses-feature>}</a> tag in your manifest file:</p>
 
 <pre style="clear:right">
 &lt;manifest ... >
