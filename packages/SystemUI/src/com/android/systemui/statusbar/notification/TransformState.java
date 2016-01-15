@@ -91,6 +91,24 @@ public class TransformState {
             transformedView.setTranslationY(otherPosition[1] - ownStablePosition[1]);
             transformedView.animate().translationY(0);
         }
+        if (animateScale()) {
+            // we also want to animate the scale if we're the same
+            View otherView = otherState.getTransformedView();
+            if (otherView.getWidth() != transformedView.getWidth()) {
+                float scaleX = (otherView.getWidth() * otherView.getScaleX()
+                        / (float) transformedView.getWidth());
+                transformedView.setScaleX(scaleX);
+                transformedView.setPivotX(0);
+                transformedView.animate().scaleX(1.0f);
+            }
+            if (otherView.getHeight() != transformedView.getHeight()) {
+                float scaleY = (otherView.getHeight() * otherView.getScaleY()
+                        / (float) transformedView.getHeight());
+                transformedView.setScaleY(scaleY);
+                transformedView.setPivotY(0);
+                transformedView.animate().scaleY(1.0f);
+            }
+        }
         transformedView.animate()
                 .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
                 .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
@@ -101,6 +119,10 @@ public class TransformState {
                     }
                 });
         setClippingDeactivated(transformedView, true);
+    }
+
+    protected boolean animateScale() {
+        return false;
     }
 
     /**
@@ -272,6 +294,8 @@ public class TransformState {
         if (visible) {
             mTransformedView.setTranslationX(0);
             mTransformedView.setTranslationY(0);
+            mTransformedView.setScaleX(1.0f);
+            mTransformedView.setScaleY(1.0f);
         }
     }
 

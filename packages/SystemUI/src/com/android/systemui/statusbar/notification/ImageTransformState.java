@@ -62,6 +62,11 @@ public class ImageTransformState extends TransformState {
     }
 
     @Override
+    protected boolean animateScale() {
+        return true;
+    }
+
+    @Override
     public void recycle() {
         super.recycle();
         sInstancePool.release(this);
