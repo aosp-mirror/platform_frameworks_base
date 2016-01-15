@@ -298,6 +298,14 @@ public class UserSwitcherController {
         return mContext.getResources().getBoolean(R.bool.config_enableFullscreenUserSwitcher);
     }
 
+    public void logoutCurrentUser() {
+        int currentUser = ActivityManager.getCurrentUser();
+        if (currentUser != UserHandle.USER_SYSTEM) {
+            switchToUserId(UserHandle.USER_SYSTEM);
+            stopUserId(currentUser);
+        }
+    }
+
     public void removeUserId(int userId) {
         if (userId == UserHandle.USER_SYSTEM) {
             Log.w(TAG, "User " + userId + " could not removed.");
@@ -338,6 +346,19 @@ public class UserSwitcherController {
         }
 
         switchToUserId(id);
+    }
+
+    public void switchTo(int userId) {
+        final int count = mUsers.size();
+        for (int i = 0; i < count; ++i) {
+            UserRecord record = mUsers.get(i);
+            if (record.info != null && record.info.id == userId) {
+                switchTo(record);
+                return;
+            }
+        }
+
+        Log.e(TAG, "Couldn't switch to user, id=" + userId);
     }
 
     private void switchToUserId(int id) {
@@ -404,11 +425,7 @@ public class UserSwitcherController {
                 }
                 return;
             } else if (ACTION_LOGOUT_USER.equals(intent.getAction())) {
-                int currentUser = ActivityManager.getCurrentUser();
-                if (currentUser != UserHandle.USER_SYSTEM) {
-                    switchToUserId(UserHandle.USER_SYSTEM);
-                    stopUserId(currentUser);
-                }
+                logoutCurrentUser();
             } else if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
                     mExitGuestDialog.cancel();

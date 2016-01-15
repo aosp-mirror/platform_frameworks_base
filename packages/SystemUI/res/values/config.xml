@@ -282,5 +282,8 @@
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
+    <!-- SystemUIFactory component -->
+    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
+
 </resources>
 
