@@ -17,6 +17,9 @@
 package android.view;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
@@ -1337,6 +1340,17 @@ public final class ViewRootImpl implements ViewParent,
         host.dispatchApplyWindowInsets(getWindowInsets(true /* forceConstruct */));
     }
 
+    private static boolean shouldUseDisplaySize(final WindowManager.LayoutParams lp) {
+        return lp.type == TYPE_STATUS_BAR_PANEL
+                || lp.type == TYPE_INPUT_METHOD
+                || lp.type == TYPE_VOLUME_OVERLAY;
+    }
+
+    private int dipToPx(int dip) {
+        final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+        return (int) (displayMetrics.density * dip + 0.5f);
+    }
+
     private void performTraversals() {
         // cache mView since it is used so much below...
         final View host = mView;
@@ -1391,18 +1405,16 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             mLayoutRequested = true;
 
-            if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
-                    || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD) {
+            if (shouldUseDisplaySize(lp)) {
                 // NOTE -- system code, won't try to do compat mode.
                 Point size = new Point();
                 mDisplay.getRealSize(size);
                 desiredWindowWidth = size.x;
                 desiredWindowHeight = size.y;
             } else {
-                DisplayMetrics packageMetrics =
-                    mView.getContext().getResources().getDisplayMetrics();
-                desiredWindowWidth = packageMetrics.widthPixels;
-                desiredWindowHeight = packageMetrics.heightPixels;
+                Configuration config = mContext.getResources().getConfiguration();
+                desiredWindowWidth = dipToPx(config.screenWidthDp);
+                desiredWindowHeight = dipToPx(config.screenHeightDp);
             }
 
             // We used to use the following condition to choose 32 bits drawing caches:
@@ -1486,17 +1498,21 @@ public final class ViewRootImpl implements ViewParent,
                 if (!mPendingOutsets.equals(mAttachInfo.mOutsets)) {
                     insetsChanged = true;
                 }
-                if ((lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
-                        || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT)
-                        && (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL
-                                || lp.type == WindowManager.LayoutParams.TYPE_INPUT_METHOD
-                                || lp.type == WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)) {
+                if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
+                        || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
-                    // NOTE -- system code, won't try to do compat mode.
-                    Point size = new Point();
-                    mDisplay.getRealSize(size);
-                    desiredWindowWidth = size.x;
-                    desiredWindowHeight = size.y;
+
+                    if (shouldUseDisplaySize(lp)) {
+                        // NOTE -- system code, won't try to do compat mode.
+                        Point size = new Point();
+                        mDisplay.getRealSize(size);
+                        desiredWindowWidth = size.x;
+                        desiredWindowHeight = size.y;
+                    } else {
+                        Configuration config = res.getConfiguration();
+                        desiredWindowWidth = dipToPx(config.screenWidthDp);
+                        desiredWindowHeight = dipToPx(config.screenHeightDp);
+                    }
                 }
             }
 
