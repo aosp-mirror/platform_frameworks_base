@@ -2107,7 +2107,7 @@ static status_t writeResourceLoadedCallbackForLayoutClasses(
                 indentStr);
     }
 
-    return hasErrors ? UNKNOWN_ERROR : NO_ERROR;
+    return hasErrors ? STATUST(UNKNOWN_ERROR) : NO_ERROR;
 }
 
 static status_t writeResourceLoadedCallback(
