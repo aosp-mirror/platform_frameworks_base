@@ -63,6 +63,7 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.FORCE_FOCUS;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 
@@ -1426,7 +1427,14 @@ class ActivityStarter {
                     mVoiceSession, mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
             mStartActivity.setTask(task, taskToAffiliate);
             if (mLaunchBounds != null) {
-                mStartActivity.task.updateOverrideConfiguration(mLaunchBounds);
+                final int stackId = mTargetStack.mStackId;
+                if (StackId.resizeStackWithLaunchBounds(stackId)) {
+                    mSupervisor.resizeStackLocked(stackId, mLaunchBounds,
+                            null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                            !PRESERVE_WINDOWS, true /* allowResizeInDockedMode */);
+                } else {
+                    mStartActivity.task.updateOverrideConfiguration(mLaunchBounds);
+                }
             }
             if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                     "Starting new activity " +
@@ -1508,6 +1516,11 @@ class ActivityStarter {
             if (stackId != mInTask.stack.mStackId) {
                 mSupervisor.moveTaskToStackUncheckedLocked(
                         mInTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
+            }
+            if (StackId.resizeStackWithLaunchBounds(stackId)) {
+                mSupervisor.resizeStackLocked(stackId, mLaunchBounds,
+                        null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                        !PRESERVE_WINDOWS, true /* allowResizeInDockedMode */);
             }
         }
         mTargetStack = mInTask.stack;
