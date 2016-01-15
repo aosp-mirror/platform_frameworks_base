@@ -197,7 +197,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void setComponents(RecentsComponent recentsComponent, Divider divider) {
-        mGestureHelper.setComponents(recentsComponent, divider);
+        mGestureHelper.setComponents(recentsComponent, divider, this);
     }
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
