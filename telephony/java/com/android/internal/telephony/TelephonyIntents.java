@@ -75,6 +75,7 @@ public class TelephonyIntents {
      */
     public static final String ACTION_RADIO_TECHNOLOGY_CHANGED
             = "android.intent.action.RADIO_TECHNOLOGY";
+
     /**
      * <p>Broadcast Action: The emergency callback mode is changed.
      * <ul>
@@ -94,6 +95,28 @@ public class TelephonyIntents {
      */
     public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED
             = "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
+
+    /**
+     * <p>Broadcast Action: The emergency call state is changed.
+     * <ul>
+     *   <li><em>phoneInEmergencyCall</em> - A boolean value, true if phone in emergency call,
+     *   false otherwise</li>
+     * </ul>
+     * <p class="note">
+     * You can <em>not</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link android.content.Context#registerReceiver(android.content.BroadcastReceiver,
+     * android.content.IntentFilter) Context.registerReceiver()}.
+     *
+     * <p class="note">
+     * Requires no permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED
+            = "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
+
     /**
      * Broadcast Action: The phone's signal strength has changed. The intent will have the
      * following extra values:</p>
