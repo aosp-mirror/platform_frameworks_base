@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.IPackageManager;
@@ -246,6 +247,25 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public ApplicationInfo getApplicationInfo(String packageName, int flags, UserHandle user)
+                throws RemoteException {
+            ensureInUserProfiles(user, "Cannot check package for unrelated profile " + user);
+            if (!isUserEnabled(user)) {
+                return null;
+            }
+
+            long ident = Binder.clearCallingIdentity();
+            try {
+                IPackageManager pm = AppGlobals.getPackageManager();
+                ApplicationInfo info = pm.getApplicationInfo(packageName, flags,
+                        user.getIdentifier());
+                return info;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public boolean isActivityEnabled(ComponentName component, UserHandle user)
                 throws RemoteException {
             ensureInUserProfiles(user, "Cannot check component for unrelated profile " + user);
@@ -465,6 +485,44 @@ public class LauncherAppsService extends SystemService {
                 mListeners.finishBroadcast();
 
                 super.onPackagesUnavailable(packages);
+            }
+
+            @Override
+            public void onPackagesSuspended(String[] packages) {
+                UserHandle user = new UserHandle(getChangingUserId());
+                final int n = mListeners.beginBroadcast();
+                for (int i = 0; i < n; i++) {
+                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesSuspended")) continue;
+                    try {
+                        listener.onPackagesSuspended(user, packages);
+                    } catch (RemoteException re) {
+                        Slog.d(TAG, "Callback failed ", re);
+                    }
+                }
+                mListeners.finishBroadcast();
+
+                super.onPackagesSuspended(packages);
+            }
+
+            @Override
+            public void onPackagesUnsuspended(String[] packages) {
+                UserHandle user = new UserHandle(getChangingUserId());
+                final int n = mListeners.beginBroadcast();
+                for (int i = 0; i < n; i++) {
+                    IOnAppsChangedListener listener = mListeners.getBroadcastItem(i);
+                    UserHandle listeningUser = (UserHandle) mListeners.getBroadcastCookie(i);
+                    if (!isEnabledProfileOf(user, listeningUser, "onPackagesUnsuspended")) continue;
+                    try {
+                        listener.onPackagesUnsuspended(user, packages);
+                    } catch (RemoteException re) {
+                        Slog.d(TAG, "Callback failed ", re);
+                    }
+                }
+                mListeners.finishBroadcast();
+
+                super.onPackagesUnsuspended(packages);
             }
 
         }

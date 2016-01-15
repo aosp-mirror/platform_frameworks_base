@@ -9335,6 +9335,7 @@ package android.content.pm {
 
   public class LauncherApps {
     method public java.util.List<android.content.pm.LauncherActivityInfo> getActivityList(java.lang.String, android.os.UserHandle);
+    method public android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String, int, android.os.UserHandle);
     method public boolean isActivityEnabled(android.content.ComponentName, android.os.UserHandle);
     method public boolean isPackageEnabled(java.lang.String, android.os.UserHandle);
     method public void registerCallback(android.content.pm.LauncherApps.Callback);
@@ -9351,7 +9352,9 @@ package android.content.pm {
     method public abstract void onPackageChanged(java.lang.String, android.os.UserHandle);
     method public abstract void onPackageRemoved(java.lang.String, android.os.UserHandle);
     method public abstract void onPackagesAvailable(java.lang.String[], android.os.UserHandle, boolean);
+    method public void onPackagesSuspended(java.lang.String[], android.os.UserHandle);
     method public abstract void onPackagesUnavailable(java.lang.String[], android.os.UserHandle, boolean);
+    method public void onPackagesUnsuspended(java.lang.String[], android.os.UserHandle);
   }
 
   public class PackageInfo implements android.os.Parcelable {
