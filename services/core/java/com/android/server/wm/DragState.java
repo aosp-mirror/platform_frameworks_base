@@ -360,8 +360,6 @@ class DragState {
         mCurrentX = x;
         mCurrentY = y;
 
-        final int myPid = Process.myPid();
-
         // Move the surface to the given touch
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                 TAG_WM, ">>> OPEN TRANSACTION notifyMoveLw");
@@ -376,7 +374,10 @@ class DragState {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                     TAG_WM, "<<< CLOSE TRANSACTION notifyMoveLw");
         }
+        notifyLocationLw(x, y);
+    }
 
+    void notifyLocationLw(float x, float y) {
         // Tell the affected window
         WindowState touchedWin = getTouchedWinAtPointLw(x, y);
         if (touchedWin == null) {
@@ -392,6 +393,8 @@ class DragState {
             }
         }
         try {
+            final int myPid = Process.myPid();
+
             // have we dragged over a new window?
             if ((touchedWin != mTargetWindow) && (mTargetWindow != null)) {
                 if (DEBUG_DRAG) {

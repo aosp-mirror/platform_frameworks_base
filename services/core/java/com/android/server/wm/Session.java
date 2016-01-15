@@ -353,6 +353,8 @@ final class Session extends IWindowSession.Stub
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(
                         TAG_WM, "<<< CLOSE TRANSACTION performDrag");
             }
+
+            mService.mDragState.notifyLocationLw(touchX, touchY);
         }
 
         return true;    // success!
