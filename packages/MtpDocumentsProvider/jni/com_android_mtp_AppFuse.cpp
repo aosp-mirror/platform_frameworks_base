@@ -45,7 +45,7 @@ constexpr size_t NUM_MAX_HANDLES = 1024;
 // The request size is bounded by the maximum size of a FUSE_WRITE request
 // because it has the largest possible data payload.
 constexpr size_t MAX_REQUEST_SIZE = sizeof(struct fuse_in_header) +
-        sizeof(struct fuse_write_in) + std::max(MAX_WRITE, MAX_READ);
+        sizeof(struct fuse_write_in) + (MAX_WRITE > MAX_READ ? MAX_WRITE : MAX_READ);
 
 static jclass app_fuse_class;
 static jmethodID app_fuse_get_file_size;
