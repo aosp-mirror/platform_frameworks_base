@@ -195,7 +195,6 @@ public class BaseInputConnection implements InputConnection {
     public boolean commitText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "commitText " + text);
         replaceText(text, newCursorPosition, false);
-        mIMM.notifyUserAction();
         sendCurrentText();
         return true;
     }
@@ -450,7 +449,6 @@ public class BaseInputConnection implements InputConnection {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         if (DEBUG) Log.v(TAG, "setComposingText " + text);
         replaceText(text, newCursorPosition, true);
-        mIMM.notifyUserAction();
         return true;
     }
 
@@ -523,29 +521,17 @@ public class BaseInputConnection implements InputConnection {
      * attached to the input connection's view.
      */
     public boolean sendKeyEvent(KeyEvent event) {
-        synchronized (mIMM.mH) {
-            ViewRootImpl viewRootImpl = mTargetView != null ? mTargetView.getViewRootImpl() : null;
-            if (viewRootImpl == null) {
-                if (mIMM.mServedView != null) {
-                    viewRootImpl = mIMM.mServedView.getViewRootImpl();
-                }
-            }
-            if (viewRootImpl != null) {
-                viewRootImpl.dispatchKeyFromIme(event);
-            }
-        }
-        mIMM.notifyUserAction();
+        mIMM.dispatchKeyEventFromInputMethod(mTargetView, event);
         return false;
     }
-    
+
     /**
      * Updates InputMethodManager with the current fullscreen mode.
      */
     public boolean reportFullscreenMode(boolean enabled) {
-        mIMM.setFullscreenMode(enabled);
         return true;
     }
-    
+
     private void sendCurrentText() {
         if (!mDummyMode) {
             return;

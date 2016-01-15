@@ -25,6 +25,8 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.Rect;
@@ -527,7 +529,7 @@ public final class InputMethodManager {
             }
         }
     }
-    
+
     private static class ControlledInputConnectionWrapper extends IInputConnectionWrapper {
         private final InputMethodManager mParentInputMethodManager;
         private boolean mActive;
@@ -549,13 +551,23 @@ public final class InputMethodManager {
         }
 
         @Override
+        protected void onUserAction() {
+            mParentInputMethodManager.notifyUserAction();
+        }
+
+        @Override
+        protected void onReportFullscreenMode(boolean enabled) {
+            mParentInputMethodManager.setFullscreenMode(enabled);
+        }
+
+        @Override
         public String toString() {
             return "ControlledInputConnectionWrapper{mActive=" + mActive
                     + " mParentInputMethodManager.mActive=" + mParentInputMethodManager.mActive
                     + "}";
         }
     }
-    
+
     final IInputMethodClient.Stub mClient = new IInputMethodClient.Stub() {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
@@ -1811,6 +1823,34 @@ public final class InputMethodManager {
             }
         }
         return DISPATCH_NOT_HANDLED;
+    }
+
+    /**
+     * Provides the default implementation of {@link InputConnection#sendKeyEvent(KeyEvent)}, which
+     * is expected to dispatch an keyboard event sent from the IME to an appropriate event target
+     * depending on the given {@link View} and the current focus state.
+     *
+     * <p>CAUTION: This method is provided only for the situation where
+     * {@link InputConnection#sendKeyEvent(KeyEvent)} needs to be implemented without relying on
+     * {@link BaseInputConnection}. Do not use this API for anything else.</p>
+     *
+     * @param targetView the default target view. If {@code null} is specified, then this method
+     * tries to find a good event target based on the current focus state.
+     * @param event the key event to be dispatched.
+     */
+    public void dispatchKeyEventFromInputMethod(@Nullable View targetView,
+            @NonNull KeyEvent event) {
+        synchronized (mH) {
+            ViewRootImpl viewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
+            if (viewRootImpl == null) {
+                if (mServedView != null) {
+                    viewRootImpl = mServedView.getViewRootImpl();
+                }
+            }
+            if (viewRootImpl != null) {
+                viewRootImpl.dispatchKeyFromIme(event);
+            }
+        }
     }
 
     // Must be called on the main looper
