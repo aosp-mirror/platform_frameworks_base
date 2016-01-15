@@ -577,7 +577,7 @@ public interface IActivityManager extends IInterface {
 
     public void suppressResizeConfigChanges(boolean suppress) throws RemoteException;
 
-    public void moveTasksToFullscreenStack(int fromStackId) throws RemoteException;
+    public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) throws RemoteException;
 
     public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
