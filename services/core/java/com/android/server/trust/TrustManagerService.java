@@ -664,11 +664,16 @@ public class TrustManagerService extends SystemService {
         public boolean isDeviceLocked(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
-            if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
-                userId = resolveProfileParent(userId);
-            }
 
-            return isDeviceLockedInner(userId);
+            long token = Binder.clearCallingIdentity();
+            try {
+                if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+                    userId = resolveProfileParent(userId);
+                }
+                return isDeviceLockedInner(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         @Override
