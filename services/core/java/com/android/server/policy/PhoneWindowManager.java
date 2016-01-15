@@ -183,6 +183,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_HOME_NOTHING = 0;
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 1;
     static final int LONG_PRESS_HOME_ASSIST = 2;
+    static final int LONG_PRESS_HOME_PICTURE_IN_PICTURE = 3;
+    static final int LAST_LONG_PRESS_HOME_BEHAVIOR = LONG_PRESS_HOME_PICTURE_IN_PICTURE;
 
     static final int DOUBLE_TAP_HOME_NOTHING = 0;
     static final int DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
@@ -1313,16 +1315,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void handleLongPressOnHome(int deviceId) {
-        if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
-            mHomeConsumed = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+    private void handleLongPressOnHome(int deviceId, KeyEvent event) {
+        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
+            return;
+        }
+        mHomeConsumed = true;
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
 
-            if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+        switch (mLongPressOnHomeBehavior) {
+            case LONG_PRESS_HOME_RECENT_SYSTEM_UI:
                 toggleRecentApps();
-            } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_ASSIST) {
+                break;
+            case LONG_PRESS_HOME_ASSIST:
                 launchAssistAction(null, deviceId);
-            }
+                break;
+            case LONG_PRESS_HOME_PICTURE_IN_PICTURE:
+                handlePipKey(event);
+                break;
+            default:
+                Log.w(TAG, "Not defined home long press behavior: " + mLongPressOnHomeBehavior);
+                break;
         }
     }
 
@@ -1331,6 +1343,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHomeConsumed = true;
             toggleRecentApps();
         }
+    }
+
+    private void handlePipKey(KeyEvent event) {
+        if (DEBUG_INPUT) Log.d(TAG, "handlePipKey event=" + event);
+        Intent intent = new Intent(Intent.ACTION_PICTURE_IN_PICTURE_BUTTON);
+        intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private final Runnable mHomeDoubleTapTimeoutRunnable = new Runnable() {
@@ -1625,7 +1644,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mLongPressOnHomeBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnHomeBehavior);
         if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
-                mLongPressOnHomeBehavior > LONG_PRESS_HOME_ASSIST) {
+                mLongPressOnHomeBehavior > LAST_LONG_PRESS_HOME_BEHAVIOR) {
             mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
         }
 
@@ -2851,7 +2870,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
-                    handleLongPressOnHome(event.getDeviceId());
+                    handleLongPressOnHome(event.getDeviceId(), event);
                 }
             }
             return -1;
