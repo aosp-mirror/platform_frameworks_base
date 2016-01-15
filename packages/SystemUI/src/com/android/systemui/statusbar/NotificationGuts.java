@@ -16,10 +16,11 @@
 
 package com.android.systemui.statusbar;
 
-import android.annotation.IdRes;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
@@ -28,13 +29,12 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -123,10 +123,27 @@ public class NotificationGuts extends LinearLayout {
         final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
         final TextView topicTitle = ((TextView) row.findViewById(R.id.title));
         mSeekBar = (SeekBar) row.findViewById(R.id.seekbar);
-        mSeekBar.setMax(4);
+        boolean systemApp = false;
+        try {
+            final PackageManager pm = BaseStatusBar.getPackageManagerForUser(
+                    getContext(), sbn.getUser().getIdentifier());
+            final PackageInfo info =
+                    pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
+            systemApp = Utils.isSystemPackage(pm, info);
+        } catch (PackageManager.NameNotFoundException e) {
+            // unlikely.
+        }
+        final int minProgress = systemApp ?
+                NotificationListenerService.Ranking.IMPORTANCE_LOW
+                : NotificationListenerService.Ranking.IMPORTANCE_NONE;
+        mSeekBar.setMax(NotificationListenerService.Ranking.IMPORTANCE_MAX);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (progress < minProgress) {
+                    seekBar.setProgress(minProgress);
+                    progress = minProgress;
+                }
                 updateTitleAndSummary(progress);
                 if (fromUser) {
                     if (appUsesTopics) {
