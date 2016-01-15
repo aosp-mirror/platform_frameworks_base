@@ -729,6 +729,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 // will return the correct value to the renderer.
                 mDisplayContent.getDockedDividerController().positionDockedStackedDivider(mFrame);
                 mContentFrame.set(mFrame);
+                if (!mFrame.equals(mLastFrame)) {
+                    mMovedByResize = true;
+                }
             }
         } else {
             mContentFrame.set(Math.max(mContentFrame.left, frame.left),
@@ -752,15 +755,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 Math.max(frame.right - mOverscanFrame.right, 0),
                 Math.max(frame.bottom - mOverscanFrame.bottom, 0));
 
-        mContentInsets.set(mContentFrame.left - frame.left,
-                mContentFrame.top - frame.top,
-                frame.right - mContentFrame.right,
-                frame.bottom - mContentFrame.bottom);
 
-        mVisibleInsets.set(mVisibleFrame.left - frame.left,
-                mVisibleFrame.top - frame.top,
-                frame.right - mVisibleFrame.right,
-                frame.bottom - mVisibleFrame.bottom);
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
 
@@ -770,7 +765,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Math.max(mStableFrame.top - mDisplayFrame.top, 0),
                     Math.max(mDisplayFrame.right - mStableFrame.right, 0),
                     Math.max(mDisplayFrame.bottom - mStableFrame.bottom, 0));
+
+            // The divider doesn't care about insets in any case, so set it to empty so we don't
+            // trigger a relayout when moving it.
+            mContentInsets.setEmpty();
+            mVisibleInsets.setEmpty();
         } else {
+            mContentInsets.set(mContentFrame.left - frame.left,
+                    mContentFrame.top - frame.top,
+                    frame.right - mContentFrame.right,
+                    frame.bottom - mContentFrame.bottom);
+
+            mVisibleInsets.set(mVisibleFrame.left - frame.left,
+                    mVisibleFrame.top - frame.top,
+                    frame.right - mVisibleFrame.right,
+                    frame.bottom - mVisibleFrame.bottom);
+
             mStableInsets.set(Math.max(mStableFrame.left - frame.left, 0),
                     Math.max(mStableFrame.top - frame.top, 0),
                     Math.max(frame.right - mStableFrame.right, 0),
@@ -1993,21 +2003,24 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
-            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig) throws RemoteException {
-        DisplayInfo displayInfo = getDisplayInfo();
-        mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
+    Rect getBackdropFrame(Rect frame) {
         // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
         // start even if we haven't received the relayout window, so that the client requests
         // the relayout sooner. When dragging stops, backDropFrame needs to stay fullscreen
         // until the window to small size, otherwise the multithread renderer will shift last
         // one or more frame to wrong offset. So here we send fullscreen backdrop if either
         // isDragResizing() or isDragResizeChanged() is true.
+        DisplayInfo displayInfo = getDisplayInfo();
+        mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
         boolean resizing = isDragResizing() || isDragResizeChanged();
-        final Rect backDropFrame = (inFreeformWorkspace() || !resizing) ? frame : mTmpRect;
+        return (inFreeformWorkspace() || !resizing) ? frame : mTmpRect;
+    }
+
+    private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
+            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+            Configuration newConfig) throws RemoteException {
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
-                reportDraw, newConfig, backDropFrame);
+                reportDraw, newConfig, getBackdropFrame(frame));
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {

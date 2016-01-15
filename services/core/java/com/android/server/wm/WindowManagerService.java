@@ -2561,8 +2561,8 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowManager.LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Configuration outConfig,
-            Surface outSurface) {
+            Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
+            Configuration outConfig, Surface outSurface) {
         int result = 0;
         boolean configChanged;
         boolean hasStatusBarPermission =
@@ -2749,6 +2749,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
             outOutsets.set(win.mOutsets);
+            outBackdropFrame.set(win.getBackdropFrame(win.mFrame));
             if (localLOGV) Slog.v(
                 TAG_WM, "Relayout given client " + client.asBinder()
                 + ", requestedWidth=" + requestedWidth
