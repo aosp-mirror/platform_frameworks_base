@@ -33620,6 +33620,7 @@ package android.service.notification {
     method public abstract void onUnsubscribe(android.net.Uri);
     field public static final java.lang.String EXTRA_RULE_ID = "android.content.automatic.ruleId";
     field public static final java.lang.String META_DATA_CONFIGURATION_ACTIVITY = "android.service.zen.automatic.configurationActivity";
+    field public static final java.lang.String META_DATA_RULE_INSTANCE_LIMIT = "android.service.zen.automatic.ruleInstanceLimit";
     field public static final java.lang.String META_DATA_RULE_TYPE = "android.service.zen.automatic.ruleType";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.ConditionProviderService";
   }
