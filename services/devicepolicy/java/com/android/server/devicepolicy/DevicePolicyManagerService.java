@@ -2626,7 +2626,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return admin != null ? admin.passwordQuality : mode;
             }
 
-            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle) && !parent) {
+            if (isSeparateProfileChallengeEnabled(userHandle) && !parent) {
                 // If a Work Challenge is in use, only return its restrictions.
                 DevicePolicyData policy = getUserDataUnchecked(userHandle);
                 final int N = policy.mAdminList.size();
@@ -2646,7 +2646,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     // Only aggregate data for the parent profile plus the non-work challenge
                     // enabled profiles.
                     if (!(userInfo.isManagedProfile()
-                            && mLockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id))) {
+                            && isSeparateProfileChallengeEnabled(userInfo.id))) {
                         DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                         final int N = policy.mAdminList.size();
                         for (int i = 0; i < N; i++) {
@@ -2659,6 +2659,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return mode;
+        }
+    }
+
+    private boolean isSeparateProfileChallengeEnabled(int userHandle) {
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            return mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
@@ -3233,7 +3242,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ComponentName adminComponentName = admin.info.getComponent();
             // TODO: Include the Admin sdk level check in LockPatternUtils check.
             ComponentName who = !isAdminApiLevelMOrBelow(adminComponentName, userHandle)
-                    && mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)
+                    && isSeparateProfileChallengeEnabled(userHandle)
                         ? adminComponentName : null;
             if (policy.mActivePasswordQuality < getPasswordQuality(who, userHandle, parent)
                     || policy.mActivePasswordLength < getPasswordMinimumLength(null, userHandle)) {
@@ -4072,7 +4081,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         enforceFullCrossUsersPermission(userHandle);
         // Managed Profile password can only be changed when per user encryption is present.
-        if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
+        if (!isSeparateProfileChallengeEnabled(userHandle)) {
             enforceNotManagedProfile(userHandle, "set the active password");
         }
 
@@ -4712,7 +4721,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             // If we are being asked explictly about this user
                             // return all disabled features even if its a managed profile.
                             which |= admin.disabledKeyguardFeatures;
-                        } else if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(
+                        } else if (!isSeparateProfileChallengeEnabled(
                                 userInfo.id)) {
                             // Otherwise a managed profile is only allowed to disable
                             // some features on the parent user, and we only aggregate them if
