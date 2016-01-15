@@ -1055,61 +1055,59 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
-     * Is this window visible?  It is not visible if there is no
-     * surface, or we are in the process of running an exit animation
-     * that will remove the surface, or its app token has been hidden.
+     * Does the minimal check for visibility. Callers generally want to use one of the public
+     * methods as they perform additional checks on the app token.
+     * TODO: See if there are other places we can use this check below instead of duplicating...
      */
-    @Override
-    public boolean isVisibleLw() {
-        final AppWindowToken atoken = mAppToken;
+    private boolean isVisibleUnchecked() {
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && (atoken == null || !atoken.hiddenRequested)
-                && !mExiting && !mDestroying;
+                && !mExiting && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
     /**
-     * Like {@link #isVisibleLw}, but also counts a window that is currently
-     * "hidden" behind the keyguard as visible.  This allows us to apply
-     * things like window flags that impact the keyguard.
-     * XXX I am starting to think we need to have ANOTHER visibility flag
-     * for this "hidden behind keyguard" state rather than overloading
-     * mPolicyVisibility.  Ungh.
+     * Is this window visible?  It is not visible if there is no surface, or we are in the process
+     * of running an exit animation that will remove the surface, or its app token has been hidden.
+     */
+    @Override
+    public boolean isVisibleLw() {
+        return (mAppToken == null || !mAppToken.hiddenRequested) && isVisibleUnchecked();
+    }
+
+    /**
+     * Like {@link #isVisibleLw}, but also counts a window that is currently "hidden" behind the
+     * keyguard as visible.  This allows us to apply things like window flags that impact the
+     * keyguard. XXX I am starting to think we need to have ANOTHER visibility flag for this
+     * "hidden behind keyguard" state rather than overloading mPolicyVisibility.  Ungh.
      */
     @Override
     public boolean isVisibleOrBehindKeyguardLw() {
-        if (mRootToken.waitingToShow &&
-                mService.mAppTransition.isTransitionSet()) {
+        if (mRootToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
         return mHasSurface && !mDestroying && !mExiting
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
-                                && !mRootToken.hidden)
+                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null || animating);
     }
 
     /**
-     * Is this window visible, ignoring its app token?  It is not visible
-     * if there is no surface, or we are in the process of running an exit animation
-     * that will remove the surface.
+     * Is this window visible, ignoring its app token? It is not visible if there is no surface,
+     * or we are in the process of running an exit animation that will remove the surface.
      */
     public boolean isWinVisibleLw() {
-        final AppWindowToken atoken = mAppToken;
-        return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && (atoken == null || !atoken.hiddenRequested || atoken.mAppAnimator.animating)
-                && !mExiting && !mDestroying;
+        return (mAppToken == null || !mAppToken.hiddenRequested || mAppToken.mAppAnimator.animating)
+                && isVisibleUnchecked();
     }
 
     /**
-     * The same as isVisible(), but follows the current hidden state of
-     * the associated app token, not the pending requested hidden state.
+     * The same as isVisible(), but follows the current hidden state of the associated app token,
+     * not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && (!mRootToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
-                && !mExiting && !mDestroying;
+        return (!mRootToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
+                && isVisibleUnchecked();
     }
 
     /**
@@ -1168,8 +1166,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         return mHasSurface && mPolicyVisibility && !mDestroying
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
-                                && !mRootToken.hidden)
+                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((mAppToken != null) && (mAppToken.mAppAnimator.animation != null)));
     }
@@ -1189,8 +1186,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
         return mHasSurface && !mDestroying
-                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE
-                                && !mRootToken.hidden)
+                && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null
                         || ((atoken != null) && (atoken.mAppAnimator.animation != null)
                                 && !mWinAnimator.isDummyAnimation()));
