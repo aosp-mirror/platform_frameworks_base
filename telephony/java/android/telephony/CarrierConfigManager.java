@@ -81,7 +81,6 @@ public class CarrierConfigManager {
      * Flag to require or skip entitlement checks.
      * If true, entitlement checks will be executed if device has been configured for it,
      * If false, entitlement checks will be skipped.
-     * @hide
      */
     public static final String
             KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL = "require_entitlement_checks_bool";
@@ -269,7 +268,6 @@ public class CarrierConfigManager {
 
     /**
      * Flag specifying whether Generic Bootstrapping Architecture capable SIM is required for IMS.
-     * @hide
      */
     public static final String KEY_CARRIER_IMS_GBA_REQUIRED_BOOL
             = "carrier_ims_gba_required_bool";
@@ -277,7 +275,6 @@ public class CarrierConfigManager {
     /**
      * Flag specifying whether IMS instant lettering is available for the carrier.  {@code True} if
      * instant lettering is available for the carrier, {@code false} otherwise.
-     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL =
             "carrier_instant_lettering_available_bool";
@@ -294,7 +291,6 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL}), determines the list of characters
      * which may not be contained in messages.  Should be specified as a regular expression suitable
      * for use with {@link String#matches(String)}.
-     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING =
             "carrier_instant_lettering_invalid_chars_string";
@@ -305,7 +301,6 @@ public class CarrierConfigManager {
      * must be escaped with a backslash '\' character.  Should be specified as a string containing
      * the characters to be escaped.  For example to escape quote and backslash the string would be
      * a quote and a backslash.
-     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING =
             "carrier_instant_lettering_escaped_chars_string";
@@ -319,7 +314,6 @@ public class CarrierConfigManager {
      * towards the messages size limit as a single bye.  If a character encoding is specified, the
      * message size limit will be based on the number of bytes in the message per the specified
      * encoding.
-     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING =
             "carrier_instant_lettering_encoding_string";
@@ -330,7 +324,6 @@ public class CarrierConfigManager {
      * in the InCall UI to ensure the user cannot enter more characters than allowed by the carrier.
      * See also {@link #KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING} for more information on how
      * the length of the message is calculated.
-     * @hide
      */
     public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT =
             "carrier_instant_lettering_length_limit_int";
@@ -353,7 +346,6 @@ public class CarrierConfigManager {
     /**
      * The default flag specifying whether ETWS/CMAS test setting is forcibly disabled in
      * Settings->More->Emergency broadcasts menu even though developer options is turned on.
-     * @hide
      */
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
             "carrier_force_disable_etws_cmas_test_bool";
@@ -361,7 +353,6 @@ public class CarrierConfigManager {
     /**
      * The default flag specifying whether "Turn on Notifications" option will be always shown in
      * Settings->More->Emergency broadcasts menu regardless developer options is turned on or not.
-     * @hide
      */
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
@@ -398,27 +389,23 @@ public class CarrierConfigManager {
     /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
      * update
-     * @hide
      */
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_BOOL = "ci_action_on_sys_update_bool";
 
     /**
      * Intent to be sent for the additional action on System update
-     * @hide
      */
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING =
             "ci_action_on_sys_update_intent_string";
 
     /**
      * Extra to be included in the intent sent for additional action on System update
-     * @hide
      */
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING =
             "ci_action_on_sys_update_extra_string";
 
     /**
      * Value of extra included in intent sent for additional action on System update
-     * @hide
      */
     public static final String KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING =
             "ci_action_on_sys_update_extra_val_string";
@@ -427,7 +414,6 @@ public class CarrierConfigManager {
      * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
      * non-zero value is specified, the UE shall wait for the specified amount of time before it
      * sends out successive DTMF tones on the network.
-     * @hide
      */
     public static final String KEY_GSM_DTMF_TONE_DELAY_INT = "gsm_dtmf_tone_delay_int";
 
@@ -435,7 +421,6 @@ public class CarrierConfigManager {
      * Specifies the amount of gap to be added in millis between DTMF tones. When a non-zero value
      * is specified, the UE shall wait for the specified amount of time before it sends out
      * successive DTMF tones on the network.
-     * @hide
      */
     public static final String KEY_IMS_DTMF_TONE_DELAY_INT = "ims_dtmf_tone_delay_int";
 
@@ -443,32 +428,27 @@ public class CarrierConfigManager {
      * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
      * non-zero value is specified, the UE shall wait for the specified amount of time before it
      * sends out successive DTMF tones on the network.
-     * @hide
      */
     public static final String KEY_CDMA_DTMF_TONE_DELAY_INT = "cdma_dtmf_tone_delay_int";
 
     /**
      * Determines whether conference calls are supported by a carrier.  When {@code true},
      * conference calling is supported, {@code false otherwise}.
-     * @hide
      */
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
      * Determine whether user can toggle Enhanced 4G LTE Mode in Settings.
-     * @hide
      */
     public static final String KEY_EDITABLE_ENHANCED_4G_LTE_BOOL = "editable_enhanced_4g_lte_bool";
 
     /**
      * Determine whether IMS apn can be shown.
-     * @hide
      */
     public static final String KEY_HIDE_IMS_APN_BOOL = "hide_ims_apn_bool";
 
     /**
      * Determine whether preferred network type can be shown.
-     * @hide
      */
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
@@ -482,7 +462,6 @@ public class CarrierConfigManager {
 
     /**
      * Allow user to add APNs
-     * @hide
      */
     public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
 
@@ -524,7 +503,6 @@ public class CarrierConfigManager {
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
      * in emergency callback mode.  Default value is {@code true}, meaning that non-emergency calls
      * are allowed in emergency callback mode.
-     * @hide
      */
     public static final String KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL =
             "allow_non_emergency_calls_in_ecm_bool";
@@ -533,8 +511,6 @@ public class CarrierConfigManager {
      * Flag indicating whether to allow carrier video calls to emergency numbers.
      * When {@code true}, video calls to emergency numbers will be allowed.  When {@code false},
      * video calls to emergency numbers will be initiated as audio-only calls instead.
-     *
-     * @hide
      */
     @SystemApi
     public static final String BOOL_ALLOW_EMERGENCY_VIDEO_CALLS =
@@ -546,8 +522,6 @@ public class CarrierConfigManager {
      * to pause transmission of video when the In-Call app is sent to the background.
      * When {@code false}, video pause signaling is not supported.  {@code True} by default unless
      * a carrier configuration overrides the default.
-     *
-     * @hide
      */
     @SystemApi
     public static final String BOOL_ALLOW_VIDEO_PAUSE =
@@ -564,8 +538,6 @@ public class CarrierConfigManager {
      * via {@link android.telecom.PhoneAccount#CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE}
      * and can choose to hide or show the video calling icon based on whether a contact supports
      * video.
-     *
-     * @hide
      */
     @SystemApi
     public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
