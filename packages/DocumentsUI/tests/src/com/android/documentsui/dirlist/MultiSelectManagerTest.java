@@ -23,7 +23,6 @@ import android.util.SparseBooleanArray;
 
 import com.android.documentsui.TestInputEvent;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -55,13 +54,21 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         mManager.addCallback(mCallback);
     }
 
-    public void testMouseClick_StartsSelectionMode() {
-        click(7);
+    public void testSelection() {
+        // Check selection.
+        mManager.toggleSelection(items.get(7));
         assertSelection(items.get(7));
+        // Check deselection.
+        mManager.toggleSelection(items.get(7));
+        assertSelectionSize(0);
     }
 
-    public void testMouseClick_NotifiesSelectionChanged() {
-        click(7);
+    public void testSelection_NotifiesSelectionChanged() {
+        // Selection should notify.
+        mManager.toggleSelection(items.get(7));
+        mCallback.assertSelectionChanged();
+        // Deselection should notify.
+        mManager.toggleSelection(items.get(7));
         mCallback.assertSelectionChanged();
     }
 

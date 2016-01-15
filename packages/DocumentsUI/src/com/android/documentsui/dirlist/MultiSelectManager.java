@@ -32,7 +32,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -90,29 +89,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
             mBandManager = new BandController();
         }
 
-        GestureDetector.SimpleOnGestureListener listener =
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        return MultiSelectManager.this.onSingleTapUp(
-                                new MotionInputEvent(e, recyclerView));
-                    }
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        MultiSelectManager.this.onLongPress(
-                                new MotionInputEvent(e, recyclerView));
-                    }
-                };
-
-        final GestureDetector detector = new GestureDetector(recyclerView.getContext(), listener);
-        detector.setOnDoubleTapListener(listener);
-
         recyclerView.addOnItemTouchListener(
                 new RecyclerView.OnItemTouchListener() {
                     @Override
                     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                        detector.onTouchEvent(e);
-
                         if (mBandManager != null) {
                             return mBandManager.handleEvent(new MotionInputEvent(e, recyclerView));
                         }
@@ -287,13 +267,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
     boolean onSingleTapUp(InputEvent input) {
         if (DEBUG) Log.d(TAG, "Processing tap event.");
         if (!hasSelection()) {
-            // if this is a mouse click on an item, start selection mode.
-            // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
-            if (input.isOverItem() && input.isMouseEvent()) {
-                int position = input.getItemPosition();
-                toggleSelection(position);
-                setSelectionRangeBegin(position);
-            }
+            // No selection active - do nothing.
             return false;
         }
 

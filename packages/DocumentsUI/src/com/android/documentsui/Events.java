@@ -111,17 +111,15 @@ public final class Events {
 
     public static final class MotionInputEvent implements InputEvent {
         private final MotionEvent mEvent;
-        private final RecyclerView mView;
         private final int mPosition;
 
         public MotionInputEvent(MotionEvent event, RecyclerView view) {
             mEvent = event;
-            mView = view;
 
             // Consider determining position lazily as an optimization.
-            View child = mView.findChildViewUnder(mEvent.getX(), mEvent.getY());
-            mPosition = (child != null)
-                    ? mView.getChildAdapterPosition(child)
+            View child = view.findChildViewUnder(mEvent.getX(), mEvent.getY());
+            mPosition = (child!= null)
+                    ? view.getChildAdapterPosition(child)
                     : RecyclerView.NO_POSITION;
         }
 
