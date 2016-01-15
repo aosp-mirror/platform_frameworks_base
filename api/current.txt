@@ -38132,9 +38132,11 @@ package android.text.style {
 
   public class LocaleSpan extends android.text.style.MetricAffectingSpan implements android.text.ParcelableSpan {
     ctor public LocaleSpan(java.util.Locale);
+    ctor public LocaleSpan(android.util.LocaleList);
     ctor public LocaleSpan(android.os.Parcel);
     method public int describeContents();
     method public java.util.Locale getLocale();
+    method public android.util.LocaleList getLocales();
     method public int getSpanTypeId();
     method public void updateDrawState(android.text.TextPaint);
     method public void updateMeasureState(android.text.TextPaint);
