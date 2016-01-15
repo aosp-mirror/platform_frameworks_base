@@ -50,11 +50,13 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IDeviceIdleController;
+import android.os.IMaintenanceActivityListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -206,8 +208,12 @@ public class DeviceIdleController extends SystemService
     private boolean mSyncActive;
     private boolean mJobsActive;
     private boolean mAlarmsActive;
+    private boolean mReportedMaintenanceActivity;
 
     public final AtomicFile mConfigFile;
+
+    private final RemoteCallbackList<IMaintenanceActivityListener> mMaintenanceActivityListeners =
+            new RemoteCallbackList<IMaintenanceActivityListener>();
 
     /**
      * Package names the system has white-listed to opt out of power save restrictions,
@@ -813,6 +819,7 @@ public class DeviceIdleController extends SystemService
     static final int MSG_REPORT_IDLE_OFF = 4;
     static final int MSG_REPORT_ACTIVE = 5;
     static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
+    static final int MSG_REPORT_MAINTENANCE_ACTIVITY = 7;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -901,6 +908,21 @@ public class DeviceIdleController extends SystemService
                 case MSG_TEMP_APP_WHITELIST_TIMEOUT: {
                     int uid = msg.arg1;
                     checkTempAppWhitelistTimeout(uid);
+                } break;
+                case MSG_REPORT_MAINTENANCE_ACTIVITY: {
+                    boolean active = (msg.arg1 == 1);
+                    final int size = mMaintenanceActivityListeners.beginBroadcast();
+                    try {
+                        for (int i = 0; i < size; i++) {
+                            try {
+                                mMaintenanceActivityListeners.getBroadcastItem(i)
+                                        .onMaintenanceActivityChanged(active);
+                            } catch (RemoteException ignored) {
+                            }
+                        }
+                    } finally {
+                        mMaintenanceActivityListeners.finishBroadcast();
+                    }
                 } break;
             }
         }
@@ -994,6 +1016,16 @@ public class DeviceIdleController extends SystemService
             getContext().enforceCallingOrSelfPermission(
                     "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
             DeviceIdleController.this.downloadServiceInactive();
+        }
+
+        @Override public boolean registerMaintenanceActivityListener(
+                IMaintenanceActivityListener listener) {
+            return DeviceIdleController.this.registerMaintenanceActivityListener(listener);
+        }
+
+        @Override public void unregisterMaintenanceActivityListener(
+                IMaintenanceActivityListener listener) {
+            DeviceIdleController.this.unregisterMaintenanceActivityListener(listener);
         }
 
         @Override protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -1704,6 +1736,7 @@ public class DeviceIdleController extends SystemService
     void downloadServiceActive(IBinder token) {
         synchronized (this) {
             mDownloadServiceActive = token;
+            reportMaintenanceActivityIfNeededLocked();
             try {
                 token.linkToDeath(new IBinder.DeathRecipient() {
                     @Override public void binderDied() {
@@ -1719,6 +1752,7 @@ public class DeviceIdleController extends SystemService
     void downloadServiceInactive() {
         synchronized (this) {
             mDownloadServiceActive = null;
+            reportMaintenanceActivityIfNeededLocked();
             exitMaintenanceEarlyIfNeededLocked();
         }
     }
@@ -1726,6 +1760,7 @@ public class DeviceIdleController extends SystemService
     void setSyncActive(boolean active) {
         synchronized (this) {
             mSyncActive = active;
+            reportMaintenanceActivityIfNeededLocked();
             if (!active) {
                 exitMaintenanceEarlyIfNeededLocked();
             }
@@ -1735,6 +1770,7 @@ public class DeviceIdleController extends SystemService
     void setJobsActive(boolean active) {
         synchronized (this) {
             mJobsActive = active;
+            reportMaintenanceActivityIfNeededLocked();
             if (!active) {
                 exitMaintenanceEarlyIfNeededLocked();
             }
@@ -1748,6 +1784,30 @@ public class DeviceIdleController extends SystemService
                 exitMaintenanceEarlyIfNeededLocked();
             }
         }
+    }
+
+    boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener) {
+        synchronized (this) {
+            mMaintenanceActivityListeners.register(listener);
+            return mReportedMaintenanceActivity;
+        }
+    }
+
+    void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener) {
+        synchronized (this) {
+            mMaintenanceActivityListeners.unregister(listener);
+        }
+    }
+
+    void reportMaintenanceActivityIfNeededLocked() {
+        boolean active = mJobsActive | mSyncActive | (mDownloadServiceActive != null);
+        if (active == mReportedMaintenanceActivity) {
+            return;
+        }
+        mReportedMaintenanceActivity = active;
+        Message msg = mHandler.obtainMessage(MSG_REPORT_MAINTENANCE_ACTIVITY,
+                mReportedMaintenanceActivity ? 1 : 0, 0);
+        mHandler.sendMessage(msg);
     }
 
     void exitMaintenanceEarlyIfNeededLocked() {
