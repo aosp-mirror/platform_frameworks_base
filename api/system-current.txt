@@ -62858,6 +62858,7 @@ package javax.net.ssl {
     method public java.lang.String[] getProtocols();
     method public final java.util.Collection<javax.net.ssl.SNIMatcher> getSNIMatchers();
     method public final java.util.List<javax.net.ssl.SNIServerName> getServerNames();
+    method public final boolean getUseCipherSuitesOrder();
     method public boolean getWantClientAuth();
     method public void setAlgorithmConstraints(java.security.AlgorithmConstraints);
     method public void setCipherSuites(java.lang.String[]);
@@ -62866,6 +62867,7 @@ package javax.net.ssl {
     method public void setProtocols(java.lang.String[]);
     method public final void setSNIMatchers(java.util.Collection<javax.net.ssl.SNIMatcher>);
     method public final void setServerNames(java.util.List<javax.net.ssl.SNIServerName>);
+    method public final void setUseCipherSuitesOrder(boolean);
     method public void setWantClientAuth(boolean);
   }
 
