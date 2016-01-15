@@ -309,6 +309,27 @@
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
 
+        <!-- started from PipUI -->
+        <activity
+            android:name="com.android.systemui.tv.pip.PipMenuActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:launchMode="singleTop"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:resizeable="true"
+            android:supportsPictureInPicture="true"
+            androidprv:alwaysFocusable="true"
+            android:excludeFromRecents="true" />
+        <activity
+            android:name="com.android.systemui.tv.pip.PipOverlayActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:launchMode="singleTop"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:resizeable="true"
+            android:supportsPictureInPicture="true"
+            android:excludeFromRecents="true" />
+
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"

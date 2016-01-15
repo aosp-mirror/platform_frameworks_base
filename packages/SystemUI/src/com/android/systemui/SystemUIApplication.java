@@ -54,6 +54,7 @@ public class SystemUIApplication extends Application {
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
+            com.android.systemui.tv.pip.PipUI.class
     };
 
     /**
