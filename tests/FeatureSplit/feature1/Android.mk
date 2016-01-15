@@ -22,10 +22,12 @@ LOCAL_PACKAGE_NAME := FeatureSplit1
 LOCAL_MODULE_TAGS := tests
 
 featureOf := FeatureSplitBase
+
+LOCAL_APK_LIBRARIES := $(featureOf)
 featureOfApk := $(call intermediates-dir-for,APPS,$(featureOf))/package.apk
 localRStamp := $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),,COMMON)/src/R.stamp
 $(localRStamp): $(featureOfApk)
 
-LOCAL_AAPT_FLAGS := --feature-of $(featureOfApk)
+LOCAL_AAPT_FLAGS := --feature-of $(featureOfApk) --custom-package com.android.test.split.feature.one
 
 include $(BUILD_PACKAGE)

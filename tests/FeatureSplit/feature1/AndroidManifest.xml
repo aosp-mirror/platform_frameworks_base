@@ -17,5 +17,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.test.split.feature"
     featureName="feature1">
-    <application android:hasCode="false" />
+
+    <uses-sdk android:minSdkVersion="21" />
+
+    <application>
+        <activity android:name=".one.One" android:label="Feature One">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
 </manifest>
