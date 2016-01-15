@@ -335,6 +335,7 @@ public abstract class Context {
      * calling application's package, rather than the package in which the service is declared.
      * @hide
      */
+    @SystemApi
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
     /**
