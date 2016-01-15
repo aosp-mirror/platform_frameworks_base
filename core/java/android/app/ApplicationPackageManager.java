@@ -1099,13 +1099,24 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public Drawable getUserBadgeForDensity(UserHandle user, int density) {
+        return getManagedProfileIconForDensity(user, density,
+                com.android.internal.R.drawable.ic_corp_badge);
+    }
+
+    @Override
+    public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
+        return getManagedProfileIconForDensity(user, density,
+                com.android.internal.R.drawable.ic_corp_badge_no_background);
+    }
+
+    private Drawable getManagedProfileIconForDensity(UserHandle user, int density,
+            int drawableId) {
         UserInfo userInfo = getUserIfProfile(user.getIdentifier());
         if (userInfo != null && userInfo.isManagedProfile()) {
             if (density <= 0) {
                 density = mContext.getResources().getDisplayMetrics().densityDpi;
             }
-            return Resources.getSystem().getDrawableForDensity(
-                    com.android.internal.R.drawable.ic_corp_badge, density);
+            return Resources.getSystem().getDrawableForDensity(drawableId, density);
         }
         return null;
     }

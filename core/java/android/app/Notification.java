@@ -2998,7 +2998,7 @@ public class Notification implements Parcelable
         private Drawable getProfileBadgeDrawable() {
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
-            return mContext.getPackageManager().getUserBadgeForDensity(
+            return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
                     new UserHandle(mContext.getUserId()), 0);
         }
 

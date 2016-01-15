@@ -532,6 +532,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
         throw new UnsupportedOperationException();

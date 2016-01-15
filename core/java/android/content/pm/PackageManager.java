@@ -4268,6 +4268,22 @@ public abstract class PackageManager {
 
     /**
      * If the target user is a managed profile of the calling user or the caller
+     * is itself a managed profile, then this returns a drawable to use as a small
+     * icon to include in a view to distinguish it from the original icon. This version
+     * doesn't have background protection and should be used over a light background instead of
+     * a badge.
+     *
+     * @param user The target user.
+     * @param density The optional desired density for the badge as per
+     *         {@link android.util.DisplayMetrics#densityDpi}. If not provided
+     *         the density of the current display is used.
+     * @return the drawable or null if no drawable is required.
+     * @hide
+     */
+    public abstract Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density);
+
+    /**
+     * If the target user is a managed profile of the calling user or the caller
      * is itself a managed profile, then this returns a copy of the label with
      * badging for accessibility services like talkback. E.g. passing in "Email"
      * and it might return "Work Email" for Email in the work profile.

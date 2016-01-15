@@ -275,7 +275,7 @@
     <dimen name="notification_large_icon_circle_padding">11dp</dimen>
 
     <!-- Size of the profile badge for notifications -->
-    <dimen name="notification_badge_size">16dp</dimen>
+    <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Keyguard dimensions -->
     <!-- TEMP -->
