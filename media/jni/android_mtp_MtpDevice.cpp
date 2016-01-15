@@ -26,6 +26,7 @@
 #include <fcntl.h>
 
 #include <memory>
+#include <string>
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -370,9 +371,26 @@ android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
     return info;
 }
 
+bool check_uint32_arg(JNIEnv *env, const char* name, jlong value, uint32_t* out) {
+    if (value < 0 || 0xffffffff < value) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalArgumentException",
+                (std::string("argument must be a 32-bit unsigned integer: ") + name).c_str());
+        return false;
+    }
+    *out = static_cast<uint32_t>(value);
+    return true;
+}
+
 static jbyteArray
-android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jint objectSize)
+android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jlong objectSizeLong)
 {
+    uint32_t objectSize;
+    if (!check_uint32_arg(env, "objectSize", objectSizeLong, &objectSize)) {
+        return nullptr;
+    }
+
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device) {
         return nullptr;
@@ -396,8 +414,8 @@ static jlong
 android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
                                          jobject thiz,
                                          jint objectID,
-                                         jlong offset,
-                                         jlong size,
+                                         jlong offsetLong,
+                                         jlong sizeLong,
                                          jbyteArray array)
 {
     if (!array) {
@@ -405,19 +423,10 @@ android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
         return -1;
     }
 
-    if (offset < 0 || 0xffffffffL < offset) {
-        jniThrowException(
-                env,
-                "java/lang/IllegalArgumentException",
-                "Offset argument must be a 32-bit unsigned integer.");
-        return -1;
-    }
-
-    if (size < 0 || 0xffffffffL < size) {
-        jniThrowException(
-                env,
-                "java/lang/IllegalArgumentException",
-                "Size argument must be a 32-bit unsigned integer.");
+    uint32_t offset;
+    uint32_t size;
+    if (!check_uint32_arg(env, "offset", offsetLong, &offset) ||
+            !check_uint32_arg(env, "size", sizeLong, &size)) {
         return -1;
     }
 
@@ -467,22 +476,22 @@ android_mtp_MtpDevice_delete_object(JNIEnv *env, jobject thiz, jint object_id)
     }
 }
 
-static jlong
+static jint
 android_mtp_MtpDevice_get_parent(JNIEnv *env, jobject thiz, jint object_id)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
-        return (jlong)device->getParent(object_id);
+        return static_cast<jint>(device->getParent(object_id));
     else
         return -1;
 }
 
-static jlong
+static jint
 android_mtp_MtpDevice_get_storage_id(JNIEnv *env, jobject thiz, jint object_id)
 {
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
-        return (jlong)device->getStorageID(object_id);
+        return static_cast<jint>(device->getStorageID(object_id));
     else
         return -1;
 }
@@ -516,8 +525,13 @@ android_mtp_MtpDevice_import_file_to_fd(JNIEnv *env, jobject thiz, jint object_i
 }
 
 static jboolean
-android_mtp_MtpDevice_send_object(JNIEnv *env, jobject thiz, jint object_id, jint size, jint fd)
+android_mtp_MtpDevice_send_object(
+        JNIEnv *env, jobject thiz, jint object_id, jlong sizeLong, jint fd)
 {
+    uint32_t size;
+    if (!check_uint32_arg(env, "size", sizeLong, &size))
+        return JNI_FALSE;
+
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return JNI_FALSE;
@@ -647,16 +661,16 @@ static const JNINativeMethod gMethods[] = {
                                         (void *)android_mtp_MtpDevice_get_object_handles},
     {"native_get_object_info",  "(I)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_get_object_info},
-    {"native_get_object",       "(II)[B",(void *)android_mtp_MtpDevice_get_object},
+    {"native_get_object",       "(IJ)[B",(void *)android_mtp_MtpDevice_get_object},
     {"native_get_partial_object", "(IJJ[B)J", (void *)android_mtp_MtpDevice_get_partial_object},
     {"native_get_thumbnail",    "(I)[B",(void *)android_mtp_MtpDevice_get_thumbnail},
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
-    {"native_get_parent",       "(I)J", (void *)android_mtp_MtpDevice_get_parent},
-    {"native_get_storage_id",   "(I)J", (void *)android_mtp_MtpDevice_get_storage_id},
+    {"native_get_parent",       "(I)I", (void *)android_mtp_MtpDevice_get_parent},
+    {"native_get_storage_id",   "(I)I", (void *)android_mtp_MtpDevice_get_storage_id},
     {"native_import_file",      "(ILjava/lang/String;)Z",
                                         (void *)android_mtp_MtpDevice_import_file},
     {"native_import_file",      "(II)Z",(void *)android_mtp_MtpDevice_import_file_to_fd},
-    {"native_send_object",      "(III)Z",(void *)android_mtp_MtpDevice_send_object},
+    {"native_send_object",      "(IJI)Z",(void *)android_mtp_MtpDevice_send_object},
     {"native_send_object_info", "(Landroid/mtp/MtpObjectInfo;)Landroid/mtp/MtpObjectInfo;",
                                         (void *)android_mtp_MtpDevice_send_object_info},
     {"native_submit_event_request",  "()I", (void *)android_mtp_MtpDevice_submit_event_request},

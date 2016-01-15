@@ -153,10 +153,11 @@ public final class MtpDevice {
      *
      * @param objectHandle handle of the object to read
      * @param objectSize the size of the object (this should match
-     *      {@link MtpObjectInfo#getCompressedSize}
+     *      {@link MtpObjectInfo#getCompressedSize})
      * @return the object's data, or null if reading fails
      */
     public byte[] getObject(int objectHandle, int objectSize) {
+        Preconditions.checkArgumentNonnegative(objectSize, "objectSize should not be negative");
         return native_get_object(objectHandle, objectSize);
     }
 
@@ -284,7 +285,7 @@ public final class MtpDevice {
      * @param descriptor file descriptor to read the data from.
      * @return true if the file transfer succeeds
      */
-    public boolean sendObject(int objectHandle, int size, ParcelFileDescriptor descriptor) {
+    public boolean sendObject(int objectHandle, long size, ParcelFileDescriptor descriptor) {
         return native_send_object(objectHandle, size, descriptor.getFd());
     }
 
@@ -343,16 +344,16 @@ public final class MtpDevice {
     private native MtpStorageInfo native_get_storage_info(int storageId);
     private native int[] native_get_object_handles(int storageId, int format, int objectHandle);
     private native MtpObjectInfo native_get_object_info(int objectHandle);
-    private native byte[] native_get_object(int objectHandle, int objectSize);
+    private native byte[] native_get_object(int objectHandle, long objectSize);
     private native long native_get_partial_object(
             int objectHandle, long offset, long objectSize, byte[] buffer) throws IOException;
     private native byte[] native_get_thumbnail(int objectHandle);
     private native boolean native_delete_object(int objectHandle);
-    private native long native_get_parent(int objectHandle);
-    private native long native_get_storage_id(int objectHandle);
+    private native int native_get_parent(int objectHandle);
+    private native int native_get_storage_id(int objectHandle);
     private native boolean native_import_file(int objectHandle, String destPath);
     private native boolean native_import_file(int objectHandle, int fd);
-    private native boolean native_send_object(int objectHandle, int size, int fd);
+    private native boolean native_send_object(int objectHandle, long size, int fd);
     private native MtpObjectInfo native_send_object_info(MtpObjectInfo info);
     private native int native_submit_event_request();
     private native MtpEvent native_reap_event_request(int handle);
