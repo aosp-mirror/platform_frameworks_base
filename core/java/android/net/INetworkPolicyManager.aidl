@@ -52,6 +52,11 @@ interface INetworkPolicyManager {
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
 
+    /** Control which applications can be exempt from background data restrictions */
+    void addRestrictBackgroundWhitelistedUid(int uid);
+    void removeRestrictBackgroundWhitelistedUid(int uid);
+    int[] getRestrictBackgroundWhitelistedUids();
+
     void setDeviceIdleMode(boolean enabled);
 
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
