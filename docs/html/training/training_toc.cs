@@ -1098,6 +1098,10 @@
                ja-lang="再生中カードを表示する">
               Displaying a Now Playing Card</a>
           </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/options.html">
+              Enabling Background Playback</a>
+          </li>
         </ul>
       </li>
 
