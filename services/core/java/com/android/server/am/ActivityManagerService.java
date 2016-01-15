@@ -18166,7 +18166,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void moveTasksToFullscreenStack(int fromStackId) {
+    public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTasksToFullscreenStack()");
         if (fromStackId == HOME_STACK_ID) {
             throw new IllegalArgumentException("You can't move tasks from the home stack.");
@@ -18176,9 +18176,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
             if (stack != null) {
                 final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                for (int i = tasks.size() - 1; i >= 0; i--) {
-                    mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
-                            FULLSCREEN_WORKSPACE_STACK_ID, 0);
+                final int size = tasks.size();
+                if (onTop) {
+                    for (int i = 0; i < size; i++) {
+                        mStackSupervisor.moveTaskToStackLocked(tasks.get(i).taskId,
+                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, !FORCE_FOCUS,
+                                "moveTasksToFullscreenStack", ANIMATE);
+                    }
+                } else {
+                    for (int i = size - 1; i >= 0; i--) {
+                        mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
+                                FULLSCREEN_WORKSPACE_STACK_ID, 0);
+                    }
                 }
             }
             Binder.restoreCallingIdentity(origId);
