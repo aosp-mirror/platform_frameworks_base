@@ -182,13 +182,6 @@ interface ITelephony {
     boolean isRadioOnForSubscriber(int subId, String callingPackage);
 
     /**
-     * Check if the SIM pin lock is enabled.
-     * @return true if the SIM pin lock is enabled.
-     * @param callingPackage The package making the call.
-     */
-    boolean isSimPinEnabled(String callingPackage);
-
-    /**
      * Supply a pin to unlock the SIM.  Blocks until a result is determined.
      * @param pin The pin to check.
      * @return whether the operation was a success.

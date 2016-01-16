@@ -3998,19 +3998,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    public boolean isSimPinEnabled() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.isSimPinEnabled(getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isSimPinEnabled", e);
-        }
-        return false;
-    }
-
-    /** @hide */
-    @SystemApi
     public boolean supplyPin(String pin) {
         try {
             ITelephony telephony = getITelephony();
