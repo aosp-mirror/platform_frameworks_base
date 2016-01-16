@@ -38,8 +38,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
-                R.dimen.notification_material_rounded_rect_radius);
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {

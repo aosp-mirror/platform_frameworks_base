@@ -137,7 +137,7 @@
 
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
-    <dimen name="standard_notification_panel_width">416dp</dimen><!-- includes notification_side_padding on each side -->
+    <dimen name="standard_notification_panel_width">416dp</dimen>
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
     <!-- Gravity for the notification panel -->
@@ -297,9 +297,6 @@
 
     <!-- The height of the area before the top stack in which the notifications slow down -->
     <dimen name="top_stack_slow_down_length">12dp</dimen>
-
-    <!-- The side padding of the notifications-->
-    <dimen name="notification_side_padding">8dp</dimen>
 
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">1dp</dimen>

@@ -258,7 +258,6 @@ public class VolumeDialog implements TunerService.Tunable {
         if (w > max) {
             w = max;
         }
-        w -= mContext.getResources().getDimensionPixelSize(R.dimen.notification_side_padding) * 2;
         lp.width = w;
         mDialogView.setLayoutParams(lp);
     }

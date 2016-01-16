@@ -19,8 +19,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
-    android:layout_marginLeft="@dimen/notification_side_padding"
-    android:layout_marginRight="@dimen/notification_side_padding"
     android:background="@drawable/volume_dialog_background"
     android:translationZ="4dp" >
 

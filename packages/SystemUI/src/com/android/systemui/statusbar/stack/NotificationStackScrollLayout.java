@@ -103,7 +103,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mInitialTouchX;
     private float mInitialTouchY;
 
-    private int mSidePaddings;
     private Paint mDebugPaint;
     private int mContentHeight;
     private int mCollapsedSize;
@@ -298,9 +297,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverflingDistance = configuration.getScaledOverflingDistance();
-
-        mSidePaddings = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_side_padding);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
         mBottomStackPeekSize = context.getResources()
@@ -337,10 +333,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int mode = MeasureSpec.getMode(widthMeasureSpec);
-        int size = MeasureSpec.getSize(widthMeasureSpec);
-        int childMeasureSpec = MeasureSpec.makeMeasureSpec(size - 2 * mSidePaddings, mode);
-        measureChildren(childMeasureSpec, heightMeasureSpec);
+        measureChildren(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override

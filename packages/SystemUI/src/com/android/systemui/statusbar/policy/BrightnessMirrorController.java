@@ -103,10 +103,5 @@ public class BrightnessMirrorController {
         lp.gravity = mBrightnessMirror.getResources().getInteger(
                 R.integer.notification_panel_layout_gravity);
         mBrightnessMirror.setLayoutParams(lp);
-
-        int padding = mBrightnessMirror.getResources().getDimensionPixelSize(
-                R.dimen.notification_side_padding);
-        mBrightnessMirror.setPadding(padding, mBrightnessMirror.getPaddingTop(),
-                padding, mBrightnessMirror.getPaddingBottom());
     }
 }

@@ -87,9 +87,7 @@
             android:id="@+id/quick_settings_panel"
             android:background="#0000"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/notification_side_padding"
-            android:layout_marginRight="@dimen/notification_side_padding" />
+            android:layout_height="wrap_content" />
 
     </com.android.systemui.tuner.AutoScrollView>
 
