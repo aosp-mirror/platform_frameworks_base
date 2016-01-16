@@ -318,6 +318,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() != MotionEvent.ACTION_DOWN
+                || !isChildInGroup() || isGroupExpanded()) {
+            return super.onTouchEvent(event);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     protected boolean shouldHideBackground() {
         return super.shouldHideBackground() || mShowNoBackground;
     }
