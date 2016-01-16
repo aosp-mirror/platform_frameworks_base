@@ -182,7 +182,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private float mMinTopOverScrollToEscape;
     private int mIntrinsicPadding;
-    private int mNotificationTopPadding;
     private float mStackTranslation;
     private float mTopPaddingOverflow;
     private boolean mDontReportNextOverScroll;
@@ -309,8 +308,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         updatePadding(mAmbientState.isDimmed());
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
-        mNotificationTopPadding = getResources().getDimensionPixelSize(
-                R.dimen.notifications_top_padding);
         mCollapseSecondCardPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_collapse_second_card_padding);
     }
@@ -1482,7 +1479,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void updateTopPadding(float qsHeight, int scrollY, boolean animate,
             boolean ignoreIntrinsicPadding) {
-        float start = qsHeight - scrollY + mNotificationTopPadding;
+        float start = qsHeight - scrollY;
         float stackHeight = getHeight() - start;
         int minStackHeight = getMinStackHeight();
         if (stackHeight <= minStackHeight) {
@@ -1496,10 +1493,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         setTopPadding(ignoreIntrinsicPadding ? (int) start : clampPadding((int) start),
                 animate);
         setStackHeight(mLastSetStackHeight);
-    }
-
-    public int getNotificationTopPadding() {
-        return mNotificationTopPadding;
     }
 
     public int getMinStackHeight() {

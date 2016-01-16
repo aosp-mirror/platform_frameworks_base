@@ -104,7 +104,6 @@ public class NotificationPanelView extends PanelView implements
     private View mQsNavbarScrim;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private NotificationStackScrollLayout mNotificationStackScroller;
-    private int mNotificationTopPadding;
     private boolean mAnimateNextTopPaddingChange;
 
     private int mTrackingPointer;
@@ -281,8 +280,6 @@ public class NotificationPanelView extends PanelView implements
     @Override
     protected void loadDimens() {
         super.loadDimens();
-        mNotificationTopPadding = getResources().getDimensionPixelSize(
-                R.dimen.notifications_top_padding);
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.4f);
         mStatusBarMinHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
@@ -400,8 +397,8 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBarState != StatusBarState.KEYGUARD) {
             int bottom = mHeader.getCollapsedHeight();
             stackScrollerPadding = mStatusBarState == StatusBarState.SHADE
-                    ? bottom + mQsPeekHeight + mNotificationTopPadding
-                    : mKeyguardStatusBar.getHeight() + mNotificationTopPadding;
+                    ? bottom + mQsPeekHeight
+                    : mKeyguardStatusBar.getHeight();
             mTopPaddingAdjustment = 0;
         } else {
             mClockPositionAlgorithm.setup(
@@ -1380,8 +1377,7 @@ public class NotificationPanelView extends PanelView implements
             // on Keyguard, maxQs denotes the top padding from the quick settings panel. We need to
             // take the maximum and linearly interpolate with the panel expansion for a nice motion.
             int maxNotifications = mClockPositionResult.stackScrollerPadding
-                    - mClockPositionResult.stackScrollerPaddingAdjustment
-                    - mNotificationTopPadding;
+                    - mClockPositionResult.stackScrollerPaddingAdjustment;
             int maxQs = getTempQsMaxExpansion();
             int max = mStatusBarState == StatusBarState.KEYGUARD
                     ? Math.max(maxNotifications, maxQs)
@@ -1395,7 +1391,7 @@ public class NotificationPanelView extends PanelView implements
             // We can only do the smoother transition on Keyguard when we also are not collapsing
             // from a scrolled quick settings.
             return interpolate(getQsExpansionFraction(),
-                    mNotificationStackScroller.getIntrinsicPadding() - mNotificationTopPadding,
+                    mNotificationStackScroller.getIntrinsicPadding(),
                     mQsMaxExpansionHeight);
         } else {
             return mQsExpansionHeight;
@@ -1625,15 +1621,13 @@ public class NotificationPanelView extends PanelView implements
             maxQsHeight = (int) mQsSizeChangeAnimator.getAnimatedValue();
         }
         float totalHeight = Math.max(
-                maxQsHeight + mNotificationStackScroller.getNotificationTopPadding(),
-                mStatusBarState == StatusBarState.KEYGUARD
+                maxQsHeight, mStatusBarState == StatusBarState.KEYGUARD
                         ? mClockPositionResult.stackScrollerPadding - mTopPaddingAdjustment
                         : 0)
                 + notificationHeight;
         if (totalHeight > mNotificationStackScroller.getHeight()) {
             float fullyCollapsedHeight = maxQsHeight
                     + mNotificationStackScroller.getMinStackHeight()
-                    + mNotificationStackScroller.getNotificationTopPadding()
                     - getScrollViewScrollY();
             totalHeight = Math.max(fullyCollapsedHeight, mNotificationStackScroller.getHeight());
         }
@@ -1727,7 +1721,7 @@ public class NotificationPanelView extends PanelView implements
         float translation = stackTranslation / HEADER_RUBBERBAND_FACTOR;
         if (mHeadsUpManager.hasPinnedHeadsUp() || mIsExpansionFromHeadsUp) {
             translation = mNotificationStackScroller.getTopPadding() + stackTranslation
-                    - mNotificationTopPadding - mQsMinExpansionHeight;
+                    - mQsMinExpansionHeight;
         }
         return Math.min(0, translation);
     }

@@ -62,7 +62,6 @@ public class StackScrollAlgorithm {
     private int mTopStackTotalSize;
     private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
-    private int mNotificationsTopPadding;
     private int mBottomStackSlowDownLength;
     private int mTopStackSlowDownLength;
     private int mCollapseSecondCardPadding;
@@ -107,8 +106,6 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
         mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
-        mNotificationsTopPadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.notifications_top_padding);
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
         mTopStackPeekSize = context.getResources()
@@ -517,8 +514,7 @@ public class StackScrollAlgorithm {
                         bottomPosition);
             }
             if (row.isPinned()) {
-                childState.yTranslation = Math.max(childState.yTranslation,
-                        mNotificationsTopPadding);
+                childState.yTranslation = Math.max(childState.yTranslation, 0);
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 if (!isTopEntry) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at

@@ -62,8 +62,7 @@
                 <View
                     android:id="@+id/reserve_notification_space"
                     android:layout_height="@dimen/min_stack_height"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="@dimen/notifications_top_padding" />
+                    android:layout_width="match_parent" />
             </LinearLayout>
         </com.android.systemui.statusbar.phone.ObservableScrollView>
 
