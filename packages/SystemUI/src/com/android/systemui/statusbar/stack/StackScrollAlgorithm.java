@@ -49,7 +49,6 @@ public class StackScrollAlgorithm {
     private int mBottomStackPeekSize;
     private int mZDistanceBetweenElements;
     private int mZBasicHeight;
-    private int mRoundedRectCornerRadius;
 
     private StackIndentationFunctor mTopStackIndentationFunctor;
     private StackIndentationFunctor mBottomStackIndentationFunctor;
@@ -123,8 +122,6 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
         mTopStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.top_stack_slow_down_length);
-        mRoundedRectCornerRadius = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_material_rounded_rect_radius);
         mCollapseSecondCardPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_collapse_second_card_padding);
         mScaleDimmed = context.getResources().getDisplayMetrics().densityDpi
@@ -225,16 +222,6 @@ public class StackScrollAlgorithm {
             } else {
                 clipHeight = newNotificationEnd - previousNotificationEnd;
                 clipHeight = Math.max(0.0f, clipHeight);
-                if (clipHeight != 0.0f) {
-
-                    // In the unlocked shade we have to clip a little bit higher because of the rounded
-                    // corners of the notifications, but only if we are not fully overlapped by
-                    // the top card.
-                    float clippingCorrection = state.dimmed
-                            ? 0
-                            : mRoundedRectCornerRadius * state.scale;
-                    clipHeight += clippingCorrection;
-                }
             }
 
             updateChildClippingAndBackground(state, newHeight, clipHeight,

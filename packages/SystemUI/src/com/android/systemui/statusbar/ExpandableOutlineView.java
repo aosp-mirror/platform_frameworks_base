@@ -32,7 +32,6 @@ import com.android.systemui.R;
 public abstract class ExpandableOutlineView extends ExpandableView {
 
     private final Rect mOutlineRect = new Rect();
-    protected final int mRoundedRectCornerRadius;
     private boolean mCustomOutline;
     private float mOutlineAlpha = 1f;
 
@@ -47,7 +46,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                             getWidth(),
                             Math.max(getActualHeight(), mClipTopAmount));
                 } else {
-                    outline.setRoundRect(mOutlineRect, mRoundedRectCornerRadius);
+                    outline.setRect(mOutlineRect);
                 }
                 outline.setAlpha(mOutlineAlpha);
             }

@@ -65,14 +65,6 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void notifyContentUpdated(StatusBarNotification notification) {};
 
     /**
-     * @return true if this template might need to be clipped with a round rect to make it look
-     *         nice, false otherwise
-     */
-    public boolean needsRoundRectClipping() {
-        return false;
-    }
-
-    /**
      * Update the appearance of the expand button.
      *
      * @param expandable should this view be expandable
