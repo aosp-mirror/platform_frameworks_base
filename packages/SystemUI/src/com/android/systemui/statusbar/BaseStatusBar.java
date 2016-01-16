@@ -1954,8 +1954,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + " alertAgain=" + alertAgain);
         }
 
+        final StatusBarNotification oldNotification = entry.notification;
         entry.notification = notification;
-        mGroupManager.onEntryUpdated(entry, entry.notification);
+        mGroupManager.onEntryUpdated(entry, oldNotification);
 
         boolean updateSuccessful = false;
         if (applyInPlace) {
