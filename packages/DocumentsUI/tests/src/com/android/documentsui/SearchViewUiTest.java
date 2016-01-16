@@ -259,12 +259,11 @@ public class SearchViewUiTest extends InstrumentationTestCase {
 
         mBot.openRoot(ROOT_1_ID);
 
-        // This assert is failing right now - fix will come with SearchManager refactoring
-        // assertDefaultTestDir1();
-        //
-        // mBot.openRoot(ROOT_0_ID);
-        //
-        // assertDefaultTestDir0();
+         assertDefaultTestDir1();
+
+         mBot.openRoot(ROOT_0_ID);
+
+         assertDefaultTestDir0();
     }
 
     private void assertDefaultTestDir0() throws UiObjectNotFoundException {
@@ -280,7 +279,7 @@ public class SearchViewUiTest extends InstrumentationTestCase {
         assertFalse(mSearchTextField.exists());
         assertTrue(mDocsList.exists());
         assertEquals(2, mDocsList.getChildCount());
-        mBot.assertHasDocuments("anotherFile0.log", "poodles.txt");
+        mBot.assertHasDocuments("anotherFile0.log", "poodles.text");
     }
 
     private void assertSearchTextField(boolean isFocused, String query)

@@ -38,24 +38,21 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
+import com.android.documentsui.SearchManager;
+import com.android.documentsui.SearchManager.SearchManagerListener;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -72,7 +69,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends Activity implements SearchManagerListener {
 
     static final String EXTRA_STATE = "state";
 
@@ -91,7 +88,7 @@ public abstract class BaseActivity extends Activity {
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
 
     abstract void onTaskFinished(Uri... uris);
-    abstract void onDirectoryChanged(int anim);
+    abstract void refreshDirectory(int anim);
     abstract void updateActionBar();
     abstract void saveStackBlocking();
     abstract State buildState();
@@ -121,7 +118,7 @@ public abstract class BaseActivity extends Activity {
                     }
                 });
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
-        mSearchManager = new SearchManager();
+        mSearchManager = new SearchManager(this);
 
         // Base classes must update result in their onCreate.
         setResult(Activity.RESULT_CANCELED);
@@ -213,7 +210,7 @@ public abstract class BaseActivity extends Activity {
         // Otherwise we delegate loading data from disk to a task
         // to ensure a responsive ui.
         if (mRoots.isRecentsRoot(root)) {
-            onCurrentDirectoryChanged(ANIM_SIDE);
+            refreshCurrentRootAndDirectory(ANIM_SIDE);
         } else {
             new PickRootTask(root, true).executeOnExecutor(getExecutorForCurrentDirectory());
         }
@@ -319,19 +316,19 @@ public abstract class BaseActivity extends Activity {
     void openContainerDocument(DocumentInfo doc) {
         checkArgument(doc.isContainer());
         mState.pushDocument(doc);
-        onCurrentDirectoryChanged(ANIM_DOWN);
+        refreshCurrentRootAndDirectory(ANIM_DOWN);
     }
 
     /**
-     * Call this when directory changes. Prior to root fragment update
-     * the (abstract) directoryChanged method will be called.
+     * Refreshes the content of the director and the menu/action bar.
+     * The current directory name and selection will get updated.
      * @param anim
      */
-    // TODO: Refactor the usage of the method - now it is called not only when the directory
-    // changed, but also to refresh the content of the directory while searching
-    final void onCurrentDirectoryChanged(int anim) {
+    final void refreshCurrentRootAndDirectory(int anim) {
+        mSearchManager.cancelSearch();
+
         mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
-        onDirectoryChanged(anim);
+        refreshDirectory(anim);
 
         final RootsFragment roots = RootsFragment.get(getFragmentManager());
         if (roots != null) {
@@ -340,10 +337,28 @@ public abstract class BaseActivity extends Activity {
 
         updateActionBar();
 
-        // Prevents searchView from being recreated while searching
-        if (!mSearchManager.isSearching()) {
-            invalidateOptionsMenu();
-        }
+        invalidateOptionsMenu();
+    }
+
+    /**
+     * Called when search results changed.
+     * Refreshes the content of the directory. It doesn't refresh elements on the action bar.
+     * e.g. The current directory name displayed on the action bar won't get updated.
+     */
+    @Override
+    public void onSearchChanged() {
+        mDirectoryContainer.setDrawDisappearingFirst(false);
+        refreshDirectory(ANIM_NONE);
+    }
+
+    /**
+     * Called when search query changed.
+     * Updates the state object.
+     * @param query - New query
+     */
+    @Override
+    public void onSearchQueryChanged(String query) {
+        mState.currentSearch = query;
     }
 
     final List<String> getExcludedAuthorities() {
@@ -479,7 +494,7 @@ public abstract class BaseActivity extends Activity {
             mDrawer.setOpen(false);
         } else if (size > 1) {
             mState.stack.pop();
-            onCurrentDirectoryChanged(ANIM_UP);
+            refreshCurrentRootAndDirectory(ANIM_UP);
         } else {
             super.onBackPressed();
         }
@@ -490,7 +505,7 @@ public abstract class BaseActivity extends Activity {
             // Update the restored stack to ensure we have freshest data
             stack.updateDocuments(getContentResolver());
             mState.setStack(stack);
-            onCurrentDirectoryChanged(ANIM_SIDE);
+            refreshCurrentRootAndDirectory(ANIM_SIDE);
 
         } catch (FileNotFoundException e) {
             Log.w(mTag, "Failed to restore stack: " + e);
@@ -579,7 +594,7 @@ public abstract class BaseActivity extends Activity {
         protected void onPostExecute(Void result) {
             if (isDestroyed()) return;
             mState.restored = true;
-            onCurrentDirectoryChanged(ANIM_NONE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
             onStackRestored(mRestoredStack, mExternal);
         }
     }
@@ -659,7 +674,7 @@ public abstract class BaseActivity extends Activity {
             while (mState.stack.size() > position + 1) {
                 mState.popDocument();
             }
-            onCurrentDirectoryChanged(ANIM_UP);
+            refreshCurrentRootAndDirectory(ANIM_UP);
         }
 
         @Override
@@ -728,170 +743,6 @@ public abstract class BaseActivity extends Activity {
             }
 
             return convertView;
-        }
-    }
-
-    /**
-     * Facade over the various search parts in the menu.
-     */
-    final class SearchManager implements
-            SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener,
-            DocumentsToolBar.OnActionViewCollapsedListener {
-
-        private boolean mSearchExpanded;
-        private boolean mIgnoreNextClose;
-        private boolean mIgnoreNextCollapse;
-
-        private DocumentsToolBar mActionBar;
-        private MenuItem mMenu;
-        private SearchView mView;
-
-        public void install(DocumentsToolBar actionBar) {
-            assert(mActionBar == null);
-            mActionBar = actionBar;
-            mMenu = actionBar.getSearchMenu();
-            mView = (SearchView) mMenu.getActionView();
-
-            mActionBar.setOnActionViewCollapsedListener(this);
-            mView.setOnQueryTextListener(this);
-            mView.setOnCloseListener(this);
-            mView.setOnSearchClickListener(this);
-            mView.setOnQueryTextFocusChangeListener(this);
-        }
-
-        /**
-         * @param root Info about the current directory.
-         */
-        void update(RootInfo root) {
-            if (mMenu == null) {
-                Log.d(mTag, "update called before Search MenuItem installed.");
-                return;
-            }
-
-            if (mState.currentSearch != null) {
-                mMenu.expandActionView();
-
-                mView.setIconified(false);
-                mView.clearFocus();
-                mView.setQuery(mState.currentSearch, false);
-            } else {
-                mView.clearFocus();
-                if (!mView.isIconified()) {
-                    mIgnoreNextClose = true;
-                    mView.setIconified(true);
-                }
-
-                if (mMenu.isActionViewExpanded()) {
-                    mIgnoreNextCollapse = true;
-                    mMenu.collapseActionView();
-                }
-            }
-
-            showMenu(root != null
-                    && ((root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0));
-        }
-
-        void showMenu(boolean visible) {
-            if (mMenu == null) {
-                Log.d(mTag, "showMenu called before Search MenuItem installed.");
-                return;
-            }
-
-            mMenu.setVisible(visible);
-            if (!visible) {
-                mState.currentSearch = null;
-            }
-        }
-
-        /**
-         * Cancels current search operation.
-         * @return True if it cancels search. False if it does not operate
-         *     search currently.
-         */
-        boolean cancelSearch() {
-            if (isExpanded() || isSearching()) {
-                // If the query string is not empty search view won't get iconified
-                mView.setQuery("", false);
-                mView.setIconified(true);
-                return true;
-            }
-            return false;
-        }
-
-        boolean isSearching() {
-            return mState.currentSearch != null;
-        }
-
-        boolean isExpanded() {
-            return mSearchExpanded;
-        }
-
-        /**
-         * Clears the search.
-         * @return True if the default behavior of clearing/dismissing SearchView should be
-         *      overridden. False otherwise.
-         */
-        @Override
-        public boolean onClose() {
-            mSearchExpanded = false;
-            if (mIgnoreNextClose) {
-                mIgnoreNextClose = false;
-                return false;
-            }
-
-            mView.setBackgroundColor(
-                    getResources().getColor(android.R.color.transparent, null));
-
-            // Refresh the directory if a search was done
-            if(mState.currentSearch != null) {
-                mState.currentSearch = null;
-                onCurrentDirectoryChanged(ANIM_NONE);
-            }
-
-            return false;
-        }
-
-        /**
-         * Sets mSearchExpanded.
-         * Called when search icon is clicked to start search.
-         * Used to detect when the view expanded instead of onMenuItemActionExpand, because
-         * SearchView has showAsAction set to always and onMenuItemAction* methods are not called.
-         */
-        @Override
-        public void onClick (View v) {
-            mSearchExpanded = true;
-            mView.setBackgroundColor(
-                    getResources().getColor(R.color.menu_search_background, null));
-        }
-
-        @Override
-        public boolean onQueryTextSubmit(String query) {
-            mState.currentSearch = query;
-            mView.clearFocus();
-            onCurrentDirectoryChanged(ANIM_NONE);
-            return true;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String newText) {
-            return false;
-        }
-
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if(!hasFocus) {
-                if(mState.currentSearch == null) {
-                    mView.setIconified(true);
-                }
-                else if(TextUtils.isEmpty(mView.getQuery())) {
-                    cancelSearch();
-                }
-            }
-        }
-
-        @Override
-        public void onActionViewCollapsed() {
-            updateActionBar();
         }
     }
 
