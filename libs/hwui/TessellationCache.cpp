@@ -160,45 +160,6 @@ private:
 // Shadow tessellation task processing
 ///////////////////////////////////////////////////////////////////////////////
 
-class ShadowTask : public Task<TessellationCache::vertexBuffer_pair_t*> {
-public:
-    ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
-            const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
-            const Vector3& lightCenter, float lightRadius)
-        : drawTransform(*drawTransform)
-        , localClip(localClip)
-        , opaque(opaque)
-        , casterPerimeter(*casterPerimeter)
-        , transformXY(*transformXY)
-        , transformZ(*transformZ)
-        , lightCenter(lightCenter)
-        , lightRadius(lightRadius) {
-    }
-
-    ~ShadowTask() {
-        TessellationCache::vertexBuffer_pair_t* bufferPair = getResult();
-        delete bufferPair->getFirst();
-        delete bufferPair->getSecond();
-        delete bufferPair;
-    }
-
-    /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
-     * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
-     * certain Allocators are destroyed before trim() is called to flush incomplete tasks.
-     *
-     * These deep copies could be avoided, long term, by cancelling or flushing outstanding tasks
-     * before tearning down single-frame LinearAllocators.
-     */
-    const Matrix4 drawTransform;
-    const Rect localClip;
-    bool opaque;
-    const SkPath casterPerimeter;
-    const Matrix4 transformXY;
-    const Matrix4 transformZ;
-    const Vector3 lightCenter;
-    const float lightRadius;
-};
-
 static void mapPointFakeZ(Vector3& point, const mat4* transformXY, const mat4* transformZ) {
     // map z coordinate with true 3d matrix
     point.z = transformZ->mapZ(point);
@@ -288,7 +249,7 @@ public:
     ~ShadowProcessor() {}
 
     virtual void onProcess(const sp<Task<TessellationCache::vertexBuffer_pair_t*> >& task) override {
-        ShadowTask* t = static_cast<ShadowTask*>(task.get());
+        TessellationCache::ShadowTask* t = static_cast<TessellationCache::ShadowTask*>(task.get());
         ATRACE_NAME("shadow tessellation");
 
         VertexBuffer* ambientBuffer = new VertexBuffer;
@@ -413,6 +374,29 @@ void TessellationCache::getShadowBuffers(const Matrix4* drawTransform, const Rec
     }
     LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
     outBuffers = *(task->getResult());
+}
+
+sp<TessellationCache::ShadowTask> TessellationCache::getShadowTask(
+        const Matrix4* drawTransform, const Rect& localClip,
+        bool opaque, const SkPath* casterPerimeter,
+        const Matrix4* transformXY, const Matrix4* transformZ,
+        const Vector3& lightCenter, float lightRadius) {
+    ShadowDescription key(casterPerimeter, drawTransform);
+    ShadowTask* task = static_cast<ShadowTask*>(mShadowCache.get(key));
+    if (!task) {
+        precacheShadows(drawTransform, localClip, opaque, casterPerimeter,
+                transformXY, transformZ, lightCenter, lightRadius);
+        task = static_cast<ShadowTask*>(mShadowCache.get(key));
+    }
+    LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
+    return task;
+}
+
+TessellationCache::ShadowTask::~ShadowTask() {
+    TessellationCache::vertexBuffer_pair_t* bufferPair = getResult();
+    delete bufferPair->getFirst();
+    delete bufferPair->getSecond();
+    delete bufferPair;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

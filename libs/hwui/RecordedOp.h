@@ -21,6 +21,7 @@
 #include "Matrix.h"
 #include "Rect.h"
 #include "RenderNode.h"
+#include "TessellationCache.h"
 #include "utils/LinearAllocator.h"
 #include "Vector.h"
 
@@ -333,25 +334,13 @@ struct RoundRectPropsOp : RecordedOp {
  * State construction handles these properties specially, ignoring matrix/bounds.
  */
 struct ShadowOp : RecordedOp {
-    ShadowOp(const RenderNodeOp& casterOp, float casterAlpha, const SkPath* casterPath,
-            const Rect& localClipRect, const Vector3& lightCenter)
+    ShadowOp(sp<TessellationCache::ShadowTask>& shadowTask, float casterAlpha)
             : RecordedOp(RecordedOpId::ShadowOp, Rect(), Matrix4::identity(), nullptr, nullptr)
-            , shadowMatrixXY(casterOp.localMatrix)
-            , shadowMatrixZ(casterOp.localMatrix)
-            , casterAlpha(casterAlpha)
-            , casterPath(casterPath)
-            , localClipRect(localClipRect)
-            , lightCenter(lightCenter) {
-        const RenderNode& node = *casterOp.renderNode;
-        node.applyViewPropertyTransforms(shadowMatrixXY, false);
-        node.applyViewPropertyTransforms(shadowMatrixZ, true);
+            , shadowTask(shadowTask)
+            , casterAlpha(casterAlpha) {
     };
-    Matrix4 shadowMatrixXY;
-    Matrix4 shadowMatrixZ;
+    sp<TessellationCache::ShadowTask> shadowTask;
     const float casterAlpha;
-    const SkPath* casterPath;
-    const Rect localClipRect;
-    const Vector3 lightCenter;
 };
 
 struct SimpleRectsOp : RecordedOp { // Filled, no AA (TODO: better name?)

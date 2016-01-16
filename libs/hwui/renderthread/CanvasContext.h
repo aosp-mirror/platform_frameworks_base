@@ -31,6 +31,7 @@
 #if HWUI_NEW_OPS
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "FrameBuilder.h"
 #endif
 
 #include <cutils/compiler.h>
@@ -197,7 +198,7 @@ private:
     OpenGLRenderer* mCanvas = nullptr;
 #if HWUI_NEW_OPS
     BakedOpRenderer::LightInfo mLightInfo;
-    Vector3 mLightCenter = { 0, 0, 0 };
+    FrameBuilder::LightGeometry mLightGeometry = { {0, 0, 0}, 0 };
 #endif
 
     bool mHaveNewSurface = false;

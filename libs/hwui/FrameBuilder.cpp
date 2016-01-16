@@ -32,17 +32,11 @@ namespace uirenderer {
 
 FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
-        const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter)
-        : FrameBuilder(layers, clip, viewportWidth, viewportHeight, nodes, lightCenter,
-                Rect(0, 0, 0, 0)) {
-}
-
-
-FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
-        uint32_t viewportWidth, uint32_t viewportHeight,
-        const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter,
-        const Rect &contentDrawBounds)
-        : mCanvasState(*this) {
+        const std::vector< sp<RenderNode> >& nodes,
+        const LightGeometry& lightGeometry, const Rect &contentDrawBounds, Caches* caches)
+        : mCanvasState(*this)
+        , mCaches(caches)
+        , mLightRadius(lightGeometry.radius) {
     ATRACE_NAME("prepare drawing commands");
 
     mLayerBuilders.reserve(layers.entries().size());
@@ -54,7 +48,7 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
     mLayerStack.push_back(0);
     mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
             clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
-            lightCenter);
+            lightGeometry.center);
 
     // Render all layers to be updated, in order. Defer in reverse order, so that they'll be
     // updated in the order they're passed in (mLayerBuilders are issued to Renderer in reverse)
@@ -366,13 +360,28 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
         casterPath = frameAllocatedPath;
     }
 
-    ShadowOp* shadowOp = new (mAllocator) ShadowOp(casterNodeOp, casterAlpha, casterPath,
-            mCanvasState.getLocalClipBounds(),
-            mCanvasState.currentSnapshot()->getRelativeLightCenter());
-    BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
-    if (CC_LIKELY(bakedOpState)) {
-        currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
+
+    if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
+        Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
+        Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
+        node.applyViewPropertyTransforms(shadowMatrixXY, false);
+        node.applyViewPropertyTransforms(shadowMatrixZ, true);
+
+        LOG_ALWAYS_FATAL_IF(!mCaches, "Caches needed for shadows");
+        sp<TessellationCache::ShadowTask> task = mCaches->tessellationCache.getShadowTask(
+                mCanvasState.currentTransform(),
+                mCanvasState.getLocalClipBounds(),
+                casterAlpha >= 1.0f,
+                casterPath,
+                &shadowMatrixXY, &shadowMatrixZ,
+                mCanvasState.currentSnapshot()->getRelativeLightCenter(),
+                mLightRadius);
+        ShadowOp* shadowOp = mAllocator.create<ShadowOp>(task, casterAlpha);
+        BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
+                mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
+        if (CC_LIKELY(bakedOpState)) {
+            currentLayer().deferUnmergeableOp(mAllocator, bakedOpState, OpBatchType::Shadow);
+        }
     }
 }
 

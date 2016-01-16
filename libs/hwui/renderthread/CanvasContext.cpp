@@ -33,10 +33,6 @@
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 
-#if HWUI_NEW_OPS
-#include "FrameBuilder.h"
-#endif
-
 #include <cutils/properties.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -152,7 +148,7 @@ bool CanvasContext::pauseSurface(ANativeWindow* window) {
 void CanvasContext::setup(int width, int height, float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
 #if HWUI_NEW_OPS
-    mLightInfo.lightRadius = lightRadius;
+    mLightGeometry.radius = lightRadius;
     mLightInfo.ambientShadowAlpha = ambientShadowAlpha;
     mLightInfo.spotShadowAlpha = spotShadowAlpha;
 #else
@@ -163,7 +159,7 @@ void CanvasContext::setup(int width, int height, float lightRadius,
 
 void CanvasContext::setLightCenter(const Vector3& lightCenter) {
 #if HWUI_NEW_OPS
-    mLightCenter = lightCenter;
+    mLightGeometry.center = lightCenter;
 #else
     if (!mCanvas) return;
     mCanvas->setLightCenter(lightCenter);
@@ -345,7 +341,7 @@ void CanvasContext::draw() {
 
 #if HWUI_NEW_OPS
     FrameBuilder frameBuilder(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
-            mRenderNodes, mLightCenter, mContentDrawBounds);
+            mRenderNodes, mLightGeometry, mContentDrawBounds, &Caches::getInstance());
     mLayerUpdateQueue.clear();
     BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(),
             mOpaque, mLightInfo);

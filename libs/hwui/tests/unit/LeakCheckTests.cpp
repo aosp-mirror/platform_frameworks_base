@@ -27,7 +27,8 @@ using namespace android;
 using namespace android::uirenderer;
 
 const LayerUpdateQueue sEmptyLayerUpdateQueue;
-const Vector3 sLightCenter = {100, 100, 100};
+const FrameBuilder::LightGeometry sLightGeometery = { {100, 100, 100}, 50};
+const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
 
 RENDERTHREAD_TEST(LeakCheck, saveLayerUnclipped_simple) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
@@ -36,12 +37,11 @@ RENDERTHREAD_TEST(LeakCheck, saveLayerUnclipped_simple) {
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
     });
-    BakedOpRenderer::LightInfo lightInfo = {50.0f, 128, 128};
     RenderState& renderState = renderThread.renderState();
     Caches& caches = Caches::getInstance();
 
     FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(200, 200), 200, 200,
-            TestUtils::createSyncedNodeList(node), sLightCenter);
-    BakedOpRenderer renderer(caches, renderState, true, lightInfo);
+            TestUtils::createSyncedNodeList(node), sLightGeometery, nullptr);
+    BakedOpRenderer renderer(caches, renderState, true, sLightInfo);
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
 }
