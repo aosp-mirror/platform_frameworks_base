@@ -19427,6 +19427,7 @@ package android.media {
     method public android.media.AudioDeviceInfo getRoutedDevice();
     method public int getSampleRate();
     method public int getState();
+    method public int getTimestamp(android.media.AudioTimestamp, int);
     method public int read(byte[], int, int);
     method public int read(byte[], int, int, int);
     method public int read(short[], int, int);
@@ -19475,6 +19476,8 @@ package android.media {
 
   public final class AudioTimestamp {
     ctor public AudioTimestamp();
+    field public static final int TIMEBASE_BOOTTIME = 1; // 0x1
+    field public static final int TIMEBASE_MONOTONIC = 0; // 0x0
     field public long framePosition;
     field public long nanoTime;
   }

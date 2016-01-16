@@ -812,6 +812,33 @@ public class AudioRecord
     }
 
     /**
+     * Poll for an {@link AudioTimestamp} on demand.
+     * <p>
+     * The AudioTimestamp reflects the frame delivery information at
+     * the earliest point available in the capture pipeline.
+     * <p>
+     * Calling {@link #startRecording()} following a {@link #stop()} will reset
+     * the frame count to 0.
+     *
+     * @param timestamp a reference to a non-null AudioTimestamp instance.
+     * @param timebase one of
+     *        {@link AudioTimestamp#TIMEBASE_BOOTTIME AudioTimestamp.TIMEBASE_BOOTTIME} or
+     *        {@link AudioTimestamp#TIMEBASE_MONOTONIC AudioTimestamp.TIMEBASE_MONOTONIC}.
+     * @return {@link #SUCCESS} if a timestamp is available,
+     *         or {@link #ERROR_INVALID_OPERATION} if a timestamp not available.
+     */
+     public int getTimestamp(@NonNull AudioTimestamp timestamp,
+             @AudioTimestamp.Timebase int timebase)
+     {
+         if (timestamp == null ||
+                 (timebase != AudioTimestamp.TIMEBASE_BOOTTIME
+                 && timebase != AudioTimestamp.TIMEBASE_MONOTONIC)) {
+             throw new IllegalArgumentException();
+         }
+         return native_get_timestamp(timestamp, timebase);
+     }
+
+    /**
      * Returns the minimum buffer size required for the successful creation of an AudioRecord
      * object, in byte units.
      * Note that this size doesn't guarantee a smooth recording under load, and higher values
@@ -1565,6 +1592,9 @@ public class AudioRecord
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
+
+    private native final int native_get_timestamp(@NonNull AudioTimestamp timestamp,
+            @AudioTimestamp.Timebase int timebase);
 
     //---------------------------------------------------------
     // Utility methods

@@ -54,6 +54,10 @@ struct audio_attributes_fields_t {
 };
 static audio_attributes_fields_t javaAudioAttrFields;
 static audio_record_fields_t     javaAudioRecordFields;
+static struct {
+    jfieldID  fieldFramePosition;     // AudioTimestamp.framePosition
+    jfieldID  fieldNanoTime;          // AudioTimestamp.nanoTime
+} javaAudioTimestampFields;
 
 struct audiorecord_callback_cookie {
     jclass      audioRecord_class;
@@ -678,7 +682,40 @@ static void android_media_AudioRecord_disableDeviceCallback(
     }
 }
 
+// ----------------------------------------------------------------------------
+static jint android_media_AudioRecord_get_timestamp(JNIEnv *env, jobject thiz,
+        jobject timestamp, jint timebase) {
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
 
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioRecord pointer for getTimestamp()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    // TODO Enable.
+#if 0
+    // get the record timestamp
+    ExtendedTimestamp ts;
+    jint status = nativeToJavaStatus(lpRecorder->getExtendedTimestamp(&ts));
+
+    if (status == AUDIO_JAVA_SUCCESS) {
+        // set the data
+        int64_t position, time;
+
+        status = nativeToJavaStatus(ts.getBestTimestamp(&position, &time, timebase));
+        if (status == AUDIO_JAVA_SUCCESS) {
+            env->SetLongField(
+                    timestamp, javaAudioTimestampFields.fieldFramePosition, position);
+            env->SetLongField(
+                    timestamp, javaAudioTimestampFields.fieldNanoTime, time);
+        }
+    }
+    return status;
+#else
+    return (jint)AUDIO_JAVA_INVALID_OPERATION;
+#endif
+}
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -716,6 +753,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_enableDeviceCallback", "()V", (void *)android_media_AudioRecord_enableDeviceCallback},
     {"native_disableDeviceCallback", "()V",
                                         (void *)android_media_AudioRecord_disableDeviceCallback},
+    {"native_get_timestamp", "(Landroid/media/AudioTimestamp;I)I",
+                                       (void *)android_media_AudioRecord_get_timestamp},
 };
 
 // field names found in android/media/AudioRecord.java
@@ -757,6 +796,13 @@ int register_android_media_AudioRecord(JNIEnv *env)
     javaAudioAttrFields.fieldFlags = GetFieldIDOrDie(env, audioAttrClass, "mFlags", "I");
     javaAudioAttrFields.fieldFormattedTags = GetFieldIDOrDie(env,
             audioAttrClass, "mFormattedTags", "Ljava/lang/String;");
+
+    // Get the RecordTimestamp class and fields
+    jclass audioTimestampClass = FindClassOrDie(env, "android/media/AudioTimestamp");
+    javaAudioTimestampFields.fieldFramePosition =
+            GetFieldIDOrDie(env, audioTimestampClass, "framePosition", "J");
+    javaAudioTimestampFields.fieldNanoTime =
+            GetFieldIDOrDie(env, audioTimestampClass, "nanoTime", "J");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
