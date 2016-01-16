@@ -17,11 +17,16 @@
 #include "tests/common/TestUtils.h"
 
 #include <gtest/gtest.h>
+#include <cstdio>
 
 using namespace android::uirenderer;
 
 static void gunitCrashHandler() {
-    FAIL() << "RenderThread fatal exception!";
+    auto testinfo = ::testing::UnitTest::GetInstance()->current_test_info();
+    printf("[  FAILED  ] %s.%s\n", testinfo->test_case_name(),
+            testinfo->name());
+    printf("[  FATAL!  ] RenderThread crashed, aborting tests!\n");
+    fflush(stdout);
 }
 
 static void hookError() {
