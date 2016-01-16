@@ -1265,13 +1265,17 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * Called when the size of the notification panel changes
+     * Called when the notification panel layouts
      */
-    public void onPanelHeightChanged() {
+    public void onPanelLaidOut() {
         if (mState == StatusBarState.KEYGUARD) {
             // Since the number of notifications is determined based on the height of the view, we
             // need to update them.
-            updateRowStates();
+            int maxBefore = getMaxKeyguardNotifications(false /* recompute */);
+            int maxNotifications = getMaxKeyguardNotifications(true /* recompute */);
+            if (maxBefore != maxNotifications) {
+                updateRowStates();
+            }
         }
     }
 
