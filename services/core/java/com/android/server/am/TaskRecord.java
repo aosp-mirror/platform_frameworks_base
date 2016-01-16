@@ -1291,24 +1291,7 @@ final class TaskRecord {
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-
-            final Configuration serviceConfig = mService.mConfiguration;
-            mOverrideConfig = new Configuration(Configuration.EMPTY);
-            // TODO(multidisplay): Update Dp to that of display stack is on.
-            final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-            mOverrideConfig.screenWidthDp =
-                    Math.min((int)(mBounds.width() / density), serviceConfig.screenWidthDp);
-            mOverrideConfig.screenHeightDp =
-                    Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
-            mOverrideConfig.smallestScreenWidthDp =
-                    Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
-            mOverrideConfig.orientation =
-                    (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
-                            ? Configuration.ORIENTATION_PORTRAIT
-                            : Configuration.ORIENTATION_LANDSCAPE;
-            final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
-            mOverrideConfig.screenLayout = Configuration.reduceScreenLayout(
-                    sl, mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
+            mOverrideConfig = calculateOverrideConfig(mBounds);
         }
 
         if (mFullscreen != oldFullscreen) {
@@ -1316,6 +1299,41 @@ final class TaskRecord {
         }
 
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
+    }
+
+    Configuration calculateOverrideConfig(Rect bounds) {
+        final Configuration serviceConfig = mService.mConfiguration;
+        final Configuration config = new Configuration(Configuration.EMPTY);
+        // TODO(multidisplay): Update Dp to that of display stack is on.
+        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        config.screenWidthDp =
+                Math.min((int)(bounds.width() / density), serviceConfig.screenWidthDp);
+        config.screenHeightDp =
+                Math.min((int)(bounds.height() / density), serviceConfig.screenHeightDp);
+        config.smallestScreenWidthDp =
+                Math.min(config.screenWidthDp, config.screenHeightDp);
+        config.orientation = (config.screenWidthDp <= config.screenHeightDp)
+                ? Configuration.ORIENTATION_PORTRAIT
+                : Configuration.ORIENTATION_LANDSCAPE;
+        final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
+        config.screenLayout = Configuration.reduceScreenLayout(
+                sl, config.screenWidthDp, config.screenHeightDp);
+        return config;
+    }
+
+    /**
+     * Using the existing configuration {@param config}, creates a new task override config such
+     * that all the fields that are usually set in an override config are set to the ones in
+     * {@param config}.
+     */
+    Configuration extractOverrideConfig(Configuration config) {
+        final Configuration extracted = new Configuration(Configuration.EMPTY);
+        extracted.screenWidthDp = config.screenWidthDp;
+        extracted.screenHeightDp = config.screenHeightDp;
+        extracted.smallestScreenWidthDp = config.smallestScreenWidthDp;
+        extracted.orientation = config.orientation;
+        extracted.screenLayout = config.screenLayout;
+        return extracted;
     }
 
     Rect updateOverrideConfigurationFromLaunchBounds() {
