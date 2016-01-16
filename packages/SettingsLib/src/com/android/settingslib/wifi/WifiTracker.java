@@ -275,6 +275,9 @@ public class WifiTracker {
     private Collection<ScanResult> fetchScanResults() {
         mScanId++;
         final List<ScanResult> newResults = mWifiManager.getScanResults();
+        if (newResults == null) {
+            return null;
+        }
         for (ScanResult newResult : newResults) {
             if (newResult.SSID == null || newResult.SSID.isEmpty()) {
                 continue;
