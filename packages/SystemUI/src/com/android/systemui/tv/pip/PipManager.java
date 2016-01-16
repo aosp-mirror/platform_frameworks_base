@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -36,6 +37,9 @@ import java.util.List;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
@@ -46,9 +50,14 @@ public class PipManager {
 
     private static PipManager sPipManager;
 
+    private static final int MAX_RUNNING_TASKS_COUNT = 10;
+
     private static final int STATE_NO_PIP = 0;
     private static final int STATE_PIP_OVERLAY = 1;
     private static final int STATE_PIP_MENU = 2;
+
+    private static final int TASK_ID_NO_PIP = -1;
+    private static final int INVALID_RESOURCE_TYPE = -1;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -58,6 +67,8 @@ public class PipManager {
     private Rect mPipBound;
     private Rect mMenuModePipBound;
     private boolean mInitialized;
+    private int mPipTaskId = TASK_ID_NO_PIP;
+
     private final Runnable mOnActivityPinnedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -74,6 +85,7 @@ public class PipManager {
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
             mState = STATE_PIP_OVERLAY;
+            mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             launchPipOverlayActivity();
         }
     };
@@ -86,15 +98,27 @@ public class PipManager {
         }
     };
 
-    private final BroadcastReceiver mPipButtonReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (DEBUG) Log.d(TAG, "PIP button pressed");
-            if (!hasPipTasks()) {
-                startPip();
-            } else if (mState == STATE_PIP_OVERLAY) {
-                showPipMenu();
+            String action = intent.getAction();
+            if (Intent.ACTION_PICTURE_IN_PICTURE_BUTTON.equals(action)) {
+                if (DEBUG) Log.d(TAG, "PIP button pressed");
+                if (!hasPipTasks()) {
+                    startPip();
+                } else if (mState == STATE_PIP_OVERLAY) {
+                    showPipMenu();
+                }
+            } else if (Intent.ACTION_MEDIA_RESOURCE_GRANTED.equals(action)) {
+                String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
+                        INVALID_RESOURCE_TYPE);
+                if (mState != STATE_NO_PIP && packageNames != null && packageNames.length > 0
+                        && resourceType == Intent.EXTRA_MEDIA_RESOURCE_TYPE_VIDEO_CODEC) {
+                    handleMediaResourceGranted(packageNames);
+                }
             }
+
         }
     };
 
@@ -125,7 +149,8 @@ public class PipManager {
         }
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PICTURE_IN_PICTURE_BUTTON);
-        mContext.registerReceiver(mPipButtonReceiver, intentFilter);
+        intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
+        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
     }
 
     private void startPip() {
@@ -142,6 +167,7 @@ public class PipManager {
      */
     public void closePip() {
         mState = STATE_NO_PIP;
+        mPipTaskId = TASK_ID_NO_PIP;
         StackInfo stackInfo = null;
         try {
             stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
@@ -166,6 +192,7 @@ public class PipManager {
      */
     public void movePipToFullscreen() {
         mState = STATE_NO_PIP;
+        mPipTaskId = TASK_ID_NO_PIP;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onMoveToFullscreen();
         }
@@ -248,6 +275,45 @@ public class PipManager {
         } catch (RemoteException e) {
             Log.e(TAG, "getStackInfo failed", e);
             return false;
+        }
+    }
+
+    private void handleMediaResourceGranted(String[] packageNames) {
+        StackInfo fullscreenStack = null;
+        try {
+            fullscreenStack = mActivityManager.getStackInfo(FULLSCREEN_WORKSPACE_STACK_ID);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getStackInfo failed", e);
+        }
+        if (fullscreenStack == null) {
+            return;
+        }
+        int fullscreenTopTaskId = fullscreenStack.taskIds[fullscreenStack.taskIds.length - 1];
+        List<RunningTaskInfo> tasks = null;
+        try {
+            tasks = mActivityManager.getTasks(MAX_RUNNING_TASKS_COUNT, 0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "getTasks failed", e);
+        }
+        if (tasks == null) {
+            return;
+        }
+        boolean wasGrantedInFullscreen = false;
+        boolean wasGrantedInPip = false;
+        for (int i = tasks.size() - 1; i >= 0; --i) {
+            RunningTaskInfo task = tasks.get(i);
+            for (int j = packageNames.length - 1; j >= 0; --j) {
+                if (task.topActivity.getPackageName().equals(packageNames[j])) {
+                    if (task.id == fullscreenTopTaskId) {
+                        wasGrantedInFullscreen = true;
+                    } else if (task.id == mPipTaskId) {
+                        wasGrantedInPip= true;
+                    }
+                }
+            }
+        }
+        if (wasGrantedInFullscreen && !wasGrantedInPip) {
+            closePip();
         }
     }
 
