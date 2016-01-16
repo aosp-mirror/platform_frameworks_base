@@ -299,8 +299,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
         final int orientation = mService.mCurConfiguration.orientation;
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
-                mService.mContext.getResources(),
-                0 /* minFlingVelocityPxPerSecond */, displayWidth, displayHeight,
+                mService.mContext.getResources(), displayWidth, displayHeight,
                 dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds);
         final SnapTarget target = algorithm.calculateNonDismissingSnapTarget(dividerPosition);
 
@@ -552,7 +551,6 @@ public class TaskStack implements DimLayer.DimLayerUser {
             mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
                     mTmpRect2);
             final int position = new DividerSnapAlgorithm(mService.mContext.getResources(),
-                    0 /* minFlingVelocityPxPerSecond */,
                     di.logicalWidth,
                     di.logicalHeight,
                     dockDividerWidth,

@@ -218,7 +218,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             if (mDragMode == DRAG_MODE_DIVIDER) {
                 int position = !mIsVertical ? (int) event.getRawY() : (int) event.getRawX();
                 SnapTarget snapTarget = mDivider.getView().getSnapAlgorithm()
-                        .calculateSnapTarget(position, 0f /* velocity */);
+                        .calculateSnapTarget(position, 0f /* velocity */, false /* hardDismiss */);
                 mDivider.getView().resizeStack(position, snapTarget.position, snapTarget);
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecents(event.getRawY());
@@ -237,7 +237,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                                 : (int) event.getRawY(),
                         mIsVertical
                                 ? mVelocityTracker.getXVelocity()
-                                : mVelocityTracker.getYVelocity());
+                                : mVelocityTracker.getYVelocity(),
+                        true /* avoidDismissStart */);
             } else if (mDragMode == DRAG_MODE_RECENTS) {
                 mRecentsComponent.onDraggingInRecentsEnded(mVelocityTracker.getYVelocity());
             }
