@@ -21,15 +21,17 @@ import android.graphics.BitmapFactory;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
-import android.os.Process;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -42,11 +44,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import libcore.io.IoUtils;
 
 public class TaskPersister {
     static final String TAG = "TaskPersister";
@@ -113,7 +113,7 @@ public class TaskPersister {
     ArrayList<WriteQueueItem> mWriteQueue = new ArrayList<WriteQueueItem>();
 
     TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor,
-            RecentTasks recentTasks) {
+            ActivityManagerService service, RecentTasks recentTasks) {
 
         final File legacyImagesDir = new File(systemDir, IMAGES_DIRNAME);
         if (legacyImagesDir.exists()) {
@@ -130,7 +130,7 @@ public class TaskPersister {
         }
 
         mStackSupervisor = stackSupervisor;
-        mService = stackSupervisor.mService;
+        mService = service;
         mRecentTasks = recentTasks;
         mLazyTaskWriterThread = new LazyTaskWriterThread("LazyTaskWriterThread");
     }
@@ -145,11 +145,15 @@ public class TaskPersister {
         final String taskString = Integer.toString(task.taskId);
         for (int queueNdx = mWriteQueue.size() - 1; queueNdx >= 0; --queueNdx) {
             final WriteQueueItem item = mWriteQueue.get(queueNdx);
-            if (item instanceof ImageWriteQueueItem &&
-                    ((ImageWriteQueueItem) item).mFilePath.startsWith(taskString)) {
-                if (DEBUG) Slog.d(TAG, "Removing " + ((ImageWriteQueueItem) item).mFilePath +
-                        " from write queue");
-                mWriteQueue.remove(queueNdx);
+            if (item instanceof ImageWriteQueueItem) {
+                final File thumbnailFile = new File(((ImageWriteQueueItem) item).mFilePath);
+                if (thumbnailFile.getName().startsWith(taskString)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Removing " + ((ImageWriteQueueItem) item).mFilePath +
+                                " from write queue");
+                    }
+                    mWriteQueue.remove(queueNdx);
+                }
             }
         }
     }
@@ -185,7 +189,8 @@ public class TaskPersister {
                     mWriteQueue.add(new TaskWriteQueueItem(task));
                 }
             } else {
-                // Dummy.
+                // Dummy. Ensures removeObsoleteFiles is called when LazyTaskThreadWriter is
+                // notified.
                 mWriteQueue.add(new WriteQueueItem());
             }
             if (flush || mWriteQueue.size() > MAX_WRITE_QUEUE_LENGTH) {
@@ -323,8 +328,8 @@ public class TaskPersister {
         return null;
     }
 
-    private List<TaskRecord> restoreTasksForUserLocked(final int userId) {
-        final List<TaskRecord> tasks = new ArrayList<TaskRecord>();
+    List<TaskRecord> restoreTasksForUserLocked(final int userId) {
+        final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
         File userTasksDir = getUserTasksDir(userId);
@@ -351,10 +356,10 @@ public class TaskPersister {
                         event != XmlPullParser.END_TAG) {
                     final String name = in.getName();
                     if (event == XmlPullParser.START_TAG) {
-                        if (DEBUG) Slog.d(TAG, "restoreTasksLocked: START_TAG name=" + name);
+                        if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: START_TAG name=" + name);
                         if (TAG_TASK.equals(name)) {
                             final TaskRecord task = TaskRecord.restoreFromXml(in, mStackSupervisor);
-                            if (DEBUG) Slog.d(TAG, "restoreTasksLocked: restored task="
+                            if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: restored task="
                                     + task);
                             if (task != null) {
                                 // XXX Don't add to write queue... there is no reason to write
@@ -362,7 +367,7 @@ public class TaskPersister {
                                 // read the same thing again.
                                 // mWriteQueue.add(new TaskWriteQueueItem(task));
                                 final int taskId = task.taskId;
-                                mStackSupervisor.setNextTaskId(taskId);
+                                mStackSupervisor.setNextTaskIdForUserLocked(taskId, userId);
                                 // Check if it's a valid user id. Don't add tasks for removed users.
                                 if (userId == task.userId) {
                                     task.isPersistable = true;
@@ -396,15 +401,6 @@ public class TaskPersister {
         if (!DEBUG) {
             removeObsoleteFiles(recoveredTaskIds, userTasksDir.listFiles());
         }
-        return tasks;
-    }
-
-    ArrayList<TaskRecord> restoreTasksLocked(final int[] validUserIds) {
-        final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
-
-        for (int userId : validUserIds) {
-            tasks.addAll(restoreTasksForUserLocked(userId));
-        }
 
         // Fix up task affiliation from taskIds
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -413,9 +409,7 @@ public class TaskPersister {
             task.setNextAffiliate(taskIdToTask(task.mNextAffiliateTaskId, tasks));
         }
 
-        TaskRecord[] tasksArray = new TaskRecord[tasks.size()];
-        tasks.toArray(tasksArray);
-        Arrays.sort(tasksArray, new Comparator<TaskRecord>() {
+        Collections.sort(tasks, new Comparator<TaskRecord>() {
             @Override
             public int compare(TaskRecord lhs, TaskRecord rhs) {
                 final long diff = rhs.mLastTimeMoved - lhs.mLastTimeMoved;
@@ -428,8 +422,7 @@ public class TaskPersister {
                 }
             }
         });
-
-        return new ArrayList<TaskRecord>(Arrays.asList(tasksArray));
+        return tasks;
     }
 
     private static void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, File[] files) {
@@ -462,7 +455,13 @@ public class TaskPersister {
     }
 
     private void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds) {
-        for (int userId : mService.getRunningUserIds()) {
+        int[] candidateUserIds;
+        synchronized (mService) {
+            // Remove only from directories of the users who have recents in memory synchronized
+            // with persistent storage.
+            candidateUserIds = mRecentTasks.usersWithRecentsLoadedLocked();
+        }
+        for (int userId : candidateUserIds) {
             removeObsoleteFiles(persistentTaskIds, getUserImagesDir(userId).listFiles());
             removeObsoleteFiles(persistentTaskIds, getUserTasksDir(userId).listFiles());
         }

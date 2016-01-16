@@ -2617,8 +2617,9 @@ final class ActivityStack {
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
                             + " out to bottom task " + bottom.task);
                 } else {
-                    targetTask = createTaskRecord(mStackSupervisor.getNextTaskId(), target.info,
-                            null, null, null, false);
+                    targetTask = createTaskRecord(
+                            mStackSupervisor.getNextTaskIdForUserLocked(target.userId),
+                            target.info, null, null, null, false);
                     targetTask.affinityIntent = target.intent;
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
                             + " out to new task " + target.task);
@@ -4824,7 +4825,8 @@ final class ActivityStack {
         final boolean wasResumed = wasFocused && (prevStack.mResumedActivity == r);
 
         final TaskRecord task = createTaskRecord(
-                mStackSupervisor.getNextTaskId(), r.info, r.intent, null, null, true);
+                mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
+                r.info, r.intent, null, null, true);
         r.setTask(task, null);
         task.addActivityToTop(r);
         setAppTask(r, task);

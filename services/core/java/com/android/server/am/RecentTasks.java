@@ -16,7 +16,12 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.*;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
@@ -27,11 +32,16 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -47,18 +57,106 @@ class RecentTasks extends ArrayList<TaskRecord> {
     // Maximum number recent bitmaps to keep in memory.
     private static final int MAX_RECENT_BITMAPS = 3;
 
-    // Activity manager service.
-    private final ActivityManagerService mService;
+    /**
+     * Save recent tasks information across reboots.
+     */
+    private final TaskPersister mTaskPersister;
+    private final SparseBooleanArray mUsersWithRecentsLoaded = new SparseBooleanArray(5);
 
     // Mainly to avoid object recreation on multiple calls.
     private final ArrayList<TaskRecord> mTmpRecents = new ArrayList<TaskRecord>();
-    private final HashMap<ComponentName, ActivityInfo> tmpAvailActCache = new HashMap<>();
-    private final HashMap<String, ApplicationInfo> tmpAvailAppCache = new HashMap<>();
-    private final ActivityInfo tmpActivityInfo = new ActivityInfo();
-    private final ApplicationInfo tmpAppInfo = new ApplicationInfo();
+    private final HashMap<ComponentName, ActivityInfo> mTmpAvailActCache = new HashMap<>();
+    private final HashMap<String, ApplicationInfo> mTmpAvailAppCache = new HashMap<>();
+    private final ActivityInfo mTmpActivityInfo = new ActivityInfo();
+    private final ApplicationInfo mTmpAppInfo = new ApplicationInfo();
 
-    RecentTasks(ActivityManagerService service) {
-        mService = service;
+    RecentTasks(ActivityManagerService service, ActivityStackSupervisor mStackSupervisor) {
+        File systemDir = Environment.getDataSystemDirectory();
+        mTaskPersister = new TaskPersister(systemDir, mStackSupervisor, service, this);
+        mStackSupervisor.setRecentTasks(this);
+    }
+
+    /**
+     * Loads the persistent recentTasks for {@code userId} into {@link #mRecentTasks} from
+     * persistent storage. Does nothing if they are already loaded.
+     *
+     * @param userId the user Id
+     */
+    void loadUserRecentsLocked(int userId) {
+        if (!mUsersWithRecentsLoaded.get(userId)) {
+            Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
+            addAll(mTaskPersister.restoreTasksForUserLocked(userId));
+            cleanupLocked(userId);
+            mUsersWithRecentsLoaded.put(userId, true);
+        }
+    }
+
+    void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
+        if (task != null && task.stack != null && task.stack.isHomeStack()) {
+            // Never persist the home stack.
+            return;
+        }
+        mTaskPersister.wakeup(task, flush);
+    }
+
+    void onSystemReady() {
+        clear();
+        loadUserRecentsLocked(UserHandle.USER_SYSTEM);
+        startPersisting();
+    }
+
+    void startPersisting() {
+        mTaskPersister.startPersisting();
+    }
+
+    Bitmap getTaskDescriptionIcon(String path) {
+        return mTaskPersister.getTaskDescriptionIcon(path);
+    }
+
+    Bitmap getImageFromWriteQueue(String path) {
+        return mTaskPersister.getImageFromWriteQueue(path);
+    }
+
+    void saveImage(Bitmap image, String path) {
+        mTaskPersister.saveImage(image, path);
+    }
+
+    void flush() {
+        mTaskPersister.flush();
+    }
+
+    /**
+     * Returns all userIds for which recents from storage are loaded
+     *
+     * @return an array of userIds.
+     */
+    int[] usersWithRecentsLoadedLocked() {
+        int[] usersWithRecentsLoaded = new int[mUsersWithRecentsLoaded.size()];
+        int len = 0;
+        for (int i = 0; i < usersWithRecentsLoaded.length; i++) {
+            int userId = mUsersWithRecentsLoaded.keyAt(i);
+            if (mUsersWithRecentsLoaded.valueAt(i)) {
+                usersWithRecentsLoaded[len++] = userId;
+            }
+        }
+        if (len < usersWithRecentsLoaded.length) {
+            // should never happen.
+            return Arrays.copyOf(usersWithRecentsLoaded, len);
+        }
+        return usersWithRecentsLoaded;
+    }
+
+    /**
+     * Removes recent tasks for this user if they are loaded, does not do anything otherwise.
+     *
+     * @param userId the user id.
+     */
+    void unloadUserRecentsLocked(int userId) {
+        if (mUsersWithRecentsLoaded.get(userId)) {
+            Slog.i(TAG, "Unloading recents for user " + userId + " from memory.");
+            mUsersWithRecentsLoaded.delete(userId);
+            removeTasksForUserLocked(userId);
+        }
     }
 
     TaskRecord taskForIdLocked(int id) {
@@ -88,9 +186,6 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 tr.removedFromRecents();
             }
         }
-
-        // Remove tasks from persistent storage.
-        mService.notifyTaskPersisterLocked(null, true);
     }
 
     /**
@@ -107,87 +202,86 @@ class RecentTasks extends ArrayList<TaskRecord> {
         }
 
         final IPackageManager pm = AppGlobals.getPackageManager();
-        final int[] users = (userId == UserHandle.USER_ALL)
-                ? mService.mUserController.getUsers() : new int[] { userId };
-        for (int userIdx = 0; userIdx < users.length; userIdx++) {
-            final int user = users[userIdx];
-            recentsCount = size() - 1;
-            for (int i = recentsCount; i >= 0; i--) {
-                TaskRecord task = get(i);
-                if (task.userId != user) {
-                    // Only look at tasks for the user ID of interest.
-                    continue;
-                }
-                if (task.autoRemoveRecents && task.getTopActivity() == null) {
-                    // This situation is broken, and we should just get rid of it now.
-                    remove(i);
-                    task.removedFromRecents();
-                    Slog.w(TAG, "Removing auto-remove without activity: " + task);
-                    continue;
-                }
-                // Check whether this activity is currently available.
-                if (task.realActivity != null) {
-                    ActivityInfo ai = tmpAvailActCache.get(task.realActivity);
+        for (int i = recentsCount - 1; i >= 0; i--) {
+            final TaskRecord task = get(i);
+            if (userId != UserHandle.USER_ALL && task.userId != userId) {
+                // Only look at tasks for the user ID of interest.
+                continue;
+            }
+            if (task.autoRemoveRecents && task.getTopActivity() == null) {
+                // This situation is broken, and we should just get rid of it now.
+                remove(i);
+                task.removedFromRecents();
+                Slog.w(TAG, "Removing auto-remove without activity: " + task);
+                continue;
+            }
+            // Check whether this activity is currently available.
+            if (task.realActivity != null) {
+                ActivityInfo ai = mTmpAvailActCache.get(task.realActivity);
+                if (ai == null) {
+                    try {
+                        // At this first cut, we're only interested in
+                        // activities that are fully runnable based on
+                        // current system state.
+                        ai = pm.getActivityInfo(task.realActivity,
+                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+                    } catch (RemoteException e) {
+                        // Will never happen.
+                        continue;
+                    }
                     if (ai == null) {
+                        ai = mTmpActivityInfo;
+                    }
+                    mTmpAvailActCache.put(task.realActivity, ai);
+                }
+                if (ai == mTmpActivityInfo) {
+                    // This could be either because the activity no longer exists, or the
+                    // app is temporarily gone. For the former we want to remove the recents
+                    // entry; for the latter we want to mark it as unavailable.
+                    ApplicationInfo app = mTmpAvailAppCache
+                            .get(task.realActivity.getPackageName());
+                    if (app == null) {
                         try {
-                            // At this first cut, we're only interested in
-                            // activities that are fully runnable based on
-                            // current system state.
-                            ai = pm.getActivityInfo(task.realActivity,
-                                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user);
+                            app = pm.getApplicationInfo(task.realActivity.getPackageName(),
+                                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
                         } catch (RemoteException e) {
                             // Will never happen.
                             continue;
                         }
-                        if (ai == null) {
-                            ai = tmpActivityInfo;
-                        }
-                        tmpAvailActCache.put(task.realActivity, ai);
-                    }
-                    if (ai == tmpActivityInfo) {
-                        // This could be either because the activity no longer exists, or the
-                        // app is temporarily gone.  For the former we want to remove the recents
-                        // entry; for the latter we want to mark it as unavailable.
-                        ApplicationInfo app = tmpAvailAppCache.get(task.realActivity.getPackageName());
                         if (app == null) {
-                            try {
-                                app = pm.getApplicationInfo(task.realActivity.getPackageName(),
-                                        PackageManager.MATCH_UNINSTALLED_PACKAGES, user);
-                            } catch (RemoteException e) {
-                                // Will never happen.
-                                continue;
-                            }
-                            if (app == null) {
-                                app = tmpAppInfo;
-                            }
-                            tmpAvailAppCache.put(task.realActivity.getPackageName(), app);
+                            app = mTmpAppInfo;
                         }
-                        if (app == tmpAppInfo || (app.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
-                            // Doesn't exist any more!  Good-bye.
-                            remove(i);
-                            task.removedFromRecents();
-                            Slog.w(TAG, "Removing no longer valid recent: " + task);
-                            continue;
-                        } else {
-                            // Otherwise just not available for now.
-                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
-                                    "Making recent unavailable: " + task);
-                            task.isAvailable = false;
-                        }
+                        mTmpAvailAppCache.put(task.realActivity.getPackageName(), app);
+                    }
+                    if (app == mTmpAppInfo
+                            || (app.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                        // Doesn't exist any more! Good-bye.
+                        remove(i);
+                        task.removedFromRecents();
+                        Slog.w(TAG, "Removing no longer valid recent: " + task);
+                        continue;
                     } else {
-                        if (!ai.enabled || !ai.applicationInfo.enabled
-                                || (ai.applicationInfo.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
-                            if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
-                                    "Making recent unavailable: " + task
-                                    + " (enabled=" + ai.enabled + "/" + ai.applicationInfo.enabled
-                                    + " flags=" + Integer.toHexString(ai.applicationInfo.flags)
-                                    + ")");
-                            task.isAvailable = false;
-                        } else {
-                            if (DEBUG_RECENTS && !task.isAvailable) Slog.d(TAG_RECENTS,
-                                    "Making recent available: " + task);
-                            task.isAvailable = true;
-                        }
+                        // Otherwise just not available for now.
+                        if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
+                                "Making recent unavailable: " + task);
+                        task.isAvailable = false;
+                    }
+                } else {
+                    if (!ai.enabled || !ai.applicationInfo.enabled
+                            || (ai.applicationInfo.flags
+                                    & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                        if (DEBUG_RECENTS && task.isAvailable) Slog.d(TAG_RECENTS,
+                                "Making recent unavailable: " + task
+                                        + " (enabled=" + ai.enabled + "/"
+                                        + ai.applicationInfo.enabled
+                                        + " flags="
+                                        + Integer.toHexString(ai.applicationInfo.flags)
+                                        + ")");
+                        task.isAvailable = false;
+                    } else {
+                        if (DEBUG_RECENTS && !task.isAvailable) Slog.d(TAG_RECENTS,
+                                "Making recent available: " + task);
+                        task.isAvailable = true;
                     }
                 }
             }
@@ -341,7 +435,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                     // Simple case: this is not an affiliated task, so we just move it to the front.
                     remove(taskIndex);
                     add(0, task);
-                    mService.notifyTaskPersisterLocked(task, false);
+                    notifyTaskPersisterLocked(task, false);
                     if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: moving to top " + task
                             + " from " + taskIndex);
                     return;
@@ -501,7 +595,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 // specified, then replace it with the existing recent task.
                 task = tr;
             }
-            mService.notifyTaskPersisterLocked(tr, false);
+            notifyTaskPersisterLocked(tr, false);
         }
 
         return -1;
@@ -551,7 +645,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         if (first.mNextAffiliate != null) {
             Slog.w(TAG, "Link error 1 first.next=" + first.mNextAffiliate);
             first.setNextAffiliate(null);
-            mService.notifyTaskPersisterLocked(first, false);
+            notifyTaskPersisterLocked(first, false);
         }
         // Everything in the middle is doubly linked from next to prev.
         final int tmpSize = mTmpRecents.size();
@@ -562,13 +656,13 @@ class RecentTasks extends ArrayList<TaskRecord> {
                 Slog.w(TAG, "Link error 2 next=" + next + " prev=" + next.mPrevAffiliate +
                         " setting prev=" + prev);
                 next.setPrevAffiliate(prev);
-                mService.notifyTaskPersisterLocked(next, false);
+                notifyTaskPersisterLocked(next, false);
             }
             if (prev.mNextAffiliate != next) {
                 Slog.w(TAG, "Link error 3 prev=" + prev + " next=" + prev.mNextAffiliate +
                         " setting next=" + next);
                 prev.setNextAffiliate(next);
-                mService.notifyTaskPersisterLocked(prev, false);
+                notifyTaskPersisterLocked(prev, false);
             }
             prev.inRecents = true;
         }
@@ -577,7 +671,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         if (last.mPrevAffiliate != null) {
             Slog.w(TAG, "Link error 4 last.prev=" + last.mPrevAffiliate);
             last.setPrevAffiliate(null);
-            mService.notifyTaskPersisterLocked(last, false);
+            notifyTaskPersisterLocked(last, false);
         }
 
         // Insert the group back into mRecentTasks at start.

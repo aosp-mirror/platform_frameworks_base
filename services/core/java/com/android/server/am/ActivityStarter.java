@@ -1421,7 +1421,8 @@ class ActivityStarter {
         }
 
         if (mReuseTask == null) {
-            final TaskRecord task = mTargetStack.createTaskRecord(mSupervisor.getNextTaskId(),
+            final TaskRecord task = mTargetStack.createTaskRecord(
+                    mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent,
                     mVoiceSession, mVoiceInteractor, !mLaunchTaskBehind /* toTop */);
@@ -1553,9 +1554,9 @@ class ActivityStarter {
             mTargetStack.moveToFront("addingToTopTask");
         }
         final ActivityRecord prev = mTargetStack.topActivity();
-        final TaskRecord task = prev != null ? prev.task
-                : mTargetStack.createTaskRecord(
-                mSupervisor.getNextTaskId(), mStartActivity.info, mIntent, null, null, true);
+        final TaskRecord task = (prev != null) ? prev.task : mTargetStack.createTaskRecord(
+                        mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
+                        mStartActivity.info, mIntent, null, null, true);
         mStartActivity.setTask(task, null);
         mWindowManager.moveTaskToTop(mStartActivity.task.taskId);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS,
