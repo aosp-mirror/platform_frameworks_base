@@ -766,9 +766,13 @@ public class UserManager {
      * @param user The user to retrieve the running state for.
      */
     public boolean isUserRunning(UserHandle user) {
+        return isUserRunning(user.getIdentifier());
+    }
+
+    /** {@hide} */
+    public boolean isUserRunning(int userId) {
         try {
-            return ActivityManagerNative.getDefault().isUserRunning(
-                    user.getIdentifier(), 0);
+            return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
         } catch (RemoteException e) {
             return false;
         }

@@ -12684,7 +12684,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (goingCallback != null) goingCallback.run();
 
-
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,

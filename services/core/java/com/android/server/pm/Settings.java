@@ -3976,7 +3976,6 @@ final class Settings {
      * given {@link VolumeInfo#fsUuid}.
      */
     List<PackageSetting> getVolumePackagesLPr(String volumeUuid) {
-        Preconditions.checkNotNull(volumeUuid);
         ArrayList<PackageSetting> res = new ArrayList<>();
         for (int i = 0; i < mPackages.size(); i++) {
             final PackageSetting setting = mPackages.valueAt(i);
