@@ -1280,6 +1280,10 @@ class ActivityStarter {
     }
 
     private ActivityRecord setTargetStackAndMoveToFrontIfNeeded(ActivityRecord intentActivity) {
+        if (intentActivity.task.stack == null) {
+            Slog.wtf(TAG, "Oops, the stack is null, we are about to crash. It was last cleared: "
+                    + intentActivity.task.lastStackClear);
+        }
         mTargetStack = intentActivity.task.stack;
         mTargetStack.mLastPausedActivity = null;
         // If the target task is not in the front, then we need to bring it to the front...

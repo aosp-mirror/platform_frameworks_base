@@ -245,6 +245,8 @@ final class TaskRecord {
     int mLayerRank = -1;
 
     Configuration mOverrideConfig = Configuration.EMPTY;
+    // STOPSHIP(b/26541093)
+    public String lastStackClear = "UNSET";
 
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
