@@ -3305,12 +3305,19 @@ public class AudioManager {
             "android.media.property.SUPPORT_SPEAKER_NEAR_ULTRASOUND";
 
     /**
+     * Used as a key for {@link #getProperty} to determine if the unprocessed audio source is
+     * available and supported with the expected frequency range and level response.
+     */
+    public static final String PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED =
+            "android.media.property.SUPPORT_AUDIO_SOURCE_UNPROCESSED";
+    /**
      * Returns the value of the property with the specified key.
      * @param key One of the strings corresponding to a property key: either
      *            {@link #PROPERTY_OUTPUT_SAMPLE_RATE},
      *            {@link #PROPERTY_OUTPUT_FRAMES_PER_BUFFER},
-     *            {@link #PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND}, or
-     *            {@link #PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND}.
+     *            {@link #PROPERTY_SUPPORT_MIC_NEAR_ULTRASOUND},
+     *            {@link #PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND}, or
+     *            {@link #PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED}.
      * @return A string representing the associated value for that property key,
      *         or null if there is no value for that key.
      */
@@ -3329,6 +3336,9 @@ public class AudioManager {
         } else if (PROPERTY_SUPPORT_SPEAKER_NEAR_ULTRASOUND.equals(key)) {
             return String.valueOf(getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_supportSpeakerNearUltrasound));
+        } else if (PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED.equals(key)) {
+            return String.valueOf(getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.config_supportAudioSourceUnprocessed));
         } else {
             // null or unknown key
             return null;
