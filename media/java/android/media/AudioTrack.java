@@ -1054,7 +1054,61 @@ public class AudioTrack implements AudioRouting
     }
 
     /**
-     *  Returns the frame count of the native <code>AudioTrack</code> buffer.
+     *  Returns the effective size of the <code>AudioTrack</code> buffer
+     * that the application writes to.
+     *  <p> This will be less than or equal to the result of
+     * {@link AudioTrack#getBufferCapacityInFrames()}.
+     * It will be equal if {@link AudioTrack#setBufferSizeInFrames()} has never been called.
+     *  <p> If the track is subsequently routed to a different output sink, the buffer
+     *  size and capacity may enlarge to accommodate.
+     *  <p> If the <code>AudioTrack</code> encoding indicates compressed data,
+     *  e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
+     *  the size of the native <code>AudioTrack</code> buffer in bytes.
+     *  <p> See also {@link AudioManager#getProperty(String)} for key
+     *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
+     *  @return current size in frames of the <code>AudioTrack</code> buffer.
+     *  @throws IllegalStateException
+     */
+    public int getBufferSizeInFrames() {
+        return native_get_buffer_size_frames();
+    }
+
+    /**
+     * Limits the effective size of the <code>AudioTrack</code> buffer
+     * that the application writes to.
+     * <p> A write to this AudioTrack will not fill the buffer beyond this limit.
+     * If a blocking write is used then the write will block until the the data
+     * can fit within this limit.
+     * <p>Changing this limit modifies the latency associated with
+     * the buffer for this track. A smaller size will give lower latency
+     * but there may be more glitches due to buffer underruns.
+     *  <p>The actual size used may not be equal to this requested size.
+     * It will be limited to a valid range with a maximum of
+     * {@link AudioTrack#getBufferCapacityInFrames()}.
+     * It may also be adjusted slightly for internal reasons.
+     * If bufferSizeInFrames is less than zero then {@link #ERROR_BAD_VALUE}
+     * will be returned.
+     * <p>This method is only supported for PCM audio.
+     * It is not supported for compressed audio tracks.
+     *
+     * @param bufferSizeInFrames requested buffer size
+     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+     *    {@link #ERROR_INVALID_OPERATION}
+     *  @throws IllegalStateException
+     * @hide
+     */
+    public int setBufferSizeInFrames(int bufferSizeInFrames) {
+        if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
+        if (bufferSizeInFrames < 0) {
+            return ERROR_BAD_VALUE;
+        }
+        return native_set_buffer_size_frames(bufferSizeInFrames);
+    }
+
+    /**
+     *  Returns the maximum size of the native <code>AudioTrack</code> buffer.
      *  <p> If the track's creation mode is {@link #MODE_STATIC},
      *  it is equal to the specified bufferSizeInBytes on construction, converted to frame units.
      *  A static track's native frame count will not change.
@@ -1069,11 +1123,12 @@ public class AudioTrack implements AudioRouting
      *  the size of the native <code>AudioTrack</code> buffer in bytes.
      *  <p> See also {@link AudioManager#getProperty(String)} for key
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
-     *  @return current size in frames of the <code>AudioTrack</code> buffer.
+     *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException
+     * @hide
      */
-    public int getBufferSizeInFrames() {
-        return native_get_native_frame_count();
+    public int getBufferCapacityInFrames() {
+        return native_get_buffer_capacity_frames();
     }
 
     /**
@@ -1084,7 +1139,7 @@ public class AudioTrack implements AudioRouting
      */
     @Deprecated
     protected int getNativeFrameCount() {
-        return native_get_native_frame_count();
+        return native_get_buffer_capacity_frames();
     }
 
     /**
@@ -2701,7 +2756,9 @@ public class AudioTrack implements AudioRouting
 
     private native final int native_reload_static();
 
-    private native final int native_get_native_frame_count();
+    private native final int native_get_buffer_size_frames();
+    private native final int native_set_buffer_size_frames(int bufferSizeInFrames);
+    private native final int native_get_buffer_capacity_frames();
 
     private native final void native_setVolume(float leftVolume, float rightVolume);
 
