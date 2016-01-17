@@ -609,7 +609,7 @@ public final class Downloads {
          * This download has successfully completed.
          * Warning: there might be other status values that indicate success
          * in the future.
-         * Use isSucccess() to capture the entire category.
+         * Use isStatusSuccess() to capture the entire category.
          */
         public static final int STATUS_SUCCESS = 200;
 
