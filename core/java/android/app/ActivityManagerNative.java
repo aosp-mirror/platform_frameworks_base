@@ -315,6 +315,34 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_LOCAL_VOICE_INTERACTION_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            Bundle options = data.readBundle();
+            startLocalVoiceInteraction(token, options);
+            reply.writeNoException();
+            return true;
+        }
+
+        case STOP_LOCAL_VOICE_INTERACTION_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder token = data.readStrongBinder();
+            stopLocalVoiceInteraction(token);
+            reply.writeNoException();
+            return true;
+        }
+
+        case SUPPORTS_LOCAL_VOICE_INTERACTION_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            boolean result = supportsLocalVoiceInteraction();
+            reply.writeNoException();
+            reply.writeInt(result? 1 : 0);
+            return true;
+        }
+
         case START_NEXT_MATCHING_ACTIVITY_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
@@ -3136,6 +3164,43 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         return result;
     }
+
+    public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(callingActivity);
+        data.writeBundle(options);
+        mRemote.transact(START_LOCAL_VOICE_INTERACTION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+
+    public void stopLocalVoiceInteraction(IBinder callingActivity) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(callingActivity);
+        mRemote.transact(STOP_LOCAL_VOICE_INTERACTION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+
+    public boolean supportsLocalVoiceInteraction() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(SUPPORTS_LOCAL_VOICE_INTERACTION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int result = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return result != 0;
+    }
+
     public boolean startNextMatchingActivity(IBinder callingActivity,
             Intent intent, Bundle options) throws RemoteException {
         Parcel data = Parcel.obtain();

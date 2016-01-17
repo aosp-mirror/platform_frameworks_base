@@ -1183,6 +1183,7 @@ package android {
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportsAssist = 16844016; // 0x10104f0
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
+    field public static final int supportsLocalInteraction = 16844048; // 0x1010510
     field public static final int supportsPictureInPicture = 16844024; // 0x10104f8
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsSwitchingToNextInputMethod = 16843755; // 0x10103eb
@@ -3436,6 +3437,7 @@ package android.app {
     method public boolean isDestroyed();
     method public boolean isFinishing();
     method public boolean isImmersive();
+    method public boolean isLocalVoiceInteractionSupported();
     method public boolean isTaskRoot();
     method public boolean isVoiceInteraction();
     method public boolean isVoiceInteractionRoot();
@@ -3477,6 +3479,8 @@ package android.app {
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyShortcut(int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onLocalVoiceInteractionStarted();
+    method public void onLocalVoiceInteractionStopped();
     method public void onLowMemory();
     method public boolean onMenuItemSelected(int, android.view.MenuItem);
     method public boolean onMenuOpened(int, android.view.Menu);
@@ -3591,12 +3595,14 @@ package android.app {
     method public void startIntentSenderForResult(android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
     method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int) throws android.content.IntentSender.SendIntentException;
     method public void startIntentSenderFromChild(android.app.Activity, android.content.IntentSender, int, android.content.Intent, int, int, int, android.os.Bundle) throws android.content.IntentSender.SendIntentException;
+    method public void startLocalVoiceInteraction(android.os.Bundle);
     method public void startLockTask();
     method public deprecated void startManagingCursor(android.database.Cursor);
     method public boolean startNextMatchingActivity(android.content.Intent);
     method public boolean startNextMatchingActivity(android.content.Intent, android.os.Bundle);
     method public void startPostponedEnterTransition();
     method public void startSearch(java.lang.String, boolean, android.os.Bundle, boolean);
+    method public void stopLocalVoiceInteraction();
     method public void stopLockTask();
     method public deprecated void stopManagingCursor(android.database.Cursor);
     method public void takeKeyEvents(boolean);
@@ -34019,6 +34025,7 @@ package android.service.voice {
     method public void setTheme(int);
     method public void show(android.os.Bundle, int);
     method public void startVoiceActivity(android.content.Intent);
+    field public static final int SHOW_SOURCE_ACTIVITY = 16; // 0x10
     field public static final int SHOW_SOURCE_APPLICATION = 8; // 0x8
     field public static final int SHOW_SOURCE_ASSIST_GESTURE = 4; // 0x4
     field public static final int SHOW_WITH_ASSIST = 1; // 0x1

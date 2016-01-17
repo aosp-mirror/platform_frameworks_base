@@ -215,12 +215,12 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         }
     }
 
-    public void finishLocked(IBinder token) {
-        if (mActiveSession == null || token != mActiveSession.mToken) {
+    public void finishLocked(IBinder token, boolean finishTask) {
+        if (mActiveSession == null || (!finishTask && token != mActiveSession.mToken)) {
             Slog.w(TAG, "finish does not match active session");
             return;
         }
-        mActiveSession.cancelLocked();
+        mActiveSession.cancelLocked(finishTask);
         mActiveSession = null;
     }
 
@@ -249,6 +249,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     + " does not match active uid " + activeUid);
         }
         return mActiveSession != null ? mActiveSession.getUserDisabledShowContextLocked() : 0;
+    }
+
+    public boolean supportsLocalVoiceInteraction() {
+        return mInfo.getSupportsLocalInteraction();
     }
 
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -308,7 +312,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         // If there is an active session, cancel it to allow it to clean up its window and other
         // state.
         if (mActiveSession != null) {
-            mActiveSession.cancelLocked();
+            mActiveSession.cancelLocked(false);
             mActiveSession = null;
         }
         try {
@@ -343,7 +347,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     @Override
     public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
         synchronized (mLock) {
-            finishLocked(connection.mToken);
+            finishLocked(connection.mToken, false);
         }
     }
 }

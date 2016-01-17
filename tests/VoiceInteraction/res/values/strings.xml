@@ -31,6 +31,8 @@
     <string name="pickVoice">Pick Voice</string>
     <string name="cancelVoice">Cancel</string>
     <string name="jumpOut">Jump out</string>
+    <string name="startFromActivity">Start voice interaction</string>
+    <string name="stopFromActivity">Stop voice interaction</string>
 
     <string name="largetext">This is a bunch of text that we will use to show how we handle it
 when reporting it for assist data.  We need many many lines of text, like\n

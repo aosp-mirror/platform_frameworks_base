@@ -3517,7 +3517,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS
      * or INTERACT_ACROSS_USERS_FULL permissions, if the userid is not for the caller.
-     * @param checkShell TODO(yamasani):
+     * @param checkShell whether to prevent shell from access if there's a debugging restriction
      * @param message the message to log on security exception
      */
     void enforceCrossUserPermission(int callingUid, int userId, boolean requireFullPermission,

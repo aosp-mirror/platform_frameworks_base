@@ -1267,6 +1267,15 @@ public class Activity extends ContextThemeWrapper
         mCalled = true;
     }
 
+    void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+        if (voiceInteractor == null) {
+            mVoiceInteractor = null;
+        } else {
+            mVoiceInteractor = new VoiceInteractor(voiceInteractor, this, this,
+                    Looper.myLooper());
+        }
+    }
+
     /**
      * Check whether this activity is running as part of a voice interaction with the user.
      * If true, it should perform its interaction with the user through the
@@ -1298,6 +1307,62 @@ public class Activity extends ContextThemeWrapper
      */
     public VoiceInteractor getVoiceInteractor() {
         return mVoiceInteractor;
+    }
+
+    /**
+     * Queries whether the currently enabled voice interaction service supports returning
+     * a voice interactor for use by the activity. This is valid only for the duration of the
+     * activity.
+     *
+     * @return whether the current voice interaction service supports local voice interaction
+     */
+    public boolean isLocalVoiceInteractionSupported() {
+        try {
+            return ActivityManagerNative.getDefault().supportsLocalVoiceInteraction();
+        } catch (RemoteException re) {
+        }
+        return false;
+    }
+
+    /**
+     * Starts a local voice interaction session. When ready,
+     * {@link #onLocalVoiceInteractionStarted()} is called. You can pass a bundle of private options
+     * to the registered voice interaction service.
+     * @param privateOptions a Bundle of private arguments to the current voice interaction service
+     */
+    public void startLocalVoiceInteraction(Bundle privateOptions) {
+        try {
+            ActivityManagerNative.getDefault().startLocalVoiceInteraction(mToken, privateOptions);
+        } catch (RemoteException re) {
+        }
+    }
+
+    /**
+     * Callback to indicate that {@link #startLocalVoiceInteraction(Bundle)} has resulted in a
+     * voice interaction session being started. You can now retrieve a voice interactor using
+     * {@link #getVoiceInteractor()}.
+     */
+    public void onLocalVoiceInteractionStarted() {
+        Log.i(TAG, "onLocalVoiceInteractionStarted! " + getVoiceInteractor());
+    }
+
+    /**
+     * Callback to indicate that the local voice interaction has stopped for some
+     * reason.
+     */
+    public void onLocalVoiceInteractionStopped() {
+        Log.i(TAG, "onLocalVoiceInteractionStopped :( " + getVoiceInteractor());
+    }
+
+    /**
+     * Request to terminate the current voice interaction that was previously started
+     * using {@link #startLocalVoiceInteraction(Bundle)}.
+     */
+    public void stopLocalVoiceInteraction() {
+        try {
+            ActivityManagerNative.getDefault().stopLocalVoiceInteraction(mToken);
+        } catch (RemoteException re) {
+        }
     }
 
     /**

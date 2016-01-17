@@ -187,6 +187,7 @@ import android.os.storage.MountServiceInternal;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -2803,16 +2804,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             r.appTimeTracker = null;
         }
+        // TODO: VI Maybe r.task.voiceInteractor || r.voiceInteractor != null
+        // TODO: Probably not, because we don't want to resume voice on switching
+        // back to this activity
         if (r.task.voiceInteractor != null) {
             startRunningVoiceLocked(r.task.voiceSession, r.info.applicationInfo.uid);
         } else {
             finishRunningVoiceLocked();
-            if (last != null && last.task.voiceSession != null) {
+            IVoiceInteractionSession session;
+            if (last != null && ((session = last.task.voiceSession) != null
+                    || (session = last.voiceSession) != null)) {
                 // We had been in a voice interaction session, but now focused has
                 // move to something different.  Just finish the session, we can't
                 // return to it and retain the proper state and synchronization with
                 // the voice interaction service.
-                finishVoiceTask(last.task.voiceSession);
+                finishVoiceTask(session);
             }
         }
         if (mStackSupervisor.moveActivityStackToFront(r, reason + " setFocusedActivity")) {
@@ -4256,6 +4262,66 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options)
+            throws RemoteException {
+        Slog.i(TAG, "Activity tried to startVoiceInteraction");
+        synchronized (this) {
+            ActivityRecord activity = getFocusedStack().topActivity();
+            if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
+                throw new SecurityException("Only focused activity can call startVoiceInteraction");
+            }
+            if (mRunningVoice != null || activity.task.voiceSession != null
+                    || activity.voiceSession != null) {
+                Slog.w(TAG, "Already in a voice interaction, cannot start new voice interaction");
+                return;
+            }
+            if (activity.pendingVoiceInteractionStart) {
+                Slog.w(TAG, "Pending start of voice interaction already.");
+                return;
+            }
+            activity.pendingVoiceInteractionStart = true;
+        }
+        LocalServices.getService(VoiceInteractionManagerInternal.class)
+                .startLocalVoiceInteraction(callingActivity, options);
+    }
+
+    @Override
+    public void stopLocalVoiceInteraction(IBinder callingActivity) throws RemoteException {
+        LocalServices.getService(VoiceInteractionManagerInternal.class)
+                .stopLocalVoiceInteraction(callingActivity);
+    }
+
+    @Override
+    public boolean supportsLocalVoiceInteraction() throws RemoteException {
+        return LocalServices.getService(VoiceInteractionManagerInternal.class)
+                .supportsLocalVoiceInteraction();
+    }
+
+    void onLocalVoiceInteractionStartedLocked(IBinder activity,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+        ActivityRecord activityToCallback = ActivityRecord.forTokenLocked(activity);
+        if (activityToCallback == null) return;
+        activityToCallback.setVoiceSessionLocked(voiceSession);
+
+        // Inform the activity
+        try {
+            activityToCallback.app.thread.scheduleLocalVoiceInteractionStarted(activity,
+                    voiceInteractor);
+            long token = Binder.clearCallingIdentity();
+            try {
+                startRunningVoiceLocked(voiceSession, activityToCallback.appInfo.uid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            // TODO: VI Should we cache the activity so that it's easier to find later
+            // rather than scan through all the stacks and activities?
+        } catch (RemoteException re) {
+            activityToCallback.clearVoiceSessionLocked();
+            // TODO: VI Should this terminate the voice session?
+        }
+    }
+
+    @Override
     public void setVoiceKeepAwake(IVoiceInteractionSession session, boolean keepAwake) {
         synchronized (this) {
             if (mRunningVoice != null && mRunningVoice.asBinder() == session.asBinder()) {
@@ -4747,9 +4813,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void finishVoiceTask(IVoiceInteractionSession session) {
-        synchronized(this) {
+        synchronized (this) {
             final long origId = Binder.clearCallingIdentity();
             try {
+                // TODO: VI Consider treating local voice interactions and voice tasks
+                // differently here
                 mStackSupervisor.finishVoiceTask(session);
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -11107,6 +11175,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void finishRunningVoiceLocked() {
+        Slog.d(TAG, "finishRunningVoiceLocked()  >>>>");
         if (mRunningVoice != null) {
             mRunningVoice = null;
             mVoiceWakeLock.release();
@@ -11250,6 +11319,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
+        Slog.d(TAG, "<<<  startRunningVoiceLocked()");
         mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
         if (mRunningVoice == null || mRunningVoice.asBinder() != session.asBinder()) {
             boolean wasRunningVoice = mRunningVoice != null;
@@ -21057,6 +21127,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void onUserRemoved(int userId) {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.onUserStoppedLocked(userId);
+            }
+        }
+
+        @Override
+        public void onLocalVoiceInteractionStarted(IBinder activity,
+                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.onLocalVoiceInteractionStartedLocked(activity,
+                        voiceSession, voiceInteractor);
             }
         }
     }

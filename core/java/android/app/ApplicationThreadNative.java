@@ -425,6 +425,16 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
+        case SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder token = data.readStrongBinder();
+            IVoiceInteractor voiceInteractor = IVoiceInteractor.Stub.asInterface(
+                    data.readStrongBinder());
+            scheduleLocalVoiceInteractionStarted(token, voiceInteractor);
+            return true;
+        }
+
         case PROFILER_CONTROL_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -1097,6 +1107,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         config.writeToParcel(data, 0);
         mRemote.transact(SCHEDULE_CONFIGURATION_CHANGED_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public final void scheduleLocalVoiceInteractionStarted(IBinder token,
+            IVoiceInteractor voiceInteractor) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        data.writeStrongBinder(voiceInteractor != null ? voiceInteractor.asBinder() : null);
+        mRemote.transact(SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

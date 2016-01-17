@@ -7512,6 +7512,10 @@ i
         <!-- Flag indicating whether this voice interaction service is capable of being launched
              from the keyguard. -->
         <attr name="supportsLaunchVoiceAssistFromKeyguard" format="boolean" />
+        <!-- Flag indicating whether this voice interaction service can handle local voice
+             interaction requests from an Activity. This flag is new in
+             {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
+        <attr name="supportsLocalInteraction" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>

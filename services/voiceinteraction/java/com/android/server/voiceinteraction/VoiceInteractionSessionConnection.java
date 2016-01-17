@@ -418,7 +418,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
         return false;
     }
 
-    public void cancelLocked() {
+    public void cancelLocked(boolean finishTask) {
         hideLocked();
         mCanceled = true;
         if (mBound) {
@@ -429,7 +429,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                     Slog.w(TAG, "Voice interation session already dead");
                 }
             }
-            if (mSession != null) {
+            if (finishTask && mSession != null) {
                 try {
                     mAm.finishVoiceTask(mSession);
                 } catch (RemoteException e) {

@@ -18,6 +18,8 @@ package com.android.server.voiceinteraction;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,6 +47,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
+import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
@@ -71,12 +74,13 @@ import java.util.List;
  */
 public class VoiceInteractionManagerService extends SystemService {
     static final String TAG = "VoiceInteractionManagerService";
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
 
     final Context mContext;
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
     final SoundTriggerHelper mSoundTriggerHelper;
+    final ActivityManagerInternal mAmInternal;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
@@ -85,6 +89,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mDbHelper = new DatabaseHelper(context);
         mSoundTriggerHelper = new SoundTriggerHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -105,6 +110,7 @@ public class VoiceInteractionManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.VOICE_INTERACTION_MANAGER_SERVICE, mServiceStub);
+        publishLocalService(VoiceInteractionManagerInternal.class, new LocalService());
     }
 
     @Override
@@ -124,6 +130,31 @@ public class VoiceInteractionManagerService extends SystemService {
         mServiceStub.switchUser(userHandle);
     }
 
+    class LocalService extends VoiceInteractionManagerInternal {
+        @Override
+        public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
+            if (DEBUG) {
+                Slog.i(TAG, "startLocalVoiceInteraction " + callingActivity);
+            }
+            VoiceInteractionManagerService.this.mServiceStub.startLocalVoiceInteraction(
+                    callingActivity, options);
+        }
+
+        @Override
+        public boolean supportsLocalVoiceInteraction() {
+            return VoiceInteractionManagerService.this.mServiceStub.supportsLocalVoiceInteraction();
+        }
+
+        @Override
+        public void stopLocalVoiceInteraction(IBinder callingActivity) {
+            if (DEBUG) {
+                Slog.i(TAG, "stopLocalVoiceInteraction " + callingActivity);
+            }
+            VoiceInteractionManagerService.this.mServiceStub.stopLocalVoiceInteraction(
+                    callingActivity);
+        }
+    }
+
     // implementation entry point and binder service
     private final VoiceInteractionManagerServiceStub mServiceStub;
 
@@ -137,6 +168,49 @@ public class VoiceInteractionManagerService extends SystemService {
 
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext.getResources());
+        }
+
+        // TODO: VI Make sure the caller is the current user or profile
+        void startLocalVoiceInteraction(final IBinder token, Bundle options) {
+            if (mImpl == null) return;
+
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                mImpl.showSessionLocked(options,
+                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY,
+                        new IVoiceInteractionSessionShowCallback.Stub() {
+                            @Override
+                            public void onFailed() {
+                            }
+
+                            @Override
+                            public void onShown() {
+                                mAmInternal.onLocalVoiceInteractionStarted(token,
+                                        mImpl.mActiveSession.mSession,
+                                        mImpl.mActiveSession.mInteractor);
+                            }
+                        },
+                        token);
+            } finally {
+                Binder.restoreCallingIdentity(caller);
+            }
+        }
+
+        public void stopLocalVoiceInteraction(IBinder callingActivity) {
+            if (mImpl == null) return;
+
+            final long caller = Binder.clearCallingIdentity();
+            try {
+                mImpl.finishLocked(callingActivity, true);
+            } finally {
+                Binder.restoreCallingIdentity(caller);
+            }
+        }
+
+        public boolean supportsLocalVoiceInteraction() {
+            if (mImpl == null) return false;
+
+            return mImpl.supportsLocalVoiceInteraction();
         }
 
         @Override
@@ -568,7 +642,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.finishLocked(token);
+                    mImpl.finishLocked(token, false);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

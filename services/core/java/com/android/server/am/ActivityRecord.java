@@ -54,6 +54,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -208,6 +209,9 @@ final class ActivityRecord {
     private int[] mVerticalSizeConfigurations;
     private int[] mHorizontalSizeConfigurations;
     private int[] mSmallestSizeConfigurations;
+
+    boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
+    IVoiceInteractionSession voiceSession;  // Voice interaction session for this activity
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -1272,6 +1276,16 @@ final class ActivityRecord {
             _taskDescription.setIconFilename(iconFilePath);
         }
         taskDescription = _taskDescription;
+    }
+
+    void setVoiceSessionLocked(IVoiceInteractionSession session) {
+        voiceSession = session;
+        pendingVoiceInteractionStart = false;
+    }
+
+    void clearVoiceSessionLocked() {
+        voiceSession = null;
+        pendingVoiceInteractionStart = false;
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {

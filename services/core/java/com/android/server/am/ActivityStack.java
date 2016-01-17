@@ -3093,8 +3093,29 @@ final class ActivityStack {
                         didOne = true;
                     }
                 }
+            } else {
+                // Check if any of the activities are using voice
+                for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+                    ActivityRecord r = tr.mActivities.get(activityNdx);
+                    if (r.voiceSession != null
+                            && r.voiceSession.asBinder() == sessionBinder) {
+                        // Inform of cancellation
+                        r.clearVoiceSessionLocked();
+                        try {
+                            r.app.thread.scheduleLocalVoiceInteractionStarted((IBinder) r.appToken,
+                                    null);
+                        } catch (RemoteException re) {
+                            // Ok
+                        }
+                        // TODO: VI This is redundant in some cases
+                        mService.finishRunningVoiceLocked();
+                        break;
+                    }
+                }
             }
         }
+        Slog.d(TAG, "ActivityStack.finishVoiceTask()");
+
         if (didOne) {
             mService.updateOomAdjLocked();
         }
@@ -4686,6 +4707,7 @@ final class ActivityStack {
         updateTaskMovement(task, true);
 
         if (!moving && task.mActivities.isEmpty()) {
+            // TODO: VI what about activity?
             final boolean isVoiceSession = task.voiceSession != null;
             if (isVoiceSession) {
                 try {
@@ -4790,6 +4812,7 @@ final class ActivityStack {
 
     void addConfigOverride(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
+        // TODO: VI deal with activity
         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,

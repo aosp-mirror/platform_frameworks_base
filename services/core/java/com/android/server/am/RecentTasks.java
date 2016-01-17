@@ -405,6 +405,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
 
         int recentsCount = size();
         // Quick case: never add voice sessions.
+        // TODO: VI what about if it's just an activity?
+        // Probably nothing to do here
         if (task.voiceSession != null) {
             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
                     "addRecent: not adding voice interaction " + task);

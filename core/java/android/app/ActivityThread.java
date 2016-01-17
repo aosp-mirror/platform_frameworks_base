@@ -1254,6 +1254,15 @@ public final class ActivityThread {
                 throws RemoteException {
             sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, token, pipMode ? 1 : 0);
         }
+
+        @Override
+        public void scheduleLocalVoiceInteractionStarted(IBinder token,
+                IVoiceInteractor voiceInteractor) throws RemoteException {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = token;
+            args.arg2 = voiceInteractor;
+            sendMessage(H.LOCAL_VOICE_INTERACTION_STARTED, args);
+        }
     }
 
     private int getLifecycleSeq() {
@@ -1317,6 +1326,7 @@ public final class ActivityThread {
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
         public static final int MULTI_WINDOW_MODE_CHANGED = 152;
         public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
+        public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1372,6 +1382,7 @@ public final class ActivityThread {
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
                     case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
                     case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
+                    case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                 }
             }
             return Integer.toString(code);
@@ -1620,6 +1631,10 @@ public final class ActivityThread {
                     break;
                 case PICTURE_IN_PICTURE_MODE_CHANGED:
                     handlePictureInPictureModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                    break;
+                case LOCAL_VOICE_INTERACTION_STARTED:
+                    handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
+                            (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
                     break;
             }
             Object obj = msg.obj;
@@ -2875,6 +2890,19 @@ public final class ActivityThread {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
             r.activity.onPictureInPictureModeChanged(pipMode);
+        }
+    }
+
+    private void handleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor interactor) {
+        final ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.voiceInteractor = interactor;
+            r.activity.setVoiceInteractor(interactor);
+            if (interactor == null) {
+                r.activity.onLocalVoiceInteractionStopped();
+            } else {
+                r.activity.onLocalVoiceInteractionStarted();
+            }
         }
     }
 

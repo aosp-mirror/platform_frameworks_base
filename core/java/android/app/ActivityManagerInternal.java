@@ -18,6 +18,10 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.os.IBinder;
+import android.service.voice.IVoiceInteractionSession;
+
+import com.android.internal.app.IVoiceInteractor;
 
 /**
  * Activity manager local system service interface.
@@ -64,4 +68,8 @@ public abstract class ActivityManagerInternal {
      * @param userId The user being cleaned up.
      */
     public abstract void onUserRemoved(int userId);
+
+    public abstract void onLocalVoiceInteractionStarted(IBinder callingActivity,
+            IVoiceInteractionSession mSession,
+            IVoiceInteractor mInteractor);
 }

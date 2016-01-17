@@ -61,5 +61,13 @@
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
+        <activity android:name="StartVoiceInteractionActivity" android:label="In-Activity Voice"
+                  android:theme="@android:style/Theme.Material.Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

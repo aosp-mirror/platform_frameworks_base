@@ -591,6 +591,12 @@ public interface IActivityManager extends IInterface {
 
     public boolean isAppForeground(int uid) throws RemoteException;
 
+    public void startLocalVoiceInteraction(IBinder token, Bundle options) throws RemoteException;
+
+    public void stopLocalVoiceInteraction(IBinder token) throws RemoteException;
+
+    public boolean supportsLocalVoiceInteraction() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -963,4 +969,7 @@ public interface IActivityManager extends IInterface {
     int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 360;
     int CLEAR_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 361;
     int IS_APP_FOREGROUND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 362;
+    int START_LOCAL_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 363;
+    int STOP_LOCAL_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 364;
+    int SUPPORTS_LOCAL_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 365;
 }

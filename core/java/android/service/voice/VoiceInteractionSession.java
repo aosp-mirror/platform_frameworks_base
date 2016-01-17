@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
@@ -49,6 +50,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -75,7 +77,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
  */
 public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCallbacks2 {
     static final String TAG = "VoiceInteractionSession";
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
 
     /**
      * Flag received in {@link #onShow}: originator requested that the session be started with
@@ -100,6 +102,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * the assistant.
      */
     public static final int SHOW_SOURCE_APPLICATION = 1<<3;
+
+    /**
+     * Flag for use with {@link #onShow}: indicates that an Activity has invoked the voice
+     * interaction service for a local interaction using
+     * {@link Activity#startLocalVoiceInteraction(Bundle)}.
+     */
+    public static final int SHOW_SOURCE_ACTIVITY = 1<<4;
 
     final Context mContext;
     final HandlerCaller mHandlerCaller;
