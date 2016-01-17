@@ -42,7 +42,6 @@ import android.util.Log;
 
 import com.android.internal.app.IAppOpsService;
 
-
 /**
  * The AudioTrack class manages and plays a single audio resource for Java applications.
  * It allows streaming of PCM audio buffers to the audio sink for playback. This is
@@ -1184,6 +1183,25 @@ public class AudioTrack implements AudioRouting
      */
     public int getLatency() {
         return native_get_latency();
+    }
+
+    /**
+     * Returns the number of underrun occurrences in the application-level write buffer
+     * since the AudioTrack was created.
+     * An underrun occurs if the application does not write audio
+     * data quickly enough, causing the buffer to underflow
+     * and a potential audio glitch or pop.
+     * Underruns are less likely when buffer sizes are large.
+     * <p> Though the "int" type is signed 32-bits, the value should be reinterpreted
+     * as if it is unsigned 32-bits.
+     * That is, the next position after 0x7FFFFFFF is (int) 0x80000000.
+     * This is a continuously advancing counter. It can wrap around to zero
+     * if there are too many underruns. If there were, for example, 68 underruns per
+     * second then the counter would wrap in 2 years.
+     * @hide
+     */
+    public int getUnderrunCount() {
+        return native_get_underrun_count();
     }
 
     /**
@@ -2778,6 +2796,8 @@ public class AudioTrack implements AudioRouting
     private native final int native_get_position();
 
     private native final int native_get_latency();
+
+    private native final int native_get_underrun_count();
 
     // longArray must be a non-null array of length >= 2
     // [0] is assigned the frame position
