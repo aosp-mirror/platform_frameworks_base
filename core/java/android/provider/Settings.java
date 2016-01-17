@@ -13715,7 +13715,7 @@ public final class Settings {
         public static final String POWER_BUTTON_LONG_PRESS =
                 "power_button_long_press";
         private static final Validator POWER_BUTTON_LONG_PRESS_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 6);
 
         /**
          * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.

@@ -1129,6 +1129,7 @@
             3 - Power off (without confirmation)
             4 - Go to voice assist
             5 - Go to assistant (Settings.Secure.ASSISTANT)
+            6 - Toggle torch on / off (if screen is off)
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
