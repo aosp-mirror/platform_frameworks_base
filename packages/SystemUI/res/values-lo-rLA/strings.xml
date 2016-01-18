@@ -3,16 +3,16 @@
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
  -->
@@ -476,4 +476,8 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ຫຼຸດ​ປະ​ສິ​ທິ​ພາບ​ການໃຊ້ງານ ແລະ ​ຂໍ້​ມູນ​ພື້ນຫຼັງ"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"ລະບົບ"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"​ໜ້າຫຼັກ"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ຫາ​ກໍ​ໃຊ້"</string>
+    <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"ກັບຄືນ"</string>
 </resources>

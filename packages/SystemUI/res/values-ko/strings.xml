@@ -3,16 +3,16 @@
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
  -->
@@ -476,4 +476,8 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"성능 및 백그라운드 데이터를 줄입니다."</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"시스템"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"홈"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"최근"</string>
+    <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"뒤로"</string>
 </resources>
