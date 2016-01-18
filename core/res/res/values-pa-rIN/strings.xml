@@ -1032,6 +1032,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ਡੀਬਗਿੰਗ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਛੋਹਵੋ।"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀਬੋਰਡ ਬਦਲੋ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ਕੀਬੋਰਡਸ ਚੁਣੋ"</string>
     <string name="show_ime" msgid="9157568568695230830">"ਇਨਪੁਟ ਵਿਧੀ ਦਿਖਾਓ"</string>
@@ -1512,4 +1524,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"ਵਿਵਿਧ"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਦੀ ਮਹੱਤਤਾ ਸੈੱਟ ਕੀਤੀ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ਇਹ ਸ਼ਾਮਲ ਲੋਕਾਂ ਦੇ ਕਾਰਨ ਮਹੱਤਵਪੂਰਨ ਹੈ।"</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ਇੱਕ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਰਿਹਾ ਹੈ, ਪਰ ਇਸ \'ਤੇ ਮੌਜੂਦਾ ਤੌਰ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਈ ਗਈ ਹੈ।"</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ਇੱਕ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਰਿਹਾ ਹੈ, ਪਰ ਵਰਤੋਂਕਾਰ ਮਿਆਦ ਪੂਰੀ ਹੋ ਚੁੱਕੀ ਹੈ।"</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ਇੱਕ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਰਿਹਾ ਹੈ, ਪਰ "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ਖਾਤਾ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਮੌਜੂਦ ਹੈ। ਕੀ ਫਿਰ ਵੀ ਅੱਗੇ ਵੱਧਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ਖਾਤੇ ਵਿੱਚ ਇੱਕ ਨਵੇਂ ਵਰਤੋਂਕਾਰ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰ ਰਿਹਾ ਹੈ। ਕੀ ਅੱਗੇ ਵੱਧਣਾ ਹੈ?"</string>
 </resources>

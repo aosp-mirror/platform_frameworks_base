@@ -1046,6 +1046,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Palieskite, kad būtų rodoma daugiau parinkčių."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Neleisti USB derinimo."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Pasirinkti klaviatūras"</string>
     <string name="show_ime" msgid="9157568568695230830">"Rodyti įvesties metodą"</string>
@@ -1548,4 +1560,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Įvairūs"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau šiuo metu tai draudžiama."</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau pasiektas naudotojų skaičiaus apribojimas."</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau paskyra "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" jau yra šiame įrenginyje. Vis tiek tęsti?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują paskyros "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" naudotoją. Tęsti?"</string>
 </resources>

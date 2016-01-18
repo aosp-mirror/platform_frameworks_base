@@ -1032,6 +1032,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"మరిన్ని ఎంపికల కోసం తాకండి."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి తాకండి."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"కీబోర్డ్‌ను మార్చు"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"కీబోర్డ్‌లను ఎంచుకోండి"</string>
     <string name="show_ime" msgid="9157568568695230830">"ఇన్‌పుట్ పద్ధతిని చూపు"</string>
@@ -1512,4 +1524,12 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"ఇతరాలు"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
+    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
+    <skip />
+    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
+    <skip />
+    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (3206420861363021392) -->
+    <skip />
 </resources>

@@ -257,7 +257,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सकिन्छ"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"वस्तुस्थिति पट्टी हुन दिनुहोस्"</string>
@@ -1038,6 +1038,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड छान्नुहोस्"</string>
     <string name="show_ime" msgid="9157568568695230830">"आगत विधि देखाउनुहोस्"</string>
@@ -1518,4 +1530,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"विविध"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहुन्छ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर हाललाई निषेध छ।"</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर प्रयोगकर्ताको सीमा पुगेको छ।"</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर यो यन्त्रमा खाता "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" पहिले नै अवस्थित छ। जे भए पनि अगाडि बढ्ने हो?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले खाता "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" मा नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ। अगाडि बढ्ने हो?"</string>
 </resources>
