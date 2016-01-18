@@ -348,6 +348,33 @@ public interface InputConnection {
     public boolean deleteSurroundingText(int beforeLength, int afterLength);
 
     /**
+     * A variant of {@link #deleteSurroundingText(int, int)}. Major differences are:
+     *
+     * <ul>
+     *     <li>The lengths are supplied in code points, not in Java chars or in glyphs.</>
+     *     <li>This method does nothing if there are one or more invalid surrogate pairs in the
+     *     requested range.</li>
+     * </ul>
+     *
+     * <p><strong>Editor authors:</strong> In addition to the requirement in
+     * {@link #deleteSurroundingText(int, int)}, make sure to do nothing when one ore more invalid
+     * surrogate pairs are found in the requested range.</p>
+     *
+     * @see #deleteSurroundingText(int, int)
+     *
+     * @param beforeLength The number of characters before the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the beginning of the
+     *        text and the cursor, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @param afterLength The number of characters after the cursor to be deleted, in code points.
+     *        If this is greater than the number of existing characters between the cursor and
+     *        the end of the text, then this method does not fail but deletes all the characters in
+     *        that range.
+     * @return true on success, false if the input connection is no longer valid.
+     */
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
+
+    /**
      * Replace the currently composing text with the given text, and
      * set the new cursor position. Any composing text set previously
      * will be removed automatically.

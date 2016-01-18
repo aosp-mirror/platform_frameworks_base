@@ -49,6 +49,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_FINISH_COMPOSING_TEXT = 65;
     private static final int DO_SEND_KEY_EVENT = 70;
     private static final int DO_DELETE_SURROUNDING_TEXT = 80;
+    private static final int DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS = 81;
     private static final int DO_BEGIN_BATCH_EDIT = 90;
     private static final int DO_END_BATCH_EDIT = 95;
     private static final int DO_REPORT_FULLSCREEN_MODE = 100;
@@ -165,9 +166,14 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessageII(DO_CLEAR_META_KEY_STATES, states, 0));
     }
 
-    public void deleteSurroundingText(int leftLength, int rightLength) {
+    public void deleteSurroundingText(int beforeLength, int afterLength) {
         dispatchMessage(obtainMessageII(DO_DELETE_SURROUNDING_TEXT,
-            leftLength, rightLength));
+                beforeLength, afterLength));
+    }
+
+    public void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+        dispatchMessage(obtainMessageII(DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS,
+                beforeLength, afterLength));
     }
 
     public void beginBatchEdit() {
@@ -402,6 +408,15 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 ic.deleteSurroundingText(msg.arg1, msg.arg2);
                 return;
             }
+            case DO_DELETE_SURROUNDING_TEXT_IN_CODE_POINTS: {
+                InputConnection ic = mInputConnection.get();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "deleteSurroundingTextInCodePoints on inactive InputConnection");
+                    return;
+                }
+                ic.deleteSurroundingTextInCodePoints(msg.arg1, msg.arg2);
+                return;
+            }
             case DO_BEGIN_BATCH_EDIT: {
                 InputConnection ic = mInputConnection.get();
                 if (ic == null || !isActive()) {
@@ -469,7 +484,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     Message obtainMessageII(int what, int arg1, int arg2) {
         return mH.obtainMessage(what, arg1, arg2);
     }
-    
+
     Message obtainMessageO(int what, Object arg1) {
         return mH.obtainMessage(what, 0, 0, arg1);
     }

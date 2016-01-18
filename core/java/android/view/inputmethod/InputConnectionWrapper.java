@@ -62,6 +62,10 @@ public class InputConnectionWrapper implements InputConnection {
         return mTarget.getExtractedText(request, flags);
     }
 
+    public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
+        return mTarget.deleteSurroundingTextInCodePoints(beforeLength, afterLength);
+    }
+
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         return mTarget.deleteSurroundingText(beforeLength, afterLength);
     }
