@@ -67,6 +67,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
@@ -487,6 +488,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_SHORT_SUPPORT_MESSAGE = "short-support-message";
         private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
         private static final String TAG_PARENT_ADMIN = "parent-admin";
+        private static final String TAG_ORGANIZATION_COLOR = "organization-color";
 
         final DeviceAdminInfo info;
 
@@ -579,6 +581,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Support text provided by the admin to display to the user.
         String shortSupportMessage = null;
         String longSupportMessage = null;
+
+        // Background color of confirm credentials screen. Default: gray.
+        static final int DEF_ORGANIZATION_COLOR = Color.GRAY;
+        int organizationColor = DEF_ORGANIZATION_COLOR;
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -787,6 +793,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 parentAdmin.writeToXml(out);
                 out.endTag(null, TAG_PARENT_ADMIN);
             }
+            if (organizationColor != DEF_ORGANIZATION_COLOR) {
+                out.startTag(null, TAG_ORGANIZATION_COLOR);
+                out.attribute(null, ATTR_VALUE, Integer.toString(organizationColor));
+                out.endTag(null, TAG_ORGANIZATION_COLOR);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -920,6 +931,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_PARENT_ADMIN.equals(tag)) {
                     parentAdmin = new ActiveAdmin(info, /* parent */ true);
                     parentAdmin.readFromXml(parser);
+                } else if (TAG_ORGANIZATION_COLOR.equals(tag)) {
+                    organizationColor = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -7680,5 +7694,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         return null;
+    }
+
+    @Override
+    public void setOrganizationColor(@NonNull ComponentName who, int color) {
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        if (!mHasFeature || !isManagedProfile(userHandle)) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            admin.organizationColor = color;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    @Override
+    public int getOrganizationColor(@NonNull ComponentName who) {
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        if (!mHasFeature || !isManagedProfile(userHandle)) {
+            return ActiveAdmin.DEF_ORGANIZATION_COLOR;
+        }
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.organizationColor;
+        }
+    }
+
+    @Override
+    public int getOrganizationColorForUser(int userHandle) {
+        if (!mHasFeature || !isManagedProfile(userHandle)) {
+            return ActiveAdmin.DEF_ORGANIZATION_COLOR;
+        }
+        enforceCrossUsersPermission(userHandle);
+        synchronized (this) {
+            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userHandle);
+            return (profileOwner != null)
+                    ? profileOwner.organizationColor
+                    : ActiveAdmin.DEF_ORGANIZATION_COLOR;
+        }
     }
 }

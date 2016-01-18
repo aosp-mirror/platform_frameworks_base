@@ -5129,4 +5129,55 @@ public class DevicePolicyManager {
             return null;
         }
     }
+
+    /**
+     * Called by a profile owner of a managed profile to set the color used for customization.
+     * This color is used as background color of the confirm credentials screen for that user.
+     * The default color is {@link android.graphics.Color#GRAY}.
+     *
+     * <p>The confirm credentials screen can be created using
+     * {@link android.app.KeyguardManager#createConfirmDeviceCredentialIntent}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param color The 32bit representation of the color to be used.
+     */
+    public void setOrganizationColor(@NonNull ComponentName admin, int color) {
+        try {
+            mService.setOrganizationColor(admin, color);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to retrieve the color used for customization.
+     * This color is used as background color of the confirm credentials screen for that user.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The 32bit representation of the color to be used.
+     */
+    public int getOrganizationColor(@NonNull ComponentName admin) {
+        try {
+            return mService.getOrganizationColor(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return 0;
+        }
+    }
+
+    /**
+     * @hide
+     * Retrieve the customization color for a given user.
+     *
+     * @param userHandle The user id of the user we're interested in.
+     * @return The 32bit representation of the color to be used.
+     */
+    public int getOrganizationColorForUser(int userHandle) {
+        try {
+            return mService.getOrganizationColorForUser(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return 0;
+        }
+    }
 }
