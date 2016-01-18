@@ -54,6 +54,7 @@ public final class TvContract {
 
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
+    private static final String PATH_RECORDED_PROGRAM = "recorded_program";
     private static final String PATH_PASSTHROUGH = "passthrough";
 
     /**
@@ -270,6 +271,15 @@ public final class TvContract {
             throw new IllegalArgumentException("Not a channel: " + channelUri);
         }
         return buildProgramsUriForChannel(ContentUris.parseId(channelUri), startTime, endTime);
+    }
+
+    /**
+     * Builds a URI that points to a specific recorded program.
+     *
+     * @param recordedProgramId The ID of the recorded program to point to.
+     */
+    public static final Uri buildRecordedProgramUri(long recordedProgramId) {
+        return ContentUris.withAppendedId(RecordedPrograms.CONTENT_URI, recordedProgramId);
     }
 
     /**
@@ -941,6 +951,8 @@ public final class TvContract {
          *
          * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
          *
+         * <p>This is a required field.
+         *
          * <p>Type: INTEGER (long)
          */
         public static final String COLUMN_CHANNEL_ID = "channel_id";
@@ -1336,6 +1348,382 @@ public final class TvContract {
     }
 
     /**
+     * Column definitions for the recorded TV programs table.
+     *
+     * <p>By default, the query results will be sorted by {@link #COLUMN_START_TIME_UTC_MILLIS} in
+     * ascending order.
+     */
+    public static final class RecordedPrograms implements BaseTvColumns {
+
+        /** The content:// style URI for this table. */
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/"
+                + PATH_RECORDED_PROGRAM);
+
+        /** The MIME type of a directory of recorded TV programs. */
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/recorded_program";
+
+        /** The MIME type of a single recorded TV program. */
+        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/recorded_program";
+
+        /**
+         * The ID of the TV channel that provided this recorded TV program.
+         *
+         * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: INTEGER (long)
+         * @see Programs#COLUMN_CHANNEL_ID
+         */
+        public static final String COLUMN_CHANNEL_ID = Programs.COLUMN_CHANNEL_ID;
+
+        /**
+         * The title of this recorded TV program.
+         *
+         * <p>If this recorded program is an episodic TV show, it is recommended that the title is
+         * the series title and its related fields ({@link #COLUMN_SEASON_NUMBER},
+         * {@link #COLUMN_EPISODE_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_TITLE
+         */
+        public static final String COLUMN_TITLE = Programs.COLUMN_TITLE;
+
+        /**
+         * The season number of this recorded TV program for episodic TV shows.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_SEASON_NUMBER
+         */
+        public static final String COLUMN_SEASON_NUMBER = Programs.COLUMN_SEASON_NUMBER;
+
+        /**
+         * The episode number of this recorded TV program for episodic TV shows.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_EPISODE_NUMBER
+         */
+        public static final String COLUMN_EPISODE_NUMBER = Programs.COLUMN_EPISODE_NUMBER;
+
+        /**
+         * The episode title of this recorded TV program for episodic TV shows.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_EPISODE_TITLE
+         */
+        public static final String COLUMN_EPISODE_TITLE = Programs.COLUMN_EPISODE_TITLE;
+
+        /**
+         * The start time of the original TV program, in milliseconds since the epoch.
+         *
+         * <p>Type: INTEGER (long)
+         * @see Programs#COLUMN_START_TIME_UTC_MILLIS
+         */
+        public static final String COLUMN_START_TIME_UTC_MILLIS =
+                Programs.COLUMN_START_TIME_UTC_MILLIS;
+
+        /**
+         * The end time of the original TV program, in milliseconds since the epoch.
+         *
+         * <p>Type: INTEGER (long)
+         * @see Programs#COLUMN_END_TIME_UTC_MILLIS
+         */
+        public static final String COLUMN_END_TIME_UTC_MILLIS = Programs.COLUMN_END_TIME_UTC_MILLIS;
+
+        /**
+         * The comma-separated genre string of this recorded TV program.
+         *
+         * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
+         * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_BROADCAST_GENRE
+         */
+        public static final String COLUMN_BROADCAST_GENRE = Programs.COLUMN_BROADCAST_GENRE;
+
+        /**
+         * The comma-separated canonical genre string of this recorded TV program.
+         *
+         * <p>Canonical genres are defined in {@link Programs.Genres}. Use
+         * {@link Programs.Genres#encode Genres.encode()} to create a text that can be stored in
+         * this column. Use {@link Programs.Genres#decode Genres.decode()} to get the canonical
+         * genre strings from the text stored in this column.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_CANONICAL_GENRE
+         * @see Programs.Genres
+         */
+        public static final String COLUMN_CANONICAL_GENRE = Programs.COLUMN_CANONICAL_GENRE;
+
+        /**
+         * The short description of this recorded TV program that is displayed to the user by
+         * default.
+         *
+         * <p>It is recommended to limit the length of the descriptions to 256 characters.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_SHORT_DESCRIPTION
+         */
+        public static final String COLUMN_SHORT_DESCRIPTION = Programs.COLUMN_SHORT_DESCRIPTION;
+
+        /**
+         * The detailed, lengthy description of this recorded TV program that is displayed only when
+         * the user wants to see more information.
+         *
+         * <p>TV input services should leave this field empty if they have no additional details
+         * beyond {@link #COLUMN_SHORT_DESCRIPTION}.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_LONG_DESCRIPTION
+         */
+        public static final String COLUMN_LONG_DESCRIPTION = Programs.COLUMN_LONG_DESCRIPTION;
+
+        /**
+         * The width of the video for this recorded TV program, in the unit of pixels.
+         *
+         * <p>Together with {@link #COLUMN_VIDEO_HEIGHT} this is used to determine the video
+         * resolution of the current recorded TV program. Can be empty if it is not known or the
+         * recorded program does not convey any video.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_VIDEO_WIDTH
+         */
+        public static final String COLUMN_VIDEO_WIDTH = Programs.COLUMN_VIDEO_WIDTH;
+
+        /**
+         * The height of the video for this recorded TV program, in the unit of pixels.
+         *
+         * <p>Together with {@link #COLUMN_VIDEO_WIDTH} this is used to determine the video
+         * resolution of the current recorded TV program. Can be empty if it is not known or the
+         * recorded program does not convey any video.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_VIDEO_HEIGHT
+         */
+        public static final String COLUMN_VIDEO_HEIGHT = Programs.COLUMN_VIDEO_HEIGHT;
+
+        /**
+         * The comma-separated audio languages of this recorded TV program.
+         *
+         * <p>This is used to describe available audio languages included in the recorded program.
+         * Use either ISO 639-1 or 639-2/T codes.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_AUDIO_LANGUAGE
+         */
+        public static final String COLUMN_AUDIO_LANGUAGE = Programs.COLUMN_AUDIO_LANGUAGE;
+
+        /**
+         * The comma-separated content ratings of this recorded TV program.
+         *
+         * <p>This is used to describe the content rating(s) of this recorded program. Each
+         * comma-separated content rating sub-string should be generated by calling
+         * {@link TvContentRating#flattenToString}. Note that in most cases the recorded program
+         * content is rated by a single rating system, thus resulting in a corresponding single
+         * sub-string that does not require comma separation and multiple sub-strings appear only
+         * when the recorded program content is rated by two or more content rating systems. If any
+         * of those ratings is specified as "blocked rating" in the user's parental control
+         * settings, the TV input service should block the current content and wait for the signal
+         * that it is okay to unblock.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_CONTENT_RATING
+         */
+        public static final String COLUMN_CONTENT_RATING = Programs.COLUMN_CONTENT_RATING;
+
+        /**
+         * The URI for the poster art of this recorded TV program.
+         *
+         * <p>The data in the column must be a URL, or a URI in one of the following formats:
+         *
+         * <ul>
+         * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+         * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})
+         * </li>
+         * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_POSTER_ART_URI
+         */
+        public static final String COLUMN_POSTER_ART_URI = Programs.COLUMN_POSTER_ART_URI;
+
+        /**
+         * The URI for the thumbnail of this recorded TV program.
+         *
+         * <p>The system can generate a thumbnail from the poster art if this column is not
+         * specified. Thus it is not necessary for TV input services to include a thumbnail if it is
+         * just a scaled image of the poster art.
+         *
+         * <p>The data in the column must be a URL, or a URI in one of the following formats:
+         *
+         * <ul>
+         * <li>content ({@link android.content.ContentResolver#SCHEME_CONTENT})</li>
+         * <li>android.resource ({@link android.content.ContentResolver#SCHEME_ANDROID_RESOURCE})
+         * </li>
+         * <li>file ({@link android.content.ContentResolver#SCHEME_FILE})</li>
+         * </ul>
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         * @see Programs#COLUMN_THUMBNAIL_URI
+         */
+        public static final String COLUMN_THUMBNAIL_URI = Programs.COLUMN_THUMBNAIL_URI;
+
+        /**
+         * The flag indicating whether this recorded TV program is searchable or not.
+         *
+         * <p>The columns of searchable recorded programs can be read by other applications that
+         * have proper permission. Care must be taken not to open sensitive data.
+         *
+         * <p>A value of 1 indicates that the recorded program is searchable and its columns can be
+         * read by other applications, a value of 0 indicates that the recorded program is hidden
+         * and its columns can be read only by the package that owns the recorded program and the
+         * system. If not specified, this value is set to 1 (searchable) by default.
+         *
+         * <p>Type: INTEGER (boolean)
+         * @see Programs#COLUMN_SEARCHABLE
+         */
+        public static final String COLUMN_SEARCHABLE = Programs.COLUMN_SEARCHABLE;
+
+        /**
+         * The URI of the recording data for this recorded program.
+         *
+         * <p>Together with {@link #COLUMN_RECORDING_DATA_BYTES}, applications can use this
+         * information to manage recording storage. The URI should indicate a file or directory with
+         * the scheme {@link android.content.ContentResolver#SCHEME_FILE}.
+         *
+         * <p>Type: TEXT
+         * @see #COLUMN_RECORDING_DATA_BYTES
+         */
+        public static final String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
+
+        /**
+         * The data size (in bytes) for this recorded program.
+         *
+         * <p>Together with {@link #COLUMN_RECORDING_DATA_URI}, applications can use this
+         * information to manage recording storage.
+         *
+         * <p>Type: INTEGER (long)
+         * @see #COLUMN_RECORDING_DATA_URI
+         */
+        public static final String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
+
+        /**
+         * The duration (in milliseconds) of this recorded program.
+         *
+         * <p>The actual duration of the recorded program can differ from the one calculated by
+         * {@link #COLUMN_END_TIME_UTC_MILLIS} - {@link #COLUMN_START_TIME_UTC_MILLIS} as program
+         * recording can be interrupted in the middle for some reason, resulting in a partially
+         * recorded program, which is still playable.
+         *
+         * <p>Type: INTEGER
+         */
+        public static final String COLUMN_RECORDING_DURATION_MILLIS = "recording_duration_millis";
+
+        /**
+         * The expiration time for this recorded program, in milliseconds since the epoch.
+         *
+         * <p>Recorded TV programs do not expire by default unless explicitly requested by the user
+         * or the user allows applications to delete them in order to free up disk space for future
+         * recording. However, some TV content can have expiration date set by the content provider
+         * when recorded. This field is used to indicate such a restriction.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: INTEGER (long)
+         */
+        public static final String COLUMN_RECORDING_EXPIRE_TIME_UTC_MILLIS =
+                "recording_expire_time_utc_millis";
+
+
+        /**
+         * Internal data used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Type: BLOB
+         * @see Programs#COLUMN_INTERNAL_PROVIDER_DATA
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_DATA =
+                Programs.COLUMN_INTERNAL_PROVIDER_DATA;
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_INTERNAL_PROVIDER_FLAG1
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG1 =
+                Programs.COLUMN_INTERNAL_PROVIDER_FLAG1;
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_INTERNAL_PROVIDER_FLAG2
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG2 =
+                Programs.COLUMN_INTERNAL_PROVIDER_FLAG2;
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_INTERNAL_PROVIDER_FLAG3
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG3 =
+                Programs.COLUMN_INTERNAL_PROVIDER_FLAG3;
+
+        /**
+         * Internal integer flag used by individual TV input services.
+         *
+         * <p>This is internal to the provider that inserted it, and should not be decoded by other
+         * apps.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_INTERNAL_PROVIDER_FLAG4
+         */
+        public static final String COLUMN_INTERNAL_PROVIDER_FLAG4 =
+                Programs.COLUMN_INTERNAL_PROVIDER_FLAG4;
+
+        /**
+         * The version number of this row entry used by TV input services.
+         *
+         * <p>This is best used by sync adapters to identify the rows to update. The number can be
+         * defined by individual TV input services. One may assign the same value as
+         * {@code version_number} in ETSI EN 300 468 or ATSC A/65, if the data are coming from a TV
+         * broadcast.
+         *
+         * <p>Type: INTEGER
+         * @see Programs#COLUMN_VERSION_NUMBER
+         */
+        public static final String COLUMN_VERSION_NUMBER = Programs.COLUMN_VERSION_NUMBER;
+
+        private RecordedPrograms() {}
+    }
+
+    /**
      * Column definitions for the TV programs that the user watched. Applications do not have access
      * to this table.
      *
@@ -1375,6 +1763,8 @@ public final class TvContract {
 
         /**
          * The ID of the TV channel that provides this TV program.
+         *
+         * <p>This is a required field.
          *
          * <p>Type: INTEGER (long)
          */

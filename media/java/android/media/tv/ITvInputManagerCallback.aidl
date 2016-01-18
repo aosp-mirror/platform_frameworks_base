@@ -16,13 +16,18 @@
 
 package android.media.tv;
 
+import android.media.tv.TvInputInfo;
+
 /**
  * Interface to receive callbacks from ITvInputManager regardless of sessions.
  * @hide
  */
 oneway interface ITvInputManagerCallback {
-    void onInputStateChanged(in String inputId, int state);
     void onInputAdded(in String inputId);
     void onInputRemoved(in String inputId);
     void onInputUpdated(in String inputId);
+
+    void onInputStateChanged(in String inputId, int state);
+
+    void onTvInputInfoChanged(in String inputId, in TvInputInfo TvInputInfo);
 }

@@ -59,20 +59,29 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
     private static final int DO_REMOVE_OVERLAY_VIEW = 12;
     private static final int DO_UNBLOCK_CONTENT = 13;
-    private static final int DO_TIME_SHIFT_PAUSE = 14;
-    private static final int DO_TIME_SHIFT_RESUME = 15;
-    private static final int DO_TIME_SHIFT_SEEK_TO = 16;
-    private static final int DO_TIME_SHIFT_SET_PLAYBACK_PARAMS = 17;
-    private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 18;
+    private static final int DO_TIME_SHIFT_PLAY = 14;
+    private static final int DO_TIME_SHIFT_PAUSE = 15;
+    private static final int DO_TIME_SHIFT_RESUME = 16;
+    private static final int DO_TIME_SHIFT_SEEK_TO = 17;
+    private static final int DO_TIME_SHIFT_SET_PLAYBACK_PARAMS = 18;
+    private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 19;
+    private static final int DO_CONNECT = 20;
+    private static final int DO_DISCONNECT = 21;
+    private static final int DO_START_RECORDING = 22;
+    private static final int DO_STOP_RECORDING = 23;
 
+    private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
 
     private TvInputService.Session mTvInputSessionImpl;
+    private TvInputService.RecordingSession mTvInputRecordingSessionImpl;
+
     private InputChannel mChannel;
     private TvInputEventReceiver mReceiver;
 
     public ITvInputSessionWrapper(Context context, TvInputService.Session sessionImpl,
             InputChannel channel) {
+        mIsRecordingSession = false;
         mCaller = new HandlerCaller(context, null, this, true /* asyncHandler */);
         mTvInputSessionImpl = sessionImpl;
         mChannel = channel;
@@ -81,9 +90,19 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         }
     }
 
+    public ITvInputSessionWrapper(Context context,
+            TvInputService.RecordingSession recordingSessionImpl) {
+        mIsRecordingSession = true;
+        mCaller = new HandlerCaller(context, null, this, true /* asyncHandler */);
+        mTvInputRecordingSessionImpl = recordingSessionImpl;
+    }
+
     @Override
     public void executeMessage(Message msg) {
-        if (mTvInputSessionImpl == null) {
+        if (!mIsRecordingSession && mTvInputSessionImpl == null) {
+            return;
+        }
+        if (mIsRecordingSession && mTvInputRecordingSessionImpl == null) {
             return;
         }
 
@@ -138,7 +157,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_APP_PRIVATE_COMMAND: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.appPrivateCommand((String) args.arg1, (Bundle) args.arg2);
+                if (mIsRecordingSession) {
+                    mTvInputRecordingSessionImpl.appPrivateCommand(
+                            (String) args.arg1, (Bundle) args.arg2);
+                } else {
+                    mTvInputSessionImpl.appPrivateCommand((String) args.arg1, (Bundle) args.arg2);
+                }
                 args.recycle();
                 break;
             }
@@ -160,6 +184,10 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.unblockContent((String) msg.obj);
                 break;
             }
+            case DO_TIME_SHIFT_PLAY: {
+                mTvInputSessionImpl.timeShiftPlay((Uri) msg.obj);
+                break;
+            }
             case DO_TIME_SHIFT_PAUSE: {
                 mTvInputSessionImpl.timeShiftPause();
                 break;
@@ -178,6 +206,25 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
+                break;
+            }
+            case DO_CONNECT: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputRecordingSessionImpl.connect((Uri) args.arg1, (Bundle) args.arg2);
+                args.recycle();
+                break;
+            }
+            case DO_DISCONNECT: {
+                mTvInputRecordingSessionImpl.disconnect();
+                mTvInputRecordingSessionImpl = null;
+                break;
+            }
+            case DO_START_RECORDING: {
+                mTvInputRecordingSessionImpl.startRecording();
+                break;
+            }
+            case DO_STOP_RECORDING: {
+                mTvInputRecordingSessionImpl.stopRecording();
                 break;
             }
             default: {
@@ -274,6 +321,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
+    public void timeShiftPlay(Uri recordedProgramUri) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(
+                DO_TIME_SHIFT_PLAY, recordedProgramUri));
+    }
+
+    @Override
     public void timeShiftPause() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_TIME_SHIFT_PAUSE));
     }
@@ -298,6 +351,28 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     public void timeShiftEnablePositionTracking(boolean enable) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
                 DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, enable));
+    }
+
+    @Override
+    public void connect(Uri channelUri, Bundle params) {
+        // Clear the pending connect requests.
+        mCaller.removeMessages(DO_CONNECT);
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_CONNECT, channelUri, params));
+    }
+
+    @Override
+    public void disconnect() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_DISCONNECT));
+    }
+
+    @Override
+    public void startRecording() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_START_RECORDING));
+    }
+
+    @Override
+    public void stopRecording() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_STOP_RECORDING));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

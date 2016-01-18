@@ -448,6 +448,37 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Plays a given recorded TV program.
+     *
+     * @param inputId The ID of the TV input that created the given recorded program.
+     * @param recordedProgramUri The URI of a recorded program.
+     */
+    public void timeShiftPlay(String inputId, Uri recordedProgramUri) {
+        if (DEBUG) Log.d(TAG, "timeShiftPlay(" + recordedProgramUri + ")");
+        if (TextUtils.isEmpty(inputId)) {
+            throw new IllegalArgumentException("inputId cannot be null or an empty string");
+        }
+        synchronized (sMainTvViewLock) {
+            if (sMainTvView.get() == null) {
+                sMainTvView = new WeakReference<>(this);
+            }
+        }
+        if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
+            if (mSession != null) {
+                mSession.timeShiftPlay(recordedProgramUri);
+            } else {
+                mSessionCallback.mRecordedProgramUri = recordedProgramUri;
+            }
+        } else {
+            resetInternal();
+            mSessionCallback = new MySessionCallback(inputId, recordedProgramUri);
+            if (mTvInputManager != null) {
+                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+            }
+        }
+    }
+
+    /**
      * Pauses playback. No-op if it is already paused. Call {@link #timeShiftResume} to resume.
      */
     public void timeShiftPause() {
@@ -994,11 +1025,17 @@ public class TvView extends ViewGroup {
         final String mInputId;
         Uri mChannelUri;
         Bundle mTuneParams;
+        Uri mRecordedProgramUri;
 
         MySessionCallback(String inputId, Uri channelUri, Bundle tuneParams) {
             mInputId = inputId;
             mChannelUri = channelUri;
             mTuneParams = tuneParams;
+        }
+
+        MySessionCallback(String inputId, Uri recordedProgramUri) {
+            mInputId = inputId;
+            mRecordedProgramUri = recordedProgramUri;
         }
 
         @Override
@@ -1043,7 +1080,11 @@ public class TvView extends ViewGroup {
                 if (mCaptionEnabled != null) {
                     mSession.setCaptionEnabled(mCaptionEnabled);
                 }
-                mSession.tune(mChannelUri, mTuneParams);
+                if (mChannelUri != null) {
+                    mSession.tune(mChannelUri, mTuneParams);
+                } else {
+                    mSession.timeShiftPlay(mRecordedProgramUri);
+                }
                 ensurePositionTracking();
             } else {
                 mSessionCallback = null;

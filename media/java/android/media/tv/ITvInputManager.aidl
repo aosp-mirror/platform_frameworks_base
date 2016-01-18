@@ -55,7 +55,8 @@ interface ITvInputManager {
     void addBlockedRating(in String rating, int userId);
     void removeBlockedRating(in String rating, int userId);
 
-    void createSession(in ITvInputClient client, in String inputId, int seq, int userId);
+    void createSession(in ITvInputClient client, in String inputId, boolean isRecordingSession,
+            int seq, int userId);
     void releaseSession(in IBinder sessionToken, int userId);
 
     void setMainSession(in IBinder sessionToken, int userId);
@@ -77,11 +78,17 @@ interface ITvInputManager {
 
     void unblockContent(in IBinder sessionToken, in String unblockedRating, int userId);
 
+    void timeShiftPlay(in IBinder sessionToken, in Uri recordedProgramUri, int userId);
     void timeShiftPause(in IBinder sessionToken, int userId);
     void timeShiftResume(in IBinder sessionToken, int userId);
     void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
     void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
+
+    // For the recording session
+    void connect(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
+    void startRecording(in IBinder sessionToken, int userId);
+    void stopRecording(in IBinder sessionToken, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();
