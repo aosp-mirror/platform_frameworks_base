@@ -626,8 +626,8 @@ public class DevicePolicyManager {
      * <p>If unspecified, defaults to {@code true} to match the behavior in
      * {@link android.os.Build.VERSION_CODES#M} and earlier.
      *
-     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE},
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE} or {@link #ACTION_PROVISION_MANAGED_USER}.
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE} or
+     * {@link #ACTION_PROVISION_MANAGED_USER}.
      *
      * @hide
      */
