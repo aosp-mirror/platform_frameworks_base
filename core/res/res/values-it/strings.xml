@@ -1032,6 +1032,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Tocca per visualizzare più opzioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Scegli tastiera"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostra metodo immissione"</string>
@@ -1512,4 +1524,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Vari"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Stabilisci tu l\'importanza di queste notifiche."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Importante a causa delle persone coinvolte."</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" sta cercando di aggiungere un nuovo utente, ma l\'app non è consentita."</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" sta cercando di aggiungere un nuovo utente, ma è stato raggiunto il limite massimo di utenti."</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" sta cercando di aggiungere un nuovo utente, ma l\'account "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" esiste già su questo dispositivo. Continuare comunque?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" sta cercando di aggiungere un nuovo utente per l\'account "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Continuare?"</string>
 </resources>

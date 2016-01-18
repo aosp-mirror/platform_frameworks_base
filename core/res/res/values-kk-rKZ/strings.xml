@@ -257,7 +257,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Дисплей ұлғайтуды басқару"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Дисплейдің масштабтау деңгейін және орналастыруды басқару."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Қимылдарды орындау"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Түртуге, жанауға, қысуға және басқа қимылдарды орындауға болады."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Түртуге, сырғытуға, қысуға және басқа қимылдарды орындауға болады."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"күйін көрсету тақтасын өшіру немесе өзгерту"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Қолданбаға күй жолағын өшіруге немесе жүйелік белгішелерді қосуға және жоюға рұқсат береді."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"күй жолағы болу"</string>
@@ -1032,6 +1032,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Қосымша параметрлер үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB жөндеуді өшіру үшін түртіңіз."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Пернетақталарды таңдау"</string>
     <string name="show_ime" msgid="9157568568695230830">"Енгізу әдісін көрсету"</string>
@@ -1512,4 +1524,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Әр түрлі"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Сіз осы хабарландырулардың маңыздылығын орнатасасыз."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Қатысты адамдарға байланысты бұл маңызды."</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" есептік жазбасы үшін жаңа пайдаланушыны қосуға тырысуда, бірақ қазіргі уақытта тыйым салынған."</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" жаңа пайдаланушыны қосуға тырысуда, бірақ пайдаланушылар саны шегіне жетті."</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" жаңа пайдаланушыны қосуға тырысуда, бірақ "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" есептік жазбасы осы құрылғыда әлдеқашан бар. Бәрібір жалғастыру керек пе?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" есептік жазбасы үшін жаңа пайдаланушыны қосуға тырысуда. Жалғастыру керек пе?"</string>
 </resources>

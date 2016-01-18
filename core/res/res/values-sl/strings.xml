@@ -259,7 +259,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadziranje povečave prikaza"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Nadziranje stopnje povečave in položaja prikaza."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajanje potez"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, vlečenja prstov skupaj in drugih potez."</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"onemogočanje ali spreminjanje vrstice stanja"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Aplikacijam omogoča onemogočenje vrstice stanja ali dodajanje in odstranjevanje ikon sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"postane vrstica stanja"</string>
@@ -1046,6 +1046,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Za več možnosti se dotaknite."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje in odpravljanje napak USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotaknite se, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
+    <skip />
+    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
+    <skip />
     <string name="select_input_method" msgid="8547250819326693584">"Sprememba tipkovnice"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izbira tipkovnic"</string>
     <string name="show_ime" msgid="9157568568695230830">"Pokaži način vnosa"</string>
@@ -1548,4 +1560,12 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Razno"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Vi določite raven pomembnosti teh obvestil."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Pomembno zaradi udeleženih ljudi."</string>
+    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
+    <skip />
+    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
+    <skip />
+    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (3206420861363021392) -->
+    <skip />
 </resources>
