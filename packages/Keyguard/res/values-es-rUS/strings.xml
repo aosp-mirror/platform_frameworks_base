@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sin servicio"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo de avión"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Se solicita el patrón al reiniciar el dispositivo."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Se solicita el PIN al reiniciar el dispositivo."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Se solicita la contraseña al reiniciar el dispositivo."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Por razones de seguridad, debe resolverse el patrón."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Por razones de seguridad, escribe el PIN."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Por razones de seguridad, ingresa la contraseña."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Se solicita el patrón al cambiar de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Se solicita el PIN al cambiar de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Se solicita la contraseña al cambiar de perfil."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Se requiere el patrón después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Se requiere el PIN después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Se requiere la contraseña después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Se requiere el patrón por razones de seguridad"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Se requiere el PIN por razones de seguridad"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Se requiere la contraseña por razones de seguridad"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Se requiere el patrón al cambiar de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Se requiere el PIN al cambiar de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Se requiere la contraseña al cambiar de perfil"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Hace <xliff:g id="NUMBER_1">%d</xliff:g> horas que no se desbloquea el dispositivo. Confirma el patrón.</item>
       <item quantity="one">Hace <xliff:g id="NUMBER_0">%d</xliff:g> hora que no se desbloquea el dispositivo. Confirma el patrón.</item>

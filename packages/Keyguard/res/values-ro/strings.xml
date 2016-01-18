@@ -112,15 +112,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Fără serviciu."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Buton pentru comutarea metodei de introducere."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mod Avion"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Când reporniți dispozitivul este necesar să introduceți modelul."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Când reporniți dispozitivul este necesar să introduceți codul PIN."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Când reporniți dispozitivul este necesar să introduceți parola."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Pentru securitate suplimentară este necesar un șablon."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Pentru securitate suplimentară este necesar un cod PIN."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Pentru securitate suplimentară este necesară o parolă."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Când comutați între profiluri este necesar să introduceți modelul."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Când comutați între profiluri este necesar să introduceți codul PIN."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Când comutați între profiluri este necesar să introduceți parola."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Modelul este necesar după repornirea dispozitivului"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Codul PIN este necesar după repornirea dispozitivului"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Parola este necesară după repornirea dispozitivului"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Modelul este necesar pentru securitate suplimentară"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Codul PIN este necesar pentru securitate suplimentară"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Parola este necesară pentru securitate suplimentară"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Modelul este necesar când comutați între profiluri"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Codul PIN este necesar când comutați între profiluri"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Parola este necesară când comutați între profiluri"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="few">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> ore. Confirmați modelul.</item>
       <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați modelul.</item>

@@ -112,15 +112,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nav pakalpojuma."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ievades metodes maiņas poga."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Lidojuma režīms"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Restartējot ierīci, ir jāievada kombinācija."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Restartējot ierīci, ir jāievada PIN."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Restartējot ierīci, ir jāievada parole."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Papildu drošībai nepieciešama atbloķēšanas kombinācija."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Papildu drošībai nepieciešams PIN kods."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Papildu drošībai nepieciešama parole."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Mainot profilu, ir jāievada kombinācija."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Mainot profilu, ir jāievada PIN."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Mainot profilu, ir jāievada parole."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pēc ierīces restartēšanas ir jāievada atbloķēšanas kombinācija."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Pēc ierīces restartēšanas ir jāievada PIN kods."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Pēc ierīces restartēšanas ir jāievada parole."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Papildu drošībai ir nepieciešama atbloķēšanas kombinācija."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Papildu drošībai ir nepieciešams PIN kods."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Papildu drošībai ir nepieciešama parole."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Pārslēdzot profilus, ir jāievada atbloķēšanas kombinācija."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Pārslēdzot profilus, ir jāievada PIN kods."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Pārslēdzot profilus, ir jāievada parole."</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="zero">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet kombināciju.</item>
       <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet kombināciju.</item>

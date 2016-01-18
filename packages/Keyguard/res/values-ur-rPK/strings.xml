@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"کوئی سروس نہیں ہے۔"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"اندراج کا طریقہ سوئچ کرنے کا بٹن۔"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ہوائی جہاز وضع"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"جب آپ آلہ کو دوبارہ شروع کرتے ہیں تو پیٹرن درکار ہوتا ہے۔"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"‏جب آپ آلہ کو دوبارہ شروع کرتے ہیں تو PIN درکار ہوتا ہے۔"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"جب آپ آلہ کو دوبارہ شروع کرتے ہیں تو پاسورڈ درکار ہوتا ہے۔"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"اضافی سیکیورٹی کیلئے پیٹرن درکار ہے۔"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"‏اضافی سیکیورٹی کیلئے PIN درکار ہے۔"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"اضافی سیکیورٹی کیلئے پاسورڈ درکار ہے۔"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"جب آپ پروفائل سوئچ کرتے ہیں تو پیٹرن درکار ہوتا ہے۔"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"‏جب آپ پروفائل سوئچ کرتے ہیں تو PIN درکار ہوتا ہے۔"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"جب آپ پروفائل سوئچ کرتے ہیں تو پاسورڈ درکار ہوتا ہے۔"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"آلہ دوبارہ چالو ہونے کے بعد پیٹرن درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"‏آلہ دوبارہ چالو ہونے کے بعد PIN درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"آلہ دوبارہ چالو ہونے کے بعد پاس ورڈ درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"اضافی سیکیورٹی کیلئے پیٹرن درکار ہے"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"‏اضافی سیکیورٹی کیلئے PIN درکار ہے"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"اضافی سیکیورٹی کیلئے پاسورڈ درکار ہے"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"جب آپ پروفائل سوئچ کرتے ہیں تو پیٹرن درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"‏جب آپ پروفائل سوئچ کرتے ہیں تو PIN درکار ہوتا ہے"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"جب آپ پروفائل سوئچ کرتے ہیں تو پاسورڈ درکار ہوتا ہے"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">آلہ <xliff:g id="NUMBER_1">%d</xliff:g> گھنٹے سے غیر مقفل نہیں کیا گیا۔ پیٹرن کی تصدیق کریں۔</item>
       <item quantity="one">آلہ <xliff:g id="NUMBER_0">%d</xliff:g> گھنٹے سے غیر مقفل نہیں کیا گیا۔ پیٹرن کی تصدیق کریں۔</item>

@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Teenus puudub."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Sisestusmeetodi vahetamise nupp."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Lennukirežiim"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Seadme taaskäivitamisel on vaja mustrit."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Seadme taaskäivitamisel on vaja PIN-koodi."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Seadme taaskäivitamisel on vaja parooli."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Täiendava turvalisuse huvides on vaja sisestada muster."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Täiendava turvalisuse huvides on vaja sisestada PIN-kood."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Täiendava turvalisuse huvides on vaja sisestada parool."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profiilide vahetamisel on vaja mustrit."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profiilide vahetamisel on vaja PIN-koodi."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profiilide vahetamisel on vaja parooli."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Pärast seadme taaskäivitamist tuleb sisestada muster"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Pärast seadme taaskäivitamist tuleb sisestada PIN-kood"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Pärast seadme taaskäivitamist tuleb sisestada parool"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Lisaturvalisuse huvides tuleb sisestada muster"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Lisaturvalisuse huvides tuleb sisestada PIN-kood"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Lisaturvalisuse huvides tuleb sisestada parool"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profiilide vahetamisel tuleb sisestada muster"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profiilide vahetamisel tuleb sisestada PIN-kood"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profiilide vahetamisel tuleb sisestada parool"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage muster.</item>
       <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage muster.</item>

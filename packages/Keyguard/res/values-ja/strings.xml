@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"端末を再起動した時にはパターンが必要です。"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"端末を再起動した時にはPINが必要です。"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"端末を再起動した時にはパスワードが必要です。"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"セキュリティを強化するため、パターンが必要です。"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"セキュリティを強化するため、PINが必要です。"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"セキュリティを強化するため、パスワードが必要です。"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"プロファイルを切り替えるにはパターンが必要です。"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"プロファイルを切り替えるにはPINが必要です。"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"プロファイルを切り替えるにはパスワードが必要です。"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後にパターンの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後に PIN の入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後にパスワードの入力が必要となります"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"セキュリティを強化するにはパターンが必要です"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"セキュリティを強化するには PIN が必要です"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"セキュリティを強化するにはパスワードが必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"プロファイルを切り替えるにはパターンが必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"プロファイルを切り替えるには PIN が必要です"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"プロファイルを切り替えるにはパスワードが必要です"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">端末のロックが<xliff:g id="NUMBER_1">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>
       <item quantity="one">端末のロックが<xliff:g id="NUMBER_0">%d</xliff:g>時間、解除されていません。パターンを確認してください。</item>

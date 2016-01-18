@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"خدماتی وجود ندارد."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"کلید تغییر روش ورود متن."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"حالت هواپیما"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید الگو درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید پین درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"هنگامی که دستگاه را راه‌اندازی مجدد می‌کنید گذرواژه درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"برای ایمنی بیشتر به الگو نیاز است."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"برای ایمنی بیشتر به پین نیاز است."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"برای ایمنی بیشتر به گذرواژه نیاز است."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"هنگامی که میان نمایه‌ها جابجا می‌شوید، الگو درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"هنگامی که میان نمایه‌ها جابجا می‌شوید، پین درخواست می‌شود."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"هنگامی که میان نمایه‌ها جابجا می‌شوید، گذرواژه درخواست می‌شود."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"بعد از بازنشانی دستگاه باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"بعد از بازنشانی دستگاه باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"بعد از بازنشانی دستگاه باید گذرواژه وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"برای ایمنی بیشتر باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"برای ایمنی بیشتر باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"برای ایمنی بیشتر باید گذرواژه وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"بعد از تغییر نمایه‌ها باید الگو وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"بعد از تغییر نمایه‌ها باید پین وارد شود"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"بعد از تغییر نمایه‌ها باید گذرواژه وارد شود"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">قفل دستگاه به مدت <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>
       <item quantity="other">قفل دستگاه به مدت <xliff:g id="NUMBER_1">%d</xliff:g> ساعت باز نشده است. الگو را تأیید کنید.</item>

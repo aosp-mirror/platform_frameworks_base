@@ -114,15 +114,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Žádný signál."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody zadávání"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Režim Letadlo"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Po restartu zařízení je vyžadováno gesto."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Po restartu zařízení je vyžadován PIN."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Po restartu zařízení je vyžadováno heslo."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Za účelem zvýšení zabezpečení je vyžadováno gesto."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Za účelem zvýšení zabezpečení je vyžadován kód PIN."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Za účelem zvýšení zabezpečení je vyžadováno heslo."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Po přepnutí profilů je vyžadováno gesto."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Po přepnutí profilů je vyžadován PIN."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Po přepnutí profilů je vyžadováno heslo."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Po restartování zařízení je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Po restartování zařízení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Po restartování zařízení je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Za účelem zvýšení zabezpečení je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Za účelem zvýšení zabezpečení je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Za účelem zvýšení zabezpečení je vyžadováno heslo"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Po přepnutí profilů je vyžadováno gesto"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Po přepnutí profilů je vyžadován kód PIN"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Po přepnutí profilů je vyžadováno heslo"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="few">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>
       <item quantity="many">Zařízení již <xliff:g id="NUMBER_1">%d</xliff:g> hodiny nebylo odemknuto. Potvrďte gesto.</item>

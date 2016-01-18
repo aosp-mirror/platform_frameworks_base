@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"কোনো পরিষেবা নেই৷"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ইনপুট পদ্ধতির বোতাম পরিবর্তন করুন৷"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"বিমান মোড"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"যখন আপনি ডিভাইস পুনর্সূচনা করবেন তখন প্যাটার্নের প্রয়োজন হবে৷"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"যখন আপনি ডিভাইস পুনর্সূচনা করবেন তখন পিন এর প্রয়োজন হবে৷"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"যখন আপনি ডিভাইস পুনর্সূচনা করবেন তখন পাসওয়ার্ডের প্রয়োজন হবে৷"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"অতিরিক্ত সুরক্ষার জন্য প্যাটার্ন প্রয়োজন৷"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"অতিরিক্ত সুরক্ষার জন্য PIN প্রয়োজন৷"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"অতিরিক্ত সুরক্ষার জন্য পাসওয়ার্ড প্রয়োজন৷"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন প্যাটার্নের প্রয়োজন হবে৷"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পিন এর প্রয়োজন হবে৷"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পাসওয়ার্ডের প্রয়োজন হবে৷"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ডিভাইস পুনরায় আরম্ভ করার পর প্যাটার্নের প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ডিভাইস পুনরায় আরম্ভ করার পর PIN এর প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"ডিভাইস পুনরায় আরম্ভ করার পর পাসওয়ার্ডের প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"অতিরিক্ত সুরক্ষার জন্য প্যাটার্ন প্রয়োজন"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"অতিরিক্ত সুরক্ষার জন্য PIN প্রয়োজন"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"অতিরিক্ত সুরক্ষার জন্য পাসওয়ার্ড প্রয়োজন"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন প্যাটার্নের প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন PIN এর প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পাসওয়ার্ডের প্রয়োজন হবে"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। প্যাটার্ন নিশ্চিত করুন।</item>
       <item quantity="other">ডিভাইস <xliff:g id="NUMBER_1">%d</xliff:g> ঘন্টার জন্য আনলক করা হয়নি। প্যাটার্ন নিশ্চিত করুন।</item>
