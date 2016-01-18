@@ -480,7 +480,13 @@ public abstract class QSTile<TState extends State> implements Listenable {
             other.dualLabelContentDescription = dualLabelContentDescription;
             other.autoMirrorDrawable = autoMirrorDrawable;
             other.disabledByPolicy = disabledByPolicy;
-            enforcedAdmin.copyTo(other.enforcedAdmin);
+            if (enforcedAdmin == null) {
+                other.enforcedAdmin = null;
+            } else if (other.enforcedAdmin == null) {
+                other.enforcedAdmin = new EnforcedAdmin(enforcedAdmin);
+            } else {
+                enforcedAdmin.copyTo(other.enforcedAdmin);
+            }
             return changed;
         }
 

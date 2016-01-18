@@ -233,6 +233,16 @@ public class RestrictedLockUtils {
             this.userId = userId;
         }
 
+        public EnforcedAdmin(EnforcedAdmin other) {
+            if (other == null) {
+                throw new IllegalArgumentException();
+            }
+            this.component = other.component;
+            this.userId = other.userId;
+        }
+
+        public EnforcedAdmin() {}
+
         @Override
         public boolean equals(Object object) {
             if (object == this) return true;
@@ -255,12 +265,10 @@ public class RestrictedLockUtils {
 
         public void copyTo(EnforcedAdmin other) {
             if (other == null) {
-                other = new EnforcedAdmin();
+                throw new IllegalArgumentException();
             }
             other.component = component;
             other.userId = userId;
         }
-
-        public EnforcedAdmin() {}
     }
 }
