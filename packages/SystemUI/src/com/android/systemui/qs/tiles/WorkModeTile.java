@@ -47,6 +47,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
         super(host);
         mUserManager = UserManager.get(mContext);
         mProfiles = new LinkedList<UserInfo>();
+        reloadManagedProfiles(UserHandle.USER_CURRENT);
     }
 
     @Override
