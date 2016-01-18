@@ -3754,6 +3754,7 @@ final class Settings {
         String[] names;
         int[] appIds;
         String[] seinfos;
+        int[] targetSdkVersions;
         int packagesCount;
         synchronized (mPackages) {
             Collection<PackageSetting> packages = mPackages.values();
@@ -3762,6 +3763,7 @@ final class Settings {
             names = new String[packagesCount];
             appIds = new int[packagesCount];
             seinfos = new String[packagesCount];
+            targetSdkVersions = new int[packagesCount];
             Iterator<PackageSetting> packagesIterator = packages.iterator();
             for (int i = 0; i < packagesCount; i++) {
                 PackageSetting ps = packagesIterator.next();
@@ -3776,6 +3778,7 @@ final class Settings {
                 names[i] = ps.name;
                 appIds[i] = ps.appId;
                 seinfos[i] = ps.pkg.applicationInfo.seinfo;
+                targetSdkVersions[i] = ps.pkg.applicationInfo.targetSdkVersion;
             }
         }
         for (int i = 0; i < packagesCount; i++) {
@@ -3786,7 +3789,7 @@ final class Settings {
             final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
             try {
                 installer.createAppData(volumeUuids[i], names[i], userHandle, flags, appIds[i],
-                        seinfos[i]);
+                        seinfos[i], targetSdkVersions[i]);
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to prepare app data", e);
             }

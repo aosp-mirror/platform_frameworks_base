@@ -86,8 +86,9 @@ public final class Installer extends SystemService {
     }
 
     public void createAppData(String uuid, String pkgname, int userid, int flags, int appid,
-            String seinfo) throws InstallerException {
-        mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo);
+            String seinfo, int targetSdkVersion) throws InstallerException {
+        mInstaller.execute("create_app_data", uuid, pkgname, userid, flags, appid, seinfo,
+            targetSdkVersion);
     }
 
     public void restoreconAppData(String uuid, String pkgname, int userid, int flags, int appid,
@@ -107,9 +108,10 @@ public final class Installer extends SystemService {
     }
 
     public void moveCompleteApp(String from_uuid, String to_uuid, String package_name,
-            String data_app_name, int appid, String seinfo) throws InstallerException {
+            String data_app_name, int appid, String seinfo, int targetSdkVersion)
+            throws InstallerException {
         mInstaller.execute("move_complete_app", from_uuid, to_uuid, package_name,
-                data_app_name, appid, seinfo);
+                data_app_name, appid, seinfo, targetSdkVersion);
     }
 
     public void getAppSize(String uuid, String pkgname, int userid, int flags, String apkPath,
