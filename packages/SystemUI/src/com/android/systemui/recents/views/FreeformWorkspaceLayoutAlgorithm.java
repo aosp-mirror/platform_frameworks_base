@@ -48,7 +48,6 @@ public class FreeformWorkspaceLayoutAlgorithm {
     public void update(List<Task> freeformTasks, TaskStackLayoutAlgorithm stackLayout) {
         Collections.reverse(freeformTasks);
         mTaskRectMap.clear();
-        mTaskRectMap.ensureCapacity(freeformTasks.size());
 
         int numFreeformTasks = stackLayout.mNumFreeformTasks;
         if (!freeformTasks.isEmpty()) {

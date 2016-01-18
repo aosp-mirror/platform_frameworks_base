@@ -98,7 +98,6 @@ public class TaskGrouping {
         int taskCount = mTaskKeys.size();
         mFrontMostTaskKey = mTaskKeys.get(mTaskKeys.size() - 1);
         mTaskKeyIndices.clear();
-        mTaskKeyIndices.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             Task.TaskKey k = mTaskKeys.get(i);
             mTaskKeyIndices.put(k, i);

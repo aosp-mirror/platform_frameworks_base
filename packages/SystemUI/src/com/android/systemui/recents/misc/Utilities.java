@@ -21,10 +21,16 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.util.ArraySet;
 import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.ViewParent;
+import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.views.TaskViewTransform;
+
+import java.util.Collections;
+import java.util.List;
 
 /* Common code */
 public class Utilities {
@@ -69,6 +75,28 @@ public class Utilities {
             parent = parent.getParent();
         }
         return null;
+    }
+
+    /**
+     * Initializes the {@param setOut} with the given object.
+     */
+    public static <T> ArraySet<T> objectToSet(T obj, ArraySet<T> setOut) {
+        setOut.clear();
+        if (obj != null) {
+            setOut.add(obj);
+        }
+        return setOut;
+    }
+
+    /**
+     * Replaces the contents of {@param setOut} with the contents of the {@param array}.
+     */
+    public static <T> ArraySet<T> arrayToSet(T[] array, ArraySet<T> setOut) {
+        setOut.clear();
+        if (array != null) {
+            Collections.addAll(setOut, array);
+        }
+        return setOut;
     }
 
     /** Scales a rect about its centroid */
@@ -125,6 +153,24 @@ public class Utilities {
         if (animator != null) {
             animator.removeAllListeners();
             animator.cancel();
+        }
+    }
+
+    /**
+     * Updates {@param transforms} to be the same size as {@param tasks}.
+     */
+    public static void matchTaskListSize(List<Task> tasks, List<TaskViewTransform> transforms) {
+        // We can reuse the task transforms where possible to reduce object allocation
+        int taskTransformCount = transforms.size();
+        int taskCount = tasks.size();
+        if (taskTransformCount < taskCount) {
+            // If there are less transforms than tasks, then add as many transforms as necessary
+            for (int i = taskTransformCount; i < taskCount; i++) {
+                transforms.add(new TaskViewTransform());
+            }
+        } else if (taskTransformCount > taskCount) {
+            // If there are more transforms than tasks, then just subset the transform list
+            transforms.subList(taskCount, taskTransformCount).clear();
         }
     }
 }

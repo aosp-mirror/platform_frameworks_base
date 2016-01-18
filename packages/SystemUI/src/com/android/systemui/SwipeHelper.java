@@ -135,7 +135,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     private ObjectAnimator createTranslationAnimation(View v, float newPos) {
         ObjectAnimator anim = ObjectAnimator.ofFloat(v,
-                mSwipeDirection == X ? "translationX" : "translationY", newPos);
+                mSwipeDirection == X ? View.TRANSLATION_X : View.TRANSLATION_Y, newPos);
         return anim;
     }
 
@@ -401,7 +401,15 @@ public class SwipeHelper implements Gefingerpoken {
                 mCallback.onChildSnappedBack(animView);
             }
         });
+        updateSnapBackAnimation(anim);
         anim.start();
+    }
+
+    /**
+     * Called to update the snap back animation.
+     */
+    protected void updateSnapBackAnimation(Animator anim) {
+        // Do nothing
     }
 
     public boolean onTouchEvent(MotionEvent ev) {

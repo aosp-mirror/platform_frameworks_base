@@ -16,11 +16,11 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -94,6 +94,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             @Override
             protected float getSize(View v) {
                 return mSv.getWidth();
+            }
+
+            @Override
+            protected void updateSnapBackAnimation(Animator anim) {
+                anim.setInterpolator(mSv.mFastOutSlowInInterpolator);
             }
         };
         mSwipeHelper.setDisableHardwareLayers(true);

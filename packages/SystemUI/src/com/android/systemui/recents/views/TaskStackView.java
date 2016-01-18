@@ -357,15 +357,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int backMostVisibleIndex = -1;
 
         // We can reuse the task transforms where possible to reduce object allocation
-        if (taskTransformCount < taskCount) {
-            // If there are less transforms than tasks, then add as many transforms as necessary
-            for (int i = taskTransformCount; i < taskCount; i++) {
-                taskTransforms.add(new TaskViewTransform());
-            }
-        } else if (taskTransformCount > taskCount) {
-            // If there are more transforms than tasks, then just subset the transform list
-            taskTransforms.subList(0, taskCount);
-        }
+        Utilities.matchTaskListSize(tasks, taskTransforms);
 
         // Update the stack transforms
         TaskViewTransform frontTransform = null;

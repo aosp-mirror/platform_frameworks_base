@@ -58,6 +58,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     void setAlpha(float alpha) {
         if (Float.compare(alpha, mAlpha) != 0) {
             mAlpha = alpha;
+            // TODO, If both clip and alpha change in the same frame, only invalidate once
             mSourceView.invalidateOutline();
         }
     }
@@ -79,6 +80,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
                 mSourceView.getHeight() - Math.max(0, mClipRect.bottom));
         if (!mLastClipBounds.equals(mClipBounds)) {
             mSourceView.setClipBounds(mClipBounds);
+            // TODO, If both clip and alpha change in the same frame, only invalidate once
             mSourceView.invalidateOutline();
             mLastClipBounds.set(mClipBounds);
         }

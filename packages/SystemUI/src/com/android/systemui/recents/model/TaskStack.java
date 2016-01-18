@@ -193,7 +193,6 @@ class FilteredTaskList {
     private void updateFilteredTaskIndices() {
         int taskCount = mFilteredTasks.size();
         mTaskIndices.clear();
-        mTaskIndices.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             Task t = mFilteredTasks.get(i);
             mTaskIndices.put(t.key, i);
@@ -841,7 +840,6 @@ public class TaskStack {
             ArrayMap<Task.TaskKey, Task> tasksMap = new ArrayMap<>();
             ArrayList<Task> tasks = mStackTaskList.getTasks();
             int taskCount = tasks.size();
-            tasksMap.ensureCapacity(taskCount);
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;

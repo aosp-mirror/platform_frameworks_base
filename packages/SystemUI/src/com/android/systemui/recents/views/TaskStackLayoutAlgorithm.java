@@ -408,7 +408,6 @@ public class TaskStackLayoutAlgorithm {
         // Put each of the tasks in the progress map at a fixed index (does not need to actually
         // map to a scroll position, just by index)
         int taskCount = stackTasks.size();
-        mTaskIndexMap.ensureCapacity(taskCount);
         for (int i = 0; i < taskCount; i++) {
             Task task = stackTasks.get(i);
             mTaskIndexMap.put(task.key, i);

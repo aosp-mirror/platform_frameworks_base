@@ -59,6 +59,7 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -66,7 +67,6 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
@@ -665,10 +665,8 @@ public class RecentsView extends FrameLayout {
     private void updateVisibleDockRegions(TaskStack.DockState[] newDockStates,
             boolean isDefaultDockState, int overrideAlpha, boolean animateAlpha,
             boolean animateBounds) {
-        ArraySet<TaskStack.DockState> newDockStatesSet = new ArraySet<>();
-        if (newDockStates != null) {
-            Collections.addAll(newDockStatesSet, newDockStates);
-        }
+        ArraySet<TaskStack.DockState> newDockStatesSet = Utilities.arrayToSet(newDockStates,
+                new ArraySet<TaskStack.DockState>());
         ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
             TaskStack.DockState dockState = visDockStates.get(i);

@@ -260,17 +260,23 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
                 setTaskProgress(toTransform.p);
             }
+            // Manually call back to the animator listener and update callback
             if (toAnimation.listener != null) {
                 toAnimation.listener.onAnimationEnd(null);
+            }
+            if (updateCallback != null) {
+                updateCallback.onAnimationUpdate(null);
             }
         } else {
             if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
                 mTmpAnimators.add(ObjectAnimator.ofFloat(this, TASK_PROGRESS, getTaskProgress(),
                         toTransform.p));
             }
-            ValueAnimator updateCallbackAnim = ValueAnimator.ofInt(0, 1);
-            updateCallbackAnim.addUpdateListener(updateCallback);
-            mTmpAnimators.add(updateCallbackAnim);
+            if (updateCallback != null) {
+                ValueAnimator updateCallbackAnim = ValueAnimator.ofInt(0, 1);
+                updateCallbackAnim.addUpdateListener(updateCallback);
+                mTmpAnimators.add(updateCallbackAnim);
+            }
 
             // Create the animator
             mTransformAnimation = toAnimation.createAnimator(mTmpAnimators);
