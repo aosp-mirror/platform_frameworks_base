@@ -34,4 +34,7 @@
          In sw600dp we want the buttons centered so this fills the space,
          (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
     <dimen name="screen_pinning_request_side_width">2dp</dimen>
+
+    <dimen name="navigation_key_width">162dp</dimen>
+    <dimen name="navigation_key_padding">42dp</dimen>
 </resources>

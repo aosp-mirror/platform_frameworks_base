@@ -90,4 +90,7 @@
     <dimen name="screen_pinning_request_side_width">8dp</dimen>
 
     <dimen name="fab_margin">24dp</dimen>
+
+    <dimen name="navigation_key_width">128dp</dimen>
+    <dimen name="navigation_key_padding">25dp</dimen>
 </resources>

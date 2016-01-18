@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.IDockedStackListener.Stub;
@@ -45,15 +46,11 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
-import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -101,6 +98,8 @@ public class NavigationBarView extends LinearLayout {
     private boolean mWakeAndUnlocking;
     private boolean mCarMode = false;
 
+    private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
+
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
         private boolean mHomeAppearing;
@@ -132,13 +131,12 @@ public class NavigationBarView extends LinearLayout {
         }
 
         public void onBackAltCleared() {
-            View backButton = getBackButton();
-            View homeButton = getHomeButton();
+            ButtonDispatcher backButton = getBackButton();
 
             // When dismissing ime during unlock, force the back button to run the same appearance
             // animation as home (if we catch this condition early enough).
-            if (backButton != null && !mBackTransitioning && backButton.getVisibility() == VISIBLE
-                    && mHomeAppearing && homeButton != null && getHomeButton().getAlpha() == 0) {
+            if (!mBackTransitioning && backButton.getVisibility() == VISIBLE
+                    && mHomeAppearing && getHomeButton().getAlpha() == 0) {
                 getBackButton().setAlpha(0);
                 ValueAnimator a = ObjectAnimator.ofFloat(backButton, "alpha", 0, 1);
                 a.setStartDelay(mStartDelay);
@@ -194,6 +192,12 @@ public class NavigationBarView extends LinearLayout {
         getIcons(context);
 
         mBarTransitions = new NavigationBarTransitions(this);
+
+        mButtonDisatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
+        mButtonDisatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
+        mButtonDisatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
+        mButtonDisatchers.put(R.id.menu, new ButtonDispatcher(R.id.menu));
+        mButtonDisatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
     }
 
     public BarTransitions getBarTransitions() {
@@ -226,10 +230,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void abortCurrentGesture() {
-        View homeButton = getHomeButton();
-        if (homeButton != null) {
-            getHomeButton().abortCurrentGesture();
-        }
+        getHomeButton().abortCurrentGesture();
     }
 
     private H mHandler = new H();
@@ -242,31 +243,24 @@ public class NavigationBarView extends LinearLayout {
         return mRotatedViews;
     }
 
-    // The following Buttons can possibly return null if NavigationBarView is extended to provide
-    // a different layout and the buttons do not exist in that new layout.
-    @Nullable
-    public KeyButtonView getRecentsButton() {
-        return (KeyButtonView) getCurrentView().findViewById(R.id.recent_apps);
+    public ButtonDispatcher getRecentsButton() {
+        return mButtonDisatchers.get(R.id.recent_apps);
     }
 
-    @Nullable
-    public View getMenuButton() {
-        return getCurrentView().findViewById(R.id.menu);
+    public ButtonDispatcher getMenuButton() {
+        return mButtonDisatchers.get(R.id.menu);
     }
 
-    @Nullable
-    public View getBackButton() {
-        return getCurrentView().findViewById(R.id.back);
+    public ButtonDispatcher getBackButton() {
+        return mButtonDisatchers.get(R.id.back);
     }
 
-    @Nullable
-    public KeyButtonView getHomeButton() {
-        return (KeyButtonView) getCurrentView().findViewById(R.id.home);
+    public ButtonDispatcher getHomeButton() {
+        return mButtonDisatchers.get(R.id.home);
     }
 
-    @Nullable
-    public View getImeSwitchButton() {
-        return getCurrentView().findViewById(R.id.ime_switcher);
+    public ButtonDispatcher getImeSwitchButton() {
+        return mButtonDisatchers.get(R.id.ime_switcher);
     }
 
     @Nullable
@@ -344,26 +338,19 @@ public class NavigationBarView extends LinearLayout {
                 ? getBackIconWithAlt(mCarMode, mVertical)
                 : getBackIcon(mCarMode, mVertical);
 
-        View backButton = getBackButton();
-        if (backButton != null && backButton instanceof ImageView) {
-            ((ImageView) backButton).setImageDrawable(backIcon);
-        }
+        getBackButton().setImageDrawable(backIcon);
 
-        ImageView recentsButton = getRecentsButton();
-        if (recentsButton != null) {
-            recentsButton.setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
-        }
+        getRecentsButton().setImageDrawable(
+                mVertical ? mRecentLandIcon : mRecentIcon);
 
-        ImageView homeButton = getHomeButton();
-        if (homeButton != null) {
-            homeButton.setImageDrawable(mCarMode ? mHomeCarModeIcon : mHomeDefaultIcon);
+        if (mCarMode) {
+            getHomeButton().setImageDrawable(mHomeCarModeIcon);
+        } else {
+            getHomeButton().setImageDrawable(mHomeDefaultIcon);
         }
 
         final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
-        View imeSwitchButton = getImeSwitchButton();
-        if (imeSwitchButton != null) {
-            imeSwitchButton.setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
-        }
+        getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
 
         // Update menu button in case the IME state has changed.
         setMenuVisibility(mShowMenu, true);
@@ -405,20 +392,9 @@ public class NavigationBarView extends LinearLayout {
             disableRecent = false;
         }
 
-        View backButton = getBackButton();
-        if (backButton != null) {
-            backButton.setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
-        }
-
-        View homeButton = getHomeButton();
-        if (homeButton != null) {
-            homeButton.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
-        }
-
-        View recentsButton = getRecentsButton();
-        if (recentsButton != null) {
-            recentsButton.setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-        }
+        getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableHome   ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
 
         // The app shelf, if it exists, follows the visibility of the home button.
         View appShelf = getAppShelf();
@@ -510,10 +486,7 @@ public class NavigationBarView extends LinearLayout {
         final boolean shouldShow = mShowMenu &&
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
 
-        View menuButton = getMenuButton();
-        if (menuButton != null) {
-            menuButton.setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
-        }
+        getMenuButton().setVisibility(shouldShow ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -526,11 +499,13 @@ public class NavigationBarView extends LinearLayout {
         mRotatedViews[Surface.ROTATION_270] = mRotatedViews[Surface.ROTATION_90];
 
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
-
-        View imeSwitchButton = getImeSwitchButton();
-        if (imeSwitchButton != null) {
-            imeSwitchButton.setOnClickListener(mImeSwitcherClickListener);
+        for (int i = 0; i < mButtonDisatchers.size(); i++) {
+            mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
         }
+        ((NavigationBarInflaterView) findViewById(R.id.navigation_inflater)).setButtonDispatchers(
+                mButtonDisatchers);
+
+        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         updateRTLOrder();
 
@@ -556,13 +531,9 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private void updateRecentsIcon(boolean dockedStackExists) {
-        ImageView recentsButton = getRecentsButton();
-
-        if (recentsButton != null) {
-            recentsButton.setImageResource(dockedStackExists
-                    ? R.drawable.ic_sysbar_docked
-                    : R.drawable.ic_sysbar_recent);
-        }
+        getRecentsButton().setImageResource(dockedStackExists
+                ? R.drawable.ic_sysbar_docked
+                : R.drawable.ic_sysbar_recent);
     }
 
     public boolean isVertical() {
@@ -576,12 +547,12 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        for (int i = 0; i < mButtonDisatchers.size(); i++) {
+            mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
+        }
         updateLayoutTransitionsEnabled();
 
-        View imeSwitchButton = getImeSwitchButton();
-        if (imeSwitchButton != null) {
-            imeSwitchButton.setOnClickListener(mImeSwitcherClickListener);
-        }
+        getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
 
@@ -669,30 +640,13 @@ public class NavigationBarView extends LinearLayout {
 
             // We swap all children of the 90 and 270 degree layouts, since they are vertical
             View rotation90 = mRotatedViews[Surface.ROTATION_90];
-            swapChildrenOrderIfVertical(rotation90.findViewById(R.id.nav_buttons));
-            adjustExtraKeyGravity(rotation90, isLayoutRtl);
+            swapChildrenOrderIfVertical(rotation90);
 
             View rotation270 = mRotatedViews[Surface.ROTATION_270];
             if (rotation90 != rotation270) {
-                swapChildrenOrderIfVertical(rotation270.findViewById(R.id.nav_buttons));
-                adjustExtraKeyGravity(rotation270, isLayoutRtl);
+                swapChildrenOrderIfVertical(rotation270);
             }
             mIsLayoutRtl = isLayoutRtl;
-        }
-    }
-
-    private void adjustExtraKeyGravity(View navBar, boolean isLayoutRtl) {
-        View menu = navBar.findViewById(R.id.menu);
-        View imeSwitcher = navBar.findViewById(R.id.ime_switcher);
-        if (menu != null) {
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) menu.getLayoutParams();
-            lp.gravity = isLayoutRtl ? Gravity.BOTTOM : Gravity.TOP;
-            menu.setLayoutParams(lp);
-        }
-        if (imeSwitcher != null) {
-            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) imeSwitcher.getLayoutParams();
-            lp.gravity = isLayoutRtl ? Gravity.BOTTOM : Gravity.TOP;
-            imeSwitcher.setLayoutParams(lp);
         }
     }
 
@@ -705,6 +659,11 @@ public class NavigationBarView extends LinearLayout {
         if (group instanceof LinearLayout) {
             LinearLayout linearLayout = (LinearLayout) group;
             if (linearLayout.getOrientation() == VERTICAL) {
+                if ((linearLayout.getGravity() & Gravity.TOP) != 0) {
+                    linearLayout.setGravity(Gravity.BOTTOM);
+                } else if ((linearLayout.getGravity() & Gravity.BOTTOM) != 0) {
+                    linearLayout.setGravity(Gravity.TOP);
+                }
                 int childCount = linearLayout.getChildCount();
                 ArrayList<View> childList = new ArrayList<>(childCount);
                 for (int i = 0; i < childCount; i++) {
@@ -714,6 +673,11 @@ public class NavigationBarView extends LinearLayout {
                 for (int i = childCount - 1; i >= 0; i--) {
                     linearLayout.addView(childList.get(i));
                 }
+            }
+        } else if (group instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) group;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                swapChildrenOrderIfVertical(viewGroup.getChildAt(i));
             }
         }
     }
@@ -802,13 +766,12 @@ public class NavigationBarView extends LinearLayout {
         pw.println("    }");
     }
 
-    private static void dumpButton(PrintWriter pw, String caption, View button) {
+    private static void dumpButton(PrintWriter pw, String caption, ButtonDispatcher button) {
         pw.print("      " + caption + ": ");
         if (button == null) {
             pw.print("null");
         } else {
-            pw.print(PhoneStatusBar.viewInfo(button)
-                    + " " + visibilityToString(button.getVisibility())
+            pw.print(visibilityToString(button.getVisibility())
                     + " alpha=" + button.getAlpha()
                     );
         }
@@ -818,4 +781,5 @@ public class NavigationBarView extends LinearLayout {
     public interface OnVerticalChangedListener {
         void onVerticalChanged(boolean isVertical);
     }
+
 }
