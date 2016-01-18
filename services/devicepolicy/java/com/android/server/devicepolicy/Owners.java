@@ -77,6 +77,8 @@ class Owners {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
     private static final String ATTR_COMPONENT_NAME = "component";
+    private static final String ATTR_REMOTE_BUGREPORT_URI = "remoteBugreportUri";
+    private static final String ATTR_REMOTE_BUGREPORT_HASH = "remoteBugreportHash";
     private static final String ATTR_USERID = "userId";
     private static final String ATTR_USER_RESTRICTIONS_MIGRATED = "userRestrictionsMigrated";
 
@@ -161,6 +163,14 @@ class Owners {
         return mDeviceOwner != null ? mDeviceOwner.admin : null;
     }
 
+    String getDeviceOwnerRemoteBugreportUri() {
+        return mDeviceOwner != null ? mDeviceOwner.remoteBugreportUri : null;
+    }
+
+    String getDeviceOwnerRemoteBugreportHash() {
+        return mDeviceOwner != null ? mDeviceOwner.remoteBugreportHash : null;
+    }
+
     void setDeviceOwner(ComponentName admin, String ownerName, int userId) {
         if (userId < 0) {
             Slog.e(TAG, "Invalid user id for device owner user: " + userId);
@@ -175,7 +185,8 @@ class Owners {
     // userRestrictionsMigrated should always be true.
     void setDeviceOwnerWithRestrictionsMigrated(ComponentName admin, String ownerName, int userId,
             boolean userRestrictionsMigrated) {
-        mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated);
+        mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated,
+                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
         mDeviceOwnerUserId = userId;
 
         mUserManagerInternal.setDeviceManaged(true);
@@ -191,7 +202,8 @@ class Owners {
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
         // For a newly set PO, there's no need for migration.
         mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
-                /* userRestrictionsMigrated =*/ true));
+                /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
+                /* remoteBugreportHash =*/ null));
         mUserManagerInternal.setUserManaged(userId, true);
     }
 
@@ -266,6 +278,16 @@ class Owners {
         writeDeviceOwner();
     }
 
+    /** Sets the remote bugreport uri and hash, and also writes to the file. */
+    void setDeviceOwnerRemoteBugreportUriAndHash(String remoteBugreportUri,
+            String remoteBugreportHash) {
+        if (mDeviceOwner != null) {
+            mDeviceOwner.remoteBugreportUri = remoteBugreportUri;
+            mDeviceOwner.remoteBugreportHash = remoteBugreportHash;
+        }
+        writeDeviceOwner();
+    }
+
     /** Sets the user restrictions migrated flag, and also writes to the file.  */
     void setProfileOwnerUserRestrictionsMigrated(int userId) {
         OwnerInfo profileOwner = mProfileOwners.get(userId);
@@ -295,7 +317,8 @@ class Owners {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
                     String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
                     mDeviceOwner = new OwnerInfo(name, packageName,
-                            /* userRestrictionsMigrated =*/ false);
+                            /* userRestrictionsMigrated =*/ false, /* remoteBugreportUri =*/ null,
+                            /* remoteBugreportHash =*/ null);
                     mDeviceOwnerUserId = UserHandle.USER_SYSTEM;
                 } else if (tag.equals(TAG_DEVICE_INITIALIZER)) {
                     // Deprecated tag
@@ -311,7 +334,7 @@ class Owners {
                                 profileOwnerComponentStr);
                         if (admin != null) {
                             profileOwnerInfo = new OwnerInfo(profileOwnerName, admin,
-                                /* userRestrictionsMigrated =*/ false);
+                                /* userRestrictionsMigrated =*/ false, null, null);
                         } else {
                             // This shouldn't happen but switch from package name -> component name
                             // might have written bad device owner files. b/17652534
@@ -321,7 +344,8 @@ class Owners {
                     }
                     if (profileOwnerInfo == null) {
                         profileOwnerInfo = new OwnerInfo(profileOwnerName, profileOwnerPackageName,
-                                /* userRestrictionsMigrated =*/ false);
+                                /* userRestrictionsMigrated =*/ false,
+                                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
                     }
                     mProfileOwners.put(userId, profileOwnerInfo);
                 } else if (TAG_SYSTEM_UPDATE_POLICY.equals(tag)) {
@@ -579,19 +603,27 @@ class Owners {
         public final String packageName;
         public final ComponentName admin;
         public boolean userRestrictionsMigrated;
+        public String remoteBugreportUri;
+        public String remoteBugreportHash;
 
-        public OwnerInfo(String name, String packageName, boolean userRestrictionsMigrated) {
+        public OwnerInfo(String name, String packageName, boolean userRestrictionsMigrated,
+                String remoteBugreportUri, String remoteBugreportHash) {
             this.name = name;
             this.packageName = packageName;
             this.admin = new ComponentName(packageName, "");
             this.userRestrictionsMigrated = userRestrictionsMigrated;
+            this.remoteBugreportUri = remoteBugreportUri;
+            this.remoteBugreportHash = remoteBugreportHash;
         }
 
-        public OwnerInfo(String name, ComponentName admin, boolean userRestrictionsMigrated) {
+        public OwnerInfo(String name, ComponentName admin, boolean userRestrictionsMigrated,
+                String remoteBugreportUri, String remoteBugreportHash) {
             this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
             this.userRestrictionsMigrated = userRestrictionsMigrated;
+            this.remoteBugreportUri = remoteBugreportUri;
+            this.remoteBugreportHash = remoteBugreportHash;
         }
 
         public void writeToXml(XmlSerializer out, String tag) throws IOException {
@@ -605,6 +637,12 @@ class Owners {
             }
             out.attribute(null, ATTR_USER_RESTRICTIONS_MIGRATED,
                     String.valueOf(userRestrictionsMigrated));
+            if (remoteBugreportUri != null) {
+                out.attribute(null, ATTR_REMOTE_BUGREPORT_URI, remoteBugreportUri);
+            }
+            if (remoteBugreportHash != null) {
+                out.attribute(null, ATTR_REMOTE_BUGREPORT_HASH, remoteBugreportHash);
+            }
             out.endTag(null, tag);
         }
 
@@ -617,12 +655,17 @@ class Owners {
                     parser.getAttributeValue(null, ATTR_USER_RESTRICTIONS_MIGRATED);
             final boolean userRestrictionsMigrated =
                     ("true".equals(userRestrictionsMigratedStr));
+            final String remoteBugreportUri = parser.getAttributeValue(null,
+                    ATTR_REMOTE_BUGREPORT_URI);
+            final String remoteBugreportHash = parser.getAttributeValue(null,
+                    ATTR_REMOTE_BUGREPORT_HASH);
 
             // Has component name?  If so, return [name, component]
             if (componentName != null) {
                 final ComponentName admin = ComponentName.unflattenFromString(componentName);
                 if (admin != null) {
-                    return new OwnerInfo(name, admin, userRestrictionsMigrated);
+                    return new OwnerInfo(name, admin, userRestrictionsMigrated,
+                            remoteBugreportUri, remoteBugreportHash);
                 } else {
                     // This shouldn't happen but switch from package name -> component name
                     // might have written bad device owner files. b/17652534
@@ -632,7 +675,8 @@ class Owners {
             }
 
             // Else, build with [name, package]
-            return new OwnerInfo(name, packageName, userRestrictionsMigrated);
+            return new OwnerInfo(name, packageName, userRestrictionsMigrated, remoteBugreportUri,
+                    remoteBugreportHash);
         }
 
         public void dump(String prefix, PrintWriter pw) {

@@ -2899,6 +2899,25 @@
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Touch to disable USB debugging.</string>
 
+    <!-- Title of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. STOPSHIP: this is not final -->
+    <string name="share_remote_bugreport_notification_title">Remote bugreport request</string>
+    <!-- Ticker of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. STOPSHIP: this is not final -->
+    <string name="share_remote_bugreport_notification_ticker">Remote bugreport request</string>
+    <!-- Message of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. STOPSHIP: this is not final -->
+    <string name="share_remote_bugreport_notification_message">Your IT admin requested remote bugreport to carry out incident investigation</string>
+    <!-- Title of notification shown for remote bugreport progress. STOPSHIP: this is not final -->
+    <string name="remote_bugreport_progress_notification_title">Remote bugreport</string>
+    <!-- Ticker of notification shown for remote bugreport progress. STOPSHIP: this is not final -->
+    <string name="remote_bugreport_progress_notification_ticker">Remote bugreport collection in progress</string>
+    <!-- Message of notification shown for remote bugreport progress. User can cancel the bugreport STOPSHIP: this is not final -->
+    <string name="remote_bugreport_progress_notification_message_can_cancel">Remote bugreport in progress. Touch to cancel.</string>
+    <!-- Message of notification shown for remote bugreport progress. User cannot cancel the bugreport STOPSHIP: this is not final -->
+    <string name="remote_bugreport_progress_notification_message_cannot_cancel">Remote bugreport in progress.</string>
+    <!-- Acceptance label of notification shown to ask for user consent for sharing the remote bugreport. STOPSHIP: this is not final -->
+    <string name="share_remote_bugreport_notification_accept">ACCEPT</string>
+    <!-- Decline label of notification shown to ask for user consent for sharing the remote bugreport. STOPSHIP: this is not final -->
+    <string name="share_remote_bugreport_notification_decline">DECLINE</string>
+
     <!-- Used to replace %s in urls retreived from the signin server with locales.  For Some        -->
     <!-- devices we don't support all the locales we ship to and need to replace the '%s' with a    -->
     <!-- locale string based on mcc values.  By default (0-length string) we don't replace the %s   -->

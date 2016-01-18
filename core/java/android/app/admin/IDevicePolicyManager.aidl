@@ -91,6 +91,8 @@ interface IDevicePolicyManager {
     boolean getStorageEncryption(in ComponentName who, int userHandle);
     int getStorageEncryptionStatus(int userHandle);
 
+    boolean requestBugreport(in ComponentName who);
+
     void setCameraDisabled(in ComponentName who, boolean disabled);
     boolean getCameraDisabled(in ComponentName who, int userHandle);
 
