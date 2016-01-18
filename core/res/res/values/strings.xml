@@ -4202,4 +4202,8 @@
     <!-- Notification detail shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
     <string name="user_encrypted_detail">User profile locked</string>
 
+    <!-- Title of notification shown after a MTP device is connected to Android. -->
+    <string name="usb_mtp_launch_notification_title">Connected to <xliff:g id="product_name">%1$s</xliff:g></string>
+    <!-- Description of notification shown after a MTP device is connected to Android. -->
+    <string name="usb_mtp_launch_notification_description">Tap to view files</string>
 </resources>

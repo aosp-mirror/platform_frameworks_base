@@ -2520,4 +2520,6 @@
   <java-symbol type="string" name="user_encrypted_message" />
   <java-symbol type="string" name="user_encrypted_detail" />
 
+  <java-symbol type="string" name="usb_mtp_launch_notification_title" />
+  <java-symbol type="string" name="usb_mtp_launch_notification_description" />
 </resources>

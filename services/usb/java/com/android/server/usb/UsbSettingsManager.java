@@ -494,6 +494,8 @@ class UsbSettingsManager {
 
     MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
+    private final MtpNotificationManager mMtpNotificationManager;
+
     public UsbSettingsManager(Context context, UserHandle user) {
         if (DEBUG) Slog.v(TAG, "Creating settings for " + user);
 
@@ -522,6 +524,14 @@ class UsbSettingsManager {
         }
 
         mPackageMonitor.register(mUserContext, null, true);
+        mMtpNotificationManager = new MtpNotificationManager(
+                context,
+                new MtpNotificationManager.OnOpenInAppListener() {
+                    @Override
+                    public void onOpenInApp(UsbDevice device) {
+                        resolveActivity(createDeviceAttachedIntent(device), device);
+                    }
+                });
     }
 
     private void readPreference(XmlPullParser parser)
@@ -723,10 +733,20 @@ class UsbSettingsManager {
     }
 
     public void deviceAttached(UsbDevice device) {
-        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Intent intent = createDeviceAttachedIntent(device);
 
+        // Send broadcast to running activity with registered intent
+        mUserContext.sendBroadcast(intent);
+
+        if (MtpNotificationManager.isMtpDevice(device)) {
+            // Show notification if the device is MTP storage.
+            mMtpNotificationManager.showNotification(device);
+        } else {
+            resolveActivity(intent, device);
+        }
+    }
+
+    private void resolveActivity(Intent intent, UsbDevice device) {
         ArrayList<ResolveInfo> matches;
         String defaultPackage;
         synchronized (mLock) {
@@ -735,9 +755,6 @@ class UsbSettingsManager {
             // Otherwise we will start the UsbResolverActivity to allow the user to choose.
             defaultPackage = mDevicePreferenceMap.get(new DeviceFilter(device));
         }
-
-        // Send broadcast to running activity with registered intent
-        mUserContext.sendBroadcast(intent);
 
         // Start activity with registered intent
         resolveActivity(intent, matches, defaultPackage, device, null);
@@ -751,6 +768,10 @@ class UsbSettingsManager {
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
         if (DEBUG) Slog.d(TAG, "usbDeviceRemoved, sending " + intent);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+
+        if (MtpNotificationManager.isMtpDevice(device)) {
+            mMtpNotificationManager.hideNotification(device);
+        }
     }
 
     public void accessoryAttached(UsbAccessory accessory) {
@@ -1223,5 +1244,12 @@ class UsbSettingsManager {
                 pw.println("  " + filter + ": " + mAccessoryPreferenceMap.get(filter));
             }
         }
+    }
+
+    private static Intent createDeviceAttachedIntent(UsbDevice device) {
+        Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 }

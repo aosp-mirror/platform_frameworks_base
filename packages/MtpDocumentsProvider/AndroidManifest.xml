@@ -15,14 +15,31 @@
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
         </provider>
+        
         <service android:name=".MtpDocumentsService" />
-        <receiver android:name=".UsbIntentReceiver" android:exported="true">
+
+        <activity android:name=".ReceiverActivity"
+                  android:theme="@android:style/Theme.NoDisplay"
+                  android:screenOrientation="locked"
+                  android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                    android:resource="@xml/device_filter" />
+                       android:resource="@xml/device_filter" />
+        </activity>
+
+        <receiver android:name=".UsbIntentReceiver" android:exported="true">
+            <!-- TODO: Remove an intent-filter for USB_DEVICE_ATTACHED after the provider becomes to
+                       open devices on demand. -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                       android:resource="@xml/device_filter" />
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+            </intent-filter>
         </receiver>
     </application>
 </manifest>
