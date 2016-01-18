@@ -13659,9 +13659,11 @@ package android.hardware.camera2 {
     method public abstract void close();
     method public abstract android.hardware.camera2.CaptureRequest.Builder createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
     method public abstract void createCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void createCaptureSessionByOutputConfiguration(java.util.List<android.hardware.camera2.params.OutputConfiguration>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract void createConstrainedHighSpeedCaptureSession(java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract android.hardware.camera2.CaptureRequest.Builder createReprocessCaptureRequest(android.hardware.camera2.TotalCaptureResult) throws android.hardware.camera2.CameraAccessException;
     method public abstract void createReprocessableCaptureSession(android.hardware.camera2.params.InputConfiguration, java.util.List<android.view.Surface>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void createReprocessableCaptureSessionWithConfigurations(android.hardware.camera2.params.InputConfiguration, java.util.List<android.hardware.camera2.params.OutputConfiguration>, android.hardware.camera2.CameraCaptureSession.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public abstract java.lang.String getId();
     field public static final int TEMPLATE_MANUAL = 6; // 0x6
     field public static final int TEMPLATE_PREVIEW = 1; // 0x1
@@ -14156,6 +14158,17 @@ package android.hardware.camera2.params {
     field public static final int METERING_WEIGHT_DONT_CARE = 0; // 0x0
     field public static final int METERING_WEIGHT_MAX = 1000; // 0x3e8
     field public static final int METERING_WEIGHT_MIN = 0; // 0x0
+  }
+
+  public final class OutputConfiguration implements android.os.Parcelable {
+    ctor public OutputConfiguration(android.view.Surface);
+    method public int describeContents();
+    method public android.view.Surface getSurface();
+    method public int getSurfaceSetId();
+    method public void setSurfaceSetId(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
+    field public static final int SURFACE_SET_ID_INVALID = -1; // 0xffffffff
   }
 
   public final class RggbChannelVector {

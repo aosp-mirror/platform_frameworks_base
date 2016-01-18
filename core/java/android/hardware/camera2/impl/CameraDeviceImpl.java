@@ -485,7 +485,13 @@ public class CameraDeviceImpl extends CameraDevice {
             Log.d(TAG, "createCaptureSessionByOutputConfiguration");
         }
 
-        createCaptureSessionInternal(null, outputConfigurations, callback, handler,
+        // OutputConfiguration objects aren't immutable, make a copy before using.
+        List<OutputConfiguration> currentOutputs = new ArrayList<OutputConfiguration>();
+        for (OutputConfiguration output : outputConfigurations) {
+            currentOutputs.add(new OutputConfiguration(output));
+        }
+
+        createCaptureSessionInternal(null, currentOutputs, callback, handler,
                 /*isConstrainedHighSpeed*/false);
     }
 
@@ -507,6 +513,34 @@ public class CameraDeviceImpl extends CameraDevice {
         }
         createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler,
                 /*isConstrainedHighSpeed*/false);
+    }
+
+    @Override
+    public void createReprocessableCaptureSessionWithConfigurations(InputConfiguration inputConfig,
+            List<OutputConfiguration> outputs,
+            android.hardware.camera2.CameraCaptureSession.StateCallback callback, Handler handler)
+                    throws CameraAccessException {
+        if (DEBUG) {
+            Log.d(TAG, "createReprocessableCaptureSessionWithConfigurations");
+        }
+
+        if (inputConfig == null) {
+            throw new IllegalArgumentException("inputConfig cannot be null when creating a " +
+                    "reprocessable capture session");
+        }
+
+        if (outputs == null) {
+            throw new IllegalArgumentException("Output configurations cannot be null when " +
+                    "creating a reprocessable capture session");
+        }
+
+        // OutputConfiguration objects aren't immutable, make a copy before using.
+        List<OutputConfiguration> currentOutputs = new ArrayList<OutputConfiguration>();
+        for (OutputConfiguration output : outputs) {
+            currentOutputs.add(new OutputConfiguration(output));
+        }
+        createCaptureSessionInternal(inputConfig, currentOutputs,
+                callback, handler, /*isConstrainedHighSpeed*/false);
     }
 
     @Override
