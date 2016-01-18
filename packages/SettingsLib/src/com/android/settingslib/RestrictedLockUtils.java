@@ -148,6 +148,104 @@ public class RestrictedLockUtils {
     }
 
     /**
+     * Check if account management for a specific type of account is disabled by admin.
+     * Only a profile or device owner can disable account management. So, we check if account
+     * management is disabled and return profile or device owner on the calling user.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if the account management is not disabled.
+     */
+    public static EnforcedAdmin checkIfAccountManagementDisabled(Context context,
+            String accountType) {
+        if (accountType == null) {
+            return null;
+        }
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        boolean isAccountTypeDisabled = false;
+        String[] disabledTypes = dpm.getAccountTypesWithManagementDisabled();
+        for (String type : disabledTypes) {
+            if (accountType.equals(type)) {
+                isAccountTypeDisabled = true;
+                break;
+            }
+        }
+        if (!isAccountTypeDisabled) {
+            return null;
+        }
+        return getProfileOrDeviceOwnerOnCallingUser(context);
+    }
+
+    /**
+     * Checks if {@link android.app.admin.DevicePolicyManager#setAutoTimeRequired} is enforced
+     * on the device.
+     *
+     * @return EnforcedAdmin Object containing the device owner component and
+     * userId the device owner is running as, or {@code null} setAutoTimeRequired is not enforced.
+     */
+    public static EnforcedAdmin checkIfAutoTimeRequired(Context context) {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm.getAutoTimeRequired()) {
+            return null;
+        }
+        ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
+        return new EnforcedAdmin(adminComponent, UserHandle.myUserId());
+    }
+
+    /**
+     * Checks if an admin has enforced minimum password quality requirements on the device.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if no quality requirements are set. If the requirements are set by
+     * multiple device admins, then the admin component will be set to {@code null} and userId to
+     * {@link UserHandle#USER_NULL}.
+     *
+     */
+    public static EnforcedAdmin checkIfPasswordQualityIsSet(Context context) {
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        boolean isDisabledByMultipleAdmins = false;
+        ComponentName adminComponent = null;
+        List<ComponentName> admins = dpm.getActiveAdmins();
+        int quality;
+        for (ComponentName admin : admins) {
+            quality = dpm.getPasswordQuality(admin);
+            if (quality >= DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                if (adminComponent == null) {
+                    adminComponent = admin;
+                } else {
+                    isDisabledByMultipleAdmins = true;
+                    break;
+                }
+            }
+        }
+        EnforcedAdmin enforcedAdmin = null;
+        if (adminComponent != null) {
+            if (!isDisabledByMultipleAdmins) {
+                enforcedAdmin = new EnforcedAdmin(adminComponent, UserHandle.myUserId());
+            } else {
+                enforcedAdmin = new EnforcedAdmin();
+            }
+        }
+        return enforcedAdmin;
+    }
+
+    public static EnforcedAdmin getProfileOrDeviceOwnerOnCallingUser(Context context) {
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
+        if (adminComponent != null) {
+            return new EnforcedAdmin(adminComponent, UserHandle.myUserId());
+        }
+        adminComponent = dpm.getProfileOwner();
+        if (adminComponent != null) {
+            return new EnforcedAdmin(adminComponent, UserHandle.myUserId());
+        }
+        return null;
+    }
+
+    /**
      * Set the menu item as disabled by admin by adding a restricted padlock at the end of the
      * text and set the click listener which will send an intent to show the admin support details
      * dialog.
@@ -178,7 +276,10 @@ public class RestrictedLockUtils {
         RestrictedLockImageSpan[] imageSpans = sb.getSpans(length - 1, length,
                 RestrictedLockImageSpan.class);
         for (ImageSpan span : imageSpans) {
+            final int start = sb.getSpanStart(span);
+            final int end = sb.getSpanEnd(span);
             sb.removeSpan(span);
+            sb.delete(start, end);
         }
         ForegroundColorSpan[] colorSpans = sb.getSpans(0, length, ForegroundColorSpan.class);
         for (ForegroundColorSpan span : colorSpans) {
