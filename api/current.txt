@@ -19209,6 +19209,7 @@ package android.media {
     field public static final android.os.Parcelable.Creator<android.media.AudioAttributes> CREATOR;
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
+    field public static final int FLAG_LOW_LATENCY = 256; // 0x100
     field public static final int USAGE_ALARM = 4; // 0x4
     field public static final int USAGE_ASSISTANCE_ACCESSIBILITY = 11; // 0xb
     field public static final int USAGE_ASSISTANCE_NAVIGATION_GUIDANCE = 12; // 0xc
@@ -19606,6 +19607,7 @@ package android.media {
     method public void flush();
     method public int getAudioFormat();
     method public int getAudioSessionId();
+    method public int getBufferCapacityInFrames();
     method public int getBufferSizeInFrames();
     method public int getChannelConfiguration();
     method public int getChannelCount();
@@ -19627,6 +19629,7 @@ package android.media {
     method public int getState();
     method public int getStreamType();
     method public boolean getTimestamp(android.media.AudioTimestamp);
+    method public int getUnderrunCount();
     method public void pause() throws java.lang.IllegalStateException;
     method public void play() throws java.lang.IllegalStateException;
     method public void release();
@@ -19634,6 +19637,7 @@ package android.media {
     method public deprecated void removeOnRoutingChangedListener(android.media.AudioTrack.OnRoutingChangedListener);
     method public void removeOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener);
     method public int setAuxEffectSendLevel(float);
+    method public int setBufferSizeInFrames(int);
     method public int setLoopPoints(int, int, int);
     method public int setNotificationMarkerPosition(int);
     method public int setPlaybackHeadPosition(int);

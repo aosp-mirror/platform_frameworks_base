@@ -1100,7 +1100,6 @@ public class AudioTrack implements AudioRouting
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      *  @throws IllegalStateException
-     * @hide
      */
     public int setBufferSizeInFrames(int bufferSizeInFrames) {
         if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
@@ -1130,7 +1129,6 @@ public class AudioTrack implements AudioRouting
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException
-     * @hide
      */
     public int getBufferCapacityInFrames() {
         return native_get_buffer_capacity_frames();
@@ -1204,7 +1202,6 @@ public class AudioTrack implements AudioRouting
      * This is a continuously advancing counter. It can wrap around to zero
      * if there are too many underruns. If there were, for example, 68 underruns per
      * second then the counter would wrap in 2 years.
-     * @hide
      */
     public int getUnderrunCount() {
         return native_get_underrun_count();

@@ -224,7 +224,6 @@ public final class AudioAttributes implements Parcelable {
     public final static int FLAG_BYPASS_MUTE = 0x1 << 7;
 
     /**
-     * @hide
      * Flag requesting a low latency path.
      * When using this flag, the sample rate must match the native sample rate
      * of the device. Effects processing is also unavailable.
