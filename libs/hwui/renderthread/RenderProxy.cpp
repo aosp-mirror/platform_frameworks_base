@@ -385,6 +385,12 @@ void RenderProxy::fence() {
     postAndWait(task);
 }
 
+void RenderProxy::staticFence() {
+    SETUP_TASK(fence);
+    UNUSED(args);
+    staticPostAndWait(task);
+}
+
 CREATE_BRIDGE1(stopDrawing, CanvasContext* context) {
     args->context->stopDrawing();
     return nullptr;
