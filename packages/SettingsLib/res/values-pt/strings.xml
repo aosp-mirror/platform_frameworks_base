@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Automático"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementação do WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configurar implementação do WebView"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"A implementação do WebView escolhida está desativada e deve ser ativada para ser usada. Deseja ativá-la?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Converter para criptografia de arquivos"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converter..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Já criptografado com base em arquivos"</string>

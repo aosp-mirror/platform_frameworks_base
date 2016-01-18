@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"自動"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"選択した WebView の実装は無効になっていますが、使用するには有効にする必要があります。有効にしますか？"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ファイル暗号化に変換する"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"変換…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ファイルは既に暗号化済みです"</string>

@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Automatska"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Postavi implementaciju WebViewa"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Odabrana implementacija WebViewa onemogućena je i morate je omogućiti da biste je mogli upotrebljavati. Želite li je omogućiti?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Pretvori u enkripciju datoteka"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Pretvori…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Enkripcija datoteka već je izvršena"</string>

@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"အလိုအလျောက်"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ရွေးချယ်ထားသည့် WebView လုပ်ဆောင်ခြင်းကို ပိတ်ထားသည်ပြီး အသုံးပြုရန်အတွက် ဖွင့်ရမည်၊ ဖွင့်လိုပါသလား။"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ဖိုင်လုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ပြောင်းရန်…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ဖိုင်ကို လုံခြုံအောင်ပြုလုပ်ပြီးပါပြီ"</string>

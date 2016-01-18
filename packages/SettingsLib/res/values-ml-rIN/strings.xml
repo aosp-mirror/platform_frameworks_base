@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"ഓട്ടോമാറ്റിക്"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"തിരഞ്ഞെടുത്ത WebView നടപ്പാക്കൽ പ്രവർത്തനരഹിതമാക്കി, ഉപയോഗിക്കുന്നതിന് ഇത് പ്രവർത്തനക്ഷമമാക്കണം, പ്രവർത്തനക്ഷമമാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ഫയൽ എൻക്രിപ്ഷനിലേക്ക് പരിവർത്തിപ്പിക്കുക"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"പരിവർത്തിപ്പിക്കുക…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ഇതിനകം തന്നെ ഫയൽ എൻക്രിപ്റ്റ് ചെയ്തു"</string>
