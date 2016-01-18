@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Otomatik"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView kullanımı"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView kullanımını ayarla"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Seçilen WebView uygulama şekli devre dışı. Bu uygulama şeklinin kullanılabilmesi için etkinleştirilmesi gerekir. Etkinleştirmek istiyor musunuz?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Dosya şifrelemeye dönüştür"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Dönüştür…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Dosya şifreleme zaten uygulandı"</string>

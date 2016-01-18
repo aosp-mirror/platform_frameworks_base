@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"ស្វ័យប្រវត្តិ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ការប្រតិបត្តិការ WebView ដែលបានជ្រើសត្រូវបានបិទដំណើរការ ប៉ុន្តែអ្នកត្រូវបើកដំណើរការវាដើម្បីប្រើ តើអ្នកចង់បើកដំណើរការវាដែរឬទេ?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"បម្លែងទៅជាការអ៊ីនគ្រីបឯកសារ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"បម្លែង…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"បានអ៊ីនគ្រីបឯកសាររួចហើយ"</string>

@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Awtomatiko"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Pagpapatupad sa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Itakda ang pagpapatupad sa WebView"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Naka-disable ang napiling pagpapatupad sa WebView, at dapat itong i-enable upang magamit, gusto mo ba itong i-enable?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"I-convert at gawing pag-encrypt ng file"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"I-convert..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Na-encrypt na ang file"</string>

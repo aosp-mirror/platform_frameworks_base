@@ -109,7 +109,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Kurzes Beispiel der Sprachsynthese abspielen"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Sprachdaten installieren"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Sprachdaten für Sprachsynthese installieren"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Dieses Sprachsynthesemodul kann den gesamten gesprochenen Text erfassen, einschließlich personenbezogener Daten wie Passwörter und Kreditkartennummern. Es ist Teil der App \"<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>\". Möchten Sie dieses Sprachsynthesemodul aktivieren?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Dieses Sprachsynthesemodul kann den gesamten gesprochenen Text erfassen, einschließlich personenbezogener Daten wie Passwörter und Kreditkartennummern. Es ist Teil der App \"<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>\". Möchtest du dieses Sprachsynthesemodul aktivieren?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Für diese Sprache ist zur Text-in-Sprache-Ausgabe eine aktive Netzwerkverbindung erforderlich."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Dies ist ein Beispiel für Sprachsynthese."</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Status der Standardsprache"</string>
@@ -179,10 +179,10 @@
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"DHCP-Client von Lollipop statt des neuen Android-DHCP-Clients verwenden"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Die mobile Datennutzung bleibt auch dann aktiviert, wenn WLAN aktiviert ist. Dies dient einem schnelleren Wechsel zwischen Netzwerken."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB-Debugging zulassen?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB-Debugging ist nur für Entwicklungszwecke vorgesehen. Damit können Sie Daten zwischen Ihrem Computer und Ihrem Gerät kopieren, Apps auf Ihrem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB-Debugging ist nur für Entwicklungszwecke vorgesehen. Damit kannst du Daten zwischen deinem Computer und deinem Gerät kopieren, Apps auf deinem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Zugriff auf USB-Debugging für alle zuvor autorisierten Computer aufheben?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Entwicklungseinstellungen zulassen?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Diese Einstellungen sind ausschließlich für Entwicklungszwecke geeignet. Sie können Ihr Gerät und die darauf installierten Apps beschädigen oder zu unerwünschtem Verhalten führen."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Diese Einstellungen sind ausschließlich für Entwicklungszwecke gedacht. Sie können dein Gerät und die darauf installierten Apps beschädigen oder zu unerwünschtem Verhalten führen."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Apps über USB bestätigen"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Überprüft installierte Apps über ADB/ADT auf schädliches Verhalten"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokales Terminal"</string>
@@ -277,13 +277,12 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"Automatisch"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-Implementierung"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView-Implementierung festlegen"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Die ausgewählte WebView-Implementierung ist deaktiviert. Um sie nutzen zu können, muss sie aktiviert sein. Möchtest du sie aktivieren?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Zu Dateiverschlüsselung wechseln"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Wechseln…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Dateiverschlüsselung wird bereits verwendet."</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Zu Dateiverschlüsselung wechseln"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Wechseln Sie von Datenpartitions- zu dateibasierter Verschlüsselung.\n !!Achtung!! Dadurch werden alle Ihre Daten gelöscht.\n Es handelt sich um eine Alphaversion, die möglicherweise nicht korrekt funktioniert.\n Wählen Sie \"Wischen und wechseln…\" aus, um fortzufahren."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Stelle von Datenpartitions- auf dateibasierte Verschlüsselung um.\n !!Achtung!! Dadurch werden alle deine Daten gelöscht.\n Es handelt sich um eine Alphaversion, die möglicherweise nicht korrekt funktioniert.\n Wähle \"Wischen und wechseln…\" aus, um fortzufahren."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Wischen und wechseln…"</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Farbmodus für Bilder"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB verwenden"</string>

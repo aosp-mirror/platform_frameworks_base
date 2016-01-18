@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"ອັດຕະໂນມັດ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ການຈັດຕັ້ງປະຕິບັດ WebView ທີ່ເລືອກຖືກປິດນຳໃຊ້, ແລະຕ້ອງຖືກເປີດນຳໃຊ້, ທ່ານຕ້ອງການເປີດນຳໃຊ້ມັນບໍ?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ປ່ຽນ​ເປັນ​ການ​ເຂົ້າ​ລະ​ຫັດ​ໄຟ​ລ໌"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ປ່ຽນ..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ໄຟ​ລ໌​ເຂົ້າ​ລະ​ຫັດ​ຮຽບ​ຮ້ອຍ​ແລ້ວ"</string>

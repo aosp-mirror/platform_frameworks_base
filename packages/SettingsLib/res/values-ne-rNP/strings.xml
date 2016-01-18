@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"स्वचालित"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट गर्नुहोस्"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"छनौट गरिएको WebView को कार्यान्वयन असक्षम गरिएको छ र प्रयोग गर्नका लागि सक्रिय गर्नुपर्छ, तपाईँ यसलाई सक्रिय गर्न चाहनुहुन्छ?"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फाइल इन्क्रिप्सनमा रूपान्तरण गर्नुहोस्"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रुपान्तरण गर्नुहोस्…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"पहिल्यै फाइल इन्क्रिप्ट गरिएको छ"</string>

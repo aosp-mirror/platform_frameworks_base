@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"自動"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 實作"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"設定 WebView 實作"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"您所選的 WebView 實作已停用，您必須先啟用 WebView 實作才能加以使用。要啟用該 WebView 實作嗎？"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"轉換成檔案加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"轉換..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"已將檔案加密"</string>

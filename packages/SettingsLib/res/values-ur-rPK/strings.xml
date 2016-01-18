@@ -277,8 +277,7 @@
     <string name="night_mode_auto" msgid="7508348175804304327">"خودکار"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏WebView کا نفاذ سیٹ کریں"</string>
-    <!-- no translation found for select_webview_provider_confirmation_text (6671472080671066972) -->
-    <skip />
+    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"‏منتخب کردہ WebView کا نفاذ غیر فعال ہے اور استعمال کرنے کیلئے اسے فعال ہونا چاہئیے، کیا آپ اسے فعال کرنا چاہتے ہیں؟"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"فائل مرموز کاری میں بدلیں"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"بدلیں…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"فائل پہلے ہی مرموز شدہ ہے"</string>
