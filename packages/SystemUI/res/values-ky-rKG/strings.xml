@@ -3,16 +3,16 @@
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
  -->
@@ -473,7 +473,11 @@
     <string name="color_revert_title" msgid="4746666545480534663">"Жөндөөлөрдү ырастоо"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Айрым түс жөндөөлөрү бул түзмөктү колдонулгус кылып коюшу мүмкүн. Бул түс жөндөөлөрүн ырастоо үчүн OK баскычын чыкылдатыңыз, болбосо бул жөндөөлөр 10 секунддан кийин баштапкы абалына келтирилет."</string>
     <string name="battery_panel_title" msgid="3476715163685592453">"Батарея (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Батареяны үнөмдөгүч кубаттоо учурунда иштебейт"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Батареяны үнөмдөгүч түзмөк кубатталып жатканда иштебейт"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батареяны үнөмдөгүч"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Иштин майнаптуулугун начарлатып, фондук дайындарды чектейт"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Тутум"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Башкы бет"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Акыркылар"</string>
+    <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артка"</string>
 </resources>

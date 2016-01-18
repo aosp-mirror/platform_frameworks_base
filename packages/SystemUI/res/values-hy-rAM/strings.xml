@@ -3,16 +3,16 @@
 /**
  * Copyright (c) 2009, The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0 
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
  -->
@@ -433,12 +433,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Թեժ կետ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի կարգավորիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտվողի միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի ընդունիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտվողի միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="got_it" msgid="2239653834387972602">"Հասկանալի է"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի կարգավորիչը ավելացվել է կարգավորումներին"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի ընդունիչը ավելացվել է կարգավորումներին"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Հեռացնել կարգավորումներից"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի կարգավորիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի ընդունիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Հավելվածը տեղադրված չէ սարքի վրա"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Ցույց տալ ժամացույցի վայրկյանները"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ցույց տալ ժամացույցի վայրկյանները կարգավիճակի տողում: Կարող է ազդել մարտկոցի աշխատանքի ժամանակի վրա:"</string>
@@ -476,4 +476,8 @@
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Մարտկոցի տնտեսումը լիցքավորման ժամանակ հասանելի չէ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Մարտկոցի տնտեսում"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Նվազեցնում է ծանրաբեռնվածությունը և ֆոնային տվյալները"</string>
+    <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Համակարգ"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Գլխավոր էջ"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Վերջինները"</string>
+    <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Հետ"</string>
 </resources>
