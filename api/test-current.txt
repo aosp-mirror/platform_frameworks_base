@@ -28567,6 +28567,7 @@ package android.os {
     field public static final java.lang.String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
     field public static final java.lang.String DISALLOW_REMOVE_USER = "no_remove_user";
     field public static final java.lang.String DISALLOW_SAFE_BOOT = "no_safe_boot";
+    field public static final java.lang.String DISALLOW_SET_USER_ICON = "no_set_user_icon";
     field public static final java.lang.String DISALLOW_SHARE_LOCATION = "no_share_location";
     field public static final java.lang.String DISALLOW_SMS = "no_sms";
     field public static final java.lang.String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";

@@ -529,6 +529,21 @@ public class UserManager {
     public static final String DISALLOW_DATA_ROAMING = "no_data_roaming";
 
     /**
+     * Specifies if a user is not allowed to change their icon. Device owner and profile owner
+     * can set this restriction. When it is set by device owner, only the target user will be
+     * affected. The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     *
+     * <p>Type: Boolean
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SET_USER_ICON = "no_set_user_icon";
+
+    /**
      * Allows apps in the parent profile to handle web links from the managed profile.
      *
      * This user restriction has an effect only in a managed profile.

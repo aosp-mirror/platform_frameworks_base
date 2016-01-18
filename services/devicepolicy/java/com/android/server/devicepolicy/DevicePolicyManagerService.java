@@ -7028,7 +7028,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userId = UserHandle.getCallingUserId();
             long id = mInjector.binderClearCallingIdentity();
             try {
-                mUserManager.setUserIcon(userId, icon);
+                mUserManagerInternal.setUserIcon(userId, icon);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
