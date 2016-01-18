@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DIM_LAYER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -33,41 +34,42 @@ import java.io.PrintWriter;
 
 public class DimLayer {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DimLayer" : TAG_WM;
-    private static final boolean DEBUG = false;
-
-    public static final float RESIZING_HINT_ALPHA = 0.5f;
-
-    public static final int RESIZING_HINT_DURATION_MS = 0;
+    private final WindowManagerService mService;
 
     /** Actual surface that dims */
-    SurfaceControl mDimSurface;
+    private SurfaceControl mDimSurface;
 
     /** Last value passed to mDimSurface.setAlpha() */
-    float mAlpha = 0;
+    private float mAlpha = 0;
 
     /** Last value passed to mDimSurface.setLayer() */
-    int mLayer = -1;
+    private int mLayer = -1;
 
     /** Next values to pass to mDimSurface.setPosition() and mDimSurface.setSize() */
-    Rect mBounds = new Rect();
+    private final Rect mBounds = new Rect();
 
     /** Last values passed to mDimSurface.setPosition() and mDimSurface.setSize() */
-    Rect mLastBounds = new Rect();
+    private final Rect mLastBounds = new Rect();
 
     /** True after mDimSurface.show() has been called, false after mDimSurface.hide(). */
     private boolean mShowing = false;
 
     /** Value of mAlpha when beginning transition to mTargetAlpha */
-    float mStartAlpha = 0;
+    private float mStartAlpha = 0;
 
     /** Final value of mAlpha following transition */
-    float mTargetAlpha = 0;
+    private float mTargetAlpha = 0;
 
     /** Time in units of SystemClock.uptimeMillis() at which the current transition started */
-    long mStartTime;
+    private long mStartTime;
 
     /** Time in milliseconds to take to transition from mStartAlpha to mTargetAlpha */
-    long mDuration;
+    private long mDuration;
+
+    private boolean mDestroyed = false;
+
+    private final int mDisplayId;
+
 
     /** Interface implemented by users of the dim layer */
     interface DimLayerUser {
@@ -80,11 +82,16 @@ public class DimLayer {
         String toShortString();
     }
     /** The user of this dim layer. */
-    final DimLayerUser mUser;
+    private final DimLayerUser mUser;
 
     DimLayer(WindowManagerService service, DimLayerUser user, int displayId) {
         mUser = user;
-        if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
+        mDisplayId = displayId;
+        mService = service;
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "Ctor: displayId=" + displayId);
+    }
+
+    private void constructSurface(WindowManagerService service) {
         SurfaceControl.openTransaction();
         try {
             if (DEBUG_SURFACE_TRACE) {
@@ -99,7 +106,10 @@ public class DimLayer {
             }
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG,
                     "  DIM " + mDimSurface + ": CREATE");
-            mDimSurface.setLayerStack(displayId);
+            mDimSurface.setLayerStack(mDisplayId);
+            adjustBounds();
+            adjustAlpha(mAlpha);
+            adjustLayer(mLayer);
         } catch (Exception e) {
             Slog.e(TAG_WM, "Exception creating Dim surface", e);
         } finally {
@@ -122,8 +132,15 @@ public class DimLayer {
     }
 
     void setLayer(int layer) {
-        if (mLayer != layer) {
-            mLayer = layer;
+        if (mLayer == layer) {
+            return;
+        }
+        mLayer = layer;
+        adjustLayer(layer);
+    }
+
+    private void adjustLayer(int layer) {
+        if (mDimSurface != null) {
             mDimSurface.setLayer(layer);
         }
     }
@@ -133,23 +150,34 @@ public class DimLayer {
     }
 
     private void setAlpha(float alpha) {
-        if (mAlpha != alpha) {
-            if (DEBUG) Slog.v(TAG, "setAlpha alpha=" + alpha);
-            try {
+        if (mAlpha == alpha) {
+            return;
+        }
+        mAlpha = alpha;
+        adjustAlpha(alpha);
+    }
+
+    private void adjustAlpha(float alpha) {
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "setAlpha alpha=" + alpha);
+        try {
+            if (mDimSurface != null) {
                 mDimSurface.setAlpha(alpha);
-                if (alpha == 0 && mShowing) {
-                    if (DEBUG) Slog.v(TAG, "setAlpha hiding");
+            }
+            if (alpha == 0 && mShowing) {
+                if (DEBUG_DIM_LAYER) Slog.v(TAG, "setAlpha hiding");
+                if (mDimSurface != null) {
                     mDimSurface.hide();
                     mShowing = false;
-                } else if (alpha > 0 && !mShowing) {
-                    if (DEBUG) Slog.v(TAG, "setAlpha showing");
+                }
+            } else if (alpha > 0 && !mShowing) {
+                if (DEBUG_DIM_LAYER) Slog.v(TAG, "setAlpha showing");
+                if (mDimSurface != null) {
                     mDimSurface.show();
                     mShowing = true;
                 }
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Failure setting alpha immediately", e);
             }
-            mAlpha = alpha;
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Failure setting alpha immediately", e);
         }
     }
 
@@ -176,8 +204,10 @@ public class DimLayer {
             yPos = -1 * dh / 6;
         }
 
-        mDimSurface.setPosition(xPos, yPos);
-        mDimSurface.setSize(dw, dh);
+        if (mDimSurface != null) {
+            mDimSurface.setPosition(xPos, yPos);
+            mDimSurface.setSize(dw, dh);
+        }
 
         mLastBounds.set(mBounds);
     }
@@ -209,7 +239,7 @@ public class DimLayer {
      * NOTE: Must be called with Surface transaction open. */
     void show() {
         if (isAnimating()) {
-            if (DEBUG) Slog.v(TAG, "show: immediate");
+            if (DEBUG_DIM_LAYER) Slog.v(TAG, "show: immediate");
             show(mLayer, mTargetAlpha, 0);
         }
     }
@@ -223,13 +253,17 @@ public class DimLayer {
      * @param duration How long to take to get there in milliseconds.
      */
     void show(int layer, float alpha, long duration) {
-        if (DEBUG) Slog.v(TAG, "show: layer=" + layer + " alpha=" + alpha
-                + " duration=" + duration);
-        if (mDimSurface == null) {
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "show: layer=" + layer + " alpha=" + alpha
+                + " duration=" + duration + ", mDestroyed=" + mDestroyed);
+        if (mDestroyed) {
             Slog.e(TAG, "show: no Surface");
             // Make sure isAnimating() returns false.
             mTargetAlpha = mAlpha = 0;
             return;
+        }
+
+        if (mDimSurface == null) {
+            constructSurface(mService);
         }
 
         if (!mLastBounds.equals(mBounds)) {
@@ -252,15 +286,15 @@ public class DimLayer {
             }
         }
         mTargetAlpha = alpha;
-        if (DEBUG) Slog.v(TAG, "show: mStartAlpha=" + mStartAlpha + " mStartTime=" + mStartTime
-                + " mTargetAlpha=" + mTargetAlpha);
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "show: mStartAlpha=" + mStartAlpha + " mStartTime="
+                + mStartTime + " mTargetAlpha=" + mTargetAlpha);
     }
 
     /** Immediate hide.
      * NOTE: Must be called with Surface transaction open. */
     void hide() {
         if (mShowing) {
-            if (DEBUG) Slog.v(TAG, "hide: immediate");
+            if (DEBUG_DIM_LAYER) Slog.v(TAG, "hide: immediate");
             hide(0);
         }
     }
@@ -273,7 +307,7 @@ public class DimLayer {
      */
     void hide(long duration) {
         if (mShowing && (mTargetAlpha != 0 || durationEndsEarlier(duration))) {
-            if (DEBUG) Slog.v(TAG, "hide: duration=" + duration);
+            if (DEBUG_DIM_LAYER) Slog.v(TAG, "hide: duration=" + duration);
             show(mLayer, 0, duration);
         }
     }
@@ -285,13 +319,12 @@ public class DimLayer {
      * @return True if animation is still required after this step.
      */
     boolean stepAnimation() {
-        if (mDimSurface == null) {
-            Slog.e(TAG, "stepAnimation: null Surface");
+        if (mDestroyed) {
+            Slog.e(TAG, "stepAnimation: surface destroyed");
             // Ensure that isAnimating() returns false;
             mTargetAlpha = mAlpha = 0;
             return false;
         }
-
         if (isAnimating()) {
             final long curTime = SystemClock.uptimeMillis();
             final float alphaDelta = mTargetAlpha - mStartAlpha;
@@ -301,7 +334,7 @@ public class DimLayer {
                 // Don't exceed limits.
                 alpha = mTargetAlpha;
             }
-            if (DEBUG) Slog.v(TAG, "stepAnimation: curTime=" + curTime + " alpha=" + alpha);
+            if (DEBUG_DIM_LAYER) Slog.v(TAG, "stepAnimation: curTime=" + curTime + " alpha=" + alpha);
             setAlpha(alpha);
         }
 
@@ -310,11 +343,12 @@ public class DimLayer {
 
     /** Cleanup */
     void destroySurface() {
-        if (DEBUG) Slog.v(TAG, "destroySurface.");
+        if (DEBUG_DIM_LAYER) Slog.v(TAG, "destroySurface.");
         if (mDimSurface != null) {
             mDimSurface.destroy();
             mDimSurface = null;
         }
+        mDestroyed = true;
     }
 
     public void printTo(String prefix, PrintWriter pw) {

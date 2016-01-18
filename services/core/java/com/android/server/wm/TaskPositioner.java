@@ -23,8 +23,6 @@ import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static com.android.server.wm.DimLayer.RESIZING_HINT_ALPHA;
-import static com.android.server.wm.DimLayer.RESIZING_HINT_DURATION_MS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -84,6 +82,10 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     private static final int CTRL_RIGHT  = 0x2;
     private static final int CTRL_TOP    = 0x4;
     private static final int CTRL_BOTTOM = 0x8;
+
+    public static final float RESIZING_HINT_ALPHA = 0.5f;
+
+    public static final int RESIZING_HINT_DURATION_MS = 0;
 
     private final WindowManagerService mService;
     private WindowPositionerEventReceiver mInputEventReceiver;
