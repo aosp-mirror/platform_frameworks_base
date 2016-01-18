@@ -25,6 +25,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.tv.pip.PipManager;
 
 /*
  * Status bar implementation for "large screen" products that mostly present no on-screen nav
@@ -167,6 +168,11 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void onCameraLaunchGestureDetected(int source) {
+    }
+
+    @Override
+    public void requestTvPictureInPicture() {
+        PipManager.getInstance().requestTvPictureInPicture();
     }
 
     @Override

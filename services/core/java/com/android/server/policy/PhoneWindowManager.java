@@ -658,6 +658,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 15;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
+    private static final int MSG_REQUEST_TV_PICTURE_IN_PICTURE = 17;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -718,6 +719,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (targetBar != null) {
                         requestTransientBars(targetBar);
                     }
+                    break;
+                case MSG_REQUEST_TV_PICTURE_IN_PICTURE:
+                    requestTvPictureInPictureInternal();
                     break;
             }
         }
@@ -1337,7 +1341,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(null, deviceId);
                 break;
             case LONG_PRESS_HOME_PICTURE_IN_PICTURE:
-                handlePipKey(event);
+                requestTvPictureInPicture(event);
                 break;
             default:
                 Log.w(TAG, "Not defined home long press behavior: " + mLongPressOnHomeBehavior);
@@ -1352,11 +1356,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void handlePipKey(KeyEvent event) {
-        if (DEBUG_INPUT) Log.d(TAG, "handlePipKey event=" + event);
-        Intent intent = new Intent(Intent.ACTION_PICTURE_IN_PICTURE_BUTTON);
-        intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+    private void requestTvPictureInPicture(KeyEvent event) {
+        if (DEBUG_INPUT) Log.d(TAG, "requestTvPictureInPicture event=" + event);
+        mHandler.removeMessages(MSG_REQUEST_TV_PICTURE_IN_PICTURE);
+        Message msg = mHandler.obtainMessage(MSG_REQUEST_TV_PICTURE_IN_PICTURE);
+        msg.setAsynchronous(true);
+        msg.sendToTarget();
+    }
+
+    private void requestTvPictureInPictureInternal() {
+        try {
+            IStatusBarService statusbar = getStatusBarService();
+            if (statusbar != null) {
+                statusbar.requestTvPictureInPicture();
+            }
+        } catch (RemoteException|IllegalArgumentException e) {
+            Slog.e(TAG, "Cannot handle picture-in-picture key", e);
+            // re-acquire status bar service next time it is needed.
+            mStatusBarService = null;
+        }
     }
 
     private final Runnable mHomeDoubleTapTimeoutRunnable = new Runnable() {
@@ -1648,14 +1666,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * eg. Disable long press on home goes to recents on sw600dp.
      */
     private void readConfigurationDependentBehaviors() {
-        mLongPressOnHomeBehavior = mContext.getResources().getInteger(
+        final Resources res = mContext.getResources();
+
+        mLongPressOnHomeBehavior = res.getInteger(
                 com.android.internal.R.integer.config_longPressOnHomeBehavior);
         if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
                 mLongPressOnHomeBehavior > LAST_LONG_PRESS_HOME_BEHAVIOR) {
             mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
         }
 
-        mDoubleTapOnHomeBehavior = mContext.getResources().getInteger(
+        mDoubleTapOnHomeBehavior = res.getInteger(
                 com.android.internal.R.integer.config_doubleTapOnHomeBehavior);
         if (mDoubleTapOnHomeBehavior < DOUBLE_TAP_HOME_NOTHING ||
                 mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
@@ -5337,7 +5357,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_WINDOW: {
                 if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
                     if (!down) {
-                        handlePipKey(event);
+                        requestTvPictureInPicture(event);
                     }
                     result &= ~ACTION_PASS_TO_USER;
                 }

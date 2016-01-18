@@ -93,4 +93,14 @@ interface IStatusBarService
     void appTransitionStarting(long statusBarAnimationsStartTime, long statusBarAnimationsDuration);
 
     void startAssist(in Bundle args);
+
+    /**
+     * Request picture-in-picture.
+     *
+     * <p>
+     * This is called when an user presses picture-in-picture key or equivalent.
+     * TV device may start picture-in-picture from foreground activity if there's none.
+     * Picture-in-picture overlay menu will be shown instead otherwise.
+     */
+    void requestTvPictureInPicture();
 }

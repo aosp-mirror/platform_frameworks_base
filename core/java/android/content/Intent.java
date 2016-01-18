@@ -2567,16 +2567,6 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_BUTTON = "android.intent.action.MEDIA_BUTTON";
 
-   /**
-     * Broadcast Action:  The "Picture-in-picture (PIP) Button" was pressed.
-     * Includes a single extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
-     * caused the broadcast.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PICTURE_IN_PICTURE_BUTTON =
-            "android.intent.action.PICTURE_IN_PICTURE_BUTTON";
-
     /**
      * Broadcast Action:  The "Camera Button" was pressed.  Includes a single
      * extra field, {@link #EXTRA_KEY_EVENT}, containing the key event that
