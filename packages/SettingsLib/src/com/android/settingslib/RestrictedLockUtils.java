@@ -16,14 +16,18 @@
 
 package com.android.settingslib;
 
+import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.Spanned;
 import android.text.SpannableStringBuilder;
@@ -147,6 +151,35 @@ public class RestrictedLockUtils {
         return enforcedAdmin;
     }
 
+    public static EnforcedAdmin checkIfUninstallBlocked(Context context,
+            String packageName, int userId) {
+        EnforcedAdmin allAppsControlDisallowedAdmin = checkIfRestrictionEnforced(context,
+                UserManager.DISALLOW_APPS_CONTROL, userId);
+        if (allAppsControlDisallowedAdmin != null) {
+            return allAppsControlDisallowedAdmin;
+        }
+        EnforcedAdmin allAppsUninstallDisallowedAdmin = checkIfRestrictionEnforced(context,
+                UserManager.DISALLOW_UNINSTALL_APPS, userId);
+        if (allAppsUninstallDisallowedAdmin != null) {
+            return allAppsUninstallDisallowedAdmin;
+        }
+        IPackageManager ipm = AppGlobals.getPackageManager();
+        try {
+            if (ipm.getBlockUninstallForUser(packageName, userId)) {
+                DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                        Context.DEVICE_POLICY_SERVICE);
+                ComponentName admin = dpm.getProfileOwner();
+                if (admin == null) {
+                    admin = dpm.getDeviceOwnerComponentOnCallingUser();
+                }
+                return new EnforcedAdmin(admin, UserHandle.myUserId());
+            }
+        } catch (RemoteException e) {
+            // Nothing to do
+        }
+        return null;
+    }
+
     /**
      * Check if account management for a specific type of account is disabled by admin.
      * Only a profile or device owner can disable account management. So, we check if account
@@ -248,27 +281,33 @@ public class RestrictedLockUtils {
     /**
      * Set the menu item as disabled by admin by adding a restricted padlock at the end of the
      * text and set the click listener which will send an intent to show the admin support details
-     * dialog.
+     * dialog. If the admin is null, remove the padlock and disabled color span. When the admin is
+     * null, we also set the OnMenuItemClickListener to null, so if you want to set a custom
+     * OnMenuItemClickListener, set it after calling this method.
      */
     public static void setMenuItemAsDisabledByAdmin(final Context context,
             final MenuItem item, final EnforcedAdmin admin) {
         SpannableStringBuilder sb = new SpannableStringBuilder(item.getTitle());
         removeExistingRestrictedSpans(sb);
 
-        final int disabledColor = context.getColor(R.color.disabled_text_color);
-        sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ImageSpan image = new RestrictedLockImageSpan(context);
-        sb.append(" ", image, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        item.setTitle(sb);
+        if (admin != null) {
+            final int disabledColor = context.getColor(R.color.disabled_text_color);
+            sb.setSpan(new ForegroundColorSpan(disabledColor), 0, sb.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ImageSpan image = new RestrictedLockImageSpan(context);
+            sb.append(" ", image, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                sendShowAdminSupportDetailsIntent(context, admin);
-                return true;
-            }
-        });
+            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    sendShowAdminSupportDetailsIntent(context, admin);
+                    return true;
+                }
+            });
+        } else {
+            item.setOnMenuItemClickListener(null);
+        }
+        item.setTitle(sb);
     }
 
     private static void removeExistingRestrictedSpans(SpannableStringBuilder sb) {
