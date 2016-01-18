@@ -656,17 +656,58 @@ static jint android_media_AudioTrack_write_native_bytes(JNIEnv *env,  jobject th
 }
 
 // ----------------------------------------------------------------------------
-static jint android_media_AudioTrack_get_native_frame_count(JNIEnv *env,  jobject thiz) {
+static jint android_media_AudioTrack_get_buffer_size_frames(JNIEnv *env,  jobject thiz) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
     if (lpTrack == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
-            "Unable to retrieve AudioTrack pointer for frameCount()");
+            "Unable to retrieve AudioTrack pointer for getBufferSizeInFrames()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    ssize_t result = lpTrack->getBufferSizeInFrames();
+    if (result < 0) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Internal error detected in getBufferSizeInFrames() = " + result);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return (jint)result;
+}
+
+// ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_set_buffer_size_frames(JNIEnv *env,
+        jobject thiz, jint bufferSizeInFrames) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for setBufferSizeInFrames()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    // Value will be coerced into the valid range.
+    // But internal values are unsigned, size_t, so we need to clip
+    // against zero here where it is signed.
+    if (bufferSizeInFrames < 0) {
+        bufferSizeInFrames = 0;
+    }
+    ssize_t result = lpTrack->setBufferSizeInFrames(bufferSizeInFrames);
+    if (result < 0) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Internal error detected in setBufferSizeInFrames() = " + result);
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+    return (jint)result;
+}
+
+// ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_get_buffer_capacity_frames(JNIEnv *env,  jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for getBufferCapacityInFrames()");
         return (jint)AUDIO_JAVA_ERROR;
     }
 
     return lpTrack->frameCount();
 }
-
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_set_playback_rate(JNIEnv *env,  jobject thiz,
@@ -1073,8 +1114,12 @@ static const JNINativeMethod gMethods[] = {
     {"native_write_short",   "([SIIIZ)I",(void *)android_media_AudioTrack_writeArray<jshortArray>},
     {"native_write_float",   "([FIIIZ)I",(void *)android_media_AudioTrack_writeArray<jfloatArray>},
     {"native_setVolume",     "(FF)V",    (void *)android_media_AudioTrack_set_volume},
-    {"native_get_native_frame_count",
-                             "()I",      (void *)android_media_AudioTrack_get_native_frame_count},
+    {"native_get_buffer_size_frames",
+                             "()I",      (void *)android_media_AudioTrack_get_buffer_size_frames},
+    {"native_set_buffer_size_frames",
+                             "(I)I",     (void *)android_media_AudioTrack_set_buffer_size_frames},
+    {"native_get_buffer_capacity_frames",
+                             "()I",      (void *)android_media_AudioTrack_get_buffer_capacity_frames},
     {"native_set_playback_rate",
                              "(I)I",     (void *)android_media_AudioTrack_set_playback_rate},
     {"native_get_playback_rate",
