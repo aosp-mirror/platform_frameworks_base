@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"సేవ లేదు."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ఎయిర్‌ప్లైన్ మోడ్"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు నమూనా అవసరం."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు PIN అవసరం."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"మీరు పరికరాన్ని పునఃప్రారంభించినప్పుడు పాస్‌వర్డ్ అవసరం."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"అదనపు భద్రత కోసం నమూనా అవసరం."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"అదనపు భద్రత కోసం PIN అవసరం."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"అదనపు భద్రత కోసం పాస్‌వర్డ్ అవసరం."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు నమూనా అవసరం."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు PIN అవసరం."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు పాస్‌వర్డ్ అవసరం."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"అదనపు భద్రత కోసం నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"అదనపు భద్రత కోసం PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"అదనపు భద్రత కోసం పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"మీరు ప్రొఫైల్‌లు మారినప్పుడు నమూనా నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"మీరు ప్రొఫైల్‌లు మారినప్పుడు PIN నమోదు చేయడం ఆవశ్యకం"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"మీరు ప్రొఫైల్‌లు మారినప్పుడు పాస్‌వర్డ్ నమోదు చేయడం ఆవశ్యకం"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">పరికరం <xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>
       <item quantity="one">పరికరం <xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు అన్‌లాక్ చేయబడలేదు. నమూనాను నిర్ధారించండి.</item>

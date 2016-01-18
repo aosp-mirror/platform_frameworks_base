@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Xidmət yoxdur."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Daxiletmə metodu düyməsinə keç"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Təyyarə rejimi"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Cihazı yenidən başladarkən nümunə kod tələb olunur."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Cihazı yenidən başladarkən PIN kod tələb olunur."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Cihazı yenidən başladarkən parol tələb olunur."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Əlavə təhlükəsizlik üçün model tələb olunur."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Əlavə təhlükəsizlik üçün PIN tələb olunur."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Əlavə təhlükəsizlik üçün parol tələb olunur."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profillər arasında keçid edərkən nümunə kod tələb olunur."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profillər arasında keçid edərkən PIN kod tələb olunur."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profillər arasında keçid edərkən parol tələb olunur."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Cihaz yeniden başladıqdan sonra qəlib kod tələb olunur"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Cihaz yeniden başladıqdan sonra PIN tələb olunur"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Cihaz yeniden başladıqdan sonra parol tələb olunur"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Əlavə təhlükəsizlik üçün qəlib tələb olunur"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Əlavə təhlükəsizlik üçün PIN tələb olunur"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Əlavə təhlükəsizlik üçün parol tələb olunur"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profillər arasında keçid edərkən qəlib kod tələb olunur"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profillər arasında keçid edərkən PIN kod tələb olunur"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profillər arasında keçid edərkən parol tələb olunur"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Cihaz <xliff:g id="NUMBER_1">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>
       <item quantity="one">Cihaz <xliff:g id="NUMBER_0">%d</xliff:g> saat kiliddən çıxarılmayıb. Nümunə kodu təsdiq edin.</item>

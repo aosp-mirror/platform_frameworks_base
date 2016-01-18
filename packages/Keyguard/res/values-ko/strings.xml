@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"서비스 불가"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"비행기 모드"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"기기를 다시 시작하려면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"기기를 다시 시작하려면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"기기를 다시 시작하려면 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"보안 강화를 위해 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"보안 강화를 위해 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"보안 강화를 위해 비밀번호가 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"프로필을 전환하려면 패턴이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"프로필을 전환하려면 PIN이 필요합니다."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"기기가 다시 시작되면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"기기가 다시 시작되면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"기기가 다시 시작되면 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"보안 강화를 위해 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"보안 강화를 위해 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"보안 강화를 위해 비밀번호가 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"프로필을 전환하려면 패턴이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"프로필을 전환하려면 PIN이 필요합니다."</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"프로필을 전환하려면 비밀번호가 필요합니다."</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g>시간 이상 기기가 잠금 해제되지 않았습니다. 패턴을 확인하세요.</item>

@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nincs szolgáltatás."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Beviteli mód váltása gomb."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Repülős üzemmód"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Ha újraindítja az eszközt, meg kell adnia a mintát."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Ha újraindítja az eszközt, meg kell adnia a PIN kódot."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Ha újraindítja az eszközt, meg kell adnia a jelszót."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Minta szükséges a nagyobb biztonság érdekében."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"PIN-kód szükséges a nagyobb biztonság érdekében."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Jelszó szükséges a nagyobb biztonság érdekében."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Ha vált a profilok között, meg kell adnia a mintát."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Ha vált a profilok között, meg kell adnia a PIN kódot."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Ha vált a profilok között, meg kell adnia a jelszót."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Az eszköz újraindítását követően meg kell adni a mintát"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Az eszköz újraindítását követően meg kell adni a PIN-kódot"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Az eszköz újraindítását követően meg kell adni a jelszót"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Minta szükséges a nagyobb biztonság érdekében"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"PIN-kód szükséges a nagyobb biztonság érdekében"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Jelszó szükséges a nagyobb biztonság érdekében"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Ha vált a profilok között, meg kell adni a mintát"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Ha vált a profilok között, meg kell adni a PIN-kódot"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Ha vált a profilok között, meg kell adni a jelszót"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>
       <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a mintát.</item>

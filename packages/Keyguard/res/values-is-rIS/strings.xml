@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ekkert símasamband."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Hnappur til að skipta um innsláttaraðferð."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flugstilling"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Mynsturs er krafist þegar þú endurræsir tækið."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"PIN-númers er krafist þegar þú endurræsir tækið."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Aðgangsorðs er krafist þegar þú endurræsir tækið."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Mynsturs er krafist af öryggisástæðum."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"PIN-númers er krafist af öryggisástæðum."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Aðgangsorðs er krafist af öryggisástæðum."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Mynsturs er krafist þegar þú skiptir um snið."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"PIN-númers er krafist þegar þú skiptir um snið."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Aðgangsorðs er krafist þegar þú skiptir um snið."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Mynsturs er krafist þegar tækið er endurræst"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN-númers er krafist þegar tækið er endurræst"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Aðgangsorðs er krafist þegar tækið er endurræst"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Mynsturs er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"PIN-númers er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Aðgangsorðs er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Mynsturs er krafist þegar þú skiptir um snið"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"PIN-númers er krafist þegar þú skiptir um snið"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Aðgangsorðs er krafist þegar þú skiptir um snið"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustund. Staðfestu mynstrið.</item>
       <item quantity="other">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustundir. Staðfestu mynstrið.</item>

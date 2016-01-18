@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sense servei."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botó de canvi del mètode d\'entrada."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Mode d\'avió"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Cal introduir el patró en reiniciar el dispositiu."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Cal introduir el PIN en reiniciar el dispositiu."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Cal introduir la contrasenya en reiniciar el dispositiu."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"El patró és necessari per disposar de més seguretat."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"El PIN és necessari per disposar de més seguretat."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"La contrasenya és necessària per disposar de més seguretat."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Cal introduir el patró en canviar de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Cal introduir el PIN en canviar de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Cal introduir la contrasenya en canviar de perfil."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Cal introduir el patró quan es reinicia el dispositiu"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Cal introduir el PIN quan es reinicia el dispositiu"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Cal introduir la contrasenya quan es reinicia el dispositiu"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Cal introduir el patró per disposar de més seguretat"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Cal introduir el PIN per disposar de més seguretat"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Cal introduir la contrasenya per disposar de més seguretat"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Cal introduir el patró en canviar de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Cal introduir el PIN en canviar de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Cal introduir la contrasenya en canviar de perfil"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Fa <xliff:g id="NUMBER_1">%d</xliff:g> hores que no es desbloqueja el dispositiu. Confirma el patró.</item>
       <item quantity="one">Fa <xliff:g id="NUMBER_0">%d</xliff:g> hora que no es desbloqueja el dispositiu. Confirma el patró.</item>

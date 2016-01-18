@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sin servicio"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Modo avión"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Se debe introducir el patrón cuando se reinicia el dispositivo."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Se debe introducir el PIN cuando se reinicia el dispositivo."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Se debe introducir la contraseña cuando se reinicia el dispositivo."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Es necesario introducir el patrón como medida de seguridad adicional."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Es necesario introducir el PIN como medida de seguridad adicional."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Es necesario introducir la contraseña como medida de seguridad adicional."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Se debe introducir el patrón cuando se cambia de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Se debe introducir el PIN cuando se cambia de perfil."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Se debe introducir la contraseña cuando se cambia de perfil."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Debes introducir el patrón después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Debes introducir el PIN después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Debes introducir la contraseña después de reiniciar el dispositivo"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Debes introducir el patrón como medida de seguridad adicional"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Debes introducir el PIN como medida de seguridad adicional"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Debes introducir la contraseña como medida de seguridad adicional"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Debes introducir el patrón cuando cambies de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Debes introducir el PIN cuando cambies de perfil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Debes introducir la contraseña cuando cambies de perfil"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">El dispositivo no se ha desbloqueado durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma el patrón.</item>
       <item quantity="one">El dispositivo no se ha desbloqueado durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma el patrón.</item>

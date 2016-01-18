@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Walang serbisyo."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Airplane mode"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Kinakailangan ang pattern kapag ni-restart mo ang device."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Kinakailangan ang PIN kapag ni-restart mo ang device."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Kinakailangan ang password kapag ni-restart mo ang device."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Kinakailangan ang pattern para sa karagdagang seguridad."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Kinakailangan ang PIN para sa karagdagang seguridad."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Kinakailangan ang password para sa karagdagang seguridad."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Kinakailangan ang pattern kapag lumipat ka ng mga profile."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Kinakailangan ang PIN kapag lumipat ka ng mga profile."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Kinakailangan ang password kapag lumipat ka ng mga profile."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Kinakailangan ang pattern pagkatapos mag-restart ng device"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Kinakailangan ang PIN pagkatapos mag-restart ng device"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Kinakailangan ang password pagkatapos mag-restart ng device"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Kinakailangan ang pattern para sa karagdagang seguridad"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Kinakailangan ang PIN para sa karagdagang seguridad"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Kinakailangan ang password para sa karagdagang seguridad"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Kinakailangan ang pattern kapag nagpalit ka ng profile"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Kinakailangan ang PIN kapag nagpalit ka ng profile"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Kinakailangan ang password kapag nagpalit ka ng profile"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> oras.. Kumpirmahin ang pattern.</item>
       <item quantity="other">Hindi na-unlock ang device sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na oras. Kumpirmahin ang pattern.</item>

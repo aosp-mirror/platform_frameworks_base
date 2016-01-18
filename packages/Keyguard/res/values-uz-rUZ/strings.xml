@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Aloqa yo‘q."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Kiritish uslubi tugmasini almashtirish."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Parvoz rejimi"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Qurilmani o‘chirib yoqishda chizmali kalit talab qilinadi."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Qurilmani o‘chirib yoqishda PIN-kod talab qilinadi."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Qurilmani o‘chirib yoqishda parol talab qilinadi."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Qo‘shimcha xavfsizlik chorasi sifatida chizmali kalit talab qilinadi."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Qo‘shimcha xavfsizlik chorasi sifatida PIN-kod talab qilinadi."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Qo‘shimcha xavfsizlik chorasi sifatida parol talab qilinadi."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Profilni amlashtirishda chizmali kalit talab qilinadi."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Profilni amlashtirishda PIN-kod talab qilinadi."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Profilni amlashtirishda parol talab qilinadi."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Qurilma o‘chirib yoqilgandan so‘ng chizmali kalit talab qilinadi"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Qurilma o‘chirib yoqilgandan so‘ng PIN kod talab qilinadi"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Qurilma o‘chirib yoqilgandan so‘ng parol talab qilinadi"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Qo‘shimcha xavfsizlik chorasi sifatida chizmali kalit talab qilinadi"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Qo‘shimcha xavfsizlik chorasi sifatida PIN kod talab qilinadi"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Qo‘shimcha xavfsizlik chorasi sifatida parol talab qilinadi"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Profilni amlashtirishda chizmali kalit talab qilinadi"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Profilni amlashtirishda PIN kod talab qilinadi"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Profilni amlashtirishda parol talab qilinadi"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Qurilma <xliff:g id="NUMBER_1">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>
       <item quantity="one">Qurilma <xliff:g id="NUMBER_0">%d</xliff:g> soatdan beri qulfdan chiqarilgani yo‘q. Chizmali kalitni yana bir marta kiriting.</item>

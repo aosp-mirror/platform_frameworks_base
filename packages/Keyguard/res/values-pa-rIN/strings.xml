@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"ਕੋਈ ਸੇਵਾ ਨਹੀਂ।"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ਇਨਪੁਟ ਵਿਧੀ ਬਟਨ ਸਵਿਚ ਕਰੋ।"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"ਏਅਰਪਲੇਨ ਮੋਡ"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ ਪੈਟਰਨ ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ PIN  ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"ਜਦੋਂ ਤੁਸੀਂ ਡਿਵਾਈਸ ਨੂੰ ਰੀਸਟਾਰਟ ਕਰਦੇ ਹੋ ਤਾਂ ਪਾਸਵਰਡ ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਲਈ ਪੈਟਰਨ ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਲਈ PIN ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"ਵਾਧੂ ਸੁਰੱਖਿਆ ਲਈ ਪਾਸਵਰਡ ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ ਪੈਟਰਨ ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ PIN ਲੁੜੀਂਦਾ ਹੈ।"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"ਜਦੋਂ ਤੁਸੀਂ ਪ੍ਰੋਫਾਈਲਾਂ ਸਵਿਚ ਕਰਦੇ ਹੋ ਤਾਂ ਪਾਸਵਰਡ ਲੁੜੀਂਦਾ ਹੈ।"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ PIN ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"ਡੀਵਾਈਸ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੋਂ ਬਾਅਦ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ PIN ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"ਵਧੀਕ ਸੁਰੱਖਿਆ ਲਈ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ ਪੈਟਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ PIN ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"ਪ੍ਰੋਫਾਈਲਾਂ ਬਦਲਣ ਦੌਰਾਨ ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>
       <item quantity="other">ਡਿਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਨਲੌਕ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ। ਪੈਟਰਨ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ।</item>

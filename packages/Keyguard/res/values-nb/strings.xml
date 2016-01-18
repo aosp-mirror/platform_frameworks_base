@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen tjeneste."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bytt knapp for inndatametode."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Flymodus"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Du må tegne mønsteret ditt når du starter enheten på nytt."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Du må skrive inn PIN-koden din når du starter enheten på nytt."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Du må skrive inn passordet ditt når du starter enheten på nytt."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Mønsteret kreves for ekstra sikkerhet."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"PIN-koden kreves for ekstra sikkerhet."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Passordet kreves for ekstra sikkerhet."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Du må tegne mønsteret ditt når du bytter profil."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Du må skrive inn PIN-koden din når du bytter profil."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Du må skrive inn passordet ditt når du bytter profil."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Du må tegne mønsteret etter at enheten har startet på nytt"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Du må skrive inn PIN-koden etter at enheten har startet på nytt"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Du må skrive inn passordet etter at enheten har startet på nytt"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Du må tegne mønsteret for ekstra sikkerhet"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Du må skrive inn PIN-koden for ekstra sikkerhet"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Du må skrive inn passordet for ekstra sikkerhet"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Du må tegne mønsteret når du bytter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Du må skrive inn PIN-koden når du bytter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Du må skrive inn passordet når du bytter profil"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Enheten er ikke blitt låst opp de siste <xliff:g id="NUMBER_1">%d</xliff:g> timene. Bekreft mønsteret.</item>
       <item quantity="one">Enheten er ikke blitt låst opp den siste <xliff:g id="NUMBER_0">%d</xliff:g> timen. Bekreft mønsteret.</item>

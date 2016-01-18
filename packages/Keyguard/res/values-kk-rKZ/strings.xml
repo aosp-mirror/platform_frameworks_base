@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Қызмет көрсетілмейді."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Енгізу әдісі түймесін ауыстыру."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Ұшақ режимі"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Құрылғыны өшіріп, қайта қосқанда, өрнекті енгізу қажет."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Құрылғыны өшіріп, қайта қосқанда, PIN кодын енгізу қажет."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Құрылғыны өшіріп, қайта қосқанда, құпия сөзді енгізу қажет."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Қосымша қауіпсіздік үшін өрнек қажет."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Қосымша қауіпсіздік үшін PIN коды қажет."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Қосымша қауіпсіздік үшін құпия сөз қажет."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Профильдерді ауыстырғанда, өрнекті енгізу қажет."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Профильдерді ауыстырғанда, PIN кодын енгізу қажет."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Профильдерді ауыстырғанда, құпия сөзді енгізу қажет."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Құрылғы қайта іске қосылғаннан кейін өрнекті енгізу қажет"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Құрылғы қайта іске қосылғаннан кейін PIN кодты енгізу қажет"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Құрылғы қайта іске қосылғаннан кейін кілтсөзді енгізу қажет"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Қосымша қауіпсіздік үшін өрнекті енгізу қажет"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Қосымша қауіпсіздік үшін PIN кодты енгізу қажет"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Қосымша қауіпсіздік үшін кілтсөзді енгізу қажет"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профильдерді ауыстырғанда өрнекті енгізу қажет"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профильдерді ауыстырғанда PIN кодты енгізу қажет"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профильдерді ауыстырғанда кілтсөзді енгізу қажет"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Құрылғы құлпы <xliff:g id="NUMBER_1">%d</xliff:g> сағат бойы ашылмады. Өрнекті растаңыз.</item>
       <item quantity="one">Құрылғы құлпы <xliff:g id="NUMBER_0">%d</xliff:g> сағат бойы ашылмады. Өрнекті растаңыз.</item>

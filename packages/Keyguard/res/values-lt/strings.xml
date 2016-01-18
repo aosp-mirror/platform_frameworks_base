@@ -114,15 +114,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nėra paslaugos."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Perjungti įvesties metodo mygtuką."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Lėktuvo režimas"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="489430505491862444">"Iš naujo paleidus įrenginį reikalingas atrakinimo piešinys."</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="994878216570694974">"Iš naujo paleidus įrenginį reikalingas PIN kodas."</string>
-    <string name="kg_prompt_reason_restart_password" msgid="2375742919528461664">"Iš naujo paleidus įrenginį reikalingas slaptažodis."</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="8930047492617900785">"Norint užtikrinti papildomą saugumą būtinas atrakinimo piešinys."</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="7470468607947726377">"Norint užtikrinti papildomą saugumą būtinas PIN kodas."</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="1177412542773936957">"Norint užtikrinti papildomą saugumą būtinas slaptažodis."</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"Perjungiant profilius reikalingas atrakinimo piešinys."</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"Perjungiant profilius reikalingas PIN kodas."</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"Perjungiant profilius reikalingas slaptažodis."</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Iš naujo paleidus įrenginį būtinas atrakinimo piešinys"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Iš naujo paleidus įrenginį būtinas PIN kodas"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Iš naujo paleidus įrenginį būtinas slaptažodis"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Norint užtikrinti papildomą saugumą būtinas atrakinimo piešinys"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Norint užtikrinti papildomą saugumą būtinas PIN kodas"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Norint užtikrinti papildomą saugumą būtinas slaptažodis"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Perjungiant profilius būtinas atrakinimo piešinys"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Perjungiant profilius būtinas PIN kodas"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Perjungiant profilius būtinas slaptažodis"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="one">Įrenginys nebuvo atrakintas <xliff:g id="NUMBER_1">%d</xliff:g> valandą. Patvirtinkite atrakinimo piešinį.</item>
       <item quantity="few">Įrenginys nebuvo atrakintas <xliff:g id="NUMBER_1">%d</xliff:g> valandas. Patvirtinkite atrakinimo piešinį.</item>
