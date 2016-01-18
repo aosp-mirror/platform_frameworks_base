@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,16 +39,25 @@ import java.io.PrintWriter;
 /**
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
-public class VolumeDialogComponent implements VolumeComponent {
+public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable {
+
+    public static final String VOLUME_DOWN_SILENT = "sysui_volume_down_silent";
+    public static final String VOLUME_UP_SILENT = "sysui_volume_up_silent";
+    public static final String VOLUME_SILENT_DO_NOT_DISTURB = "sysui_do_not_disturb";
+
+    public static final boolean DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT = true;
+    public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = true;
+    public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = true;
+
     private final SystemUI mSysui;
     private final Context mContext;
     private final VolumeDialogController mController;
     private final ZenModeController mZenModeController;
     private final VolumeDialog mDialog;
-    private final VolumePolicy mVolumePolicy = new VolumePolicy(
-            true,  // volumeDownToEnterSilent
-            true,  // volumeUpToExitSilent
-            true,  // doNotDisturbWhenSilent
+    private VolumePolicy mVolumePolicy = new VolumePolicy(
+            DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
+            DEFAULT_VOLUME_UP_TO_EXIT_SILENT,  // volumeUpToExitSilent
+            DEFAULT_DO_NOT_DISTURB_WHEN_SILENT,  // doNotDisturbWhenSilent
             400    // vibrateToSilentDebounce
     );
 
@@ -65,6 +75,41 @@ public class VolumeDialogComponent implements VolumeComponent {
         mDialog = new VolumeDialog(context, WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY,
                 mController, zen, mVolumeDialogCallback);
         applyConfiguration();
+        TunerService.get(mContext).addTunable(this, VOLUME_DOWN_SILENT, VOLUME_UP_SILENT,
+                VOLUME_SILENT_DO_NOT_DISTURB);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (VOLUME_DOWN_SILENT.equals(key)) {
+            final boolean volumeDownToEnterSilent = newValue != null
+                    ? Integer.parseInt(newValue) != 0
+                    : DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT;
+            setVolumePolicy(volumeDownToEnterSilent,
+                    mVolumePolicy.volumeUpToExitSilent, mVolumePolicy.doNotDisturbWhenSilent,
+                    mVolumePolicy.vibrateToSilentDebounce);
+        } else if (VOLUME_UP_SILENT.equals(key)) {
+            final boolean volumeUpToExitSilent = newValue != null
+                    ? Integer.parseInt(newValue) != 0
+                    : DEFAULT_VOLUME_UP_TO_EXIT_SILENT;
+            setVolumePolicy(mVolumePolicy.volumeDownToEnterSilent,
+                    volumeUpToExitSilent, mVolumePolicy.doNotDisturbWhenSilent,
+                    mVolumePolicy.vibrateToSilentDebounce);
+        } else if (VOLUME_SILENT_DO_NOT_DISTURB.equals(key)) {
+            final boolean doNotDisturbWhenSilent = newValue != null
+                    ? Integer.parseInt(newValue) != 0
+                    : DEFAULT_DO_NOT_DISTURB_WHEN_SILENT;
+            setVolumePolicy(mVolumePolicy.volumeDownToEnterSilent,
+                    mVolumePolicy.volumeUpToExitSilent, doNotDisturbWhenSilent,
+                    mVolumePolicy.vibrateToSilentDebounce);
+        }
+    }
+
+    private void setVolumePolicy(boolean volumeDownToEnterSilent, boolean volumeUpToExitSilent,
+            boolean doNotDisturbWhenSilent, int vibrateToSilentDebounce) {
+        mVolumePolicy = new VolumePolicy(volumeDownToEnterSilent, volumeUpToExitSilent,
+                doNotDisturbWhenSilent, vibrateToSilentDebounce);
+        mController.setVolumePolicy(mVolumePolicy);
     }
 
     private void sendUserActivity() {

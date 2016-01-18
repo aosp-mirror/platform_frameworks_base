@@ -1306,4 +1306,13 @@
     <!-- SysUI Tuner: Summary of option to show full do not disturb panel in volume [CHAR LIMIT=NONE] -->
     <string name="tuner_full_zen_summary">Allow full control of do not disturb in the volume dialog.</string>
 
+    <!-- SysUI Tuner: Label for screen about volume and do not disturb settings [CHAR LIMIT=60] -->
+    <string name="volume_and_do_not_disturb">Volume and Do not disturb</string>
+
+    <!-- SysUI Tuner: Switch to control volume down behavior [CHAR LIMIT=60] -->
+    <string name="volume_down_silent">Enter do not disturb on volume down</string>
+
+    <!-- SysUI Tuner: Switch to control volume up behavior [CHAR LIMIT=60] -->
+    <string name="volume_up_silent">Exit do not disturb on volume up</string>
+
 </resources>
