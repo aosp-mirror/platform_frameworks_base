@@ -29,7 +29,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_CROP;
-import static com.android.server.wm.WindowManagerDebugConfig.HIDE_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.localLOGV;
+import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowState.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
@@ -547,7 +548,7 @@ class WindowStateAnimator {
         if (mDestroyPreservedSurfaceUponRedraw) {
             return;
         }
-        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", null);
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", false);
         if (mSurfaceController != null) {
             mSurfaceController.setLayer(mAnimLayer + 1);
         }
@@ -665,13 +666,13 @@ class WindowStateAnimator {
                 Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
                 WindowManagerService.logSurface(w, "CREATE pos=("
                         + w.mFrame.left + "," + w.mFrame.top + ") ("
-                        + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", null);
+                        + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
             }
 
             // Start a new transaction and apply position & offset.
             final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
             if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                    "POS " + mTmpSize.left + ", " + mTmpSize.top, null);
+                    "POS " + mTmpSize.left + ", " + mTmpSize.top, false);
             mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack,
                     mAnimLayer);
             mLastHidden = true;
@@ -758,25 +759,13 @@ class WindowStateAnimator {
             }
 
             try {
-                if (DEBUG_VISIBILITY) {
-                    RuntimeException e = null;
-                    if (!HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    Slog.w(TAG, "Window " + this + " destroying surface "
-                            + mSurfaceController + ", session " + mSession, e);
-                }
+                if (DEBUG_VISIBILITY) logWithStack(TAG, "Window " + this + " destroying surface "
+                        + mSurfaceController + ", session " + mSession);
                 if (mSurfaceDestroyDeferred) {
                     if (mSurfaceController != null && mPendingDestroySurface != mSurfaceController) {
                         if (mPendingDestroySurface != null) {
                             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                                RuntimeException e = null;
-                                if (!HIDE_STACK_CRAWLS) {
-                                    e = new RuntimeException();
-                                    e.fillInStackTrace();
-                                }
-                                WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
+                                WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
                             }
                             mPendingDestroySurface.destroyInTransaction();
                         }
@@ -784,12 +773,7 @@ class WindowStateAnimator {
                     }
                 } else {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                        RuntimeException e = null;
-                        if (!HIDE_STACK_CRAWLS) {
-                            e = new RuntimeException();
-                            e.fillInStackTrace();
-                        }
-                        WindowManagerService.logSurface(mWin, "DESTROY", null);
+                        WindowManagerService.logSurface(mWin, "DESTROY", true);
                     }
                     destroySurface();
                 }
@@ -820,12 +804,7 @@ class WindowStateAnimator {
         try {
             if (mPendingDestroySurface != null) {
                 if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    RuntimeException e = null;
-                    if (!HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    WindowManagerService.logSurface(mWin, "DESTROY PENDING", e);
+                    WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
                 }
                 mPendingDestroySurface.destroyInTransaction();
                 // Don't hide wallpaper if we're destroying a deferred surface
@@ -1308,7 +1287,7 @@ class WindowStateAnimator {
                     + " matrix=[" + mDsDx + "*" + w.mHScale
                     + "," + mDtDx + "*" + w.mVScale
                     + "][" + mDsDy + "*" + w.mHScale
-                    + "," + mDtDy + "*" + w.mVScale + "]", null);
+                    + "," + mDtDy + "*" + w.mVScale + "]", false);
 
             boolean prepared =
                 mSurfaceController.prepareToShowInTransaction(mShownAlpha, mAnimLayer,
@@ -1620,14 +1599,7 @@ class WindowStateAnimator {
                     + " transit=" + transit
                     + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
-                if (DEBUG_ANIM) {
-                    RuntimeException e = null;
-                    if (!HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    Slog.v(TAG, "Loaded animation " + a + " for " + this, e);
-                }
+                if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
                 setAnimation(a);
                 mAnimationIsEntrance = isEntrance;
             }

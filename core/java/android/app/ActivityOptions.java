@@ -1125,4 +1125,11 @@ public class ActivityOptions {
         return null;
     }
 
+    /** @hide */
+    @Override
+    public String toString() {
+        return "ActivityOptions(" + hashCode() + "), mPackageName=" + mPackageName
+                + ", mAnimationType=" + mAnimationType + ", mStartX=" + mStartX + ", mStartY="
+                + mStartY + ", mWidth=" + mWidth + ", mHeight=" + mHeight;
+    }
 }
