@@ -48430,6 +48430,9 @@ package java.lang {
     field public static final java.lang.Class<java.lang.Float> TYPE;
   }
 
+  public abstract class FunctionalInterface implements java.lang.annotation.Annotation {
+  }
+
   public class IllegalAccessError extends java.lang.IncompatibleClassChangeError {
     ctor public IllegalAccessError();
     ctor public IllegalAccessError(java.lang.String);
