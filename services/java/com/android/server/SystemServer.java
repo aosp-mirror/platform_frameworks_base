@@ -31,8 +31,11 @@ import android.content.res.Resources.Theme;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FactoryTest;
+import android.os.FileUtils;
 import android.os.IPowerManager;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -95,6 +98,8 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -143,6 +148,9 @@ public final class SystemServer {
             "com.android.server.search.SearchManagerService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
+
+    private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
+    private static final String BLOCK_MAP_FILE = "/cache/recovery/block.map";
 
     /**
      * Default theme used by the system context. This is used to style
@@ -324,6 +332,30 @@ public final class SystemServer {
                 reason = null;
             }
 
+            // If it's a pending reboot into recovery to apply an update,
+            // always make sure uncrypt gets executed properly when needed.
+            // If '/cache/recovery/block.map' hasn't been created, stop the
+            // reboot which will fail for sure, and get a chance to capture a
+            // bugreport when that's still feasible. (Bug; 26444951)
+            if (PowerManager.REBOOT_RECOVERY.equals(reason)) {
+                File packageFile = new File(UNCRYPT_PACKAGE_FILE);
+                if (packageFile.exists()) {
+                    String filename = null;
+                    try {
+                        filename = FileUtils.readTextFile(packageFile, 0, null);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Error reading uncrypt package file", e);
+                    }
+
+                    if (filename != null && filename.startsWith("/data")) {
+                        if (!new File(BLOCK_MAP_FILE).exists()) {
+                            Slog.e(TAG, "Can't find block map file, uncrypt failed or " +
+                                       "unexpected runtime restart?");
+                            return;
+                        }
+                    }
+                }
+            }
             ShutdownThread.rebootOrShutdown(null, reboot, reason);
         }
     }
