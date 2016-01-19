@@ -24,7 +24,6 @@ import android.os.Handler;
 import java.lang.String;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -210,7 +209,22 @@ public final class Call {
          * Call sends responses through connection.
          * @hide
          */
-        public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00400000;
+        public static final int CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION = 0x00200000;
+
+        /**
+         * When set, prevents a video {@code Call} from being downgraded to an audio-only call.
+         * <p>
+         * Should be set when the VideoState has the {@link VideoProfile#STATE_TX_ENABLED} or
+         * {@link VideoProfile#STATE_RX_ENABLED} bits set to indicate that the connection cannot be
+         * downgraded from a video call back to a VideoState of
+         * {@link VideoProfile#STATE_AUDIO_ONLY}.
+         * <p>
+         * Intuitively, a call which can be downgraded to audio should also have local and remote
+         * video
+         * capabilities (see {@link #CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL} and
+         * {@link #CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL}).
+         */
+        public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 0x00400000;
 
         //******************************************************************************************
         // Next CAPABILITY value: 0x00800000
@@ -326,6 +340,9 @@ public final class Call {
             }
             if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
                 builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
+            }
+            if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
+                builder.append(" CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO");
             }
             if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
                 builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
