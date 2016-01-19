@@ -944,9 +944,6 @@ public class Vpn {
      */
     public void startLegacyVpnPrivileged(VpnProfile profile, KeyStore keyStore,
             LinkProperties egress) {
-        if (!keyStore.isUnlocked()) {
-            throw new IllegalStateException("KeyStore isn't unlocked");
-        }
         UserManager mgr = UserManager.get(mContext);
         UserInfo user = mgr.getUserInfo(mUserHandle);
         if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
