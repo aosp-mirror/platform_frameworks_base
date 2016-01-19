@@ -18,15 +18,18 @@ package com.android.server.policy;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.WindowManager.LayoutParams.*;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -188,6 +191,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     static final int DOUBLE_TAP_HOME_NOTHING = 0;
     static final int DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
+
+    static final int SHORT_PRESS_WINDOW_NOTHING = 0;
+    static final int SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE = 1;
 
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
@@ -409,6 +415,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
     int mShortPressOnSleepBehavior;
+    int mShortPressWindowBehavior;
     boolean mAwake;
     boolean mScreenOnEarly;
     boolean mScreenOnFully;
@@ -1653,6 +1660,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mDoubleTapOnHomeBehavior < DOUBLE_TAP_HOME_NOTHING ||
                 mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
             mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
+        }
+
+        mShortPressWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
+        if (mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
+            mShortPressWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
     }
 
@@ -5329,6 +5341,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
+                break;
+            }
+            case KeyEvent.KEYCODE_WINDOW: {
+                if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
+                    if (!down) {
+                        handlePipKey(event);
+                    }
+                    result &= ~ACTION_PASS_TO_USER;
+                }
+                break;
             }
         }
 
@@ -6302,11 +6324,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
-                    if (mContext.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_WATCH)) {
+                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH)) {
                         theme = com.android.internal.R.style.Theme_Micro_Dialog_Alert;
-                    } else if (mContext.getPackageManager().hasSystemFeature(
-                            PackageManager.FEATURE_TELEVISION)) {
+                    } else if (mContext.getPackageManager().hasSystemFeature(FEATURE_TELEVISION)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
                         theme = 0;
