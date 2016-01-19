@@ -913,6 +913,11 @@ public class JobSchedulerService extends com.android.server.SystemService
                     minPriorityContextId = i;
                     break;
                 }
+                if (job == null) {
+                    // No job on this context, but nextPending can't run here because
+                    // the context has a preferred Uid.
+                    continue;
+                }
                 if (job.getUid() != nextPending.getUid()) {
                     continue;
                 }
