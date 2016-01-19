@@ -269,7 +269,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // These are no longer handled by the policy, because we need custom strategies for them
     BluetoothControllerImpl mBluetoothController;
     SecurityControllerImpl mSecurityController;
-    BatteryController mBatteryController;
+    protected BatteryController mBatteryController;
     LocationControllerImpl mLocationController;
     NetworkControllerImpl mNetworkController;
     HotspotControllerImpl mHotspotController;
@@ -935,14 +935,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     protected void createNavigationBarView(Context context) {
-    // Optionally show app shortcuts in the nav bar "shelf" area.
-        if (shouldShowAppShelf()) {
-            mNavigationBarView = (NavigationBarView) View.inflate(
-                    context, R.layout.navigation_bar_with_apps, null);
-        } else {
-            mNavigationBarView = (NavigationBarView) View.inflate(
-                    context, R.layout.navigation_bar, null);
-        }
+        inflateNavigationBarView(context);
         mNavigationBarView.setDisabledFlags(mDisabled1);
         mNavigationBarView.setComponents(mRecents, getComponent(Divider.class));
         mNavigationBarView.setOnVerticalChangedListener(
@@ -963,7 +956,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }});
     }
 
-    private void initSignalCluster(View containerView) {
+    protected void inflateNavigationBarView(Context context) {
+        // Optionally show app shortcuts in the nav bar "shelf" area.
+        if (shouldShowAppShelf()) {
+            mNavigationBarView = (NavigationBarView) View.inflate(
+                    context, R.layout.navigation_bar_with_apps, null);
+        } else {
+            mNavigationBarView = (NavigationBarView) View.inflate(
+                    context, R.layout.navigation_bar, null);
+        }
+    }
+
+    protected void initSignalCluster(View containerView) {
         SignalClusterView signalCluster =
                 (SignalClusterView) containerView.findViewById(R.id.signal_cluster);
         if (signalCluster != null) {
