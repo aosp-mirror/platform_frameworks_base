@@ -123,4 +123,10 @@ public class TouchCalibration implements Parcelable {
                Float.floatToIntBits(mYScale)  ^
                Float.floatToIntBits(mYOffset);
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%f, %f, %f, %f, %f, %f]",
+                mXScale, mXYMix, mXOffset, mYXMix, mYScale, mYOffset);
+    }
 }

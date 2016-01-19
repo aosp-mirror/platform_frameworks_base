@@ -16,7 +16,7 @@
 
 package android.hardware.input;
 
-import android.view.PointerIcon;
+import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 
@@ -40,6 +40,9 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.PointerIcon;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodSubtype;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -640,6 +643,51 @@ public final class InputManager {
             mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
             Log.w(TAG, "Could not remove keyboard layout for input device.", ex);
+        }
+    }
+
+
+    /**
+     * Gets the keyboard layout for the specified input device and IME subtype.
+     *
+     * @param identifier The identifier for the input device.
+     * @param inputMethodInfo The input method.
+     * @param inputMethodSubtype The input method subtype.
+     *
+     * @return The associated {@link KeyboardLayout}, or null if one has not been set.
+     *
+     * @hide
+     */
+    public KeyboardLayout getKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            InputMethodInfo inputMethodInfo, InputMethodSubtype inputMethodSubtype) {
+        try {
+            return mIm.getKeyboardLayoutForInputDevice(
+                    identifier, inputMethodInfo, inputMethodSubtype);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not set keyboard layout.", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Sets the keyboard layout for the specified input device and IME subtype pair.
+     *
+     * @param identifier The identifier for the input device.
+     * @param inputMethodInfo The input method with which to associate the keyboard layout.
+     * @param inputMethodSubtype The input method subtype which which to associate the keyboard
+     *                           layout.
+     * @param keyboardLayoutDescriptor The descriptor of the keyboard layout to set
+     *
+     * @hide
+     */
+    public void setKeyboardLayoutForInputDevice(InputDeviceIdentifier identifier,
+            InputMethodInfo inputMethodInfo, InputMethodSubtype inputMethodSubtype,
+            String keyboardLayoutDescriptor) {
+        try {
+            mIm.setKeyboardLayoutForInputDevice(identifier, inputMethodInfo,
+                    inputMethodSubtype, keyboardLayoutDescriptor);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "Could not set keyboard layout.", ex);
         }
     }
 
