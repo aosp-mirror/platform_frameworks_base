@@ -113,6 +113,11 @@
         android:title="@string/color_transform"
         android:fragment="com.android.systemui.tuner.ColorMatrixFragment" />
 
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="sysui_show_full_zen"
+        android:title="@string/tuner_full_zen_title"
+        android:summary="@string/tuner_full_zen_summary" />
+
     <!-- Warning, this goes last. -->
     <Preference
         android:summary="@string/tuner_persistent_warning"

@@ -21,7 +21,6 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GEN
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.LayoutTransition;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -62,7 +61,6 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -71,6 +69,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.volume.VolumeDialogController.State;
 import com.android.systemui.volume.VolumeDialogController.StreamState;
 
@@ -85,8 +84,10 @@ import java.util.List;
  *
  * Methods ending in "H" must be called on the (ui) handler.
  */
-public class VolumeDialog {
+public class VolumeDialog implements TunerService.Tunable {
     private static final String TAG = Util.logTag(VolumeDialog.class);
+
+    public static final String SHOW_FULL_ZEN = "sysui_show_full_zen";
 
     private static final long USER_ATTEMPT_GRACE_PERIOD = 1000;
     private static final int WAIT_FOR_RIPPLE = 200;
@@ -130,6 +131,9 @@ public class VolumeDialog {
     private long mCollapseTime;
     private boolean mHovering = false;
     private int mLastActiveStream;
+
+    private boolean mShowFullZen;
+    private final ZenModePanel mZenPanel;
 
     public VolumeDialog(Context context, int windowType, VolumeDialogController controller,
             ZenModeController zenModeController, Callback callback) {
@@ -221,11 +225,23 @@ public class VolumeDialog {
         mExpandButtonAnimationDuration = res.getInteger(R.integer.volume_expand_animation_duration);
         mZenFooter = (ZenFooter) mDialog.findViewById(R.id.volume_zen_footer);
         mZenFooter.init(zenModeController);
+        mZenPanel = (ZenModePanel) mDialog.findViewById(R.id.zen_mode_panel);
+        mZenPanel.addNoneButton();
+        mZenPanel.init(zenModeController);
+        mZenPanel.setCallback(mZenPanelCallback);
 
         mAccessibility.init();
 
         controller.addCallback(mControllerCallbackH, mHandler);
         controller.getState();
+        TunerService.get(mContext).addTunable(this, SHOW_FULL_ZEN);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (SHOW_FULL_ZEN.equals(key)) {
+            mShowFullZen = newValue != null && Integer.parseInt(newValue) != 0;
+        }
     }
 
     private ColorStateList loadColorStateList(int colorResId) {
@@ -278,7 +294,7 @@ public class VolumeDialog {
                     .getDimensionPixelSize(R.dimen.volume_slider_interspacing);
             final LinearLayout.LayoutParams lp =
                     new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h);
-            mDialogContentView.addView(v, mDialogContentView.getChildCount() - 1, lp);
+            mDialogContentView.addView(v, mDialogContentView.getChildCount() - 2, lp);
             row.space = v;
         }
         row.settingsButton.addOnLayoutChangeListener(new OnLayoutChangeListener() {
@@ -306,7 +322,7 @@ public class VolumeDialog {
             }
         });
         // add new row just before the footer
-        mDialogContentView.addView(row.view, mDialogContentView.getChildCount() - 1);
+        mDialogContentView.addView(row.view, mDialogContentView.getChildCount() - 2);
         mRows.add(row);
     }
 
@@ -655,12 +671,21 @@ public class VolumeDialog {
         if (D.BUG) Log.d(TAG, "updateFooterH");
         final boolean wasVisible = mZenFooter.getVisibility() == View.VISIBLE;
         final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF
-                && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded);
+                && (mAudioManager.isStreamAffectedByRingerMode(mActiveStream) || mExpanded)
+                && !mShowFullZen;
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
         }
         Util.setVisOrGone(mZenFooter, visible);
         mZenFooter.update();
+
+        final boolean fullWasVisible = mZenPanel.getVisibility() == View.VISIBLE;
+        final boolean fullVisible = mShowFullZen && (mState.zenMode != Global.ZEN_MODE_OFF
+                || mExpanded);
+        if (fullWasVisible != fullVisible && !fullVisible) {
+            prepareForCollapse();
+        }
+        Util.setVisOrGone(mZenPanel, fullVisible);
     }
 
     private void updateVolumeRowH(VolumeRow row) {
@@ -900,6 +925,23 @@ public class VolumeDialog {
         @Override
         public void onShowSafetyWarning(int flags) {
             showSafetyWarningH(flags);
+        }
+    };
+
+    private final ZenModePanel.Callback mZenPanelCallback = new ZenModePanel.Callback() {
+        @Override
+        public void onPrioritySettings() {
+            mCallback.onZenPrioritySettingsClicked();
+        }
+
+        @Override
+        public void onInteraction() {
+            mHandler.sendEmptyMessage(H.RESCHEDULE_TIMEOUT);
+        }
+
+        @Override
+        public void onExpanded(boolean expanded) {
+            // noop.
         }
     };
 
