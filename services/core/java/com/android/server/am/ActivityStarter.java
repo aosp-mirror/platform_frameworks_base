@@ -876,7 +876,7 @@ class ActivityStarter {
                 // In this situation we want to remove all activities from the task up to the one
                 // being started. In most cases this means we are resetting the task to its initial
                 // state.
-                final ActivityRecord top = intentActivity.task.performClearTaskLocked(
+                final ActivityRecord top = intentActivity.task.performClearTaskForReuseLocked(
                         mStartActivity, mLaunchFlags);
                 if (top != null) {
                     if (top.frontOfTask) {
