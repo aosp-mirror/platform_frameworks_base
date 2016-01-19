@@ -117,7 +117,7 @@ class ZygoteConnection {
 
     /**
      * Reads one start command from the command socket. If successful,
-     * a child is forked and a {@link ZygoteInit.MethodAndArgsCaller}
+     * a child is forked and a {@link Zygote.MethodAndArgsCaller}
      * exception is thrown in that child while in the parent process,
      * the method returns normally. On failure, the child is not
      * spawned and messages are printed to the log and stderr. Returns
@@ -126,10 +126,10 @@ class ZygoteConnection {
      *
      * @return false if command socket should continue to be read from, or
      * true if an end-of-file has been encountered.
-     * @throws ZygoteInit.MethodAndArgsCaller trampoline to invoke main()
+     * @throws Zygote.MethodAndArgsCaller trampoline to invoke main()
      * method in child process
      */
-    boolean runOnce() throws ZygoteInit.MethodAndArgsCaller {
+    boolean runOnce(ZygoteServer zygoteServer) throws Zygote.MethodAndArgsCaller {
 
         String args[];
         Arguments parsedArgs = null;
@@ -214,7 +214,7 @@ class ZygoteConnection {
                 fdsToClose[0] = fd.getInt$();
             }
 
-            fd = ZygoteInit.getServerSocketFileDescriptor();
+            fd = zygoteServer.getServerSocketFileDescriptor();
 
             if (fd != null) {
                 fdsToClose[1] = fd.getInt$();
@@ -238,12 +238,13 @@ class ZygoteConnection {
         try {
             if (pid == 0) {
                 // in child
+                zygoteServer.closeServerSocket();
                 IoUtils.closeQuietly(serverPipeFd);
                 serverPipeFd = null;
                 handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
 
                 // should never get here, the child is expected to either
-                // throw ZygoteInit.MethodAndArgsCaller or exec().
+                // throw Zygote.MethodAndArgsCaller or exec().
                 return true;
             } else {
                 // in parent...pid of < 0 means failure
@@ -712,12 +713,12 @@ class ZygoteConnection {
      * @param newStderr null-ok; stream to use for stderr until stdio
      * is reopened.
      *
-     * @throws ZygoteInit.MethodAndArgsCaller on success to
+     * @throws Zygote.MethodAndArgsCaller on success to
      * trampoline to code that invokes static main.
      */
     private void handleChildProc(Arguments parsedArgs,
             FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
-            throws ZygoteInit.MethodAndArgsCaller {
+            throws Zygote.MethodAndArgsCaller {
         /**
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
@@ -725,8 +726,6 @@ class ZygoteConnection {
          */
 
         closeSocket();
-        ZygoteInit.closeServerSocket();
-
         if (descriptors != null) {
             try {
                 Os.dup2(descriptors[0], STDIN_FILENO);
