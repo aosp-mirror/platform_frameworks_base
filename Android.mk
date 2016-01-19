@@ -429,6 +429,14 @@ LOCAL_SRC_FILES += \
 	core/java/android/service/quicksettings/IQSService.aidl \
 	core/java/android/service/quicksettings/IQSTileService.aidl \
 
+# The following are native binders that need to go with the native component
+# at system/update_engine/binder_bindings/. Use relative path to refer to them.
+LOCAL_SRC_FILES += \
+	../../system/update_engine/binder_bindings/android/os/IUpdateEngine.aidl \
+	../../system/update_engine/binder_bindings/android/os/IUpdateEngineCallback.aidl \
+
+LOCAL_AIDL_INCLUDES += system/update_engine/binder_bindings
+
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += \
       $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
