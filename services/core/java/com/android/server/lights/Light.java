@@ -31,6 +31,11 @@ public abstract class Light {
      */
     public static final int BRIGHTNESS_MODE_SENSOR = 1;
 
+    /**
+     * Low-persistence light mode.
+     */
+    public static final int BRIGHTNESS_MODE_LOW_PERSISTENCE = 2;
+
     public abstract void setBrightness(int brightness);
     public abstract void setBrightness(int brightness, int brightnessMode);
     public abstract void setColor(int color);
