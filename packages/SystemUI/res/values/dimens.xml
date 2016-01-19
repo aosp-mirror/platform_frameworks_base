@@ -301,9 +301,6 @@
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">1dp</dimen>
 
-    <!-- The padding between the individual notification cards when dimmed. -->
-    <dimen name="notification_padding_dimmed">0dp</dimen>
-
     <!-- The padding between the individual notification cards. -->
     <dimen name="notification_padding">2dp</dimen>
 

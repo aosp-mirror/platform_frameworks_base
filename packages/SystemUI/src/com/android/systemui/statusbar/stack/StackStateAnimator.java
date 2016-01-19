@@ -55,19 +55,16 @@ public class StackStateAnimator {
 
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
-    private static final int TAG_ANIMATOR_SCALE = R.id.scale_animator_tag;
     private static final int TAG_ANIMATOR_ALPHA = R.id.alpha_animator_tag;
     private static final int TAG_ANIMATOR_HEIGHT = R.id.height_animator_tag;
     private static final int TAG_ANIMATOR_TOP_INSET = R.id.top_inset_animator_tag;
     private static final int TAG_END_TRANSLATION_Y = R.id.translation_y_animator_end_value_tag;
     private static final int TAG_END_TRANSLATION_Z = R.id.translation_z_animator_end_value_tag;
-    private static final int TAG_END_SCALE = R.id.scale_animator_end_value_tag;
     private static final int TAG_END_ALPHA = R.id.alpha_animator_end_value_tag;
     private static final int TAG_END_HEIGHT = R.id.height_animator_end_value_tag;
     private static final int TAG_END_TOP_INSET = R.id.top_inset_animator_end_value_tag;
     private static final int TAG_START_TRANSLATION_Y = R.id.translation_y_animator_start_value_tag;
     private static final int TAG_START_TRANSLATION_Z = R.id.translation_z_animator_start_value_tag;
-    private static final int TAG_START_SCALE = R.id.scale_animator_start_value_tag;
     private static final int TAG_START_ALPHA = R.id.alpha_animator_start_value_tag;
     private static final int TAG_START_HEIGHT = R.id.height_animator_start_value_tag;
     private static final int TAG_START_TOP_INSET = R.id.top_inset_animator_start_value_tag;
@@ -212,14 +209,13 @@ public class StackStateAnimator {
         }
         boolean yTranslationChanging = child.getTranslationY() != viewState.yTranslation;
         boolean zTranslationChanging = child.getTranslationZ() != viewState.zTranslation;
-        boolean scaleChanging = child.getScaleX() != viewState.scale;
         boolean alphaChanging = alpha != child.getAlpha();
         boolean heightChanging = viewState.height != child.getActualHeight();
         boolean darkChanging = viewState.dark != child.isDark();
         boolean topInsetChanging = viewState.clipTopAmount != child.getClipTopAmount();
         boolean hasDelays = mAnimationFilter.hasDelays;
-        boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || scaleChanging ||
-                alphaChanging || heightChanging || topInsetChanging || darkChanging;
+        boolean isDelayRelevant = yTranslationChanging || zTranslationChanging || alphaChanging
+                || heightChanging || topInsetChanging || darkChanging;
         long delay = 0;
         if (fixedDelay != -1) {
             delay = fixedDelay;
@@ -280,7 +276,6 @@ public class StackStateAnimator {
         }
         boolean yTranslationChanging = child.getTranslationY() != viewState.yTranslation;
         boolean zTranslationChanging = child.getTranslationZ() != viewState.zTranslation;
-        boolean scaleChanging = child.getScaleX() != viewState.scale;
         float childAlpha = child.getVisibility() == View.INVISIBLE ? 0.0f : child.getAlpha();
         boolean alphaChanging = viewState.alpha != childAlpha;
         if (child instanceof ExpandableView) {
@@ -296,11 +291,6 @@ public class StackStateAnimator {
         // start translationZ animation
         if (zTranslationChanging) {
             startZTranslationAnimation(child, viewState, duration, delay);
-        }
-
-        // start scale animation
-        if (scaleChanging) {
-            startScaleAnimation(child, viewState, duration);
         }
 
         // start alpha animation
@@ -681,60 +671,6 @@ public class StackStateAnimator {
         child.setTag(TAG_ANIMATOR_TRANSLATION_Y, animator);
         child.setTag(TAG_START_TRANSLATION_Y, child.getTranslationY());
         child.setTag(TAG_END_TRANSLATION_Y, newEndValue);
-    }
-
-    private void startScaleAnimation(final View child,
-            ViewState viewState, long duration) {
-        Float previousStartValue = getChildTag(child, TAG_START_SCALE);
-        Float previousEndValue = getChildTag(child, TAG_END_SCALE);
-        float newEndValue = viewState.scale;
-        if (previousEndValue != null && previousEndValue == newEndValue) {
-            return;
-        }
-        ObjectAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_SCALE);
-        if (!mAnimationFilter.animateScale) {
-            // just a local update was performed
-            if (previousAnimator != null) {
-                // we need to increase all animation keyframes of the previous animator by the
-                // relative change to the end value
-                PropertyValuesHolder[] values = previousAnimator.getValues();
-                float relativeDiff = newEndValue - previousEndValue;
-                float newStartValue = previousStartValue + relativeDiff;
-                values[0].setFloatValues(newStartValue, newEndValue);
-                values[1].setFloatValues(newStartValue, newEndValue);
-                child.setTag(TAG_START_SCALE, newStartValue);
-                child.setTag(TAG_END_SCALE, newEndValue);
-                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
-                return;
-            } else {
-                // no new animation needed, let's just apply the value
-                child.setScaleX(newEndValue);
-                child.setScaleY(newEndValue);
-            }
-        }
-
-        PropertyValuesHolder holderX =
-                PropertyValuesHolder.ofFloat(View.SCALE_X, child.getScaleX(), newEndValue);
-        PropertyValuesHolder holderY =
-                PropertyValuesHolder.ofFloat(View.SCALE_Y, child.getScaleY(), newEndValue);
-        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(child, holderX, holderY);
-        animator.setInterpolator(mFastOutSlowInInterpolator);
-        long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
-        animator.setDuration(newDuration);
-        animator.addListener(getGlobalAnimationFinishedListener());
-        // remove the tag when the animation is finished
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                child.setTag(TAG_ANIMATOR_SCALE, null);
-                child.setTag(TAG_START_SCALE, null);
-                child.setTag(TAG_END_SCALE, null);
-            }
-        });
-        startAnimator(animator);
-        child.setTag(TAG_ANIMATOR_SCALE, animator);
-        child.setTag(TAG_START_SCALE, child.getScaleX());
-        child.setTag(TAG_END_SCALE, newEndValue);
     }
 
     private void startAnimator(ValueAnimator animator) {

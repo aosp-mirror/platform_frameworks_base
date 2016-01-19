@@ -29,14 +29,12 @@ public class ViewState {
     public float yTranslation;
     public float zTranslation;
     public boolean gone;
-    public float scale;
 
     public void copyFrom(ViewState viewState) {
         alpha = viewState.alpha;
         yTranslation = viewState.yTranslation;
         zTranslation = viewState.zTranslation;
         gone = viewState.gone;
-        scale = viewState.scale;
     }
 
     public void initFrom(View view) {
@@ -44,6 +42,5 @@ public class ViewState {
         yTranslation = view.getTranslationY();
         zTranslation = view.getTranslationZ();
         gone = view.getVisibility() == View.GONE;
-        scale = view.getScaleX();
     }
 }

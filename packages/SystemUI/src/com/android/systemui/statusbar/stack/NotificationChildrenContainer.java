@@ -324,7 +324,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.dark = parentState.dark;
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
-            childState.scale =  1.0f;
             childState.clipTopAmount = 0;
             childState.topOverLap = 0;
             boolean visible = i <= lastVisibleIndex;

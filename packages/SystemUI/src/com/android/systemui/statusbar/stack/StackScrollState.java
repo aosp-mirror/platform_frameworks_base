@@ -183,11 +183,9 @@ public class StackScrollState {
         float yTranslation = view.getTranslationY();
         float xTranslation = view.getTranslationX();
         float zTranslation = view.getTranslationZ();
-        float scale = view.getScaleX();
         float newAlpha = state.alpha;
         float newYTranslation = state.yTranslation;
         float newZTranslation = state.zTranslation;
-        float newScale = state.scale;
         boolean becomesInvisible = newAlpha == 0.0f;
         if (alpha != newAlpha && xTranslation == 0) {
             // apply layer type
@@ -224,12 +222,6 @@ public class StackScrollState {
         // apply zTranslation
         if (zTranslation != newZTranslation) {
             view.setTranslationZ(newZTranslation);
-        }
-
-        // apply scale
-        if (scale != newScale) {
-            view.setScaleX(newScale);
-            view.setScaleY(newScale);
         }
     }
 

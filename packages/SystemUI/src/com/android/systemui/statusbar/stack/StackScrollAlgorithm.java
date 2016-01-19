@@ -41,8 +41,6 @@ public class StackScrollAlgorithm {
     private static final int MAX_ITEMS_IN_BOTTOM_STACK = 3;
     private static final int MAX_ITEMS_IN_TOP_STACK = 3;
 
-    public static final float DIMMED_SCALE = 0.98f;
-
     private int mPaddingBetweenElements;
     private int mCollapsedSize;
     private int mTopStackPeekSize;
@@ -60,15 +58,12 @@ public class StackScrollAlgorithm {
     private ExpandableView mFirstChildWhileExpanding;
     private boolean mExpandedOnStart;
     private int mTopStackTotalSize;
-    private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
     private int mBottomStackSlowDownLength;
     private int mTopStackSlowDownLength;
     private int mCollapseSecondCardPadding;
-    private boolean mScaleDimmed;
     private ExpandableView mFirstChild;
     private int mFirstChildMinHeight;
-    private boolean mDimmed;
 
     public StackScrollAlgorithm(Context context) {
         initView(context);
@@ -80,9 +75,7 @@ public class StackScrollAlgorithm {
     }
 
     private void updatePadding() {
-        mPaddingBetweenElements = mDimmed && mScaleDimmed
-                ? mPaddingBetweenElementsDimmed
-                : mPaddingBetweenElementsNormal;
+        mPaddingBetweenElements = mPaddingBetweenElementsNormal;
         mTopStackTotalSize = mTopStackSlowDownLength + mPaddingBetweenElements
                 + mTopStackPeekSize;
         mTopStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
@@ -102,8 +95,6 @@ public class StackScrollAlgorithm {
     }
 
     private void initConstants(Context context) {
-        mPaddingBetweenElementsDimmed = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
         mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
         mCollapsedSize = context.getResources()
@@ -121,12 +112,6 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.top_stack_slow_down_length);
         mCollapseSecondCardPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.notification_collapse_second_card_padding);
-        mScaleDimmed = context.getResources().getDisplayMetrics().densityDpi
-                >= DisplayMetrics.DENSITY_420;
-    }
-
-    public boolean shouldScaleDimmed() {
-        return mScaleDimmed;
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -206,8 +191,8 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackViewState state = resultState.getViewStateForView(child);
-            float newYTranslation = state.yTranslation + state.height * (1f - state.scale) / 2f;
-            float newHeight = state.height * state.scale;
+            float newYTranslation = state.yTranslation;
+            float newHeight = state.height;
             // apply clipping and shadow
             float newNotificationEnd = newYTranslation + newHeight;
 
@@ -236,7 +221,7 @@ public class StackScrollAlgorithm {
                 } else {
                     previousNotificationIsSwiped = ambientState.getDraggedViews().contains(child);
                     previousNotificationEnd = newNotificationEnd;
-                    previousNotificationStart = newYTranslation + state.clipTopAmount * state.scale;
+                    previousNotificationStart = newYTranslation + state.clipTopAmount;
                 }
             }
         }
@@ -260,13 +245,13 @@ public class StackScrollAlgorithm {
             float clipHeight, float backgroundHeight) {
         if (realHeight > clipHeight) {
             // Rather overlap than create a hole.
-            state.topOverLap = (int) Math.floor((realHeight - clipHeight) / state.scale);
+            state.topOverLap = (int) Math.floor(realHeight - clipHeight);
         } else {
             state.topOverLap = 0;
         }
         if (realHeight > backgroundHeight) {
             // Rather overlap than create a hole.
-            state.clipTopAmount = (int) Math.floor((realHeight - backgroundHeight) / state.scale);
+            state.clipTopAmount = (int) Math.floor(realHeight - backgroundHeight);
         } else {
             state.clipTopAmount = 0;
         }
@@ -289,9 +274,6 @@ public class StackScrollAlgorithm {
             childViewState.dark = dark;
             childViewState.hideSensitive = hideSensitive;
             boolean isActivatedChild = activatedChild == child;
-            childViewState.scale = !mScaleDimmed || !dimmed || isActivatedChild
-                    ? 1.0f
-                    : DIMMED_SCALE;
             if (dimmed && isActivatedChild) {
                 childViewState.zTranslation += 2.0f * mZDistanceBetweenElements;
             }
@@ -898,11 +880,6 @@ public class StackScrollAlgorithm {
                 }
             });
         }
-    }
-
-    public void setDimmed(boolean dimmed) {
-        mDimmed = dimmed;
-        updatePadding();
     }
 
     public void onReset(ExpandableView view) {

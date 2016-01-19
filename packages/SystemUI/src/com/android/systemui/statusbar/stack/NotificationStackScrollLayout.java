@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StackScrollerDecorView;
@@ -109,7 +108,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBottomStackSlowDownHeight;
     private int mBottomStackPeekSize;
     private int mPaddingBetweenElements;
-    private int mPaddingBetweenElementsDimmed;
     private int mPaddingBetweenElementsNormal;
     private int mTopPadding;
     private int mCollapseSecondCardPadding;
@@ -301,24 +299,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mStackScrollAlgorithm.initView(context);
-        mPaddingBetweenElementsDimmed = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_padding_dimmed);
         mPaddingBetweenElementsNormal = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_padding);
-        updatePadding(mAmbientState.isDimmed());
+        mPaddingBetweenElements = mPaddingBetweenElementsNormal;
+        mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
         mCollapseSecondCardPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_collapse_second_card_padding);
-    }
-
-    private void updatePadding(boolean dimmed) {
-        mPaddingBetweenElements = dimmed && mStackScrollAlgorithm.shouldScaleDimmed()
-                ? mPaddingBetweenElementsDimmed
-                : mPaddingBetweenElementsNormal;
-        mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
-        updateContentHeight();
-        notifyHeightChangeListener(null);
     }
 
     private void notifyHeightChangeListener(ExpandableView view) {
@@ -2404,9 +2392,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * See {@link AmbientState#setDimmed}.
      */
     public void setDimmed(boolean dimmed, boolean animate) {
-        mStackScrollAlgorithm.setDimmed(dimmed);
         mAmbientState.setDimmed(dimmed);
-        updatePadding(dimmed);
         if (animate && mAnimationsEnabled) {
             mDimmedNeedsAnimation = true;
             mNeedsAnimation =  true;
@@ -2955,7 +2941,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateTopInset()
                         .animateY()
                         .animateDimmed()
-                        .animateScale()
                         .animateZ(),
 
                 // ANIMATION_TYPE_START_DRAG
@@ -2969,13 +2954,11 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_ACTIVATED_CHILD
                 new AnimationFilter()
-                        .animateScale()
                         .animateAlpha(),
 
                 // ANIMATION_TYPE_DIMMED
                 new AnimationFilter()
                         .animateY()
-                        .animateScale()
                         .animateDimmed(),
 
                 // ANIMATION_TYPE_CHANGE_POSITION
@@ -2998,7 +2981,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateTopInset()
                         .animateY()
                         .animateDimmed()
-                        .animateScale()
                         .animateZ()
                         .hasDelays(),
 
@@ -3059,7 +3041,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 new AnimationFilter()
                         .animateAlpha()
                         .animateDark()
-                        .animateScale()
                         .animateDimmed()
                         .animateHideSensitive()
                         .animateHeight()
