@@ -150,6 +150,7 @@ public class PopupWindow {
 
     private Transition mEnterTransition;
     private Transition mExitTransition;
+    private Rect mEpicenterBounds;
 
     private boolean mAboveAnchor;
     private int mWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
@@ -343,6 +344,25 @@ public class PopupWindow {
 
     public void setExitTransition(Transition exitTransition) {
         mExitTransition = exitTransition;
+    }
+
+    /**
+     * Sets the bounds used as the epicenter of the enter and exit transitions.
+     * <p>
+     * Transitions use a point or Rect, referred to as the epicenter, to orient
+     * the direction of travel. For popup windows, the anchor view bounds are
+     * used as the default epicenter.
+     * <p>
+     * See {@link Transition#setEpicenterCallback(EpicenterCallback)} for more
+     * information about how transition epicenters.
+     *
+     * @param bounds the epicenter bounds relative to the anchor view, or
+     *               {@code null} to use the default epicenter
+     * @see #getTransitionEpicenter()
+     * @hide
+     */
+    public void setEpicenterBounds(Rect bounds) {
+        mEpicenterBounds = bounds;
     }
 
     private Transition getTransition(int resId) {
@@ -1621,7 +1641,7 @@ public class PopupWindow {
             p.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
             mWindowManager.updateViewLayout(decorView, p);
 
-            final Rect epicenter = getRelativeAnchorBounds();
+            final Rect epicenter = getTransitionEpicenter();
             exitTransition.setEpicenterCallback(new EpicenterCallback() {
                 @Override
                 public Rect onGetEpicenter(Transition transition) {
@@ -1646,7 +1666,17 @@ public class PopupWindow {
         }
     }
 
-    private Rect getRelativeAnchorBounds() {
+    /**
+     * Returns the window-relative epicenter bounds to be used by enter and
+     * exit transitions.
+     * <p>
+     * <strong>Note:</strong> This is distinct from the rect passed to
+     * {@link #setEpicenterBounds(Rect)}, which is anchor-relative.
+     *
+     * @return the window-relative epicenter bounds to be used by enter and
+     *         exit transitions
+     */
+    private Rect getTransitionEpicenter() {
         final View anchor = mAnchor != null ? mAnchor.get() : null;
         final View decor = mDecorView;
         if (anchor == null || decor == null) {
@@ -1659,6 +1689,15 @@ public class PopupWindow {
         // Compute the position of the anchor relative to the popup.
         final Rect bounds = new Rect(0, 0, anchor.getWidth(), anchor.getHeight());
         bounds.offset(anchorLocation[0] - popupLocation[0], anchorLocation[1] - popupLocation[1]);
+
+        // Use anchor-relative epicenter, if specified.
+        if (mEpicenterBounds != null) {
+            final int offsetX = bounds.left;
+            final int offsetY = bounds.top;
+            bounds.set(mEpicenterBounds);
+            bounds.offset(offsetX, offsetY);
+        }
+
         return bounds;
     }
 
@@ -2031,7 +2070,7 @@ public class PopupWindow {
                             observer.removeOnGlobalLayoutListener(this);
                         }
 
-                        final Rect epicenter = getRelativeAnchorBounds();
+                        final Rect epicenter = getTransitionEpicenter();
                         enterTransition.setEpicenterCallback(new EpicenterCallback() {
                             @Override
                             public Rect onGetEpicenter(Transition transition) {

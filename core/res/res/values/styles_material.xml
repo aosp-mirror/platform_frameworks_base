@@ -877,7 +877,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.ContextPopupMenu" parent="Widget.Material.ListPopupWindow">
         <item name="overlapAnchor">true</item>
-        <item name="popupEnterTransition">@null</item>
     </style>
 
     <style name="Widget.Material.ActionButton">

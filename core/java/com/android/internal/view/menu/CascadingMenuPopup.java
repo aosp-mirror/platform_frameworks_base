@@ -362,6 +362,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
 
         final int x;
         final int y;
+        final Rect epicenterBounds;
         if (parentView != null) {
             // This menu is a cascading submenu anchored to a parent view.
             popupWindow.setTouchModal(false);
@@ -396,13 +397,16 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
             }
 
             y = parentOffsetTop;
+            epicenterBounds = null;
         } else {
             x = mInitXOffset;
             y = mInitYOffset;
+            epicenterBounds = getEpicenterBounds();
         }
 
         popupWindow.setHorizontalOffset(x);
         popupWindow.setVerticalOffset(y);
+        popupWindow.setEpicenterBounds(epicenterBounds);
 
         final CascadingMenuInfo menuInfo = new CascadingMenuInfo(popupWindow, menu, mLastPosition);
         mShowingMenus.add(menuInfo);

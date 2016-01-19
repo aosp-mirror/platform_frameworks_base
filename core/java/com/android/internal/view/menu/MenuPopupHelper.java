@@ -23,6 +23,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.content.Context;
+import android.graphics.Rect;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.PopupWindow.OnDismissListener;
@@ -31,6 +33,8 @@ import android.widget.PopupWindow.OnDismissListener;
  * Presents a menu as a small, simple popup anchored to another view.
  */
 public class MenuPopupHelper implements MenuHelper {
+    private static final int TOUCH_EPICENTER_SIZE_DP = 48;
+
     private final Context mContext;
 
     // Immutable cached popup menu properties.
@@ -163,6 +167,11 @@ public class MenuPopupHelper implements MenuHelper {
      * Shows the popup menu and makes a best-effort to anchor it to the
      * specified (x,y) coordinate relative to the anchor view.
      * <p>
+     * Additionally, the popup's transition epicenter (see
+     * {@link android.widget.PopupWindow#setEpicenterBounds(Rect)} will be
+     * centered on the specified coordinate, rather than using the bounds of
+     * the anchor view.
+     * <p>
      * If the popup's resolved gravity is {@link Gravity#LEFT}, this will
      * display the popup with its top-left corner at (x,y) relative to the
      * anchor view. If the resolved gravity is {@link Gravity#RIGHT}, the
@@ -222,8 +231,11 @@ public class MenuPopupHelper implements MenuHelper {
         return popup;
     }
 
-    private void showPopup(int xOffset, int yOffset, boolean resolveOffsets, boolean showTitle) {
-        if (resolveOffsets) {
+    private void showPopup(int xOffset, int yOffset, boolean useOffsets, boolean showTitle) {
+        final MenuPopup popup = getPopup();
+        popup.setShowTitle(showTitle);
+
+        if (useOffsets) {
             // If the resolved drop-down gravity is RIGHT, the popup's right
             // edge will be aligned with the anchor view. Adjust by the anchor
             // width such that the top-right corner is at the X offset.
@@ -232,12 +244,21 @@ public class MenuPopupHelper implements MenuHelper {
             if (hgrav == Gravity.RIGHT) {
                 xOffset -= mAnchorView.getWidth();
             }
+
+            popup.setHorizontalOffset(xOffset);
+            popup.setVerticalOffset(yOffset);
+
+            // Set the transition epicenter to be roughly finger (or mouse
+            // cursor) sized and centered around the offset position. This
+            // will give the appearance that the window is emerging from
+            // the touch point.
+            final float density = mContext.getResources().getDisplayMetrics().density;
+            final int halfSize = (int) (TOUCH_EPICENTER_SIZE_DP * density / 2);
+            final Rect epicenter = new Rect(xOffset - halfSize, yOffset - halfSize,
+                    xOffset + halfSize, yOffset + halfSize);
+            popup.setEpicenterBounds(epicenter);
         }
 
-        final MenuPopup popup = getPopup();
-        popup.setHorizontalOffset(xOffset);
-        popup.setVerticalOffset(yOffset);
-        popup.setShowTitle(showTitle);
         popup.show();
     }
 
