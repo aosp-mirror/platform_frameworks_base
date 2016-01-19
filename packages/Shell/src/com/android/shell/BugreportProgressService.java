@@ -464,6 +464,7 @@ public class BugreportProgressService extends Service {
                     + info + ")");
             return;
         }
+        Log.v(TAG, "Sending 'Progress' notification for pid " + info.pid + ": " + percentText);
         NotificationManager.from(mContext).notify(TAG, info.pid, notification);
     }
 
@@ -852,7 +853,7 @@ public class BugreportProgressService extends Service {
     }
 
     /**
-     * Sends a notitication indicating the bugreport has finished so use can share it.
+     * Sends a notification indicating the bugreport has finished so use can share it.
      */
     private static void sendBugreportNotification(Context context, BugreportInfo info) {
         final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
@@ -878,7 +879,27 @@ public class BugreportProgressService extends Service {
             builder.setContentInfo(info.name);
         }
 
+        Log.v(TAG, "Sending 'Share' notification for pid " + info.pid + ": " + title);
         NotificationManager.from(context).notify(TAG, info.pid, builder.build());
+    }
+
+    /**
+     * Sends a notification indicating the bugreport is being updated so the user can wait until it
+     * finishes - at this point there is nothing to be done other than waiting, hence it has no
+     * pending action.
+     */
+    private static void sendBugreportBeingUpdatedNotification(Context context, int pid) {
+        final String title = context.getString(R.string.bugreport_updating_title);
+        final Notification.Builder builder = new Notification.Builder(context)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setContentTitle(title)
+                .setTicker(title)
+                .setContentText(context.getString(R.string.bugreport_updating_wait))
+                .setLocalOnly(true)
+                .setColor(context.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+        Log.v(TAG, "Sending 'Updating zip' notification for pid " + pid + ": " + title);
+        NotificationManager.from(context).notify(TAG, pid, builder.build());
     }
 
     /**
@@ -938,11 +959,13 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Not touching zip file since neither title nor description are set");
             return;
         }
+
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
+        sendBugreportBeingUpdatedNotification(mContext, info.pid); // ...and that takes time
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
-        Log.d(TAG, "Writing temporary zip file (" + tmpZip + ")");
+        Log.d(TAG, "Writing temporary zip file (" + tmpZip + ") with title and/or description");
         try (ZipFile oldZip = new ZipFile(info.bugreportFile);
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tmpZip))) {
 

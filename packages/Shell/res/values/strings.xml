@@ -21,6 +21,10 @@
     <string name="bugreport_in_progress_title">Bug report is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
     <string name="bugreport_finished_title">Bug report captured</string>
+    <!-- Title of notification indicating a bugreport is being updated before it can be shared. [CHAR LIMIT=50] -->
+    <string name="bugreport_updating_title">Adding details to the bug report</string>
+    <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
+    <string name="bugreport_updating_wait">Please wait\u2026</string>
 
     <!-- Text of notification indicating that swipe left will share the captured bugreport. [CHAR LIMIT=100] -->
     <string name="bugreport_finished_text" product="watch">Swipe left to share your bug report</string>
