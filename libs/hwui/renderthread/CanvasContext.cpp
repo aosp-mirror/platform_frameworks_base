@@ -29,6 +29,7 @@
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
 #include "protos/hwui.pb.h"
+#include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
 
 #if HWUI_NEW_OPS
@@ -213,10 +214,13 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         // node(s) are non client / filler nodes.
         info.mode = (node.get() == target ? TreeInfo::MODE_FULL : TreeInfo::MODE_RT_ONLY);
         node->prepareTree(info);
+        GL_CHECKPOINT();
     }
     mAnimationContext->runRemainingAnimations(info);
+    GL_CHECKPOINT();
 
     freePrefetechedLayers();
+    GL_CHECKPOINT();
 
     if (CC_UNLIKELY(!mNativeWindow.get())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
@@ -463,6 +467,9 @@ void CanvasContext::draw() {
 
     bool drew = mCanvas->finish();
 #endif
+
+    GL_CHECKPOINT();
+
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();

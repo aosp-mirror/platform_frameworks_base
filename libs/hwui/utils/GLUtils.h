@@ -16,8 +16,17 @@
 #ifndef GLUTILS_H
 #define GLUTILS_H
 
+#include <cutils/log.h>
+
 namespace android {
 namespace uirenderer {
+
+#if 0
+#define GL_CHECKPOINT() LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(),\
+        "GL errors! %s:%d", __FILE__, __LINE__)
+#else
+#define GL_CHECKPOINT()
+#endif
 
 class GLUtils {
 public:
