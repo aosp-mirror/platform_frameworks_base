@@ -64,8 +64,8 @@ public class UserManager {
      * use {@link android.accounts.AccountManager} APIs to add or remove accounts when account
      * management is disallowed.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -75,10 +75,10 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from changing Wi-Fi
      * access points. The default value is <code>false</code>.
-     * <p/>This restriction has no effect in a managed profile.
+     * <p>This restriction has no effect in a managed profile.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -89,8 +89,8 @@ public class UserManager {
      * Specifies if a user is disallowed from installing applications.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -101,8 +101,8 @@ public class UserManager {
      * Specifies if a user is disallowed from uninstalling applications.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -112,11 +112,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from turning on location sharing.
      * The default value is <code>false</code>.
-     * <p/>In a managed profile, location sharing always reflects the primary user's setting, but
+     * <p>In a managed profile, location sharing always reflects the primary user's setting, but
      * can be overridden and forced off by setting this restriction to true in the managed profile.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -128,8 +128,8 @@ public class UserManager {
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -140,10 +140,10 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring bluetooth.
      * This does <em>not</em> restrict the user from turning bluetooth on or off.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect in a managed profile.
+     * <p>This restriction has no effect in a managed profile.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -155,8 +155,8 @@ public class UserManager {
      * USB. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -167,8 +167,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring user
      * credentials. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -181,8 +181,8 @@ public class UserManager {
      * This restriction has no effect on managed profiles.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -193,8 +193,8 @@ public class UserManager {
      * Specifies if a user is disallowed from enabling or
      * accessing debugging features. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -207,8 +207,8 @@ public class UserManager {
      * This restriction has an effect in a managed profile only from
      * {@link android.os.Build.VERSION_CODES#M}
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -220,8 +220,8 @@ public class UserManager {
      * & portable hotspots. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -232,11 +232,11 @@ public class UserManager {
      * Specifies if a user is disallowed from resetting network settings
      * from Settings. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can reset the network settings of the device.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -247,11 +247,11 @@ public class UserManager {
      * Specifies if a user is disallowed from factory resetting
      * from Settings. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can factory reset the device.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -262,11 +262,11 @@ public class UserManager {
      * Specifies if a user is disallowed from adding new users and
      * profiles. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can add other users.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -277,8 +277,8 @@ public class UserManager {
      * Specifies if a user is disallowed from disabling application
      * verification. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -289,11 +289,11 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring cell
      * broadcasts. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can configure cell broadcasts.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -304,11 +304,11 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring mobile
      * networks. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can configure mobile networks.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -328,8 +328,8 @@ public class UserManager {
      * <p>
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -341,8 +341,8 @@ public class UserManager {
      * physical external media. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -354,8 +354,8 @@ public class UserManager {
      * volume. If set, the microphone will be muted. This can only be set by device owners
      * and profile owners on the primary user. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -367,8 +367,8 @@ public class UserManager {
      * volume. If set, the master volume will be muted. This can only be set by device owners
      * and profile owners on the primary user. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -379,11 +379,11 @@ public class UserManager {
      * Specifies that the user is not allowed to make outgoing
      * phone calls. Emergency calls are still permitted.
      * The default value is <code>false</code>.
-     * <p/>This restriction has no effect on managed profiles since call intents are normally
+     * <p>This restriction has no effect on managed profiles since call intents are normally
      * forwarded to the primary user.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -394,8 +394,8 @@ public class UserManager {
      * Specifies that the user is not allowed to send or receive
      * SMS messages. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -407,8 +407,8 @@ public class UserManager {
      * device owner may wish to prevent the user from experiencing amusement or
      * joy while using the device. The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -428,8 +428,8 @@ public class UserManager {
      * <p>This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -442,8 +442,8 @@ public class UserManager {
      * pasted in this profile.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -454,8 +454,8 @@ public class UserManager {
      * Specifies if the user is not allowed to use NFC to beam out data from apps.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -492,8 +492,8 @@ public class UserManager {
      * This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -568,8 +568,8 @@ public class UserManager {
      * define a host can handle intents from the managed profile.
      * The default value is <code>false</code>.
      *
-     * <p/>Key for user restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
@@ -588,8 +588,8 @@ public class UserManager {
      * management application that sets this flag to update it when the final
      * restrictions are enforced.
      *
-     * <p/>Key for application restrictions.
-     * <p/>Type: Boolean
+     * <p>Key for application restrictions.
+     * <p>Type: Boolean
      * @see android.app.admin.DevicePolicyManager#setApplicationRestrictions(
      *      android.content.ComponentName, String, Bundle)
      * @see android.app.admin.DevicePolicyManager#getApplicationRestrictions(
