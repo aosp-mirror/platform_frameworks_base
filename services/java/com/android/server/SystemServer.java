@@ -1051,7 +1051,7 @@ public final class SystemServer {
 
                 traceBeginAndSlog("StartBackgroundDexOptService");
                 try {
-                    BackgroundDexOptService.schedule(context, 0);
+                    BackgroundDexOptService.schedule(context);
                 } catch (Throwable e) {
                     reportWtf("starting BackgroundDexOptService", e);
                 }

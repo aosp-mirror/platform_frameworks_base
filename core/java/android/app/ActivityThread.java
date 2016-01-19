@@ -4723,6 +4723,9 @@ public final class ActivityThread {
     }
 
     private static void setupJitProfileSupport(LoadedApk loadedApk, File cacheDir) {
+        if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
+            return;
+        }
         final ApplicationInfo appInfo = loadedApk.getApplicationInfo();
         if (isSharingRuntime(appInfo)) {
             // If sharing is enabled we do not have a unique application

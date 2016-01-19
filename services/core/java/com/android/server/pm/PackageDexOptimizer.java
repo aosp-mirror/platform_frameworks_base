@@ -23,6 +23,7 @@ import android.content.pm.PackageParser;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.storage.StorageManager;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -68,6 +69,11 @@ final class PackageDexOptimizer {
         mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*dexopt*");
     }
 
+    static boolean canOptimizePackage(PackageParser.Package pkg) {
+        return pkg.canHaveOatDir() &&
+                ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0);
+    }
+
     /**
      * Performs dexopt on all code paths and libraries of the specified package for specified
      * instruction sets.
@@ -76,7 +82,7 @@ final class PackageDexOptimizer {
      * {@link PackageManagerService#mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean inclDependencies) {
+            boolean inclDependencies, String volumeUuid, boolean useProfiles) {
         ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new ArraySet<String>();
@@ -91,7 +97,7 @@ final class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, done);
+                return performDexOptLI(pkg, instructionSets, done, volumeUuid, useProfiles);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -101,7 +107,7 @@ final class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            ArraySet<String> done) {
+            ArraySet<String> done, String volumeUuid, boolean useProfiles) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -115,7 +121,7 @@ final class PackageDexOptimizer {
             }
         }
 
-        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+        if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
 
@@ -124,18 +130,15 @@ final class PackageDexOptimizer {
 
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
-        // There are three basic cases here:
-        // 1.) we need to dexopt, either because we are forced or it is needed
-        // 2.) we are deferring a needed dexopt
-        // 3.) we are skipping an unneeded dexopt
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
+            if (!useProfiles && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
+                // Skip only if we do not use profiles since they might trigger a recompilation.
                 continue;
             }
 
             for (String path : paths) {
-                final int dexoptNeeded;
+                int dexoptNeeded;
                 try {
                     dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
                             dexCodeInstructionSet, /* defer */false);
@@ -144,38 +147,46 @@ final class PackageDexOptimizer {
                     return DEX_OPT_FAILED;
                 }
 
-                if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                    final String dexoptType;
-                    String oatDir = null;
-                    if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
-                        dexoptType = "dex2oat";
-                        oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
-                    } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
-                        dexoptType = "patchoat";
-                    } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
-                        dexoptType = "self patchoat";
+                if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
+                    if (useProfiles) {
+                        // If we do a profile guided compilation then we might recompile the same
+                        // package if more profile information is available.
+                        dexoptNeeded = DexFile.DEX2OAT_NEEDED;
                     } else {
-                        throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
+                        // No dexopt needed and we don't use profiles. Nothing to do.
+                        continue;
                     }
+                }
+                final String dexoptType;
+                String oatDir = null;
+                if (dexoptNeeded == DexFile.DEX2OAT_NEEDED) {
+                    dexoptType = "dex2oat";
+                    oatDir = createOatDirIfSupported(pkg, dexCodeInstructionSet);
+                } else if (dexoptNeeded == DexFile.PATCHOAT_NEEDED) {
+                    dexoptType = "patchoat";
+                } else if (dexoptNeeded == DexFile.SELF_PATCHOAT_NEEDED) {
+                    dexoptType = "self patchoat";
+                } else {
+                    throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
+                }
 
-                    Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
-                            + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                            + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                            + " oatDir = " + oatDir);
-                    final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                    final int dexFlags =
-                            (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
-                            | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
-                            | (debuggable ? DEXOPT_DEBUGGABLE : 0)
-                            | DEXOPT_BOOTCOMPLETE;
-                    try {
-                        mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                                pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir,
-                                dexFlags);
-                        performedDexOpt = true;
-                    } catch (InstallerException e) {
-                        Slog.w(TAG, "Failed to dexopt", e);
-                    }
+                Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
+                        + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
+                        + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
+                        + " oatDir = " + oatDir);
+                final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                final int dexFlags =
+                        (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
+                        | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
+                        | (debuggable ? DEXOPT_DEBUGGABLE : 0)
+                        | DEXOPT_BOOTCOMPLETE;
+                try {
+                    mPackageManagerService.mInstaller.dexopt(path, sharedGid,
+                            pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir,
+                            dexFlags, volumeUuid, useProfiles);
+                    performedDexOpt = true;
+                } catch (InstallerException e) {
+                    Slog.w(TAG, "Failed to dexopt", e);
                 }
             }
 
@@ -235,7 +246,10 @@ final class PackageDexOptimizer {
             PackageParser.Package libPkg = mPackageManagerService.findSharedNonSystemLibrary(
                     libName);
             if (libPkg != null && !done.contains(libName)) {
-                performDexOptLI(libPkg, instructionSets, done);
+                // TODO: Analyze and investigate if we (should) profile libraries.
+                // Currently this will do a full compilation of the library.
+                performDexOptLI(libPkg, instructionSets, done,
+                        StorageManager.UUID_PRIVATE_INTERNAL, /*useProfiles*/ false);
             }
         }
     }

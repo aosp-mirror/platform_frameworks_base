@@ -24,6 +24,7 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -50,12 +51,13 @@ public class BackgroundDexOptService extends JobService {
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
 
-    public static void schedule(Context context, long minLatency) {
+    private boolean useJitProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+
+    public static void schedule(Context context) {
         JobScheduler js = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo job = new JobInfo.Builder(BACKGROUND_DEXOPT_JOB, sDexoptServiceName)
                 .setRequiresDeviceIdle(true)
                 .setRequiresCharging(true)
-                .setMinimumLatency(minLatency)
                 .setPeriodic(TimeUnit.DAYS.toMillis(1))
                 .build();
         js.schedule(job);
@@ -63,16 +65,17 @@ public class BackgroundDexOptService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        Log.i(TAG, "onIdleStart");
+        Log.i(TAG, "onStartJob");
         final PackageManagerService pm =
                 (PackageManagerService)ServiceManager.getService("package");
 
         if (pm.isStorageLow()) {
-            schedule(BackgroundDexOptService.this, RETRY_LATENCY);
+            Log.i(TAG, "Low storage, skipping this run");
             return false;
         }
-        final ArraySet<String> pkgs = pm.getPackagesThatNeedDexOpt();
-        if (pkgs == null) {
+        final ArraySet<String> pkgs = pm.getOptimizablePackages();
+        if (pkgs == null || pkgs.isEmpty()) {
+            Log.i(TAG, "No packages to optimize");
             return false;
         }
 
@@ -83,15 +86,14 @@ public class BackgroundDexOptService extends JobService {
             public void run() {
                 for (String pkg : pkgs) {
                     if (!mIdleTime.get()) {
-                        // stopped while still working, so we need to reschedule
-                        schedule(BackgroundDexOptService.this, 0);
+                        // Out of the idle state. Stop the compilation.
                         return;
                     }
                     if (sFailedPackageNames.contains(pkg)) {
                         // skip previously failing package
                         continue;
                     }
-                    if (!pm.performDexOpt(pkg, null /* instruction set */)) {
+                    if (!pm.performDexOpt(pkg, /* instruction set */ null, useJitProfiles)) {
                         // there was a problem running dexopt,
                         // remember this so we do not keep retrying.
                         sFailedPackageNames.add(pkg);

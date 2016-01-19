@@ -2093,8 +2093,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         try {
                             int dexoptNeeded = DexFile.getDexOptNeeded(lib, null, dexCodeInstructionSet, false);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
+                                // Shared libraries do not have profiles so we perform a full
+                                // AOT compilation.
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
-                                        dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/);
+                                        dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
+                                        StorageManager.UUID_PRIVATE_INTERNAL,
+                                        false /*useProfiles*/);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -6647,25 +6651,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    // TODO: this is not used nor needed. Delete it.
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet);
+        return performDexOptTraced(packageName, instructionSet, false);
     }
 
-    public boolean performDexOpt(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet);
+    public boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles) {
+        return performDexOptTraced(packageName, instructionSet, useProfiles);
     }
 
-    private boolean performDexOptTraced(String packageName, String instructionSet) {
+    private boolean performDexOptTraced(String packageName, String instructionSet,
+                boolean useProfiles) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet);
+            return performDexOptInternal(packageName, instructionSet, useProfiles);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
-    private boolean performDexOptInternal(String packageName, String instructionSet) {
+    private boolean performDexOptInternal(String packageName, String instructionSet,
+                boolean useProfiles) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
@@ -6677,7 +6684,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             targetInstructionSet = instructionSet != null ? instructionSet :
                     getPrimaryInstructionSet(p.applicationInfo);
-            if (p.mDexOptPerformed.contains(targetInstructionSet)) {
+            if (!useProfiles && p.mDexOptPerformed.contains(targetInstructionSet)) {
+                // Skip only if we do not use profiles since they might trigger a recompilation.
                 return false;
             }
         }
@@ -6686,7 +6694,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        true /* inclDependencies */);
+                        true /* inclDependencies */, p.volumeUuid, useProfiles);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6694,20 +6702,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    public ArraySet<String> getPackagesThatNeedDexOpt() {
-        ArraySet<String> pkgs = null;
+    public ArraySet<String> getOptimizablePackages() {
+        ArraySet<String> pkgs = new ArraySet<String>();
         synchronized (mPackages) {
             for (PackageParser.Package p : mPackages.values()) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, p.packageName + " mDexOptPerformed=" + p.mDexOptPerformed.toArray());
+                if (PackageDexOptimizer.canOptimizePackage(p)) {
+                    pkgs.add(p.packageName);
                 }
-                if (!p.mDexOptPerformed.isEmpty()) {
-                    continue;
-                }
-                if (pkgs == null) {
-                    pkgs = new ArraySet<String>();
-                }
-                pkgs.add(p.packageName);
             }
         }
         return pkgs;
@@ -6735,8 +6736,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
+            // Whoever is calling forceDexOpt wants a fully compiled package.
+            // Don't use profiles since that may cause compilation to be skipped.
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /* inclDependencies */);
+                    true /* inclDependencies */, pkg.volumeUuid, false /* useProfiles */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
