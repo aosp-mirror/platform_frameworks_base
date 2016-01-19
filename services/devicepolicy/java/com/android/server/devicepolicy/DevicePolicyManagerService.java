@@ -196,6 +196,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
+    private static final String ATTR_PROVISIONING_STATE = "provisioning-state";
     private static final String ATTR_PERMISSION_POLICY = "permission-policy";
 
     private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
@@ -358,6 +359,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int mPasswordOwner = -1;
         long mLastMaximumTimeToLock = -1;
         boolean mUserSetupComplete = false;
+        int mUserProvisioningState;
         int mPermissionPolicy;
 
         final ArrayMap<ComponentName, ActiveAdmin> mAdminMap = new ArrayMap<>();
@@ -2008,6 +2010,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
+            if (policy.mUserProvisioningState != DevicePolicyManager.STATE_USER_UNMANAGED) {
+                out.attribute(null, ATTR_PROVISIONING_STATE,
+                        Integer.toString(policy.mUserProvisioningState));
+            }
             if (policy.mPermissionPolicy != DevicePolicyManager.PERMISSION_POLICY_PROMPT) {
                 out.attribute(null, ATTR_PERMISSION_POLICY,
                         Integer.toString(policy.mPermissionPolicy));
@@ -2144,6 +2150,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String userSetupComplete = parser.getAttributeValue(null, ATTR_SETUP_COMPLETE);
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
+            }
+            String provisioningState = parser.getAttributeValue(null, ATTR_PROVISIONING_STATE);
+            if (!TextUtils.isEmpty(provisioningState)) {
+                policy.mUserProvisioningState = Integer.parseInt(provisioningState);
             }
             String permissionPolicy = parser.getAttributeValue(null, ATTR_PERMISSION_POLICY);
             if (!TextUtils.isEmpty(permissionPolicy)) {
@@ -5352,6 +5362,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mDelegatedCertInstallerPackage = null;
         policy.mApplicationRestrictionsManagingPackage = null;
         policy.mStatusBarDisabled = false;
+        policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         saveSettingsLocked(userId);
 
         final long ident = mInjector.binderClearCallingIdentity();
@@ -5376,6 +5387,98 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return true;
         }
         return getUserData(userHandle).mUserSetupComplete;
+    }
+
+    @Override
+    public int getUserProvisioningState() {
+        if (!mHasFeature) {
+            return DevicePolicyManager.STATE_USER_UNMANAGED;
+        }
+        int userHandle = mInjector.userHandleGetCallingUserId();
+        return getUserProvisioningState(userHandle);
+    }
+
+    private int getUserProvisioningState(int userHandle) {
+        return getUserData(userHandle).mUserProvisioningState;
+    }
+
+    @Override
+    public void setUserProvisioningState(int newState, int userHandle) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        if (userHandle != mOwners.getDeviceOwnerUserId() && !mOwners.hasProfileOwner(userHandle)
+                && getManagedUserId(userHandle) == -1) {
+            // No managed device, user or profile, so setting provisioning state makes no sense.
+            throw new IllegalStateException("Not allowed to change provisioning state unless a "
+                      + "device or profile owner is set.");
+        }
+
+        synchronized (this) {
+            boolean transitionCheckNeeded = true;
+
+            // Calling identity/permission checks.
+            final int callingUid = mInjector.binderGetCallingUid();
+            if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+                // ADB shell can only move directly from un-managed to finalized as part of directly
+                // setting profile-owner or device-owner.
+                if (getUserProvisioningState(userHandle) !=
+                        DevicePolicyManager.STATE_USER_UNMANAGED
+                        || newState != DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
+                    throw new IllegalStateException("Not allowed to change provisioning state "
+                            + "unless current provisioning state is unmanaged, and new state is "
+                            + "finalized.");
+                }
+                transitionCheckNeeded = false;
+            } else {
+                // For all other cases, caller must have MANAGE_PROFILE_AND_DEVICE_OWNERS.
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+            }
+
+            final DevicePolicyData policyData = getUserData(userHandle);
+            if (transitionCheckNeeded) {
+                // Optional state transition check for non-ADB case.
+                checkUserProvisioningStateTransition(policyData.mUserProvisioningState, newState);
+            }
+            policyData.mUserProvisioningState = newState;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    private void checkUserProvisioningStateTransition(int currentState, int newState) {
+        // Valid transitions for normal use-cases.
+        switch (currentState) {
+            case DevicePolicyManager.STATE_USER_UNMANAGED:
+                // Can move to any state from unmanaged (except itself as an edge case)..
+                if (newState != DevicePolicyManager.STATE_USER_UNMANAGED) {
+                    return;
+                }
+                break;
+            case DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE:
+            case DevicePolicyManager.STATE_USER_SETUP_COMPLETE:
+                // Can only move to finalized from these states.
+                if (newState == DevicePolicyManager.STATE_USER_SETUP_FINALIZED) {
+                    return;
+                }
+                break;
+            case DevicePolicyManager.STATE_USER_PROFILE_COMPLETE:
+                // Current user has a managed-profile, but current user is not managed, so
+                // rather than moving to finalized state, go back to unmanaged once
+                // profile provisioning is complete.
+                if (newState == DevicePolicyManager.STATE_USER_UNMANAGED) {
+                    return;
+                }
+                break;
+            case DevicePolicyManager.STATE_USER_SETUP_FINALIZED:
+                // Cannot transition out of finalized.
+                break;
+        }
+
+        // Didn't meet any of the accepted state transition checks above, throw appropriate error.
+        throw new IllegalStateException("Cannot move to user provisioning state [" + newState + "] "
+                + "from state [" + currentState + "]");
     }
 
     @Override
@@ -5697,7 +5800,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             for (int u = 0; u < userCount; u++) {
                 DevicePolicyData policy = getUserData(mUserData.keyAt(u));
                 pw.println();
-                pw.println("  Enabled Device Admins (User " + policy.mUserHandle + "):");
+                pw.println("  Enabled Device Admins (User " + policy.mUserHandle
+                        + ", provisioningState: " + policy.mUserProvisioningState + "):");
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin ap = policy.mAdminList.get(i);

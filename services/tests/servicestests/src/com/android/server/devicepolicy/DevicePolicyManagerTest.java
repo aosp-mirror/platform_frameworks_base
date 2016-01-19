@@ -15,9 +15,6 @@
  */
 package com.android.server.devicepolicy;
 
-import com.android.server.LocalServices;
-import com.android.server.SystemService;
-
 import android.Manifest.permission;
 import android.app.Activity;
 import android.app.admin.DeviceAdminReceiver;
@@ -27,7 +24,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
-import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Process;
@@ -37,11 +33,16 @@ import android.test.MoreAsserts;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,13 +65,17 @@ import static org.mockito.Mockito.when;
  *
  m FrameworksServicesTests &&
  adb install \
-   -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
+   -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.devicepolicy.DevicePolicyManagerTest \
    -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
 public class DevicePolicyManagerTest extends DpmTestBase {
+    private static final List<String> OWNER_SETUP_PERMISSIONS = Arrays.asList(
+            permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
+            permission.MANAGE_USERS, permission.INTERACT_ACROSS_USERS_FULL);
+
     private DpmMockContext mContext;
     public DevicePolicyManager dpm;
     public DevicePolicyManagerServiceTestable dpms;
@@ -1542,5 +1547,157 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Check that the system user remains affiliated.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         assertTrue(dpm.isAffiliatedUser());
+    }
+
+    public void testGetUserProvisioningState_defaultResult() {
+        assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
+    }
+
+    public void testSetUserProvisioningState_permission() throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_unprivileged() throws Exception {
+        setupProfileOwner();
+        try {
+            dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                    DpmMockContext.CALLER_USER_HANDLE);
+            fail("Expected SecurityException");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    public void testSetUserProvisioningState_noManagement() {
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        try {
+            dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                    DpmMockContext.CALLER_USER_HANDLE);
+            fail("IllegalStateException expected");
+        } catch (IllegalStateException e) {
+            MoreAsserts.assertContainsRegex("change provisioning state unless a .* owner is set",
+                    e.getMessage());
+        }
+        assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
+    }
+
+    public void testSetUserProvisioningState_deviceOwnerFromSetupWizard() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
+                DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_deviceOwnerFromSetupWizardAlternative()
+            throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
+                DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_deviceOwnerWithoutSetupWizard() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_managedProfileFromSetupWizard_primaryUser()
+            throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_PROFILE_COMPLETE,
+                DevicePolicyManager.STATE_USER_UNMANAGED);
+    }
+
+    public void testSetUserProvisioningState_managedProfileFromSetupWizard_managedProfile()
+            throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_managedProfileWithoutSetupWizard() throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
+    }
+
+    public void testSetUserProvisioningState_illegalTransitionOutOfFinalized1() throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        try {
+            exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                    DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
+                    DevicePolicyManager.STATE_USER_UNMANAGED);
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException e) {
+            MoreAsserts.assertContainsRegex("Cannot move to user provisioning state",
+                    e.getMessage());
+        }
+    }
+
+    public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
+            throws Exception {
+        setupProfileOwner();
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+
+        try {
+            exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
+                    DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
+                    DevicePolicyManager.STATE_USER_SETUP_COMPLETE);
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException e) {
+            MoreAsserts.assertContainsRegex("Cannot move to user provisioning state",
+                    e.getMessage());
+        }
+    }
+
+    private void exerciseUserProvisioningTransitions(int userId, int... states) {
+        assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
+        for (int state : states) {
+            dpm.setUserProvisioningState(state, userId);
+            assertEquals(state, dpm.getUserProvisioningState());
+        }
+    }
+
+    private void setupProfileOwner() throws Exception {
+        mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
+
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
+        dpm.setActiveAdmin(admin1, false);
+        assertTrue(dpm.setProfileOwner(admin1, null, DpmMockContext.CALLER_USER_HANDLE));
+
+        mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
+    }
+
+    private void setupDeviceOwner() throws Exception {
+        mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
+
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin1, false);
+        assertTrue(dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM));
+
+        mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
     }
 }
