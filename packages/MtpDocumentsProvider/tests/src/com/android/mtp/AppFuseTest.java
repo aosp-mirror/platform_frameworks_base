@@ -28,13 +28,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
-/**
- * TODO: Enable this test after adding SELinux policies for appfuse.
- */
 @MediumTest
 public class AppFuseTest extends AndroidTestCase {
-
-    public void disabled_testMount() throws ErrnoException, InterruptedException {
+    public void testMount() throws ErrnoException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final AppFuse appFuse = new AppFuse("test", new TestCallback());
         appFuse.mount(storageManager);
@@ -45,7 +41,7 @@ public class AppFuseTest extends AndroidTestCase {
         assertTrue(1 != Os.stat(file.getPath()).st_ino);
     }
 
-    public void disabled_testOpenFile() throws IOException {
+    public void testOpenFile() throws IOException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final int INODE = 10;
         final AppFuse appFuse = new AppFuse(
@@ -65,7 +61,7 @@ public class AppFuseTest extends AndroidTestCase {
         appFuse.close();
     }
 
-    public void disabled_testOpenFile_error() {
+    public void testOpenFile_error() {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final int INODE = 10;
         final AppFuse appFuse = new AppFuse("test", new TestCallback());
@@ -79,7 +75,7 @@ public class AppFuseTest extends AndroidTestCase {
         appFuse.close();
     }
 
-    public void disabled_testReadFile() throws IOException {
+    public void testReadFile() throws IOException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final int INODE = 10;
         final byte[] BYTES = new byte[] { 'a', 'b', 'c', 'd', 'e' };

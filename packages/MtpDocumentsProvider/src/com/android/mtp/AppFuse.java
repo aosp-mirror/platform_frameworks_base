@@ -21,25 +21,27 @@ import android.os.Process;
 import android.os.storage.StorageManager;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.mtp.annotations.UsedByNative;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/**
- * TODO: Remove VisibleForTesting class.
- */
-@VisibleForTesting
 public class AppFuse {
     static {
         System.loadLibrary("appfuse_jni");
     }
+
+    /**
+     * Max read amount specified at the FUSE kernel implementation.
+     * The value is copied from sdcard.c.
+     */
+    static final int MAX_READ = 128 * 1024;
 
     private final String mName;
     private final Callback mCallback;
     private final Thread mMessageThread;
     private ParcelFileDescriptor mDeviceFd;
 
-    @VisibleForTesting
     AppFuse(String name, Callback callback) {
         mName = name;
         mCallback = callback;
@@ -51,7 +53,6 @@ public class AppFuse {
         });
     }
 
-    @VisibleForTesting
     void mount(StorageManager storageManager) {
         mDeviceFd = storageManager.mountAppFuse(mName);
         mMessageThread.start();
@@ -72,11 +73,6 @@ public class AppFuse {
         }
     }
 
-    /**
-     * @param i
-     * @throws FileNotFoundException
-     */
-    @VisibleForTesting
     public ParcelFileDescriptor openFile(int i) throws FileNotFoundException {
         return ParcelFileDescriptor.open(new File(
                 getMountPoint(),
@@ -94,7 +90,7 @@ public class AppFuse {
         byte[] getObjectBytes(int inode, long offset, int size) throws IOException;
     }
 
-    @VisibleForTesting
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
     private long getFileSize(int inode) {
         try {
             return mCallback.getFileSize(inode);
@@ -103,8 +99,11 @@ public class AppFuse {
         }
     }
 
-    @VisibleForTesting
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
     private byte[] getObjectBytes(int inode, long offset, int size) {
+        if (offset < 0 || size < 0 || size > MAX_READ) {
+            return null;
+        }
         try {
             return mCallback.getObjectBytes(inode, offset, size);
         } catch (IOException e) {

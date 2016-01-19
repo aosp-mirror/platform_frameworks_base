@@ -16,6 +16,8 @@
 
 package com.android.mtp;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -26,6 +28,7 @@ import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsContract;
@@ -34,6 +37,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -68,6 +72,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private RootScanner mRootScanner;
     private Resources mResources;
     private MtpDatabase mDatabase;
+    private AppFuse mAppFuse;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -85,6 +90,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        mAppFuse = new AppFuse(TAG, new AppFuseCallback());
+        // TODO: Mount AppFuse on demands.
+        mAppFuse.mount(getContext().getSystemService(StorageManager.class));
         resume();
         return true;
     }
@@ -147,16 +155,27 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             switch (mode) {
                 case "r":
-                    return getPipeManager(identifier).readDocument(mMtpManager, identifier);
+                    final long fileSize = getFileSize(documentId);
+                    // MTP getPartialObject operation does not support files that are larger than 4GB.
+                    // Fallback to non-seekable file descriptor.
+                    // TODO: Use getPartialObject64 for MTP devices that support Android vendor
+                    // extension.
+                    if (fileSize <= 0xffffffff) {
+                        return mAppFuse.openFile(Integer.parseInt(documentId));
+                    } else {
+                        return getPipeManager(identifier).readDocument(mMtpManager, identifier);
+                    }
                 case "w":
                     // TODO: Clear the parent document loader task (if exists) and call notify
                     // when writing is completed.
                     return getPipeManager(identifier).writeDocument(
                             getContext(), mMtpManager, identifier);
-                default:
-                    // TODO: Add support for seekable files.
+                case "rw":
+                    // TODO: Add support for "rw" mode.
                     throw new UnsupportedOperationException(
-                            "The provider does not support seekable file.");
+                            "The provider does not support 'rw' mode.");
+                default:
+                    throw new IllegalArgumentException("Unknown mode for openDocument: " + mode);
             }
         } catch (IOException error) {
             throw new FileNotFoundException(error.getMessage());
@@ -330,6 +349,21 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         return getDeviceToolkit(identifier.mDeviceId).mDocumentLoader;
     }
 
+    private long getFileSize(String documentId) throws FileNotFoundException {
+        final Cursor cursor = mDatabase.queryDocument(
+                documentId,
+                MtpDatabase.strings(Document.COLUMN_SIZE, Document.COLUMN_DISPLAY_NAME));
+        try {
+            if (cursor.moveToNext()) {
+                return cursor.getLong(0);
+            } else {
+                throw new FileNotFoundException();
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
     private static class DeviceToolkit {
         public final PipeManager mPipeManager;
         public final DocumentLoader mDocumentLoader;
@@ -337,6 +371,23 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public DeviceToolkit(MtpManager manager, ContentResolver resolver, MtpDatabase database) {
             mPipeManager = new PipeManager();
             mDocumentLoader = new DocumentLoader(manager, resolver, database);
+        }
+    }
+
+    private class AppFuseCallback implements AppFuse.Callback {
+        final byte[] mBytes = new byte[AppFuse.MAX_READ];
+
+        @Override
+        public byte[] getObjectBytes(int inode, long offset, int size) throws IOException {
+            final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
+            mMtpManager.getPartialObject(
+                    identifier.mDeviceId, identifier.mObjectHandle, (int) offset, size, mBytes);
+            return mBytes;
+        }
+
+        @Override
+        public long getFileSize(int inode) throws FileNotFoundException {
+            return MtpDocumentsProvider.this.getFileSize(String.valueOf(inode));
         }
     }
 }
