@@ -743,6 +743,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.control.availableModes", int[].class);
 
     /**
+     * <p>Range of boosts for {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} supported
+     * by this camera device.</p>
+     * <p>Devices support post RAW sensitivity boost  will advertise
+     * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} key for controling
+     * post RAW sensitivity boost.</p>
+     * <p>This key will be <code>null</code> for devices that do not support any RAW format
+     * outputs. For devices that do support RAW format outputs, this key will always
+     * present, and if a device does not support post RAW sensitivity boost, it will
+     * list <code>(100, 100)</code> in this key.</p>
+     * <p><b>Units</b>: ISO arithmetic units, the same as {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     */
+    @PublicKey
+    public static final Key<android.util.Range<Integer>> CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE =
+            new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support

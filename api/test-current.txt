@@ -13454,6 +13454,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AF;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AWB;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Integer>> CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> DEPTH_DEPTH_IS_EXCLUSIVE;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> EDGE_AVAILABLE_EDGE_MODES;
     field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> FLASH_INFO_AVAILABLE;
@@ -13813,6 +13814,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_CAPTURE_INTENT;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_EFFECT_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_SCENE_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
     field public static final android.os.Parcelable.Creator<android.hardware.camera2.CaptureRequest> CREATOR;
@@ -13891,6 +13893,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_CAPTURE_INTENT;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_EFFECT_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_POST_RAW_SENSITIVITY_BOOST;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_SCENE_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> EDGE_MODE;
