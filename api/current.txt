@@ -58047,8 +58047,11 @@ package java.util {
     method public static boolean equals(java.lang.Object, java.lang.Object);
     method public static int hash(java.lang.Object...);
     method public static int hashCode(java.lang.Object);
+    method public static boolean isNull(java.lang.Object);
+    method public static boolean nonNull(java.lang.Object);
     method public static T requireNonNull(T);
     method public static T requireNonNull(T, java.lang.String);
+    method public static T requireNonNull(T, java.util.function.Supplier<java.lang.String>);
     method public static java.lang.String toString(java.lang.Object);
     method public static java.lang.String toString(java.lang.Object, java.lang.String);
   }
@@ -59751,6 +59754,217 @@ package java.util.concurrent.locks {
     method public boolean tryLock();
     method public boolean tryLock(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
     method public void unlock();
+  }
+
+}
+
+package java.util.function {
+
+  public abstract interface BiConsumer {
+    method public abstract void accept(T, U);
+    method public default java.util.function.BiConsumer<T, U> andThen(java.util.function.BiConsumer<? super T, ? super U>);
+  }
+
+  public abstract interface BiFunction {
+    method public default java.util.function.BiFunction<T, U, V> andThen(java.util.function.Function<? super R, ? extends V>);
+    method public abstract R apply(T, U);
+  }
+
+  public abstract interface BiPredicate {
+    method public default java.util.function.BiPredicate<T, U> and(java.util.function.BiPredicate<? super T, ? super U>);
+    method public default java.util.function.BiPredicate<T, U> negate();
+    method public default java.util.function.BiPredicate<T, U> or(java.util.function.BiPredicate<? super T, ? super U>);
+    method public abstract boolean test(T, U);
+  }
+
+  public abstract interface BinaryOperator implements java.util.function.BiFunction {
+    method public static java.util.function.BinaryOperator<T> maxBy(java.util.Comparator<? super T>);
+    method public static java.util.function.BinaryOperator<T> minBy(java.util.Comparator<? super T>);
+  }
+
+  public abstract interface BooleanSupplier {
+    method public abstract boolean getAsBoolean();
+  }
+
+  public abstract interface Consumer {
+    method public abstract void accept(T);
+    method public default java.util.function.Consumer<T> andThen(java.util.function.Consumer<? super T>);
+  }
+
+  public abstract interface DoubleBinaryOperator {
+    method public abstract double applyAsDouble(double, double);
+  }
+
+  public abstract interface DoubleConsumer {
+    method public abstract void accept(double);
+    method public default java.util.function.DoubleConsumer andThen(java.util.function.DoubleConsumer);
+  }
+
+  public abstract interface DoubleFunction {
+    method public abstract R apply(double);
+  }
+
+  public abstract interface DoublePredicate {
+    method public default java.util.function.DoublePredicate and(java.util.function.DoublePredicate);
+    method public default java.util.function.DoublePredicate negate();
+    method public default java.util.function.DoublePredicate or(java.util.function.DoublePredicate);
+    method public abstract boolean test(double);
+  }
+
+  public abstract interface DoubleSupplier {
+    method public abstract double getAsDouble();
+  }
+
+  public abstract interface DoubleToIntFunction {
+    method public abstract int applyAsInt(double);
+  }
+
+  public abstract interface DoubleToLongFunction {
+    method public abstract long applyAsLong(double);
+  }
+
+  public abstract interface DoubleUnaryOperator {
+    method public default java.util.function.DoubleUnaryOperator andThen(java.util.function.DoubleUnaryOperator);
+    method public abstract double applyAsDouble(double);
+    method public default java.util.function.DoubleUnaryOperator compose(java.util.function.DoubleUnaryOperator);
+    method public static java.util.function.DoubleUnaryOperator identity();
+  }
+
+  public abstract interface Function {
+    method public default java.util.function.Function<T, V> andThen(java.util.function.Function<? super R, ? extends V>);
+    method public abstract R apply(T);
+    method public default java.util.function.Function<V, R> compose(java.util.function.Function<? super V, ? extends T>);
+    method public static java.util.function.Function<T, T> identity();
+  }
+
+  public abstract interface IntBinaryOperator {
+    method public abstract int applyAsInt(int, int);
+  }
+
+  public abstract interface IntConsumer {
+    method public abstract void accept(int);
+    method public default java.util.function.IntConsumer andThen(java.util.function.IntConsumer);
+  }
+
+  public abstract interface IntFunction {
+    method public abstract R apply(int);
+  }
+
+  public abstract interface IntPredicate {
+    method public default java.util.function.IntPredicate and(java.util.function.IntPredicate);
+    method public default java.util.function.IntPredicate negate();
+    method public default java.util.function.IntPredicate or(java.util.function.IntPredicate);
+    method public abstract boolean test(int);
+  }
+
+  public abstract interface IntSupplier {
+    method public abstract int getAsInt();
+  }
+
+  public abstract interface IntToDoubleFunction {
+    method public abstract double applyAsDouble(int);
+  }
+
+  public abstract interface IntToLongFunction {
+    method public abstract long applyAsLong(int);
+  }
+
+  public abstract interface IntUnaryOperator {
+    method public default java.util.function.IntUnaryOperator andThen(java.util.function.IntUnaryOperator);
+    method public abstract int applyAsInt(int);
+    method public default java.util.function.IntUnaryOperator compose(java.util.function.IntUnaryOperator);
+    method public static java.util.function.IntUnaryOperator identity();
+  }
+
+  public abstract interface LongBinaryOperator {
+    method public abstract long applyAsLong(long, long);
+  }
+
+  public abstract interface LongConsumer {
+    method public abstract void accept(long);
+    method public default java.util.function.LongConsumer andThen(java.util.function.LongConsumer);
+  }
+
+  public abstract interface LongFunction {
+    method public abstract R apply(long);
+  }
+
+  public abstract interface LongPredicate {
+    method public default java.util.function.LongPredicate and(java.util.function.LongPredicate);
+    method public default java.util.function.LongPredicate negate();
+    method public default java.util.function.LongPredicate or(java.util.function.LongPredicate);
+    method public abstract boolean test(long);
+  }
+
+  public abstract interface LongSupplier {
+    method public abstract long getAsLong();
+  }
+
+  public abstract interface LongToDoubleFunction {
+    method public abstract double applyAsDouble(long);
+  }
+
+  public abstract interface LongToIntFunction {
+    method public abstract int applyAsInt(long);
+  }
+
+  public abstract interface LongUnaryOperator {
+    method public default java.util.function.LongUnaryOperator andThen(java.util.function.LongUnaryOperator);
+    method public abstract long applyAsLong(long);
+    method public default java.util.function.LongUnaryOperator compose(java.util.function.LongUnaryOperator);
+    method public static java.util.function.LongUnaryOperator identity();
+  }
+
+  public abstract interface ObjDoubleConsumer {
+    method public abstract void accept(T, double);
+  }
+
+  public abstract interface ObjIntConsumer {
+    method public abstract void accept(T, int);
+  }
+
+  public abstract interface ObjLongConsumer {
+    method public abstract void accept(T, long);
+  }
+
+  public abstract interface Predicate {
+    method public default java.util.function.Predicate<T> and(java.util.function.Predicate<? super T>);
+    method public static java.util.function.Predicate<T> isEqual(java.lang.Object);
+    method public default java.util.function.Predicate<T> negate();
+    method public default java.util.function.Predicate<T> or(java.util.function.Predicate<? super T>);
+    method public abstract boolean test(T);
+  }
+
+  public abstract interface Supplier {
+    method public abstract T get();
+  }
+
+  public abstract interface ToDoubleBiFunction {
+    method public abstract double applyAsDouble(T, U);
+  }
+
+  public abstract interface ToDoubleFunction {
+    method public abstract double applyAsDouble(T);
+  }
+
+  public abstract interface ToIntBiFunction {
+    method public abstract int applyAsInt(T, U);
+  }
+
+  public abstract interface ToIntFunction {
+    method public abstract int applyAsInt(T);
+  }
+
+  public abstract interface ToLongBiFunction {
+    method public abstract long applyAsLong(T, U);
+  }
+
+  public abstract interface ToLongFunction {
+    method public abstract long applyAsLong(T);
+  }
+
+  public abstract interface UnaryOperator implements java.util.function.Function {
+    method public static java.util.function.UnaryOperator<T> identity();
   }
 
 }
