@@ -1034,7 +1034,8 @@ class ActivityStarter {
     }
 
     private void launchRecentsAppIfNeeded(ActivityStack topStack) {
-        if (topStack.mStackId == HOME_STACK_ID && mTargetStack.mStackId == DOCKED_STACK_ID) {
+        if (topStack.mStackId == HOME_STACK_ID && mTargetStack != null
+                && mTargetStack.mStackId == DOCKED_STACK_ID) {
             // We launch an activity while being in home stack, which means either launcher or
             // recents into docked stack. We don't want the launched activity to be alone in a
             // docked stack, so we want to immediately launch recents too.
