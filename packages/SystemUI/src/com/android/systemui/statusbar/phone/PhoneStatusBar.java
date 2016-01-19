@@ -94,6 +94,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -131,7 +132,6 @@ import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -744,9 +744,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
 
-        SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_speed_bump, mStackScroller, false);
-        mStackScroller.setSpeedBumpView(speedBump);
+
         mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, mStackScroller, false);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);

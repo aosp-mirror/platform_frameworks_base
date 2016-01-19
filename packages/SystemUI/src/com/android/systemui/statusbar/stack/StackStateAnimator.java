@@ -28,7 +28,6 @@ import android.view.animation.Interpolator;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
@@ -251,10 +250,7 @@ public class StackStateAnimator {
         if (wasAdded) {
             child.performAddAnimation(delay, mCurrentLength);
         }
-        if (child instanceof SpeedBumpView) {
-            finalState.performSpeedBumpAnimation(i, (SpeedBumpView) child, viewState,
-                    delay + duration);
-        } else if (child instanceof ExpandableNotificationRow) {
+        if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             row.startChildAnimation(finalState, this, delay, duration);
         }

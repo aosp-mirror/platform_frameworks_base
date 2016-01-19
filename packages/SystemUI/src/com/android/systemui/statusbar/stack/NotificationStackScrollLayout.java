@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
-import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -160,7 +159,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mGoToFullShadeNeedsAnimation;
     private boolean mIsExpanded = true;
     private boolean mChildrenUpdateRequested;
-    private SpeedBumpView mSpeedBumpView;
     private boolean mIsExpansionChanging;
     private boolean mPanelTracking;
     private boolean mExpandingNotification;
@@ -356,18 +354,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void updateSpeedBumpIndex(int newIndex) {
-        int currentIndex = indexOfChild(mSpeedBumpView);
-
-        // If we are currently layouted before the new speed bump index, we have to decrease it.
-        boolean validIndex = newIndex > 0;
-        if (newIndex > getChildCount() - 1) {
-            validIndex = false;
-            newIndex = -1;
-        }
-        if (validIndex && currentIndex != newIndex) {
-            changeViewPosition(mSpeedBumpView, newIndex);
-        }
-        updateSpeedBump(validIndex);
         mAmbientState.setSpeedBumpIndex(newIndex);
     }
 
@@ -664,8 +650,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
             if (slidingChild.getVisibility() == GONE
-                    || slidingChild instanceof StackScrollerDecorView
-                    || slidingChild == mSpeedBumpView) {
+                    || slidingChild instanceof StackScrollerDecorView) {
                 continue;
             }
             float childTop = slidingChild.getTranslationY();
@@ -692,8 +677,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
             if (slidingChild.getVisibility() == GONE
-                    || slidingChild instanceof StackScrollerDecorView
-                    || slidingChild == mSpeedBumpView) {
+                    || slidingChild instanceof StackScrollerDecorView) {
                 continue;
             }
             float childTop = slidingChild.getTranslationY();
@@ -2440,28 +2424,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         runAnimationFinishedRunnables();
     }
 
-    public void setSpeedBumpView(SpeedBumpView speedBumpView) {
-        mSpeedBumpView = speedBumpView;
-        addView(speedBumpView);
-    }
-
-    private void updateSpeedBump(boolean visible) {
-        boolean notGoneBefore = mSpeedBumpView.getVisibility() != GONE;
-        if (visible != notGoneBefore) {
-            int newVisibility = visible ? VISIBLE : GONE;
-            mSpeedBumpView.setVisibility(newVisibility);
-            if (visible) {
-                // Make invisible to ensure that the appear animation is played.
-                mSpeedBumpView.setInvisible();
-            } else {
-                // TODO: This doesn't really work, because the view is already set to GONE above.
-                generateRemoveAnimation(mSpeedBumpView);
-            }
-        }
-    }
-
     public void goToFullShade(long delay) {
-        updateSpeedBump(true /* visibility */);
         mDismissView.setInvisible();
         mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;

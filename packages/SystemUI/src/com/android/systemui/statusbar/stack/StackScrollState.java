@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.SpeedBumpView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -107,9 +106,7 @@ public class StackScrollState {
             if (!applyState(child, state)) {
                 continue;
             }
-            if(child instanceof SpeedBumpView) {
-                performSpeedBumpAnimation(i, (SpeedBumpView) child, state, 0);
-            } else if (child instanceof DismissView) {
+            if (child instanceof DismissView) {
                 DismissView dismissView = (DismissView) child;
                 boolean visible = state.topOverLap < mClearAllTopPadding;
                 dismissView.performVisibilityAnimation(visible && !dismissView.willBeGone());
@@ -224,27 +221,4 @@ public class StackScrollState {
             view.setTranslationZ(newZTranslation);
         }
     }
-
-    public void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, StackViewState state,
-            long delay) {
-        View nextChild = getNextChildNotGone(i);
-        if (nextChild != null) {
-            float lineEnd = state.yTranslation + state.height / 2;
-            StackViewState nextState = getViewStateForView(nextChild);
-            boolean startIsAboveNext = nextState.yTranslation > lineEnd;
-            speedBump.animateDivider(startIsAboveNext, delay, null /* onFinishedRunnable */);
-        }
-    }
-
-    private View getNextChildNotGone(int childIndex) {
-        int childCount = mHostView.getChildCount();
-        for (int i = childIndex + 1; i < childCount; i++) {
-            View child = mHostView.getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
-                return child;
-            }
-        }
-        return null;
-    }
-
 }
