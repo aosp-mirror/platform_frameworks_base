@@ -176,6 +176,7 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         mPopup.setHorizontalOffset(mXOffset);
         mPopup.setVerticalOffset(mYOffset);
+        mPopup.setEpicenterBounds(getEpicenterBounds());
         mPopup.show();
 
         ListView listView = mPopup.getListView();

@@ -74,6 +74,7 @@ public class ListPopupWindow implements ShowableListMenu {
     private int mDropDownVerticalOffset;
     private int mDropDownWindowLayoutType = WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
     private boolean mDropDownVerticalOffsetSet;
+    private boolean mIsAnimatedFromAnchor = true;
 
     private int mDropDownGravity = Gravity.NO_GRAVITY;
 
@@ -101,7 +102,13 @@ public class ListPopupWindow implements ShowableListMenu {
 
     private final Handler mHandler;
 
-    private Rect mTempRect = new Rect();
+    private final Rect mTempRect = new Rect();
+
+    /**
+     * Optional anchor-relative bounds to be used as the transition epicenter.
+     * When {@code null}, the anchor bounds are used as the epicenter.
+     */
+    private Rect mEpicenterBounds;
 
     private boolean mModal;
 
@@ -452,6 +459,17 @@ public class ListPopupWindow implements ShowableListMenu {
     }
 
     /**
+     * Specifies the anchor-relative bounds of the popup's transition
+     * epicenter.
+     *
+     * @param bounds anchor-relative bounds
+     * @hide
+     */
+    public void setEpicenterBounds(Rect bounds) {
+        mEpicenterBounds = bounds;
+    }
+
+    /**
      * Set the gravity of the dropdown list. This is commonly used to
      * set gravity to START or END for alignment with the anchor.
      *
@@ -649,6 +667,7 @@ public class ListPopupWindow implements ShowableListMenu {
             // only set this if the dropdown is not always visible
             mPopup.setOutsideTouchable(!mForceIgnoreOutsideTouch && !mDropDownAlwaysVisible);
             mPopup.setTouchInterceptor(mTouchInterceptor);
+            mPopup.setEpicenterBounds(mEpicenterBounds);
             mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, mDropDownGravity);
             mDropDownList.setSelection(ListView.INVALID_POSITION);

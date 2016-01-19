@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -37,6 +38,7 @@ import android.widget.PopupWindow;
  */
 public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
         AdapterView.OnItemClickListener {
+    private Rect mEpicenterBounds;
 
     public abstract void setForceShowIcon(boolean forceShow);
 
@@ -58,6 +60,23 @@ public abstract class MenuPopup implements ShowableListMenu, MenuPresenter,
     public abstract void setHorizontalOffset(int x);
 
     public abstract void setVerticalOffset(int y);
+
+    /**
+     * Specifies the anchor-relative bounds of the popup's transition
+     * epicenter.
+     *
+     * @param bounds anchor-relative bounds
+     */
+    public void setEpicenterBounds(Rect bounds) {
+        mEpicenterBounds = bounds;
+    }
+
+    /**
+     * @return anchor-relative bounds of the popup's transition epicenter
+     */
+    public Rect getEpicenterBounds() {
+        return mEpicenterBounds;
+    }
 
     /**
      * Set whether a title entry should be shown in the popup menu (if a title exists for the
