@@ -3,6 +3,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
     android_media_AmrInputStream.cpp \
+    android_media_ExifInterface.cpp \
     android_media_ImageWriter.cpp \
     android_media_ImageReader.cpp \
     android_media_MediaCrypto.cpp \
@@ -44,6 +45,7 @@ LOCAL_SHARED_LIBRARIES := \
     libusbhost \
     libjhead \
     libexif \
+    libpiex \
     libstagefright_amrnb_common
 
 LOCAL_REQUIRED_MODULES := \
@@ -54,6 +56,7 @@ LOCAL_STATIC_LIBRARIES := \
 
 LOCAL_C_INCLUDES += \
     external/libexif/ \
+    external/piex/ \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/base/libs/hwui \

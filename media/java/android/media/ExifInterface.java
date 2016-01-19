@@ -17,7 +17,7 @@
 package android.media;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
+import java.io.RandomAccessFile;
 import java.util.regex.Pattern;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 /**
- * This is a class for reading and writing Exif tags in a JPEG file.
+ * This is a class for reading and writing Exif tags in a JPEG file or a RAW image file.
+ * <p>
+ * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF and RAF.
  */
 public class ExifInterface {
     // The Exif tag names
@@ -68,8 +70,6 @@ public class ExifInterface {
     /** Type is int. */
     public static final String TAG_SUBSEC_TIME_DIG = "SubSecTimeDigitized";
 
-
-
     /**
      * @hide
      */
@@ -98,15 +98,22 @@ public class ExifInterface {
     /** Type is String. Name of GPS processing method used for location finding. */
     public static final String TAG_GPS_PROCESSING_METHOD = "GPSProcessingMethod";
 
+    // Private tags used for thumbnail information.
+    private static final String TAG_HAS_THUMBNAIL = "hasThumbnail";
+    private static final String TAG_THUMBNAIL_OFFSET = "thumbnailOffset";
+    private static final String TAG_THUMBNAIL_LENGTH = "thumbnailLength";
+
     // Constants used for the Orientation Exif tag.
     public static final int ORIENTATION_UNDEFINED = 0;
     public static final int ORIENTATION_NORMAL = 1;
     public static final int ORIENTATION_FLIP_HORIZONTAL = 2;  // left right reversed mirror
     public static final int ORIENTATION_ROTATE_180 = 3;
     public static final int ORIENTATION_FLIP_VERTICAL = 4;  // upside down mirror
-    public static final int ORIENTATION_TRANSPOSE = 5;  // flipped about top-left <--> bottom-right axis
+    // flipped about top-left <--> bottom-right axis
+    public static final int ORIENTATION_TRANSPOSE = 5;
     public static final int ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
-    public static final int ORIENTATION_TRANSVERSE = 7;  // flipped about top-right <--> bottom-left axis
+    // flipped about top-right <--> bottom-left axis
+    public static final int ORIENTATION_TRANSVERSE = 7;
     public static final int ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
 
     // Constants used for white balance
@@ -116,13 +123,20 @@ public class ExifInterface {
 
     static {
         System.loadLibrary("jhead_jni");
+        System.loadLibrary("media_jni");
+        initRawNative();
+
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    private String mFilename;
-    private HashMap<String, String> mAttributes;
+    private final String mFilename;
+    private final HashMap<String, String> mAttributes = new HashMap<>();
+    private boolean mIsRaw;
     private boolean mHasThumbnail;
+    // The following values used for indicating a thumbnail position.
+    private int mThumbnailOffset;
+    private int mThumbnailLength;
 
     // Because the underlying implementation (jhead) uses static variables,
     // there can only be one user at a time for the native functions (and
@@ -134,19 +148,20 @@ public class ExifInterface {
     private static final Pattern sNonZeroTimePattern = Pattern.compile(".*[1-9].*");
 
     /**
-     * Reads Exif tags from the specified JPEG file.
+     * Reads Exif tags from the specified image file.
      */
     public ExifInterface(String filename) throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
         mFilename = filename;
+        // First test whether a given file is a one of RAW format or not.
         loadAttributes();
     }
 
     /**
      * Returns the value of the specified tag or {@code null} if there
-     * is no such tag in the JPEG file.
+     * is no such tag in the image file.
      *
      * @param tag the name of the tag.
      */
@@ -156,7 +171,7 @@ public class ExifInterface {
 
     /**
      * Returns the integer value of the specified tag. If there is no such tag
-     * in the JPEG file or the value cannot be parsed as integer, return
+     * in the image file or the value cannot be parsed as integer, return
      * <var>defaultValue</var>.
      *
      * @param tag the name of the tag.
@@ -174,7 +189,7 @@ public class ExifInterface {
 
     /**
      * Returns the double value of the specified rational tag. If there is no
-     * such tag in the JPEG file or the value cannot be parsed as double, return
+     * such tag in the image file or the value cannot be parsed as double, return
      * <var>defaultValue</var>.
      *
      * @param tag the name of the tag.
@@ -210,17 +225,42 @@ public class ExifInterface {
      *
      * mAttributes is a HashMap which stores the Exif attributes of the file.
      * The key is the standard tag name and the value is the tag's value: e.g.
-     * Model -> Nikon. Numeric values are stored as strings.
+     * Model -&gt; Nikon. Numeric values are stored as strings.
      *
      * This function also initialize mHasThumbnail to indicate whether the
      * file has a thumbnail inside.
      */
     private void loadAttributes() throws IOException {
+        HashMap map = getRawAttributesNative(mFilename);
+        mIsRaw = map != null;
+        if (mIsRaw) {
+            for (Object o : map.entrySet()) {
+                Map.Entry entry = (Map.Entry) o;
+                String attrName = (String) entry.getKey();
+                String attrValue = (String) entry.getValue();
+
+                switch (attrName) {
+                    case TAG_HAS_THUMBNAIL:
+                        mHasThumbnail = attrValue.equalsIgnoreCase("true");
+                        break;
+                    case TAG_THUMBNAIL_OFFSET:
+                        mThumbnailOffset = Integer.parseInt(attrValue);
+                        break;
+                    case TAG_THUMBNAIL_LENGTH:
+                        mThumbnailLength = Integer.parseInt(attrValue);
+                        break;
+                    default:
+                        mAttributes.put(attrName, attrValue);
+                        break;
+                }
+            }
+            return;
+        }
+
         // format of string passed from native C code:
         // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
         // example:
         // "4 attrPtr ImageLength=4 1024Model=6 FooImageWidth=4 1280Make=3 FOO"
-        mAttributes = new HashMap<String, String>();
 
         String attrStr;
         synchronized (sLock) {
@@ -248,7 +288,7 @@ public class ExifInterface {
             String attrValue = attrStr.substring(ptr, ptr + attrLen);
             ptr += attrLen;
 
-            if (attrName.equals("hasThumbnail")) {
+            if (attrName.equals(TAG_HAS_THUMBNAIL)) {
                 mHasThumbnail = attrValue.equalsIgnoreCase("true");
             } else {
                 mAttributes.put(attrName, attrValue);
@@ -257,32 +297,36 @@ public class ExifInterface {
     }
 
     /**
-     * Save the tag data into the JPEG file. This is expensive because it involves
-     * copying all the JPG data from one file to another and deleting the old file
-     * and renaming the other. It's best to use {@link #setAttribute(String,String)}
-     * to set all attributes to write and make a single call rather than multiple
-     * calls for each attribute.
+     * Save the tag data into the original image file. This is expensive because it involves
+     * copying all the data from one file to another and deleting the old file and renaming the
+     * other. It's best to use{@link #setAttribute(String,String)} to set all attributes to write
+     * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
+        if (mIsRaw) {
+            throw new UnsupportedOperationException(
+                    "ExifInterface does not support saving attributes on RAW formats.");
+        }
+
         // format of string passed to native C code:
         // "attrCnt attr1=valueLen value1attr2=value2Len value2..."
         // example:
         // "4 attrPtr ImageLength=4 1024Model=6 FooImageWidth=4 1280Make=3 FOO"
         StringBuilder sb = new StringBuilder();
         int size = mAttributes.size();
-        if (mAttributes.containsKey("hasThumbnail")) {
+        if (mAttributes.containsKey(TAG_HAS_THUMBNAIL)) {
             --size;
         }
-        sb.append(size + " ");
-        for (Map.Entry<String, String> iter : mAttributes.entrySet()) {
-            String key = iter.getKey();
-            if (key.equals("hasThumbnail")) {
+        sb.append(size).append(" ");
+        for (Map.Entry<String, String> entry : mAttributes.entrySet()) {
+            String key = entry.getKey();
+            if (key.equals(TAG_HAS_THUMBNAIL)) {
                 // this is a fake attribute not saved as an exif tag
                 continue;
             }
-            String val = iter.getValue();
-            sb.append(key + "=");
-            sb.append(val.length() + " ");
+            String val = entry.getValue();
+            sb.append(key).append("=");
+            sb.append(val.length()).append(" ");
             sb.append(val);
         }
         String s = sb.toString();
@@ -293,25 +337,43 @@ public class ExifInterface {
     }
 
     /**
-     * Returns true if the JPEG file has a thumbnail.
+     * Returns true if the image file has a thumbnail.
      */
     public boolean hasThumbnail() {
         return mHasThumbnail;
     }
 
     /**
-     * Returns the thumbnail inside the JPEG file, or {@code null} if there is no thumbnail.
+     * Returns the thumbnail inside the image file, or {@code null} if there is no thumbnail.
      * The returned data is in JPEG format and can be decoded using
      * {@link android.graphics.BitmapFactory#decodeByteArray(byte[],int,int)}
      */
     public byte[] getThumbnail() {
+        if (mIsRaw) {
+            if (mHasThumbnail) {
+                try (RandomAccessFile file = new RandomAccessFile(mFilename, "r")) {
+                    if (file.length() < mThumbnailLength + mThumbnailOffset) {
+                        throw new IOException("Corrupted image.");
+                    }
+                    file.seek(mThumbnailOffset);
+
+                    byte[] buffer = new byte[mThumbnailLength];
+                    file.readFully(buffer);
+                    return buffer;
+                } catch (IOException e) {
+                    // Couldn't get a thumbnail image.
+                }
+            }
+            return null;
+        }
+
         synchronized (sLock) {
             return getThumbnailNative(mFilename);
         }
     }
 
     /**
-     * Returns the offset and length of thumbnail inside the JPEG file, or
+     * Returns the offset and length of thumbnail inside the image file, or
      * {@code null} if there is no thumbnail.
      *
      * @return two-element array, the offset in the first value, and length in
@@ -319,6 +381,13 @@ public class ExifInterface {
      * @hide
      */
     public long[] getThumbnailRange() {
+        if (mIsRaw) {
+            long[] range = new long[2];
+            range[0] = mThumbnailOffset;
+            range[1] = mThumbnailLength;
+            return range;
+        }
+
         synchronized (sLock) {
             return getThumbnailRangeNative(mFilename);
         }
@@ -447,26 +516,28 @@ public class ExifInterface {
                 return (float) -result;
             }
             return (float) result;
-        } catch (NumberFormatException e) {
-            // Some of the nubmers are not valid
-            throw new IllegalArgumentException();
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // Some of the rational does not follow the correct format
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            // Not valid
             throw new IllegalArgumentException();
         }
     }
 
-    private native boolean appendThumbnailNative(String fileName,
+    // JNI methods for JPEG.
+    private static native boolean appendThumbnailNative(String fileName,
             String thumbnailFileName);
 
-    private native void saveAttributesNative(String fileName,
+    private static native void saveAttributesNative(String fileName,
             String compressedAttributes);
 
-    private native String getAttributesNative(String fileName);
+    private static native String getAttributesNative(String fileName);
 
-    private native void commitChangesNative(String fileName);
+    private static native void commitChangesNative(String fileName);
 
-    private native byte[] getThumbnailNative(String fileName);
+    private static native byte[] getThumbnailNative(String fileName);
 
-    private native long[] getThumbnailRangeNative(String fileName);
+    private static native long[] getThumbnailRangeNative(String fileName);
+
+    // JNI methods for RAW formats.
+    private static native void initRawNative();
+    private static native HashMap getRawAttributesNative(String filename);
 }
