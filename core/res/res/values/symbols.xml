@@ -305,6 +305,7 @@
   <java-symbol type="bool" name="config_supportSpeakerNearUltrasound" />
   <java-symbol type="bool" name="config_supportAudioSourceUnprocessed" />
   <java-symbol type="bool" name="config_freeformWindowManagement" />
+  <java-symbol type="bool" name="config_guestUserEphemeral" />
   <java-symbol type="string" name="config_defaultPictureInPictureBounds" />
   <java-symbol type="string" name="config_centeredPictureInPictureBounds" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />

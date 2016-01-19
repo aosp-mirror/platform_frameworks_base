@@ -32,6 +32,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1841,7 +1842,11 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                 }
 
-                if (parent != null && parent.info.isEphemeral()) {
+                // Add ephemeral flag to guests if required. Also inherit it from parent.
+                boolean ephemeralGuests = Resources.getSystem()
+                        .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+                if ((isGuest && ephemeralGuests)
+                        || (parent != null && parent.info.isEphemeral())) {
                     flags |= UserInfo.FLAG_EPHEMERAL;
                 }
                 userId = getNextAvailableId();
@@ -2800,6 +2805,8 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println();
             pw.println("  Max users: " + UserManager.getMaxSupportedUsers());
             pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
+            pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_guestUserEphemeral));
         }
     }
 
