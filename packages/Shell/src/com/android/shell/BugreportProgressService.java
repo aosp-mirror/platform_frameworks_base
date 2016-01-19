@@ -934,6 +934,10 @@ public class BugreportProgressService extends Service {
             Log.e(TAG, "INTERNAL ERROR: no bugreportFile on " + info);
             return;
         }
+        if (TextUtils.isEmpty(info.title) && TextUtils.isEmpty(info.description)) {
+            Log.d(TAG, "Not touching zip file since neither title nor description are set");
+            return;
+        }
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
         final File dir = info.bugreportFile.getParentFile();
