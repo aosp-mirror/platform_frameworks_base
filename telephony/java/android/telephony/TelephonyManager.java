@@ -296,7 +296,7 @@ public class TelephonyManager {
     /**
      * @hide
      */
-    public static final boolean EMERGENCY_ASSISTANCE_ENABLED = false;
+    public static final boolean EMERGENCY_ASSISTANCE_ENABLED = true;
 
     /**
      * The lookup key used with the {@link #ACTION_PHONE_STATE_CHANGED} broadcast
