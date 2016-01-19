@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import static android.system.OsConstants.POLLIN;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
@@ -34,7 +33,6 @@ import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
-import android.system.StructPollfd;
 import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
@@ -51,17 +49,13 @@ import dalvik.system.ZygoteHooks;
 import libcore.io.IoUtils;
 
 import java.io.BufferedReader;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.Security;
 import java.security.Provider;
-import java.util.ArrayList;
 
 /**
  * Startup class for the zygote process.
@@ -81,8 +75,6 @@ public class ZygoteInit {
     private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
     private static final String PROPERTY_RUNNING_IN_CONTAINER = "ro.boot.container";
 
-    private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
-
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
 
@@ -93,11 +85,8 @@ public class ZygoteInit {
 
     private static final String SOCKET_NAME_ARG = "--socket-name=";
 
-    private static LocalServerSocket sServerSocket;
-
     /**
-     * Used to pre-load resources.  We hold a global reference on it so it
-     * never gets destroyed.
+     * Used to pre-load resources.
      */
     private static Resources mResources;
 
@@ -108,78 +97,6 @@ public class ZygoteInit {
 
     /** Controls whether we should preload resources during zygote init. */
     public static final boolean PRELOAD_RESOURCES = true;
-
-    /**
-     * Registers a server socket for zygote command connections
-     *
-     * @throws RuntimeException when open fails
-     */
-    private static void registerZygoteSocket(String socketName) {
-        if (sServerSocket == null) {
-            int fileDesc;
-            final String fullSocketName = ANDROID_SOCKET_PREFIX + socketName;
-            try {
-                String env = System.getenv(fullSocketName);
-                fileDesc = Integer.parseInt(env);
-            } catch (RuntimeException ex) {
-                throw new RuntimeException(fullSocketName + " unset or invalid", ex);
-            }
-
-            try {
-                FileDescriptor fd = new FileDescriptor();
-                fd.setInt$(fileDesc);
-                sServerSocket = new LocalServerSocket(fd);
-            } catch (IOException ex) {
-                throw new RuntimeException(
-                        "Error binding to local socket '" + fileDesc + "'", ex);
-            }
-        }
-    }
-
-    /**
-     * Waits for and accepts a single command connection. Throws
-     * RuntimeException on failure.
-     */
-    private static ZygoteConnection acceptCommandPeer(String abiList) {
-        try {
-            return new ZygoteConnection(sServerSocket.accept(), abiList);
-        } catch (IOException ex) {
-            throw new RuntimeException(
-                    "IOException during accept()", ex);
-        }
-    }
-
-    /**
-     * Close and clean up zygote sockets. Called on shutdown and on the
-     * child's exit path.
-     */
-    static void closeServerSocket() {
-        try {
-            if (sServerSocket != null) {
-                FileDescriptor fd = sServerSocket.getFileDescriptor();
-                sServerSocket.close();
-                if (fd != null) {
-                    Os.close(fd);
-                }
-            }
-        } catch (IOException ex) {
-            Log.e(TAG, "Zygote:  error closing sockets", ex);
-        } catch (ErrnoException ex) {
-            Log.e(TAG, "Zygote:  error closing descriptor", ex);
-        }
-
-        sServerSocket = null;
-    }
-
-    /**
-     * Return the server socket's underlying file descriptor, so that
-     * ZygoteConnection can pass it to the native code for proper
-     * closure after a child process is forked off.
-     */
-
-    static FileDescriptor getServerSocketFileDescriptor() {
-        return sServerSocket.getFileDescriptor();
-    }
 
     private static final int UNPRIVILEGED_UID = 9999;
     private static final int UNPRIVILEGED_GID = 9999;
@@ -492,9 +409,7 @@ public class ZygoteInit {
      */
     private static void handleSystemServerProcess(
             ZygoteConnection.Arguments parsedArgs)
-            throws ZygoteInit.MethodAndArgsCaller {
-
-        closeServerSocket();
+            throws Zygote.MethodAndArgsCaller {
 
         // set umask to 0077 so new files and directories will default to owner-only permissions.
         Os.umask(S_IRWXG | S_IRWXO);
@@ -597,8 +512,8 @@ public class ZygoteInit {
     /**
      * Prepare the arguments and fork for the system server process.
      */
-    private static boolean startSystemServer(String abiList, String socketName)
-            throws MethodAndArgsCaller, RuntimeException {
+    private static boolean startSystemServer(String abiList, String socketName, ZygoteServer zygoteServer)
+            throws Zygote.MethodAndArgsCaller, RuntimeException {
         long capabilities = posixCapabilitiesAsBits(
             OsConstants.CAP_IPC_LOCK,
             OsConstants.CAP_KILL,
@@ -653,6 +568,7 @@ public class ZygoteInit {
                 waitForSecondaryZygote(socketName);
             }
 
+            zygoteServer.closeServerSocket();
             handleSystemServerProcess(parsedArgs);
         }
 
@@ -674,6 +590,8 @@ public class ZygoteInit {
     }
 
     public static void main(String argv[]) {
+        ZygoteServer zygoteServer = new ZygoteServer();
+
         // Mark zygote start. This ensures that thread creation will throw
         // an error.
         ZygoteHooks.startZygoteNoThreadCreation();
@@ -703,7 +621,7 @@ public class ZygoteInit {
                 throw new RuntimeException("No ABI list supplied.");
             }
 
-            registerZygoteSocket(socketName);
+            zygoteServer.registerServerSocket(socketName);
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ZygotePreload");
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
                 SystemClock.uptimeMillis());
@@ -720,8 +638,6 @@ public class ZygoteInit {
             gcAndFinalize();
             Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
 
-            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
-
             // Disable tracing so that forked processes do not inherit stale tracing tags from
             // Zygote.
             Trace.setTracingEnabled(false);
@@ -732,18 +648,18 @@ public class ZygoteInit {
             ZygoteHooks.stopZygoteNoThreadCreation();
 
             if (startSystemServer) {
-                startSystemServer(abiList, socketName);
+                startSystemServer(abiList, socketName, zygoteServer);
             }
 
             Log.i(TAG, "Accepting command socket connections");
-            runSelectLoop(abiList);
+            zygoteServer.runSelectLoop(abiList);
 
-            closeServerSocket();
-        } catch (MethodAndArgsCaller caller) {
+            zygoteServer.closeServerSocket();
+        } catch (Zygote.MethodAndArgsCaller caller) {
             caller.run();
         } catch (RuntimeException ex) {
-            Log.e(TAG, "Zygote died with exception", ex);
-            closeServerSocket();
+            Log.e(TAG, "System zygote died with exception", ex);
+            zygoteServer.closeServerSocket();
             throw ex;
         }
     }
@@ -779,89 +695,8 @@ public class ZygoteInit {
     }
 
     /**
-     * Runs the zygote process's select loop. Accepts new connections as
-     * they happen, and reads commands from connections one spawn-request's
-     * worth at a time.
-     *
-     * @throws MethodAndArgsCaller in a child process when a main() should
-     * be executed.
-     */
-    private static void runSelectLoop(String abiList) throws MethodAndArgsCaller {
-        ArrayList<FileDescriptor> fds = new ArrayList<FileDescriptor>();
-        ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
-
-        fds.add(sServerSocket.getFileDescriptor());
-        peers.add(null);
-
-        while (true) {
-            StructPollfd[] pollFds = new StructPollfd[fds.size()];
-            for (int i = 0; i < pollFds.length; ++i) {
-                pollFds[i] = new StructPollfd();
-                pollFds[i].fd = fds.get(i);
-                pollFds[i].events = (short) POLLIN;
-            }
-            try {
-                Os.poll(pollFds, -1);
-            } catch (ErrnoException ex) {
-                throw new RuntimeException("poll failed", ex);
-            }
-            for (int i = pollFds.length - 1; i >= 0; --i) {
-                if ((pollFds[i].revents & POLLIN) == 0) {
-                    continue;
-                }
-                if (i == 0) {
-                    ZygoteConnection newPeer = acceptCommandPeer(abiList);
-                    peers.add(newPeer);
-                    fds.add(newPeer.getFileDesciptor());
-                } else {
-                    boolean done = peers.get(i).runOnce();
-                    if (done) {
-                        peers.remove(i);
-                        fds.remove(i);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Class not instantiable.
      */
     private ZygoteInit() {
-    }
-
-    /**
-     * Helper exception class which holds a method and arguments and
-     * can call them. This is used as part of a trampoline to get rid of
-     * the initial process setup stack frames.
-     */
-    public static class MethodAndArgsCaller extends Exception
-            implements Runnable {
-        /** method to call */
-        private final Method mMethod;
-
-        /** argument array */
-        private final String[] mArgs;
-
-        public MethodAndArgsCaller(Method method, String[] args) {
-            mMethod = method;
-            mArgs = args;
-        }
-
-        public void run() {
-            try {
-                mMethod.invoke(null, new Object[] { mArgs });
-            } catch (IllegalAccessException ex) {
-                throw new RuntimeException(ex);
-            } catch (InvocationTargetException ex) {
-                Throwable cause = ex.getCause();
-                if (cause instanceof RuntimeException) {
-                    throw (RuntimeException) cause;
-                } else if (cause instanceof Error) {
-                    throw (Error) cause;
-                }
-                throw new RuntimeException(ex);
-            }
-        }
     }
 }

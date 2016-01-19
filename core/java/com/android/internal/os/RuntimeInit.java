@@ -207,7 +207,7 @@ public class RuntimeInit {
      * @param classLoader the classLoader to load {@className} with
      */
     private static void invokeStaticMain(String className, String[] argv, ClassLoader classLoader)
-            throws ZygoteInit.MethodAndArgsCaller {
+            throws Zygote.MethodAndArgsCaller {
         Class<?> cl;
 
         try {
@@ -241,7 +241,7 @@ public class RuntimeInit {
          * clears up all the stack frames that were required in setting
          * up the process.
          */
-        throw new ZygoteInit.MethodAndArgsCaller(m, argv);
+        throw new Zygote.MethodAndArgsCaller(m, argv);
     }
 
     public static final void main(String[] argv) {
@@ -278,7 +278,7 @@ public class RuntimeInit {
      * @param argv arg strings
      */
     public static final void zygoteInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
-            throws ZygoteInit.MethodAndArgsCaller {
+            throws Zygote.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
 
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "RuntimeInit");
@@ -301,14 +301,14 @@ public class RuntimeInit {
      * @param argv arg strings
      */
     public static void wrapperInit(int targetSdkVersion, String[] argv)
-            throws ZygoteInit.MethodAndArgsCaller {
+            throws Zygote.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from wrapper");
 
         applicationInit(targetSdkVersion, argv, null);
     }
 
     private static void applicationInit(int targetSdkVersion, String[] argv, ClassLoader classLoader)
-            throws ZygoteInit.MethodAndArgsCaller {
+            throws Zygote.MethodAndArgsCaller {
         // If the application calls System.exit(), terminate the process
         // immediately without running any shutdown hooks.  It is not possible to
         // shutdown an Android application gracefully.  Among other things, the
