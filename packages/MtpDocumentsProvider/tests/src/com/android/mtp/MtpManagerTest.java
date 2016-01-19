@@ -101,9 +101,6 @@ public class MtpManagerTest extends InstrumentationTestCase {
     }
 
     public void testCreateDocumentAndGetPartialObject() throws Exception {
-        final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
-        final ParcelFileDescriptor.AutoCloseOutputStream stream =
-                new ParcelFileDescriptor.AutoCloseOutputStream(fds[1]);
         int storageId = 0;
         for (final MtpDeviceRecord record : mManager.getDevices()) {
             if (record.deviceId == mUsbDevice.getDeviceId()) {
@@ -112,6 +109,7 @@ public class MtpManagerTest extends InstrumentationTestCase {
             }
         }
         assertTrue("Valid storage not found.", storageId != 0);
+
         final String testFileName = "MtpManagerTest_testFile.txt";
         for (final int handle : mManager.getObjectHandles(
                 mUsbDevice.getDeviceId(), storageId, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN)) {
@@ -121,22 +119,22 @@ public class MtpManagerTest extends InstrumentationTestCase {
                 break;
             }
         }
+
+        final ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
         final byte[] expectedBytes = "Hello Android!".getBytes("ascii");
-        final int objectHandle;
-        try {
+        try (final ParcelFileDescriptor.AutoCloseOutputStream stream =
+                new ParcelFileDescriptor.AutoCloseOutputStream(fds[1])) {
             stream.write(expectedBytes);
-            objectHandle = mManager.createDocument(
-                    mUsbDevice.getDeviceId(),
-                    new MtpObjectInfo.Builder()
-                            .setStorageId(storageId)
-                            .setName(testFileName)
-                            .setCompressedSize(expectedBytes.length)
-                            .setFormat(MtpConstants.FORMAT_TEXT)
-                            .build(),
-                    fds[0]);
-        } finally {
-            stream.close();
         }
+        final int objectHandle = mManager.createDocument(
+                mUsbDevice.getDeviceId(),
+                new MtpObjectInfo.Builder()
+                        .setStorageId(storageId)
+                        .setName(testFileName)
+                        .setCompressedSize(expectedBytes.length)
+                        .setFormat(MtpConstants.FORMAT_TEXT)
+                        .build(),
+                fds[0]);
         final byte[] bytes = new byte[100];
         assertEquals(5, mManager.getPartialObject(
                 mUsbDevice.getDeviceId(), objectHandle, 0, 5, bytes));
