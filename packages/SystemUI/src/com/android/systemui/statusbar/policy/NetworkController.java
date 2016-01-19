@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SubscriptionInfo;
-import com.android.settingslib.net.MobileDataController;
+import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public interface NetworkController {
     void setWifiEnabled(boolean enabled);
     void onUserSwitched(int newUserId);
     AccessPointController getAccessPointController();
-    MobileDataController getMobileDataController();
+    DataUsageController getMobileDataController();
 
     public interface SignalCallback {
         void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,

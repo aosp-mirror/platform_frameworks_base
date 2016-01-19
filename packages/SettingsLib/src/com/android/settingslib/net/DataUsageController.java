@@ -42,11 +42,11 @@ import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 
-public class MobileDataController {
-    private static final String TAG = "MobileDataController";
+public class DataUsageController {
+    private static final String TAG = "DataUsageController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final long DEFAULT_WARNING_LEVEL = 2L * 1024 * 1024 * 1024;
+    public static final long DEFAULT_WARNING_LEVEL = 2L * 1024 * 1024 * 1024;
     private static final int FIELDS = FIELD_RX_BYTES | FIELD_TX_BYTES;
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
     private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
@@ -62,7 +62,7 @@ public class MobileDataController {
     private Callback mCallback;
     private NetworkNameProvider mNetworkController;
 
-    public MobileDataController(Context context) {
+    public DataUsageController(Context context) {
         mContext = context;
         mTelephonyManager = TelephonyManager.from(context);
         mConnectivityManager = ConnectivityManager.from(context);
@@ -109,16 +109,25 @@ public class MobileDataController {
         if (subscriberId == null) {
             return warn("no subscriber id");
         }
+        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        template = NetworkTemplate.normalize(template, mTelephonyManager.getMergedSubscriberIds());
+
+        return getDataUsageInfo(template);
+    }
+
+    public DataUsageInfo getWifiDataUsageInfo() {
+        NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
+        return getDataUsageInfo(template);
+    }
+
+    public DataUsageInfo getDataUsageInfo(NetworkTemplate template) {
         final INetworkStatsSession session = getSession();
         if (session == null) {
             return warn("no stats session");
         }
-        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
-        template = NetworkTemplate.normalize(template, mTelephonyManager.getMergedSubscriberIds());
-
         final NetworkPolicy policy = findNetworkPolicy(template);
         try {
-            final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELDS);
+            final NetworkStatsHistory history = session.getHistoryForNetwork(template, FIELDS);
             final long now = System.currentTimeMillis();
             final long start, end;
             if (policy != null && policy.cycleDay > 0) {
@@ -153,6 +162,7 @@ public class MobileDataController {
             }
             final long totalBytes = entry.rxBytes + entry.txBytes;
             final DataUsageInfo usage = new DataUsageInfo();
+            usage.startDate = start;
             usage.usageLevel = totalBytes;
             usage.period = formatDateRange(start, end);
             if (policy != null) {
@@ -238,6 +248,7 @@ public class MobileDataController {
     public static class DataUsageInfo {
         public String carrier;
         public String period;
+        public long startDate;
         public long limitLevel;
         public long warningLevel;
         public long usageLevel;

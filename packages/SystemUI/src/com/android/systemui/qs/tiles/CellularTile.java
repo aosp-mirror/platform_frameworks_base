@@ -24,7 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.internal.logging.MetricsLogger;
-import com.android.settingslib.net.MobileDataController;
+import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSIconView;
 import com.android.systemui.qs.QSTile;
@@ -39,7 +39,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
     private final NetworkController mController;
-    private final MobileDataController mDataController;
+    private final DataUsageController mDataController;
     private final CellularDetailAdapter mDetailAdapter;
 
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
@@ -255,7 +255,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             final DataUsageDetailView v = (DataUsageDetailView) (convertView != null
                     ? convertView
                     : LayoutInflater.from(mContext).inflate(R.layout.data_usage, parent, false));
-            final MobileDataController.DataUsageInfo info = mDataController.getDataUsageInfo();
+            final DataUsageController.DataUsageInfo info = mDataController.getDataUsageInfo();
             if (info == null) return v;
             v.bind(info);
             return v;
