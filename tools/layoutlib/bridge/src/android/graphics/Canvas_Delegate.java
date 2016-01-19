@@ -35,7 +35,6 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -713,8 +712,27 @@ public final class Canvas_Delegate {
                         if (bounds.isEmpty()) {
                             // Apple JRE 1.6 doesn't like drawing empty shapes.
                             // http://b.android.com/178278
-                            return;
+
+                            if (pathDelegate.isEmpty()) {
+                                // This means that the path doesn't have any lines or curves so
+                                // nothing to draw.
+                                return;
+                            }
+
+                            // The stroke width is not consider for the size of the bounds so,
+                            // for example, a horizontal line, would be considered as an empty
+                            // rectangle.
+                            // If the strokeWidth is not 0, we use it to consider the size of the
+                            // path as well.
+                            float strokeWidth = paintDelegate.getStrokeWidth();
+                            if (strokeWidth <= 0.0f) {
+                                return;
+                            }
+                            bounds.setRect(bounds.getX(), bounds.getY(),
+                                    Math.max(strokeWidth, bounds.getWidth()),
+                                    Math.max(strokeWidth, bounds.getHeight()));
                         }
+
                         int style = paintDelegate.getStyle();
 
                         if (style == Paint.Style.FILL.nativeInt ||

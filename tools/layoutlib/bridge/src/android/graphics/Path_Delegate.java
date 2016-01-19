@@ -57,12 +57,17 @@ public final class Path_Delegate {
     private static final DelegateManager<Path_Delegate> sManager =
             new DelegateManager<Path_Delegate>(Path_Delegate.class);
 
+    private static final float EPSILON = 1e-4f;
+
     // ---- delegate data ----
     private FillType mFillType = FillType.WINDING;
     private Path2D mPath = new Path2D.Double();
 
     private float mLastX = 0;
     private float mLastY = 0;
+
+    // true if the path contains does not contain a curve or line.
+    private boolean mCachedIsEmpty = true;
 
     // ---- Public Helper methods ----
 
@@ -75,7 +80,7 @@ public final class Path_Delegate {
     }
 
     public void setJavaShape(Shape shape) {
-        mPath.reset();
+        reset();
         mPath.append(shape, false /*connect*/);
     }
 
@@ -84,7 +89,7 @@ public final class Path_Delegate {
     }
 
     public void setPathIterator(PathIterator iterator) {
-        mPath.reset();
+        reset();
         mPath.append(iterator, false /*connect*/);
     }
 
@@ -591,11 +596,37 @@ public final class Path_Delegate {
 
 
     /**
-     * Returns whether the path is empty.
-     * @return true if the path is empty.
+     * Returns whether the path already contains any points.
+     * Note that this is different to
+     * {@link #isEmpty} because if all elements are {@link PathIterator#SEG_MOVETO},
+     * {@link #isEmpty} will return true while hasPoints will return false.
      */
-    private boolean isEmpty() {
-        return mPath.getCurrentPoint() == null;
+    public boolean hasPoints() {
+        return !mPath.getPathIterator(null).isDone();
+    }
+
+    /**
+     * Returns whether the path is empty (contains no lines or curves).
+     * @see Path#isEmpty
+     */
+    public boolean isEmpty() {
+        if (!mCachedIsEmpty) {
+            return false;
+        }
+
+        float[] coords = new float[6];
+        mCachedIsEmpty = Boolean.TRUE;
+        for (PathIterator it = mPath.getPathIterator(null); !it.isDone(); it.next()) {
+            int type = it.currentSegment(coords);
+            if (type != PathIterator.SEG_MOVETO) {
+                // Once we know that the path is not empty, we do not need to check again unless
+                // Path#reset is called.
+                mCachedIsEmpty = false;
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -645,7 +676,7 @@ public final class Path_Delegate {
      * @param y The y-coordinate of the end of a line
      */
     private void lineTo(float x, float y) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         mPath.lineTo(mLastX = x, mLastY = y);
@@ -662,9 +693,15 @@ public final class Path_Delegate {
      *           this contour, to specify a line
      */
     private void rLineTo(float dx, float dy) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
+
+        if (Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON) {
+            // The delta is so small that this shouldn't generate a line
+            return;
+        }
+
         dx += mLastX;
         dy += mLastY;
         mPath.lineTo(mLastX = dx, mLastY = dy);
@@ -699,7 +736,7 @@ public final class Path_Delegate {
      *            this contour, for the end point of a quadratic curve
      */
     private void rQuadTo(float dx1, float dy1, float dx2, float dy2) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         dx1 += mLastX;
@@ -723,7 +760,7 @@ public final class Path_Delegate {
      */
     private void cubicTo(float x1, float y1, float x2, float y2,
                         float x3, float y3) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(0, 0);
         }
         mPath.curveTo(x1, y1, x2, y2, mLastX = x3, mLastY = y3);
@@ -736,7 +773,7 @@ public final class Path_Delegate {
      */
     private void rCubicTo(float dx1, float dy1, float dx2, float dy2,
                          float dx3, float dy3) {
-        if (isEmpty()) {
+        if (!hasPoints()) {
             mPath.moveTo(mLastX = 0, mLastY = 0);
         }
         dx1 += mLastX;
