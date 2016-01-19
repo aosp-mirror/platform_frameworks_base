@@ -526,9 +526,8 @@ public class RecentsView extends FrameLayout {
                                 public void onAnimationEnd(Animator animation) {
                                     // Dock the task and launch it
                                     SystemServicesProxy ssp = Recents.getSystemServices();
-                                    ssp.startTaskInDockedMode(getContext(), event.task.key.id,
-                                            dockState.createMode);
-                                    launchTask(event.task, null, INVALID_STACK_ID);
+                                    ssp.startTaskInDockedMode(getContext(), event.taskView,
+                                            event.task.key.id, dockState.createMode);
 
                                     mTaskStackView.getStack().removeTask(event.task);
                                 }
