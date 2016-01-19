@@ -241,6 +241,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     const Glop::Mesh::Indices& indices = mesh.indices;
     const Glop::Fill& fill = glop.fill;
 
+    GL_CHECKPOINT();
+
     // ---------------------------------------------
     // ---------- Program + uniform setup ----------
     // ---------------------------------------------
@@ -283,6 +285,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         glUniform1f(fill.program->getUniform("roundRectRadius"),
                 roundedOutRadius);
     }
+
+    GL_CHECKPOINT();
 
     // --------------------------------
     // ---------- Mesh setup ----------
@@ -335,10 +339,14 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     // Shader uniforms
     SkiaShader::apply(*mCaches, fill.skiaShaderData);
 
+    GL_CHECKPOINT();
+
     // ------------------------------------
     // ---------- GL state setup ----------
     // ------------------------------------
     blend().setFactors(glop.blend.src, glop.blend.dst);
+
+    GL_CHECKPOINT();
 
     // ------------------------------------
     // ---------- Actual drawing ----------
@@ -368,6 +376,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         glDrawArrays(mesh.primitiveMode, 0, mesh.elementCount);
     }
 
+    GL_CHECKPOINT();
+
     // -----------------------------------
     // ---------- Mesh teardown ----------
     // -----------------------------------
@@ -377,6 +387,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     if (vertices.attribFlags & VertexAttribFlags::Color) {
         glDisableVertexAttribArray(colorLocation);
     }
+
+    GL_CHECKPOINT();
 }
 
 void RenderState::dump() {

@@ -277,9 +277,9 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
 
     if (mUseFloatTexture) {
         // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
-        texture->upload(width, height, GL_RGBA16F, GL_RGBA, GL_FLOAT, pixels);
+        texture->upload(GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, pixels);
     } else {
-        texture->upload(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        texture->upload(GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     }
 
     texture->setFilter(GL_LINEAR);
