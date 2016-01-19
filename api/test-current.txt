@@ -35031,6 +35031,7 @@ package android.telecom {
     method public static boolean hasProperty(int, int);
     method public boolean hasProperty(int);
     method public static java.lang.String propertiesToString(int);
+    field public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 4194304; // 0x400000
     field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int CAPABILITY_HOLD = 1; // 0x1
@@ -35171,6 +35172,7 @@ package android.telecom {
     method public final void setVideoProvider(android.telecom.Connection.VideoProvider);
     method public final void setVideoState(int);
     method public static java.lang.String stateToString(int);
+    field public static final int CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO = 8388608; // 0x800000
     field public static final int CAPABILITY_CAN_PAUSE_VIDEO = 1048576; // 0x100000
     field public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 524288; // 0x80000
     field public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
