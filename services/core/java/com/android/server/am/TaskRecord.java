@@ -206,7 +206,7 @@ final class TaskRecord {
 
     // Used in the unique case where we are clearing the task in order to reuse it. In that case we
     // do not want to delete the stack when the task goes empty.
-    boolean mReuseTask = false;
+    private boolean mReuseTask = false;
 
     private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
     private final File mLastThumbnailFile; // File containing last thumbnail.
@@ -775,6 +775,13 @@ final class TaskRecord {
         mReuseTask = true;
         performClearTaskAtIndexLocked(0);
         mReuseTask = false;
+    }
+
+    ActivityRecord performClearTaskForReuseLocked(ActivityRecord newR, int launchFlags) {
+        mReuseTask = true;
+        final ActivityRecord result = performClearTaskLocked(newR, launchFlags);
+        mReuseTask = false;
+        return result;
     }
 
     /**
