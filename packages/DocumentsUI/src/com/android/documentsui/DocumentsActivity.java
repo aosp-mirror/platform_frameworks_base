@@ -120,7 +120,7 @@ public class DocumentsActivity extends BaseActivity {
             setTitle("");
             new RestoreStackTask().execute();
         } else {
-            onCurrentDirectoryChanged(ANIM_NONE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
         }
     }
 
@@ -332,7 +332,7 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    void onDirectoryChanged(int anim) {
+    void refreshDirectory(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
@@ -353,12 +353,12 @@ public class DocumentsActivity extends BaseActivity {
                 mState.derivedMode = mState.userMode;
             }
         } else {
-            if (mState.currentSearch != null) {
+            if (mSearchManager.isSearching()) {
                 // Ongoing search
                 DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
             } else {
                 // Normal boring directory
-                DirectoryFragment.showNormal(fm, root, cwd, anim);
+                DirectoryFragment.showDirectory(fm, root, cwd, anim);
             }
         }
 

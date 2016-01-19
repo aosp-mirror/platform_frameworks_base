@@ -163,7 +163,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private MessageBar mMessageBar;
     private View mProgressBar;
 
-    public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
+    public static void showDirectory(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
     }
 

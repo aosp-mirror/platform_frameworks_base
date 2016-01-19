@@ -95,7 +95,7 @@ public class FilesActivity extends BaseActivity {
 
         if (mState.restored) {
             if (DEBUG) Log.d(TAG, "Stack already resolved for uri: " + intent.getData());
-            onCurrentDirectoryChanged(ANIM_NONE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (!mState.stack.isEmpty()) {
             // If a non-empty stack is present in our state it was read (presumably)
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
@@ -106,7 +106,7 @@ public class FilesActivity extends BaseActivity {
             // don't specify a real content target.
             if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
             checkState(uri == null || LauncherActivity.isLaunchUri(uri));
-            onCurrentDirectoryChanged(ANIM_NONE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (DocumentsContract.isRootUri(this, uri)) {
             if (DEBUG) Log.d(TAG, "Launching with root URI.");
             // If we've got a specific root to display, restore that root using a dedicated
@@ -288,7 +288,7 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    void onDirectoryChanged(int anim) {
+    void refreshDirectory(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
@@ -307,7 +307,7 @@ public class FilesActivity extends BaseActivity {
                 DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
             } else {
                 // Normal boring directory
-                DirectoryFragment.showNormal(fm, root, cwd, anim);
+                DirectoryFragment.showDirectory(fm, root, cwd, anim);
             }
         }
     }

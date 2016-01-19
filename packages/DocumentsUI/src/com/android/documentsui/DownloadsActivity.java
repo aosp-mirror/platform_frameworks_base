@@ -92,7 +92,7 @@ public class DownloadsActivity extends BaseActivity {
             final Uri rootUri = getIntent().getData();
             new RestoreRootTask(rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
         } else {
-            onCurrentDirectoryChanged(ANIM_NONE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
         }
     }
 
@@ -164,7 +164,7 @@ public class DownloadsActivity extends BaseActivity {
     }
 
     @Override
-    void onDirectoryChanged(int anim) {
+    void refreshDirectory(int anim) {
         final FragmentManager fm = getFragmentManager();
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
@@ -178,7 +178,7 @@ public class DownloadsActivity extends BaseActivity {
             DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
         } else {
             // Normal boring directory
-            DirectoryFragment.showNormal(fm, root, cwd, anim);
+            DirectoryFragment.showDirectory(fm, root, cwd, anim);
         }
     }
 
