@@ -123,6 +123,14 @@ interface IWindowSession {
     void repositionChild(IWindow childWindow, int left, int top, int right, int bottom,
             long deferTransactionUntilFrame, out Rect outFrame);
 
+    /*
+     * Notify the window manager that an application is relaunching and
+     * child windows should be prepared for replacement.
+     *
+     * @param appToken The application
+     */
+    void prepareToReplaceChildren(IBinder appToken);
+
     /**
      * If a call to relayout() asked to have the surface destroy deferred,
      * it must call this once it is okay to destroy that surface.

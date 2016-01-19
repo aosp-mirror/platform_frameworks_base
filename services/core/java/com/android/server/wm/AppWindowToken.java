@@ -405,6 +405,17 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void setReplacingChildren() {
+        if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Marking app token " + appWindowToken
+                + " with replacing child windows.");
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            if (w.isChildWindow()) {
+                w.setReplacing(false /* animate */);
+            }
+        }
+    }
+
     void resetReplacingWindows() {
         if (DEBUG_ADD_REMOVE) Slog.d(TAG_WM, "Resetting app token " + appWindowToken
                 + " of replacing window marks.");

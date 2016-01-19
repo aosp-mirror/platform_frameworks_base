@@ -2693,7 +2693,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     final boolean notExitingOrAnimating =
                             !win.mExiting && !win.isAnimatingWithSavedSurface();
                     result |= notExitingOrAnimating ? RELAYOUT_RES_SURFACE_CHANGED : 0;
-                    if (notExitingOrAnimating) {
+                    // We don't want to animate visibility of windows which are pending
+                    // replacement. In the case of activity relaunch child windows
+                    // could request visibility changes as they are detached from the main
+                    // application window during the tear down process. If we satisfied
+                    // these visibility changes though, we would cause a visual glitch
+                    // hiding the window before it's replacement was available.
+                    // So we just do nothing on our side.
+                    if (notExitingOrAnimating && win.mWillReplaceWindow == false) {
                         focusMayChange = tryStartingAnimation(win, winAnimator, isDefaultDisplay,
                                 focusMayChange);
 
@@ -2893,9 +2900,10 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mWindowMap) {
                 WindowState win = windowForClientLocked(session, client, false);
-                if (win == null) {
+                if (win == null || win.mWillReplaceWindow) {
                     return;
                 }
+
                 win.mWinAnimator.destroyDeferredSurfaceLocked();
             }
         } finally {
@@ -10180,6 +10188,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             appWindowToken.setReplacingWindows(animate);
+        }
+    }
+
+    /**
+     * Hint to a token that its children will be replaced across activity relaunch.
+     * The children would otherwise be removed  shortly following this as the
+     * activity is torn down.
+     * @param token Application token for which the activity will be relaunched.
+     */
+    public void setReplacingChildren(IBinder token) {
+        AppWindowToken appWindowToken = null;
+        synchronized (mWindowMap) {
+            appWindowToken = findAppWindowToken(token);
+            if (appWindowToken == null || !appWindowToken.isVisible()) {
+                Slog.w(TAG_WM, "Attempted to set replacing window on non-existing app token "
+                        + token);
+                return;
+            }
+
+            appWindowToken.setReplacingChildren();
+            scheduleClearReplacingWindowIfNeeded(token, true /* replacing */);
         }
     }
 
