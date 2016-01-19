@@ -16,91 +16,24 @@
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "ExifInterface_JNI"
-#include <utils/Log.h>
-#include <utils/String8.h>
-#include <utils/KeyedVector.h>
 
-#include <android_runtime/AndroidRuntime.h>
-
-#include <jni.h>
-#include <JNIHelp.h>
-
-#include <nativehelper/ScopedLocalRef.h>
+#include "android_media_Utils.h"
 
 #include "src/piex_types.h"
 #include "src/piex.h"
 
+#include <jni.h>
+#include <JNIHelp.h>
+#include <android_runtime/AndroidRuntime.h>
+#include <nativehelper/ScopedLocalRef.h>
+
+#include <utils/Log.h>
+#include <utils/String8.h>
+#include <utils/KeyedVector.h>
+
 // ----------------------------------------------------------------------------
 
 using namespace android;
-
-class FileStream : public piex::StreamInterface {
-private:
-    FILE *mFile;
-    size_t mPosition;
-    size_t mSize;
-
-public:
-    FileStream(const String8 filename)
-        : mPosition(0),
-          mSize(0) {
-        mFile = fopen(filename.string(), "r");
-        if (mFile == NULL) {
-            return;
-        }
-        // Get the size.
-        fseek(mFile, 0l, SEEK_END);
-        mSize = ftell(mFile);
-        fseek(mFile, 0l, SEEK_SET);
-    }
-
-    ~FileStream() {
-        if (mFile != NULL) {
-            fclose(mFile);
-            mFile = NULL;
-        }
-    }
-
-    // Reads 'length' amount of bytes from 'offset' to 'data'. The 'data' buffer
-    // provided by the caller, guaranteed to be at least "length" bytes long.
-    // On 'kOk' the 'data' pointer contains 'length' valid bytes beginning at
-    // 'offset' bytes from the start of the stream.
-    // Returns 'kFail' if 'offset' + 'length' exceeds the stream and does not
-    // change the contents of 'data'.
-    piex::Error GetData(
-            const size_t offset, const size_t length, std::uint8_t* data)
-            override {
-        if (mFile == NULL) {
-            return piex::Error::kFail;
-        }
-
-        // Seek first.
-        if (mPosition != offset) {
-            fseek(mFile, offset, SEEK_SET);
-        }
-
-        // Read bytes.
-        size_t size = fread((void*)data, sizeof(std::uint8_t), length, mFile);
-        mPosition += size;
-
-        // Handle errors.
-        if (ferror(mFile)) {
-            return piex::Error::kFail;
-        }
-        if (size == 0 && feof(mFile)) {
-            return piex::Error::kFail;
-        }
-        return piex::Error::kOk;
-    }
-
-    bool exists() {
-        return mFile != NULL;
-    }
-
-    size_t size() {
-        return mSize;
-    }
-};
 
 #define FIND_CLASS(var, className) \
     var = env->FindClass(className); \
@@ -159,31 +92,10 @@ static jobject ExifInterface_getRawMetadata(
     env->ReleaseStringUTFChars(jfilename, filenameChars);
 
     piex::PreviewImageData image_data;
-    memset(&image_data, 0, sizeof(image_data));
     std::unique_ptr<FileStream> stream(new FileStream(filename));
 
-    if (!stream.get()->exists()) {
-        // File is not exists.
-        ALOGI("File is not exists: %s", filename.string());
-        return NULL;
-    }
-
-    if (!piex::IsRaw(stream.get())) {
-        // Format not supported.
-        ALOGI("Format not supported: %s", filename.string());
-        return NULL;
-    }
-
-    piex::Error err = piex::GetPreviewImageData(stream.get(), &image_data);
-    if (err != piex::Error::kOk) {
-        // The input data seems to be broken.
-        ALOGI("Raw image not detected: %s (error code: %d)", filename.string(), (int32_t)err);
-        return NULL;
-    }
-
-    if (image_data.thumbnail_offset + image_data.thumbnail_length > stream.get()->size()) {
-        // Corrupted file.
-        ALOGI("Corrupted file: %s", filename.string());
+    if (!GetExifFromRawImage(stream.get(), filename, image_data)) {
+        ALOGI("Raw image not detected: %s", filename.string());
         return NULL;
     }
 

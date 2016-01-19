@@ -91,8 +91,10 @@ public class MediaFile {
     public static final int FILE_TYPE_RW2     = 305;
     public static final int FILE_TYPE_ORF     = 306;
     public static final int FILE_TYPE_RAF     = 307;
+    public static final int FILE_TYPE_PEF     = 308;
+    public static final int FILE_TYPE_SRW     = 309;
     private static final int FIRST_RAW_IMAGE_FILE_TYPE = FILE_TYPE_DNG;
-    private static final int LAST_RAW_IMAGE_FILE_TYPE = FILE_TYPE_RAF;
+    private static final int LAST_RAW_IMAGE_FILE_TYPE = FILE_TYPE_SRW;
 
     // Playlist file types
     public static final int FILE_TYPE_M3U      = 41;
@@ -228,17 +230,19 @@ public class MediaFile {
         addFileType("GIF", FILE_TYPE_GIF, "image/gif", MtpConstants.FORMAT_GIF);
         addFileType("PNG", FILE_TYPE_PNG, "image/png", MtpConstants.FORMAT_PNG);
         addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", MtpConstants.FORMAT_BMP);
-        addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp");
-        addFileType("WEBP", FILE_TYPE_WEBP, "image/webp");
+        addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp", MtpConstants.FORMAT_DEFINED);
+        addFileType("WEBP", FILE_TYPE_WEBP, "image/webp", MtpConstants.FORMAT_DEFINED);
 
         addFileType("DNG", FILE_TYPE_DNG, "image/x-adobe-dng", MtpConstants.FORMAT_DNG);
-        addFileType("CR2", FILE_TYPE_CR2, "image/x-canon-cr2");
-        addFileType("NEF", FILE_TYPE_NEF, "image/x-nikon-nef");
-        addFileType("NRW", FILE_TYPE_NRW, "image/x-nikon-nrw");
-        addFileType("ARW", FILE_TYPE_ARW, "image/x-sony-arw");
-        addFileType("RW2", FILE_TYPE_RW2, "image/x-panasonic-rw2");
-        addFileType("ORF", FILE_TYPE_ORF, "image/x-olympus-orf");
-        addFileType("RAF", FILE_TYPE_RAF, "image/x-fuji-raf");
+        addFileType("CR2", FILE_TYPE_CR2, "image/x-canon-cr2", MtpConstants.FORMAT_TIFF);
+        addFileType("NEF", FILE_TYPE_NEF, "image/x-nikon-nef", MtpConstants.FORMAT_TIFF_EP);
+        addFileType("NRW", FILE_TYPE_NRW, "image/x-nikon-nrw", MtpConstants.FORMAT_TIFF);
+        addFileType("ARW", FILE_TYPE_ARW, "image/x-sony-arw", MtpConstants.FORMAT_TIFF);
+        addFileType("RW2", FILE_TYPE_RW2, "image/x-panasonic-rw2", MtpConstants.FORMAT_TIFF);
+        addFileType("ORF", FILE_TYPE_ORF, "image/x-olympus-orf", MtpConstants.FORMAT_TIFF);
+        addFileType("RAF", FILE_TYPE_RAF, "image/x-fuji-raf", MtpConstants.FORMAT_DEFINED);
+        addFileType("PEF", FILE_TYPE_PEF, "image/x-pentax-pef", MtpConstants.FORMAT_TIFF);
+        addFileType("SRW", FILE_TYPE_SRW, "image/x-samsung-srw", MtpConstants.FORMAT_TIFF);
 
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("M3U", FILE_TYPE_M3U, "application/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);

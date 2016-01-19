@@ -182,6 +182,13 @@ public final class MtpConstants {
     public static final int FORMAT_MPEG = 0x300B;
     /** Format code for ASF files */
     public static final int FORMAT_ASF = 0x300C;
+    /**
+     * Format code for unknown image files.
+     * <p>
+     * Will be used for the formats which are not specified in PTP specification.
+     * For instance, WEBP and WBMP.
+     */
+    public static final int FORMAT_DEFINED = 0x3800;
     /** Format code for JPEG image files */
     public static final int FORMAT_EXIF_JPEG = 0x3801;
     /** Format code for TIFF EP image files */
@@ -272,12 +279,12 @@ public final class MtpConstants {
     public static final int FORMAT_MS_POWERPOINT_PRESENTATION = 0xBA86;
 
     /**
-      * Returns true if the object is abstract (that is, it has no representation
-      * in the underlying file system).
-      *
-      * @param format the format of the object
-      * @return true if the object is abstract
-      */
+     * Returns true if the object is abstract (that is, it has no representation
+     * in the underlying file system).
+     *
+     * @param format the format of the object
+     * @return true if the object is abstract
+     */
     public static boolean isAbstractObject(int format) {
         switch (format) {
             case FORMAT_ABSTRACT_MULTIMEDIA_ALBUM:

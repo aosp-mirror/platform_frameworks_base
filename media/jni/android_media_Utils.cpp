@@ -28,6 +28,91 @@
 
 namespace android {
 
+FileStream::FileStream(const String8 filename)
+    : mPosition(0),
+      mSize(0) {
+    mFile = fopen(filename.string(), "r");
+    if (mFile == NULL) {
+        return;
+    }
+    // Get the size.
+    fseek(mFile, 0l, SEEK_END);
+    mSize = ftell(mFile);
+    fseek(mFile, 0l, SEEK_SET);
+}
+
+FileStream::~FileStream() {
+    if (mFile != NULL) {
+        fclose(mFile);
+        mFile = NULL;
+    }
+}
+
+piex::Error FileStream::GetData(
+        const size_t offset, const size_t length, std::uint8_t* data) {
+    if (mFile == NULL) {
+        return piex::Error::kFail;
+    }
+
+    // Seek first.
+    if (mPosition != offset) {
+        fseek(mFile, offset, SEEK_SET);
+    }
+
+    // Read bytes.
+    size_t size = fread((void*)data, sizeof(std::uint8_t), length, mFile);
+    mPosition += size;
+
+    // Handle errors.
+    if (ferror(mFile) || (size == 0 && feof(mFile))) {
+        ALOGV("GetData read failed: (offset: %zu, length: %zu)", offset, length);
+        return piex::Error::kFail;
+    }
+    return piex::Error::kOk;
+}
+
+bool FileStream::exists() const {
+    return mFile != NULL;
+}
+
+size_t FileStream::size() const {
+    return mSize;
+}
+
+bool GetExifFromRawImage(
+        FileStream::FileStream* stream, const String8& filename,
+        piex::PreviewImageData& image_data) {
+    memset(&image_data, 0, sizeof(image_data));
+
+    if (!stream->exists()) {
+        // File is not exists.
+        ALOGV("File is not exists: %s", filename.string());
+        return false;
+    }
+
+    if (!piex::IsRaw(stream)) {
+        // Format not supported.
+        ALOGV("Format not supported: %s", filename.string());
+        return false;
+    }
+
+    piex::Error err = piex::GetPreviewImageData(stream, &image_data);
+
+    if (err != piex::Error::kOk) {
+        // The input data seems to be broken.
+        ALOGV("Raw image not detected: %s (piex error code: %d)", filename.string(), (int32_t)err);
+        return false;
+    }
+
+    if (image_data.thumbnail_offset + image_data.thumbnail_length > stream->size()) {
+        // Corrupted image.
+        ALOGV("Corrupted file: %s", filename.string());
+        return false;
+    }
+
+    return true;
+}
+
 bool ConvertKeyValueArraysToKeyedVector(
         JNIEnv *env, jobjectArray keys, jobjectArray values,
         KeyedVector<String8, String8>* keyedVector) {
