@@ -64,7 +64,8 @@ class PropertyValuesHolder_Delegate {
     private static long registerMethod(Class<?> targetClass, String methodName, Class[] types,
             int nArgs) {
         // Encode the number of arguments in the method name
-        String methodIndexName = String.format("%1$s#%2$d", methodName, nArgs);
+        String methodIndexName = String.format("%1$s.%2$s#%3$d", targetClass.getSimpleName(),
+                methodName, nArgs);
         synchronized (sMethodIndexLock) {
             Long methodId = METHOD_NAME_TO_ID.get(methodIndexName);
 
