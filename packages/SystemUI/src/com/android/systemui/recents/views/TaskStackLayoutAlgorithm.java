@@ -373,7 +373,7 @@ public class TaskStackLayoutAlgorithm {
      * Computes the minimum and maximum scroll progress values and the progress values for each task
      * in the stack.
      */
-    void update(TaskStack stack, ArraySet<Task> ignoreTasksSet) {
+    void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Clear the progress map
@@ -393,7 +393,7 @@ public class TaskStackLayoutAlgorithm {
         ArrayList<Task> stackTasks = new ArrayList<>();
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
-            if (ignoreTasksSet.contains(task)) {
+            if (ignoreTasksSet.contains(task.key)) {
                 continue;
             }
             if (task.isFreeformTask()) {
@@ -553,7 +553,8 @@ public class TaskStackLayoutAlgorithm {
 
             boolean isFrontMostTaskInGroup = task.group == null || task.group.isFrontMostTask(task);
             if (isFrontMostTaskInGroup) {
-                getStackTransform(taskProgress, mInitialScrollP, tmpTransform, null);
+                getStackTransform(taskProgress, mInitialScrollP, tmpTransform, null,
+                        false /* ignoreSingleTaskCase */);
                 float screenY = tmpTransform.rect.top;
                 boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
                 if (hasVisibleThumbnail) {
@@ -596,13 +597,21 @@ public class TaskStackLayoutAlgorithm {
                 return transformOut;
             }
             return getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
-                    frontTransform);
+                    frontTransform, false /* ignoreSingleTaskCase */);
         }
     }
 
-    /** Update/get the transform */
+    /**
+     * Update/get the transform.
+     *
+     * @param ignoreSingleTaskCase When set, will ensure that the transform computed does not take
+     *                             into account the special single-task case.  This is only used
+     *                             internally to ensure that we can calculate the transform for any
+     *                             position in the stack.
+     */
     public TaskViewTransform getStackTransform(float taskProgress, float stackScroll,
-            TaskViewTransform transformOut, TaskViewTransform frontTransform) {
+            TaskViewTransform transformOut, TaskViewTransform frontTransform,
+            boolean ignoreSingleTaskCase) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Compute the focused and unfocused offset
@@ -632,7 +641,7 @@ public class TaskStackLayoutAlgorithm {
         int y;
         float z;
         float relP;
-        if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
+        if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1 && !ignoreSingleTaskCase) {
             // When there is exactly one task, then decouple the task from the stack and just move
             // in screen space
             p = (mMinScrollP - stackScroll) / mNumStackTasks;
@@ -762,8 +771,8 @@ public class TaskStackLayoutAlgorithm {
                 mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
         float max = mUnfocusedRange.relativeMax +
                 mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
-        getStackTransform(min, 0f, mBackOfStackTransform, null);
-        getStackTransform(max, 0f, mFrontOfStackTransform, null);
+        getStackTransform(min, 0f, mBackOfStackTransform, null, true /* ignoreSingleTaskCase */);
+        getStackTransform(max, 0f, mFrontOfStackTransform, null, true /* ignoreSingleTaskCase */);
         mBackOfStackTransform.visible = true;
         mFrontOfStackTransform.visible = true;
     }

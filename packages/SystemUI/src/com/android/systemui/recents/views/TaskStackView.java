@@ -30,6 +30,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.MutableBoolean;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -77,7 +78,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
@@ -100,9 +100,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private static final float SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
     private static final float HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD = 0.3f;
 
-    private static final int DEFAULT_SYNC_STACK_DURATION = 200;
+    public static final int DEFAULT_SYNC_STACK_DURATION = 200;
     private static final int DRAG_SCALE_DURATION = 175;
     private static final float DRAG_SCALE_FACTOR = 1.05f;
+
+    private static final ArraySet<Task.TaskKey> EMPTY_TASK_SET = new ArraySet<>();
 
     TaskStack mStack;
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
@@ -116,7 +118,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     ArrayList<TaskView> mTaskViews = new ArrayList<>();
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
-    TaskViewAnimation mDeferredTaskViewUpdateAnimation = null;
+    ArraySet<Task.TaskKey> mIgnoreTasks = new ArraySet<>();
+    TaskViewAnimation mDeferredTaskViewLayoutAnimation = null;
 
     DozeTrigger mUIDozeTrigger;
     Task mFocusedTask;
@@ -137,7 +140,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
     ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();
-    ArraySet<Task> mTmpTaskSet = new ArraySet<>();
     List<TaskView> mTmpTaskViews = new ArrayList<>();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     LayoutInflater mInflater;
@@ -345,30 +347,82 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Gets the stack transforms of a list of tasks, and returns the visible range of tasks.
-     * This call ignores freeform tasks.
+     * Adds a task to the ignored set.
      */
-    private boolean updateStackTransforms(ArrayList<TaskViewTransform> taskTransforms,
-            ArrayList<Task> tasks, float stackScroll,
-            int[] visibleRangeOut, ArraySet<Task> ignoreTasksSet) {
-        int taskTransformCount = taskTransforms.size();
+    void addIgnoreTask(Task task) {
+        mIgnoreTasks.add(task.key);
+    }
+
+    /**
+     * Removes a task from the ignored set.
+     */
+    void removeIgnoreTask(Task task) {
+        mIgnoreTasks.remove(task.key);
+    }
+
+    /**
+     * Returns whether the specified {@param task} is ignored.
+     */
+    boolean isIgnoredTask(Task task) {
+        return mIgnoreTasks.contains(task.key);
+    }
+
+    /**
+     * Computes the task transforms at the current stack scroll for all visible tasks. If a valid
+     * target stack scroll is provided (ie. is different than {@param curStackScroll}), then the
+     * visible range includes all tasks at the target stack scroll. This is useful for ensure that
+     * all views necessary for a transition or animation will be visible at the start.
+     *
+     * This call ignores freeform tasks.
+     *
+     * @param taskTransforms The set of task view transforms to reuse, this list will be sized to
+     *                       match the size of {@param tasks}
+     * @param tasks The set of tasks for which to generate transforms
+     * @param curStackScroll The current stack scroll
+     * @param targetStackScroll The stack scroll that we anticipate we are going to be scrolling to.
+     *                          The range of the union of the visible views at the current and
+     *                          target stack scrolls will be returned.
+     * @param ignoreTasksSet The set of tasks to skip for purposes of calculaing the visible range.
+     *                       Transforms will still be calculated for the ignore tasks.
+     */
+    boolean computeVisibleTaskTransforms(ArrayList<TaskViewTransform> taskTransforms,
+            ArrayList<Task> tasks, float curStackScroll, float targetStackScroll,
+            int[] visibleRangeOut, ArraySet<Task.TaskKey> ignoreTasksSet) {
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
         int backMostVisibleIndex = -1;
+        boolean useTargetStackScroll = Float.compare(curStackScroll, targetStackScroll) != 0;
 
         // We can reuse the task transforms where possible to reduce object allocation
         Utilities.matchTaskListSize(tasks, taskTransforms);
 
         // Update the stack transforms
         TaskViewTransform frontTransform = null;
+        TaskViewTransform frontTransformAtTarget = null;
+        TaskViewTransform transform = null;
+        TaskViewTransform transformAtTarget = null;
         for (int i = taskCount - 1; i >= 0; i--) {
             Task task = tasks.get(i);
-            if (ignoreTasksSet.contains(task)) {
-                continue;
+
+            // Calculate the current and (if necessary) the target transform for the task
+            transform = mLayoutAlgorithm.getStackTransform(task, curStackScroll,
+                    taskTransforms.get(i), frontTransform);
+            if (useTargetStackScroll && !transform.visible) {
+                // If we have a target stack scroll and the task is not currently visible, then we
+                // just update the transform at the new scroll
+                // TODO: Optimize this
+                transformAtTarget = mLayoutAlgorithm.getStackTransform(task,
+                        targetStackScroll, new TaskViewTransform(), frontTransformAtTarget);
+                if (transformAtTarget.visible) {
+                    transform.copyFrom(transformAtTarget);
+                }
             }
 
-            TaskViewTransform transform = mLayoutAlgorithm.getStackTransform(task, stackScroll,
-                    taskTransforms.get(i), frontTransform);
+            // For ignore tasks, only calculate the stack transform and skip the calculation of the
+            // visible stack indices
+            if (ignoreTasksSet.contains(task.key)) {
+                continue;
+            }
 
             // For freeform tasks, only calculate the stack transform and skip the calculation of
             // the visible stack indices
@@ -392,7 +446,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     break;
                 }
             }
+
             frontTransform = transform;
+            frontTransformAtTarget = transformAtTarget;
         }
         if (visibleRangeOut != null) {
             visibleRangeOut[0] = frontMostVisibleIndex;
@@ -402,33 +458,48 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Updates the children {@link TaskView}s to match the tasks in the current {@link TaskStack}.
-     * This call does not update the {@link TaskView}s to their position in the layout except when
-     * they are initially picked up from the pool, when they will be placed in a suitable initial
-     * position.
+     * Binds the visible {@link TaskView}s at the given target scroll.
+     *
+     * @see #bindVisibleTaskViews(float, ArraySet<Task.TaskKey>)
      */
-    private void bindTaskViewsWithStack(ArraySet<Task> ignoreTasksSet) {
-        final float stackScroll = mStackScroller.getStackScroll();
+    void bindVisibleTaskViews(float targetStackScroll) {
+        bindVisibleTaskViews(targetStackScroll, mIgnoreTasks);
+    }
+
+    /**
+     * Synchronizes the set of children {@link TaskView}s to match the visible set of tasks in the
+     * current {@link TaskStack}. This call does not continue on to update their position to the
+     * computed {@link TaskViewTransform}s of the visible range, but only ensures that they will
+     * be added/removed from the view hierarchy and placed in the correct Z order and initial
+     * position (if not currently on screen).
+     *
+     * @param targetStackScroll If provided, will ensure that the set of visible {@link TaskView}s
+     *                          includes those visible at the current stack scroll, and all at the
+     *                          target stack scroll.
+     * @param ignoreTasksSet The set of tasks to ignore in this rebinding of the visible
+     *                       {@link TaskView}s
+     */
+    void bindVisibleTaskViews(float targetStackScroll, ArraySet<Task.TaskKey> ignoreTasksSet) {
         final int[] visibleStackRange = mTmpVisibleRange;
 
         // Get all the task transforms
         final ArrayList<Task> tasks = mStack.getStackTasks();
-        final boolean isValidVisibleStackRange = updateStackTransforms(mCurrentTaskTransforms,
-                tasks, stackScroll, visibleStackRange, ignoreTasksSet);
+        final boolean isValidVisibleRange = computeVisibleTaskTransforms(mCurrentTaskTransforms,
+                tasks, mStackScroller.getStackScroll(), targetStackScroll, visibleStackRange,
+                ignoreTasksSet);
 
         // Return all the invisible children to the pool
-        final List<TaskView> taskViews = getTaskViews();
-        final int taskViewCount = taskViews.size();
-        int lastFocusedTaskIndex = -1;
         mTmpTaskViewMap.clear();
-        mTmpTaskViewMap.ensureCapacity(tasks.size());
+        List<TaskView> taskViews = getTaskViews();
+        int lastFocusedTaskIndex = -1;
+        int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
-            final TaskView tv = taskViews.get(i);
-            final Task task = tv.getTask();
-            final int taskIndex = mStack.indexOfStackTask(task);
+            TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+            int taskIndex = mStack.indexOfStackTask(task);
 
             // Skip ignored tasks
-            if (ignoreTasksSet.contains(task)) {
+            if (ignoreTasksSet.contains(task.key)) {
                 continue;
             }
 
@@ -445,13 +516,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Pick up all the newly visible children
-        int lastVisStackIndex = isValidVisibleStackRange ? visibleStackRange[1] : 0;
-        for (int i = mStack.getTaskCount() - 1; i >= lastVisStackIndex; i--) {
-            final Task task = tasks.get(i);
-            final TaskViewTransform transform = mCurrentTaskTransforms.get(i);
+        int lastVisStackIndex = isValidVisibleRange ? visibleStackRange[1] : 0;
+        for (int i = tasks.size() - 1; i >= lastVisStackIndex; i--) {
+            Task task = tasks.get(i);
+            TaskViewTransform transform = mCurrentTaskTransforms.get(i);
 
             // Skip ignored tasks
-            if (ignoreTasksSet.contains(task)) {
+            if (ignoreTasksSet.contains(task.key)) {
                 continue;
             }
 
@@ -502,26 +573,34 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Cancels any existing {@link TaskView} animations, and updates each {@link TaskView} to its
-     * current position as defined by the {@link TaskStackLayoutAlgorithm}.
+     * Relayout the the visible {@link TaskView}s to their current transforms as specified by the
+     * {@link TaskStackLayoutAlgorithm} with the given {@param animation}. This call cancels any
+     * animations that are current running on those task views, and will ensure that the children
+     * {@link TaskView}s will match the set of visible tasks in the stack.
      *
-     * @param ignoreTasks the set of tasks to ignore in the relayout
+     * @see #relayoutTaskViews(TaskViewAnimation, ArraySet<Task.TaskKey>)
      */
-    private void updateTaskViewsToLayout(TaskViewAnimation animation, Task... ignoreTasks) {
-        // Keep track of the ignore tasks
-        ArraySet<Task> ignoreTasksSet = mTmpTaskSet;
-        ignoreTasksSet.clear();
-        ignoreTasksSet.ensureCapacity(ignoreTasks.length);
-        Collections.addAll(ignoreTasksSet, ignoreTasks);
+    void relayoutTaskViews(TaskViewAnimation animation) {
+        relayoutTaskViews(animation, mIgnoreTasks);
+    }
 
+    /**
+     * Relayout the the visible {@link TaskView}s to their current transforms as specified by the
+     * {@link TaskStackLayoutAlgorithm} with the given {@param animation}. This call cancels any
+     * animations that are current running on those task views, and will ensure that the children
+     * {@link TaskView}s will match the set of visible tasks in the stack.
+     *
+     * @param ignoreTasksSet the set of tasks to ignore in the relayout
+     */
+    void relayoutTaskViews(TaskViewAnimation animation, ArraySet<Task.TaskKey> ignoreTasksSet) {
         // If we had a deferred animation, cancel that
-        mDeferredTaskViewUpdateAnimation = null;
+        mDeferredTaskViewLayoutAnimation = null;
 
         // Cancel all task view animations
         cancelAllTaskViewAnimations();
 
-        // Fetch the current set of TaskViews
-        bindTaskViewsWithStack(ignoreTasksSet);
+        // Synchronize the current set of TaskViews
+        bindVisibleTaskViews(mStackScroller.getStackScroll(), ignoreTasksSet);
 
         // Animate them to their final transforms with the given animation
         List<TaskView> taskViews = getTaskViews();
@@ -531,7 +610,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             final int taskIndex = mStack.indexOfStackTask(tv.getTask());
             final TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
 
-            if (ignoreTasksSet.contains(tv.getTask())) {
+            if (ignoreTasksSet.contains(tv.getTask().key)) {
                 continue;
             }
 
@@ -542,8 +621,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**
      * Posts an update to synchronize the {@link TaskView}s with the stack on the next frame.
      */
-    private void updateTaskViewsToLayoutOnNextFrame(TaskViewAnimation animation) {
-        mDeferredTaskViewUpdateAnimation = animation;
+    void relayoutTaskViewsOnNextFrame(TaskViewAnimation animation) {
+        mDeferredTaskViewLayoutAnimation = animation;
         postInvalidateOnAnimation();
     }
 
@@ -558,13 +637,62 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Cancels all {@link TaskView} animations.
+     * Returns the current task transforms of all tasks, falling back to the stack layout if there
+     * is no {@link TaskView} for the task.
      */
-    private void cancelAllTaskViewAnimations() {
+    public void getCurrentTaskTransforms(ArrayList<Task> tasks,
+            ArrayList<TaskViewTransform> transformsOut) {
+        Utilities.matchTaskListSize(tasks, transformsOut);
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            Task task = tasks.get(i);
+            TaskViewTransform transform = transformsOut.get(i);
+            TaskView tv = getChildViewForTask(task);
+            if (tv != null) {
+                transform.fillIn(tv);
+            } else {
+                mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(),
+                        transform, null);
+            }
+            transform.visible = true;
+        }
+    }
+
+    /**
+     * Returns the task transforms for all the tasks in the stack if the stack was at the given
+     * {@param stackScroll}.
+     */
+    public void getLayoutTaskTransforms(float stackScroll, ArrayList<Task> tasks,
+            ArrayList<TaskViewTransform> transformsOut) {
+        Utilities.matchTaskListSize(tasks, transformsOut);
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            Task task = tasks.get(i);
+            TaskViewTransform transform = transformsOut.get(i);
+            mLayoutAlgorithm.getStackTransform(task, stackScroll, transform, null);
+            transform.visible = true;
+        }
+    }
+
+    /**
+     * Cancels all {@link TaskView} animations.
+     *
+     * @see #cancelAllTaskViewAnimations(ArraySet<Task.TaskKey>)
+     */
+    void cancelAllTaskViewAnimations() {
+        cancelAllTaskViewAnimations(mIgnoreTasks);
+    }
+
+    /**
+     * Cancels all {@link TaskView} animations.
+     *
+     * @param ignoreTasksSet The set of tasks to continue running their animations.
+     */
+    void cancelAllTaskViewAnimations(ArraySet<Task.TaskKey> ignoreTasksSet) {
         List<TaskView> taskViews = getTaskViews();
         for (int i = taskViews.size() - 1; i >= 0; i--) {
             final TaskView tv = taskViews.get(i);
-            tv.cancelTransformAnimation();
+            if (!ignoreTasksSet.contains(tv.getTask().key)) {
+                tv.cancelTransformAnimation();
+            }
         }
     }
 
@@ -577,11 +705,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the clip on each task child
         List<TaskView> taskViews = getTaskViews();
         TaskView tmpTv = null;
+        TaskView prevVisibleTv = null;
         int taskViewCount = taskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
             TaskView frontTv = null;
             int clipBottom = 0;
+
+            if (mIgnoreTasks.contains(tv.getTask().key)) {
+                // For each of the ignore tasks, update the translationZ of its TaskView to be
+                // between the translationZ of the tasks immediately underneath it
+                if (prevVisibleTv != null) {
+                    tv.setTranslationZ(Math.max(tv.getTranslationZ(),
+                            prevVisibleTv.getTranslationZ() + 0.1f));
+                }
+            }
+
             if (i < (taskViewCount - 1) && tv.shouldClipViewInStack()) {
                 // Find the next view to clip against
                 for (int j = i + 1; j < taskViewCount; j++) {
@@ -609,33 +748,37 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (!config.useHardwareLayers) {
                 tv.mThumbnailView.updateThumbnailVisibility(clipBottom - tv.getPaddingBottom());
             }
+            prevVisibleTv = tv;
         }
         mTaskViewsClipDirty = false;
     }
 
     /**
+     * Updates the layout algorithm min and max virtual scroll bounds.
+     *
+     * @see #updateLayoutAlgorithm(boolean, ArraySet<Task.TaskKey>)
+     */
+    void updateLayoutAlgorithm(boolean boundScrollToNewMinMax) {
+        updateLayoutAlgorithm(boundScrollToNewMinMax, mIgnoreTasks);
+    }
+
+    /**
      * Updates the min and max virtual scroll bounds.
      *
-     * @param ignoreTasks the set of tasks to ignore in the relayout
+     * @param ignoreTasksSet the set of tasks to ignore in the relayout
      */
-    void updateLayout(boolean boundScrollToNewMinMax, Task... ignoreTasks) {
-        // Keep track of the ingore tasks
-        ArraySet<Task> ignoreTasksSet = mTmpTaskSet;
-        ignoreTasksSet.clear();
-        ignoreTasksSet.ensureCapacity(ignoreTasks.length);
-        Collections.addAll(ignoreTasksSet, ignoreTasks);
-
+    void updateLayoutAlgorithm(boolean boundScrollToNewMinMax,
+            ArraySet<Task.TaskKey> ignoreTasksSet) {
         // Compute the min and max scroll values
         mLayoutAlgorithm.update(mStack, ignoreTasksSet);
 
-        // Update the freeform workspace
+        // Update the freeform workspace background
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.hasFreeformWorkspaceSupport()) {
             mTmpRect.set(mLayoutAlgorithm.mFreeformRect);
             mFreeformWorkspaceBackground.setBounds(mTmpRect);
         }
 
-        // Debug logging
         if (boundScrollToNewMinMax) {
             mStackScroller.boundScroll();
         }
@@ -937,28 +1080,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             // Notify accessibility
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
         }
-        if (mDeferredTaskViewUpdateAnimation != null) {
-            updateTaskViewsToLayout(mDeferredTaskViewUpdateAnimation);
+        if (mDeferredTaskViewLayoutAnimation != null) {
+            relayoutTaskViews(mDeferredTaskViewLayoutAnimation);
             mTaskViewsClipDirty = true;
-            mDeferredTaskViewUpdateAnimation = null;
+            mDeferredTaskViewLayoutAnimation = null;
         }
         if (mTaskViewsClipDirty) {
             clipTaskViews();
         }
-    }
-
-    /**
-     * Computes the stack and task rects.
-     *
-     * @param ignoreTasks the set of tasks to ignore in the relayout
-     */
-    public void computeRects(Rect taskStackBounds, boolean boundScroll, Task... ignoreTasks) {
-        // Compute the rects in the stack algorithm
-        mLayoutAlgorithm.initialize(taskStackBounds,
-                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
-
-        // Update the scroll bounds
-        updateLayout(boundScroll, ignoreTasks);
     }
 
     /**
@@ -967,11 +1096,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void updateLayoutForStack(TaskStack stack) {
         mStack = stack;
-        updateLayout(false);
+        updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
     }
 
     /**
-     * Computes the maximum number of visible tasks and thumbnails.  Requires that
+     * Computes the maximum number of visible tasks and thumbnails. Requires that
      * updateLayoutForStack() is called first.
      */
     public TaskStackLayoutAlgorithm.VisibilityReport computeStackVisibilityReport() {
@@ -1002,16 +1131,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
-        // Compute our stack/task rects
-        computeRects(mStackBounds, false);
+        // Compute the rects in the stack algorithm
+        mLayoutAlgorithm.initialize(mStackBounds,
+                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
+        updateLayoutAlgorithm(false /* boundScroll */, EMPTY_TASK_SET);
 
         // If this is the first layout, then scroll to the front of the stack, then update the
         // TaskViews with the stack so that we can lay them out
         if (mAwaitingFirstLayout) {
             mStackScroller.setStackScrollToInitialState();
         }
-        mTmpTaskSet.clear();
-        bindTaskViewsWithStack(mTmpTaskSet);
+        // Rebind all the views, including the ignore ones
+        bindVisibleTaskViews(mStackScroller.getStackScroll(), EMPTY_TASK_SET);
 
         // Measure each of the TaskViews
         mTmpTaskViews.clear();
@@ -1066,7 +1197,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mStackScroller.boundScroll();
             }
         }
-        updateTaskViewsToLayout(TaskViewAnimation.IMMEDIATE);
+        // Relayout all of the task views including the ignored ones
+        relayoutTaskViews(TaskViewAnimation.IMMEDIATE, EMPTY_TASK_SET);
         clipTaskViews();
 
         if (mAwaitingFirstLayout || !mEnterAnimationComplete) {
@@ -1106,8 +1238,29 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public boolean isTouchPointInView(float x, float y, TaskView tv) {
-        return (tv.getLeft() <= x && x <= tv.getRight()) &&
-                (tv.getTop() <= y && y <= tv.getBottom());
+        mTmpRect.set(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
+        mTmpRect.offset((int) tv.getTranslationX(), (int) tv.getTranslationY());
+        return mTmpRect.contains((int) x, (int) y);
+    }
+
+    /**
+     * Returns a non-ignored task in the {@param tasks} list that can be used as an achor when
+     * calculating the scroll position before and after a layout change.
+     */
+    public Task findAnchorTask(List<Task> tasks, MutableBoolean isFrontMostTask) {
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            Task task = tasks.get(i);
+
+            // Ignore deleting tasks
+            if (mIgnoreTasks.contains(task.key)) {
+                if (i == tasks.size() - 1) {
+                    isFrontMostTask.value = true;
+                }
+                continue;
+            }
+            return task;
+        }
+        return null;
     }
 
     @Override
@@ -1152,70 +1305,38 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onStackTaskAdded(TaskStack stack, Task newTask) {
         // Update the min/max scroll and animate other task views into their new positions
-        updateLayout(true);
+        updateLayoutAlgorithm(true /* boundScroll */);
 
         // Animate all the tasks into place
-        updateTaskViewsToLayout(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
+        relayoutTaskViews(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
                 mFastOutSlowInInterpolator));
     }
 
+    /**
+     * We expect that the {@link TaskView} associated with the removed task is already hidden.
+     */
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask) {
+            Task newFrontMostTask, TaskViewAnimation animation) {
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
         }
 
-        if (!removedTask.isFreeformTask()) {
-            // Remove the view associated with this task, we can't rely on updateTransforms
-            // to work here because the task is no longer in the list
-            TaskView tv = getChildViewForTask(removedTask);
-            if (tv != null) {
-                mViewPool.returnViewToPool(tv);
-            }
-
-            // Get the stack scroll of the task to anchor to (since we are removing something, the
-            // front most task will be our anchor task)
-            Task anchorTask = mStack.getStackFrontMostTask();
-            float prevAnchorTaskScroll = 0;
-            if (anchorTask != null) {
-                prevAnchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
-            }
-
-            // Update the min/max scroll and animate other task views into their new positions
-            updateLayout(true);
-
-            if (wasFrontMostTask) {
-                // Since the max scroll progress is offset from the bottom of the stack, just scroll
-                // to ensure that the new front most task is now fully visible
-                mStackScroller.setStackScroll(mLayoutAlgorithm.mMaxScrollP);
-            } else if (anchorTask != null) {
-                // Otherwise, offset the scroll by the movement of the anchor task
-                float anchorTaskScroll = mLayoutAlgorithm.getStackScrollForTask(anchorTask);
-                float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
-                if (mLayoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
-                    // If we are focused, we don't want the front task to move, but otherwise, we
-                    // allow the back task to move up, and the front task to move back
-                    stackScrollOffset /= 2;
-                }
-                mStackScroller.setStackScroll(mStackScroller.getStackScroll() + stackScrollOffset);
-                mStackScroller.boundScroll();
-            }
-        } else {
-            // Remove the view associated with this task, we can't rely on updateTransforms
-            // to work here because the task is no longer in the list
-            TaskView tv = getChildViewForTask(removedTask);
-            if (tv != null) {
-                mViewPool.returnViewToPool(tv);
-            }
-
-            // Update the min/max scroll and animate other task views into their new positions
-            updateLayout(true);
+        // Remove the view associated with this task, we can't rely on updateTransforms
+        // to work here because the task is no longer in the list
+        TaskView tv = getChildViewForTask(removedTask);
+        if (tv != null) {
+            mViewPool.returnViewToPool(tv);
         }
 
-        // Animate all the tasks into place
-        updateTaskViewsToLayout(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
-                mFastOutSlowInInterpolator));
+        // Remove the task from the ignored set
+        removeIgnoreTask(removedTask);
+
+        // If requested, relayout with the given animation
+        if (animation != null) {
+            updateLayoutAlgorithm(true /* boundScroll */);
+            relayoutTaskViews(animation);
+        }
 
         // Update the new front most task's action button
         if (mScreenPinningEnabled && newFrontMostTask != null) {
@@ -1232,7 +1353,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     @Override
-    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask) {
+    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask,
+            TaskViewAnimation animation) {
         // To be implemented
     }
 
@@ -1316,7 +1438,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onTaskViewClipStateChanged(TaskView tv) {
-        clipTaskViews();
+        if (!mTaskViewsClipDirty) {
+            mTaskViewsClipDirty = true;
+            invalidate();
+        }
     }
 
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
@@ -1324,7 +1449,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onScrollChanged(float prevScroll, float curScroll, TaskViewAnimation animation) {
         mUIDozeTrigger.poke();
-        updateTaskViewsToLayoutOnNextFrame(animation);
+        if (animation != null) {
+            relayoutTaskViewsOnNextFrame(animation);
+        }
 
         if (shouldShowHistoryButton() &&
                 prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
@@ -1354,7 +1481,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.dismissTask();
                 } else {
                     // Otherwise, remove the task from the stack immediately
-                    mStack.removeTask(t);
+                    mStack.removeTask(t, TaskViewAnimation.IMMEDIATE);
                 }
             }
         }
@@ -1402,7 +1529,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(TaskViewDismissedEvent event) {
-        removeTaskViewFromStack(event.taskView);
+        removeTaskViewFromStack(event.taskView, event.task);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
     }
 
@@ -1455,23 +1582,29 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
+        TaskViewAnimation animation = new TaskViewAnimation(250, mFastOutSlowInInterpolator);
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
+            addIgnoreTask(event.task);
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
             mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
                     getMeasuredHeight(), mDividerSize, mLayoutAlgorithm.mSystemInsets,
                     getResources()));
-            computeRects(mStackBounds, true /* boundScroll */, event.task /* ignoreTask */);
-            updateTaskViewsToLayout(new TaskViewAnimation(250, mFastOutSlowInInterpolator),
-                    event.task /* ignoreTask */);
+            mLayoutAlgorithm.initialize(mStackBounds,
+                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
+            updateLayoutAlgorithm(true /* boundScroll */);
         } else {
-            // Restore the pre-drag task stack bounds
+            // Restore the pre-drag task stack bounds, but ensure that we don't layout the dragging
+            // task view, so add it back to the ignore set after updating the layout
             mStackBounds.set(mStableStackBounds);
-            computeRects(mStackBounds, true /* boundScroll */);
-            updateTaskViewsToLayout(new TaskViewAnimation(250, mFastOutSlowInInterpolator),
-                    event.task /* ignoreTask */);
+            removeIgnoreTask(event.task);
+            mLayoutAlgorithm.initialize(mStackBounds,
+                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
+            updateLayoutAlgorithm(true /* boundScroll */);
+            addIgnoreTask(event.task);
         }
+        relayoutTaskViews(animation);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -1487,14 +1620,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         if (hasChangedStacks) {
             // Move the task to the right position in the stack (ie. the front of the stack if
-            // freeform or the front of the stack if fullscreen).  Note, we MUST move the tasks
+            // freeform or the front of the stack if fullscreen). Note, we MUST move the tasks
             // before we update their stack ids, otherwise, the keys will have changed.
             if (event.dropTarget == mFreeformWorkspaceDropTarget) {
                 mStack.moveTaskToStack(event.task, FREEFORM_WORKSPACE_STACK_ID);
             } else if (event.dropTarget == mStackDropTarget) {
                 mStack.moveTaskToStack(event.task, FULLSCREEN_WORKSPACE_STACK_ID);
             }
-            updateLayout(true);
+            updateLayoutAlgorithm(true /* boundScroll */);
 
             // Move the task to the new stack in the system after the animation completes
             event.addPostAnimationCallback(new Runnable() {
@@ -1522,11 +1655,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mLayoutAlgorithm.getStackTransform(event.task, getScroller().getStackScroll(),
                 mTmpTransform, null);
         event.getAnimationTrigger().increment();
-        updateTaskViewsToLayout(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
+        relayoutTaskViews(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
                 mFastOutSlowInInterpolator));
         updateTaskViewToTransform(event.taskView, mTmpTransform,
                 new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION, mFastOutSlowInInterpolator,
                         event.getAnimationTrigger().decrementOnAnimationEnd()));
+        removeIgnoreTask(event.task);
     }
 
     public final void onBusEvent(StackViewScrolledEvent event) {
@@ -1593,15 +1727,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Removes the task from the stack, and updates the focus to the next task in the stack if the
      * removed TaskView was focused.
      */
-    private void removeTaskViewFromStack(TaskView tv) {
-        Task task = tv.getTask();
-
+    private void removeTaskViewFromStack(TaskView tv, Task task) {
         // Announce for accessibility
         tv.announceForAccessibility(getContext().getString(
-                R.string.accessibility_recents_item_dismissed, tv.getTask().title));
+                R.string.accessibility_recents_item_dismissed, task.title));
 
         // Remove the task from the stack
-        mStack.removeTask(task);
+        mStack.removeTask(task, new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
+                mFastOutSlowInInterpolator));
     }
 
     /**
@@ -1622,7 +1755,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Returns the insert index for the task in the current set of task views.  If the given task
+     * Returns the insert index for the task in the current set of task views. If the given task
      * is already in the task view list, then this method returns the insert index assuming it
      * is first removed at the previous index.
      *
