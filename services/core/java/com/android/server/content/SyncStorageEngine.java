@@ -1459,15 +1459,23 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * @return a copy of the current syncs data structure. Will not return
-     * null.
+     * @param userId Id of user to return current sync info.
+     * @param canAccessAccounts Determines whether to redact Account information from the result.
+     * @return a copy of the current syncs data structure. Will not return null.
      */
-    public List<SyncInfo> getCurrentSyncsCopy(int userId) {
+    public List<SyncInfo> getCurrentSyncsCopy(int userId, boolean canAccessAccounts) {
         synchronized (mAuthorities) {
             final List<SyncInfo> syncs = getCurrentSyncsLocked(userId);
             final List<SyncInfo> syncsCopy = new ArrayList<SyncInfo>();
             for (SyncInfo sync : syncs) {
-                syncsCopy.add(new SyncInfo(sync));
+                SyncInfo copy;
+                if (!canAccessAccounts) {
+                    copy = SyncInfo.createAccountRedacted(
+                        sync.authorityId, sync.authority, sync.startTime);
+                } else {
+                    copy = new SyncInfo(sync);
+                }
+                syncsCopy.add(copy);
             }
             return syncsCopy;
         }
