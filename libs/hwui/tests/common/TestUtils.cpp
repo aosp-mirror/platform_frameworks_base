@@ -21,7 +21,6 @@
 
 #include <unistd.h>
 #include <signal.h>
-#include <setjmp.h>
 
 namespace android {
 namespace uirenderer {
@@ -129,11 +128,14 @@ static void defaultCrashHandler() {
     fprintf(stderr, "RenderThread crashed!");
 }
 
-static jmp_buf gErrJmpBuff;
 static std::function<void()> gCrashHandler = defaultCrashHandler;
+static sighandler_t gPreviousSignalHandler;
 
 static void signalHandler(int sig) {
-    longjmp(gErrJmpBuff, 1);
+    gCrashHandler();
+    if (gPreviousSignalHandler) {
+        gPreviousSignalHandler(sig);
+    }
 }
 
 void TestUtils::setRenderThreadCrashHandler(std::function<void()> crashHandler) {
@@ -141,17 +143,7 @@ void TestUtils::setRenderThreadCrashHandler(std::function<void()> crashHandler) 
 }
 
 void TestUtils::TestTask::run() {
-    struct sigaction act;
-    memset(&act, 0, sizeof(act));
-    act.sa_handler = signalHandler;
-
-    if (setjmp(gErrJmpBuff)) {
-        gCrashHandler();
-        return;
-    }
-
-    sigaction(SIGABRT, &act, nullptr);
-
+    gPreviousSignalHandler = signal(SIGABRT, signalHandler);
 
     // RenderState only valid once RenderThread is running, so queried here
     RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
@@ -159,6 +151,9 @@ void TestUtils::TestTask::run() {
     renderState.onGLContextCreated();
     rtCallback(renderthread::RenderThread::getInstance());
     renderState.onGLContextDestroyed();
+
+    // Restore the previous signal handler
+    signal(SIGABRT, gPreviousSignalHandler);
 }
 
 } /* namespace uirenderer */
