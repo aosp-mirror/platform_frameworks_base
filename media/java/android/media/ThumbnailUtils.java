@@ -92,7 +92,8 @@ public class ThumbnailUtils {
         SizedThumbnailBitmap sizedThumbnailBitmap = new SizedThumbnailBitmap();
         Bitmap bitmap = null;
         MediaFileType fileType = MediaFile.getFileType(filePath);
-        if (fileType != null && fileType.fileType == MediaFile.FILE_TYPE_JPEG) {
+        if (fileType != null && (fileType.fileType == MediaFile.FILE_TYPE_JPEG
+                || MediaFile.isRawImageFileType(fileType.fileType))) {
             createThumbnailFromEXIF(filePath, targetSize, maxPixels, sizedThumbnailBitmap);
             bitmap = sizedThumbnailBitmap.mBitmap;
         }

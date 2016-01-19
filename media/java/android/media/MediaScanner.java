@@ -899,7 +899,8 @@ public class MediaScanner implements AutoCloseable {
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
-            } else if (mFileType == MediaFile.FILE_TYPE_JPEG && !mNoMedia) {
+            } else if ((mFileType == MediaFile.FILE_TYPE_JPEG
+                    || MediaFile.isRawImageFileType(mFileType)) && !mNoMedia) {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);

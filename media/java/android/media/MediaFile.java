@@ -52,7 +52,7 @@ public class MediaFile {
     public static final int FILE_TYPE_IMY     = 13;
     private static final int FIRST_MIDI_FILE_TYPE = FILE_TYPE_MID;
     private static final int LAST_MIDI_FILE_TYPE = FILE_TYPE_IMY;
-   
+
     // Video file types
     public static final int FILE_TYPE_MP4     = 21;
     public static final int FILE_TYPE_M4V     = 22;
@@ -66,7 +66,7 @@ public class MediaFile {
     public static final int FILE_TYPE_WEBM    = 30;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
     private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_WEBM;
-    
+
     // More video file types
     public static final int FILE_TYPE_MP2PS   = 200;
     private static final int FIRST_VIDEO_FILE_TYPE2 = FILE_TYPE_MP2PS;
@@ -81,7 +81,19 @@ public class MediaFile {
     public static final int FILE_TYPE_WEBP    = 36;
     private static final int FIRST_IMAGE_FILE_TYPE = FILE_TYPE_JPEG;
     private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_WEBP;
-   
+
+    // Raw image file types
+    public static final int FILE_TYPE_DNG     = 300;
+    public static final int FILE_TYPE_CR2     = 301;
+    public static final int FILE_TYPE_NEF     = 302;
+    public static final int FILE_TYPE_NRW     = 303;
+    public static final int FILE_TYPE_ARW     = 304;
+    public static final int FILE_TYPE_RW2     = 305;
+    public static final int FILE_TYPE_ORF     = 306;
+    public static final int FILE_TYPE_RAF     = 307;
+    private static final int FIRST_RAW_IMAGE_FILE_TYPE = FILE_TYPE_DNG;
+    private static final int LAST_RAW_IMAGE_FILE_TYPE = FILE_TYPE_RAF;
+
     // Playlist file types
     public static final int FILE_TYPE_M3U      = 41;
     public static final int FILE_TYPE_PLS      = 42;
@@ -105,17 +117,17 @@ public class MediaFile {
     public static final int FILE_TYPE_MS_EXCEL      = 105;
     public static final int FILE_TYPE_MS_POWERPOINT = 106;
     public static final int FILE_TYPE_ZIP           = 107;
-    
+
     public static class MediaFileType {
         public final int fileType;
         public final String mimeType;
-        
+
         MediaFileType(int fileType, String mimeType) {
             this.fileType = fileType;
             this.mimeType = mimeType;
         }
     }
-    
+
     private static final HashMap<String, MediaFileType> sFileTypeMap
             = new HashMap<String, MediaFileType>();
     private static final HashMap<String, Integer> sMimeTypeMap
@@ -182,7 +194,7 @@ public class MediaFile {
         addFileType("AAC", FILE_TYPE_AAC, "audio/aac", MtpConstants.FORMAT_AAC);
         addFileType("AAC", FILE_TYPE_AAC, "audio/aac-adts", MtpConstants.FORMAT_AAC);
         addFileType("MKA", FILE_TYPE_MKA, "audio/x-matroska");
- 
+
         addFileType("MID", FILE_TYPE_MID, "audio/midi");
         addFileType("MIDI", FILE_TYPE_MID, "audio/midi");
         addFileType("XMF", FILE_TYPE_MID, "audio/midi");
@@ -192,7 +204,7 @@ public class MediaFile {
         addFileType("RTX", FILE_TYPE_MID, "audio/midi");
         addFileType("OTA", FILE_TYPE_MID, "audio/midi");
         addFileType("MXMF", FILE_TYPE_MID, "audio/midi");
-        
+
         addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg", MtpConstants.FORMAT_MPEG);
         addFileType("MPG", FILE_TYPE_MP4, "video/mpeg", MtpConstants.FORMAT_MPEG);
         addFileType("MP4", FILE_TYPE_MP4, "video/mp4", MtpConstants.FORMAT_MPEG);
@@ -218,7 +230,16 @@ public class MediaFile {
         addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", MtpConstants.FORMAT_BMP);
         addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp");
         addFileType("WEBP", FILE_TYPE_WEBP, "image/webp");
- 
+
+        addFileType("DNG", FILE_TYPE_DNG, "image/x-adobe-dng", MtpConstants.FORMAT_DNG);
+        addFileType("CR2", FILE_TYPE_CR2, "image/x-canon-cr2");
+        addFileType("NEF", FILE_TYPE_NEF, "image/x-nikon-nef");
+        addFileType("NRW", FILE_TYPE_NRW, "image/x-nikon-nrw");
+        addFileType("ARW", FILE_TYPE_ARW, "image/x-sony-arw");
+        addFileType("RW2", FILE_TYPE_RW2, "image/x-panasonic-rw2");
+        addFileType("ORF", FILE_TYPE_ORF, "image/x-olympus-orf");
+        addFileType("RAF", FILE_TYPE_RAF, "image/x-fuji-raf");
+
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("M3U", FILE_TYPE_M3U, "application/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("PLS", FILE_TYPE_PLS, "audio/x-scpls", MtpConstants.FORMAT_PLS_PLAYLIST);
@@ -258,7 +279,14 @@ public class MediaFile {
 
     public static boolean isImageFileType(int fileType) {
         return (fileType >= FIRST_IMAGE_FILE_TYPE &&
-                fileType <= LAST_IMAGE_FILE_TYPE);
+                fileType <= LAST_IMAGE_FILE_TYPE)
+            || (fileType >= FIRST_RAW_IMAGE_FILE_TYPE &&
+                fileType <= LAST_RAW_IMAGE_FILE_TYPE);
+    }
+
+    public static boolean isRawImageFileType(int fileType) {
+        return (fileType >= FIRST_RAW_IMAGE_FILE_TYPE &&
+                fileType <= LAST_RAW_IMAGE_FILE_TYPE);
     }
 
     public static boolean isPlayListFileType(int fileType) {
