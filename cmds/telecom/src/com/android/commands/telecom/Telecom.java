@@ -19,11 +19,13 @@ package com.android.commands.telecom;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
+import android.os.IUserManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
-import android.text.TextUtils;
 
 import com.android.internal.os.BaseCommand;
 import com.android.internal.telecom.ITelecomService;
@@ -53,16 +55,17 @@ public final class Telecom extends BaseCommand {
     private ComponentName mComponent;
     private String mAccountId;
     private ITelecomService mTelecomService;
+    private IUserManager mUserManager;
 
     @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: telecom [subcommand] [options]\n" +
-                "usage: telecom set-phone-account-enabled <COMPONENT> <ID>\n" +
-                "usage: telecom set-phone-account-disabled <COMPONENT> <ID>\n" +
-                "usage: telecom register-phone-account <COMPONENT> <ID> <LABEL>\n" +
-                "usage: telecom register-sim-phone-account <COMPONENT> <ID> <LABEL> <ADDRESS>\n" +
-                "usage: telecom unregister-phone-account <COMPONENT> <ID>\n" +
+                "usage: telecom set-phone-account-enabled <COMPONENT> <ID> <USER_SN>\n" +
+                "usage: telecom set-phone-account-disabled <COMPONENT> <ID> <USER_SN>\n" +
+                "usage: telecom register-phone-account <COMPONENT> <ID> <USER_SN> <LABEL>\n" +
+                "usage: telecom register-sim-phone-account <COMPONENT> <ID> <USER_SN> <LABEL> <ADDRESS>\n" +
+                "usage: telecom unregister-phone-account <COMPONENT> <ID> <USER_SN>\n" +
                 "usage: telecom set-default-dialer <PACKAGE>\n" +
                 "usage: telecom get-default-dialer\n" +
                 "usage: telecom get-system-dialer\n" +
@@ -87,6 +90,12 @@ public final class Telecom extends BaseCommand {
                 ServiceManager.getService(Context.TELECOM_SERVICE));
         if (mTelecomService == null) {
             showError("Error: Could not access the Telecom Manager. Is the system running?");
+            return;
+        }
+        mUserManager = IUserManager.Stub
+                .asInterface(ServiceManager.getService(Context.USER_SERVICE));
+        if (mUserManager == null) {
+            showError("Error: Could not access the User Manager. Is the system running?");
             return;
         }
 
@@ -183,10 +192,18 @@ public final class Telecom extends BaseCommand {
         System.out.println(mTelecomService.getSystemDialerPackage());
     }
 
-    private PhoneAccountHandle getPhoneAccountHandleFromArgs() {
+    private PhoneAccountHandle getPhoneAccountHandleFromArgs() throws RemoteException{
         final ComponentName component = parseComponentName(nextArgRequired());
         final String accountId = nextArgRequired();
-        return new PhoneAccountHandle(component, accountId);
+        final String userSnInStr = nextArgRequired();
+        UserHandle userHandle;
+        try {
+            final int userSn = Integer.parseInt(userSnInStr);
+            userHandle = UserHandle.of(mUserManager.getUserHandle(userSn));
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException ("Invalid user serial number " + userSnInStr);
+        }
+        return new PhoneAccountHandle(component, accountId, userHandle);
     }
 
     private ComponentName parseComponentName(String component) {
