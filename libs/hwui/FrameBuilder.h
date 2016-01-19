@@ -21,6 +21,7 @@
 #include "DisplayList.h"
 #include "LayerBuilder.h"
 #include "RecordedOp.h"
+#include "utils/GLUtils.h"
 
 #include <vector>
 #include <unordered_map>
@@ -99,22 +100,30 @@ public:
         // Relay through layers in reverse order, since layers
         // later in the list will be drawn by earlier ones
         for (int i = mLayerBuilders.size() - 1; i >= 1; i--) {
+            GL_CHECKPOINT();
             LayerBuilder& layer = *(mLayerBuilders[i]);
             if (layer.renderNode) {
                 // cached HW layer - can't skip layer if empty
                 renderer.startRepaintLayer(layer.offscreenBuffer, layer.repaintRect);
+                GL_CHECKPOINT();
                 layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
+                GL_CHECKPOINT();
                 renderer.endLayer();
             } else if (!layer.empty()) { // save layer - skip entire layer if empty
                 layer.offscreenBuffer = renderer.startTemporaryLayer(layer.width, layer.height);
+                GL_CHECKPOINT();
                 layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
+                GL_CHECKPOINT();
                 renderer.endLayer();
             }
         }
 
+        GL_CHECKPOINT();
         const LayerBuilder& fbo0 = *(mLayerBuilders[0]);
         renderer.startFrame(fbo0.width, fbo0.height, fbo0.repaintRect);
+        GL_CHECKPOINT();
         fbo0.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
+        GL_CHECKPOINT();
         renderer.endFrame(fbo0.repaintRect);
     }
 

@@ -16,6 +16,7 @@
 
 #include "Caches.h"
 #include "Texture.h"
+#include "utils/GLUtils.h"
 #include "utils/TraceUtils.h"
 
 #include <utils/Log.h>
@@ -93,22 +94,28 @@ bool Texture::updateSize(uint32_t width, uint32_t height, GLint format) {
 
 void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
+    GL_CHECKPOINT();
     bool needsAlloc = updateSize(width, height, internalformat);
     if (!needsAlloc && !pixels) {
         return;
     }
     mCaches.textureState().activateTexture(0);
+    GL_CHECKPOINT();
     if (!mId) {
         glGenTextures(1, &mId);
         needsAlloc = true;
     }
+    GL_CHECKPOINT();
     mCaches.textureState().bindTexture(GL_TEXTURE_2D, mId);
+    GL_CHECKPOINT();
     if (needsAlloc) {
         glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
                 format, type, pixels);
+        GL_CHECKPOINT();
     } else {
         glTexSubImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
                 format, type, pixels);
+        GL_CHECKPOINT();
     }
 }
 
