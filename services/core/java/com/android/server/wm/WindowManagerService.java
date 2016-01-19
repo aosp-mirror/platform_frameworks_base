@@ -20,7 +20,6 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -57,7 +56,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -220,7 +218,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerDebugConfig.HIDE_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -1502,7 +1500,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (w != null) {
             if (willMove) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
-                        + w + (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4)));
+                        + w + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
                 mInputMethodTarget = w;
                 mInputMethodTargetWaitingAnim = false;
                 if (w.mAppToken != null) {
@@ -1516,7 +1514,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (willMove) {
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to null."
-                    + (HIDE_STACK_CRAWLS ? "" : " Callers=" + Debug.getCallers(4)));
+                    + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
             mInputMethodTarget = null;
             mLayersController.setInputMethodAnimLayerAdjustment(0);
         }
@@ -2391,22 +2389,27 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    static void logSurface(WindowState w, String msg, RuntimeException where) {
+    static void logSurface(WindowState w, String msg, boolean withStackTrace) {
         String str = "  SURFACE " + msg + ": " + w;
-        if (where != null) {
-            Slog.i(TAG_WM, str, where);
+        if (withStackTrace) {
+            logWithStack(TAG, str);
         } else {
             Slog.i(TAG_WM, str);
         }
     }
 
-    static void logSurface(SurfaceControl s, String title, String msg, RuntimeException where) {
+    static void logSurface(SurfaceControl s, String title, String msg) {
         String str = "  SURFACE " + s + ": " + msg + " / " + title;
-        if (where != null) {
-            Slog.i(TAG_WM, str, where);
-        } else {
-            Slog.i(TAG_WM, str);
+        Slog.i(TAG_WM, str);
+    }
+
+    static void logWithStack(String tag, String s) {
+        RuntimeException e = null;
+        if (SHOW_STACK_CRAWLS) {
+            e = new RuntimeException();
+            e.fillInStackTrace();
         }
+        Slog.i(tag, s, e);
     }
 
     void setTransparentRegionWindow(Session session, IWindow client, Region region) {
@@ -2415,7 +2418,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState w = windowForClientLocked(session, client, false);
                 if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                        "transparentRegionHint=" + region, null);
+                        "transparentRegionHint=" + region, false);
 
                 if ((w != null) && w.mHasSurface) {
                     w.mWinAnimator.setTransparentRegionHintLocked(region);
@@ -2990,14 +2993,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mCurConfiguration.orientation, frame, insets, surfaceInsets, isVoiceInteraction,
                     !fullscreen, atoken.mTask.mTaskId);
             if (a != null) {
-                if (DEBUG_ANIM) {
-                    RuntimeException e = null;
-                    if (!HIDE_STACK_CRAWLS) {
-                        e = new RuntimeException();
-                        e.fillInStackTrace();
-                    }
-                    Slog.v(TAG_WM, "Loaded animation " + a + " for " + atoken, e);
-                }
+                if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
                 final int containingHeight = frame.height();
                 atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight,
@@ -4306,16 +4302,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void startAppFreezingScreenLocked(AppWindowToken wtoken) {
-        if (DEBUG_ORIENTATION) {
-            RuntimeException e = null;
-            if (!HIDE_STACK_CRAWLS) {
-                e = new RuntimeException();
-                e.fillInStackTrace();
-            }
-            Slog.i(TAG_WM, "Set freezing of " + wtoken.appToken
-                    + ": hidden=" + wtoken.hidden + " freezing="
-                    + wtoken.mAppAnimator.freezingScreen, e);
-        }
+        if (DEBUG_ORIENTATION) logWithStack(TAG, "Set freezing of " + wtoken.appToken + ": hidden="
+                + wtoken.hidden + " freezing=" + wtoken.mAppAnimator.freezingScreen);
         if (!wtoken.hiddenRequested) {
             if (!wtoken.mAppAnimator.freezingScreen) {
                 wtoken.mAppAnimator.freezingScreen = true;
@@ -8933,7 +8921,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + ws + " surface=" + wsa.mSurfaceController
                                     + " token=" + ws.mAppToken
                                     + " saved=" + ws.mAppToken.hasSavedSurface());
-                            if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
+                            if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", false);
                             wsa.destroySurface();
                             ws.setHasSurface(false);
                             leakedSurface = true;
@@ -8979,7 +8967,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surfaceController != null) {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(winAnimator.mWin,
-                            "RECOVER DESTROY", null);
+                            "RECOVER DESTROY", false);
                     surfaceController.destroyInTransaction();
                     winAnimator.mWin.setHasSurface(false);
                     scheduleRemoveStartingWindowLocked(winAnimator.mWin.mAppToken);

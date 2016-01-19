@@ -71,6 +71,6 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_VERBOSE_TRANSACTIONS = false && SHOW_TRANSACTIONS;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
-    static final boolean HIDE_STACK_CRAWLS = true;
+    static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
 }

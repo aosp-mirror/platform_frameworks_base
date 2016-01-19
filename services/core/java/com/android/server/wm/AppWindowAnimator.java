@@ -247,7 +247,7 @@ public class AppWindowAnimator {
         thumbnailTransformation.getMatrix().getValues(tmpFloats);
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "POS " + tmpFloats[Matrix.MTRANS_X]
-                + ", " + tmpFloats[Matrix.MTRANS_Y], null);
+                + ", " + tmpFloats[Matrix.MTRANS_Y]);
         thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
@@ -255,7 +255,7 @@ public class AppWindowAnimator {
                 + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
                 + "," + tmpFloats[Matrix.MSKEW_Y]
                 + "][" + tmpFloats[Matrix.MSKEW_X]
-                + "," + tmpFloats[Matrix.MSCALE_Y] + "]", null);
+                + "," + tmpFloats[Matrix.MSCALE_Y] + "]");
         thumbnail.setAlpha(thumbnailTransformation.getAlpha());
         if (thumbnailForceAboveLayer > 0) {
             thumbnail.setLayer(thumbnailForceAboveLayer + 1);
