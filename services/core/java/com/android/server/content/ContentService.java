@@ -772,9 +772,13 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
 
+        final boolean canAccessAccounts =
+            mContext.checkCallingOrSelfPermission(Manifest.permission.GET_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
         long identityToken = clearCallingIdentity();
         try {
-            return getSyncManager().getSyncStorageEngine().getCurrentSyncsCopy(userId);
+            return getSyncManager().getSyncStorageEngine()
+                .getCurrentSyncsCopy(userId, canAccessAccounts);
         } finally {
             restoreCallingIdentity(identityToken);
         }
