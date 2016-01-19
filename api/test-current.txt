@@ -24282,6 +24282,7 @@ package android.nfc {
 
   public final class Tag implements android.os.Parcelable {
     method public int describeContents();
+    method public boolean done(int);
     method public byte[] getId();
     method public java.lang.String[] getTechList();
     method public void writeToParcel(android.os.Parcel, int);

@@ -25,13 +25,13 @@ import android.nfc.TransceiveResult;
  */
 interface INfcTag
 {
-    int close(int nativeHandle);
     int connect(int nativeHandle, int technology);
     int reconnect(int nativeHandle);
     int[] getTechList(int nativeHandle);
     boolean isNdef(int nativeHandle);
     boolean isPresent(int nativeHandle);
     TransceiveResult transceive(int nativeHandle, in byte[] data, boolean raw);
+    boolean done(int nativeHandle, int debounceMs);
 
     NdefMessage ndefRead(int nativeHandle);
     int ndefWrite(int nativeHandle, in NdefMessage msg);
