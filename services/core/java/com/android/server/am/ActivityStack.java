@@ -41,6 +41,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.ArraySet;
 
+import android.util.Log;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BatteryStatsImpl;
@@ -4712,6 +4713,7 @@ final class ActivityStack {
         }
 
         task.stack = null;
+        task.lastStackClear = Log.getStackTraceString(new Throwable());
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent,
