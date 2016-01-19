@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
-HWUI_NEW_OPS := true
+HWUI_NEW_OPS := false
 
 hwui_src_files := \
     font/CacheTexture.cpp \
@@ -233,7 +233,6 @@ LOCAL_SRC_FILES += \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
-    tests/unit/LeakCheckTests.cpp \
     tests/unit/VectorDrawableTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/StringUtilsTests.cpp
@@ -242,6 +241,7 @@ ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
         tests/unit/BakedOpStateTests.cpp \
         tests/unit/FrameBuilderTests.cpp \
+        tests/unit/LeakCheckTests.cpp \
         tests/unit/RecordingCanvasTests.cpp
 endif
 
