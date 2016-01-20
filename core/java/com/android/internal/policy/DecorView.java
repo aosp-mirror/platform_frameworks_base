@@ -35,6 +35,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -94,6 +95,8 @@ import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 /** @hide */
 public class DecorView extends FrameLayout implements RootViewSurfaceTaker, WindowCallbacks {
     private static final String TAG = "DecorView";
+
+    private static final boolean DEBUG_MEASURE = false;
 
     private static final boolean SWEEP_OPEN_MENU = false;
 
@@ -575,7 +578,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 } else {
                     w = 0;
                 }
-
+                if (DEBUG_MEASURE) Log.d(mLogTag, "Fixed width: " + w);
                 if (w > 0) {
                     final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(
@@ -597,6 +600,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 } else {
                     h = 0;
                 }
+                if (DEBUG_MEASURE) Log.d(mLogTag, "Fixed height: " + h);
                 if (h > 0) {
                     final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(
@@ -641,6 +645,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 } else {
                     min = 0;
                 }
+                if (DEBUG_MEASURE) Log.d(mLogTag, "Adjust for min width: " + min + ", value::"
+                        + tv.coerceToString() + ", mAvailableWidth=" + mAvailableWidth);
 
                 if (width < min) {
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(min, EXACTLY);
@@ -1591,7 +1597,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
-    void onConfigurationChanged() {
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         int workspaceId = getStackId();
         if (mStackId != workspaceId) {
             mStackId = workspaceId;
@@ -1948,11 +1956,20 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
-    void updateLogTag(WindowManager.LayoutParams params) {
+    private static String getTitleSuffix(WindowManager.LayoutParams params) {
+        if (params == null) {
+            return "";
+        }
         final String[] split = params.getTitle().toString().split("\\.");
         if (split.length > 0) {
-            mLogTag = TAG + "[" + split[split.length - 1] + "]";
+            return split[split.length - 1];
+        } else {
+            return "";
         }
+    }
+
+    void updateLogTag(WindowManager.LayoutParams params) {
+        mLogTag = TAG + "[" + getTitleSuffix(params) + "]";
     }
 
     private void updateAvailableWidth() {
@@ -1974,6 +1991,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 // We run into this if the app is using supportlib.
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "DecorView@" + Integer.toHexString(this.hashCode()) + "["
+                + getTitleSuffix(mWindow.getAttributes()) + "]";
     }
 
     private static class ColorViewState {
