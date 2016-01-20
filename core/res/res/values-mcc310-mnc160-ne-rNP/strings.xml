@@ -26,7 +26,7 @@
     <item msgid="3017901214286816293">"Wi-Fi बाट कल गर्न र सन्देशहरू पठाउन, सबभन्दा पहिला यो सेवा सेटअप गर्न तपाईँको वाहकलाई भन्नुहोस्। त्यसपछि फेरि सेटिङहरूबाट Wi-Fi कलिङ सक्रिय पार्नुहोस्।"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7068215934335709161">"तपाईँको वाहकसँग दर्ता गर्नुहोस्"</item>
+    <item msgid="7068215934335709161">"आफ्नो वाहकसँग दर्ता गर्नुहोस्"</item>
   </string-array>
     <string name="wfcSpnFormat" msgid="2031160810542298336">"%s Wi-Fi कलिङ"</string>
 </resources>

@@ -23,7 +23,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3017901214286816293">"በWi-Fi ላይ ጥሪዎችን ለማድረግ እና መልዕክቶችን ለመላክ መጀመሪያ የአገልግሎት አቅራቢዎ ይህን አገልግሎት እንዲያዘጋጅልዎ መጠየቅ አለብዎት። ከዚያ ከቅንብሮች ሆነው እንደገና የWi-Fi ጥሪን ያብሩ።"</item>
+    <item msgid="3017901214286816293">"በWi-Fi ላይ ጥሪዎችን ለማድረግ እና መልዕክቶችን ለመላክ መጀመሪያ የአገልግሎት አቅራቢዎ ይህን አገልግሎት እንዲያዘጋጅልዎ ይጠይቁ። ከዚያ ከቅንብሮች ሆነው እንደገና የWi-Fi ጥሪን ያብሩ።"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7068215934335709161">"የአገልግሎት አቅራቢዎ ጋር ይመዝገቡ"</item>

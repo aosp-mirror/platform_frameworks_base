@@ -28,5 +28,5 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7068215934335709161">"Registra\'t amb el teu operador de telefonia mòbil"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="2031160810542298336">"Trucada de Wi-Fi de: %s"</string>
+    <string name="wfcSpnFormat" msgid="2031160810542298336">"Trucada per Wi-Fi amb %s"</string>
 </resources>
