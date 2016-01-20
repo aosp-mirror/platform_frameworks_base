@@ -600,6 +600,14 @@ public class ActivityManager {
         public static boolean allowTopTaskToReturnHome(int stackId) {
             return stackId != PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if the stack should be resized to match the bounds specified by
+         * {@link ActivityOptions#setLaunchBounds} when launching an activity into the stack.
+         */
+        public static boolean resizeStackWithLaunchBounds(int stackId) {
+            return stackId == PINNED_STACK_ID;
+        }
     }
 
     /**

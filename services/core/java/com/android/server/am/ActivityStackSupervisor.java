@@ -1719,11 +1719,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
                 }
-                // WM resizeTask must be done after the task is moved to the correct stack,
-                // because Task's setBounds() also updates dim layer's bounds, but that has
-                // dependency on the stack.
-                mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig,
-                        false /*relayout*/, false /*forced*/);
+                if (StackId.resizeStackWithLaunchBounds(stackId)) {
+                    resizeStackLocked(stackId, bounds,
+                            null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
+                            !PRESERVE_WINDOWS, true /* allowResizeInDockedMode */);
+                } else {
+                    // WM resizeTask must be done after the task is moved to the correct stack,
+                    // because Task's setBounds() also updates dim layer's bounds, but that has
+                    // dependency on the stack.
+                    mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig,
+                            false /* relayout */, false /* forced */);
+                }
             }
         }
 
