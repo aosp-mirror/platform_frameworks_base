@@ -499,7 +499,8 @@ public class SurfaceView extends View {
                     mLayout.privateFlags |=
                             WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
                 }
-                mLayout.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+                mLayout.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+                    | WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 
                 if (mWindow == null) {
                     Display display = getDisplay();
