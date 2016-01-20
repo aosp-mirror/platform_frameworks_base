@@ -70,24 +70,24 @@
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
                 android:paddingStart="?attr/listPreferredItemPaddingStart"
-                android:paddingEnd="0dp"
-                android:paddingTop="5dp" >
+                android:paddingEnd="16dp"
+                android:paddingTop="16dp" >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:text="@string/hardware"
-                    android:textAppearance="?attr/textAppearanceMedium"
-                    android:textColor="?attr/textColorAlertDialogListItem" />
+                    android:textAppearance="?attr/textAppearanceListItem"
+                    android:ellipsize="marquee" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
+                    android:maxLines="10"
                     android:text="@string/show_ime"
-                    android:textAppearance="?attr/textAppearanceSmall"
-                    android:textColor="?attr/textColorAlertDialogListItem" />
+                    android:textAppearance="?attr/textAppearanceListItemSecondary"
+                    android:textColor="?attr/textColorSecondary" />
             </LinearLayout>
 
             <Switch
