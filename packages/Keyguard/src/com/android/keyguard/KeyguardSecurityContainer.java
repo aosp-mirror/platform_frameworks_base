@@ -18,6 +18,7 @@ package com.android.keyguard;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
+import android.auditing.SecurityLog;
 import android.content.Context;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -423,6 +424,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
+            if (SecurityLog.isLoggingEnabled()) {
+                SecurityLog.writeEvent(SecurityLog.TAG_DEVICE_UNLOCK_ATTEMPT,
+                        (success ? 1 : 0),
+                        mCurrentSecuritySelection.name());
+            }
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 monitor.clearFailedUnlockAttempts();
