@@ -31,7 +31,9 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Скриншот готов"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Не удалось сделать скриншот"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Детали отчета об ошибке"</string>
-    <string name="bugreport_info_name" msgid="5089191832271852826">"Краткое название"</string>
-    <string name="bugreport_info_title" msgid="127167853370557175">"Краткое описание ошибки"</string>
+    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
+    <skip />
+    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
+    <skip />
     <string name="bugreport_info_description" msgid="4117088998733546784">"Подробное описание"</string>
 </resources>
