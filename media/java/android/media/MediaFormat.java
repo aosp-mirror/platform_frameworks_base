@@ -44,7 +44,8 @@ import java.util.Map;
  *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
-* <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
  * <tr><td>{@link #KEY_MAX_WIDTH}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution width</td></tr>
  * <tr><td>{@link #KEY_MAX_HEIGHT}</td><td>Integer</td><td><b>decoder-only</b>, optional, max-resolution height</td></tr>
  * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
@@ -217,6 +218,20 @@ public final class MediaFormat {
     public static final String KEY_I_FRAME_INTERVAL = "i-frame-interval";
 
     /**
+    * An optional key describing the period of intra refresh in frames. This is an
+    * optional parameter that applies only to video encoders. If encoder supports it
+    * ({@link MediaCodecInfo.CodecCapabilities#FEATURE_IntraRefresh}), the whole
+    * frame is completely refreshed after the specified period. Also for each frame,
+    * a fix subset of macroblocks must be intra coded which leads to more constant bitrate
+    * than inserting a key frame. This key is recommended for video streaming applications
+    * as it provides low-delay and good error-resilience. This key is ignored if the
+    * video encoder does not support the intra refresh feature. Use the output format to
+    * verify that this feature was enabled.
+    * The associated value is an integer.
+    */
+    public static final String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
+
+   /**
      * A key describing the temporal layering schema.  This is an optional parameter
      * that applies only to video encoders.  Use {@link MediaCodec#getInputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
