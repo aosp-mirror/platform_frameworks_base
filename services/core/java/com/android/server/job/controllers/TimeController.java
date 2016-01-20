@@ -202,7 +202,7 @@ public class TimeController extends StateController {
     /**
      * Set an alarm with the {@link android.app.AlarmManager} for the next time at which a job's
      * delay will expire.
-     * This alarm <b>will not</b> wake up the phone.
+     * This alarm <b>will</b> wake up the phone.
      */
     private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
@@ -238,7 +238,7 @@ public class TimeController extends StateController {
             if (DEBUG) {
                 Slog.d(TAG, "Setting " + tag + " for: " + alarmTimeElapsed);
             }
-            mAlarmService.set(AlarmManager.ELAPSED_REALTIME, alarmTimeElapsed,
+            mAlarmService.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTimeElapsed,
                     tag, listener, null);
         }
     }
