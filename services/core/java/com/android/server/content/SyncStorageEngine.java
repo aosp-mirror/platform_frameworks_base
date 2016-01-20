@@ -1911,8 +1911,10 @@ public class SyncStorageEngine extends Handler {
                             if ("authority".equals(tagName)) {
                                 authority = parseAuthority(parser, version);
                                 periodicSync = null;
-                                if (authority.ident > highestAuthorityId) {
-                                    highestAuthorityId = authority.ident;
+                                if (authority != null) {
+                                    if (authority.ident > highestAuthorityId) {
+                                        highestAuthorityId = authority.ident;
+                                    }
                                 }
                             } else if (XML_TAG_LISTEN_FOR_TICKLES.equals(tagName)) {
                                 parseListenForTickles(parser);
