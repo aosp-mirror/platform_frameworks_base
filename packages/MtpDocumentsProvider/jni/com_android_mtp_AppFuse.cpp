@@ -31,6 +31,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "nativehelper/ScopedPrimitiveArray.h"
+#include "nativehelper/ScopedLocalRef.h"
 
 namespace {
 
@@ -334,16 +335,16 @@ private:
         const uint32_t read_size = static_cast<uint32_t>(std::min(
                 static_cast<uint64_t>(size),
                 get_file_size(inode) - offset));
-        const jbyteArray array = (jbyteArray) env_->CallObjectMethod(
+        ScopedLocalRef<jbyteArray> array(env_, static_cast<jbyteArray>(env_->CallObjectMethod(
                 self_,
                 app_fuse_get_object_bytes,
                 inode,
                 offset,
-                read_size);
-        if (array == nullptr) {
+                read_size)));
+        if (array.get() == nullptr) {
             return -1;
         }
-        ScopedByteArrayRO bytes(env_, array);
+        ScopedByteArrayRO bytes(env_, array.get());
         if (bytes.size() != read_size || bytes.get() == nullptr) {
             return -1;
         }
