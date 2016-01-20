@@ -273,8 +273,6 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions,
 
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
     if (mUseFloatTexture) {
         // We have to use GL_RGBA16F because GL_RGBA32F does not support filtering
         texture->upload(GL_RGBA16F, width, height, GL_RGBA, GL_FLOAT, pixels);
