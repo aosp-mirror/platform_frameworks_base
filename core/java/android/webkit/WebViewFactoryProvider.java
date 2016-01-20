@@ -107,7 +107,6 @@ public interface WebViewFactoryProvider {
      * implementation must return the same instance on subsequent calls.
      *
      * @return the TokenBindingService instance
-     * @hide
      */
     TokenBindingService getTokenBindingService();
 
