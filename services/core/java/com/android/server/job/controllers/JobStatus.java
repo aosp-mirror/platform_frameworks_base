@@ -92,6 +92,8 @@ public class JobStatus {
     /** Copy constructor. */
     public JobStatus(JobStatus jobStatus) {
         this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.getNumFailures());
+        this.sourceUserId = jobStatus.sourceUserId;
+        this.sourcePackageName = jobStatus.sourcePackageName;
         this.earliestRunTimeElapsedMillis = jobStatus.getEarliestRunTime();
         this.latestRunTimeElapsedMillis = jobStatus.getLatestRunTimeElapsed();
     }
@@ -132,6 +134,8 @@ public class JobStatus {
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
         this(rescheduling.job, rescheduling.getUid(), backoffAttempt);
+        this.sourceUserId = rescheduling.sourceUserId;
+        this.sourcePackageName = rescheduling.sourcePackageName;
 
         earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
         latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
