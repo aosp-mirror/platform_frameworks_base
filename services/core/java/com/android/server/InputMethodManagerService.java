@@ -2537,7 +2537,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // By this IPC call, only a process which shares the same uid with the IME can add
         // additional input method subtypes to the IME.
-        if (TextUtils.isEmpty(imiId) || subtypes == null || subtypes.length == 0) return;
+        if (TextUtils.isEmpty(imiId) || subtypes == null) return;
         synchronized (mMethodMap) {
             final InputMethodInfo imi = mMethodMap.get(imiId);
             if (imi == null) return;
