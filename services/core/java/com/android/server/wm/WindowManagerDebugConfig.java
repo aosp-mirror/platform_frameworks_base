@@ -35,8 +35,8 @@ public class WindowManagerDebugConfig {
 
     static final boolean DEBUG_RESIZE = false;
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = true;
-    static final boolean DEBUG_FOCUS = true;
+    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
     static final boolean DEBUG_ANIM = false;
     static final boolean DEBUG_KEYGUARD = false;
@@ -50,15 +50,15 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
-    static final boolean DEBUG_APP_TRANSITIONS = true;
-    static final boolean DEBUG_STARTING_WINDOW = true;
+    static final boolean DEBUG_APP_TRANSITIONS = false;
+    static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
     static final boolean DEBUG_SCREEN_ON = false;
     static final boolean DEBUG_SCREENSHOT = false;
     static final boolean DEBUG_BOOT = false;
-    static final boolean DEBUG_LAYOUT_REPEATS = true;
+    static final boolean DEBUG_LAYOUT_REPEATS = false;
     static final boolean DEBUG_SURFACE_TRACE = false;
     static final boolean DEBUG_WINDOW_TRACE = false;
     static final boolean DEBUG_TASK_MOVEMENT = false;
