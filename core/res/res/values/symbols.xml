@@ -1593,7 +1593,6 @@
   <java-symbol type="string" name="bugreport_option_interactive_title" />
   <java-symbol type="string" name="bugreport_status" />
   <java-symbol type="string" name="bugreport_title" />
-  <java-symbol type="string" name="config_orientationSensorType" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
