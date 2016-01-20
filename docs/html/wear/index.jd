@@ -213,6 +213,9 @@ page.image=images/cards/android-wear_2x.png
             <div class="col-4">
               <img src="/wear/images/partners/broadcom.png" alt="Broadcom">
             </div>
+             <div class="col-4">
+              <img src="/wear/images/partners/casio.png" alt="Casio">
+            </div>
             <div class="col-4">
               <img src="/wear/images/partners/fossil.png" alt="Fossil">
             </div>
@@ -234,8 +237,14 @@ page.image=images/cards/android-wear_2x.png
             <div class="col-4">
               <img src="/wear/images/partners/mips.png" alt="MIPS">
             </div>
+             <div class="col-4">
+              <img src="/wear/images/partners/mobvoi.png" alt="Mobvoi">
+            </div>
             <div class="col-4">
               <img src="/wear/images/partners/motorola.png" alt="Motorola">
+            </div>
+             <div class="col-4">
+              <img src="/wear/images/partners/nb.png" alt="New Balance">
             </div>
             <div class="col-4">
               <img src="/wear/images/partners/qualcomm.png" alt="Qualcomm">
@@ -249,6 +258,7 @@ page.image=images/cards/android-wear_2x.png
             <div class="col-4">
               <img src="/wear/images/partners/tagheuer.png" alt="Tag Heuer">
             </div>
+
           </div>
         </div> <!-- end .wrap -->
       </div>
