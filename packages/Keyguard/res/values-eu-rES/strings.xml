@@ -110,7 +110,7 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Zerbitzurik gabe."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Idazketa-metodoa aldatzeko botoia."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Hegaldi modua"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Eredua marraztu beharko duzu da gailua berrabiarazten denean"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Eredua marraztu beharko duzu gailua berrabiarazten denean"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"PIN kodea idatzi beharko duzu gailua berrabiarazten denean"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Pasahitza idatzi beharko duzu gailua berrabiarazten denean"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Segurtasun handiagoa izateko, eredua behar da"</string>

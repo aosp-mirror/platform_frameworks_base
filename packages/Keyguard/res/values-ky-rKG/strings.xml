@@ -110,15 +110,15 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Байланыш жок."</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Киргизүү ыкмасын которуу баскычы."</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Учак режими"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Түзмөк кайра күйгүзүлгөндөн кийин графикалык ачкыч керектелет"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Түзмөк кайра күйгүзүлгөндөн кийин PIN код керектелет"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Түзмөк кайра күйгүзүлгөндөн кийин сырсөз керектелет"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Кошумча коопсуздук үчүн графикалык ачкыч керектелет"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Кошумча коопсуздук үчүн PIN код керектелет"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Кошумча коопсуздук үчүн сырсөз керектелет"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профилдерди которгонуңузда графикалык ачкыч керектелет"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профилдерди которгонуңузда PIN код керектелет"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профилдерди которгонуңузда сырсөз керектелет"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"Түзмөк кайра күйгүзүлгөндөн кийин графикалык ачкыч талап кылынат"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"Түзмөк кайра күйгүзүлгөндөн кийин PIN код талап кылынат"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"Түзмөк кайра күйгүзүлгөндөн кийин сырсөз талап кылынат"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"Коопсуздукту бекемдөө үчүн графикалык ачкыч талап кылынат"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"Коопсуздукту бекемдөө үчүн PIN код талап кылынат"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"Коопсуздукту бекемдөө үчүн сырсөз талап кылынат"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профилдерди которуштурганда графикалык ачкыч талап кылынат"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профилдерди которуштурганда PIN код талап кылынат"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профилдерди которуштурганда сырсөз талап кылынат"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>
       <item quantity="one">Түзмөктүн кулпусу <xliff:g id="NUMBER_0">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>

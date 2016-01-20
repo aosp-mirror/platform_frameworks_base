@@ -46,7 +46,7 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM 卡處於鎖定狀態。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM 卡處於 PUK 鎖定狀態"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解除 SIM 卡鎖定..."</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖形解鎖。"</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖案解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密碼解鎖。"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖形區域。"</string>
@@ -79,7 +79,7 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖形嘗試次數過多"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，這台平板電腦將會重設，其中的所有資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，系統會重設您的手機，其中的所有資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。這台平板電腦將會重設，其中的所有資料也會一併遭到刪除。"</string>
@@ -92,8 +92,8 @@
     <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次機會。如果失敗次數超過限制，您的 Work 設定檔將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"您嘗試解鎖平板電腦已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。您的 Work 設定檔將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您嘗試解鎖手機已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。您的 Work 設定檔將遭到移除，所有設定檔資料也會一併遭到刪除。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM 卡的 PIN 碼輸入錯誤，您現在必須請行動通訊業者為裝置解鎖。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM 卡的 PIN 碼輸入錯誤，您還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
@@ -110,18 +110,18 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"沒有服務。"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"飛航模式"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"裝置重新啟動後需要畫出解鎖圖形"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"裝置重新啟動後需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"裝置重新啟動後需要輸入 PIN 碼"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"裝置重新啟動後需要輸入密碼"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"請畫出解鎖圖形，以進一步確保資訊安全"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"請畫出解鎖圖案，以進一步確保資訊安全"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"請輸入 PIN 碼，以進一步確保資訊安全"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"請輸入密碼，以進一步確保資訊安全"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切換設定檔時需要畫出解鎖圖形"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"切換設定檔時需要畫出解鎖圖案"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"切換設定檔時需要輸入 PIN 碼"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"切換設定檔時需要輸入密碼"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認圖形。</item>
-      <item quantity="one">裝置已有 <xliff:g id="NUMBER_0">%d</xliff:g> 小時未解鎖。請確認圖形。</item>
+      <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認圖案。</item>
+      <item quantity="one">裝置已有 <xliff:g id="NUMBER_0">%d</xliff:g> 小時未解鎖。請確認圖案。</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
       <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認 PIN 碼。</item>
