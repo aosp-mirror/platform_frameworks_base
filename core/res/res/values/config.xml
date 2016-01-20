@@ -2005,9 +2005,9 @@
     <string-array name="config_notificationSignalExtractors">
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.TopicPriorityExtractor</item>
+        <item>com.android.server.notification.TopicImportanceExtractor</item>
         <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
         <item>com.android.server.notification.TopicVisibilityExtractor</item>
-        <item>com.android.server.notification.TopicImportanceExtractor</item>
     </string-array>
 
     <!-- Flag indicating that this device does not rotate and will always remain in its default
