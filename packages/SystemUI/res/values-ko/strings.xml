@@ -331,6 +331,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"모두\n차단"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"중요 알림만\n허용"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"알람만\n"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"모두 수신"</string>
+    <!-- no translation found for interruption_level_all_twoline (3719402899156124780) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"고속 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"저속 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> 후 충전 완료)"</string>
@@ -480,4 +483,14 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"홈"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"최근"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"뒤로"</string>
+    <!-- no translation found for tuner_full_zen_title (5905081395132280054) -->
+    <skip />
+    <!-- no translation found for tuner_full_zen_summary (6883568374520596402) -->
+    <skip />
+    <!-- no translation found for volume_and_do_not_disturb (3114580364524650941) -->
+    <skip />
+    <!-- no translation found for volume_down_silent (66962568467719591) -->
+    <skip />
+    <!-- no translation found for volume_up_silent (7141255269783588286) -->
+    <skip />
 </resources>

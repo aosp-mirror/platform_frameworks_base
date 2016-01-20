@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot aufgenommen"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Zum Ansehen berühren"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot konnte nicht aufgenommen werden."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Screenshot nicht möglich. Entweder zu wenig Speicher oder die App/Ihr Unternehmen lässt dies nicht zu."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Screenshot nicht möglich. Entweder zu wenig Speicher oder die App/dein Unternehmen lässt dies nicht zu."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Als Medienplayer (MTP) bereitstellen"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Als Kamera (PTP) bereitstellen"</string>
@@ -331,6 +331,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Laut-\nlos"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Nur\nwichtige"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Nur\nWecker"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
+    <!-- no translation found for interruption_level_all_twoline (3719402899156124780) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Wird aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Wird schnell aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Wird langsam aufgeladen (voll in <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -364,7 +367,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Energiesparmodus deaktivieren"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf Ihrem Bildschirm angezeigten Aktivitäten auf."</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf deinem Bildschirm angezeigten Aktivitäten auf."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht erneut anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
@@ -439,7 +442,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"Herzlichen Glückwunsch! System UI Tuner wurde \"Einstellungen\" hinzugefügt."</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Aus \"Einstellungen\" entfernen"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"System UI Tuner aus \"Einstellungen\" entfernen und die Verwendung von allen zugehörigen Funktionen beenden?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"Die App ist nicht auf Ihrem Gerät installiert."</string>
+    <string name="activity_not_found" msgid="348423244327799974">"Die App ist nicht auf deinem Gerät installiert."</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Uhrsekunden anzeigen"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Uhrsekunden in der Statusleiste anzeigen. Kann sich auf die Akkulaufzeit auswirken."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Schnelleinstellungen neu anordnen"</string>
@@ -480,4 +483,14 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startseite"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Letzte"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Zurück"</string>
+    <!-- no translation found for tuner_full_zen_title (5905081395132280054) -->
+    <skip />
+    <!-- no translation found for tuner_full_zen_summary (6883568374520596402) -->
+    <skip />
+    <!-- no translation found for volume_and_do_not_disturb (3114580364524650941) -->
+    <skip />
+    <!-- no translation found for volume_down_silent (66962568467719591) -->
+    <skip />
+    <!-- no translation found for volume_up_silent (7141255269783588286) -->
+    <skip />
 </resources>

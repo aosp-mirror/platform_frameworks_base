@@ -331,6 +331,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Totale\nstilte"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Alleen\nprioriteit"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alleen\nalarmen"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
+    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"Alle\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Snel opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Langzaam opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -480,4 +482,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startpagina"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Terug"</string>
+    <string name="tuner_full_zen_title" msgid="5905081395132280054">"\'Niet storen\' weergeven in volume"</string>
+    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Volledig beheer van \'Niet storen\' in het volumedialoogvenster toestaan."</string>
+    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Volume en \'Niet storen\'"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"\'Niet storen\' activeren bij volume omlaag"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"\'Niet storen\' afsluiten bij volume omhoog"</string>
 </resources>
