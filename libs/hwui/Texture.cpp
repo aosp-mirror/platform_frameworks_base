@@ -122,7 +122,6 @@ void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
 static void uploadToTexture(bool resize, GLenum format, GLenum type, GLsizei stride, GLsizei bpp,
         GLsizei width, GLsizei height, const GLvoid * data) {
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, bpp);
     const bool useStride = stride != width
             && Caches::getInstance().extensions().hasUnpackRowLength();
     if ((stride == width) || useStride) {

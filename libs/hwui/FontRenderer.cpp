@@ -458,7 +458,6 @@ void FontRenderer::checkTextureUpdate() {
     GLuint lastTextureId = 0;
 
     bool resetPixelStore = false;
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Iterate over all the cache textures and see which ones need to be updated
     checkTextureUpdateForCache(caches, mACacheTextures, resetPixelStore, lastTextureId);

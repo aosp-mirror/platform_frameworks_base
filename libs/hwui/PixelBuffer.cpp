@@ -20,6 +20,7 @@
 #include "Extensions.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
+#include "utils/GLUtils.h"
 
 #include <utils/Log.h>
 
@@ -112,14 +113,10 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mCaches.pixelBufferState().bind(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
-#if DEBUG_OPENGL
-        if (!mMappedPointer) {
-            GLenum status = GL_NO_ERROR;
-            while ((status = glGetError()) != GL_NO_ERROR) {
-                ALOGE("Could not map GPU pixel buffer: 0x%x", status);
-            }
+        if (CC_UNLIKELY(!mMappedPointer)) {
+            GLUtils::dumpGLErrors();
+            LOG_ALWAYS_FATAL("Failed to map PBO");
         }
-#endif
         mAccessMode = mode;
     }
 
