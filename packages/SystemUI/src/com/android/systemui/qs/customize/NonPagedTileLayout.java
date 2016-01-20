@@ -31,7 +31,6 @@ import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
 import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QuickTileLayout;
 
 import java.util.ArrayList;
 
@@ -42,7 +41,6 @@ import java.util.ArrayList;
  */
 public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, OnTouchListener {
 
-    private QuickTileLayout mQuickTiles;
     private final ArrayList<TilePage> mPages = new ArrayList<>();
     private final ArrayList<TileRecord> mTiles = new ArrayList<TileRecord>();
     private CustomQSPanel mPanel;
@@ -58,8 +56,6 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mQuickTiles = (QuickTileLayout) findViewById(R.id.quick_tile_layout);
-        mQuickTiles.setVisibility(View.GONE);
         TilePage page = (PagedTileLayout.TilePage) findViewById(R.id.tile_page);
         page.setMaxRows(3 /* First page only gets 3 */);
         mPages.add(page);
@@ -95,7 +91,6 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     }
 
     private void distributeTiles() {
-        mQuickTiles.removeAllViews();
         final int NP = mPages.size();
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
@@ -124,7 +119,8 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
     }
 
     @Override
-    public void updateResources() {
+    public boolean updateResources() {
+        return false;
     }
 
     @Override
@@ -133,24 +129,20 @@ public class NonPagedTileLayout extends LinearLayout implements QSTileLayout, On
             case DragEvent.ACTION_DRAG_LOCATION:
                 float x = event.getX();
                 float y = event.getY();
-                if (contains(mQuickTiles, x, y)) {
-                    // TODO: Reset to pre-drag state.
-                } else {
-                    final int NP = mPages.size();
-                    for (int i = 0; i < NP; i++) {
-                        TilePage page = mPages.get(i);
-                        if (contains(page, x, y)) {
-                            x -= page.getLeft();
-                            y -= page.getTop();
-                            final int NC = page.getChildCount();
-                            for (int j = 0; j < NC; j++) {
-                                View child = page.getChildAt(j);
-                                if (contains(child, x, y)) {
-                                    mPanel.tileSelected((QSTile<?>) child.getTag(), mCurrentClip);
-                                }
+                final int NP = mPages.size();
+                for (int i = 0; i < NP; i++) {
+                    TilePage page = mPages.get(i);
+                    if (contains(page, x, y)) {
+                        x -= page.getLeft();
+                        y -= page.getTop();
+                        final int NC = page.getChildCount();
+                        for (int j = 0; j < NC; j++) {
+                            View child = page.getChildAt(j);
+                            if (contains(child, x, y)) {
+                                mPanel.tileSelected((QSTile<?>) child.getTag(), mCurrentClip);
                             }
-                            break;
                         }
+                        break;
                     }
                 }
                 break;
