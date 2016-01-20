@@ -22,7 +22,10 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -32,11 +35,14 @@ import android.view.animation.Interpolator;
  */
 public class ScrimView extends View
 {
+    private final Paint mPaint = new Paint();
     private int mScrimColor;
     private boolean mIsEmpty = true;
     private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
     private ValueAnimator mAlphaAnimator;
+    private Rect mExcludedRect = new Rect();
+    private boolean mHasExcludedArea;
     private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
             = new ValueAnimator.AnimatorUpdateListener() {
         @Override
@@ -75,12 +81,35 @@ public class ScrimView extends View
             int color = mScrimColor;
             color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
                     Color.green(color), Color.blue(color));
-            canvas.drawColor(color, mode);
+            if (!mHasExcludedArea) {
+                canvas.drawColor(color, mode);
+            } else {
+                mPaint.setColor(color);
+                if (mExcludedRect.top > 0) {
+                    canvas.drawRect(0, 0, getWidth(), mExcludedRect.top, mPaint);
+                }
+                if (mExcludedRect.left > 0) {
+                    canvas.drawRect(0,  mExcludedRect.top, mExcludedRect.left, mExcludedRect.bottom,
+                            mPaint);
+                }
+                if (mExcludedRect.right < getWidth()) {
+                    canvas.drawRect(mExcludedRect.right,
+                            mExcludedRect.top,
+                            getWidth(),
+                            mExcludedRect.bottom,
+                            mPaint);
+                }
+                if (mExcludedRect.bottom < getHeight()) {
+                    canvas.drawRect(0,  mExcludedRect.bottom, getWidth(), getHeight(), mPaint);
+                }
+            }
         }
     }
 
     public void setDrawAsSrc(boolean asSrc) {
         mDrawAsSrc = asSrc;
+        mPaint.setXfermode(new PorterDuffXfermode(mDrawAsSrc ? PorterDuff.Mode.SRC
+                : PorterDuff.Mode.SRC_OVER));
         invalidate();
     }
 
@@ -119,5 +148,20 @@ public class ScrimView extends View
         mAlphaAnimator.setInterpolator(interpolator);
         mAlphaAnimator.setDuration(durationOut);
         mAlphaAnimator.start();
+    }
+
+    public void setExcludedArea(Rect area) {
+        if (area == null) {
+            mHasExcludedArea = false;
+            invalidate();
+            return;
+        }
+        area.left = Math.max(area.left, 0);
+        area.top = Math.max(area.top, 0);
+        area.right = Math.min(area.right, getWidth());
+        area.bottom = Math.min(area.bottom, getHeight());
+        mExcludedRect.set(area);
+        mHasExcludedArea = area.left < area.right && area.top < area.bottom;
+        invalidate();
     }
 }

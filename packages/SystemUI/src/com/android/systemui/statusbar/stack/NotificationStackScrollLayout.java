@@ -22,6 +22,10 @@ import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -228,6 +232,18 @@ public class NotificationStackScrollLayout extends ViewGroup
     private NotificationOverflowContainer mOverflowContainer;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private FalsingManager mFalsingManager;
+    private ColorDrawable mBackground;
+    private boolean mAnimationRunning;
+    private ViewTreeObserver.OnPreDrawListener mBackgroundUpdater
+            = new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            updateBackground();
+            return true;
+        }
+    };
+    private Rect mBackgroundBounds = new Rect();
+    private Rect mCurrentBounds = null;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -244,6 +260,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mBackground = new ColorDrawable(context.getColor(
+                R.color.notification_shade_background_color));
+        mBackground.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         mExpandHelper = new ExpandHelper(getContext(), this,
@@ -255,8 +274,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSwipeHelper.setLongPressListener(mLongPressListener);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
         initView(context);
+        setWillNotDraw(false);
         if (DEBUG) {
-            setWillNotDraw(false);
             mDebugPaint = new Paint();
             mDebugPaint.setColor(0xffff0000);
             mDebugPaint.setStrokeWidth(2);
@@ -267,6 +286,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     protected void onDraw(Canvas canvas) {
+        mBackground.draw(canvas);
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -1390,6 +1410,82 @@ public class NotificationStackScrollLayout extends ViewGroup
         mContentHeight = height + mTopPadding;
     }
 
+    private void updateBackground() {
+        if (mAmbientState.isDark()) {
+            return;
+        }
+        updateBackgroundBounds();
+        if (!mCurrentBounds.equals(mBackgroundBounds)) {
+            mCurrentBounds.set(mBackgroundBounds);
+            mScrimController.setExcludedBackgroundArea(mCurrentBounds);
+            mBackground.setBounds(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom);
+            invalidate();
+        }
+    }
+
+    /**
+     * Update the background bounds to the new desired bounds
+     */
+    private void updateBackgroundBounds() {
+        ActivatableNotificationView firstView = getFirstViewWithBackground();
+        int top = 0;
+        if (firstView != null) {
+            int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(firstView);
+            if (mBackgroundBounds.top == finalTranslationY) {
+                // we're ending up at the same location as we are now, lets just skip the animation
+                top = finalTranslationY;
+            } else {
+                top = (int) firstView.getTranslationY();
+            }
+        }
+        ActivatableNotificationView lastView = getLastViewWithBackground();
+        int bottom = 0;
+        if (lastView != null) {
+            int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(lastView);
+            int finalHeight = StackStateAnimator.getFinalActualHeight(lastView);
+            int finalBottom = finalTranslationY + finalHeight;
+            finalBottom = Math.min(finalBottom, getHeight());
+            if (mBackgroundBounds.bottom == finalBottom) {
+                // we're ending up at the same location as we are now, lets just skip the animation
+                bottom = finalBottom;
+            } else {
+                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
+                bottom = Math.min(bottom, getHeight());
+            }
+        }
+        mBackgroundBounds.top = top;
+        mBackgroundBounds.bottom = bottom;
+        mBackgroundBounds.left = (int) getX();
+        mBackgroundBounds.right = (int) (getX() + getWidth());
+        if (mCurrentBounds == null) {
+            mCurrentBounds = new Rect(mBackgroundBounds);
+        }
+    }
+
+    private ActivatableNotificationView getLastViewWithBackground() {
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE
+                    && child instanceof ActivatableNotificationView) {
+                return (ActivatableNotificationView) child;
+            }
+        }
+        return null;
+    }
+
+    private ActivatableNotificationView getFirstViewWithBackground() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE
+                    && child instanceof ActivatableNotificationView) {
+                return (ActivatableNotificationView) child;
+            }
+        }
+        return null;
+    }
+
     /**
      * Fling the scroll view
      *
@@ -1866,9 +1962,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty() || isCurrentlyAnimating()) {
+            setAnimationRunning(true);
             mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState,
                     mGoToFullShadeDelay);
             mAnimationEvents.clear();
+            updateBackground();
         } else {
             applyCurrentState();
         }
@@ -2354,6 +2452,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildAnimationFinished() {
+        setAnimationRunning(false);
         requestChildrenUpdate();
         runAnimationFinishedRunnables();
         clearViewOverlays();
@@ -2422,6 +2521,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mListener.onChildLocationsChanged(this);
         }
         runAnimationFinishedRunnables();
+        updateBackground();
     }
 
     public void goToFullShade(long delay) {
@@ -2468,6 +2568,14 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation =  true;
         }
         requestChildrenUpdate();
+        if (dark) {
+            setWillNotDraw(!DEBUG);
+            mScrimController.setExcludedBackgroundArea(null);
+        } else {
+            updateBackground();
+            setWillNotDraw(false);
+            // TODO: fade in background
+        }
     }
 
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
@@ -2825,6 +2933,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public boolean hasOverlappingRendering() {
         return !mForceNoOverlappingRendering && super.hasOverlappingRendering();
+    }
+
+    public void setAnimationRunning(boolean animationRunning) {
+        if (animationRunning != mAnimationRunning) {
+            if (animationRunning) {
+                getViewTreeObserver().addOnPreDrawListener(mBackgroundUpdater);
+            } else {
+                getViewTreeObserver().removeOnPreDrawListener(mBackgroundUpdater);
+            }
+            mAnimationRunning = animationRunning;
+        }
     }
 
     /**

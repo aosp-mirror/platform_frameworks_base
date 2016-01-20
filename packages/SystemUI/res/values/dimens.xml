@@ -302,7 +302,7 @@
     <dimen name="z_distance_between_notifications">1dp</dimen>
 
     <!-- The padding between the individual notification cards. -->
-    <dimen name="notification_padding">2dp</dimen>
+    <dimen name="notification_padding">0.5dp</dimen>
 
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>

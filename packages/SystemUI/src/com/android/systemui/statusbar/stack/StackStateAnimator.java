@@ -905,6 +905,22 @@ public class StackStateAnimator {
         }
     }
 
+    /**
+     * Get the end value of the height animation running on a view or the actualHeight
+     * if no animation is running.
+     */
+    public static float getFinalTranslationY(ExpandableView view) {
+        if (view == null) {
+            return 0;
+        }
+        ValueAnimator yAnimator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_Y);
+        if (yAnimator == null) {
+            return view.getTranslationY();
+        } else {
+            return getChildTag(view, TAG_END_TRANSLATION_Y);
+        }
+    }
+
     public void setHeadsUpAppearHeightBottom(int headsUpAppearHeightBottom) {
         mHeadsUpAppearHeightBottom = headsUpAppearHeightBottom;
     }

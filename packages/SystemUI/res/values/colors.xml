@@ -83,9 +83,8 @@
     <!-- The color of the material notification background when low priority -->
     <color name="notification_material_background_low_priority_color">#fff5f5f5</color>
 
-    <!-- The color of the material notification background for media notifications when no custom
-         color is specified -->
-    <color name="notification_material_background_media_default_color">#ff424242</color>
+    <!-- The background color of the notification shade -->
+    <color name="notification_shade_background_color">#fff9f9f9</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>
