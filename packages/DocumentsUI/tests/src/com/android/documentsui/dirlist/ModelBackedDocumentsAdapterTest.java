@@ -51,7 +51,7 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
     public void setUp() {
 
         final Context testContext = TestContext.createStorageTestContext(getContext(), AUTHORITY);
-        mModel = new TestModel(testContext, AUTHORITY);
+        mModel = new TestModel(AUTHORITY);
         mModel.update(NAMES);
 
         DocumentsAdapter.Environment env = new TestEnvironment(testContext);

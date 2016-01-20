@@ -87,7 +87,7 @@
     <!-- Button label that hides the error bar [CHAR LIMIT=24] -->
     <string name="button_dismiss">Dismiss</string>
     <string name="button_retry">Try Again</string>
-    
+
     <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
     <string name="sort_name">By name</string>
     <!-- Mode that sorts documents by their last modified time in descending order; most recent first [CHAR LIMIT=24] -->
@@ -158,6 +158,8 @@
     <string name="copy_preparing">Preparing for copy\u2026</string>
     <!-- Text shown on the notification while DocumentsUI performs setup in preparation for moving files [CHAR LIMIT=32] -->
     <string name="move_preparing">Preparing for move\u2026</string>
+    <!-- Text shown on the notification while DocumentsUI performs setup in preparation for deleting files [CHAR LIMIT=32] -->
+    <string name="delete_preparing">Preparing for delete\u2026</string>
     <!-- Title of the copy error notification [CHAR LIMIT=48] -->
     <plurals name="copy_error_notification_title">
         <item quantity="one">Couldn\'t copy <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
@@ -167,6 +169,11 @@
     <plurals name="move_error_notification_title">
         <item quantity="one">Couldn\'t move <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
         <item quantity="other">Couldn\'t move <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+    </plurals>
+    <!-- Title of the delete error notification [CHAR LIMIT=48] -->
+    <plurals name="delete_error_notification_title">
+        <item quantity="one">Couldn\'t delete <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\'t delete <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
     <string name="notification_touch_for_details">Touch to view details</string>

@@ -124,10 +124,12 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     public static final int REQUEST_COPY_DESTINATION = 1;
 
-    private static final String TAG = "DirectoryFragment";
-
-    private static final int LOADER_ID = 42;
     static final boolean DEBUG_ENABLE_DND = true;
+
+    private static final String TAG = "DirectoryFragment";
+    private static final int LOADER_ID = 42;
+    private static final int DELETE_UNDO_TIMEOUT = 5000;
+    private static final int DELETE_JOB_DELAY = 5500;
 
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_ROOT = "root";
@@ -339,7 +341,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     : MultiSelectManager.MODE_SINGLE);
         mSelectionManager.addCallback(new SelectionModeListener());
 
-        mModel = new Model(context);
+        mModel = new Model();
         mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
 
@@ -852,16 +854,32 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     }
 
     private void deleteDocuments(final Selection selected) {
-        Context context = getActivity();
-        String message = Shared.getQuantityString(context, R.plurals.deleting, selected.size());
 
-        // Hide the files in the UI.
-        final SparseArray<String> toDelete = mAdapter.hide(selected.getAll());
+            checkArgument(!selected.isEmpty());
+            new GetDocumentsTask() {
+                @Override
+                void onDocumentsReady(List<DocumentInfo> docs) {
+                    // Hide the files in the UI.
+                    final SparseArray<String> hidden = mAdapter.hide(selected.getAll());
+
+                    checkState(DELETE_JOB_DELAY > DELETE_UNDO_TIMEOUT);
+                    String operationId = FileOperations.delete(
+                            getActivity(), docs, getDisplayState().stack,
+                            DELETE_JOB_DELAY);
+                    showDeleteSnackbar(hidden, operationId);
+                }
+            }.execute(selected);
+    }
+
+    private void showDeleteSnackbar(final SparseArray<String> hidden, final String jobId) {
+
+        Context context = getActivity();
+        String message = Shared.getQuantityString(context, R.plurals.deleting, hidden.size());
 
         // Show a snackbar informing the user that files will be deleted, and give them an option to
         // cancel.
         final Activity activity = getActivity();
-        Snackbars.makeSnackbar(activity, message, Snackbar.LENGTH_LONG)
+        Snackbars.makeSnackbar(activity, message, DELETE_UNDO_TIMEOUT)
                 .setAction(
                         R.string.undo,
                         new View.OnClickListener() {
@@ -874,22 +892,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                             public void onDismissed(Snackbar snackbar, int event) {
                                 if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
                                     // If the delete was cancelled, just unhide the files.
-                                    mAdapter.unhide(toDelete);
-                                } else {
-                                    // Actually kick off the delete.
-                                    mModel.delete(
-                                            selected,
-                                            new Model.DeletionListener() {
-                                                @Override
-                                                  public void onError() {
-                                                      Snackbars.makeSnackbar(
-                                                              activity,
-                                                              R.string.toast_failed_delete,
-                                                              Snackbar.LENGTH_LONG)
-                                                              .show();
-
-                                                  }
-                                            });
+                                    FileOperations.cancel(activity, jobId);
+                                    mAdapter.unhide(hidden);
                                 }
                             }
                         })

@@ -16,16 +16,13 @@
 
 package com.android.documentsui.dirlist;
 
-import android.content.Context;
 import android.database.MatrixCursor;
 import android.provider.DocumentsContract.Document;
 
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
-import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 
 import java.util.Random;
-import java.util.Set;
 
 public class TestModel extends Model {
 
@@ -39,14 +36,9 @@ public class TestModel extends Model {
     };
 
     private final String mAuthority;
-    private Set<String> mDeleted;
 
-    /**
-     * Creates a new context. context must be configured with provider for authority.
-     * @see TestContext#createStorageTestContext(Context, String).
-     */
-    public TestModel(Context context, String authority) {
-        super(context);
+    public TestModel(String authority) {
+        super();
         mAuthority = authority;
     }
 
@@ -74,13 +66,5 @@ public class TestModel extends Model {
     // WRT documentId because of this.
     String idForPosition(int p) {
         return createModelId(mAuthority, Integer.toString(p));
-    }
-
-    @Override
-    public void delete(Selection selected, DeletionListener listener) {
-        for (String id : selected.getAll()) {
-            mDeleted.add(id);
-        }
-        listener.onCompletion();
     }
 }

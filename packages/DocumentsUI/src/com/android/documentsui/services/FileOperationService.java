@@ -27,6 +27,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
@@ -92,7 +93,7 @@ public class FileOperationService extends Service implements Job.Listener {
     @GuardedBy("mRunning")
     private Map<String, JobRecord> mRunning = new HashMap<>();
 
-    private int mLastStarted;
+    private int mLastServiceId;
 
     @Override
     public void onCreate() {
@@ -111,7 +112,18 @@ public class FileOperationService extends Service implements Job.Listener {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startTime) {
+    public void onDestroy() {
+        if (DEBUG) Log.d(TAG, "Shutting down executor.");
+        List<Runnable> unfinished = executor.shutdownNow();
+        if (!unfinished.isEmpty()) {
+            Log.w(TAG, "Shutting down, but executor reports running jobs: " + unfinished);
+        }
+        executor = null;
+        if (DEBUG) Log.d(TAG, "Destroyed.");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int serviceId) {
         // TODO: Ensure we're not being called with retry or redeliver.
         // checkArgument(flags == 0);  // retry and redeliver are not supported.
 
@@ -123,17 +135,17 @@ public class FileOperationService extends Service implements Job.Listener {
             handleCancel(intent);
         } else {
             checkArgument(operationType != OPERATION_UNKNOWN);
-            handleOperation(intent, startTime, jobId, operationType);
+            handleOperation(intent, serviceId, jobId, operationType);
         }
 
         return START_NOT_STICKY;
     }
 
-    private void handleOperation(Intent intent, int startTime, String jobId, int operationType) {
-        if (DEBUG) Log.d(TAG, "onStartCommand: " + jobId + " with start time " + startTime);
+    private void handleOperation(Intent intent, int serviceId, String jobId, int operationType) {
+        if (DEBUG) Log.d(TAG, "onStartCommand: " + jobId + " with serviceId " + serviceId);
 
-        // Track start time so we can stop the service once we're out of work to do.
-        mLastStarted = startTime;
+        // Track the service supplied id so we can stop the service once we're out of work to do.
+        mLastServiceId = serviceId;
 
         Job job = null;
         synchronized (mRunning) {
@@ -147,12 +159,18 @@ public class FileOperationService extends Service implements Job.Listener {
 
             job = createJob(operationType, jobId, srcs, stack);
 
+            if (job == null) {
+                return;
+            }
+
             mWakeLock.acquire();
         }
 
         checkState(job != null);
         int delay = intent.getIntExtra(EXTRA_DELAY, DEFAULT_DELAY);
         checkArgument(delay <= MAX_DELAY);
+        if (DEBUG) Log.d(
+                TAG, "Scheduling job " + job.id + " to run in " + delay + " milliseconds.");
         ScheduledFuture<?> future = executor.schedule(job, delay, TimeUnit.MILLISECONDS);
         mRunning.put(jobId, new JobRecord(job, future));
     }
@@ -196,11 +214,19 @@ public class FileOperationService extends Service implements Job.Listener {
         // TODO: Guarantee the job is being finalized
     }
 
+    /**
+     * Creates a new job. Returns null if a job with {@code id} already exists.
+     * @return
+     */
     @GuardedBy("mRunning")
-    private Job createJob(
+    private @Nullable Job createJob(
             @OpType int operationType, String id, List<DocumentInfo> srcs, DocumentStack stack) {
 
-        checkArgument(!mRunning.containsKey(id));
+        if (mRunning.containsKey(id)) {
+            Log.w(TAG, "Duplicate job id: " + id
+                    + ". Ignoring job request for srcs: " + srcs + ", stack: " + stack + ".");
+            return null;
+        }
 
         Job job = null;
         switch (operationType) {
@@ -211,7 +237,8 @@ public class FileOperationService extends Service implements Job.Listener {
                 job = jobFactory.createMove(this, getApplicationContext(), this, id, stack, srcs);
                 break;
             case OPERATION_DELETE:
-                throw new UnsupportedOperationException();
+                job = jobFactory.createDelete(this, getApplicationContext(), this, id, stack, srcs);
+                break;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -234,20 +261,21 @@ public class FileOperationService extends Service implements Job.Listener {
 
     /**
      * Most likely shuts down. Won't shut down if service has a pending
-     * message.
+     * message. Thread pool is deal with in onDestroy.
      */
     private void shutdown() {
-        if (DEBUG) Log.d(TAG, "Shutting down. Last start time: " + mLastStarted);
+        if (DEBUG) Log.d(TAG, "Shutting down. Last serviceId was " + mLastServiceId);
         mWakeLock.release();
         mWakeLock = null;
-        boolean gonnaStop = stopSelfResult(mLastStarted);
+
+        // Turns out, for us, stopSelfResult always returns false in tests,
+        // so we can't guard executor shutdown. For this reason we move
+        // executor shutdown to #onDestroy.
+        boolean gonnaStop = stopSelfResult(mLastServiceId);
         if (DEBUG) Log.d(TAG, "Stopping service: " + gonnaStop);
         if (!gonnaStop) {
             Log.w(TAG, "Service should be stopping, but reports otherwise.");
         }
-        // Sadly "gonnaStop" is always false in tests, so we can't guard executor shutdown.
-        List<Runnable> unfinished = executor.shutdownNow();
-        checkState(unfinished.isEmpty());
     }
 
     @VisibleForTesting
