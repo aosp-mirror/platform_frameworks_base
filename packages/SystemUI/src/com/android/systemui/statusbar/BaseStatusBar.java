@@ -1175,7 +1175,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void toggleKeyboardShortcuts() {
-        getKeyboardShortcuts().toggleKeyboardShortcuts(mContext);
+        getKeyboardShortcuts().toggleKeyboardShortcuts();
     }
 
     protected void cancelPreloadingRecents() {
@@ -1518,7 +1518,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected KeyboardShortcuts getKeyboardShortcuts() {
         if (mKeyboardShortcuts == null) {
-            mKeyboardShortcuts = new KeyboardShortcuts();
+            mKeyboardShortcuts = new KeyboardShortcuts(mContext);
         }
 
         return mKeyboardShortcuts;

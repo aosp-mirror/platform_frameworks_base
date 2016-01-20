@@ -154,4 +154,9 @@
 
     <color name="switch_bar_background">#ff37474f</color>
     <color name="switch_accent_color">#ff7fcac3</color>
+
+    <!-- Keyboard shortcuts colors -->
+    <color name="ksh_system_group_color">#ff00bcd4</color>
+    <color name="ksh_application_group_color">#fff44336</color>
+    <color name="ksh_dialog_background_color">#ffffffff</color>
 </resources>

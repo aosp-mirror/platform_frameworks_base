@@ -32,6 +32,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 public final class KeyboardShortcutGroup implements Parcelable {
     private final CharSequence mLabel;
     private final List<KeyboardShortcutInfo> mItems;
+    // The system group looks different UI wise.
+    private boolean mSystemGroup;
 
     /**
      * @param label The title to be used for this group, or null if there is none.
@@ -50,10 +52,33 @@ public final class KeyboardShortcutGroup implements Parcelable {
         this(label, Collections.<KeyboardShortcutInfo>emptyList());
     }
 
+    /**
+     * @param label The title to be used for this group, or null if there is none.
+     * @param items The set of items to be included.
+     * @param isSystemGroup Set this to {@code true} if this is s system group.
+     * @hide
+     */
+    public KeyboardShortcutGroup(@Nullable CharSequence label,
+            @NonNull List<KeyboardShortcutInfo> items, boolean isSystemGroup) {
+        mLabel = label;
+        mItems = new ArrayList<>(checkNotNull(items));
+        mSystemGroup = isSystemGroup;
+    }
+
+    /**
+     * @param label The title to be used for this group, or null if there is none.
+     * @param isSystemGroup Set this to {@code true} if this is s system group.
+     * @hide
+     */
+    public KeyboardShortcutGroup(@Nullable CharSequence label, boolean isSystemGroup) {
+        this(label, Collections.<KeyboardShortcutInfo>emptyList(), isSystemGroup);
+    }
+
     private KeyboardShortcutGroup(Parcel source) {
         mItems = new ArrayList<>();
         mLabel = source.readCharSequence();
         source.readTypedList(mItems, KeyboardShortcutInfo.CREATOR);
+        mSystemGroup = source.readInt() == 1;
     }
 
     /**
@@ -68,6 +93,11 @@ public final class KeyboardShortcutGroup implements Parcelable {
      */
     public List<KeyboardShortcutInfo> getItems() {
         return mItems;
+    }
+
+    /** @hide **/
+    public boolean isSystemGroup() {
+        return mSystemGroup;
     }
 
     /**
@@ -88,6 +118,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeCharSequence(mLabel);
         dest.writeTypedList(mItems);
+        dest.writeInt(mSystemGroup ? 1 : 0);
     }
 
     public static final Creator<KeyboardShortcutGroup> CREATOR =
