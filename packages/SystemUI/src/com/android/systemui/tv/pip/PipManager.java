@@ -32,11 +32,14 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.systemui.Prefs;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static com.android.systemui.Prefs.Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.
@@ -44,6 +47,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 public class PipManager {
     private static final String TAG = "PipManager";
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_FORCE_ONBOARDING = false;
 
     private static PipManager sPipManager;
 
@@ -65,6 +69,7 @@ public class PipManager {
     private Rect mMenuModePipBound;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
+    private boolean mOnboardingShown;
 
     private final Runnable mOnActivityPinnedRunnable = new Runnable() {
         @Override
@@ -83,6 +88,7 @@ public class PipManager {
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             showPipOverlay(false);
+            launchPipOnboardingActivityIfNeeded();
         }
     };
     private final Runnable mOnTaskStackChanged = new Runnable() {
@@ -145,6 +151,8 @@ public class PipManager {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        mOnboardingShown = Prefs.getBoolean(
+                mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
     }
 
     /**
@@ -169,7 +177,7 @@ public class PipManager {
     }
 
     /**
-     * Closes PIP (PIPped activity and PIP system UI).
+     * Closes PIP (PIPed activity and PIP system UI).
      */
     public void closePip() {
         mState = STATE_NO_PIP;
@@ -194,7 +202,7 @@ public class PipManager {
     }
 
     /**
-     * Moves the PIPped activity to the fullscreen and closes PIP system UI.
+     * Moves the PIPed activity to the fullscreen and closes PIP system UI.
      */
     public void movePipToFullscreen() {
         mState = STATE_NO_PIP;
@@ -258,6 +266,17 @@ public class PipManager {
      */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
+    }
+
+    private void launchPipOnboardingActivityIfNeeded() {
+        if (DEBUG_FORCE_ONBOARDING || !mOnboardingShown) {
+            mOnboardingShown = true;
+            Prefs.putBoolean(mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, true);
+
+            Intent intent = new Intent(mContext, PipOnboardingActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        }
     }
 
     private boolean hasPipTasks() {
@@ -334,7 +353,7 @@ public class PipManager {
      */
     public interface Listener {
         /**
-         * Invoked when a PIPped activity is closed.
+         * Invoked when a PIPed activity is closed.
          */
         void onPipActivityClosed();
         /**
@@ -342,7 +361,7 @@ public class PipManager {
          */
         void onShowPipMenu();
         /**
-         * Invoked when the PIPped activity is returned back to the fullscreen.
+         * Invoked when the PIPed activity is returned back to the fullscreen.
          */
         void onMoveToFullscreen();
     }

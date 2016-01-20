@@ -17,6 +17,8 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Picture-in-Picture menu -->
+    <eat-comment />
     <!-- Button to close PIP on PIP UI -->
     <string name="pip_exit" translatable="false">Close PIP</string>
     <!-- Button to move PIP screen to the fullscreen on PIP UI -->
@@ -29,4 +31,13 @@
     <string name="pip_cancel" translatable="false">Cancel</string>
     <!-- Overlay text on PIP -->
     <string name="pip_hold_home" translatable="false">Hold HOME to control PIP</string>
+
+    <!-- Picture-in-Picture onboarding screen -->
+    <eat-comment />
+    <!-- Title for onboarding screen. -->
+    <string name="pip_onboarding_title" translatable="false">Picture-in-picture</string>
+    <!-- Description for onboarding screen. -->
+    <string name="pip_onboarding_description" translatable="false">Press and hold the HOME\nbutton to close or control it</string>
+    <!-- Button to close onboarding screen. -->
+    <string name="pip_onboarding_button" translatable="false">Got it</string>
 </resources>

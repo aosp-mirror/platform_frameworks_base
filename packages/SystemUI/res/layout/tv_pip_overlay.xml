@@ -17,17 +17,13 @@
 */
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/guide_overlay"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/guide_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:padding="3dp"
-        android:textSize="13sp"
-        android:textColor="#111111"
-        android:background="#99EEEEEE"
-        android:text="@string/pip_hold_home" />
-</FrameLayout>
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:padding="3dp"
+    android:textSize="13sp"
+    android:textColor="#111111"
+    android:background="#99EEEEEE"
+    android:text="@string/pip_hold_home" />

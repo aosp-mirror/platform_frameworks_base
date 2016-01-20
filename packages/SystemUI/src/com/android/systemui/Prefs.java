@@ -43,6 +43,7 @@ public final class Prefs {
         Key.DND_FAVORITE_BUCKET_INDEX,
         Key.DND_NONE_SELECTED,
         Key.DND_FAVORITE_ZEN,
+        Key.TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN,
     })
     public @interface Key {
         String OVERVIEW_SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
@@ -58,6 +59,7 @@ public final class Prefs {
         String DND_FAVORITE_BUCKET_INDEX = "DndCountdownMinuteIndex";
         String DND_NONE_SELECTED = "DndNoneSelected";
         String DND_FAVORITE_ZEN = "DndFavoriteZen";
+        String TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN = "TvPictureInPictureOnboardingShown";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

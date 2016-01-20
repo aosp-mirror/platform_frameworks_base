@@ -349,6 +349,12 @@
             android:resizeable="true"
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />
+        <activity
+            android:name="com.android.systemui.tv.pip.PipOnboardingActivity"
+            android:exported="true"
+            android:theme="@style/PipTheme"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true" />
 
         <!-- platform logo easter egg activity -->
         <activity

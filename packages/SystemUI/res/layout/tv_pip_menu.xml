@@ -17,45 +17,37 @@
 */
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <FrameLayout
-        android:layout_alignParentEnd="true"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:background="#88FFFFFF">
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_gravity="end"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:background="#88FFFFFF"
+    android:gravity="center_vertical" >
 
-            <Button android:id="@+id/full"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/pip_fullscreen"
-                android:textSize="10sp"
-                android:focusable="true" />
+    <Button android:id="@+id/full"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/pip_fullscreen"
+        android:textSize="10sp"
+        android:focusable="true" />
 
-            <Button android:id="@+id/exit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/pip_exit"
-                android:textSize="10sp"
-                android:focusable="true" />
+    <Button android:id="@+id/exit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/pip_exit"
+        android:textSize="10sp"
+        android:focusable="true" />
 
-            <Button android:id="@+id/cancel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="@string/pip_cancel"
-                android:textSize="10sp"
-                android:focusable="true" />
-        </LinearLayout>
-    </FrameLayout>
-</RelativeLayout>
+    <Button android:id="@+id/cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:text="@string/pip_cancel"
+        android:textSize="10sp"
+        android:focusable="true" />
+</LinearLayout>
