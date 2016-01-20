@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Looper;
 import android.telephony.Rlog;
 import android.os.Handler;
 import android.os.Message;
@@ -348,31 +347,7 @@ public class SubscriptionManager {
      * for #onSubscriptionsChanged to be invoked.
      */
     public static class OnSubscriptionsChangedListener {
-        private final Handler mHandler;
-
-        public OnSubscriptionsChangedListener() {
-            mHandler = new OnSubscriptionsChangedListenerHandler();
-        }
-
-        /**
-         * Contructor that takes in looper as parameter in case a subclass/instantiation needs
-         * to use a specific looper (like in tests where mainLooper may need to be used).
-         * @param looper Looper to be used for mHandler
-         * @hide
-         */
-        protected OnSubscriptionsChangedListener(Looper looper) {
-            mHandler = new OnSubscriptionsChangedListenerHandler(looper);
-        }
-
-        private class OnSubscriptionsChangedListenerHandler extends Handler {
-            private OnSubscriptionsChangedListenerHandler() {
-                super();
-            }
-
-            private OnSubscriptionsChangedListenerHandler(Looper looper) {
-                super(looper);
-            }
-
+        private final Handler mHandler  = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 if (DBG) {
@@ -380,7 +355,7 @@ public class SubscriptionManager {
                 }
                 OnSubscriptionsChangedListener.this.onSubscriptionsChanged();
             }
-        }
+        };
 
         /**
          * Callback invoked when there is any change to any SubscriptionInfo. Typically
