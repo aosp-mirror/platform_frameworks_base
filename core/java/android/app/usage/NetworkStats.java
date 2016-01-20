@@ -208,6 +208,15 @@ public final class NetworkStats implements AutoCloseable {
             return uid;
         }
 
+        private static int convertRoaming(int roaming) {
+            switch (roaming) {
+                case android.net.NetworkStats.ROAMING_ALL : return ROAMING_ALL;
+                case android.net.NetworkStats.ROAMING_DEFAULT : return ROAMING_DEFAULT;
+                case android.net.NetworkStats.ROAMING_ROAMING : return ROAMING_ROAMING;
+            }
+            return 0;
+        }
+
         public Bucket() {
         }
 
@@ -454,9 +463,9 @@ public final class NetworkStats implements AutoCloseable {
     private void fillBucketFromSummaryEntry(Bucket bucketOut) {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
-        // TODO: Implement metering/roaming tracking.
+        // TODO: Implement metering tracking.
         bucketOut.mMetering = Bucket.METERING_ALL;
-        bucketOut.mRoaming = Bucket.ROAMING_ALL;
+        bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
         bucketOut.mEndTimeStamp = mEndTimeStamp;
         bucketOut.mRxBytes = mRecycledSummaryEntry.rxBytes;
