@@ -183,7 +183,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!plan.hasTasks()) {
-            loader.preloadTasks(plan, launchState.launchedFromHome);
+            loader.preloadTasks(plan, -1, launchState.launchedFromHome);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = launchState.launchedToTaskId;
@@ -192,24 +192,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         loader.loadTasks(this, plan, loadOpts);
 
         TaskStack stack = plan.getTaskStack();
-        ArrayList<Task> tasks = stack.getStackTasks();
-        int taskCount = stack.getTaskCount();
         mRecentsView.setTaskStack(stack);
 
-        // Mark the task that is the launch target
-        int launchTaskIndexInStack = 0;
-        if (launchState.launchedToTaskId != -1) {
-            for (int j = 0; j < taskCount; j++) {
-                Task t = tasks.get(j);
-                if (t.key.id == launchState.launchedToTaskId) {
-                    t.isLaunchTarget = true;
-                    launchTaskIndexInStack = tasks.size() - j - 1;
-                    break;
-                }
-            }
-        }
-
         // Animate the SystemUI scrims into view
+        Task launchTarget = stack.getLaunchTarget();
+        int taskCount = stack.getTaskCount();
+        int launchTaskIndexInStack = launchTarget != null
+                ? stack.indexOfStackTask(launchTarget)
+                : 0;
         boolean hasStatusBarScrim = taskCount > 0;
         boolean animateStatusBarScrim = launchState.launchedFromHome;
         boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
@@ -527,7 +517,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             launchOpts.loadThumbnails = false;
             launchOpts.onlyLoadForCache = true;
             RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-            loader.preloadTasks(loadPlan, false);
+            loader.preloadTasks(loadPlan, -1, false);
             loader.loadTasks(this, loadPlan, launchOpts);
             EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack()));
         }

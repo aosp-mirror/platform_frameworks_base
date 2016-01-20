@@ -154,7 +154,8 @@ public class Task {
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription,
                 String dismissDescription, int colorPrimary, boolean isHistorical,
-                Rect bounds, ActivityManager.TaskDescription taskDescription) {
+                boolean isLaunchTarget, Rect bounds,
+                ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -170,6 +171,7 @@ public class Task {
                 Color.WHITE) > 3f;
         this.bounds = bounds;
         this.taskDescription = taskDescription;
+        this.isLaunchTarget = isLaunchTarget;
         this.isHistorical = isHistorical;
     }
 

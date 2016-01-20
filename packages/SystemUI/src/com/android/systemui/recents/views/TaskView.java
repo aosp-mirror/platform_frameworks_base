@@ -459,16 +459,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     public void showActionButton(boolean fadeIn, int fadeInDuration) {
         mActionButtonView.setVisibility(View.VISIBLE);
 
-        if (fadeIn) {
-            if (mActionButtonView.getAlpha() < 1f) {
-                mActionButtonView.animate()
-                        .alpha(1f)
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(fadeInDuration)
-                        .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                        .start();
-            }
+        if (fadeIn && mActionButtonView.getAlpha() < 1f) {
+            mActionButtonView.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(fadeInDuration)
+                    .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                    .start();
         } else {
             mActionButtonView.setScaleX(1f);
             mActionButtonView.setScaleY(1f);
@@ -484,29 +482,27 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
      */
     public void hideActionButton(boolean fadeOut, int fadeOutDuration, boolean scaleDown,
             final Animator.AnimatorListener animListener) {
-        if (fadeOut) {
-            if (mActionButtonView.getAlpha() > 0f) {
-                if (scaleDown) {
-                    float toScale = 0.9f;
-                    mActionButtonView.animate()
-                            .scaleX(toScale)
-                            .scaleY(toScale);
-                }
+        if (fadeOut && mActionButtonView.getAlpha() > 0f) {
+            if (scaleDown) {
+                float toScale = 0.9f;
                 mActionButtonView.animate()
-                        .alpha(0f)
-                        .setDuration(fadeOutDuration)
-                        .setInterpolator(PhoneStatusBar.ALPHA_OUT)
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (animListener != null) {
-                                    animListener.onAnimationEnd(null);
-                                }
-                                mActionButtonView.setVisibility(View.INVISIBLE);
-                            }
-                        })
-                        .start();
+                        .scaleX(toScale)
+                        .scaleY(toScale);
             }
+            mActionButtonView.animate()
+                    .alpha(0f)
+                    .setDuration(fadeOutDuration)
+                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (animListener != null) {
+                                animListener.onAnimationEnd(null);
+                            }
+                            mActionButtonView.setVisibility(View.INVISIBLE);
+                        }
+                    })
+                    .start();
         } else {
             mActionButtonView.setAlpha(0f);
             mActionButtonView.setVisibility(View.INVISIBLE);

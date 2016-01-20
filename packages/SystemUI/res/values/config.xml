@@ -147,6 +147,9 @@
     <!-- The duration for animating the task decorations in after transitioning from an app. -->
     <integer name="recents_task_enter_from_app_duration">200</integer>
 
+    <!-- The duration for animating the task decorations in after transitioning from an app. -->
+    <integer name="recents_task_enter_from_affiliated_app_duration">125</integer>
+
     <!-- The duration for animating the task decorations out before transitioning to an app. -->
     <integer name="recents_task_exit_to_app_duration">125</integer>
 

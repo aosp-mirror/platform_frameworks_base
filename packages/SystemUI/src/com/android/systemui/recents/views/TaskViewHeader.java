@@ -228,6 +228,7 @@ public class TaskViewHeader extends FrameLayout
 
         mTaskViewRect.set(0, 0, width, height);
         boolean updateMoveTaskButton = mMoveTaskButton.getVisibility() != View.GONE;
+        boolean isFreeformTask = (mTask != null) && mTask.isFreeformTask();
         int appIconWidth = mIconView.getMeasuredWidth();
         int activityDescWidth = (mTask != null)
                 ? (int) mTitleView.getPaint().measureText(mTask.title)
@@ -239,19 +240,20 @@ public class TaskViewHeader extends FrameLayout
 
         // Priority-wise, we show the activity icon first, the dismiss icon if there is room, the
         // move-task icon if there is room, and then finally, the activity label if there is room
-        if (width < (appIconWidth + dismissIconWidth)) {
+        if (isFreeformTask && width < (appIconWidth + dismissIconWidth)) {
             mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.INVISIBLE);
             }
             mDismissButton.setVisibility(View.INVISIBLE);
-        } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth)) {
+        } else if (isFreeformTask && width < (appIconWidth + dismissIconWidth +
+                moveTaskIconWidth)) {
             mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {
                 mMoveTaskButton.setVisibility(View.INVISIBLE);
             }
             mDismissButton.setVisibility(View.VISIBLE);
-        } else if (width < (appIconWidth + dismissIconWidth + moveTaskIconWidth +
+        } else if (isFreeformTask && width < (appIconWidth + dismissIconWidth + moveTaskIconWidth +
                 activityDescWidth)) {
             mTitleView.setVisibility(View.INVISIBLE);
             if (updateMoveTaskButton) {

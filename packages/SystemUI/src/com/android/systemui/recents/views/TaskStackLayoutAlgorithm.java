@@ -434,19 +434,25 @@ public class TaskStackLayoutAlgorithm {
             mFreeformLayoutAlgorithm.update(freeformTasks, this);
             mInitialScrollP = mMaxScrollP;
         } else {
+            Task launchTask = stack.getLaunchTarget();
+            int launchTaskIndex = launchTask != null
+                    ? stack.indexOfStackTask(launchTask)
+                    : mNumStackTasks - 1;
             if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
                 mInitialScrollP = mMinScrollP;
             } else if (getDefaultFocusState() > 0f) {
                 RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
                 if (launchState.launchedFromHome) {
-                    mInitialScrollP = Math.max(mMinScrollP, mNumStackTasks - 1);
+                    mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, launchTaskIndex));
                 } else {
-                    mInitialScrollP = Math.max(mMinScrollP, mNumStackTasks - 2);
+                    mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP,
+                            launchTaskIndex - 1));
                 }
             } else {
                 float offsetPct = (float) (mTaskRect.height() / 2) / mStackRect.height();
                 float normX = mUnfocusedCurveInterpolator.getX(offsetPct);
-                mInitialScrollP = (mNumStackTasks - 1) - mUnfocusedRange.getAbsoluteX(normX);
+                mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP,
+                        launchTaskIndex - mUnfocusedRange.getAbsoluteX(normX)));
             }
         }
     }

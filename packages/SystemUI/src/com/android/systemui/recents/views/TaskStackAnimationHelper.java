@@ -130,6 +130,7 @@ public class TaskStackAnimationHelper {
                     // Move the task view slightly lower so we can animate it in
                     RectF bounds = new RectF(mTmpTransform.rect);
                     bounds.offset(0, taskViewAffiliateGroupEnterOffset);
+                    tv.setClipViewInStack(false);
                     tv.setAlpha(0f);
                     tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top,
                             (int) bounds.right, (int) bounds.bottom);
@@ -165,6 +166,8 @@ public class TaskStackAnimationHelper {
 
         int taskViewEnterFromAppDuration = res.getInteger(
                 R.integer.recents_task_enter_from_app_duration);
+        int taskViewEnterFromAffiliatedAppDuration = res.getInteger(
+                R.integer.recents_task_enter_from_affiliated_app_duration);
         int taskViewEnterFromHomeDuration = res.getInteger(
                 R.integer.recents_task_enter_from_home_duration);
         int taskViewEnterFromHomeStaggerDelay = res.getInteger(
@@ -174,7 +177,7 @@ public class TaskStackAnimationHelper {
         List<TaskView> taskViews = mStackView.getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
-            TaskView tv = taskViews.get(i);
+            final TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
             boolean currentTaskOccludesLaunchTarget = false;
             if (launchTargetTask != null) {
@@ -195,8 +198,14 @@ public class TaskStackAnimationHelper {
                     // Animate the task up if it was occluding the launch target
                     if (currentTaskOccludesLaunchTarget) {
                         TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                                taskViewEnterFromAppDuration, PhoneStatusBar.ALPHA_IN,
-                                postAnimationTrigger.decrementOnAnimationEnd());
+                                taskViewEnterFromAffiliatedAppDuration, PhoneStatusBar.ALPHA_IN,
+                                new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        postAnimationTrigger.decrement();
+                                        tv.setClipViewInStack(false);
+                                    }
+                                });
                         postAnimationTrigger.increment();
                         mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
                     }
@@ -286,7 +295,7 @@ public class TaskStackAnimationHelper {
             } else if (currentTaskOccludesLaunchTarget) {
                 // Animate this task out of view
                 TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                        taskViewExitToAppDuration, mFastOutLinearInInterpolator,
+                        taskViewExitToAppDuration, PhoneStatusBar.ALPHA_OUT,
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
 

@@ -1220,9 +1220,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Set the task focused state without requesting view focus, and leave the focus animations
         // until after the enter-animation
+        Task launchTask = mStack.getLaunchTarget();
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
+        int focusedTaskIndex = launchTask != null
+                ? mStack.indexOfStackTask(launchTask)
+                : launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
         if (focusedTaskIndex != -1) {
             setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
                     false /* requestViewFocus */);

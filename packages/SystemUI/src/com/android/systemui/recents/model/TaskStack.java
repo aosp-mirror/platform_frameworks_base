@@ -848,12 +848,17 @@ public class TaskStack {
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;
-                int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
-                        IndividualTaskIdOffset + t.key.id;
-                if (mAffinitiesGroups.containsKey(affiliation)) {
-                    group = getGroupWithAffiliation(affiliation);
+                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
+                    int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
+                            IndividualTaskIdOffset + t.key.id;
+                    if (mAffinitiesGroups.containsKey(affiliation)) {
+                        group = getGroupWithAffiliation(affiliation);
+                    } else {
+                        group = new TaskGrouping(affiliation);
+                        addGroup(group);
+                    }
                 } else {
-                    group = new TaskGrouping(affiliation);
+                    group = new TaskGrouping(t.key.id);
                     addGroup(group);
                 }
                 group.addTask(t);
