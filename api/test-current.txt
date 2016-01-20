@@ -20213,6 +20213,24 @@ package android.media {
     field public static final int VP8Level_Version2 = 4; // 0x4
     field public static final int VP8Level_Version3 = 8; // 0x8
     field public static final int VP8ProfileMain = 1; // 0x1
+    field public static final int VP9Level1 = 0; // 0x0
+    field public static final int VP9Level11 = 1; // 0x1
+    field public static final int VP9Level2 = 2; // 0x2
+    field public static final int VP9Level21 = 4; // 0x4
+    field public static final int VP9Level3 = 8; // 0x8
+    field public static final int VP9Level31 = 16; // 0x10
+    field public static final int VP9Level4 = 32; // 0x20
+    field public static final int VP9Level41 = 64; // 0x40
+    field public static final int VP9Level5 = 128; // 0x80
+    field public static final int VP9Level51 = 256; // 0x100
+    field public static final int VP9Level52 = 512; // 0x200
+    field public static final int VP9Level6 = 1024; // 0x400
+    field public static final int VP9Level61 = 2048; // 0x800
+    field public static final int VP9Level62 = 4096; // 0x1000
+    field public static final int VP9Profile0 = 0; // 0x0
+    field public static final int VP9Profile1 = 1; // 0x1
+    field public static final int VP9Profile2 = 2; // 0x2
+    field public static final int VP9Profile3 = 3; // 0x3
     field public int level;
     field public int profile;
   }

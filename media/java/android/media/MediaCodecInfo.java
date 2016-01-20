@@ -1726,7 +1726,7 @@ public final class MediaCodecInfo {
         }
 
         private void applyLevelLimits() {
-            int maxBlocksPerSecond = 0;
+            long maxBlocksPerSecond = 0;
             int maxBlocks = 0;
             int maxBps = 0;
             int maxDPBBlocks = 0;
@@ -2052,11 +2052,11 @@ public final class MediaCodecInfo {
                         16 /* blockWidth */, 16 /* blockHeight */,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
                 mFrameRateRange = Range.create(1, maxRate);
-            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8) ||
-                    mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)) {
-                maxBlocks = maxBlocksPerSecond = Integer.MAX_VALUE;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8)) {
+                maxBlocks = Integer.MAX_VALUE;
+                maxBlocksPerSecond = Integer.MAX_VALUE;
 
-                // TODO: set to 100Mbps for now, need a number for VPX
+                // TODO: set to 100Mbps for now, need a number for VP8
                 maxBps = 100000000;
 
                 // profile levels are not indicative for VPx, but verify
@@ -2084,10 +2084,79 @@ public final class MediaCodecInfo {
                     errors &= ~ERROR_NONE_SUPPORTED;
                 }
 
-                final int blockSize =
-                    mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP8) ? 16 : 8;
+                final int blockSize = 16;
                 applyMacroBlockLimits(Short.MAX_VALUE, Short.MAX_VALUE,
                         maxBlocks, maxBlocksPerSecond, blockSize, blockSize,
+                        1 /* widthAlignment */, 1 /* heightAlignment */);
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_VP9)) {
+                maxBlocksPerSecond = 829440;
+                maxBlocks = 36864;
+                maxBps = 200000;
+
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    long SR = 0;
+                    int FS = 0;
+                    int BR = 0;
+                    switch (profileLevel.level) {
+                        case CodecProfileLevel.VP9Level1:
+                            SR =      829440; FS =    36864; BR =    200; break;
+                        case CodecProfileLevel.VP9Level11:
+                            SR =     2764800; FS =    73728; BR =    800; break;
+                        case CodecProfileLevel.VP9Level2:
+                            SR =     4608000; FS =   122880; BR =   1800; break;
+                        case CodecProfileLevel.VP9Level21:
+                            SR =     9216000; FS =   245760; BR =   3600; break;
+                        case CodecProfileLevel.VP9Level3:
+                            SR =    20736000; FS =   552960; BR =   7200; break;
+                        case CodecProfileLevel.VP9Level31:
+                            SR =    36864000; FS =   983040; BR =  12000; break;
+                        case CodecProfileLevel.VP9Level4:
+                            SR =    83558400; FS =  2228224; BR =  18000; break;
+                        case CodecProfileLevel.VP9Level41:
+                            SR =   160432128; FS =  2228224; BR =  30000; break;
+                        case CodecProfileLevel.VP9Level5:
+                            SR =   311951360; FS =  8912896; BR =  60000; break;
+                        case CodecProfileLevel.VP9Level51:
+                            SR =   588251136; FS =  8912896; BR = 120000; break;
+                        case CodecProfileLevel.VP9Level52:
+                            SR =  1176502272; FS =  8912896; BR = 180000; break;
+                        case CodecProfileLevel.VP9Level6:
+                            SR =  1176502272; FS = 35651584; BR = 180000; break;
+                        case CodecProfileLevel.VP9Level61:
+                            SR = 2353004544L; FS = 35651584; BR = 240000; break;
+                        case CodecProfileLevel.VP9Level62:
+                            SR = 4706009088L; FS = 35651584; BR = 480000; break;
+                        default:
+                            Log.w(TAG, "Unrecognized level "
+                                    + profileLevel.level + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.VP9Profile0:
+                        case CodecProfileLevel.VP9Profile1:
+                        case CodecProfileLevel.VP9Profile2:
+                        case CodecProfileLevel.VP9Profile3:
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    errors &= ~ERROR_NONE_SUPPORTED;
+                    maxBlocksPerSecond = Math.max(SR, maxBlocksPerSecond);
+                    maxBlocks = Math.max(FS, maxBlocks);
+                    maxBps = Math.max(BR * 1000, maxBps);
+                }
+
+                final int blockSize = 8;
+                int maxLengthInBlocks = Utils.divUp(maxBlocks, blockSize);
+                maxBlocks = Utils.divUp(maxBlocks, blockSize * blockSize);
+                maxBlocksPerSecond = Utils.divUp(maxBlocksPerSecond, blockSize * blockSize);
+
+                applyMacroBlockLimits(
+                        maxLengthInBlocks, maxLengthInBlocks,
+                        maxBlocks, maxBlocksPerSecond,
+                        blockSize, blockSize,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
                 maxBlocks = 36864;
@@ -2531,6 +2600,28 @@ public final class MediaCodecInfo {
         // from OMX_VIDEO_VP8PROFILETYPE
         public static final int VP8ProfileMain = 0x01;
 
+        // from OMX_VIDEO_VP9PROFILETYPE
+        public static final int VP9Profile0 = 0x00;
+        public static final int VP9Profile1 = 0x01;
+        public static final int VP9Profile2 = 0x02;
+        public static final int VP9Profile3 = 0x03;
+
+        // from OMX_VIDEO_VP9LEVELTYPE
+        public static final int VP9Level1  = 0x0;
+        public static final int VP9Level11 = 0x1;
+        public static final int VP9Level2  = 0x2;
+        public static final int VP9Level21 = 0x4;
+        public static final int VP9Level3  = 0x8;
+        public static final int VP9Level31 = 0x10;
+        public static final int VP9Level4  = 0x20;
+        public static final int VP9Level41 = 0x40;
+        public static final int VP9Level5  = 0x80;
+        public static final int VP9Level51 = 0x100;
+        public static final int VP9Level52 = 0x200;
+        public static final int VP9Level6  = 0x400;
+        public static final int VP9Level61 = 0x800;
+        public static final int VP9Level62 = 0x1000;
+
         // from OMX_VIDEO_HEVCPROFILETYPE
         public static final int HEVCProfileMain   = 0x01;
         public static final int HEVCProfileMain10 = 0x02;
@@ -2566,14 +2657,18 @@ public final class MediaCodecInfo {
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
          * this can be OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263PROFILETYPE,
-         * OMX_VIDEO_MPEG4PROFILETYPE or OMX_VIDEO_VP8PROFILETYPE.
+         * OMX_VIDEO_MPEG4PROFILETYPE, OMX_VIDEO_VP8PROFILETYPE or OMX_VIDEO_VP9PROFILETYPE.
          */
         public int profile;
 
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
          * this can be OMX_VIDEO_AVCLEVELTYPE, OMX_VIDEO_H263LEVELTYPE
-         * OMX_VIDEO_MPEG4LEVELTYPE or OMX_VIDEO_VP8LEVELTYPE.
+         * OMX_VIDEO_MPEG4LEVELTYPE, OMX_VIDEO_VP8LEVELTYPE or OMX_VIDEO_VP9LEVELTYPE.
+         *
+         * Note that VP9 decoder on platforms before {@link android.os.Build.VERSION_CODES#N} may
+         * not advertise a profile level support. For those VP9 decoders, please use
+         * {@link VideoCapabilities} to determine the codec capabilities.
          */
         public int level;
     };
