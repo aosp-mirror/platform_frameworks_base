@@ -36258,6 +36258,7 @@ package android.telephony {
     method public java.lang.String getDeviceId(int);
     method public java.lang.String getDeviceSoftwareVersion();
     method public java.lang.String getGroupIdLevel1();
+    method public java.lang.String getIccSimChallengeResponse(int, java.lang.String);
     method public java.lang.String getLine1Number();
     method public java.lang.String getMmsUAProfUrl();
     method public java.lang.String getMmsUserAgent();
