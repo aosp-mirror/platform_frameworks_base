@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -91,7 +92,8 @@ public class ConfirmUserCreationActivity extends AlertActivity
         }
         final String message;
         // Check the user restrictions
-        boolean cantCreateUser = mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER);
+        boolean cantCreateUser = mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER)
+                || !mUserManager.isAdminUser();
         // Check the system state and user count
         boolean cantCreateAnyMoreUsers = !mUserManager.canAddMoreUsers();
         // Check the account existence
