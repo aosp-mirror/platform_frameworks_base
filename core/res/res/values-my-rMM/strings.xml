@@ -211,6 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်း"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းအား ယူရန်"</string>
     <string name="bugreport_message" msgid="398447048750350456">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"အသံတိတ်စနစ်"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"အသံပိတ်ထားသည်"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"အသံဖွင့်ထားသည်"</string>
@@ -1032,18 +1041,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ထပ်မံရွေးချယ်စရာများအတွက် ထိပါ"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB အမှားစစ်ခြင်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ဒီဘာဂင် ပိတ်ရန် ထိပါ။"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို စီမံအုပ်ချုပ်သူထံ ပို့မလား။"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"သင်၏ IT စီမံအုပ်ချုပ်သူက ပြဿနာကို ဖြေရှင်းနိုင်ရန် ချွတ်ယွင်းချက်အစီရင်ခံစာကို တောင်းဆိုပါသည်"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"လက်ခံပါ"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ငြင်းပယ်ပါ"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"ချွတ်ယွင်းချက် စာရင်းကို ယူနေပါသည်..."</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"ဖျက်သိမ်းရန် တို့ပါ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ကီးဘုတ် ပြောင်းလဲရန်"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ကီးဘုတ်များကို ရွေးရန်"</string>
     <string name="show_ime" msgid="9157568568695230830">"ရိုက်သွင်းမှု နည်းလမ်းကို ပြရန်"</string>

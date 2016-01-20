@@ -23,10 +23,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3017901214286816293">"Upang tumawag at magpadala ng mga mensahe sa pamamagitan ng Wi-Fi, hilingin muna sa iyong carrier na i-set up ang serbisyong ito. Pagkatapos ay muling i-on ang pagtawag sa Wi-Fi mula sa Mga Setting."</item>
+    <item msgid="3017901214286816293">"Upang tumawag at magpadala ng mga mensahe sa pamamagitan ng Wi-Fi, hilingin muna sa iyong carrier na i-set up ang serbisyong ito. Pagkatapos ay muling i-on ang pagtawag gamit ang Wi-Fi mula sa Mga Setting."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7068215934335709161">"Magparehistro sa iyong carrier"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="2031160810542298336">"Pagtawag sa Pamamagitan ng Wi-Fi ng %s"</string>
+    <string name="wfcSpnFormat" msgid="2031160810542298336">"Pagtawag Gamit ang Wi-Fi ng %s"</string>
 </resources>

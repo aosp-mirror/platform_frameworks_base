@@ -211,6 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Bug report"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Take bug report"</string>
     <string name="bugreport_message" msgid="398447048750350456">"This will collect information about your current device state, to send as an email message. It will take a little time from starting the bug report until it is ready to be sent. Please be patient."</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Silent mode"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sound is OFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sound is ON"</string>
@@ -1032,18 +1041,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Touch for more options."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Touch to disable USB debugging."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Share bug report with admin?"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"Your IT admin requested a bug report to help troubleshoot"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPT"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"DECLINE"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Taking bug report…"</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Touch to cancel"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Change keyboard"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Choose keyboards"</string>
     <string name="show_ime" msgid="9157568568695230830">"Show input method"</string>

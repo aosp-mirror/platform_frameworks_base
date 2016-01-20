@@ -211,6 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"错误报告"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"提交错误报告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"静音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"声音已开启"</string>
@@ -1032,18 +1041,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"触摸以查看更多选项。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"要与管理员分享错误报告吗？"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"您的 IT 管理员已请求获取错误报告，以便帮助您排查问题"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"接受"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"拒绝"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"正在生成错误报告…"</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"触摸可取消"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"选择键盘"</string>
     <string name="show_ime" msgid="9157568568695230830">"显示输入法"</string>
@@ -1524,12 +1527,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"这些通知的重要性由您来设置。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
-    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
-    <skip />
-    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
-    <skip />
-    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (3206420861363021392) -->
-    <skip />
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但是系统目前禁止执行这项操作。"</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但已达到用户人数上限。"</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但这个设备上已经存在"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号。仍要继续吗？"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试为"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号添加新用户，要继续吗？"</string>
 </resources>

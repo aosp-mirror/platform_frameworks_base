@@ -212,6 +212,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raport despre erori"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Executați un raport despre erori"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Acest raport va colecta informații despre starea actuală a dispozitivului, pentru a le trimite într-un e-mail. Aveți răbdare după pornirea raportului despre erori până când va fi gata de trimis."</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mod Silențios"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sunetul este DEZACTIVAT"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sunetul este ACTIVAT"</string>
@@ -1039,18 +1048,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Atingeți pentru mai multe opțiuni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depanarea USB este conectată"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Atingeți pentru a dezactiva depanarea USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Trimiteți raportul de eroare administratorului?"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"Administratorul IT a solicitat un raport de eroare pentru a remedia problemele"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPTAȚI"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REFUZAȚI"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Se creează un raport de eroare…"</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Atingeți pentru a anula"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Schimbați tastatura"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Alegeți tastaturi"</string>
     <string name="show_ime" msgid="9157568568695230830">"Afișați metoda de introducere a textului"</string>
@@ -1542,12 +1545,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Dvs. setați importanța acestor notificări."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Notificarea este importantă având în vedere persoanele implicate."</string>
-    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
-    <skip />
-    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
-    <skip />
-    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (3206420861363021392) -->
-    <skip />
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar momentan nu îi este permis."</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar a fost atinsă limita de utilizatori."</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar contul "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" există deja pe acest dispozitiv. Continuați oricum?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator pentru contul "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Continuați?"</string>
 </resources>

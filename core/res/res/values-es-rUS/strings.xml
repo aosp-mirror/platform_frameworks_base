@@ -211,6 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de errores"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Iniciar informe de errores"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"El sonido está Desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"El sonido está Activado"</string>
@@ -1032,18 +1041,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"¿Quieres compartir el informe de errores con el administrador?"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"El administrador de TI solicitó un informe de errores para ayudar a solucionar el problema"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEPTAR"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECHAZAR"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Realizando un informe de errores…"</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Toca para cancelar"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
     <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
@@ -1524,12 +1527,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Varios"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Estableciste la importancia de estas notificaciones."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Es importante debido a las personas involucradas."</string>
-    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
-    <skip />
-    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
-    <skip />
-    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (3206420861363021392) -->
-    <skip />
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está intentando agregar un usuario nuevo, pero esta app no está permitida."</string>
+    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está intentado agregar un usuario nuevo, pero ya se alcanzó el límite máximo de usuarios."</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está intentado agregar un usuario nuevo, pero la cuenta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ya existe en este dispositivo. ¿Deseas continuar de todas formas?"</string>
+    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está intentando agregar un usuario nuevo a la cuenta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". ¿Deseas continuar?"</string>
 </resources>

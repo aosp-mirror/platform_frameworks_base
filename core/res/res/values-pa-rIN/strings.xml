@@ -211,6 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈ-ਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੀ ਵਰਤਮਾਨ ਡਿਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਤਰ ਕਰੇਗਾ। ਬਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
+    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <skip />
+    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
+    <skip />
+    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
+    <skip />
+    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"ਸਾਈਲੈਂਟ ਮੋਡ"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ਅਵਾਜ਼ ਬੰਦ ਹੈ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ਅਵਾਜ਼ ਚਾਲੂ ਹੈ"</string>
@@ -1032,18 +1041,12 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ਡੀਬਗਿੰਗ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਛੋਹਵੋ।"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (3116061729914615290) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (1310517845557771773) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_accept (8203856129078669677) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_decline (6337969352057443969) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_title (2785600634417078622) -->
-    <skip />
-    <!-- no translation found for remote_bugreport_progress_notification_message_can_cancel (5743435483005099451) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"ਕੀ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"ਸਮੱਸਿਆ ਦੇ ਨਿਪਟਾਰੇ ਵਿੱਚ ਮਦਦ ਲਈ ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
+    <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ਸਵੀਕਾਰ ਕਰੋ"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
+    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
+    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"ਰੱਦ ਕਰਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀਬੋਰਡ ਬਦਲੋ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ਕੀਬੋਰਡਸ ਚੁਣੋ"</string>
     <string name="show_ime" msgid="9157568568695230830">"ਇਨਪੁਟ ਵਿਧੀ ਦਿਖਾਓ"</string>
