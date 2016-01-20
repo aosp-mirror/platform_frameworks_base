@@ -31,7 +31,7 @@ public class CustomPrinterIconCallback {
     /** The printer the call back is for */
     private final @NonNull PrinterId mPrinterId;
     private final @NonNull IPrintServiceClient mObserver;
-    private static final String LOG_TAG = "CustomPrinterIconCallback";
+    private static final String LOG_TAG = "CustomPrinterIconCB";
 
     /**
      * Create a callback class to be used once a icon is loaded
