@@ -1197,7 +1197,12 @@ class WindowSurfacePlacer {
                     // if app window is removed, or window relayout to invisible. We don't want to
                     // clear it out for windows that get replaced, because the animation depends on
                     // the flag to remove the replaced window.
-                    if (!win.mWillReplaceWindow) {
+                    //
+                    // We also don't clear the mExiting flag for windows which have the
+                    // mRemoveOnExit flag. This indicates an explicit remove request has been issued
+                    // by the client. We should let animation proceed and not clear this flag or
+                    // they won't eventually be removed by WindowStateAnimator#finishExit.
+                    if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
                         win.mExiting = false;
                     }
                     if (win.mWinAnimator.mAnimLayer > layer) {
