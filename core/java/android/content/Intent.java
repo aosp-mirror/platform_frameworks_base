@@ -663,10 +663,13 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_DEFAULT = ACTION_VIEW;
 
     /**
-     * Activity Action: Quick view the data.
-     * <p>Input: {@link #getData} is URI from which to retrieve data.
+     * Activity Action: Quick view the data. Launches a quick viewer for
+     * a URI or a list of URIs.
+     * <p>Input: {@link #getData} is a mandatory content URI of the item to
+     * preview. {@link #getClipData} contains an optional list of content URIs
+     * if there is more than one item to preview. {@link #EXTRA_INDEX} is an
+     * optional index of the URI in the clip data to show first.
      * <p>Output: nothing.
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
@@ -4126,7 +4129,10 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_SIM_ACTIVATION_RESPONSE =
             "android.intent.extra.SIM_ACTIVATION_RESPONSE";
 
-    /** {@hide} */
+    /**
+     * Optional index with semantics depending on the intent action.
+     * @see #ACTION_QUICK_VIEW
+     */
     public static final String EXTRA_INDEX = "android.intent.extra.INDEX";
 
     /**

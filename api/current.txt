@@ -8449,6 +8449,7 @@ package android.content {
     field public static final java.lang.String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
     field public static final java.lang.String ACTION_PROVIDER_CHANGED = "android.intent.action.PROVIDER_CHANGED";
     field public static final java.lang.String ACTION_QUICK_CLOCK = "android.intent.action.QUICK_CLOCK";
+    field public static final java.lang.String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
     field public static final java.lang.String ACTION_REBOOT = "android.intent.action.REBOOT";
     field public static final java.lang.String ACTION_RUN = "android.intent.action.RUN";
     field public static final java.lang.String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
@@ -8542,6 +8543,7 @@ package android.content {
     field public static final java.lang.String EXTRA_DONT_KILL_APP = "android.intent.extra.DONT_KILL_APP";
     field public static final java.lang.String EXTRA_EMAIL = "android.intent.extra.EMAIL";
     field public static final java.lang.String EXTRA_HTML_TEXT = "android.intent.extra.HTML_TEXT";
+    field public static final java.lang.String EXTRA_INDEX = "android.intent.extra.INDEX";
     field public static final java.lang.String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
     field public static final java.lang.String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_INTENT = "android.intent.extra.INTENT";
