@@ -23,6 +23,7 @@
 
 #include <utils/Log.h>
 #include <utils/Looper.h>
+#include <utils/Vector.h>
 
 #include <gui/Sensor.h>
 #include <gui/SensorManager.h>
@@ -45,6 +46,7 @@ namespace android {
 
 struct SensorOffsets
 {
+    jclass      clazz;
     jfieldID    name;
     jfieldID    vendor;
     jfieldID    version;
@@ -60,8 +62,13 @@ struct SensorOffsets
     jfieldID    maxDelay;
     jfieldID    flags;
     jmethodID   setType;
+    jmethodID   init;
 } gSensorOffsets;
 
+struct ListOffsets {
+    jclass      clazz;
+    jmethodID   add;
+} gListOffsets;
 
 /*
  * The method below are not thread-safe and not intended to be
@@ -70,8 +77,10 @@ struct SensorOffsets
 static void
 nativeClassInit (JNIEnv *_env, jclass _this)
 {
-    jclass sensorClass = _env->FindClass("android/hardware/Sensor");
+    //android.hardware.Sensor
     SensorOffsets& sensorOffsets = gSensorOffsets;
+    jclass sensorClass = (jclass) _env->NewGlobalRef(_env->FindClass("android/hardware/Sensor"));
+    sensorOffsets.clazz       = sensorClass;
     sensorOffsets.name        = _env->GetFieldID(sensorClass, "mName",      "Ljava/lang/String;");
     sensorOffsets.vendor      = _env->GetFieldID(sensorClass, "mVendor",    "Ljava/lang/String;");
     sensorOffsets.version     = _env->GetFieldID(sensorClass, "mVersion",   "I");
@@ -88,7 +97,15 @@ nativeClassInit (JNIEnv *_env, jclass _this)
                                                         "Ljava/lang/String;");
     sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
     sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
+
     sensorOffsets.setType = _env->GetMethodID(sensorClass, "setType", "(I)Z");
+    sensorOffsets.init = _env->GetMethodID(sensorClass, "<init>", "()V");
+
+    // java.util.List;
+    ListOffsets& listOffsets = gListOffsets;
+    jclass listClass = (jclass) _env->NewGlobalRef(_env->FindClass("java/util/List"));
+    listOffsets.clazz = listClass;
+    listOffsets.add = _env->GetMethodID(listClass, "add", "(Ljava/lang/Object;)Z");
 }
 
 /**
@@ -141,6 +158,46 @@ nativeCreate
     return (jlong) &SensorManager::getInstanceForPackage(String16(opPackageNameUtf.c_str()));
 }
 
+static jobject
+translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nativeSensor) {
+    const SensorOffsets& sensorOffsets(gSensorOffsets);
+
+    if (sensor == NULL) {
+        // Sensor sensor = new Sensor();
+        sensor = env->NewObject(sensorOffsets.clazz, sensorOffsets.init, "");
+    }
+
+    if (sensor != NULL) {
+        jstring name = env->NewStringUTF(nativeSensor.getName().string());
+        jstring vendor = env->NewStringUTF(nativeSensor.getVendor().string());
+        jstring requiredPermission =
+                env->NewStringUTF(nativeSensor.getRequiredPermission().string());
+
+        env->SetObjectField(sensor, sensorOffsets.name,      name);
+        env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
+        env->SetIntField(sensor, sensorOffsets.version,      nativeSensor.getVersion());
+        env->SetIntField(sensor, sensorOffsets.handle,       nativeSensor.getHandle());
+        env->SetFloatField(sensor, sensorOffsets.range,      nativeSensor.getMaxValue());
+        env->SetFloatField(sensor, sensorOffsets.resolution, nativeSensor.getResolution());
+        env->SetFloatField(sensor, sensorOffsets.power,      nativeSensor.getPowerUsage());
+        env->SetIntField(sensor, sensorOffsets.minDelay,     nativeSensor.getMinDelay());
+        env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
+                         nativeSensor.getFifoReservedEventCount());
+        env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
+                         nativeSensor.getFifoMaxEventCount());
+        env->SetObjectField(sensor, sensorOffsets.requiredPermission,
+                            requiredPermission);
+        env->SetIntField(sensor, sensorOffsets.maxDelay, nativeSensor.getMaxDelay());
+        env->SetIntField(sensor, sensorOffsets.flags, nativeSensor.getFlags());
+        if (env->CallBooleanMethod(sensor, sensorOffsets.setType, nativeSensor.getType())
+                == JNI_FALSE) {
+            jstring stringType = getInternedString(env, &nativeSensor.getStringType());
+            env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
+        }
+    }
+    return sensor;
+}
+
 static jboolean
 nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensor, jint index)
 {
@@ -178,6 +235,24 @@ nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject s
         env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
     }
     return true;
+}
+
+static void
+nativeGetDynamicSensors(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensorList) {
+
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    const ListOffsets& listOffsets(gListOffsets);
+
+    Vector<Sensor> nativeList;
+
+    mgr->getDynamicSensorList(nativeList);
+
+    ALOGI("DYNS native SensorManager.getDynamicSensorList return %d sensors", nativeList.size());
+    for (size_t i = 0; i < nativeList.size(); ++i) {
+        jobject sensor = translateNativeSensorToJavaSensor(env, NULL, nativeList[i]);
+        // add to list
+        env->CallBooleanMethod(sensorList, listOffsets.add, sensor);
+    }
 }
 
 static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
@@ -235,6 +310,11 @@ private:
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
                     env->SetFloatArrayRegion(mScratch, 0, 1, &value);
+                } else if (buffer[i].type == SENSOR_TYPE_DYNAMIC_SENSOR_META) {
+                    float value[2];
+                    value[0] = buffer[i].dynamic_sensor_meta.connected ? 1.f: 0.f;
+                    value[1] = float(buffer[i].dynamic_sensor_meta.handle);
+                    env->SetFloatArrayRegion(mScratch, 0, 2, value);
                 } else {
                     env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
                 }
@@ -354,6 +434,10 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeGetSensorAtIndex",
             "(JLandroid/hardware/Sensor;I)Z",
             (void*)nativeGetSensorAtIndex },
+
+    {"nativeGetDynamicSensors",
+            "(JLjava/util/List;)V",
+            (void*)nativeGetDynamicSensors },
 
     {"nativeIsDataInjectionEnabled",
             "(J)Z",
