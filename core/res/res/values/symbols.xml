@@ -2530,4 +2530,9 @@
   <java-symbol type="array" name="resolver_target_actions_pin" />
   <java-symbol type="array" name="resolver_target_actions_unpin" />
 
+  <java-symbol type="string" name="carrier_app_dialog_message" />
+  <java-symbol type="string" name="carrier_app_dialog_button" />
+  <java-symbol type="string" name="carrier_app_dialog_not_now" />
+  <java-symbol type="string" name="carrier_app_notification_title" />
+  <java-symbol type="string" name="carrier_app_notification_text" />
 </resources>

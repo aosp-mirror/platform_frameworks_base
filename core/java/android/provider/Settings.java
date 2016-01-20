@@ -6895,6 +6895,15 @@ public final class Settings {
        public static final String TETHER_DUN_APN = "tether_dun_apn";
 
        /**
+        * List of carrier apps which are whitelisted to prompt the user for install when
+        * a sim card with matching uicc carrier privilege rules is inserted.
+        *
+        * The value is "package1;package2;..."
+        * @hide
+        */
+       public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+
+       /**
         * USB Mass Storage Enabled
         */
        public static final String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
