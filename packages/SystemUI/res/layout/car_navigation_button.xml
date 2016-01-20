@@ -22,7 +22,7 @@
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:background="?android:attr/selectableItemBackground">
     <com.android.keyguard.AlphaOptimizedImageButton
             android:id="@+id/car_nav_button_icon"
             android:layout_height="match_parent"
