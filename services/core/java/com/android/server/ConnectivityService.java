@@ -33,7 +33,6 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
 import android.annotation.Nullable;
-import android.app.AlarmManager;
 import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -88,7 +87,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -115,7 +113,6 @@ import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
-import com.android.internal.telephony.DctConstants;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
@@ -155,11 +152,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @hide
@@ -2186,7 +2181,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (wasDefault) {
                 mDefaultInetConditionPublished = 0;
             }
-            notifyIfacesChanged();
+            notifyIfacesChangedForNetworkStats();
             // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
             // by other networks that are already connected. Perhaps that can be done by
             // sending all CALLBACK_LOST messages (for requests, not listens) at the end
@@ -4095,7 +4090,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // TODO - move this check to cover the whole function
         if (!Objects.equals(newLp, oldLp)) {
-            notifyIfacesChanged();
+            notifyIfacesChangedForNetworkStats();
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
         }
 
@@ -4719,7 +4714,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         notifyLockdownVpn(networkAgent);
 
         if (oldInfo != null && oldInfo.getState() == state) {
-            if (VDBG) log("ignoring duplicate network state non-change");
+            if (oldInfo.isRoaming() != newInfo.isRoaming()) {
+                if (VDBG) log("roaming status changed, notifying NetworkStatsService");
+                notifyIfacesChangedForNetworkStats();
+            } else if (VDBG) log("ignoring duplicate network state non-change");
+            // In either case, no further work should be needed.
             return;
         }
         if (DBG) {
@@ -4749,7 +4748,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             networkAgent.created = true;
             updateLinkProperties(networkAgent, null);
-            notifyIfacesChanged();
+            notifyIfacesChangedForNetworkStats();
 
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             scheduleUnvalidatedPrompt(networkAgent);
@@ -4913,9 +4912,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Notify other system services that set of active ifaces has changed.
+     * Notify NetworkStatsService that the set of active ifaces has changed, or that one of the
+     * properties tracked by NetworkStatsService on an active iface has changed.
      */
-    private void notifyIfacesChanged() {
+    private void notifyIfacesChangedForNetworkStats() {
         try {
             mStatsService.forceUpdateIfaces();
         } catch (Exception ignored) {
@@ -4949,7 +4949,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             success = mVpns.get(user).setUnderlyingNetworks(networks);
         }
         if (success) {
-            notifyIfacesChanged();
+            notifyIfacesChangedForNetworkStats();
         }
         return success;
     }
