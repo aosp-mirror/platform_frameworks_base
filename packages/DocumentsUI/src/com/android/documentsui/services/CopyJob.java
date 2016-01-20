@@ -17,6 +17,10 @@
 package com.android.documentsui.services;
 
 import static android.os.SystemClock.elapsedRealtime;
+import static android.provider.DocumentsContract.buildChildDocumentsUri;
+import static android.provider.DocumentsContract.buildDocumentUri;
+import static android.provider.DocumentsContract.getDocumentId;
+import static android.provider.DocumentsContract.isChildDocument;
 import static com.android.documentsui.DocumentsApplication.acquireUnstableProviderOrThrow;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
@@ -44,6 +48,7 @@ import android.webkit.MimeTypeMap;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.services.FileOperationService.OpType;
 
 import libcore.io.IoUtils;
 
@@ -80,9 +85,22 @@ class CopyJob extends Job {
      *
      * @param srcs List of files to be copied.
      */
-    CopyJob(Context serviceContext, Context appContext, Listener listener,
+    CopyJob(Context service, Context appContext, Listener listener,
             String id, DocumentStack destination, List<DocumentInfo> srcs) {
-        super(OPERATION_COPY, serviceContext, appContext, listener, id, destination);
+        super(service, appContext, listener, OPERATION_COPY, id, destination);
+
+        checkArgument(!srcs.isEmpty());
+        this.mSrcFiles = srcs;
+    }
+
+    /**
+     * @see @link {@link Job} constructor for most param descriptions.
+     *
+     * @param srcs List of files to be copied.
+     */
+    CopyJob(Context service, Context appContext, Listener listener,
+            @OpType int opType, String id, DocumentStack destination, List<DocumentInfo> srcs) {
+        super(service, appContext, listener, opType, id, destination);
 
         checkArgument(!srcs.isEmpty());
         this.mSrcFiles = srcs;
@@ -91,15 +109,15 @@ class CopyJob extends Job {
     @Override
     Builder createProgressBuilder() {
         return super.createProgressBuilder(
-                serviceContext.getString(R.string.copy_notification_title),
+                service.getString(R.string.copy_notification_title),
                 R.drawable.ic_menu_copy,
-                serviceContext.getString(android.R.string.cancel),
+                service.getString(android.R.string.cancel),
                 R.drawable.ic_cab_cancel);
     }
 
     @Override
     public Notification getSetupNotification() {
-        return getSetupNotification(serviceContext.getString(R.string.copy_preparing));
+        return getSetupNotification(service.getString(R.string.copy_preparing));
     }
 
     public boolean shouldUpdateProgress() {
@@ -113,7 +131,7 @@ class CopyJob extends Job {
         mProgressBuilder.setContentInfo(
                 NumberFormat.getPercentInstance().format(completed));
         if (mRemainingTime > 0) {
-            mProgressBuilder.setContentText(serviceContext.getString(msgId,
+            mProgressBuilder.setContentText(service.getString(msgId,
                     DateUtils.formatDuration(mRemainingTime)));
         } else {
             mProgressBuilder.setContentText(null);
@@ -164,7 +182,7 @@ class CopyJob extends Job {
     }
 
     @Override
-    void run(FileOperationService service) throws RemoteException {
+    void start() throws RemoteException {
         mStartTime = elapsedRealtime();
 
         // Acquire content providers.
@@ -186,16 +204,14 @@ class CopyJob extends Job {
 
             // Guard unsupported recursive operation.
             if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
-                if (DEBUG) Log.d(TAG, "Skipping recursive operation on directory "
-                        + dstInfo.derivedUri);
-                onFileFailed(srcInfo);
+                onFileFailed(srcInfo,
+                        "Skipping recursive operation on directory " + dstInfo.derivedUri + ".");
                 continue;
             }
 
             if (DEBUG) Log.d(TAG,
-                    "Performing op-type:" + type() + " of " + srcInfo.displayName
-                    + " (" + srcInfo.derivedUri + ")" + " to " + dstInfo.displayName
-                    + " (" + dstInfo.derivedUri + ")");
+                    "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")"
+                    + " to " + dstInfo.displayName + " (" + dstInfo.derivedUri + ")");
 
             processDocument(srcInfo, dstInfo);
         }
@@ -219,7 +235,6 @@ class CopyJob extends Job {
      *
      * @param srcInfo DocumentInfos for the documents to copy.
      * @param dstDirInfo The destination directory.
-     * @param mode The transfer mode (copy or move).
      * @return True on success, false on failure.
      * @throws RemoteException
      */
@@ -234,7 +249,8 @@ class CopyJob extends Job {
             if ((srcInfo.flags & Document.FLAG_SUPPORTS_COPY) != 0) {
                 if (DocumentsContract.copyDocument(srcClient, srcInfo.derivedUri,
                         dstDirInfo.derivedUri) == null) {
-                    onFileFailed(srcInfo);
+                    onFileFailed(srcInfo,
+                            "Provider side copy failed for documents: " + srcInfo.derivedUri + ".");
                 }
                 return false;
             }
@@ -249,6 +265,7 @@ class CopyJob extends Job {
         final String dstMimeType;
         final String dstDisplayName;
 
+        if (DEBUG) Log.d(TAG, "Doing byte copy of document: " + srcInfo);
         // If the file is virtual, but can be converted to another format, then try to copy it
         // as such format. Also, append an extension for the target mime type (if known).
         if (srcInfo.isVirtualDocument()) {
@@ -261,9 +278,7 @@ class CopyJob extends Job {
                 dstDisplayName = srcInfo.displayName +
                         (extension != null ? "." + extension : srcInfo.displayName);
             } else {
-                // The virtual file is not available as any alternative streamable format.
-                // TODO: Log failures.
-                onFileFailed(srcInfo);
+                onFileFailed(srcInfo, "Cannot copy virtual file. No streamable formats available.");
                 return false;
             }
         } else {
@@ -277,7 +292,9 @@ class CopyJob extends Job {
                 dstDirInfo.derivedUri, dstMimeType, dstDisplayName);
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.
-            onFileFailed(srcInfo);
+            onFileFailed(srcInfo,
+                    "Couldn't create destination document " + dstDisplayName
+                    + " in directory " + dstDirInfo.displayName + ".");
             return false;
         }
 
@@ -285,7 +302,8 @@ class CopyJob extends Job {
         try {
             dstInfo = DocumentInfo.fromUri(getContentResolver(), dstUri);
         } catch (FileNotFoundException e) {
-            onFileFailed(srcInfo);
+            onFileFailed(srcInfo,
+                    "Could not load DocumentInfo for newly created file: " + dstUri + ".");
             return false;
         }
 
@@ -327,7 +345,7 @@ class CopyJob extends Job {
                     srcDirInfo.documentId);
             cursor = srcClient.query(queryUri, queryColumns, null, null, null);
             DocumentInfo srcInfo;
-            while (cursor.moveToNext()) {
+            while (cursor.moveToNext() && !isCanceled()) {
                 srcInfo = DocumentInfo.fromCursor(cursor, srcDirInfo.authority);
                 success &= processDocument(srcInfo, dstDirInfo);
             }
@@ -374,7 +392,7 @@ class CopyJob extends Job {
             dstFile = dstClient.openFile(dstInfo.derivedUri, "w", canceller);
             dst = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[32 * 1024];
             int len;
             while ((len = src.read(buffer)) != -1) {
                 if (isCanceled()) {
@@ -389,7 +407,8 @@ class CopyJob extends Job {
             srcFile.checkError();
         } catch (IOException e) {
             success = false;
-            onFileFailed(srcInfo);
+            onFileFailed(srcInfo, "Exception thrown while copying from "
+                    + srcInfo.derivedUri + " to " + dstInfo.derivedUri + ".");
 
             if (dstFile != null) {
                 try {
@@ -405,7 +424,7 @@ class CopyJob extends Job {
         }
 
         if (!success) {
-            // Clean up half-copied files.
+            if (DEBUG) Log.d(TAG, "Cleaning up failed operation leftovers.");
             canceller.cancel();
             try {
                 DocumentsContract.deleteDocument(dstClient, dstInfo.derivedUri);
@@ -452,8 +471,7 @@ class CopyJob extends Job {
     private static long calculateFileSizesRecursively(
             ContentProviderClient client, Uri uri) throws RemoteException {
         final String authority = uri.getAuthority();
-        final Uri queryUri = DocumentsContract.buildChildDocumentsUri(authority,
-                DocumentsContract.getDocumentId(uri));
+        final Uri queryUri = buildChildDocumentsUri(authority, getDocumentId(uri));
         final String queryColumns[] = new String[] {
                 Document.COLUMN_DOCUMENT_ID,
                 Document.COLUMN_MIME_TYPE,
@@ -468,7 +486,7 @@ class CopyJob extends Job {
                 if (Document.MIME_TYPE_DIR.equals(
                         getCursorString(cursor, Document.COLUMN_MIME_TYPE))) {
                     // Recurse into directories.
-                    final Uri dirUri = DocumentsContract.buildDocumentUri(authority,
+                    final Uri dirUri = buildDocumentUri(authority,
                             getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
                     result += calculateFileSizesRecursively(client, dirUri);
                 } else {
@@ -497,9 +515,13 @@ class CopyJob extends Job {
     boolean isDescendentOf(DocumentInfo doc, DocumentInfo parentDoc)
             throws RemoteException {
         if (parentDoc.isDirectory() && doc.authority.equals(parentDoc.authority)) {
-            return DocumentsContract.isChildDocument(
-                    dstClient, doc.derivedUri, parentDoc.derivedUri);
+            return isChildDocument(dstClient, doc.derivedUri, parentDoc.derivedUri);
         }
         return false;
+    }
+
+    private void onFileFailed(DocumentInfo file, String msg) {
+        Log.w(TAG, msg);
+        onFileFailed(file);
     }
 }

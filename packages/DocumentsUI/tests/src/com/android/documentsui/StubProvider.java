@@ -48,8 +48,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StubProvider extends DocumentsProvider {
 
@@ -57,9 +59,15 @@ public class StubProvider extends DocumentsProvider {
     public static final String ROOT_0_ID = "TEST_ROOT_0";
     public static final String ROOT_1_ID = "TEST_ROOT_1";
 
+    public static final String EXTRA_SIZE = "com.android.documentsui.stubprovider.SIZE";
+    public static final String EXTRA_ROOT = "com.android.documentsui.stubprovider.ROOT";
+    public static final String EXTRA_PATH = "com.android.documentsui.stubprovider.PATH";
+    public static final String EXTRA_STREAM_TYPES
+            = "com.android.documentsui.stubprovider.STREAM_TYPES";
+    public static final String EXTRA_CONTENT = "com.android.documentsui.stubprovider.CONTENT";
+
     private static final String TAG = "StubProvider";
-    private static final String EXTRA_SIZE = "com.android.documentsui.stubprovider.SIZE";
-    private static final String EXTRA_ROOT = "com.android.documentsui.stubprovider.ROOT";
+
     private static final String STORAGE_SIZE_KEY = "documentsui.stubprovider.size";
     private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100;  // 100 MB.
 
@@ -78,7 +86,7 @@ public class StubProvider extends DocumentsProvider {
 
     private String mAuthority = DEFAULT_AUTHORITY;
     private SharedPreferences mPrefs;
-    private String mSimulateReadErrors;
+    private Set<String> mSimulateReadErrorIds = new HashSet<>();
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -97,6 +105,7 @@ public class StubProvider extends DocumentsProvider {
         Log.d(TAG, "Resetting storage.");
         removeChildrenRecursively(getContext().getCacheDir());
         mStorage.clear();
+        mSimulateReadErrorIds.clear();
 
         mPrefs = getContext().getSharedPreferences(
                 "com.android.documentsui.stubprovider.preferences", Context.MODE_PRIVATE);
@@ -296,6 +305,7 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
+
         final StubDocument document = mStorage.get(docId);
         if (document == null || !document.file.isFile()) {
             throw new FileNotFoundException();
@@ -305,17 +315,12 @@ public class StubProvider extends DocumentsProvider {
         }
 
         if ("r".equals(mode)) {
-            final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(document.file,
-                        ParcelFileDescriptor.MODE_READ_ONLY);
-            if (docId.equals(mSimulateReadErrors)) {
-                return new ParcelFileDescriptor(pfd) {
-                    @Override
-                    public void checkError() throws IOException {
-                        throw new IOException("Test error");
-                    }
-                };
+            if (mSimulateReadErrorIds.contains(docId)) {
+                Log.d(TAG, "Simulated errs enabled. Open in the wrong mode.");
+                return ParcelFileDescriptor.open(
+                        document.file, ParcelFileDescriptor.MODE_WRITE_ONLY);
             }
-            return pfd;
+            return ParcelFileDescriptor.open(document.file, ParcelFileDescriptor.MODE_READ_ONLY);
         }
         if ("w".equals(mode)) {
             return startWrite(document);
@@ -326,7 +331,11 @@ public class StubProvider extends DocumentsProvider {
 
     @VisibleForTesting
     public void simulateReadErrorsForFile(Uri uri) {
-        mSimulateReadErrors = DocumentsContract.getDocumentId(uri);
+        simulateReadErrorsForFile(DocumentsContract.getDocumentId(uri));
+    }
+
+    public void simulateReadErrorsForFile(String id) {
+        mSimulateReadErrorIds.add(id);
     }
 
     @Override
@@ -337,9 +346,9 @@ public class StubProvider extends DocumentsProvider {
 
     @Override
     public AssetFileDescriptor openTypedDocument(
-            String documentId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
+            String docId, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
-        final StubDocument document = mStorage.get(documentId);
+        final StubDocument document = mStorage.get(docId);
         if (document == null || !document.file.isFile() || document.streamTypes == null) {
             throw new FileNotFoundException();
         }
@@ -349,7 +358,7 @@ public class StubProvider extends DocumentsProvider {
             if (mimeType.equals(mimeTypeFilter)) {
                 ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                             document.file, ParcelFileDescriptor.MODE_READ_ONLY);
-                if (documentId.equals(mSimulateReadErrors)) {
+                if (mSimulateReadErrorIds.contains(docId)) {
                     pfd = new ParcelFileDescriptor(pfd) {
                         @Override
                         public void checkError() throws IOException {
@@ -454,9 +463,34 @@ public class StubProvider extends DocumentsProvider {
             case "configure":
                 configure(arg, extras);
                 return null;
+            case "createVirtualFile":
+                return createVirtualFileFromBundle(extras);
+            case "simulateReadErrorsForFile":
+                simulateReadErrorsForFile(arg);
+                return null;
             default:
                 return super.call(method, arg, extras);
         }
+    }
+
+    private Bundle createVirtualFileFromBundle(Bundle extras) {
+        try {
+            Uri uri = createVirtualFile(
+                    extras.getString(EXTRA_ROOT),
+                    extras.getString(EXTRA_PATH),
+                    extras.getString(Document.COLUMN_MIME_TYPE),
+                    extras.getStringArrayList(EXTRA_STREAM_TYPES),
+                    extras.getByteArray(EXTRA_CONTENT));
+
+            String documentId = DocumentsContract.getDocumentId(uri);
+            Bundle result = new Bundle();
+            result.putString(Document.COLUMN_DOCUMENT_ID, documentId);
+            return result;
+        } catch (IOException e) {
+            Log.e(TAG, "Couldn't create virtual file.");
+        }
+
+        return null;
     }
 
     private void configure(String arg, Bundle extras) {
@@ -530,6 +564,7 @@ public class StubProvider extends DocumentsProvider {
     public Uri createVirtualFile(
             String rootId, String path, String mimeType, List<String> streamTypes, byte[] content)
             throws FileNotFoundException, IOException {
+
         final File file = createFile(rootId, path, mimeType, content);
         final StubDocument parent = mStorage.get(getDocumentIdForFile(file.getParentFile()));
         if (parent == null) {
@@ -559,7 +594,7 @@ public class StubProvider extends DocumentsProvider {
 
     private File createFile(String rootId, String path, String mimeType, byte[] content)
             throws FileNotFoundException, IOException {
-        Log.d(TAG, "Creating test file " + rootId + ":" + path);
+        Log.d(TAG, "Creating test file " + rootId + " : " + path);
         StubDocument root = mRoots.get(rootId).document;
         if (root == null) {
             throw new FileNotFoundException("No roots with the ID " + rootId + " were found");

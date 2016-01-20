@@ -16,6 +16,12 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
+import static com.android.documentsui.services.FileOperationService.EXTRA_FAILURE;
+import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
+import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
+import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
+import static com.android.documentsui.services.FileOperationService.FAILURE_COPY;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 import static com.android.internal.util.Preconditions.checkArgument;
 
@@ -39,14 +45,19 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.util.ArrayList;
+import java.util.List;
 
-abstract class Job {
+/**
+ * A mashup of work item and ui progress update factory. Used by {@link FileOperationService}
+ * to do work and show progress relating to this work.
+ */
+abstract class Job implements Runnable {
 
-    final Context serviceContext;
+    final Context service;
     final Context appContext;
     final Listener listener;
 
-    final @OpType int mOpType;
+    final @OpType int operationType;
     final String id;
     final DocumentStack stack;
 
@@ -58,10 +69,9 @@ abstract class Job {
     /**
      * A simple progressable job, much like an AsyncTask, but with support
      * for providing various related notification, progress and navigation information.
-     * @param opType
+     * @param operationType
      *
-     * @param serviceContext The context of the service in which this job is running.
-     *     This is usually just "this".
+     * @param service The service context in which this job is running.
      * @param appContext The context of the invoking application. This is usually
      *     just {@code getApplicationContext()}.
      * @param listener
@@ -70,14 +80,15 @@ abstract class Job {
      *     destination in the Files app where the user will be take when the
      *     navigation intent is invoked (presumably from notification).
      */
-    Job(@OpType int opType, Context serviceContext, Context appContext, Listener listener,
-            String id, DocumentStack stack) {
+    Job(Context service, Context appContext, Listener listener,
+            @OpType int operationType, String id, DocumentStack stack) {
 
-        checkArgument(opType != OPERATION_UNKNOWN);
-        this.serviceContext = serviceContext;
+        checkArgument(operationType != OPERATION_UNKNOWN);
+
+        this.service = service;
         this.appContext = appContext;
         this.listener = listener;
-        mOpType = opType;
+        this.operationType = operationType;
 
         this.id = id;
         this.stack = stack;
@@ -85,12 +96,30 @@ abstract class Job {
         mProgressBuilder = createProgressBuilder();
     }
 
-    abstract void run(FileOperationService service) throws RemoteException;
-    abstract void cleanup();
-
-    @OpType int type() {
-        return mOpType;
+    @Override
+    public final void run() {
+        listener.onStart(this);
+        try {
+            start();
+        } catch (Exception e) {
+            // In the case of an unmanaged failure, we still want
+            // to resolve business in an orderly fashion. That'll
+            // ensure the service is shut down and notifications
+            // shown/closed.
+            listener.onFailed(this);
+        } finally {
+            if (failed()) {
+                listener.onFailed(this);
+            } else {
+                listener.onFinished(this);
+            }
+        }
     }
+
+    abstract void start() throws RemoteException;
+
+    // Service will call this when it is done with the job.
+    abstract void cleanup();
 
     abstract Notification getSetupNotification();
     // TODO: Progress notification for deletes.
@@ -106,7 +135,7 @@ abstract class Job {
     }
 
     final ContentResolver getContentResolver() {
-        return serviceContext.getContentResolver();
+        return service.getContentResolver();
     }
 
     void onFileFailed(DocumentInfo file) {
@@ -125,15 +154,15 @@ abstract class Job {
 
     Notification getFailureNotification(@PluralsRes int titleId, @DrawableRes int icon) {
         final Intent navigateIntent = buildNavigateIntent();
-        navigateIntent.putExtra(FileOperationService.EXTRA_FAILURE, FileOperationService.FAILURE_COPY);
-        navigateIntent.putExtra(FileOperationService.EXTRA_OPERATION, mOpType);
+        navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
+        navigateIntent.putExtra(EXTRA_OPERATION, operationType);
 
-        navigateIntent.putParcelableArrayListExtra(FileOperationService.EXTRA_SRC_LIST, failedFiles);
+        navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, failedFiles);
 
-        final Notification.Builder errorBuilder = new Notification.Builder(serviceContext)
-                .setContentTitle(serviceContext.getResources().getQuantityString(titleId,
+        final Notification.Builder errorBuilder = new Notification.Builder(service)
+                .setContentTitle(service.getResources().getQuantityString(titleId,
                         failedFiles.size(), failedFiles.size()))
-                .setContentText(serviceContext.getString(R.string.notification_touch_for_details))
+                .setContentText(service.getString(R.string.notification_touch_for_details))
                 .setContentIntent(PendingIntent.getActivity(appContext, 0, navigateIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT))
                 .setCategory(Notification.CATEGORY_ERROR)
@@ -147,7 +176,7 @@ abstract class Job {
     final Builder createProgressBuilder(
             String title, @DrawableRes int icon,
             String actionTitle, @DrawableRes int actionIcon) {
-        Notification.Builder progressBuilder = new Notification.Builder(serviceContext)
+        Notification.Builder progressBuilder = new Notification.Builder(service)
                 .setContentTitle(title)
                 .setContentIntent(
                         PendingIntent.getActivity(appContext, 0, buildNavigateIntent(), 0))
@@ -161,7 +190,7 @@ abstract class Job {
                 actionIcon,
                 actionTitle,
                 PendingIntent.getService(
-                        serviceContext,
+                        service,
                         0,
                         cancelIntent,
                         PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_CANCEL_CURRENT));
@@ -173,21 +202,44 @@ abstract class Job {
      * Creates an intent for navigating back to the destination directory.
      */
     Intent buildNavigateIntent() {
-        Intent intent = new Intent(serviceContext, FilesActivity.class);
+        Intent intent = new Intent(service, FilesActivity.class);
         intent.setAction(DocumentsContract.ACTION_BROWSE);
         intent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
         return intent;
     }
 
     Intent createCancelIntent() {
-        final Intent cancelIntent = new Intent(serviceContext, FileOperationService.class);
-        cancelIntent.putExtra(FileOperationService.EXTRA_CANCEL, true);
-        cancelIntent.putExtra(FileOperationService.EXTRA_JOB_ID, id);
+        final Intent cancelIntent = new Intent(service, FileOperationService.class);
+        cancelIntent.putExtra(EXTRA_CANCEL, true);
+        cancelIntent.putExtra(EXTRA_JOB_ID, id);
         return cancelIntent;
     }
 
+    /**
+     * Factory class that facilitates our testing FileOperationService.
+     */
+    static class Factory {
+
+        static final Factory instance = new Factory();
+
+        Job createCopy(Context service, Context appContext, Listener listener,
+                String id, DocumentStack stack, List<DocumentInfo> srcs) {
+            return new CopyJob(service, appContext, listener, id, stack, srcs);
+        }
+
+        Job createMove(Context service, Context appContext, Listener listener,
+                String id, DocumentStack stack, List<DocumentInfo> srcs) {
+            return new MoveJob(service, appContext, listener, id, stack, srcs);
+        }
+    }
+
+    /**
+     * Listener interface employed by the service that owns us as well as tests.
+     */
     interface Listener {
+        void onStart(Job job);
+        void onFailed(Job job);
+        void onFinished(Job job);
         void onProgress(CopyJob job);
-        void onProgress(MoveJob job);
     }
 }

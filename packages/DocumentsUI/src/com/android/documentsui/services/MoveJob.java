@@ -16,6 +16,8 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
+
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
@@ -43,28 +45,23 @@ final class MoveJob extends CopyJob {
      *
      * @param srcs List of files to be moved.
      */
-    MoveJob(Context serviceContext, Context appContext, Listener listener,
+    MoveJob(Context service, Context appContext, Listener listener,
             String id, DocumentStack destination, List<DocumentInfo> srcs) {
-        super(serviceContext, appContext, listener, id, destination, srcs);
-    }
-
-    @Override
-    int type() {
-        return FileOperationService.OPERATION_MOVE;
+        super(service, appContext, listener, OPERATION_MOVE, id, destination, srcs);
     }
 
     @Override
     Builder createProgressBuilder() {
         return super.createProgressBuilder(
-                serviceContext.getString(R.string.move_notification_title),
+                service.getString(R.string.move_notification_title),
                 R.drawable.ic_menu_copy,
-                serviceContext.getString(android.R.string.cancel),
+                service.getString(android.R.string.cancel),
                 R.drawable.ic_cab_cancel);
     }
 
     @Override
     public Notification getSetupNotification() {
-        return getSetupNotification(serviceContext.getString(R.string.move_preparing));
+        return getSetupNotification(service.getString(R.string.move_preparing));
     }
 
     @Override
@@ -78,15 +75,6 @@ final class MoveJob extends CopyJob {
                 R.plurals.move_error_notification_title, R.drawable.ic_menu_copy);
     }
 
-    /**
-     * Copies a the given document to the given location.
-     *
-     * @param srcInfo DocumentInfos for the documents to copy.
-     * @param dstDirInfo The destination directory.
-     * @param mode The transfer mode (copy or move).
-     * @return True on success, false on failure.
-     * @throws RemoteException
-     */
     @Override
     boolean processDocument(DocumentInfo srcInfo, DocumentInfo dstDirInfo) throws RemoteException {
 
@@ -105,20 +93,22 @@ final class MoveJob extends CopyJob {
         }
 
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
-        boolean success = byteCopyDocument(srcInfo, dstDirInfo);
+        boolean copied = byteCopyDocument(srcInfo, dstDirInfo);
 
-        if (success) {
-            // This is racey. We should make sure that we never delete a directory after
-            // it changed, so we don't remove a file which had not been copied earlier
-            // to the target location.
-            try {
-                DocumentsContract.deleteDocument(srcClient, srcInfo.derivedUri);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to delete source after copy: " + srcInfo.derivedUri, e);
-                return false;
-            }
+        return copied && !isCanceled() && deleteSrcDocument(srcInfo);
+    }
+
+    private boolean deleteSrcDocument(DocumentInfo srcInfo) {
+        // This is racey. We should make sure that we never delete a directory after
+        // it changed, so we don't remove a file which had not been copied earlier
+        // to the target location.
+        try {
+            DocumentsContract.deleteDocument(srcClient, srcInfo.derivedUri);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to delete source after copy: " + srcInfo.derivedUri, e);
+            return false;
         }
 
-        return success;
+        return true;  // victory dance!
     }
 }
