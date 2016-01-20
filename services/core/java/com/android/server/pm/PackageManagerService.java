@@ -34,6 +34,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INSTALL_EXTERNAL;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_CONFLICTING_PROVIDER;
+import static android.content.pm.PackageManager.INSTALL_FAILED_DEXOPT;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID;
@@ -626,6 +627,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
+
+    private boolean mUseJitProfiles =
+            SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -6624,6 +6628,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
+    public void extractPackagesIfNeeded() {
+        enforceSystemOrRoot("Only the system can request package extraction");
+
+        // Extract pacakges only if profile-guided compilation is enabled because
+        // otherwise BackgroundDexOptService will not dexopt them later.
+        if (mUseJitProfiles) {
+            ArraySet<String> pkgs = getOptimizablePackages();
+            if (pkgs != null) {
+                for (String pkg : pkgs) {
+                    performDexOpt(pkg, null /* instructionSet */, false /* useProfiles */,
+                            true /* extractOnly */);
+                }
+            }
+        }
+    }
+
     private ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
         try {
@@ -6654,25 +6675,27 @@ public class PackageManagerService extends IPackageManager.Stub {
     // TODO: this is not used nor needed. Delete it.
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet, false);
+        return performDexOptTraced(packageName, instructionSet, false /* useProfiles */,
+                false /* extractOnly */);
     }
 
-    public boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles) {
-        return performDexOptTraced(packageName, instructionSet, useProfiles);
+    public boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles,
+            boolean extractOnly) {
+        return performDexOptTraced(packageName, instructionSet, useProfiles, extractOnly);
     }
 
     private boolean performDexOptTraced(String packageName, String instructionSet,
-                boolean useProfiles) {
+                boolean useProfiles, boolean extractOnly) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet, useProfiles);
+            return performDexOptInternal(packageName, instructionSet, useProfiles, extractOnly);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
     private boolean performDexOptInternal(String packageName, String instructionSet,
-                boolean useProfiles) {
+                boolean useProfiles, boolean extractOnly) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
@@ -6694,7 +6717,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        true /* inclDependencies */, p.volumeUuid, useProfiles);
+                        true /* inclDependencies */, p.volumeUuid, useProfiles, extractOnly);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6739,7 +6762,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Whoever is calling forceDexOpt wants a fully compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /* inclDependencies */, pkg.volumeUuid, false /* useProfiles */);
+                    true /* inclDependencies */, pkg.volumeUuid, false /* useProfiles */,
+                    false /* extractOnly */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -12980,6 +13004,24 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error deriving application ABI");
                 return;
+            }
+
+            // Extract package to save the VM unzipping the APK in memory during
+            // launch. Only do this if profile-guided compilation is enabled because
+            // otherwise BackgroundDexOptService will not dexopt the package later.
+            if (mUseJitProfiles) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                // Do not run PackageDexOptimizer through the local performDexOpt
+                // method because `pkg` is not in `mPackages` yet.
+                int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
+                        false /* inclDependencies */, volumeUuid, false /* useProfiles */,
+                        true /* extractOnly */);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
+                    String msg = "Extracking package failed for " + pkgName;
+                    res.setError(INSTALL_FAILED_DEXOPT, msg);
+                    return;
+                }
             }
         }
 

@@ -93,7 +93,8 @@ public class BackgroundDexOptService extends JobService {
                         // skip previously failing package
                         continue;
                     }
-                    if (!pm.performDexOpt(pkg, /* instruction set */ null, useJitProfiles)) {
+                    if (!pm.performDexOpt(pkg, /* instruction set */ null, useJitProfiles,
+                            /* extractOnly */ false)) {
                         // there was a problem running dexopt,
                         // remember this so we do not keep retrying.
                         sFailedPackageNames.add(pkg);

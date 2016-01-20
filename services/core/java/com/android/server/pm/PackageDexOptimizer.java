@@ -41,7 +41,7 @@ import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
 import static com.android.server.pm.Installer.DEXOPT_PUBLIC;
 import static com.android.server.pm.Installer.DEXOPT_SAFEMODE;
-import static com.android.server.pm.Installer.DEXOPT_USEJIT;
+import static com.android.server.pm.Installer.DEXOPT_EXTRACTONLY;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 
@@ -82,7 +82,7 @@ final class PackageDexOptimizer {
      * {@link PackageManagerService#mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean inclDependencies, String volumeUuid, boolean useProfiles) {
+            boolean inclDependencies, String volumeUuid, boolean useProfiles, boolean extractOnly) {
         ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new ArraySet<String>();
@@ -97,7 +97,8 @@ final class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, done, volumeUuid, useProfiles);
+                return performDexOptLI(pkg, instructionSets, done, volumeUuid, useProfiles,
+                        extractOnly);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -107,7 +108,7 @@ final class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            ArraySet<String> done, String volumeUuid, boolean useProfiles) {
+            ArraySet<String> done, String volumeUuid, boolean useProfiles, boolean extractOnly) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -173,12 +174,13 @@ final class PackageDexOptimizer {
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
-                        + " oatDir = " + oatDir);
+                        + " extractOnly=" + extractOnly + " oatDir = " + oatDir);
                 final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
                 final int dexFlags =
                         (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
                         | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                         | (debuggable ? DEXOPT_DEBUGGABLE : 0)
+                        | (extractOnly ? DEXOPT_EXTRACTONLY : 0)
                         | DEXOPT_BOOTCOMPLETE;
                 try {
                     mPackageManagerService.mInstaller.dexopt(path, sharedGid,
@@ -190,12 +192,14 @@ final class PackageDexOptimizer {
                 }
             }
 
-            // At this point we haven't failed dexopt and we haven't deferred dexopt. We must
-            // either have either succeeded dexopt, or have had getDexOptNeeded tell us
-            // it isn't required. We therefore mark that this package doesn't need dexopt unless
-            // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
-            // it.
-            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
+            if (!extractOnly) {
+                // At this point we haven't failed dexopt and we haven't deferred dexopt. We must
+                // either have either succeeded dexopt, or have had getDexOptNeeded tell us
+                // it isn't required. We therefore mark that this package doesn't need dexopt unless
+                // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
+                // it.
+                pkg.mDexOptPerformed.add(dexCodeInstructionSet);
+            }
         }
 
         // If we've gotten here, we're sure that no error occurred and that we haven't
@@ -249,7 +253,8 @@ final class PackageDexOptimizer {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 // Currently this will do a full compilation of the library.
                 performDexOptLI(libPkg, instructionSets, done,
-                        StorageManager.UUID_PRIVATE_INTERNAL, /*useProfiles*/ false);
+                        StorageManager.UUID_PRIVATE_INTERNAL, /*useProfiles*/ false,
+                        /* extractOnly */ false);
             }
         }
     }

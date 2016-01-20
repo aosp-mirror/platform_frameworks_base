@@ -47,8 +47,8 @@ public final class Installer extends SystemService {
     public static final int DEXOPT_DEBUGGABLE   = 1 << 3;
     /** The system boot has finished */
     public static final int DEXOPT_BOOTCOMPLETE = 1 << 4;
-    /** Run the application with the JIT compiler */
-    public static final int DEXOPT_USEJIT       = 1 << 5;
+    /** Do not compile, only extract bytecode into an OAT file */
+    public static final int DEXOPT_EXTRACTONLY  = 1 << 5;
 
     /** @hide */
     @IntDef(flag = true, value = {

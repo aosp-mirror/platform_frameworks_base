@@ -667,6 +667,14 @@ public final class SystemServer {
         }
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "ExtractPackagesIfNeeded");
+        try {
+            mPackageManagerService.extractPackagesIfNeeded();
+        } catch (Throwable e) {
+            reportWtf("extract packages", e);
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+
         try {
             ActivityManagerNative.getDefault().showBootMessage(
                     context.getResources().getText(

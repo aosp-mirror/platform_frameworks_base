@@ -429,6 +429,12 @@ interface IPackageManager {
     void performFstrimIfNeeded();
 
     /**
+     * Ask the package manager to extract packages if needed, to save
+     * the VM unzipping the APK in memory during launch.
+     */
+    void extractPackagesIfNeeded();
+
+    /**
      * Notify the package manager that a package is going to be used.
      */
     void notifyPackageUse(String packageName);
