@@ -161,7 +161,11 @@ public class Resources {
     final DisplayMetrics mMetrics = new DisplayMetrics();
 
     private final Configuration mConfiguration = new Configuration();
+
+    // Invariant: mResolvedLocale is the resolved locale of mLocalesForResolved
+    private LocaleList mLocalesForResolved = null;
     private Locale mResolvedLocale = null;
+
     private PluralRules mPluralRule;
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
@@ -1950,8 +1954,7 @@ public class Resources {
             final int configChanges = calcConfigChanges(config);
 
             LocaleList locales = mConfiguration.getLocales();
-            final boolean setLocalesToDefault = locales.isEmpty();
-            if (setLocalesToDefault) {
+            if (locales.isEmpty()) {
                 locales = LocaleList.getDefault();
                 mConfiguration.setLocales(locales);
             }
@@ -1980,8 +1983,7 @@ public class Resources {
                 keyboardHidden = mConfiguration.keyboardHidden;
             }
 
-            if (setLocalesToDefault || mResolvedLocale == null
-                    || (configChanges & Configuration.NATIVE_CONFIG_LOCALE) != 0) {
+            if (locales != mLocalesForResolved) {
                 if (locales.size() == 1) {
                     // This is an optimization to avoid the JNI call(s) when the result of
                     // getFirstMatchWithEnglishSupported() does not depend on the supported locales.
@@ -1997,6 +1999,7 @@ public class Resources {
                     }
                     mResolvedLocale = locales.getFirstMatchWithEnglishSupported(supportedLocales);
                 }
+                mLocalesForResolved = locales;
             }
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
                     adjustLanguageTag(mResolvedLocale.toLanguageTag()),
