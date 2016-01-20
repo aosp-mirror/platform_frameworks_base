@@ -1199,13 +1199,6 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/fast_fade_out</item>
     </style>
 
-    <!-- Style for the popup window that contains text suggestions. -->
-    <style name="Widget.TextSuggestionsPopupWindow">
-        <item name="dropDownSelector">@drawable/list_selector_background</item>
-        <item name="popupBackground">@drawable/text_edit_suggestions_window</item>
-        <item name="dropDownWidth">wrap_content</item>
-    </style>
-
     <style name="Widget.ActionBar">
         <item name="background">@drawable/action_bar_background</item>
         <item name="displayOptions">useLogo|showHome|showTitle</item>

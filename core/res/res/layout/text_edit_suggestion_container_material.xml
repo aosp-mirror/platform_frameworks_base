@@ -14,17 +14,19 @@
      limitations under the License.
 -->
 
+<!-- Background of the popup window is the same as the one of the floating toolbar.
+     Use floating toolbar background style. -->
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:divider="?android:attr/dividerHorizontal"
+    android:background="?android:attr/floatingToolbarPopupBackgroundDrawable"
+    android:divider="?android:attr/listDivider"
     android:showDividers="middle" >
     <ListView
         android:id="@+id/suggestionContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:paddingTop="8dip"
-        android:paddingBottom="8dip"
+        android:paddingBottom="0dip"
         android:divider="@null" />
     <LinearLayout
         android:layout_width="match_parent"

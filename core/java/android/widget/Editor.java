@@ -38,6 +38,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -3098,10 +3099,6 @@ public class Editor {
         private SuggestionSpan mMisspelledSpan;
 
         private class CustomPopupWindow extends PopupWindow {
-            public CustomPopupWindow(Context context, int defStyleAttr) {
-                super(context, null, defStyleAttr);
-            }
-
             @Override
             public void dismiss() {
                 if (!isShowing()) {
@@ -3126,9 +3123,9 @@ public class Editor {
 
         @Override
         protected void createPopupWindow() {
-            mPopupWindow = new CustomPopupWindow(mTextView.getContext(),
-                com.android.internal.R.attr.textSuggestionsWindowStyle);
+            mPopupWindow = new CustomPopupWindow();
             mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
+            mPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             mPopupWindow.setFocusable(true);
             mPopupWindow.setClippingEnabled(false);
         }

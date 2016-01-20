@@ -401,8 +401,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle" />
 
-    <style name="Widget.Holo.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow" />
-
     <style name="Widget.Holo.AbsListView" parent="Widget.AbsListView" />
 
     <style name="Widget.Holo.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
@@ -813,8 +811,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle" />
-
-    <style name="Widget.Holo.Light.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow" />
 
     <style name="Widget.Holo.Light.AbsListView" parent="Widget.AbsListView" />
 

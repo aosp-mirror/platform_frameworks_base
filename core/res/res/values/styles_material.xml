@@ -570,7 +570,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.CheckedTextView" parent="Widget.CheckedTextView" />
     <style name="Widget.Material.TextSelectHandle" parent="Widget.TextSelectHandle"/>
-    <style name="Widget.Material.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow"/>
     <style name="Widget.Material.AbsListView" parent="Widget.AbsListView"/>
 
     <style name="Widget.Material.AutoCompleteTextView" parent="Widget.AutoCompleteTextView">
@@ -994,7 +993,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.SuggestionItem" parent="@android:style/TextAppearance.Material.Body1">
-        <item name="background">@color/white</item>
         <item name="alpha">.87</item>
         <item name="textColor">@color/black</item>
         <item name="drawablePadding">8dip</item>
@@ -1016,7 +1014,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.SuggestionButton" parent="@android:style/TextAppearance.Material.Button">
-        <item name="background">@color/white</item>
         <item name="alpha">.87</item>
         <item name="textColor">#009688</item>
         <item name="drawablePadding">8dip</item>
@@ -1060,7 +1057,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.TextView.SpinnerItem" parent="Widget.Material.TextView.SpinnerItem"/>
     <style name="Widget.Material.Light.CheckedTextView" parent="Widget.Material.CheckedTextView"/>
     <style name="Widget.Material.Light.TextSelectHandle" parent="Widget.Material.TextSelectHandle"/>
-    <style name="Widget.Material.Light.TextSuggestionsPopupWindow" parent="Widget.Material.TextSuggestionsPopupWindow"/>
     <style name="Widget.Material.Light.AbsListView" parent="Widget.Material.AbsListView"/>
     <style name="Widget.Material.Light.AutoCompleteTextView" parent="Widget.Material.AutoCompleteTextView" />
     <style name="Widget.Material.Light.CompoundButton" parent="Widget.Material.CompoundButton"/>

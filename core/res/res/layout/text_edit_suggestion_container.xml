@@ -16,6 +16,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:background="@drawable/text_edit_suggestions_window"
+    android:dropDownSelector="@drawable/list_selector_background"
     android:divider="@null">
     <ListView
         android:id="@+id/suggestionContainer"

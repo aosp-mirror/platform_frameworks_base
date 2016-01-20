@@ -98,7 +98,6 @@ easier.
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@style/Widget.DeviceDefault.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.DeviceDefault.TextSuggestionsPopupWindow</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.DeviceDefault.AbsListView</item>
@@ -350,7 +349,6 @@ easier.
 
         <!-- Text selection handle attributes -->
         <item name="textSelectHandleWindowStyle">@style/Widget.DeviceDefault.TextSelectHandle</item>
-        <item name="textSuggestionsWindowStyle">@style/Widget.DeviceDefault.Light.TextSuggestionsPopupWindow</item>
 
         <!-- Widget styles -->
         <item name="absListViewStyle">@style/Widget.DeviceDefault.Light.AbsListView</item>
