@@ -24,6 +24,13 @@ import android.os.Parcelable;
  * Information about the sync operation that is currently underway.
  */
 public class SyncInfo implements Parcelable {
+    /**
+     * Used when the caller receiving this object doesn't have permission to access the accounts
+     * on device.
+     * @See Manifest.permission.GET_ACCOUNTS
+     */
+    private static final Account REDACTED_ACCOUNT = new Account("*****", "*****");
+
     /** @hide */
     public final int authorityId;
 
@@ -43,6 +50,17 @@ public class SyncInfo implements Parcelable {
      * See {@link android.os.SystemClock#elapsedRealtime()}.
      */
     public final long startTime;
+
+    /**
+     * Creates a SyncInfo object with an unusable Account. Used when the caller receiving this
+     * object doesn't have access to the accounts on the device.
+     * @See Manifest.permission.GET_ACCOUNTS
+     * @hide
+     */
+    public static SyncInfo createAccountRedacted(
+        int authorityId, String authority, long startTime) {
+            return new SyncInfo(authorityId, REDACTED_ACCOUNT, authority, startTime);
+    }
 
     /** @hide */
     public SyncInfo(int authorityId, Account account, String authority, long startTime) {
