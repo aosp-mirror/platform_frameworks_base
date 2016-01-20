@@ -1099,6 +1099,10 @@
               Displaying a Now Playing Card</a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/guided-step.html">
+              Adding a Guided Step</a>
+          </li>
+          <li>
             <a href="<?cs var:toroot ?>training/tv/playback/options.html">
               Enabling Background Playback</a>
           </li>

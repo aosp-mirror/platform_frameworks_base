@@ -137,6 +137,11 @@ page.article=true
   <p>See <a href="{@docRoot}training/tv/start/layouts.html#advertising">Provide Effective Advertising</a>.</p>
 </li>
 
+<li>
+  Use the Leanback library for guiding the user through a series of decisions.
+  <p>See <a href="{@docRoot}training/tv/playback/guided-step.html">Adding a Guided Step</a>.</p>
+</li>
+
 </ol>
 
 
