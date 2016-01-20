@@ -6,8 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-
 import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
 import com.android.systemui.R;
@@ -25,7 +23,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final ArrayList<TileRecord> mTiles = new ArrayList<TileRecord>();
     private final ArrayList<TilePage> mPages = new ArrayList<TilePage>();
 
-    private FirstPage mFirstPage;
     private PageIndicator mPageIndicator;
 
     private int mNumPages;
@@ -59,16 +56,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
         ((LayoutParams) mPageIndicator.getLayoutParams()).isDecor = true;
 
-        mFirstPage = (FirstPage) findViewById(R.id.first_page);
-        removeView(mFirstPage); // We don't actually want this on the view yet, just inflated.
-        mPages.add(mFirstPage.mTilePage);
+        mPages.add((TilePage) LayoutInflater.from(mContext)
+                .inflate(R.layout.qs_paged_page, this, false));
     }
 
     @Override
     public int getOffsetTop(TileRecord tile) {
-        if (tile.tileView.getParent() == mFirstPage.mTilePage) {
-            return mFirstPage.getTop() + mFirstPage.mTilePage.getTop();
-        }
         return ((ViewGroup) tile.tileView.getParent()).getTop();
     }
 
@@ -87,7 +80,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private void distributeTiles() {
         if (DEBUG) Log.d(TAG, "Distributing tiles");
-        mFirstPage.mQuickQuickTiles.removeAllViews();
         final int NP = mPages.size();
         for (int i = 0; i < NP; i++) {
             mPages.get(i).clear();
@@ -137,33 +129,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setMeasuredDimension(getMeasuredWidth(), maxHeight + mPageIndicator.getMeasuredHeight());
     }
 
-    public static class FirstPage extends LinearLayout {
-        private LinearLayout mQuickQuickTiles;
-        private TilePage mTilePage;
-
-        public FirstPage(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        @Override
-        protected void onFinishInflate() {
-            super.onFinishInflate();
-            mQuickQuickTiles = (LinearLayout) findViewById(R.id.quick_tile_layout);
-            mQuickQuickTiles.setVisibility(View.GONE);
-            mTilePage = (TilePage) findViewById(R.id.tile_page);
-            // Less rows on first page, because it needs room for the quick tiles.
-            mTilePage.mMaxRows = 3;
-        }
-
-        @Override
-        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-            // The ViewPager will try to make us taller, don't do it unless we need to.
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
-                    MeasureSpec.AT_MOST);
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        }
-    }
-
     public static class TilePage extends TileLayout {
         private int mMaxRows = 3;
 
@@ -201,7 +166,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         public Object instantiateItem(ViewGroup container, int position) {
             if (DEBUG) Log.d(TAG, "Instantiating " + position);
-            ViewGroup view = position == 0 ? mFirstPage : mPages.get(position);
+            ViewGroup view = mPages.get(position);
             container.addView(view);
             return view;
         }
