@@ -592,6 +592,7 @@ public class AccountManager {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         if (authTokenType == null) throw new IllegalArgumentException("authTokenType is null");
         return new Future2Task<String>(handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.getAuthTokenLabel(mResponse, accountType, authTokenType);
             }
@@ -637,9 +638,11 @@ public class AccountManager {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
         return new Future2Task<Boolean>(handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.hasFeatures(mResponse, account, features, mContext.getOpPackageName());
             }
+            @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
                     throw new AuthenticatorException("no result in response");
@@ -689,10 +692,12 @@ public class AccountManager {
             AccountManagerCallback<Account[]> callback, Handler handler) {
         if (type == null) throw new IllegalArgumentException("type is null");
         return new Future2Task<Account[]>(handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.getAccountsByFeatures(mResponse, type, features,
                         mContext.getOpPackageName());
             }
+            @Override
             public Account[] bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_ACCOUNTS)) {
                     throw new AuthenticatorException("no result in response");
@@ -971,6 +976,7 @@ public class AccountManager {
         if (userHandle == null)
             throw new IllegalArgumentException("userHandle is null");
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.removeAccountAsUser(mResponse, account, activity != null,
                         userHandle.getIdentifier());
@@ -1051,7 +1057,7 @@ public class AccountManager {
      * is needed for those platforms. See docs for this function in API level 22.
      *
      * @param account The account for which an auth token is to be fetched. Cannot be {@code null}.
-     * @param authTokenType The type of auth token to fetch. Cannot be {@code null}. 
+     * @param authTokenType The type of auth token to fetch. Cannot be {@code null}.
      * @return The cached auth token for this account and type, or null if
      *     no auth token is cached or the account does not exist.
      * @see #getAuthToken
@@ -1245,7 +1251,7 @@ public class AccountManager {
      * tokens to access Gmail and Google Calendar for the same account.
      *
      * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
-     * USE_CREDENTIALS permission is needed for those platforms. See docs for 
+     * USE_CREDENTIALS permission is needed for those platforms. See docs for
      * this function in API level 22.
      *
      * <p>This method may be called from any thread, but the returned
@@ -1295,6 +1301,7 @@ public class AccountManager {
         }
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         false /* notifyOnAuthFailure */, true /* expectActivityLaunch */,
@@ -1412,7 +1419,7 @@ public class AccountManager {
      * {@link AccountManagerFuture} must not be used on the main thread.
      *
      * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
-     * USE_CREDENTIALS permission is needed for those platforms. See docs for 
+     * USE_CREDENTIALS permission is needed for those platforms. See docs for
      * this function in API level 22.
      *
      * @param account The account to fetch an auth token for
@@ -1463,6 +1470,7 @@ public class AccountManager {
         }
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
         return new AmsTask(null, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.getAuthToken(mResponse, account, authTokenType,
                         notifyAuthFailure, false /* expectActivityLaunch */, optionsIn);
@@ -1478,7 +1486,7 @@ public class AccountManager {
      *
      * <p>This method may be called from any thread, but the returned
      * {@link AccountManagerFuture} must not be used on the main thread.
-     * 
+     *
      * <p><b>NOTE:</b> If targeting your app to work on API level 22 and before,
      * MANAGE_ACCOUNTS permission is needed for those platforms. See docs for
      * this function in API level 22.
@@ -1532,6 +1540,7 @@ public class AccountManager {
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
 
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.addAccount(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, optionsIn);
@@ -1556,6 +1565,7 @@ public class AccountManager {
         optionsIn.putString(KEY_ANDROID_PACKAGE_NAME, mContext.getPackageName());
 
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.addAccountAsUser(mResponse, accountType, authTokenType,
                         requiredFeatures, activity != null, optionsIn, userHandle.getIdentifier());
@@ -1732,6 +1742,7 @@ public class AccountManager {
         if (account == null) throw new IllegalArgumentException("account is null");
         final int userId = userHandle.getIdentifier();
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.confirmCredentialsAsUser(mResponse, account, options, activity != null,
                         userId);
@@ -1794,6 +1805,7 @@ public class AccountManager {
             final Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.updateCredentials(mResponse, account, authTokenType, activity != null,
                         options);
@@ -1847,6 +1859,7 @@ public class AccountManager {
             final Handler handler) {
         if (accountType == null) throw new IllegalArgumentException("accountType is null");
         return new AmsTask(activity, handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.editProperties(mResponse, accountType, activity != null);
             }
@@ -1886,6 +1899,7 @@ public class AccountManager {
             final AccountManagerFuture<Bundle> future) {
         handler = handler == null ? mMainHandler : handler;
         handler.post(new Runnable() {
+            @Override
             public void run() {
                 callback.run(future);
             }
@@ -1900,6 +1914,7 @@ public class AccountManager {
         System.arraycopy(accounts, 0, accountsCopy, 0, accountsCopy.length);
         handler = (handler == null) ? mMainHandler : handler;
         handler.post(new Runnable() {
+            @Override
             public void run() {
                 try {
                     listener.onAccountsUpdated(accountsCopy);
@@ -1919,6 +1934,7 @@ public class AccountManager {
         final Activity mActivity;
         public AmsTask(Activity activity, Handler handler, AccountManagerCallback<Bundle> callback) {
             super(new Callable<Bundle>() {
+                @Override
                 public Bundle call() throws Exception {
                     throw new IllegalStateException("this should never be called");
                 }
@@ -1939,6 +1955,7 @@ public class AccountManager {
             return this;
         }
 
+        @Override
         protected void set(Bundle bundle) {
             // TODO: somehow a null is being set as the result of the Future. Log this
             // case to help debug where this is occurring. When this bug is fixed this
@@ -1989,16 +2006,19 @@ public class AccountManager {
             throw new OperationCanceledException();
         }
 
+        @Override
         public Bundle getResult()
                 throws OperationCanceledException, IOException, AuthenticatorException {
             return internalGetResult(null, null);
         }
 
+        @Override
         public Bundle getResult(long timeout, TimeUnit unit)
                 throws OperationCanceledException, IOException, AuthenticatorException {
             return internalGetResult(timeout, unit);
         }
 
+        @Override
         protected void done() {
             if (mCallback != null) {
                 postToHandler(mHandler, mCallback, this);
@@ -2007,6 +2027,7 @@ public class AccountManager {
 
         /** Handles the responses from the AccountManager */
         private class Response extends IAccountManagerResponse.Stub {
+            @Override
             public void onResult(Bundle bundle) {
                 Intent intent = bundle.getParcelable(KEY_INTENT);
                 if (intent != null && mActivity != null) {
@@ -2026,6 +2047,7 @@ public class AccountManager {
                 }
             }
 
+            @Override
             public void onError(int code, String message) {
                 if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED
                         || code == ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
@@ -2046,6 +2068,7 @@ public class AccountManager {
 
         public BaseFutureTask(Handler handler) {
             super(new Callable<T>() {
+                @Override
                 public T call() throws Exception {
                     throw new IllegalStateException("this should never be called");
                 }
@@ -2072,6 +2095,7 @@ public class AccountManager {
         }
 
         protected class Response extends IAccountManagerResponse.Stub {
+            @Override
             public void onResult(Bundle bundle) {
                 try {
                     T result = bundleToResult(bundle);
@@ -2088,6 +2112,7 @@ public class AccountManager {
                 onError(ERROR_CODE_INVALID_RESPONSE, "no result in response");
             }
 
+            @Override
             public void onError(int code, String message) {
                 if (code == ERROR_CODE_CANCELED || code == ERROR_CODE_USER_RESTRICTED
                         || code == ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
@@ -2109,9 +2134,11 @@ public class AccountManager {
             mCallback = callback;
         }
 
+        @Override
         protected void done() {
             if (mCallback != null) {
                 postRunnableToHandler(new Runnable() {
+                    @Override
                     public void run() {
                         mCallback.run(Future2Task.this);
                     }
@@ -2162,11 +2189,13 @@ public class AccountManager {
             throw new OperationCanceledException();
         }
 
+        @Override
         public T getResult()
                 throws OperationCanceledException, IOException, AuthenticatorException {
             return internalGetResult(null, null);
         }
 
+        @Override
         public T getResult(long timeout, TimeUnit unit)
                 throws OperationCanceledException, IOException, AuthenticatorException {
             return internalGetResult(timeout, unit);
@@ -2218,9 +2247,11 @@ public class AccountManager {
         final AccountManagerCallback<Bundle> mMyCallback;
         private volatile int mNumAccounts = 0;
 
+        @Override
         public void doWork() throws RemoteException {
             getAccountsByTypeAndFeatures(mAccountType, mFeatures,
                     new AccountManagerCallback<Account[]>() {
+                        @Override
                         public void run(AccountManagerFuture<Account[]> future) {
                             Account[] accounts;
                             try {
@@ -2271,6 +2302,7 @@ public class AccountManager {
                                 if (mActivity != null) {
                                     IAccountManagerResponse chooseResponse =
                                             new IAccountManagerResponse.Stub() {
+                                        @Override
                                         public void onResult(Bundle value) throws RemoteException {
                                             Account account = new Account(
                                                     value.getString(KEY_ACCOUNT_NAME),
@@ -2279,6 +2311,7 @@ public class AccountManager {
                                                     mActivity, mMyCallback, mHandler);
                                         }
 
+                                        @Override
                                         public void onError(int errorCode, String errorMessage)
                                                 throws RemoteException {
                                             mResponse.onError(errorCode, errorMessage);
@@ -2311,6 +2344,7 @@ public class AccountManager {
                         }}, mHandler);
         }
 
+        @Override
         public void run(AccountManagerFuture<Bundle> future) {
             try {
                 final Bundle result = future.getResult();
@@ -2531,6 +2565,7 @@ public class AccountManager {
      * in mAccountsUpdatedListeners.
      */
     private final BroadcastReceiver mAccountsChangedBroadcastReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(final Context context, final Intent intent) {
             final Account[] accounts = getAccounts();
             // send the result to the listeners
@@ -2851,6 +2886,25 @@ public class AccountManager {
             final Activity activity,
             AccountManagerCallback<Bundle> callback,
             Handler handler) {
+        return finishSessionAsUser(
+                sessionBundle,
+                activity,
+                Process.myUserHandle(),
+                callback,
+                handler);
+    }
+
+    /**
+     * @see #finishSession
+     * @hide
+     */
+    @SystemApi
+    public AccountManagerFuture<Bundle> finishSessionAsUser(
+            final Bundle sessionBundle,
+            final Activity activity,
+            final UserHandle userHandle,
+            AccountManagerCallback<Bundle> callback,
+            Handler handler) {
         if (sessionBundle == null) {
             throw new IllegalArgumentException("sessionBundle is null");
         }
@@ -2862,7 +2916,12 @@ public class AccountManager {
         return new AmsTask(activity, handler, callback) {
             @Override
             public void doWork() throws RemoteException {
-                mService.finishSession(mResponse, sessionBundle, activity != null, appInfo);
+                mService.finishSessionAsUser(
+                        mResponse,
+                        sessionBundle,
+                        activity != null,
+                        appInfo,
+                        userHandle.getIdentifier());
             }
         }.start();
     }
@@ -2898,12 +2957,14 @@ public class AccountManager {
         }
 
         return new Future2Task<Boolean>(handler, callback) {
+            @Override
             public void doWork() throws RemoteException {
                 mService.isCredentialsUpdateSuggested(
                         mResponse,
                         account,
                         statusToken);
             }
+            @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
                     throw new AuthenticatorException("no result in response");

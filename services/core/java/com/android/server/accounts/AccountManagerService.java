@@ -2486,16 +2486,20 @@ public class AccountManagerService
     }
 
     @Override
-    public void finishSession(IAccountManagerResponse response,
+    public void finishSessionAsUser(IAccountManagerResponse response,
             @NonNull Bundle sessionBundle,
             boolean expectActivityLaunch,
-            Bundle appInfo) {
+            Bundle appInfo,
+            int userId) {
+        int callingUid = Binder.getCallingUid();
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG,
-                    "finishSession: response " + response
+                    "finishSession: response "+ response
                             + ", expectActivityLaunch " + expectActivityLaunch
-                            + ", caller's uid " + Binder.getCallingUid()
-                            + ", pid " + Binder.getCallingPid());
+                            + ", caller's uid " + callingUid
+                            + ", caller's user id " + UserHandle.getCallingUserId()
+                            + ", pid " + Binder.getCallingPid()
+                            + ", for user id " + userId);
         }
         if (response == null) {
             throw new IllegalArgumentException("response is null");
@@ -2507,17 +2511,24 @@ public class AccountManagerService
             throw new IllegalArgumentException("sessionBundle is empty");
         }
 
-        final int uid = Binder.getCallingUid();
+        // Only allow the system process to finish session for other users
+        if (isCrossUser(callingUid, userId)) {
+            throw new SecurityException(
+                    String.format(
+                            "User %s trying to finish session for %s without cross user permission",
+                            UserHandle.getCallingUserId(),
+                            userId));
+        }
+
         // Only allow system to finish session
-        if (!isSystemUid(uid)) {
+        if (!isSystemUid(callingUid)) {
             String msg = String.format(
-                    "uid %s cannot finish session.",
-                    uid);
+                    "uid %s cannot finish session because it's not system uid.",
+                    callingUid);
             throw new SecurityException(msg);
         }
 
-        final int userId = UserHandle.getUserId(uid);
-        if (!canUserModifyAccounts(userId, uid)) {
+        if (!canUserModifyAccounts(userId, callingUid)) {
             sendErrorResponse(response,
                     AccountManager.ERROR_CODE_USER_RESTRICTED,
                     "User is not allowed to add an account!");
@@ -2559,7 +2570,7 @@ public class AccountManagerService
             }
 
             // Add info that may be used by add account or update credentials flow.
-            decryptedBundle.putInt(AccountManager.KEY_CALLER_UID, uid);
+            decryptedBundle.putInt(AccountManager.KEY_CALLER_UID, callingUid);
             decryptedBundle.putInt(AccountManager.KEY_CALLER_PID, pid);
         } catch (GeneralSecurityException e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -2572,7 +2583,7 @@ public class AccountManagerService
             return;
         }
 
-        if (!canUserModifyAccountsForType(userId, accountType, uid)) {
+        if (!canUserModifyAccountsForType(userId, accountType, callingUid)) {
             sendErrorResponse(
                     response,
                     AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE,
@@ -2589,7 +2600,7 @@ public class AccountManagerService
                     accounts,
                     DebugDbHelper.ACTION_CALLED_ACCOUNT_SESSION_FINISH,
                     TABLE_ACCOUNTS,
-                    uid);
+                    callingUid);
             new Session(
                     accounts,
                     response,

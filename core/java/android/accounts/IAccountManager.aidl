@@ -92,9 +92,9 @@ interface IAccountManager {
     void startUpdateCredentialsSession(in IAccountManagerResponse response, in Account account,
         String authTokenType, boolean expectActivityLaunch, in Bundle options);
 
-    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) */
-    void finishSession(in IAccountManagerResponse response, in Bundle sessionBundle,
-        boolean expectActivityLaunch, in Bundle appInfo);
+    /* Finish session started by startAddAccountSession(...) or startUpdateCredentialsSession(...) for user */
+    void finishSessionAsUser(in IAccountManagerResponse response, in Bundle sessionBundle,
+        boolean expectActivityLaunch, in Bundle appInfo, int userId);
 
     /* Check if an account exists on any user on the device. */
     boolean someUserHasAccount(in Account account);
