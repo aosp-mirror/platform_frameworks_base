@@ -89,7 +89,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
 
     @Override
     public void onPointerEvent(MotionEvent event) {
-        if (mGestureDetector != null) {
+        if (mGestureDetector != null && event.isTouchEvent()) {
             mGestureDetector.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
