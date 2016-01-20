@@ -331,6 +331,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nsilence"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priority\nonly"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarms\nonly"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"All"</string>
+    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"All\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Charging rapidly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Charging slowly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
@@ -480,4 +482,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Home"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Back"</string>
+    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Show Do Not Disturb in volume"</string>
+    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Allow full control of Do Not Disturb in the volume dialogue."</string>
+    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Volume and Do Not Disturb"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"Enter Do Not Disturb on volume down"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Exit Do Not Disturb on volume up"</string>
 </resources>

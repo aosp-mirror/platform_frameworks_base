@@ -331,6 +331,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Täielik\nvaikus"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Ainult\nprioriteetsed"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ainult\nalarmid"</string>
+    <string name="interruption_level_all" msgid="1330581184930945764">"Kõik"</string>
+    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"Kõik\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Kiirlaadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Aeglane laadimine (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>, kuni seade on täis)"</string>
@@ -480,4 +482,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Avaekraan"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Hiljutised"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Tagasi"</string>
+    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Kuva helitugevuse juures funktsioon Mitte segada"</string>
+    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Helitugevuse dialoogis lubatakse funktsiooni Mitte segada täielik juhtimine."</string>
+    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Helitugevus ja funktsioon Mitte segada"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"Lülita helitugevuse vähendamisel sisse funkt. Mitte segada"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"Lülita helitugevuse suurendamisel välja funkt. Mitte segada"</string>
 </resources>
