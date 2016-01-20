@@ -37,13 +37,11 @@ import android.widget.BaseAdapter;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.Icon;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.tuner.QSPagingSwitch;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,8 +72,9 @@ public class TileAdapter extends BaseAdapter {
             }
             mCurrentTiles = tileSpecs;
             final TileGroup group = new TileGroup("com.android.settings", mContext);
-            // TODO: Pull this list from a more authoritative place.
-            String[] possibleTiles = QSPagingSwitch.QS_PAGE_TILES.split(",");
+            String possible = mContext.getString(R.string.quick_settings_tiles_default)
+                    + ",user,hotspot,inversion";
+            String[] possibleTiles = possible.split(",");
             for (int i = 0; i < possibleTiles.length; i++) {
                 final String spec = possibleTiles[i];
                 if (spec.startsWith("q")) {

@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanel.TileRecord;
@@ -21,6 +20,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mColumns;
     private int mCellWidth;
     private int mCellHeight;
+    private int mCellMargin;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
@@ -54,52 +54,33 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         super.removeAllViews();
     }
 
-    public void updateResources() {
+    public boolean updateResources() {
         final Resources res = mContext.getResources();
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        mCellHeight = getCellHeight();
-        mCellWidth = (int) (mCellHeight * TILE_ASPECT);
+        mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        mCellMargin = res.getDimensionPixelSize(R.dimen.qs_tile_margin);
         if (mColumns != columns) {
             mColumns = columns;
             postInvalidate();
+            return true;
         }
-    }
-
-    protected int getCellHeight() {
-        return mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        return false;
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int numTiles = mRecords.size();
         final int width = MeasureSpec.getSize(widthMeasureSpec);
-        int r = -1;
-        int c = -1;
-        int rows = 0;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            // wrap to next column if we've reached the max # of columns
-            // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1)) {
-                r++;
-                c = 0;
-            } else {
-                c++;
-            }
-            record.row = r;
-            record.col = c;
-            rows = r + 1;
-        }
+        final int rows = (numTiles + mColumns - 1) / mColumns;
+        mCellWidth = (width - (mCellMargin * (mColumns + 1))) / mColumns;
 
         View previousView = this;
         for (TileRecord record : mRecords) {
             if (record.tileView.getVisibility() == GONE) continue;
-            final int cw = mCellWidth;
-            final int ch = mCellHeight;
-            record.tileView.measure(exactly(cw), exactly(ch));
+            record.tileView.measure(exactly(mCellWidth), exactly(mCellHeight));
             previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
-        int h = rows == 0 ? 0 : getRowTop(rows);
-        setMeasuredDimension(width, h);
+        setMeasuredDimension(width, (mCellHeight + mCellMargin) * rows + mCellMargin);
     }
 
     private static int exactly(int size) {
@@ -110,37 +91,32 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getWidth();
         boolean isRtl = getLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            final int cols = getColumnCount(record.row);
-            final int cw = mCellWidth;
-            final int extra = (w - cw * cols) / (cols + 1);
-            int left = record.col * cw + (record.col + 1) * extra;
-            final int top = getRowTop(record.row);
+        int row = 0;
+        int column = 0;
+        for (int i = 0; i < mRecords.size(); i++, column++) {
+            if (column == mColumns) {
+                row++;
+                column -= mColumns;
+            }
+            TileRecord record = mRecords.get(i);
+            int left = getColumnStart(column);
+            final int top = getRowTop(row);
             int right;
-            int tileWith = record.tileView.getMeasuredWidth();
             if (isRtl) {
                 right = w - left;
-                left = right - tileWith;
+                left = right - mCellWidth;
             } else {
-                right = left + tileWith;
+                right = left + mCellWidth;
             }
             record.tileView.layout(left, top, right, top + record.tileView.getMeasuredHeight());
         }
     }
 
     private int getRowTop(int row) {
-        if (row <= 0) return 0;
-        return row * mCellHeight;
+        return row * (mCellHeight + mCellMargin) + mCellMargin;
     }
 
-    private int getColumnCount(int row) {
-        int cols = 0;
-        for (TileRecord record : mRecords) {
-            if (record.tileView.getVisibility() == GONE) continue;
-            if (record.row == row) cols++;
-        }
-        return cols;
+    private int getColumnStart(int column) {
+        return column * (mCellWidth + mCellMargin) + mCellMargin;
     }
-
 }

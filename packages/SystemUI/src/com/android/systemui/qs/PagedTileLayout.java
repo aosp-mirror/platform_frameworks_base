@@ -62,27 +62,32 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public int getOffsetTop(TileRecord tile) {
-        return ((ViewGroup) tile.tileView.getParent()).getTop();
+        return ((ViewGroup) tile.tileView.getParent()).getTop() + getTop();
     }
 
     @Override
     public void addTile(TileRecord tile) {
         mTiles.add(tile);
-        distributeTiles();
+        postDistributeTiles();
     }
 
     @Override
     public void removeTile(TileRecord tile) {
         if (mTiles.remove(tile)) {
-            distributeTiles();
+            postDistributeTiles();
         }
+    }
+
+    private void postDistributeTiles() {
+        removeCallbacks(mDistribute);
+        post(mDistribute);
     }
 
     private void distributeTiles() {
         if (DEBUG) Log.d(TAG, "Distributing tiles");
         final int NP = mPages.size();
         for (int i = 0; i < NP; i++) {
-            mPages.get(i).clear();
+            mPages.get(i).removeAllViews();
         }
         int index = 0;
         final int NT = mTiles.size();
@@ -107,10 +112,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
-    public void updateResources() {
+    public boolean updateResources() {
+        boolean changed = false;
         for (int i = 0; i < mPages.size(); i++) {
-            mPages.get(i).updateResources();
+            changed |= mPages.get(i).updateResources();
         }
+        if (changed) {
+            distributeTiles();
+        }
+        return changed;
     }
 
     @Override
@@ -129,6 +139,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setMeasuredDimension(getMeasuredWidth(), maxHeight + mPageIndicator.getMeasuredHeight());
     }
 
+    private final Runnable mDistribute = new Runnable() {
+        @Override
+        public void run() {
+            distributeTiles();
+        }
+    };
+
     public static class TilePage extends TileLayout {
         private int mMaxRows = 3;
 
@@ -137,19 +154,17 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             updateResources();
         }
 
+        @Override
+        public boolean updateResources() {
+            if (super.updateResources()) {
+                mMaxRows = mColumns != 3 ? 2 : 3;
+                return true;
+            }
+            return false;
+        }
+
         public void setMaxRows(int maxRows) {
             mMaxRows = maxRows;
-        }
-
-        @Override
-        protected int getCellHeight() {
-            return mContext.getResources().getDimensionPixelSize(R.dimen.qs_new_tile_height);
-        }
-
-        private void clear() {
-            if (DEBUG) Log.d(TAG, "Clearing page");
-            removeAllViews();
-            mRecords.clear();
         }
 
         public boolean isFull() {

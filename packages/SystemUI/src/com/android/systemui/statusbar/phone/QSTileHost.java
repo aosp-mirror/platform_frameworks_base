@@ -295,6 +295,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
             if (mTiles.containsKey(tileSpec)) {
                 QSTile<?> tile = mTiles.get(tileSpec);
                 if (DEBUG) Log.d(TAG, "Adding " + tile);
+                tile.removeCallbacks();
                 newTiles.put(tileSpec, tile);
             } else {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
