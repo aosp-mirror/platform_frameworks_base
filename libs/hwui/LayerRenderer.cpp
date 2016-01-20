@@ -373,7 +373,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         GLenum format;
         GLenum type;
 
-        GLenum error = GL_NO_ERROR;
         bool status = false;
 
         switch (bitmap->colorType()) {
@@ -408,7 +407,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         renderState.bindFramebuffer(fbo);
 
         glGenTextures(1, &texture);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
+        GL_CHECKPOINT();
 
         caches.textureState().activateTexture(0);
         caches.textureState().bindTexture(texture);
@@ -423,11 +422,11 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
                 0, format, type, nullptr);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
+        GL_CHECKPOINT();
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, texture, 0);
-        if ((error = glGetError()) != GL_NO_ERROR) goto error;
+        GL_CHECKPOINT();
 
         {
             LayerRenderer renderer(renderState, layer);
@@ -438,7 +437,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
 
-            if ((error = glGetError()) != GL_NO_ERROR) goto error;
+            GL_CHECKPOINT();
 
             {
                 Rect bounds;
@@ -448,18 +447,11 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
                 glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
                         type, bitmap->getPixels());
 
-                if ((error = glGetError()) != GL_NO_ERROR) goto error;
+                GL_CHECKPOINT();
             }
 
             status = true;
         }
-
-error:
-#if DEBUG_OPENGL
-        if (error != GL_NO_ERROR) {
-            ALOGD("GL error while copying layer into bitmap = 0x%x", error);
-        }
-#endif
 
         renderState.bindFramebuffer(previousFbo);
         layer->setAlpha(alpha, mode);

@@ -207,7 +207,6 @@ void Layer::allocateTexture() {
 #endif
     if (texture.mId) {
         texture.updateSize(getWidth(), getHeight(), GL_RGBA);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }

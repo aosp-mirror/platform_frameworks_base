@@ -43,6 +43,7 @@ TextureState::TextureState()
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
     LOG_ALWAYS_FATAL_IF(maxTextureUnits < kTextureUnitsCount,
             "At least %d texture units are required!", kTextureUnitsCount);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 void TextureState::activateTexture(GLuint textureUnit) {

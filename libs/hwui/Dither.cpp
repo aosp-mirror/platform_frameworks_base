@@ -54,7 +54,6 @@ void Dither::bindDitherTexture() {
                 15 * dither,  7 * dither, 13 * dither,  5 * dither
             };
 
-            glPixelStorei(GL_UNPACK_ALIGNMENT, sizeof(GLfloat));
             glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, DITHER_KERNEL_SIZE, DITHER_KERNEL_SIZE, 0,
                     GL_RED, GL_FLOAT, &pattern);
         } else {
@@ -65,7 +64,6 @@ void Dither::bindDitherTexture() {
                 15,  7, 13,  5
             };
 
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, DITHER_KERNEL_SIZE, DITHER_KERNEL_SIZE, 0,
                     GL_ALPHA, GL_UNSIGNED_BYTE, &pattern);
         }
