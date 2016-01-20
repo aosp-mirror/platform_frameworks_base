@@ -75,6 +75,12 @@ public class DropDownListView extends ListView {
     private AbsListViewAutoScroller mScrollHelper;
 
     /**
+     * Runnable posted when we are awaiting hover event resolution. When set,
+     * drawable state changes are postponed.
+     */
+    private ResolveHoverRunnable mResolveHoverRunnable;
+
+    /**
      * Creates a new list view wrapper.
      *
      * @param context this view's context
@@ -101,18 +107,36 @@ public class DropDownListView extends ListView {
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (mResolveHoverRunnable != null) {
+            // Resolved hover event as hover => touch transition.
+            mResolveHoverRunnable.cancel();
+        }
+
+        return super.onTouchEvent(ev);
+    }
+
+    @Override
     public boolean onHoverEvent(@NonNull MotionEvent ev) {
+        final int action = ev.getActionMasked();
+        if (action == MotionEvent.ACTION_HOVER_EXIT && mResolveHoverRunnable == null) {
+            // This may be transitioning to TOUCH_DOWN. Postpone drawable state
+            // updates until either the next frame or the next touch event.
+            mResolveHoverRunnable = new ResolveHoverRunnable();
+            mResolveHoverRunnable.post();
+        }
+
         // Allow the super class to handle hover state management first.
         final boolean handled = super.onHoverEvent(ev);
 
-        final int action = ev.getActionMasked();
         if (action == MotionEvent.ACTION_HOVER_ENTER
                 || action == MotionEvent.ACTION_HOVER_MOVE) {
             final int position = pointToPosition((int) ev.getX(), (int) ev.getY());
             if (position != INVALID_POSITION && position != mSelectedPosition) {
                 final View hoveredItem = getChildAt(position - getFirstVisiblePosition());
                 if (hoveredItem.isEnabled()) {
-                    // Force a focus so that the proper selector state gets used when we update.
+                    // Force a focus so that the proper selector state gets
+                    // used when we update.
                     requestFocus();
 
                     positionSelector(position, hoveredItem);
@@ -122,7 +146,8 @@ public class DropDownListView extends ListView {
                 updateSelectorState();
             }
         } else {
-            // Do not cancel the selected position if the selection is visible by other reasons.
+            // Do not cancel the selected position if the selection is visible
+            // by other means.
             if (!super.shouldShowSelector()) {
                 setSelectedPositionInt(INVALID_POSITION);
                 setNextSelectedPositionInt(INVALID_POSITION);
@@ -130,6 +155,13 @@ public class DropDownListView extends ListView {
         }
 
         return handled;
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        if (mResolveHoverRunnable == null) {
+            super.drawableStateChanged();
+        }
     }
 
     /**
@@ -196,12 +228,14 @@ public class DropDownListView extends ListView {
     }
 
     /**
-     * Sets whether the list selection is hidden, as part of a workaround for a touch mode issue
-     * (see the declaration for mListSelectionHidden).
-     * @param listSelectionHidden
+     * Sets whether the list selection is hidden, as part of a workaround for a
+     * touch mode issue (see the declaration for mListSelectionHidden).
+     *
+     * @param hideListSelection {@code true} to hide list selection,
+     *                          {@code false} to show
      */
-    public void setListSelectionHidden(boolean listSelectionHidden) {
-        this.mListSelectionHidden = listSelectionHidden;
+    public void setListSelectionHidden(boolean hideListSelection) {
+        mListSelectionHidden = hideListSelection;
     }
 
     private void clearPressedItem() {
@@ -311,5 +345,26 @@ public class DropDownListView extends ListView {
     @Override
     public boolean hasFocus() {
         return mHijackFocus || super.hasFocus();
+    }
+
+    /**
+     * Runnable that forces hover event resolution and updates drawable state.
+     */
+    private class ResolveHoverRunnable implements Runnable {
+        @Override
+        public void run() {
+            // Resolved hover event as standard hover exit.
+            mResolveHoverRunnable = null;
+            drawableStateChanged();
+        }
+
+        public void cancel() {
+            mResolveHoverRunnable = null;
+            removeCallbacks(this);
+        }
+
+        public void post() {
+            DropDownListView.this.post(this);
+        }
     }
 }
