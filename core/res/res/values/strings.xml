@@ -493,23 +493,18 @@
         time from starting the bug report until it is ready to be sent; please be
         patient.</string>
     <!-- Title in the bugreport dialog for the interactive workflow. [CHAR LIMIT=20] -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
     <string name="bugreport_option_interactive_title">Interactive report</string>
     <!-- Summary in the bugreport dialog for the interactive workflow. [CHAR LIMIT=NONE] -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
     <string name="bugreport_option_interactive_summary">Use this under most circumstances.
         It allows you to track progress of the report and enter more details about the problem.
         It might omit some less-used sections that take a long time to report.</string>
     <!-- Title in the bugreport dialog for the full workflow. [CHAR LIMIT=20] -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
     <string name="bugreport_option_full_title">Full report</string>
     <!-- Summary in the bugreport dialog for the full workflow. [CHAR LIMIT=20] -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
     <string name="bugreport_option_full_summary">Use this option for minimal interference when
         your device is unresponsive or too slow, or when you need all sections.
         Does not take a screenshot or allow you to enter more details.</string>
     <!--  Toast message informing user in how many seconds a bugreport screenshot will be taken -->
-    <!-- DO NOT TRANSLATE YET: final phrasing still being discussed -->
     <plurals name="bugreport_countdown">
         <item quantity="one">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> second.</item>
         <item quantity="other">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> seconds.</item>

@@ -58,10 +58,10 @@
 
     <!-- Text of the hint asking for the bug report name, which when set will define a suffix in the
          bug report file names. [CHAR LIMIT=30] -->
-    <string name="bugreport_info_name">Short name</string>
+    <string name="bugreport_info_name">Filename</string>
     <!-- Text of hint asking for the bug report title, which when set will define the
          Subject of the email message. [CHAR LIMIT=60] -->
-    <string name="bugreport_info_title">1-line summary</string>
+    <string name="bugreport_info_title">Title</string>
     <!-- Text of hint asking for the bug report description, which when set will describe
          what the bug report is about. [CHAR LIMIT=NONE] -->
     <string name="bugreport_info_description">Detailed description</string>
