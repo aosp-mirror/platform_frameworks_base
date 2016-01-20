@@ -136,6 +136,9 @@ public class RttManager {
     public static final int REASON_INVALID_REQUEST          = -4;
     /** Do not have required permission */
     public static final int REASON_PERMISSION_DENIED        = -5;
+    /** Ranging failed because responder role is enabled in STA mode.*/
+    public static final int
+            REASON_INITIATOR_NOT_ALLOWED_WHEN_RESPONDER_ON  = -6;
 
     public static final String DESCRIPTION_KEY  = "android.net.wifi.RttManager.Description";
 
@@ -191,6 +194,8 @@ public class RttManager {
         public int preambleSupported;
         //RTT bandwidth supported
         public int bwSupported;
+        // Whether STA responder role is supported.
+        public boolean responderSupported;
 
         @Override
         public String toString() {
@@ -244,6 +249,9 @@ public class RttManager {
 
             sb.append("is supported.");
 
+            sb.append(" STA responder role is ")
+                .append(responderSupported ? "supported" : "not supported.");
+
             return sb.toString();
         }
         /** Implement the Parcelable interface {@hide} */
@@ -261,7 +269,7 @@ public class RttManager {
             dest.writeInt(lcrSupported ? 1 : 0);
             dest.writeInt(preambleSupported);
             dest.writeInt(bwSupported);
-
+            dest.writeInt(responderSupported ? 1 : 0);
         }
 
         /** Implement the Parcelable interface {@hide} */
@@ -275,6 +283,7 @@ public class RttManager {
                         capabilities.lcrSupported = in.readInt() == 1 ? true : false;
                         capabilities.preambleSupported = in.readInt();
                         capabilities.bwSupported = in.readInt();
+                        capabilities.responderSupported = (in.readInt() == 1);
                         return capabilities;
                     }
                 /** Implement the Parcelable interface {@hide} */
@@ -898,6 +907,160 @@ public class RttManager {
         sAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
     }
 
+    /**
+     * Callbacks for responder operations.
+     * <p>
+     * A {@link ResponderCallback} is the handle to the calling client. {@link RttManager} will keep
+     * a reference to the callback for the entire period when responder is enabled. The same
+     * callback as used in enabling responder needs to be passed for disabling responder.
+     * The client can freely destroy or reuse the callback after {@link RttManager#disableResponder}
+     * is called.
+     */
+    public abstract static class ResponderCallback {
+        /** Callback when responder is enabled. */
+        public abstract void onResponderEnabled(ResponderConfig config);
+        /** Callback when enabling responder failed. */
+        public abstract void onResponderEnableFailure(int reason);
+        // TODO: consider adding onResponderAborted once it's supported.
+    }
+
+    /**
+     * Enable Wi-Fi RTT responder mode on the device. The enabling result will be delivered via
+     * {@code callback}.
+     * <p>
+     * Note calling this method with the same callback when the responder is already enabled won't
+     * change the responder state, a cached {@link ResponderConfig} from the last enabling will be
+     * returned through the callback.
+     *
+     * @param callback Callback for responder enabling/disabling result.
+     * @throws IllegalArgumentException If {@code callback} is null.
+     */
+    public void enableResponder(ResponderCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+        validateChannel();
+        int key = putListenerIfAbsent(callback);
+        sAsyncChannel.sendMessage(CMD_OP_ENABLE_RESPONDER, 0, key);
+    }
+
+    /**
+     * Disable Wi-Fi RTT responder mode on the device. The {@code callback} needs to be the
+     * same one used in {@link #enableResponder(ResponderCallback)}.
+     * <p>
+     * Calling this method when responder isn't enabled won't have any effect. The callback can be
+     * reused for enabling responder after this method is called.
+     *
+     * @param callback The same callback used for enabling responder.
+     * @throws IllegalArgumentException If {@code callback} is null.
+     */
+    public void disableResponder(ResponderCallback callback) {
+        if (callback == null) {
+            throw new IllegalArgumentException("callback cannot be null");
+        }
+        validateChannel();
+        int key = removeListener(callback);
+        if (key == INVALID_KEY) {
+            Log.e(TAG, "responder not enabled yet");
+            return;
+        }
+        sAsyncChannel.sendMessage(CMD_OP_DISABLE_RESPONDER, 0, key);
+    }
+
+    /**
+     * Configuration used for RTT responder mode. The configuration information can be used by a
+     * peer device to range the responder.
+     *
+     * @see ScanResult
+     */
+    public static class ResponderConfig implements Parcelable {
+
+        // TODO: make all fields final once we can get mac address from responder HAL APIs.
+        /**
+         * Wi-Fi mac address used for responder mode.
+         */
+        public String macAddress = "";
+
+        /**
+         * The primary 20 MHz frequency (in MHz) of the channel where responder is enabled.
+         * @see ScanResult#frequency
+         */
+        public int frequency;
+
+        /**
+         * Center frequency of the channel where responder is enabled on. Only in use when channel
+         * width is at least 40MHz.
+         * @see ScanResult#centerFreq0
+         */
+        public int centerFreq0;
+
+        /**
+         * Center frequency of the second segment when channel width is 80 + 80 MHz.
+         * @see ScanResult#centerFreq1
+         */
+        public int centerFreq1;
+
+        /**
+         * Width of the channel where responder is enabled on.
+         * @see ScanResult#channelWidth
+         */
+        public int channelWidth;
+
+        /**
+         * Preamble supported by responder.
+         */
+        public int preamble;
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("macAddress = ").append(macAddress)
+                    .append(" frequency = ").append(frequency)
+                    .append(" centerFreq0 = ").append(centerFreq0)
+                    .append(" centerFreq1 = ").append(centerFreq1)
+                    .append(" channelWidth = ").append(channelWidth)
+                    .append(" preamble = ").append(preamble);
+            return builder.toString();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(macAddress);
+            dest.writeInt(frequency);
+            dest.writeInt(centerFreq0);
+            dest.writeInt(centerFreq1);
+            dest.writeInt(channelWidth);
+            dest.writeInt(preamble);
+        }
+
+        /** Implement {@link Parcelable} interface */
+        public static final Parcelable.Creator<ResponderConfig> CREATOR =
+                new Parcelable.Creator<ResponderConfig>() {
+            @Override
+            public ResponderConfig createFromParcel(Parcel in) {
+                ResponderConfig config = new ResponderConfig();
+                config.macAddress = in.readString();
+                config.frequency = in.readInt();
+                config.centerFreq0 = in.readInt();
+                config.centerFreq1 = in.readInt();
+                config.channelWidth = in.readInt();
+                config.preamble = in.readInt();
+                return config;
+            }
+
+            @Override
+            public ResponderConfig[] newArray(int size) {
+                return new ResponderConfig[size];
+            }
+        };
+
+    }
+
     /* private methods */
     public static final int BASE = Protocol.BASE_WIFI_RTT_MANAGER;
 
@@ -906,6 +1069,12 @@ public class RttManager {
     public static final int CMD_OP_FAILED               = BASE + 2;
     public static final int CMD_OP_SUCCEEDED            = BASE + 3;
     public static final int CMD_OP_ABORTED              = BASE + 4;
+    public static final int CMD_OP_ENABLE_RESPONDER     = BASE + 5;
+    public static final int CMD_OP_DISABLE_RESPONDER    = BASE + 6;
+    public static final int
+            CMD_OP_ENALBE_RESPONDER_SUCCEEDED           = BASE + 7;
+    public static final int
+            CMD_OP_ENALBE_RESPONDER_FAILED              = BASE + 8;
 
     private Context mContext;
     private IRttManager mService;
@@ -992,6 +1161,23 @@ public class RttManager {
         return key;
     }
 
+    // Insert a listener if it doesn't exist in sListenerMap. Returns the key of the listener.
+    private static int putListenerIfAbsent(Object listener) {
+        if (listener == null) return INVALID_KEY;
+        synchronized (sListenerMapLock) {
+            int key = getListenerKey(listener);
+            if (key != INVALID_KEY) {
+                return key;
+            }
+            do {
+                key = sListenerKey++;
+            } while (key == INVALID_KEY);
+            sListenerMap.put(key, listener);
+            return key;
+        }
+
+    }
+
     private static Object getListener(int key) {
         if (key == INVALID_KEY) return null;
         synchronized (sListenerMapLock) {
@@ -1047,9 +1233,9 @@ public class RttManager {
                         // to fail and throw an exception
                         sAsyncChannel = null;
                     }
-                    sConnected.countDown();
                     return;
                 case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
+                    sConnected.countDown();
                     return;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
                     Log.e(TAG, "Channel connection lost");
@@ -1080,6 +1266,14 @@ public class RttManager {
                     break;
                 case CMD_OP_ABORTED :
                     ((RttListener) listener).onAborted();
+                    removeListener(msg.arg2);
+                    break;
+                case CMD_OP_ENALBE_RESPONDER_SUCCEEDED:
+                    ResponderConfig config = (ResponderConfig) msg.obj;
+                    ((ResponderCallback) (listener)).onResponderEnabled(config);
+                    break;
+                case CMD_OP_ENALBE_RESPONDER_FAILED:
+                    ((ResponderCallback) (listener)).onResponderEnableFailure(msg.arg1);
                     removeListener(msg.arg2);
                     break;
                 default:

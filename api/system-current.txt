@@ -20666,12 +20666,18 @@ package android.net.wifi {
   }
 
   public class RttManager {
+    method public void disableResponder(android.net.wifi.RttManager.ResponderCallback);
+    method public void enableResponder(android.net.wifi.RttManager.ResponderCallback);
     method public deprecated android.net.wifi.RttManager.Capabilities getCapabilities();
     method public android.net.wifi.RttManager.RttCapabilities getRttCapabilities();
     method public void startRanging(android.net.wifi.RttManager.RttParams[], android.net.wifi.RttManager.RttListener);
     method public void stopRanging(android.net.wifi.RttManager.RttListener);
     field public static final int BASE = 160256; // 0x27200
     field public static final int CMD_OP_ABORTED = 160260; // 0x27204
+    field public static final int CMD_OP_DISABLE_RESPONDER = 160262; // 0x27206
+    field public static final int CMD_OP_ENABLE_RESPONDER = 160261; // 0x27205
+    field public static final int CMD_OP_ENALBE_RESPONDER_FAILED = 160264; // 0x27208
+    field public static final int CMD_OP_ENALBE_RESPONDER_SUCCEEDED = 160263; // 0x27207
     field public static final int CMD_OP_FAILED = 160258; // 0x27202
     field public static final int CMD_OP_START_RANGING = 160256; // 0x27200
     field public static final int CMD_OP_STOP_RANGING = 160257; // 0x27201
@@ -20680,6 +20686,7 @@ package android.net.wifi {
     field public static final int PREAMBLE_HT = 2; // 0x2
     field public static final int PREAMBLE_LEGACY = 1; // 0x1
     field public static final int PREAMBLE_VHT = 4; // 0x4
+    field public static final int REASON_INITIATOR_NOT_ALLOWED_WHEN_RESPONDER_ON = -6; // 0xfffffffa
     field public static final int REASON_INVALID_LISTENER = -3; // 0xfffffffd
     field public static final int REASON_INVALID_REQUEST = -4; // 0xfffffffc
     field public static final int REASON_NOT_AVAILABLE = -2; // 0xfffffffe
@@ -20747,6 +20754,25 @@ package android.net.wifi {
     field public android.net.wifi.RttManager.RttResult[] mResults;
   }
 
+  public static abstract class RttManager.ResponderCallback {
+    ctor public RttManager.ResponderCallback();
+    method public abstract void onResponderEnableFailure(int);
+    method public abstract void onResponderEnabled(android.net.wifi.RttManager.ResponderConfig);
+  }
+
+  public static class RttManager.ResponderConfig implements android.os.Parcelable {
+    ctor public RttManager.ResponderConfig();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.wifi.RttManager.ResponderConfig> CREATOR;
+    field public int centerFreq0;
+    field public int centerFreq1;
+    field public int channelWidth;
+    field public int frequency;
+    field public java.lang.String macAddress;
+    field public int preamble;
+  }
+
   public static class RttManager.RttCapabilities implements android.os.Parcelable {
     ctor public RttManager.RttCapabilities();
     method public int describeContents();
@@ -20756,6 +20782,7 @@ package android.net.wifi {
     field public boolean lcrSupported;
     field public boolean oneSidedRttSupported;
     field public int preambleSupported;
+    field public boolean responderSupported;
     field public deprecated boolean supportedPeerType;
     field public deprecated boolean supportedType;
     field public boolean twoSided11McRttSupported;
