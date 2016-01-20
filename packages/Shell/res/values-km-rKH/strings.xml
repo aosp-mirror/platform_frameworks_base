@@ -31,7 +31,9 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"បានថតរូបថតអេក្រង់ដោយជោគជ័យ"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"មិនអាចថតរូបថតអេក្រង់បានទេ"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ព័ត៌មានលម្អិតពីរបាយការណ៍កំហុស"</string>
-    <string name="bugreport_info_name" msgid="5089191832271852826">"ឈ្មោះ​ខ្លី"</string>
-    <string name="bugreport_info_title" msgid="127167853370557175">"ការសង្ខេបមួយជួរ"</string>
+    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
+    <skip />
+    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
+    <skip />
     <string name="bugreport_info_description" msgid="4117088998733546784">"ការពិពណ៌នាលម្អិត"</string>
 </resources>
