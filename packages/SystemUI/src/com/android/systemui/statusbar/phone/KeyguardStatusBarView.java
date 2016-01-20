@@ -23,14 +23,13 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -58,7 +57,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
-    private Interpolator mFastOutSlowInInterpolator;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -73,8 +71,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
         loadDimens();
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.fast_out_slow_in);
         updateUserSwitcher();
     }
 
@@ -199,7 +195,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                         .translationX(0)
                         .setDuration(400)
                         .setStartDelay(userSwitcherHiding ? 300 : 0)
-                        .setInterpolator(mFastOutSlowInInterpolator)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                         .start();
                 if (userSwitcherHiding) {
                     getOverlay().add(mMultiUserSwitch);
@@ -207,7 +203,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                             .alpha(0f)
                             .setDuration(300)
                             .setStartDelay(0)
-                            .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                            .setInterpolator(Interpolators.ALPHA_OUT)
                             .withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
@@ -223,7 +219,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                             .alpha(1f)
                             .setDuration(300)
                             .setStartDelay(200)
-                            .setInterpolator(PhoneStatusBar.ALPHA_IN);
+                            .setInterpolator(Interpolators.ALPHA_IN);
                 }
                 return true;
             }

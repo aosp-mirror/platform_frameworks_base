@@ -24,8 +24,7 @@ import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
@@ -53,7 +52,6 @@ public class DragDownHelper implements Gefingerpoken {
     private final int[] mTemp2 = new int[2];
     private boolean mDraggedFarEnough;
     private ExpandableView mStartingChild;
-    private Interpolator mInterpolator;
     private float mLastHeight;
     private FalsingManager mFalsingManager;
 
@@ -61,8 +59,6 @@ public class DragDownHelper implements Gefingerpoken {
             DragDownCallback dragDownCallback) {
         mMinDragDistance = context.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance);
-        mInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mCallback = callback;
         mDragDownCallback = dragDownCallback;
@@ -187,7 +183,7 @@ public class DragDownHelper implements Gefingerpoken {
         }
         ObjectAnimator anim = ObjectAnimator.ofInt(child, "actualHeight",
                 child.getActualHeight(), child.getMinHeight());
-        anim.setInterpolator(mInterpolator);
+        anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -200,7 +196,7 @@ public class DragDownHelper implements Gefingerpoken {
 
     private void cancelExpansion() {
         ValueAnimator anim = ValueAnimator.ofFloat(mLastHeight, 0);
-        anim.setInterpolator(mInterpolator);
+        anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

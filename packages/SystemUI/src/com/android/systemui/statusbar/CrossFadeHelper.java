@@ -31,7 +31,7 @@ public class CrossFadeHelper {
         view.animate()
                 .alpha(0f)
                 .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -56,7 +56,7 @@ public class CrossFadeHelper {
         view.animate()
                 .alpha(1f)
                 .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .setInterpolator(Interpolators.ALPHA_IN)
                 .withEndAction(null);
         if (view.hasOverlappingRendering()) {
             view.animate().withLayer();

@@ -87,11 +87,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -125,6 +122,7 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -438,10 +436,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDozingRequested;
     protected boolean mScrimSrcModeEnabled;
 
-    private Interpolator mLinearInterpolator = new LinearInterpolator();
-    private Interpolator mBackdropInterpolator = new AccelerateDecelerateInterpolator();
-    public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
-    public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
+    public static final Interpolator ALPHA_IN = Interpolators.ALPHA_IN;
+    public static final Interpolator ALPHA_OUT = Interpolators.ALPHA_OUT;
 
     private BackDropView mBackdrop;
     private ImageView mBackdropFront, mBackdropBack;
@@ -1847,7 +1843,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             // if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in
                             // libhwui.
                             .alpha(0.002f)
-                            .setInterpolator(mBackdropInterpolator)
+                            .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
                             .setDuration(300)
                             .setStartDelay(0)
                             .withEndAction(new Runnable() {
@@ -1866,7 +1862,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 // behind.
                                 .setDuration(mKeyguardFadingAwayDuration / 2)
                                 .setStartDelay(mKeyguardFadingAwayDelay)
-                                .setInterpolator(mLinearInterpolator)
+                                .setInterpolator(Interpolators.LINEAR)
                                 .start();
                     }
                 }

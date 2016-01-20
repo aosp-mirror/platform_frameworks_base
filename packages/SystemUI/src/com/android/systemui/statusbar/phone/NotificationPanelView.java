@@ -39,11 +39,11 @@ import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
@@ -150,9 +151,6 @@ public class NotificationPanelView extends PanelView implements
     private int mUnlockMoveDistance;
     private float mEmptyDragAmount;
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mFastOutLinearInterpolator;
-    private Interpolator mDozeAnimationInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
     private int mTopPaddingAdjustment;
@@ -252,12 +250,6 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
         mNotificationStackScroller.setScrollView(mScrollView);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.fast_out_slow_in);
-        mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.fast_out_linear_in);
-        mDozeAnimationInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
@@ -368,7 +360,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mQsSizeChangeAnimator = ValueAnimator.ofInt(oldHeight, newHeight);
         mQsSizeChangeAnimator.setDuration(300);
-        mQsSizeChangeAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        mQsSizeChangeAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mQsSizeChangeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -468,7 +460,7 @@ public class NotificationPanelView extends PanelView implements
                 }
                 mClockAnimator = ObjectAnimator
                         .ofFloat(mKeyguardStatusView, View.Y, mClockAnimationTarget);
-                mClockAnimator.setInterpolator(mFastOutSlowInInterpolator);
+                mClockAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 mClockAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 mClockAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
@@ -1104,7 +1096,7 @@ public class NotificationPanelView extends PanelView implements
                     .translationY(0f)
                     .setStartDelay(delay)
                     .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .start();
             mQsContainer.setY(-mQsContainer.getHeight());
             mQsContainerAnimator = ObjectAnimator.ofFloat(mQsContainer, View.TRANSLATION_Y,
@@ -1113,7 +1105,7 @@ public class NotificationPanelView extends PanelView implements
                             - mQsContainer.getTop());
             mQsContainerAnimator.setStartDelay(delay);
             mQsContainerAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE);
-            mQsContainerAnimator.setInterpolator(mFastOutSlowInInterpolator);
+            mQsContainerAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
             mQsContainerAnimator.addListener(mAnimateHeaderSlidingInListener);
             mQsContainerAnimator.start();
             mQsContainer.addOnLayoutChangeListener(mQsContainerAnimatorUpdater);
@@ -1135,7 +1127,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.animate().y(-mHeader.getHeight())
                 .setStartDelay(0)
                 .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -1149,7 +1141,7 @@ public class NotificationPanelView extends PanelView implements
                 .y(-mQsContainer.getHeight())
                 .setStartDelay(0)
                 .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .start();
     }
 
@@ -1171,7 +1163,7 @@ public class NotificationPanelView extends PanelView implements
         anim.setDuration(mStatusBar.isKeyguardFadingAway()
                 ? mStatusBar.getKeyguardFadingAwayDuration() / 2
                 : StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        anim.setInterpolator(mDozeAnimationInterpolator);
+        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -1196,7 +1188,7 @@ public class NotificationPanelView extends PanelView implements
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         anim.addUpdateListener(mStatusBarAnimateAlphaListener);
         anim.setDuration(duration);
-        anim.setInterpolator(mDozeAnimationInterpolator);
+        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         anim.start();
     }
 
@@ -1215,7 +1207,7 @@ public class NotificationPanelView extends PanelView implements
                     .alpha(0f)
                     .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
                     .setDuration(mStatusBar.getKeyguardFadingAwayDuration() / 2)
-                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
                     .withEndAction(mAnimateKeyguardBottomAreaInvisibleEndRunnable)
                     .start();
         } else if (statusBarState == StatusBarState.KEYGUARD
@@ -1242,7 +1234,7 @@ public class NotificationPanelView extends PanelView implements
                     .alpha(0f)
                     .setStartDelay(0)
                     .setDuration(160)
-                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
                     .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
             if (keyguardFadingAway) {
                 mKeyguardStatusView.animate()
@@ -1260,7 +1252,7 @@ public class NotificationPanelView extends PanelView implements
                     .alpha(1f)
                     .setStartDelay(0)
                     .setDuration(320)
-                    .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                    .setInterpolator(Interpolators.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
         } else if (statusBarState == StatusBarState.KEYGUARD) {
             mKeyguardStatusView.animate().cancel();
@@ -1674,14 +1666,14 @@ public class NotificationPanelView extends PanelView implements
             boolean active = getMaxPanelHeight() - getExpandedHeight() > mUnlockMoveDistance;
             KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
             if (active && !mUnlockIconActive && mTracking) {
-                lockIcon.setImageAlpha(1.0f, true, 150, mFastOutLinearInterpolator, null);
+                lockIcon.setImageAlpha(1.0f, true, 150, Interpolators.FAST_OUT_LINEAR_IN, null);
                 lockIcon.setImageScale(LOCK_ICON_ACTIVE_SCALE, true, 150,
-                        mFastOutLinearInterpolator);
+                        Interpolators.FAST_OUT_LINEAR_IN);
             } else if (!active && mUnlockIconActive && mTracking) {
                 lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true /* animate */,
-                        150, mFastOutLinearInterpolator, null);
+                        150, Interpolators.FAST_OUT_LINEAR_IN, null);
                 lockIcon.setImageScale(1.0f, true, 150,
-                        mFastOutLinearInterpolator);
+                        Interpolators.FAST_OUT_LINEAR_IN);
             }
             mUnlockIconActive = active;
         }
@@ -1886,8 +1878,8 @@ public class NotificationPanelView extends PanelView implements
         if (!expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
-            lockIcon.setImageAlpha(0.0f, true, 100, mFastOutLinearInterpolator, null);
-            lockIcon.setImageScale(2.0f, true, 100, mFastOutLinearInterpolator);
+            lockIcon.setImageAlpha(0.0f, true, 100, Interpolators.FAST_OUT_LINEAR_IN, null);
+            lockIcon.setImageScale(2.0f, true, 100, Interpolators.FAST_OUT_LINEAR_IN);
         }
     }
 
@@ -2027,12 +2019,12 @@ public class NotificationPanelView extends PanelView implements
      */
     private void startHighlightIconAnimation(final KeyguardAffordanceView icon) {
         icon.setImageAlpha(1.0f, true, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
-                mFastOutSlowInInterpolator, new Runnable() {
+                Interpolators.FAST_OUT_SLOW_IN, new Runnable() {
                     @Override
                     public void run() {
                         icon.setImageAlpha(icon.getRestingAlpha(),
                                 true /* animate */, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
-                                mFastOutSlowInInterpolator, null);
+                                Interpolators.FAST_OUT_SLOW_IN, null);
                     }
                 });
     }

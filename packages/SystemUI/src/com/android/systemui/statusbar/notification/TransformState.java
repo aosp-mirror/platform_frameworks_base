@@ -22,8 +22,6 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,6 +29,7 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
@@ -44,7 +43,6 @@ public class TransformState {
     private static final int CLIP_CLIPPING_SET = R.id.clip_children_set_tag;
     private static final int CLIP_CHILDREN_TAG = R.id.clip_children_tag;
     private static final int CLIP_TO_PADDING = R.id.clip_to_padding_tag;
-    public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
 
     protected View mTransformedView;
@@ -110,7 +108,7 @@ public class TransformState {
             }
         }
         transformedView.animate()
-                .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
                 .withEndAction(new Runnable() {
                     @Override
@@ -168,7 +166,7 @@ public class TransformState {
                     .translationY(otherStablePosition[1] - ownPosition[1]);
         }
         transformedView.animate()
-                .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
                 .withEndAction(new Runnable() {
                     @Override

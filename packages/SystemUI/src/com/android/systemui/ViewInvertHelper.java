@@ -24,8 +24,8 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
+import com.android.systemui.statusbar.Interpolators;
 
 import java.util.ArrayList;
 
@@ -35,7 +35,6 @@ import java.util.ArrayList;
 public class ViewInvertHelper {
 
     private final Paint mDarkPaint = new Paint();
-    private final Interpolator mLinearOutSlowInInterpolator;
     private final ColorMatrix mMatrix = new ColorMatrix();
     private final ColorMatrix mGrayscaleMatrix = new ColorMatrix();
     private final long mFadeDuration;
@@ -46,8 +45,6 @@ public class ViewInvertHelper {
         addTarget(v);
     }
     public ViewInvertHelper(Context context, long fadeDuration) {
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                android.R.interpolator.linear_out_slow_in);
         mFadeDuration = fadeDuration;
     }
 
@@ -89,7 +86,7 @@ public class ViewInvertHelper {
             }
         });
         animator.setDuration(mFadeDuration);
-        animator.setInterpolator(mLinearOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         animator.setStartDelay(delay);
         animator.start();
     }

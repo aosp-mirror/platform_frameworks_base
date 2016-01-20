@@ -22,12 +22,12 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.ArrayList;
@@ -68,7 +68,6 @@ public class StackStateAnimator {
     private static final int TAG_START_HEIGHT = R.id.height_animator_start_value_tag;
     private static final int TAG_START_TOP_INSET = R.id.top_inset_animator_start_value_tag;
 
-    private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mHeadsUpAppearInterpolator;
     private final int mGoToFullShadeAppearingTranslation;
     private final StackViewState mTmpState = new StackViewState();
@@ -95,8 +94,6 @@ public class StackStateAnimator {
 
     public StackStateAnimator(NotificationStackScrollLayout hostLayout) {
         mHostLayout = hostLayout;
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(hostLayout.getContext(),
-                android.R.interpolator.fast_out_slow_in);
         mGoToFullShadeAppearingTranslation =
                 hostLayout.getContext().getResources().getDimensionPixelSize(
                         R.dimen.go_to_full_shade_appearing_translation);
@@ -407,7 +404,7 @@ public class StackStateAnimator {
                         false /* notifyListeners */);
             }
         });
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
         if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
@@ -465,7 +462,7 @@ public class StackStateAnimator {
                 child.setClipTopAmount((int) animation.getAnimatedValue());
             }
         });
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
         if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
@@ -520,7 +517,7 @@ public class StackStateAnimator {
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.ALPHA,
                 child.getAlpha(), newEndValue);
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         // Handle layer type
         child.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         animator.addListener(new AnimatorListenerAdapter() {
@@ -591,7 +588,7 @@ public class StackStateAnimator {
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.TRANSLATION_Z,
                 child.getTranslationZ(), newEndValue);
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
         if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
@@ -645,7 +642,7 @@ public class StackStateAnimator {
         ObjectAnimator animator = ObjectAnimator.ofFloat(child, View.TRANSLATION_Y,
                 child.getTranslationY(), newEndValue);
         Interpolator interpolator = mHeadsUpAppearChildren.contains(child) ?
-                mHeadsUpAppearInterpolator :mFastOutSlowInInterpolator;
+                mHeadsUpAppearInterpolator :Interpolators.FAST_OUT_SLOW_IN;
         animator.setInterpolator(interpolator);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
@@ -866,7 +863,7 @@ public class StackStateAnimator {
                         isRubberbanded);
             }
         });
-        overScrollAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        overScrollAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         overScrollAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

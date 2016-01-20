@@ -30,11 +30,9 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.Interpolators;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -47,9 +45,6 @@ public class SwipeHelper implements Gefingerpoken {
 
     public static final int X = 0;
     public static final int Y = 1;
-
-    private static LinearInterpolator sLinearInterpolator = new LinearInterpolator();
-    private final Interpolator mFastOutLinearInInterpolator;
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int DEFAULT_ESCAPE_ANIMATION_DURATION = 200; // ms
@@ -97,8 +92,6 @@ public class SwipeHelper implements Gefingerpoken {
         mPagingTouchSlop = ViewConfiguration.get(context).getScaledPagingTouchSlop();
 
         mLongPressTimeout = (long) (ViewConfiguration.getLongPressTimeout() * 1.5f); // extra long-press!
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                android.R.interpolator.fast_out_linear_in);
         mFalsingThreshold = context.getResources().getDimensionPixelSize(
                 R.dimen.swipe_helper_falsing_threshold);
         mFalsingManager = FalsingManager.getInstance(context);
@@ -357,9 +350,9 @@ public class SwipeHelper implements Gefingerpoken {
         }
         ObjectAnimator anim = createTranslationAnimation(animView, newPos);
         if (useAccelerateInterpolator) {
-            anim.setInterpolator(mFastOutLinearInInterpolator);
+            anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
         } else {
-            anim.setInterpolator(sLinearInterpolator);
+            anim.setInterpolator(Interpolators.LINEAR);
         }
         anim.setDuration(duration);
         if (delay > 0) {

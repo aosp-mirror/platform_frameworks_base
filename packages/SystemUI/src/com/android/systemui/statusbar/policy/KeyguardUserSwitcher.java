@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.Interpolator;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,9 +34,9 @@ import android.widget.FrameLayout;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
  * Manages the user switcher on the Keyguard.
@@ -73,8 +74,7 @@ public class KeyguardUserSwitcher {
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mUserSwitcherController = userSwitcherController;
             mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
-                    AnimationUtils.loadInterpolator(
-                            context, android.R.interpolator.fast_out_slow_in));
+                    Interpolators.FAST_OUT_SLOW_IN);
             mUserSwitcherContainer.setKeyguardUserSwitcher(this);
         } else {
             mUserSwitcherContainer = null;
@@ -158,7 +158,7 @@ public class KeyguardUserSwitcher {
         mAnimating = true;
         mBgAnimator = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
         mBgAnimator.setDuration(400);
-        mBgAnimator.setInterpolator(PhoneStatusBar.ALPHA_IN);
+        mBgAnimator.setInterpolator(Interpolators.ALPHA_IN);
         mBgAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -174,7 +174,7 @@ public class KeyguardUserSwitcher {
         mUserSwitcher.animate()
                 .alpha(0f)
                 .setDuration(300)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {

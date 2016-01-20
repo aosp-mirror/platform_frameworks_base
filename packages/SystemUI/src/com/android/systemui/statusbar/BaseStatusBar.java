@@ -219,8 +219,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
 
-    private TimeInterpolator mLinearOutSlowIn, mFastOutLinearIn;
-
     private KeyboardShortcuts mKeyboardShortcuts;
 
     /**
@@ -638,11 +636,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
-        mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear_out_slow_in);
-        mFastOutLinearIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_linear_in);
-
         // Connect in to the status bar manager service
         mCommandQueue = new CommandQueue(this);
 
@@ -1016,7 +1009,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         final Animator a
                                 = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
                         a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                        a.setInterpolator(mLinearOutSlowIn);
+                        a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
                         a.start();
                         guts.setExposed(true);
                         mStackScroller.onHeightChanged(null, true /* needsAnimation */);
@@ -1048,7 +1041,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             final Animator a = ViewAnimationUtils.createCircularReveal(v,
                     x, y, r, 0);
             a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            a.setInterpolator(mFastOutLinearIn);
+            a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
             a.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {

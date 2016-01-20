@@ -38,6 +38,7 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
@@ -55,7 +56,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             0, PorterDuff.Mode.SRC_ATOP);
     private final int mIconDarkAlpha;
     private final int mIconDarkColor = 0xffffffff;
-    protected final Interpolator mLinearOutSlowInInterpolator;
     protected final ViewInvertHelper mInvertHelper;
 
     protected final ViewTransformationHelper mTransformationHelper;
@@ -69,8 +69,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected NotificationHeaderViewWrapper(Context ctx, View view) {
         super(view);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
-                android.R.interpolator.linear_out_slow_in);
         mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
         resolveHeaderViews();
@@ -185,7 +183,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         ValueAnimator animator = ValueAnimator.ofFloat(startIntensity, endIntensity);
         animator.addUpdateListener(updateListener);
         animator.setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
-        animator.setInterpolator(mLinearOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         animator.setStartDelay(delay);
         if (listener != null) {
             animator.addListener(listener);

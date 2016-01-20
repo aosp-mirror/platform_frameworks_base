@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.Interpolators;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
@@ -124,7 +125,6 @@ public class BarTransitions {
         private final int mTransparent;
         private final int mWarning;
         private final Drawable mGradient;
-        private final TimeInterpolator mInterpolator;
 
         private int mMode = -1;
         private boolean mAnimating;
@@ -152,7 +152,6 @@ public class BarTransitions {
                 mWarning = context.getColor(com.android.internal.R.color.battery_saver_mode_color);
             }
             mGradient = context.getDrawable(gradientResourceId);
-            mInterpolator = new LinearInterpolator();
         }
 
         @Override
@@ -222,7 +221,8 @@ public class BarTransitions {
                     mGradientAlpha = targetGradientAlpha;
                 } else {
                     final float t = (now - mStartTime) / (float)(mEndTime - mStartTime);
-                    final float v = Math.max(0, Math.min(mInterpolator.getInterpolation(t), 1));
+                    final float v = Math.max(0, Math.min(
+                            Interpolators.LINEAR.getInterpolation(t), 1));
                     mGradientAlpha = (int)(v * targetGradientAlpha + mGradientAlphaStart * (1 - v));
                     mColor = Color.argb(
                           (int)(v * Color.alpha(targetColor) + Color.alpha(mColorStart) * (1 - v)),

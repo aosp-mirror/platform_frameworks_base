@@ -29,7 +29,6 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
@@ -39,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -100,8 +100,6 @@ public abstract class PanelView extends FrameLayout {
     private float mInitialTouchX;
     private boolean mTouchDisabled;
 
-    private Interpolator mLinearOutSlowInInterpolator;
-    private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mBounceInterpolator;
     protected KeyguardBottomAreaView mKeyguardBottomArea;
 
@@ -161,7 +159,7 @@ public abstract class PanelView extends FrameLayout {
         }
         mPeekAnimator = ObjectAnimator.ofFloat(this, "expandedHeight", mPeekHeight)
                 .setDuration(250);
-        mPeekAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+        mPeekAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         mPeekAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
@@ -187,10 +185,6 @@ public abstract class PanelView extends FrameLayout {
     public PanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f);
-        mFastOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mBounceInterpolator = new BounceInterpolator();
         mFalsingManager = FalsingManager.getInstance(context);
     }
@@ -951,7 +945,7 @@ public abstract class PanelView extends FrameLayout {
         float target = Math.max(0, getMaxPanelHeight() - mHintDistance);
         ValueAnimator animator = createHeightAnimator(target);
         animator.setDuration(250);
-        animator.setInterpolator(mFastOutSlowInInterpolator);
+        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
@@ -975,7 +969,7 @@ public abstract class PanelView extends FrameLayout {
         mKeyguardBottomArea.getIndicationView().animate()
                 .translationY(-mHintDistance)
                 .setDuration(250)
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {

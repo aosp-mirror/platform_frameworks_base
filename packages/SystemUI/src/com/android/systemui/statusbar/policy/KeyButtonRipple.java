@@ -32,7 +32,7 @@ import android.view.View;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.Interpolators;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,7 +59,6 @@ public class KeyButtonRipple extends Drawable {
     private int mMaxWidth;
 
     private final Interpolator mInterpolator = new LogInterpolator();
-    private final Interpolator mAlphaExitInterpolator = PhoneStatusBar.ALPHA_OUT;
     private boolean mSupportHardware;
     private final View mTargetView;
 
@@ -225,7 +224,7 @@ public class KeyButtonRipple extends Drawable {
 
     private void exitSoftware() {
         ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(this, "glowAlpha", mGlowAlpha, 0f);
-        alphaAnimator.setInterpolator(mAlphaExitInterpolator);
+        alphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
         alphaAnimator.setDuration(ANIMATION_DURATION_FADE);
         alphaAnimator.addListener(mAnimatorListener);
         alphaAnimator.start();
@@ -331,7 +330,7 @@ public class KeyButtonRipple extends Drawable {
         final RenderNodeAnimator opacityAnim = new RenderNodeAnimator(mPaintProp,
                 RenderNodeAnimator.PAINT_ALPHA, 0);
         opacityAnim.setDuration(ANIMATION_DURATION_FADE);
-        opacityAnim.setInterpolator(mAlphaExitInterpolator);
+        opacityAnim.setInterpolator(Interpolators.ALPHA_OUT);
         opacityAnim.addListener(mAnimatorListener);
         opacityAnim.setTarget(mTargetView);
 

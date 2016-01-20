@@ -28,9 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewConfiguration;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
@@ -107,11 +105,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private OnActivatedListener mOnActivatedListener;
 
-    private final Interpolator mLinearOutSlowInInterpolator;
-    protected final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mSlowOutFastInInterpolator;
     private final Interpolator mSlowOutLinearInInterpolator;
-    private final Interpolator mLinearInterpolator;
     private Interpolator mCurrentAppearInterpolator;
     private Interpolator mCurrentAlphaInterpolator;
 
@@ -135,13 +130,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mFastOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
-        mLinearInterpolator = new LinearInterpolator();
         setClipChildren(false);
         setClipToPadding(false);
         mLegacyColor = context.getColor(R.color.notification_legacy_background_color);
@@ -291,8 +281,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         Interpolator interpolator;
         Interpolator alphaInterpolator;
         if (!reverse) {
-            interpolator = mLinearOutSlowInInterpolator;
-            alphaInterpolator = mLinearOutSlowInInterpolator;
+            interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+            alphaInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
         } else {
             interpolator = ACTIVATE_INVERSE_INTERPOLATOR;
             alphaInterpolator = ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
@@ -431,7 +421,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 .scaleY(1f)
                 .setDuration(DARK_ANIMATION_LENGTH)
                 .setStartDelay(delay)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationCancel(Animator animation) {
@@ -474,7 +464,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setAlpha(startAlpha);
         mBackgroundAnimator =
                 ObjectAnimator.ofFloat(mBackgroundNormal, View.ALPHA, startAlpha, endAlpha);
-        mBackgroundAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        mBackgroundAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mBackgroundAnimator.setDuration(duration);
         mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -577,16 +567,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         float targetValue;
         if (isAppearing) {
             mCurrentAppearInterpolator = mSlowOutFastInInterpolator;
-            mCurrentAlphaInterpolator = mLinearOutSlowInInterpolator;
+            mCurrentAlphaInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
             targetValue = 1.0f;
         } else {
-            mCurrentAppearInterpolator = mFastOutSlowInInterpolator;
+            mCurrentAppearInterpolator = Interpolators.FAST_OUT_SLOW_IN;
             mCurrentAlphaInterpolator = mSlowOutLinearInInterpolator;
             targetValue = 0.0f;
         }
         mAppearAnimator = ValueAnimator.ofFloat(mAppearAnimationFraction,
                 targetValue);
-        mAppearAnimator.setInterpolator(mLinearInterpolator);
+        mAppearAnimator.setInterpolator(Interpolators.LINEAR);
         mAppearAnimator.setDuration(
                 (long) (duration * Math.abs(mAppearAnimationFraction - targetValue)));
         mAppearAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
