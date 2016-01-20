@@ -289,7 +289,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
         final PowerManager pm =
                 (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, runningJob.getTag());
-        mWakeLock.setWorkSource(new WorkSource(runningJob.getUid()));
+        mWakeLock.setWorkSource(new WorkSource(runningJob.getSourceUid()));
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
         mCallbackHandler.obtainMessage(MSG_SERVICE_BOUND).sendToTarget();
