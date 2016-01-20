@@ -31,15 +31,16 @@ import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.style.CharacterStyle;
 import android.text.style.RelativeSizeSpan;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.View;
 import android.widget.TextView;
-
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-
 import libcore.icu.LocaleData;
 
 import java.text.SimpleDateFormat;
@@ -87,7 +88,6 @@ public class Clock extends TextView implements DemoMode, Tunable {
         } finally {
             a.recycle();
         }
-        TunerService.get(context).addTunable(this, CLOCK_SECONDS);
     }
 
     @Override
@@ -106,6 +106,8 @@ public class Clock extends TextView implements DemoMode, Tunable {
 
             getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
                     null, getHandler());
+            TunerService.get(getContext()).addTunable(this, CLOCK_SECONDS,
+                    StatusBarIconController.ICON_BLACKLIST);
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -125,6 +127,7 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (mAttached) {
             getContext().unregisterReceiver(mIntentReceiver);
             mAttached = false;
+            TunerService.get(getContext()).removeTunable(this);
         }
     }
 
@@ -157,8 +160,13 @@ public class Clock extends TextView implements DemoMode, Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        mShowSeconds = newValue != null && Integer.parseInt(newValue) != 0;
-        updateShowSeconds();
+        if (CLOCK_SECONDS.equals(key)) {
+            mShowSeconds = newValue != null && Integer.parseInt(newValue) != 0;
+            updateShowSeconds();
+        } else if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            ArraySet<String> list = StatusBarIconController.getIconBlacklist(newValue);
+            setVisibility(list.contains("clock") ? View.GONE : View.VISIBLE);
+        }
     }
 
     private void updateShowSeconds() {

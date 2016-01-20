@@ -450,6 +450,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean mShowImeWithHardKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
+    private final String mSlotIme;
 
     class SettingsObserver extends ContentObserver {
         int mUserId;
@@ -761,6 +762,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
+        mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
@@ -1043,7 +1045,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mNotificationManager = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
                 mStatusBar = statusBar;
-                statusBar.setIconVisibility("ime", false);
+                statusBar.setIconVisibility(mSlotIme, false);
                 updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
                 mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                         com.android.internal.R.bool.show_ongoing_ime_switcher);
@@ -1595,7 +1597,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethod = null;
         }
         if (mStatusBar != null) {
-            mStatusBar.setIconVisibility("ime", false);
+            mStatusBar.setIconVisibility(mSlotIme, false);
         }
     }
 
@@ -1635,7 +1637,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (iconId == 0) {
                     if (DEBUG) Slog.d(TAG, "hide the small icon for the input method");
                     if (mStatusBar != null) {
-                        mStatusBar.setIconVisibility("ime", false);
+                        mStatusBar.setIconVisibility(mSlotIme, false);
                     }
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
@@ -1650,10 +1652,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         /* ignore */
                     }
                     if (mStatusBar != null) {
-                        mStatusBar.setIcon("ime", packageName, iconId, 0,
+                        mStatusBar.setIcon(mSlotIme, packageName, iconId, 0,
                                 contentDescription  != null
                                         ? contentDescription.toString() : null);
-                        mStatusBar.setIconVisibility("ime", true);
+                        mStatusBar.setIconVisibility(mSlotIme, true);
                     }
                 }
             }

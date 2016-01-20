@@ -2448,4 +2448,30 @@
   <java-symbol type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
   <java-symbol type="style" name="Theme.Material.DayNight.Panel" />
   <java-symbol type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
+
+  <java-symbol type="string" name="status_bar_rotate" />
+  <java-symbol type="string" name="status_bar_headset" />
+  <java-symbol type="string" name="status_bar_managed_profile" />
+  <java-symbol type="string" name="status_bar_ime" />
+  <java-symbol type="string" name="status_bar_sync_failing" />
+  <java-symbol type="string" name="status_bar_sync_active" />
+  <java-symbol type="string" name="status_bar_cast" />
+  <java-symbol type="string" name="status_bar_hotspot" />
+  <java-symbol type="string" name="status_bar_location" />
+  <java-symbol type="string" name="status_bar_bluetooth" />
+  <java-symbol type="string" name="status_bar_nfc" />
+  <java-symbol type="string" name="status_bar_tty" />
+  <java-symbol type="string" name="status_bar_speakerphone" />
+  <java-symbol type="string" name="status_bar_zen" />
+  <java-symbol type="string" name="status_bar_mute" />
+  <java-symbol type="string" name="status_bar_volume" />
+  <java-symbol type="string" name="status_bar_wifi" />
+  <java-symbol type="string" name="status_bar_cdma_eri" />
+  <java-symbol type="string" name="status_bar_data_connection" />
+  <java-symbol type="string" name="status_bar_phone_evdo_signal" />
+  <java-symbol type="string" name="status_bar_phone_signal" />
+  <java-symbol type="string" name="status_bar_battery" />
+  <java-symbol type="string" name="status_bar_alarm_clock" />
+  <java-symbol type="string" name="status_bar_secure" />
+  <java-symbol type="string" name="status_bar_clock" />
 </resources>

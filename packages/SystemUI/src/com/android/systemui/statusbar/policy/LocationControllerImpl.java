@@ -43,7 +43,6 @@ import java.util.List;
 public class LocationControllerImpl extends BroadcastReceiver implements LocationController {
     // The name of the placeholder corresponding to the location request status icon.
     // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
-    public static final String LOCATION_STATUS_ICON_PLACEHOLDER = "location";
     public static final int LOCATION_STATUS_ICON_ID = R.drawable.stat_sys_location;
 
     private static final int[] mHighPowerRequestAppOpArray
@@ -59,9 +58,11 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
             new ArrayList<LocationSettingsChangeCallback>();
     private final H mHandler = new H();
+    public final String mSlotLocation;
 
     public LocationControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
+        mSlotLocation = mContext.getString(com.android.internal.R.string.status_bar_location);
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
@@ -173,10 +174,10 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     // Updates the status view based on the current state of location requests.
     private void refreshViews() {
         if (mAreActiveLocationRequests) {
-            mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID,
+            mStatusBarManager.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
                     0, mContext.getString(R.string.accessibility_location_active));
         } else {
-            mStatusBarManager.removeIcon(LOCATION_STATUS_ICON_PLACEHOLDER);
+            mStatusBarManager.removeIcon(mSlotLocation);
         }
     }
 
