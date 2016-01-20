@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -36,6 +40,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.OverScroller;
 
 import com.android.systemui.ExpandHelper;
@@ -47,6 +52,7 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -238,12 +244,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
-            updateBackground();
+            // if it needs animation
+            if (!mNeedsAnimation && !mChildrenUpdateRequested) {
+                updateBackground();
+            }
             return true;
         }
     };
     private Rect mBackgroundBounds = new Rect();
-    private Rect mCurrentBounds = null;
+    private Rect mStartAnimationRect = new Rect();
+    private Rect mEndAnimationRect = new Rect();
+    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);;
+    private boolean mAnimateNextBackgroundBottom;
+    private boolean mAnimateNextBackgroundTop;
+    private ObjectAnimator mBottomAnimator = null;
+    private ObjectAnimator mTopAnimator = null;
+    private ActivatableNotificationView mFirstVisibleBackgroundChild = null;
+    private ActivatableNotificationView mLastVisibleBackgroundChild = null;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -364,6 +381,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mRequestViewResizeAnimationOnLayout = false;
         }
         requestChildrenUpdate();
+        updateFirstAndLastBackgroundViews();
     }
 
     private void requestAnimationOnViewResize(ExpandableNotificationRow row) {
@@ -1416,36 +1434,178 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         updateBackgroundBounds();
         if (!mCurrentBounds.equals(mBackgroundBounds)) {
-            mCurrentBounds.set(mBackgroundBounds);
-            mScrimController.setExcludedBackgroundArea(mCurrentBounds);
-            mBackground.setBounds(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom);
-            invalidate();
+            if (mAnimateNextBackgroundTop || mAnimateNextBackgroundBottom || areBoundsAnimating()) {
+                startBackgroundAnimation();
+            } else {
+                mCurrentBounds.set(mBackgroundBounds);
+                applyCurrentBackgroundBounds();
+            }
+        } else {
+            if (mBottomAnimator != null) {
+                mBottomAnimator.cancel();
+            }
+            if (mTopAnimator != null) {
+                mTopAnimator.cancel();
+            }
         }
+        mAnimateNextBackgroundBottom = false;
+        mAnimateNextBackgroundTop = false;
+    }
+
+    private boolean areBoundsAnimating() {
+        return mBottomAnimator != null || mTopAnimator != null;
+    }
+
+    private void startBackgroundAnimation() {
+        startBottomAnimation();
+        startTopAnimation();
+    }
+
+    private void startTopAnimation() {
+        int previousEndValue = mEndAnimationRect.top;
+        int newEndValue = mBackgroundBounds.top;
+        ObjectAnimator previousAnimator = mTopAnimator;
+        if (previousAnimator != null && previousEndValue == newEndValue) {
+            return;
+        }
+        if (!mAnimateNextBackgroundTop) {
+            // just a local update was performed
+            if (previousAnimator != null) {
+                // we need to increase all animation keyframes of the previous animator by the
+                // relative change to the end value
+                int previousStartValue = mStartAnimationRect.top;
+                PropertyValuesHolder[] values = previousAnimator.getValues();
+                values[0].setIntValues(previousStartValue, newEndValue);
+                mStartAnimationRect.top = previousStartValue;
+                mEndAnimationRect.top = newEndValue;
+                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+                return;
+            } else {
+                // no new animation needed, let's just apply the value
+                setBackgroundTop(newEndValue);
+                return;
+            }
+        }
+        if (previousAnimator != null) {
+            previousAnimator.cancel();
+        }
+        ObjectAnimator animator = ObjectAnimator.ofInt(this, "backgroundTop",
+                mCurrentBounds.top, newEndValue);
+        Interpolator interpolator = Interpolators.FAST_OUT_SLOW_IN;
+        animator.setInterpolator(interpolator);
+        animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mStartAnimationRect.top = -1;
+                mEndAnimationRect.top = -1;
+                mTopAnimator = null;
+            }
+        });
+        animator.start();
+        mStartAnimationRect.top = mCurrentBounds.top;
+        mEndAnimationRect.top = newEndValue;
+        mTopAnimator = animator;
+    }
+
+    private void startBottomAnimation() {
+        int previousStartValue = mStartAnimationRect.bottom;
+        int previousEndValue = mEndAnimationRect.bottom;
+        int newEndValue = mBackgroundBounds.bottom;
+        ObjectAnimator previousAnimator = mBottomAnimator;
+        if (previousAnimator != null && previousEndValue == newEndValue) {
+            return;
+        }
+        if (!mAnimateNextBackgroundBottom) {
+            // just a local update was performed
+            if (previousAnimator != null) {
+                // we need to increase all animation keyframes of the previous animator by the
+                // relative change to the end value
+                PropertyValuesHolder[] values = previousAnimator.getValues();
+                values[0].setIntValues(previousStartValue, newEndValue);
+                mStartAnimationRect.bottom = previousStartValue;
+                mEndAnimationRect.bottom = newEndValue;
+                previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+                return;
+            } else {
+                // no new animation needed, let's just apply the value
+                setBackgroundBottom(newEndValue);
+                return;
+            }
+        }
+        if (previousAnimator != null) {
+            previousAnimator.cancel();
+        }
+        ObjectAnimator animator = ObjectAnimator.ofInt(this, "backgroundBottom",
+                mCurrentBounds.bottom, newEndValue);
+        Interpolator interpolator = Interpolators.FAST_OUT_SLOW_IN;
+        animator.setInterpolator(interpolator);
+        animator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        // remove the tag when the animation is finished
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mStartAnimationRect.bottom = -1;
+                mEndAnimationRect.bottom = -1;
+                mBottomAnimator = null;
+            }
+        });
+        animator.start();
+        mStartAnimationRect.bottom = mCurrentBounds.bottom;
+        mEndAnimationRect.bottom = newEndValue;
+        mBottomAnimator = animator;
+    }
+
+    private void setBackgroundTop(int top) {
+        mCurrentBounds.top = top;
+        applyCurrentBackgroundBounds();
+    }
+
+    public void setBackgroundBottom(int bottom) {
+        mCurrentBounds.bottom = bottom;
+        applyCurrentBackgroundBounds();
+    }
+
+    private void applyCurrentBackgroundBounds() {
+        mScrimController.setExcludedBackgroundArea(mCurrentBounds);
+        mBackground.setBounds(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom);
+        invalidate();
     }
 
     /**
      * Update the background bounds to the new desired bounds
      */
     private void updateBackgroundBounds() {
-        ActivatableNotificationView firstView = getFirstViewWithBackground();
+        mBackgroundBounds.left = (int) getX();
+        mBackgroundBounds.right = (int) (getX() + getWidth());
+        if (!mIsExpanded) {
+            mBackgroundBounds.top = 0;
+            mBackgroundBounds.bottom = 0;
+        }
+        ActivatableNotificationView firstView = mFirstVisibleBackgroundChild;
         int top = 0;
         if (firstView != null) {
             int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(firstView);
-            if (mBackgroundBounds.top == finalTranslationY) {
+            if (mAnimateNextBackgroundTop
+                    || mTopAnimator == null && mCurrentBounds.top == finalTranslationY
+                    || mTopAnimator != null && mEndAnimationRect.top == finalTranslationY) {
                 // we're ending up at the same location as we are now, lets just skip the animation
                 top = finalTranslationY;
             } else {
                 top = (int) firstView.getTranslationY();
             }
         }
-        ActivatableNotificationView lastView = getLastViewWithBackground();
+        ActivatableNotificationView lastView = mLastVisibleBackgroundChild;
         int bottom = 0;
         if (lastView != null) {
             int finalTranslationY = (int) StackStateAnimator.getFinalTranslationY(lastView);
             int finalHeight = StackStateAnimator.getFinalActualHeight(lastView);
             int finalBottom = finalTranslationY + finalHeight;
             finalBottom = Math.min(finalBottom, getHeight());
-            if (mBackgroundBounds.bottom == finalBottom) {
+            if (mAnimateNextBackgroundBottom
+                    || mBottomAnimator == null && mCurrentBounds.bottom == finalBottom
+                    || mBottomAnimator != null && mEndAnimationRect.bottom == finalBottom) {
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
@@ -1455,14 +1615,24 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mBackgroundBounds.top = top;
         mBackgroundBounds.bottom = bottom;
-        mBackgroundBounds.left = (int) getX();
-        mBackgroundBounds.right = (int) (getX() + getWidth());
-        if (mCurrentBounds == null) {
-            mCurrentBounds = new Rect(mBackgroundBounds);
-        }
     }
 
-    private ActivatableNotificationView getLastViewWithBackground() {
+    private ActivatableNotificationView getFirstPinnedHeadsUp() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE
+                    && child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (row.isPinned()) {
+                    return row;
+                }
+            }
+        }
+        return null;
+    }
+
+    private ActivatableNotificationView getLastChildWithBackground() {
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
@@ -1474,7 +1644,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return null;
     }
 
-    private ActivatableNotificationView getFirstViewWithBackground() {
+    private ActivatableNotificationView getFirstChildWithBackground() {
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -1854,6 +2024,20 @@ public class NotificationStackScrollLayout extends ViewGroup
         onViewAddedInternal(child);
     }
 
+    private void updateFirstAndLastBackgroundViews() {
+        ActivatableNotificationView firstChild = getFirstChildWithBackground();
+        ActivatableNotificationView lastChild = getLastChildWithBackground();
+        if (mAnimationsEnabled && mIsExpanded) {
+            mAnimateNextBackgroundTop = firstChild != mFirstVisibleBackgroundChild;
+            mAnimateNextBackgroundBottom = lastChild != mLastVisibleBackgroundChild;
+        } else {
+            mAnimateNextBackgroundTop = false;
+            mAnimateNextBackgroundBottom = false;
+        }
+        mFirstVisibleBackgroundChild = firstChild;
+        mLastVisibleBackgroundChild = lastChild;
+    }
+
     private void onViewAddedInternal(View child) {
         updateHideSensitiveForChild(child);
         mStackScrollAlgorithm.notifyChildrenChanged(this);
@@ -1962,9 +2146,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty() || isCurrentlyAnimating()) {
-            setAnimationRunning(true);
             mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState,
                     mGoToFullShadeDelay);
+            setAnimationRunning(true);
             mAnimationEvents.clear();
             updateBackground();
         } else {
