@@ -1781,6 +1781,16 @@ public class LinearLayout extends ViewGroup {
         }
     }
 
+    /**
+     * Returns the current gravity. See {@link android.view.Gravity}
+     *
+     * @return the current gravity.
+     * @see #setGravity
+     */
+    public int getGravity() {
+        return mGravity;
+    }
+
     @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
         final int gravity = horizontalGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
