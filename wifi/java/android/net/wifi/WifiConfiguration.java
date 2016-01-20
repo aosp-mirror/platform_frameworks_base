@@ -761,7 +761,8 @@ public class WifiConfiguration implements Parcelable {
          * selection status value as index to extec the corresponding debug string
          */
         private static final String[] QUALITY_NETWORK_SELECTION_STATUS = {
-                "NETWORK_SELECTION_ENABLED", "NETWORK_SELECTION_TEMPORARY_DISABLED",
+                "NETWORK_SELECTION_ENABLED",
+                "NETWORK_SELECTION_TEMPORARY_DISABLED",
                 "NETWORK_SELECTION_PERMANENTLY_DISABLED"};
 
         //Quality Network disabled reasons
@@ -814,12 +815,15 @@ public class WifiConfiguration implements Parcelable {
          * Quality network selection disable reason String (for debug purpose)
          */
         private static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
-                "NETWORK_SELECTION_ENABLE", "NETWORK_SELECTION_DISABLED_BAD_LINK",
+                "NETWORK_SELECTION_ENABLE",
+                "NETWORK_SELECTION_DISABLED_BAD_LINK",
                 "NETWORK_SELECTION_DISABLED_ASSOCIATION_REJECTION ",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_FAILURE",
                 "NETWORK_SELECTION_DISABLED_DHCP_FAILURE",
-                "NETWORK_SELECTION_DISABLED_DNS_FAILURE", "NETWORK_SELECTION_DISABLED_TLS_VERSION",
+                "NETWORK_SELECTION_DISABLED_DNS_FAILURE",
+                "NETWORK_SELECTION_DISABLED_TLS_VERSION",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_CREDENTIALS",
+                "NETWORK_SELECTION_DISABLED_NO_INTERNET",
                 "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER"};
 
         /**
