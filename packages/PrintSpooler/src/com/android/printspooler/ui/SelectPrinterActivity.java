@@ -635,9 +635,9 @@ public final class SelectPrinterActivity extends Activity {
             CharSequence description = printer.getDescription();
 
             CharSequence subtitle;
-            if (printServiceLabel == null) {
+            if (TextUtils.isEmpty(printServiceLabel)) {
                 subtitle = description;
-            } else if (description == null) {
+            } else if (TextUtils.isEmpty(description)) {
                 subtitle = printServiceLabel;
             } else {
                 subtitle = getString(R.string.printer_extended_description_template,
