@@ -78,6 +78,7 @@ public class WifiConfiguration implements Parcelable {
           * (requires {@code preSharedKey} to be specified).
           * @hide
           */
+        @SystemApi
         public static final int WPA2_PSK = 4;
 
         public static final String varName = "key_mgmt";
