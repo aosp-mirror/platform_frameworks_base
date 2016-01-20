@@ -936,13 +936,23 @@ public class DeviceIdleController extends SystemService
         @Override public void addPowerSaveWhitelistApp(String name) {
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            addPowerSaveWhitelistAppInternal(name);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                addPowerSaveWhitelistAppInternal(name);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override public void removePowerSaveWhitelistApp(String name) {
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            removePowerSaveWhitelistAppInternal(name);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                removePowerSaveWhitelistAppInternal(name);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override public String[] getSystemPowerWhitelistExceptIdle() {
@@ -1003,19 +1013,34 @@ public class DeviceIdleController extends SystemService
         @Override public void exitIdle(String reason) {
             getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
                     null);
-            exitIdleInternal(reason);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                exitIdleInternal(reason);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override public void downloadServiceActive(IBinder token) {
             getContext().enforceCallingOrSelfPermission(
                     "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
-            DeviceIdleController.this.downloadServiceActive(token);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                DeviceIdleController.this.downloadServiceActive(token);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override public void downloadServiceInactive() {
             getContext().enforceCallingOrSelfPermission(
                     "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
-            DeviceIdleController.this.downloadServiceInactive();
+            long ident = Binder.clearCallingIdentity();
+            try {
+                DeviceIdleController.this.downloadServiceInactive();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override public boolean registerMaintenanceActivityListener(
