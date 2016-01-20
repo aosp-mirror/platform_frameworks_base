@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation that shows the method is used by JNI.
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.FIELD})
 public @interface UsedByNative {
     /**
      * JNI file name that uses the method.
