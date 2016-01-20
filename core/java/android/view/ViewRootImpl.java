@@ -1251,13 +1251,16 @@ public final class ViewRootImpl implements ViewParent,
             if (mTmpValue.type == TypedValue.TYPE_DIMENSION) {
                 baseSize = (int)mTmpValue.getDimension(packageMetrics);
             }
-            if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": baseSize=" + baseSize);
+            if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": baseSize=" + baseSize
+                    + ", desiredWindowWidth=" + desiredWindowWidth);
             if (baseSize != 0 && desiredWindowWidth > baseSize) {
                 childWidthMeasureSpec = getRootMeasureSpec(baseSize, lp.width);
                 childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
                 performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
                 if (DEBUG_DIALOG) Log.v(mTag, "Window " + mView + ": measured ("
-                        + host.getMeasuredWidth() + "," + host.getMeasuredHeight() + ")");
+                        + host.getMeasuredWidth() + "," + host.getMeasuredHeight()
+                        + ") from width spec: " + MeasureSpec.toString(childWidthMeasureSpec)
+                        + " and height spec: " + MeasureSpec.toString(childHeightMeasureSpec));
                 if ((host.getMeasuredWidthAndState()&View.MEASURED_STATE_TOO_SMALL) == 0) {
                     goodMeasure = true;
                 } else {
