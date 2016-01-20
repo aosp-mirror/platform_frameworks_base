@@ -411,8 +411,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called after the user has changed their password, as a result of
      * receiving {@link #ACTION_PASSWORD_CHANGED}.  At this point you
-     * can use {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()
-     * DevicePolicyManager.getCurrentFailedPasswordAttempts()}
+     * can use {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      * to retrieve the active password characteristics.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
