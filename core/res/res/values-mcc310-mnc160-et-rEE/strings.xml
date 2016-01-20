@@ -23,10 +23,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="3017901214286816293">"Üle WiFi-võrgu helistamiseks ja sõnumite saatmiseks paluge operaatoril esmalt see teenus seadistada. Seejärel lülitage WiFi-kõned menüüs Seaded uuesti sisse."</item>
+    <item msgid="3017901214286816293">"WiFi-võrgu kaudu helistamiseks ja sõnumite saatmiseks paluge operaatoril esmalt see teenus seadistada. Seejärel lülitage WiFi-kõned menüüs Seaded uuesti sisse."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7068215934335709161">"Registreeruge operaatori juures"</item>
   </string-array>
-    <string name="wfcSpnFormat" msgid="2031160810542298336">"%s WiFi kaudu helistamine"</string>
+    <string name="wfcSpnFormat" msgid="2031160810542298336">"Operaatori %s WiFi-kõned"</string>
 </resources>
