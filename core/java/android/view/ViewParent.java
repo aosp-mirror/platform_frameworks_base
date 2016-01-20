@@ -266,14 +266,14 @@ public interface ViewParent {
      *            intercept touch events.
      */
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept);
-    
+
     /**
      * Called when a child of this group wants a particular rectangle to be
      * positioned onto the screen.  {@link ViewGroup}s overriding this can trust
      * that:
      * <ul>
      *   <li>child will be a direct child of this group</li>
-     *   <li>rectangle will be in the child's coordinates</li>
+     *   <li>rectangle will be in the child's content coordinates</li>
      * </ul>
      *
      * <p>{@link ViewGroup}s overriding this should uphold the contract:</p>
