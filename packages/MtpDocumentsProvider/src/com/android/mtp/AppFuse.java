@@ -39,6 +39,7 @@ public class AppFuse {
      * The value is copied from sdcard.c.
      */
     static final int MAX_READ = 128 * 1024;
+    static final int MAX_WRITE = 256 * 1024;
 
     private final String mName;
     private final Callback mCallback;
@@ -47,7 +48,7 @@ public class AppFuse {
      * Buffer for read bytes request.
      * Don't use the buffer from the out of AppFuseMessageThread.
      */
-    private byte[] mBuffer = new byte[MAX_READ];
+    private byte[] mBuffer = new byte[Math.max(MAX_READ, MAX_WRITE)];
 
     private Thread mMessageThread;
     private ParcelFileDescriptor mDeviceFd;
@@ -79,11 +80,22 @@ public class AppFuse {
         }
     }
 
-    public ParcelFileDescriptor openFile(int i) throws FileNotFoundException {
+    /**
+     * Opens a file on app fuse and returns ParcelFileDescriptor.
+     *
+     * @param i ID for opened file.
+     * @param mode Mode for opening file.
+     * @see ParcelFileDescriptor#MODE_READ_ONLY
+     * @see ParcelFileDescriptor#MODE_WRITE_ONLY
+     */
+    public ParcelFileDescriptor openFile(int i, int mode) throws FileNotFoundException {
+        Preconditions.checkArgument(
+                mode == ParcelFileDescriptor.MODE_READ_ONLY ||
+                mode == ParcelFileDescriptor.MODE_WRITE_ONLY);
         return ParcelFileDescriptor.open(new File(
                 getMountPoint(),
                 Integer.toString(i)),
-                ParcelFileDescriptor.MODE_READ_ONLY);
+                mode);
     }
 
     File getMountPoint() {
@@ -100,7 +112,7 @@ public class AppFuse {
         long getFileSize(int inode) throws FileNotFoundException;
 
         /**
-         * Returns flie bytes for the give inode.
+         * Returns file bytes for the give inode.
          * @param inode
          * @param offset Offset for file bytes.
          * @param size Size for file bytes.
@@ -109,6 +121,17 @@ public class AppFuse {
          * @throws IOException
          */
         long readObjectBytes(int inode, long offset, long size, byte[] bytes) throws IOException;
+
+        /**
+         * Handles writing bytes for the give inode.
+         * @param inode
+         * @param offset Offset for file bytes.
+         * @param size Size for file bytes.
+         * @param bytes Buffer to store file bytes.
+         * @return Number of read bytes. Must not be negative.
+         * @throws IOException
+         */
+        int writeObjectBytes(int inode, long offset, int size, byte[] bytes) throws IOException;
     }
 
     @UsedByNative("com_android_mtp_AppFuse.cpp")
@@ -136,6 +159,15 @@ public class AppFuse {
         } catch (UnsupportedOperationException e) {
             return -OsConstants.ENOTSUP;
         }
+    }
+
+    @UsedByNative("com_android_mtp_AppFuse.cpp")
+    @WorkerThread
+    private /* unsgined */ int writeObjectBytes(int inode,
+                                                /* unsigned */ long offset,
+                                                /* unsigned */ int size,
+                                                byte[] bytes) throws IOException {
+        return mCallback.writeObjectBytes(inode, offset, size, bytes);
     }
 
     private native boolean native_start_app_fuse_loop(int fd);

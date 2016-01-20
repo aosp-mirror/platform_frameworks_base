@@ -51,6 +51,7 @@ constexpr size_t MAX_REQUEST_SIZE = sizeof(struct fuse_in_header) +
 static jclass app_fuse_class;
 static jmethodID app_fuse_get_file_size;
 static jmethodID app_fuse_read_object_bytes;
+static jmethodID app_fuse_write_object_bytes;
 static jfieldID app_fuse_buffer;
 
 // NOTE:
@@ -139,6 +140,9 @@ public:
                 return true;
             case FUSE_READ:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_read);
+                return true;
+            case FUSE_WRITE:
+                invoke_handler(fd, req, &AppFuse::handle_fuse_write);
                 return true;
             case FUSE_RELEASE:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_release);
@@ -289,6 +293,29 @@ private:
         return 0;
     }
 
+    int handle_fuse_write(const fuse_in_header& /* header */,
+                          const fuse_write_in* in,
+                          FuseResponse<fuse_write_out>* out) {
+        if (in->size > MAX_WRITE) {
+            return -EINVAL;
+        }
+        const std::map<uint32_t, uint64_t>::iterator it = handles_.find(in->fh);
+        if (it == handles_.end()) {
+            return -EBADF;
+        }
+        const uint64_t offset = in->offset;
+        const uint32_t size = in->size;
+        const void* const buffer = reinterpret_cast<const uint8_t*>(in) + sizeof(fuse_write_in);
+        uint32_t written_size;
+        const int result = write_object_bytes(it->second, offset, size, buffer, &written_size);
+        if (result < 0) {
+            return result;
+        }
+        out->prepare_buffer();
+        out->data()->size = written_size;
+        return 0;
+    }
+
     int handle_fuse_release(const fuse_in_header& /* header */,
                             const fuse_release_in* in,
                             FuseResponse<void>* /* out */) {
@@ -353,6 +380,27 @@ private:
         }
         memcpy(buf, bytes.get(), read_size);
         return read_size;
+    }
+
+    int write_object_bytes(int inode, uint64_t offset, uint32_t size, const void* buffer,
+                           uint32_t* written_size) {
+        ScopedLocalRef<jbyteArray> array(
+                env_,
+                static_cast<jbyteArray>(env_->GetObjectField(self_, app_fuse_buffer)));
+        {
+            ScopedByteArrayRW bytes(env_, array.get());
+            if (bytes.get() == nullptr) {
+                return -EIO;
+            }
+            memcpy(bytes.get(), buffer, size);
+        }
+        *written_size = env_->CallIntMethod(
+                self_, app_fuse_write_object_bytes, inode, offset, size, array.get());
+        if (env_->ExceptionCheck()) {
+            env_->ExceptionClear();
+            return -EIO;
+        }
+        return 0;
     }
 
     static void fuse_reply(int fd, int unique, int reply_code, void* reply_data,
@@ -466,6 +514,28 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
     app_fuse_buffer = env->GetFieldID(app_fuse_class, "mBuffer", "[B");
     if (app_fuse_buffer == nullptr) {
         ALOGE("Can't find mBuffer");
+        return -1;
+    }
+
+    app_fuse_write_object_bytes = env->GetMethodID(app_fuse_class, "writeObjectBytes", "(IJI[B)I");
+    if (app_fuse_write_object_bytes == nullptr) {
+        ALOGE("Can't find getWriteObjectBytes");
+        return -1;
+    }
+
+    app_fuse_buffer = env->GetFieldID(app_fuse_class, "mBuffer", "[B");
+    if (app_fuse_buffer == nullptr) {
+        ALOGE("Can't find mBuffer");
+        return -1;
+    }
+
+    const jfieldID read_max_fied = env->GetStaticFieldID(app_fuse_class, "MAX_READ", "I");
+    if (static_cast<int>(env->GetStaticIntField(app_fuse_class, read_max_fied)) != MAX_READ) {
+        return -1;
+    }
+
+    const jfieldID write_max_fied = env->GetStaticFieldID(app_fuse_class, "MAX_WRITE", "I");
+    if (static_cast<int>(env->GetStaticIntField(app_fuse_class, write_max_fied)) != MAX_WRITE) {
         return -1;
     }
 

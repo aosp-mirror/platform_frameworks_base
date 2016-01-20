@@ -242,7 +242,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     // extension.
                     if (MtpDeviceRecord.isPartialReadSupported(
                             device.operationsSupported, fileSize)) {
-                        return mAppFuse.openFile(Integer.parseInt(documentId));
+                        return mAppFuse.openFile(
+                                Integer.parseInt(documentId), ParcelFileDescriptor.MODE_READ_ONLY);
                     } else {
                         return getPipeManager(identifier).readDocument(mMtpManager, identifier);
                     }
@@ -605,6 +606,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         @Override
         public long getFileSize(int inode) throws FileNotFoundException {
             return MtpDocumentsProvider.this.getFileSize(String.valueOf(inode));
+        }
+
+        @Override
+        public int writeObjectBytes(int inode, long offset, int size, byte[] bytes)
+                throws IOException {
+            // TODO: Implement it.
+            throw new IOException();
         }
     }
 }
