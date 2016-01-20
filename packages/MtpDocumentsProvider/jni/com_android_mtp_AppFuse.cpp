@@ -379,7 +379,7 @@ private:
 
 jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
         JNIEnv* env, jobject self, jint jfd) {
-    ScopedFd fd(dup(static_cast<int>(jfd)));
+    ScopedFd fd(static_cast<int>(jfd));
     AppFuse appfuse(env, self);
 
     ALOGD("Start fuse loop.");

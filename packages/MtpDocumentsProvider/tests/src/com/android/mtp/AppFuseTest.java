@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 @MediumTest
 public class AppFuseTest extends AndroidTestCase {
-    public void testMount() throws ErrnoException {
+    public void testMount() throws ErrnoException, IOException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final AppFuse appFuse = new AppFuse("test", new TestCallback());
         appFuse.mount(storageManager);
@@ -61,7 +61,7 @@ public class AppFuseTest extends AndroidTestCase {
         appFuse.close();
     }
 
-    public void testOpenFile_error() {
+    public void testOpenFile_fileNotFound() throws IOException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         final int INODE = 10;
         final AppFuse appFuse = new AppFuse("test", new TestCallback());
