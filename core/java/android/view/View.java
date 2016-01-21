@@ -6691,6 +6691,68 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         info.addAction(AccessibilityAction.ACTION_SHOW_ON_SCREEN);
+        populateAccessibilityNodeInfoDrawingOrderInParent(info);
+    }
+
+    /**
+     * Determine the order in which this view will be drawn relative to its siblings for a11y
+     *
+     * @param info The info whose drawing order should be populated
+     */
+    private void populateAccessibilityNodeInfoDrawingOrderInParent(AccessibilityNodeInfo info) {
+        int drawingOrderInParent = 1;
+        // Iterate up the hierarchy if parents are not important for a11y
+        View viewAtDrawingLevel = this;
+        final ViewParent parent = getParentForAccessibility();
+        while (viewAtDrawingLevel != parent) {
+            final ViewParent currentParent = viewAtDrawingLevel.getParent();
+            if (!(currentParent instanceof ViewGroup)) {
+                // Should only happen for the Decor
+                drawingOrderInParent = 0;
+                break;
+            } else {
+                final ViewGroup parentGroup = (ViewGroup) currentParent;
+                final int childCount = parentGroup.getChildCount();
+                if (childCount > 1) {
+                    List<View> preorderedList = parentGroup.buildOrderedChildList();
+                    if (preorderedList != null) {
+                        final int childDrawIndex = preorderedList.indexOf(viewAtDrawingLevel);
+                        for (int i = 0; i < childDrawIndex; i++) {
+                            drawingOrderInParent += numViewsForAccessibility(preorderedList.get(i));
+                        }
+                    } else {
+                        final int childIndex = parentGroup.indexOfChild(viewAtDrawingLevel);
+                        final boolean customOrder = parentGroup.isChildrenDrawingOrderEnabled();
+                        final int childDrawIndex = ((childIndex >= 0) && customOrder) ? parentGroup
+                                .getChildDrawingOrder(childCount, childIndex) : childIndex;
+                        final int numChildrenToIterate = customOrder ? childCount : childDrawIndex;
+                        if (childDrawIndex != 0) {
+                            for (int i = 0; i < numChildrenToIterate; i++) {
+                                final int otherDrawIndex = (customOrder ?
+                                        parentGroup.getChildDrawingOrder(childCount, i) : i);
+                                if (otherDrawIndex < childDrawIndex) {
+                                    drawingOrderInParent +=
+                                            numViewsForAccessibility(parentGroup.getChildAt(i));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            viewAtDrawingLevel = (View) currentParent;
+        }
+        info.setDrawingOrder(drawingOrderInParent);
+    }
+
+    private static int numViewsForAccessibility(View view) {
+        if (view != null) {
+            if (view.includeForAccessibility()) {
+                return 1;
+            } else if (view instanceof ViewGroup) {
+                return ((ViewGroup) view).getNumChildrenForAccessibility();
+            }
+        }
+        return 0;
     }
 
     private View findLabelForView(View view, int labeledId) {

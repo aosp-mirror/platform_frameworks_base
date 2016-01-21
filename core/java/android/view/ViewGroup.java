@@ -3083,6 +3083,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Counts the number of children of this View that will be sent to an accessibility service.
+     *
+     * @return The number of children an {@code AccessibilityNodeInfo} rooted at this View
+     * would have.
+     */
+    int getNumChildrenForAccessibility() {
+        int numChildrenForAccessibility = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child.includeForAccessibility()) {
+                numChildrenForAccessibility++;
+            } else if (child instanceof ViewGroup) {
+                numChildrenForAccessibility += ((ViewGroup) child)
+                        .getNumChildrenForAccessibility();
+            }
+        }
+        return numChildrenForAccessibility;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Subclasses should always call <code>super.onNestedPrePerformAccessibilityAction</code></p>

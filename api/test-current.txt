@@ -42877,6 +42877,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo getCollectionItemInfo();
     method public java.lang.CharSequence getContentDescription();
+    method public int getDrawingOrder();
     method public java.lang.CharSequence getError();
     method public android.os.Bundle getExtras();
     method public int getInputType();
@@ -42939,6 +42940,7 @@ package android.view.accessibility {
     method public void setContentInvalid(boolean);
     method public void setContextClickable(boolean);
     method public void setDismissable(boolean);
+    method public void setDrawingOrder(int);
     method public void setEditable(boolean);
     method public void setEnabled(boolean);
     method public void setError(java.lang.CharSequence);
