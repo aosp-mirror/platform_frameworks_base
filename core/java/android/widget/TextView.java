@@ -4992,6 +4992,35 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Change "hint" locales associated with the text view, which will be reported to an IME with
+     * {@link EditorInfo#hintLocales} when it has focus.
+     *
+     * <p><strong>Note:</strong> If you want new "hint" to take effect immediately you need to
+     * call {@link InputMethodManager#restartInput(View)}.</p>
+     * @param hintLocales List of the languages that the user is supposed to switch to no matter
+     * what input method subtype is currently used. Set {@code null} to clear the current "hint".
+     * @see #getImeHIntLocales()
+     * @see android.view.inputmethod.EditorInfo#hintLocales
+     */
+    public void setImeHintLocales(@Nullable LocaleList hintLocales) {
+        createEditorIfNeeded();
+        mEditor.createInputContentTypeIfNeeded();
+        mEditor.mInputContentType.imeHintLocales = hintLocales;
+    }
+
+    /**
+     * @return The current languages list "hint". {@code null} when no "hint" is available.
+     * @see #setImeHintLocales(LocaleList)
+     * @see android.view.inputmethod.EditorInfo#hintLocales
+     */
+    @Nullable
+    public LocaleList getImeHintLocales() {
+        if (mEditor == null) { return null; }
+        if (mEditor.mInputContentType == null) { return null; }
+        return mEditor.mInputContentType.imeHintLocales;
+    }
+
+    /**
      * Returns the error message that was set to be displayed with
      * {@link #setError}, or <code>null</code> if no error was set
      * or if it the error was cleared by the widget after user input.
@@ -6411,8 +6440,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.actionLabel = mEditor.mInputContentType.imeActionLabel;
                 outAttrs.actionId = mEditor.mInputContentType.imeActionId;
                 outAttrs.extras = mEditor.mInputContentType.extras;
+                outAttrs.hintLocales = mEditor.mInputContentType.imeHintLocales;
             } else {
                 outAttrs.imeOptions = EditorInfo.IME_NULL;
+                outAttrs.hintLocales = null;
             }
             if (focusSearch(FOCUS_DOWN) != null) {
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NAVIGATE_NEXT;
@@ -6440,9 +6471,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_ENTER_ACTION;
             }
             outAttrs.hintText = mHint;
-            // LocaleList is designed to be immutable.  This is theoretically equivalent to copy
-            // the snapshot of the current text locales.
-            outAttrs.locales = getTextLocales();
             if (mText instanceof Editable) {
                 InputConnection ic = new EditableInputConnection(this);
                 outAttrs.initialSelStart = getSelectionStart();

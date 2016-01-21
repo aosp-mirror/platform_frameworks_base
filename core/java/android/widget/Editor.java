@@ -69,6 +69,7 @@ import android.text.style.SuggestionSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
 import android.util.DisplayMetrics;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -5299,6 +5300,7 @@ public class Editor {
         Bundle extras;
         OnEditorActionListener onEditorActionListener;
         boolean enterDown;
+        LocaleList imeHintLocales;
     }
 
     static class InputMethodState {

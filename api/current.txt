@@ -43584,6 +43584,7 @@ package android.view.inputmethod {
     field public android.os.Bundle extras;
     field public int fieldId;
     field public java.lang.String fieldName;
+    field public android.util.LocaleList hintLocales;
     field public java.lang.CharSequence hintText;
     field public int imeOptions;
     field public int initialCapsMode;
@@ -43591,7 +43592,6 @@ package android.view.inputmethod {
     field public int initialSelStart;
     field public int inputType;
     field public java.lang.CharSequence label;
-    field public android.util.LocaleList locales;
     field public java.lang.String packageName;
     field public java.lang.String privateImeOptions;
   }
@@ -46838,6 +46838,7 @@ package android.widget {
     method public int getHyphenationFrequency();
     method public int getImeActionId();
     method public java.lang.CharSequence getImeActionLabel();
+    method public android.util.LocaleList getImeHintLocales();
     method public int getImeOptions();
     method public boolean getIncludeFontPadding();
     method public android.os.Bundle getInputExtras(boolean);
@@ -46944,6 +46945,7 @@ package android.widget {
     method public void setHorizontallyScrolling(boolean);
     method public void setHyphenationFrequency(int);
     method public void setImeActionLabel(java.lang.CharSequence, int);
+    method public void setImeHintLocales(android.util.LocaleList);
     method public void setImeOptions(int);
     method public void setIncludeFontPadding(boolean);
     method public void setInputExtras(int) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
