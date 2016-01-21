@@ -31,7 +31,7 @@ namespace VectorDrawable {
 
 const int Tree::MAX_CACHED_BITMAP_SIZE = 2048;
 
-void Path::draw(Canvas* outCanvas, const SkMatrix& groupStackedMatrix, float scaleX, float scaleY) {
+void Path::draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix, float scaleX, float scaleY) {
     float matrixScale = getMatrixScale(groupStackedMatrix);
     if (matrixScale == 0) {
         // When either x or y is scaled to 0, we don't need to draw anything.
@@ -186,7 +186,7 @@ inline SkColor applyAlpha(SkColor color, float alpha) {
     return SkColorSetA(color, alphaBytes * alpha);
 }
 
-void FullPath::drawPath(Canvas* outCanvas, const SkPath& renderPath, float strokeScale){
+void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float strokeScale){
     // Draw path's fill, if fill color isn't transparent.
     if (mFillColor != SK_ColorTRANSPARENT) {
         mPaint.setStyle(SkPaint::Style::kFill_Style);
@@ -287,9 +287,9 @@ bool FullPath::getProperties(int8_t* outProperties, int length) {
     return true;
 }
 
-void ClipPath::drawPath(Canvas* outCanvas, const SkPath& renderPath,
+void ClipPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
         float strokeScale){
-    outCanvas->clipPath(&renderPath, SkRegion::kIntersect_Op);
+    outCanvas->clipPath(renderPath, SkRegion::kIntersect_Op);
 }
 
 Group::Group(const Group& group) : Node(group) {
@@ -302,7 +302,7 @@ Group::Group(const Group& group) : Node(group) {
     mTranslateY = group.mTranslateY;
 }
 
-void Group::draw(Canvas* outCanvas, const SkMatrix& currentMatrix, float scaleX,
+void Group::draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix, float scaleX,
         float scaleY) {
     // TODO: Try apply the matrix to the canvas instead of passing it down the tree
 
@@ -315,7 +315,7 @@ void Group::draw(Canvas* outCanvas, const SkMatrix& currentMatrix, float scaleX,
     stackedMatrix.postConcat(currentMatrix);
 
     // Save the current clip information, which is local to this group.
-    outCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
+    outCanvas->save();
     // Draw the group tree in the same order as the XML file.
     for (Node* child : mChildren) {
         child->draw(outCanvas, stackedMatrix, scaleX, scaleY);
@@ -465,10 +465,10 @@ void Tree::drawCachedBitmapWithRootAlpha(Canvas* outCanvas, SkColorFilter* filte
 
 void Tree::updateCachedBitmap(int width, int height) {
     mCachedBitmap.eraseColor(SK_ColorTRANSPARENT);
-    Canvas* outCanvas = Canvas::create_canvas(mCachedBitmap);
+    SkCanvas outCanvas(mCachedBitmap);
     float scaleX = width / mViewportWidth;
     float scaleY = height / mViewportHeight;
-    mRootNode->draw(outCanvas, SkMatrix::I(), scaleX, scaleY);
+    mRootNode->draw(&outCanvas, SkMatrix::I(), scaleX, scaleY);
     mCacheDirty = false;
 }
 

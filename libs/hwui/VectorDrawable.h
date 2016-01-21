@@ -20,6 +20,7 @@
 #include "Canvas.h"
 #include <SkBitmap.h>
 #include <SkColor.h>
+#include <SkCanvas.h>
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPath.h>
@@ -56,7 +57,7 @@ public:
         mName = node.mName;
     }
     Node() {}
-    virtual void draw(Canvas* outCanvas, const SkMatrix& currentMatrix,
+    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
             float scaleX, float scaleY) = 0;
     virtual void dump() = 0;
     void setName(const char* name) {
@@ -85,7 +86,7 @@ public:
     void dump() override;
     bool canMorph(const Data& path);
     bool canMorph(const Path& path);
-    void draw(Canvas* outCanvas, const SkMatrix& groupStackedMatrix,
+    void draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix,
             float scaleX, float scaleY) override;
     void setPath(const char* path, size_t strLength);
     void setPathData(const Data& data);
@@ -93,7 +94,7 @@ public:
 
 protected:
     virtual const SkPath& getUpdatedPath();
-    virtual void drawPath(Canvas *outCanvas, const SkPath& renderPath,
+    virtual void drawPath(SkCanvas *outCanvas, const SkPath& renderPath,
             float strokeScale) = 0;
     Data mData;
     SkPath mSkPath;
@@ -163,7 +164,7 @@ public:
 
 protected:
     const SkPath& getUpdatedPath() override;
-    void drawPath(Canvas* outCanvas, const SkPath& renderPath,
+    void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
             float strokeScale) override;
 
 private:
@@ -193,7 +194,7 @@ public:
     ClipPath(const Data& nodes) : Path(nodes) {}
 
 protected:
-    void drawPath(Canvas* outCanvas, const SkPath& renderPath,
+    void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
             float strokeScale) override;
 };
 
@@ -243,7 +244,7 @@ public:
     void setTranslateY(float translateY) {
         mTranslateY = translateY;
     }
-    virtual void draw(Canvas* outCanvas, const SkMatrix& currentMatrix,
+    virtual void draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix,
             float scaleX, float scaleY) override;
     void updateLocalMatrix(float rotate, float pivotX, float pivotY,
             float scaleX, float scaleY, float translateX, float translateY);
