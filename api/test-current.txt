@@ -2612,6 +2612,7 @@ package android.accessibilityservice {
 
   public abstract class AccessibilityService extends android.app.Service {
     ctor public AccessibilityService();
+    method public final void disableSelf();
     method public final boolean dispatchGesture(android.accessibilityservice.GestureDescription, android.accessibilityservice.AccessibilityService.GestureResultCallback, android.os.Handler);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
     method public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();

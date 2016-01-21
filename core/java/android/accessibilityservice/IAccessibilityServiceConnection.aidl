@@ -65,6 +65,8 @@ interface IAccessibilityServiceConnection {
 
     boolean performGlobalAction(int action);
 
+    oneway void disableSelf();
+
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
     float getMagnificationScale();
