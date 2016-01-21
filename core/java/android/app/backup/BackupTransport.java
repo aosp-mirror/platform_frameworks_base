@@ -50,6 +50,10 @@ public class BackupTransport {
     public static final int AGENT_ERROR = -1003;
     public static final int AGENT_UNKNOWN = -1004;
 
+    // Indicates that operation was initiated by user, not a scheduled one.
+    // Transport should ignore its own moratoriums for call with this flag set.
+    public static final int FLAG_USER_INITIATED = 1;
+
     IBackupTransport mBinderImpl = new TransportImpl();
 
     public IBinder getBinder() {
@@ -228,19 +232,24 @@ public class BackupTransport {
      *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
-     * @param data The data stream that resulted from invoking the application's
+     * @param inFd Descriptor of file with data that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
-     * @param wipeAllFirst When true, <i>all</i> backed-up data for the current device/account
-     *   must be erased prior to the storage of the data provided here.  The purpose of this
-     *   is to provide a guarantee that no stale data exists in the restore set when the
-     *   device begins providing incremental backups.
+     * @param flags {@link BackupTransport#FLAG_USER_INITIATED} or 0.
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
      *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
      *  specific package, but allow others to proceed),
      *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), or
      *  {@link BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
      *  become lost due to inactivity purge or some other reason and needs re-initializing)
+     */
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags) {
+        return performBackup(packageInfo, inFd);
+    }
+
+    /**
+     * Legacy version of {@link #performBackup(PackageInfo, ParcelFileDescriptor, int)} that
+     * doesn't use flags parameter.
      */
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd) {
         return BackupTransport.TRANSPORT_ERROR;
@@ -392,10 +401,20 @@ public class BackupTransport {
      *    close this file descriptor now; otherwise it should be cached for use during
      *    succeeding calls to {@link #sendBackupData(int)}, and closed in response to
      *    {@link #finishBackup()}.
+     * @param flags {@link BackupTransport#FLAG_USER_INITIATED} or 0.
      * @return TRANSPORT_PACKAGE_REJECTED to indicate that the stated application is not
      *    to be backed up; TRANSPORT_OK to indicate that the OS may proceed with delivering
      *    backup data; TRANSPORT_ERROR to indicate a fatal error condition that precludes
      *    performing a backup at this time.
+     */
+    public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket,
+            int flags) {
+        return performFullBackup(targetPackage, socket);
+    }
+
+    /**
+     * Legacy version of {@link #performFullBackup(PackageInfo, ParcelFileDescriptor, int)} that
+     * doesn't use flags parameter.
      */
     public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) {
         return BackupTransport.TRANSPORT_PACKAGE_REJECTED;
@@ -568,9 +587,9 @@ public class BackupTransport {
         }
 
         @Override
-        public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd)
+        public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags)
                 throws RemoteException {
-            return BackupTransport.this.performBackup(packageInfo, inFd);
+            return BackupTransport.this.performBackup(packageInfo, inFd, flags);
         }
 
         @Override
@@ -619,8 +638,9 @@ public class BackupTransport {
         }
 
         @Override
-        public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) throws RemoteException {
-            return BackupTransport.this.performFullBackup(targetPackage, socket);
+        public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket,
+                int flags) throws RemoteException {
+            return BackupTransport.this.performFullBackup(targetPackage, socket, flags);
         }
 
         @Override

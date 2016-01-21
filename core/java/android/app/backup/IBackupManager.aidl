@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.app.backup.IBackupObserver;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.os.ParcelFileDescriptor;
@@ -326,4 +327,19 @@ interface IBackupManager {
      *     no suitable data is available.
      */
     long getAvailableRestoreToken(String packageName);
+
+    /**
+     * Request an immediate backup, providing an observer to which results of the backup operation
+     * will be published. The Android backup system will decide for each package whether it will
+     * be full app data backup or key/value-pair-based backup.
+     *
+     * <p>If this method returns zero (meaning success), the OS will attempt to backup all provided
+     * packages using the remote transport.
+     *
+     * @param observer The {@link BackupObserver} to receive callbacks during the backup
+     * operation.
+     *
+     * @return Zero on success; nonzero on error.
+     */
+    int requestBackup(in String[] packages, IBackupObserver observer);
 }
