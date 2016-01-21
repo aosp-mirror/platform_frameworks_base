@@ -468,7 +468,7 @@ class WindowStateAnimator {
         if (WindowManagerService.localLOGV) Slog.v(
                 TAG, "Exit animation finished in " + this
                 + ": remove=" + mWin.mRemoveOnExit);
-        if (mSurfaceController != null && mSurfaceController.hasSurface()) {
+        if (hasSurface()) {
             mService.mDestroySurface.add(mWin);
             mWin.mDestroying = true;
             hide("finishExit");
@@ -732,6 +732,11 @@ class WindowStateAnimator {
         mTmpSize.top -= scale * attrs.surfaceInsets.top;
         mTmpSize.right += scale * (attrs.surfaceInsets.left + attrs.surfaceInsets.right);
         mTmpSize.bottom += scale * (attrs.surfaceInsets.top + attrs.surfaceInsets.bottom);
+    }
+
+    boolean hasSurface() {
+        return !mWin.mSurfaceSaved
+                && mSurfaceController != null && mSurfaceController.hasSurface();
     }
 
     void destroySurfaceLocked() {
@@ -1229,7 +1234,7 @@ class WindowStateAnimator {
 
     void prepareSurfaceLocked(final boolean recoveringMemory) {
         final WindowState w = mWin;
-        if (mSurfaceController == null || !mSurfaceController.hasSurface()) {
+        if (!hasSurface()) {
             if (w.mOrientationChanging) {
                 if (DEBUG_ORIENTATION) {
                     Slog.v(TAG, "Orientation change skips hidden " + w);
@@ -1311,7 +1316,7 @@ class WindowStateAnimator {
                     w.mOrientationChanging = false;
                 }
             }
-            if (mSurfaceController != null && mSurfaceController.hasSurface()) {
+            if (hasSurface()) {
                 w.mToken.hasVisible = true;
             }
         } else {

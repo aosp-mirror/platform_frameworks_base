@@ -1768,43 +1768,67 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken != null && mAppToken.mAnimatingWithSavedSurface;
     }
 
-    // Returns true if the surface is saved.
-    boolean destroyOrSaveSurface() {
-        Task task = getTask();
+    private boolean shouldSaveSurface() {
         if (ActivityManager.isLowRamDeviceStatic()) {
             // Don't save surfaces on Svelte devices.
-            mSurfaceSaved = false;
-        } else if (task == null || task.inHomeStack()
-                || task.getTopVisibleAppToken() != mAppToken) {
+            return false;
+        }
+
+        if (isChildWindow()) {
+            return false;
+        }
+
+        Task task = getTask();
+        if (task == null || task.inHomeStack()) {
             // Don't save surfaces for home stack apps. These usually resume and draw
             // first frame very fast. Saving surfaces are mostly a waste of memory.
-            // Don't save if the window is not the topmost window.
-            mSurfaceSaved = false;
-        } else if (isChildWindow()) {
-            mSurfaceSaved = false;
-        } else {
-            mSurfaceSaved = mAppToken.shouldSaveSurface();
+            return false;
         }
-        if (mSurfaceSaved == false) {
+
+        final AppWindowToken taskTop = task.getTopVisibleAppToken();
+        if (taskTop != null && taskTop != mAppToken) {
+            // Don't save if the window is not the topmost window.
+            return false;
+        }
+
+        return mAppToken.shouldSaveSurface();
+    }
+
+    void destroyOrSaveSurface() {
+        mSurfaceSaved = shouldSaveSurface();
+        if (mSurfaceSaved) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG, "Saving surface: " + this);
+            }
+
+            mWinAnimator.hide("saved surface");
+            mWinAnimator.mDrawState = WindowStateAnimator.NO_SURFACE;
+            setHasSurface(false);
+        } else {
             mWinAnimator.destroySurfaceLocked();
         }
-        return mSurfaceSaved;
     }
 
     public void destroySavedSurface() {
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "Destroying saved surface: " + this);
         if (mSurfaceSaved) {
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                Slog.v(TAG, "Destroying saved surface: " + this);
+            }
             mWinAnimator.destroySurfaceLocked();
+        }
+    }
+
+    public void restoreSavedSurface() {
+        mSurfaceSaved = false;
+        setHasSurface(true);
+        mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+            Slog.v(TAG, "Restoring saved surface: " + this);
         }
     }
 
     public boolean hasSavedSurface() {
         return mSurfaceSaved;
-    }
-
-    public void restoreSavedSurface() {
-        mSurfaceSaved = false;
-        mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
     }
 
     @Override
