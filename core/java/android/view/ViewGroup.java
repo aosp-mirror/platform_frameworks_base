@@ -700,9 +700,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         mGroupFlags |= (focusability & FLAG_MASK_FOCUSABILITY);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void handleFocusGainInternal(int direction, Rect previouslyFocusedRect) {
         if (mFocused != null) {
@@ -712,9 +709,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.handleFocusGainInternal(direction, previouslyFocusedRect);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void requestChildFocus(View child, View focused) {
         if (DBG) {
             System.out.println(this + " requestChildFocus()");
@@ -739,9 +734,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void focusableViewAvailable(View v) {
         if (mParent != null
                 // shortcut: don't report a new focusable view if we block our descendants from
@@ -760,9 +753,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean showContextMenuForChild(View originalView) {
         return mParent != null && mParent.showContextMenuForChild(originalView);
     }
@@ -772,9 +763,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mParent != null && mParent.showContextMenuForChild(originalView, x, y);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
         if ((mGroupFlags & FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED) == 0) {
@@ -791,9 +779,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ActionMode startActionModeForChild(
             View originalView, ActionMode.Callback callback, int type) {
@@ -848,6 +833,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param direction One of FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, and
      *        FOCUS_RIGHT, or 0 for not applicable.
      */
+    @Override
     public View focusSearch(View focused, int direction) {
         if (isRootNamespace()) {
             // root namespace means we should consider ourselves the top of the
@@ -860,16 +846,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle, boolean immediate) {
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         ViewParent parent = mParent;
@@ -921,6 +902,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Called when a child view has changed whether or not it is tracking transient state.
      */
+    @Override
     public void childHasTransientStateChanged(View child, boolean childHasTransientState) {
         final boolean oldHasTransientState = hasTransientState();
         if (childHasTransientState) {
@@ -945,18 +927,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mChildCountWithTransientState > 0 || super.hasTransientState();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchUnhandledMove(View focused, int direction) {
         return mFocused != null &&
                 mFocused.dispatchUnhandledMove(focused, direction);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void clearChildFocus(View child) {
         if (DBG) {
             System.out.println(this + " clearChildFocus()");
@@ -968,9 +945,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void clearFocus() {
         if (DBG) {
@@ -985,9 +959,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void unFocus(View focused) {
         if (DBG) {
@@ -1054,9 +1025,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasFocusable() {
         if ((mViewFlags & VISIBILITY_MASK) != VISIBLE) {
@@ -1083,9 +1051,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addFocusables(ArrayList<View> views, int direction, int focusableMode) {
         final int focusableCount = views.size();
@@ -1195,9 +1160,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchWindowFocusChanged(boolean hasFocus) {
         super.dispatchWindowFocusChanged(hasFocus);
@@ -1208,9 +1170,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addTouchables(ArrayList<View> views) {
         super.addTouchables(views);
@@ -1239,9 +1198,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchDisplayHint(int hint) {
         super.dispatchDisplayHint(hint);
@@ -1287,9 +1243,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void dispatchVisibilityChanged(View changedView, int visibility) {
         super.dispatchVisibilityChanged(changedView, visibility);
@@ -1300,9 +1253,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchWindowVisibilityChanged(int visibility) {
         super.dispatchWindowVisibilityChanged(visibility);
@@ -1313,9 +1263,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchConfigurationChanged(Configuration newConfig) {
         super.dispatchConfigurationChanged(newConfig);
@@ -1326,9 +1273,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void recomputeViewAttributes(View child) {
         if (mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
             ViewParent parent = mParent;
@@ -1350,9 +1295,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void bringChildToFront(View child) {
         final int index = indexOfChild(child);
         if (index >= 0) {
@@ -1369,9 +1312,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mLocalPoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     // TODO: Write real docs
     @Override
     public boolean dispatchDragEvent(DragEvent event) {
@@ -1631,9 +1571,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return changed;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchKeyEventPreIme(KeyEvent event) {
         if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
@@ -1646,9 +1583,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (mInputEventConsistencyVerifier != null) {
@@ -1673,9 +1607,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchKeyShortcutEvent(KeyEvent event) {
         if ((mPrivateFlags & (PFLAG_FOCUSED | PFLAG_HAS_BOUNDS))
@@ -1688,9 +1619,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchTrackballEvent(MotionEvent event) {
         if (mInputEventConsistencyVerifier != null) {
@@ -1744,9 +1672,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return super.getPointerIcon(event, x, y);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings({"ConstantConditions"})
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
@@ -2045,9 +1970,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return MotionEvent.obtainNoHistory(event);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean dispatchGenericPointerEvent(MotionEvent event) {
         // Send the event to the child under the pointer.
@@ -2081,9 +2003,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return super.dispatchGenericPointerEvent(event);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean dispatchGenericFocusedEvent(MotionEvent event) {
         // Send the event to the focused child or to this view group if it has focus.
@@ -2124,9 +2043,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return handled;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mInputEventConsistencyVerifier != null) {
@@ -2721,9 +2637,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
 
         if (disallowIntercept == ((mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0)) {
@@ -2893,9 +2807,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void dispatchAttachedToWindow(AttachInfo info, int visibility) {
         mGroupFlags |= FLAG_PREVENT_DISPATCH_ATTACHED_TO_WINDOW;
@@ -2962,6 +2873,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * adds in all child views of the view group, in addition to calling the default View
      * implementation.
      */
+    @Override
     public void dispatchProvideStructure(ViewStructure structure) {
         super.dispatchProvideStructure(structure);
         if (!isAssistBlocked()) {
@@ -3098,9 +3010,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     void dispatchDetachedFromWindow() {
         // If we still have a touch target, we are still in the process of
@@ -3152,9 +3061,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
         super.dispatchSaveInstanceState(container);
@@ -3180,9 +3086,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         super.dispatchSaveInstanceState(container);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         super.dispatchRestoreInstanceState(container);
@@ -3255,6 +3158,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mLayoutMode == LAYOUT_MODE_OPTICAL_BOUNDS;
     }
 
+    @Override
     Insets computeOpticalInsets() {
         if (isLayoutModeOptical()) {
             int left = 0;
@@ -3386,9 +3290,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void dispatchDraw(Canvas canvas) {
         boolean usingRenderNodeProperties = canvas.isRecordingFor(mRenderNode);
@@ -3514,6 +3415,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // drawChild() after the animation is over
             mGroupFlags |= FLAG_NOTIFY_ANIMATION_LISTENER;
             final Runnable end = new Runnable() {
+               @Override
                public void run() {
                    notifyAnimationListener();
                }
@@ -3612,6 +3514,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         if (mAnimationListener != null) {
            final Runnable end = new Runnable() {
+               @Override
                public void run() {
                    mAnimationListener.onAnimationEnd(mLayoutAnimationController.getAnimation());
                }
@@ -3761,9 +3664,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return hasBooleanFlag(FLAG_CLIP_TO_PADDING);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchSetSelected(boolean selected) {
         final View[] children = mChildren;
@@ -3773,9 +3673,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void dispatchSetActivated(boolean activated) {
         final View[] children = mChildren;
@@ -4180,6 +4077,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param child the child view to add
      * @param params the layout parameters to set on the child
      */
+    @Override
     public void addView(View child, LayoutParams params) {
         addView(child, -1, params);
     }
@@ -4212,9 +4110,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         addViewInner(child, index, params, false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
         if (!checkLayoutParams(params)) {
             throw new IllegalArgumentException("Invalid LayoutParams supplied to " + this);
@@ -4225,9 +4121,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         view.setLayoutParams(params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
         return  p != null;
     }
@@ -4574,6 +4467,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@link #draw(android.graphics.Canvas)}, {@link #onDraw(android.graphics.Canvas)},
      * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      */
+    @Override
     public void removeView(View view) {
         if (removeViewInternal(view)) {
             requestLayout();
@@ -5075,6 +4969,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Don't call or override this method. It is used for the implementation of
      * the view hierarchy.
      */
+    @Override
     public final void invalidateChild(View child, final Rect dirty) {
         ViewParent parent = this;
 
@@ -5183,6 +5078,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * if this ViewGroup is already fully invalidated or if the dirty rectangle
      * does not intersect with this ViewGroup's bounds.
      */
+    @Override
     public ViewParent invalidateChildInParent(final int[] location, final Rect dirty) {
         if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
                 (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
@@ -5476,9 +5372,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
         // It doesn't make a whole lot of sense to call this on a view that isn't attached,
         // but for some simple tests it can be useful. If we don't have attach info this
@@ -5538,9 +5432,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return rectIsVisible;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void layout(int l, int t, int r, int b) {
         if (!mSuppressLayout && (mTransition == null || !mTransition.isChangingLayout())) {
@@ -5554,9 +5445,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected abstract void onLayout(boolean changed,
             int l, int t, int r, int b);
@@ -5921,9 +5809,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void debug(int depth) {
         super.debug(depth);
@@ -6340,9 +6225,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return mSuppressLayout;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean gatherTransparentRegion(Region region) {
         // If no transparent regions requested, we are always opaque.
@@ -6366,9 +6248,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return meOpaque || noneOfTheChildrenAreTransparent;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void requestTransparentRegion(View child) {
         if (child != null) {
             child.mPrivateFlags |= View.PFLAG_REQUEST_TRANSPARENT_REGIONS;
@@ -6494,6 +6374,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * If {@link #addStatesFromChildren} is true, refreshes this group's
      * drawable state (to include the states from its children).
      */
+    @Override
     public void childDrawableStateChanged(View child) {
         if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0) {
             refreshDrawableState();
@@ -7239,9 +7120,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             a.recycle();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public MarginLayoutParams(int width, int height) {
             super(width, height);
 
@@ -7271,9 +7149,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.mMarginFlags = source.mMarginFlags;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         public MarginLayoutParams(LayoutParams source) {
             super(source);
 
