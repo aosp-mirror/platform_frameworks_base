@@ -1699,6 +1699,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
 
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
+    const AutoTexture autoCleanup(texture);
 
     // 9 patches are built for stretching - always filter
     int textureFillFlags = TextureFillFlags::ForceFilter;
