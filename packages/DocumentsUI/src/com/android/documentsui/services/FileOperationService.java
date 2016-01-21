@@ -51,9 +51,11 @@ public class FileOperationService extends Service implements Job.Listener {
 
     private static final int DEFAULT_DELAY = 0;
     private static final int MAX_DELAY = 10 * 1000;  // ten seconds
+    private static final int POOL_SIZE = 2;  // "pool size", not *max* "pool size".
+    private static final int NOTIFICATION_ID_PROGRESS = 0;
+    private static final int NOTIFICATION_ID_FAILURE = 1;
 
     public static final String TAG = "FileOperationService";
-    private static final int POOL_SIZE = 2;  // "pool size", not *max* "pool size".
 
     public static final String EXTRA_JOB_ID = "com.android.documentsui.JOB_ID";
     public static final String EXTRA_DELAY = "com.android.documentsui.DELAY";
@@ -191,7 +193,7 @@ public class FileOperationService extends Service implements Job.Listener {
         // interactivity for the user in case the copy loop is stalled.
         // Try to cancel it even if we don't have a job id...in case there is some sad
         // orphan notification.
-        mNotificationManager.cancel(jobId, 0);
+        mNotificationManager.cancel(jobId, NOTIFICATION_ID_PROGRESS);
 
         // TODO: Guarantee the job is being finalized
     }
@@ -258,7 +260,7 @@ public class FileOperationService extends Service implements Job.Listener {
     @Override
     public void onStart(Job job) {
         if (DEBUG) Log.d(TAG, "onStart: " + job.id);
-        mNotificationManager.notify(job.id, 0, job.getSetupNotification());
+        mNotificationManager.notify(job.id, NOTIFICATION_ID_PROGRESS, job.getSetupNotification());
     }
 
     @Override
@@ -266,7 +268,7 @@ public class FileOperationService extends Service implements Job.Listener {
         if (DEBUG) Log.d(TAG, "onFinished: " + job.id);
 
         // Dismiss the ongoing copy notification when the copy is done.
-        mNotificationManager.cancel(job.id, 0);
+        mNotificationManager.cancel(job.id, NOTIFICATION_ID_PROGRESS);
 
         synchronized (mRunning) {
             deleteJob(job);
@@ -276,7 +278,8 @@ public class FileOperationService extends Service implements Job.Listener {
     @Override
     public void onProgress(CopyJob job) {
         if (DEBUG) Log.d(TAG, "onProgress: " + job.id);
-        mNotificationManager.notify(job.id, 0, job.getProgressNotification());
+        mNotificationManager.notify(
+                job.id, NOTIFICATION_ID_PROGRESS, job.getProgressNotification());
     }
 
     @Override
@@ -284,8 +287,8 @@ public class FileOperationService extends Service implements Job.Listener {
         if (DEBUG) Log.d(TAG, "onFailed: " + job.id);
         checkArgument(job.failed());
         Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
-        mNotificationManager.notify(job.id, 0, job.getFailureNotification());
-        onFinished(job);  // failed jobs don't call finished, so we do.
+        mNotificationManager.notify(job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
+        onFinished(job);  // Failed jobs don't call finished, so we do.
     }
 
     private static final class JobRecord {
