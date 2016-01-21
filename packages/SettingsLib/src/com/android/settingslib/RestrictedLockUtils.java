@@ -244,14 +244,16 @@ public class RestrictedLockUtils {
         ComponentName adminComponent = null;
         List<ComponentName> admins = dpm.getActiveAdmins();
         int quality;
-        for (ComponentName admin : admins) {
-            quality = dpm.getPasswordQuality(admin);
-            if (quality >= DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
-                if (adminComponent == null) {
-                    adminComponent = admin;
-                } else {
-                    isDisabledByMultipleAdmins = true;
-                    break;
+        if (admins != null) {
+            for (ComponentName admin : admins) {
+                quality = dpm.getPasswordQuality(admin);
+                if (quality >= DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                    if (adminComponent == null) {
+                        adminComponent = admin;
+                    } else {
+                        isDisabledByMultipleAdmins = true;
+                        break;
+                    }
                 }
             }
         }
