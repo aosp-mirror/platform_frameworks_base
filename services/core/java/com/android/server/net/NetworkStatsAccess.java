@@ -66,13 +66,24 @@ public final class NetworkStatsAccess {
          *
          * <p>Granted to:
          * <ul>
-         * <li>Apps with the PACKAGE_USAGE_STATS permission granted. Note that this is an AppOps bit
-         * so it is not necessarily sufficient to declare this in the manifest.
-         * <li>Apps with the (signature/privileged) READ_NETWORK_USAGE_HISTORY permission.
          * <li>Profile owners.
          * </ul>
          */
         int USER = 1;
+
+        /**
+         * Access level for apps which can access usage summary of device. Device summary includes
+         * usage by apps running in any profiles/users, however this access level does not
+         * allow querying usage of individual apps running in other profiles/users.
+         *
+         * <p>Granted to:
+         * <ul>
+         * <li>Apps with the PACKAGE_USAGE_STATS permission granted. Note that this is an AppOps bit
+         * so it is not necessarily sufficient to declare this in the manifest.
+         * <li>Apps with the (signature/privileged) READ_NETWORK_USAGE_HISTORY permission.
+         * </ul>
+         */
+        int DEVICESUMMARY = 2;
 
         /**
          * Access level for apps which can access usage for any app on the device, including apps
@@ -85,7 +96,7 @@ public final class NetworkStatsAccess {
          * <li>The system UID.
          * </ul>
          */
-        int DEVICE = 2;
+        int DEVICE = 3;
     }
 
     /** Returns the {@link NetworkStatsAccess.Level} for the given caller. */
@@ -107,11 +118,15 @@ public final class NetworkStatsAccess {
             return NetworkStatsAccess.Level.DEVICE;
         }
 
+        boolean hasAppOpsPermission = hasAppOpsPermission(context, callingUid, callingPackage);
+        if (hasAppOpsPermission || context.checkCallingOrSelfPermission(
+                READ_NETWORK_USAGE_HISTORY) == PackageManager.PERMISSION_GRANTED) {
+            return NetworkStatsAccess.Level.DEVICESUMMARY;
+        }
+
         boolean isProfileOwner = dpmi != null && dpmi.isActiveAdminWithPolicy(callingUid,
                 DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        if (hasAppOpsPermission(context, callingUid, callingPackage) || isProfileOwner
-                || context.checkCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY) ==
-                PackageManager.PERMISSION_GRANTED) {
+        if (isProfileOwner) {
             // Apps with the AppOps permission, profile owners, and apps with the privileged
             // permission can access data usage for all apps in this user/profile.
             return NetworkStatsAccess.Level.USER;
@@ -131,6 +146,7 @@ public final class NetworkStatsAccess {
             case NetworkStatsAccess.Level.DEVICE:
                 // Device-level access - can access usage for any uid.
                 return true;
+            case NetworkStatsAccess.Level.DEVICESUMMARY:
             case NetworkStatsAccess.Level.USER:
                 // User-level access - can access usage for any app running in the same user, along
                 // with some special uids (system, removed, or tethering).

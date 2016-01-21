@@ -52,10 +52,12 @@ import android.util.Log;
  * {@link NetworkStats.Bucket#STATE_ALL} and all Bucket's roaming is going to be
  * {@link NetworkStats.Bucket#ROAMING_ALL}.
  * <p />
- * <b>NOTE:</b> Accessing stats for apps other than the calling app requires the permission
- * {@link android.Manifest.permission#PACKAGE_USAGE_STATS}, which is a system-level permission and
- * will not be granted to third-party apps. However, declaring the permission implies intention to
- * use the API and the user of the device can grant permission through the Settings application.
+ * <b>NOTE:</b> Calling {@link #querySummaryForDevice} or accessing stats for apps other than the
+ * calling app requires the permission {@link android.Manifest.permission#PACKAGE_USAGE_STATS},
+ * which is a system-level permission and will not be granted to third-party apps. However,
+ * declaring the permission implies intention to use the API and the user of the device can grant
+ * permission through the Settings application.
+ * <p />
  * Profile owner apps are automatically granted permission to query data on the profile they manage
  * (that is, for any query except {@link #querySummaryForDevice}). Device owner apps and carrier-
  * privileged apps likewise get access to usage data for all users on the device.

@@ -484,15 +484,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             public NetworkStats getDeviceSummaryForNetwork(NetworkTemplate template, long start,
                     long end) {
                 @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(mCallingPackage);
-                if (accessLevel < NetworkStatsAccess.Level.DEVICE) {
+                if (accessLevel < NetworkStatsAccess.Level.DEVICESUMMARY) {
                     throw new SecurityException("Calling package " + mCallingPackage
-                            + " cannot access device-level network stats");
+                            + " cannot access device summary network stats");
                 }
                 NetworkStats result = new NetworkStats(end - start, 1);
                 final long ident = Binder.clearCallingIdentity();
                 try {
+                    // Using access level higher than the one we checked for above.
+                    // Reason is that we are combining usage data in a way that is not PII
+                    // anymore.
                     result.combineAllValues(
-                            internalGetSummaryForNetwork(template, start, end, accessLevel));
+                            internalGetSummaryForNetwork(template, start, end,
+                                    NetworkStatsAccess.Level.DEVICE));
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
