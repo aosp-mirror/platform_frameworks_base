@@ -331,4 +331,22 @@ public interface MetricsConstants {
      * Logged when the user launches a task from overview.
      */
     public static final int ACTION_OVERVIEW_SELECT = 277;
+
+    /** Logged when the user views the emergency info. */
+    public static final int ACTION_VIEW_EMERGENCY_INFO = 278;
+
+    /** Logged when the user views the edit emergency info activity. */
+    public static final int ACTION_EDIT_EMERGENCY_INFO = 279;
+
+    /** Logged when the user edits an emergency info field. */
+    public static final int ACTION_EDIT_EMERGENCY_INFO_FIELD = 280;
+
+    /** Logged when the user adds a new emergency contact. */
+    public static final int ACTION_ADD_EMERGENCY_CONTACT = 281;
+
+    /** Logged when the user deletes an emergency contact. */
+    public static final int ACTION_DELETE_EMERGENCY_CONTACT = 282;
+
+    /** Logged when the user calls an emergency contact. */
+    public static final int ACTION_CALL_EMERGENCY_CONTACT = 283;
 }
