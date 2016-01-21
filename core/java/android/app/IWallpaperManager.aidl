@@ -28,37 +28,47 @@ interface IWallpaperManager {
 
     /**
      * Set the wallpaper.
+     *
+     * If 'extras' is non-null, on successful return it will contain:
+     *   EXTRA_SET_WALLPAPER_ID : integer ID that the new wallpaper will have
+     *
+     * 'which' is some combination of:
+     *   FLAG_SET_SYSTEM
+     *   FLAG_SET_LOCK
      */
-    ParcelFileDescriptor setWallpaper(String name, in String callingPackage);
+    ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
+            out Bundle extras, int which);
     
     /**
-     * Set the live wallpaper.
+     * Set the live wallpaper. This only affects the system wallpaper.
      */
     void setWallpaperComponentChecked(in ComponentName name, in String callingPackage);
 
     /**
-     * Set the live wallpaper.
+     * Set the live wallpaper. This only affects the system wallpaper.
      */
     void setWallpaperComponent(in ComponentName name);
 
     /**
-     * Get the wallpaper.
+     * Get the system wallpaper.
      */
     ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
             out Bundle outParams);
     
     /**
-     * Get information about a live wallpaper.
+     * If the current system wallpaper is a live wallpaper component, return the
+     * information about that wallpaper.  Otherwise, if it is a static image,
+     * simply return null.
      */
     WallpaperInfo getWallpaperInfo();
     
     /**
-     * Clear the wallpaper.
+     * Clear the system wallpaper.
      */
     void clearWallpaper(in String callingPackage);
 
     /**
-     * Return whether there is a wallpaper set with the given name.
+     * Return whether the current system wallpaper has the given name.
      */
     boolean hasNamedWallpaper(String name);
 
