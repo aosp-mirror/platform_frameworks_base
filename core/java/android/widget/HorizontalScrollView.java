@@ -454,6 +454,10 @@ public class HorizontalScrollView extends FrameLayout {
             return true;
         }
 
+        if (super.onInterceptTouchEvent(ev)) {
+            return true;
+        }
+
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE: {
                 /*

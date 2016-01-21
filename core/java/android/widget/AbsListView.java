@@ -3669,6 +3669,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /** @hide */
+    @Override
+    protected boolean handleScrollBarDragging(MotionEvent event) {
+        // Doesn't support normal scroll bar dragging. Use FastScroller.
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         if (!isEnabled()) {

@@ -489,6 +489,10 @@ public class ScrollView extends FrameLayout {
             return true;
         }
 
+        if (super.onInterceptTouchEvent(ev)) {
+            return true;
+        }
+
         /*
          * Don't try to intercept touch if we can't scroll anyway.
          */

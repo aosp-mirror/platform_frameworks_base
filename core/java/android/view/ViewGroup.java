@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 /**
@@ -1717,6 +1718,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
+        if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
+            return PointerIcon.getSystemIcon(mContext, PointerIcon.STYLE_ARROW);
+        }
         // Check what the child under the pointer says about the pointer.
         final int childrenCount = mChildrenCount;
         if (childrenCount != 0) {
@@ -2027,7 +2031,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * hover exit event in {@link #onHoverEvent} and then the hovered child will
      * receive a hover enter event.
      * </p><p>
-     * The default implementation always returns false.
+     * The default implementation handles mouse hover on the scroll bars.
      * </p>
      *
      * @param event The motion event that describes the hover.
@@ -2035,6 +2039,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * and prevent its children from receiving it.
      */
     public boolean onInterceptHoverEvent(MotionEvent event) {
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final int action = event.getAction();
+            final float x = event.getX();
+            final float y = event.getY();
+            if ((action == MotionEvent.ACTION_HOVER_MOVE
+                    || action == MotionEvent.ACTION_HOVER_ENTER) && isOnScrollbar(x, y)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -2781,6 +2794,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * messages will be delivered here.
      */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.isFromSource(InputDevice.SOURCE_MOUSE)
+                && ev.getAction() == MotionEvent.ACTION_DOWN
+                && ev.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
+                && isOnScrollbarThumb(ev.getX(), ev.getY())) {
+            return true;
+        }
         return false;
     }
 
