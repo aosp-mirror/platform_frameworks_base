@@ -30,6 +30,7 @@ import java.security.spec.AlgorithmParameterSpec;
  * attached to the View hierarchy.
  * @hide
  */
+@SystemApi
 public abstract class TokenBindingService {
 
     public static final String KEY_ALGORITHM_RSA2048_PKCS_1_5 = "RSA2048_PKCS_1.5";
