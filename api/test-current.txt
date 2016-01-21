@@ -8371,7 +8371,6 @@ package android.content {
     field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     field public static final java.lang.String ACTION_ASSIST = "android.intent.action.ASSIST";
     field public static final java.lang.String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";
-    field public static final java.lang.String ACTION_AVAILABILITY_CHANGED = "android.intent.action.AVAILABILITY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
     field public static final java.lang.String ACTION_BATTERY_OKAY = "android.intent.action.BATTERY_OKAY";

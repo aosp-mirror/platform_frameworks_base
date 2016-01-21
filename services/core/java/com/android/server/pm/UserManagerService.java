@@ -552,22 +552,13 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private void broadcastProfileAvailabilityChanges(UserHandle profileHandle,
-            UserHandle parentHandle, Bundle extras) {
-        // Send intent to profile
-        Intent intent = new Intent(Intent.ACTION_AVAILABILITY_CHANGED);
+            UserHandle parentHandle, boolean inQuietMode) {
+        Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
+        intent.putExtra(Intent.EXTRA_QUIET_MODE, inQuietMode);
+        intent.putExtra(Intent.EXTRA_USER, profileHandle);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        intent.putExtras(extras);
-        mContext.sendBroadcastAsUser(intent, profileHandle);
-
-        // Send intent to parent
-        if (parentHandle != null) {
-            intent = new Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
-            intent.putExtra(Intent.EXTRA_USER, profileHandle);
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, profileHandle.getIdentifier());
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            intent.putExtras(extras);
-            mContext.sendBroadcastAsUser(intent, parentHandle);
-        }
+        mContext.sendBroadcastAsUser(intent, parentHandle);
     }
 
     @Override
@@ -591,10 +582,21 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (changed) {
-            Bundle extras = new Bundle();
-            extras.putBoolean(Intent.EXTRA_QUIET_MODE, enableQuietMode);
-            broadcastProfileAvailabilityChanges(profile.getUserHandle(),
-                    parent != null ? parent.getUserHandle() : null, extras);
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (enableQuietMode) {
+                    ActivityManagerNative.getDefault().stopUser(userHandle, /* force */true, null);
+                } else {
+                    ActivityManagerNative.getDefault().startUserInBackground(userHandle);
+                }
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "fail to start/stop user for quiet mode", e);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
+            broadcastProfileAvailabilityChanges(profile.getUserHandle(), parent.getUserHandle(),
+                    enableQuietMode);
         }
     }
 
@@ -606,7 +608,7 @@ public class UserManagerService extends IUserManager.Stub {
                 info = getUserInfoLU(userHandle);
             }
             if (info == null || !info.isManagedProfile()) {
-                throw new IllegalArgumentException("User " + userHandle + " is not a profile");
+                return false;
             }
             return info.isQuietModeEnabled();
         }
