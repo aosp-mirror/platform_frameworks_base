@@ -243,7 +243,7 @@ class CopyJob extends Job {
         // TODO: When optimized copy kicks in, we'll not making any progress updates.
         // For now. Local storage isn't using optimized copy.
 
-        // When copying within the same provider, try to use optimized copying and moving.
+        // When copying within the same provider, try to use optimized copying.
         // If not supported, then fallback to byte-by-byte copy/move.
         if (srcInfo.authority.equals(dstDirInfo.authority)) {
             if ((srcInfo.flags & Document.FLAG_SUPPORTS_COPY) != 0) {
@@ -251,8 +251,9 @@ class CopyJob extends Job {
                         dstDirInfo.derivedUri) == null) {
                     onFileFailed(srcInfo,
                             "Provider side copy failed for documents: " + srcInfo.derivedUri + ".");
+                    return false;
                 }
-                return false;
+                return true;
             }
         }
 
