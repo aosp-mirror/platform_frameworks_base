@@ -8685,6 +8685,120 @@ public final class ContactsContract {
                 "com.android.contacts.action.SHOW_OR_CREATE_CONTACT";
 
         /**
+         * Activity Action: Initiate a message to someone by voice. The message could be text,
+         * audio, video or image(photo). This action supports messaging with a specific contact
+         * regardless of the underlying messaging protocol used.
+         * <p>
+         * The action could be originated from the Voice Assistant as a voice interaction. In such
+         * case, a receiving activity that supports {@link android.content.Intent#CATEGORY_VOICE}
+         * could check return value of {@link android.app.Activity#isVoiceInteractionRoot} before
+         * proceeding. By doing this check the activity verifies that the action indeed was
+         * initiated by Voice Assistant and could send a message right away, without any further
+         * input from the user. This allows for a smooth user experience when sending a message by
+         * voice. Note: this activity must also support the {@link
+         * android.content.Intent#CATEGORY_DEFAULT} so it can be found by {@link
+         * android.service.voice.VoiceInteractionSession#startVoiceActivity}.
+         * <p>
+         * When the action was not initiated by Voice Assistant or when the receiving activity does
+         * not support {@link android.content.Intent#CATEGORY_VOICE}, the activity should confirm
+         * with the user before sending the message (because in this case it is unknown which app
+         * sent the intent, it could be malicious).
+         * <p>
+         * To allow the Voice Assistant to help users with contacts disambiguation, the messaging
+         * app may choose to integrate with the Contacts Provider. The following convention should
+         * be met when creating Data table for such integration:
+         * <ul>
+         * <li>Column {@link DataColumns#DATA1} should store the unique contact ID as understood by
+         * the app. This value will be used in the {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID}.</li>
+         * <li>Optionally, column {@link DataColumns#DATA3} could store a human readable label for
+         * the ID. For example it could be phone number or human readable username/user_id like
+         * "a_super_cool_user_name". This label may be shown below the Contact Name by the Voice
+         * Assistant as the user completes the voice action. If DATA3 is empty, the ID in DATA1 may
+         * be shown instead.</li>
+         * <li><em>Note: Do not use DATA3 to store the Contact Name. The Voice Assistant will
+         * already get the Contact Name from the RawContact’s display_name.</em></li>
+         * <li><em>Note: Some apps may choose to use phone number as the unique contact ID in DATA1.
+         * If this applies to you and you’d like phone number to be shown below the Contact Name by
+         * the Voice Assistant, then you may choose to leave DATA3 empty.</em></li>
+         * </ul>
+         * <p>
+         * Input: {@link android.content.Intent#getType} is the MIME type of the data being sent.
+         * The intent sender will always put the concrete mime type in the intent type, like
+         * "text/plain" or "audio/wav" for example. If the MIME type is "text/plain", message to
+         * sent will be provided via {@link android.content.Intent#EXTRA_TEXT} as a styled
+         * CharSequence. Otherwise, the message content will be supplied through {@link
+         * android.content.Intent#setClipData(ClipData)} as a content provider URI(s). In the latter
+         * case, EXTRA_TEXT could still be supplied optionally; for example, for audio messages
+         * ClipData will contain URI of a recording and EXTRA_TEXT could contain the text
+         * transcription of this recording.
+         * <p>
+         * The message can have n recipients. The n-th recipient of the message will be provided as
+         * n-th elements of {@link #EXTRA_RECIPIENT_CONTACT_URI}, {@link
+         * #EXTRA_RECIPIENT_CONTACT_CHAT_ID} and {@link #EXTRA_RECIPIENT_CONTACT_NAME} (as a
+         * consequence, EXTRA_RECIPIENT_CONTACT_URI, EXTRA_RECIPIENT_CONTACT_CHAT_ID and
+         * EXTRA_RECIPIENT_CONTACT_NAME should all be of length n). If neither of these 3 elements
+         * is provided (e.g. all 3 are null) for the recipient or if the information provided is
+         * ambiguous then the activity should prompt the user for the recipient to send the message
+         * to.
+         * <p>
+         * Output: nothing
+         *
+         * @see #EXTRA_RECIPIENT_CONTACT_URI
+         * @see #EXTRA_RECIPIENT_CONTACT_CHAT_ID
+         * @see #EXTRA_RECIPIENT_CONTACT_NAME
+         */
+        public static final String ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS =
+                "android.provider.action.VOICE_SEND_MESSAGE_TO_CONTACTS";
+
+        /**
+         * This extra specifies a content provider uri(s) for the contact(s) (if the contacts were
+         * located in the Contacts Provider), used with {@link
+         * #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient(s). The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID} and
+         * {@link #EXTRA_RECIPIENT_CONTACT_NAME}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * <em>Note: one contact may have multiple accounts (e.g. Chat IDs) on a specific messaging
+         * platform, so this may be ambiguous. E.g., one contact “John Smith” could have two
+         * accounts on the same messaging app.</em>
+         * <p>
+         * <em>Example value: {"content://com.android.contacts/contacts/16"}</em>
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_URI =
+                "android.provider.extra.RECIPIENT_CONTACT_URI";
+
+        /**
+         * This extra specifies a messaging app’s unique ID(s) for the contact(s), used with {@link
+         * #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient(s). The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_URI} and {@link
+         * #EXTRA_RECIPIENT_CONTACT_NAME}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * The value of the elements comes from the {@link DataColumns#DATA1} column in Contacts
+         * Provider, and should be the unambiguous contact endpoint. This value is app-specific, it
+         * could be a phone number or some proprietary ID.
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_CHAT_ID =
+                "android.provider.extra.RECIPIENT_CONTACT_CHAT_ID";
+
+        /**
+         * This extra specifies the contact name (full name from the Contacts Provider), used with
+         * {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} to supply the recipient. The value of this
+         * extra is a {@code String[]}. The number of elements in the array should be equal to
+         * number of recipients (and consistent with {@link #EXTRA_RECIPIENT_CONTACT_URI} and {@link
+         * #EXTRA_RECIPIENT_CONTACT_CHAT_ID}). When the value of the element for the particular
+         * recipient is absent, it will be set to null.
+         * <p>
+         * The value of the elements comes from RawContact's display_name column.
+         * <p>
+         * <em>Example value: {"Jane Doe"}</em>
+         */
+        public static final String EXTRA_RECIPIENT_CONTACT_NAME =
+                "android.provider.extra.RECIPIENT_CONTACT_NAME";
+
+        /**
          * Starts an Activity that lets the user select the multiple phones from a
          * list of phone numbers which come from the contacts or
          * {@link #EXTRA_PHONE_URIS}.
