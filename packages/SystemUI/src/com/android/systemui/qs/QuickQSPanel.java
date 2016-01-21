@@ -145,8 +145,9 @@ public class QuickQSPanel extends QSPanel {
         }
 
         @Override
-        public void updateResources() {
+        public boolean updateResources() {
             // No resources here.
+            return false;
         }
     }
 }

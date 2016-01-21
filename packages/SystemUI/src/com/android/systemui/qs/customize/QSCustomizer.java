@@ -45,7 +45,6 @@ import com.android.systemui.qs.customize.TileAdapter.TileSelectedListener;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.tuner.QSPagingSwitch;
 
 import java.util.ArrayList;
 
@@ -145,7 +144,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private void reset() {
         ArrayList<String> tiles = new ArrayList<>();
-        for (String tile : QSPagingSwitch.QS_PAGE_TILES.split(",")) {
+        String defTiles = mContext.getString(R.string.quick_settings_tiles_default);
+        for (String tile : defTiles.split(",")) {
             tiles.add(tile);
         }
         mQsPanel.setTiles(tiles);

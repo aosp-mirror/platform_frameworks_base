@@ -129,6 +129,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.ADD_CALLBACK, callback).sendToTarget();
     }
 
+    public void removeCallbacks() {
+        mHandler.sendEmptyMessage(H.REMOVE_CALLBACKS);
+    }
+
     public void click() {
         mHandler.sendEmptyMessage(H.CLICK);
     }
@@ -186,6 +190,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
     private void handleAddCallback(Callback callback) {
         mCallbacks.add(callback);
         handleRefreshState(null);
+    }
+
+    private void handleRemoveCallbacks() {
+        mCallbacks.clear();
     }
 
     protected void handleSecondaryClick() {
@@ -285,6 +293,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int SCAN_STATE_CHANGED = 9;
         private static final int DESTROY = 10;
         private static final int CLEAR_STATE = 11;
+        private static final int REMOVE_CALLBACKS = 12;
 
         private H(Looper looper) {
             super(looper);
@@ -296,7 +305,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
             try {
                 if (msg.what == ADD_CALLBACK) {
                     name = "handleAddCallback";
-                    handleAddCallback((QSTile.Callback)msg.obj);
+                    handleAddCallback((QSTile.Callback) msg.obj);
+                } else if (msg.what == REMOVE_CALLBACKS) {
+                    name = "handleRemoveCallbacks";
+                    handleRemoveCallbacks();
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
                     if (mState.disabledByPolicy) {

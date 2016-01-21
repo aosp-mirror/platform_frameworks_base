@@ -38,4 +38,6 @@
          while the stack is not focused. -->
     <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
     <item name="recents_layout_unfocused_range_max" format="float" type="integer">1.5</item>
+
+    <integer name="quick_settings_num_columns">4</integer>
 </resources>

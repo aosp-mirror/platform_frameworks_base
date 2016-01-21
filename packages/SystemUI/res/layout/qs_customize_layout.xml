@@ -21,14 +21,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.android.systemui.qs.QuickTileLayout
-        android:id="@+id/quick_tile_layout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_quick_actions_height"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/qs_quick_actions_padding"
-        android:paddingEnd="@dimen/qs_quick_actions_padding" />
-
     <view
         class="com.android.systemui.qs.PagedTileLayout$TilePage"
         android:id="@+id/tile_page"
