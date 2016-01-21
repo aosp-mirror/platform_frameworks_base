@@ -3589,9 +3589,7 @@ public final class ViewRootImpl implements ViewParent,
 
         // tell the window manager
         try {
-            if (!isInLocalFocusMode()) {
-                mWindowSession.setInTouchMode(inTouchMode);
-            }
+            mWindowSession.setInTouchMode(inTouchMode);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
