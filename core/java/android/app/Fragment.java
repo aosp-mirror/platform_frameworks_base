@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1416,11 +1417,30 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * at this point.  If you want to do work once the activity itself is
      * created, see {@link #onActivityCreated(Bundle)}.
      *
+     * <p>If your app's <code>targetSdkVersion</code> is 23 or lower, child fragments
+     * being restored from the savedInstanceState are restored after <code>onCreate</code>
+     * returns. When targeting N or above and running on an N or newer platform version
+     * they are restored by <code>Fragment.onCreate</code>.</p>
+     *
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
     public void onCreate(@Nullable Bundle savedInstanceState) {
         mCalled = true;
+        final Context context = getContext();
+        final int version = context != null ? context.getApplicationInfo().targetSdkVersion : 0;
+        if (version >= Build.VERSION_CODES.N) {
+            if (savedInstanceState != null) {
+                Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
+                if (p != null) {
+                    if (mChildFragmentManager == null) {
+                        instantiateChildFragmentManager();
+                    }
+                    mChildFragmentManager.restoreAllState(p, null);
+                    mChildFragmentManager.dispatchCreate();
+                }
+            }
+        }
     }
 
     /**
@@ -2210,14 +2230,18 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
             throw new SuperNotCalledException("Fragment " + this
                     + " did not call through to super.onCreate()");
         }
-        if (savedInstanceState != null) {
-            Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
-            if (p != null) {
-                if (mChildFragmentManager == null) {
-                    instantiateChildFragmentManager();
+        final Context context = getContext();
+        final int version = context != null ? context.getApplicationInfo().targetSdkVersion : 0;
+        if (version < Build.VERSION_CODES.N) {
+            if (savedInstanceState != null) {
+                Parcelable p = savedInstanceState.getParcelable(Activity.FRAGMENTS_TAG);
+                if (p != null) {
+                    if (mChildFragmentManager == null) {
+                        instantiateChildFragmentManager();
+                    }
+                    mChildFragmentManager.restoreAllState(p, null);
+                    mChildFragmentManager.dispatchCreate();
                 }
-                mChildFragmentManager.restoreAllState(p, null);
-                mChildFragmentManager.dispatchCreate();
             }
         }
     }
