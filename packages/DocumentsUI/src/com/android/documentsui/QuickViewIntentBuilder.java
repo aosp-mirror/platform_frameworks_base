@@ -72,18 +72,12 @@ final class QuickViewIntentBuilder {
 
         String trustedPkg = mResources.getString(R.string.trusted_quick_viewer_package);
 
-        Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
-        intent.setDataAndType(mDocument.derivedUri, mDocument.mimeType);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        if (TextUtils.isEmpty(trustedPkg)) {
-            if (hasRegisteredHandler(intent)) {
-                return intent;
-            }
-        } else {
+        if (!TextUtils.isEmpty(trustedPkg)) {
+            Intent intent = new Intent(Intent.ACTION_QUICK_VIEW);
+            intent.setDataAndType(mDocument.derivedUri, mDocument.mimeType);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setPackage(trustedPkg);
             if (hasRegisteredHandler(intent)) {
-                // We have a trusted handler. Load all of the docs into the intent.
                 Cursor cursor = mSiblings.getCursor();
                 for (int i = 0; i < cursor.getCount(); i++) {
                     onNextItem(i, cursor);
