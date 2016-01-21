@@ -79,7 +79,7 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
     private static final boolean DEBUG_ATLAS_TEXTURE = false;
 
     // Minimum size in pixels to consider for the resulting texture
-    private static final int MIN_SIZE = 768;
+    private static final int MIN_SIZE = 512;
     // Maximum size in pixels to consider for the resulting texture
     private static final int MAX_SIZE = 2048;
     // Increment in number of pixels between size variants when looking
@@ -664,21 +664,31 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
             if (DEBUG_ATLAS) Log.d(LOG_TAG, "Running " + Thread.currentThread().getName());
 
             Atlas.Entry entry = new Atlas.Entry();
-            for (Atlas.Type type : Atlas.Type.values()) {
-                for (int width = mEnd; width > mStart; width -= mStep) {
-                    for (int height = MAX_SIZE; height > MIN_SIZE; height -= STEP) {
-                        // If the atlas is not big enough, skip it
-                        if (width * height <= mThreshold) continue;
 
+            for (int width = mEnd; width > mStart; width -= mStep) {
+                for (int height = MAX_SIZE; height > MIN_SIZE; height -= STEP) {
+                    // If the atlas is not big enough, skip it
+                    if (width * height <= mThreshold) continue;
+
+                    boolean packSuccess = false;
+
+                    for (Atlas.Type type : Atlas.Type.values()) {
                         final int count = packBitmaps(type, width, height, entry);
                         if (count > 0) {
                             mResults.add(new WorkerResult(type, width, height, count));
-                            // If we were able to pack everything let's stop here
-                            // Increasing the height further won't make things better
                             if (count == mBitmaps.size()) {
+                                // If we were able to pack everything let's stop here
+                                // Changing the type further won't make things better
+                                packSuccess = true;
                                 break;
                             }
                         }
+                    }
+
+                    // If we were not able to pack everything let's stop here
+                    // Decreasing the height further won't make things better
+                    if (!packSuccess) {
+                        break;
                     }
                 }
             }
