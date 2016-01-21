@@ -551,12 +551,13 @@ public:
             if (resourceFile) {
                 return mergeCompiledFile(file, std::move(resourceFile), override);
             }
-        } else {
-            // Ignore non .flat files. This could be classes.dex or something else that happens
-            // to be in an archive.
+
+            return false;
         }
 
-        return false;
+        // Ignore non .flat files. This could be classes.dex or something else that happens
+        // to be in an archive.
+        return true;
     }
 
     int run(const std::vector<std::string>& inputFiles) {

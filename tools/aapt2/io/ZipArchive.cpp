@@ -75,11 +75,19 @@ ZipFileCollection::ZipFileCollection() : mHandle(nullptr) {
 
 std::unique_ptr<ZipFileCollection> ZipFileCollection::create(const StringPiece& path,
                                                              std::string* outError) {
+    constexpr static const int32_t kEmptyArchive = -6;
+
     std::unique_ptr<ZipFileCollection> collection = std::unique_ptr<ZipFileCollection>(
             new ZipFileCollection());
 
     int32_t result = OpenArchive(path.data(), &collection->mHandle);
     if (result != 0) {
+        // If a zip is empty, result will be an error code. This is fine and we should
+        // return an empty ZipFileCollection.
+        if (result == kEmptyArchive) {
+            return collection;
+        }
+
         if (outError) *outError = ErrorCodeString(result);
         return {};
     }
