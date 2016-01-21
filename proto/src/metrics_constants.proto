@@ -339,5 +339,8 @@ message MetricsEvent {
 
     // Logged when the user calls an emergency contact.
     ACTION_CALL_EMERGENCY_CONTACT = 283;
+
+    // QS Tile for Data Saver.
+    QS_DATA_SAVER = 284;
   }
 }

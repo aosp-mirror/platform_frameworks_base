@@ -33,6 +33,7 @@ public interface NetworkController {
     void onUserSwitched(int newUserId);
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();
+    DataSaverController getDataSaverController();
 
     public interface SignalCallback {
         void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,

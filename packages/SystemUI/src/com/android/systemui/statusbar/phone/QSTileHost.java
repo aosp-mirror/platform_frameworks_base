@@ -38,6 +38,7 @@ import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.HotspotTile;
@@ -346,6 +347,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("hotspot")) return new HotspotTile(this);
         else if (tileSpec.equals("user")) return new UserTile(this);
         else if (tileSpec.equals("battery")) return new BatteryTile(this);
+        else if (tileSpec.equals("saver")) return new DataSaverTile(this);
         else if (tileSpec.equals(ColorMatrixTile.COLOR_MATRIX_SPEC))
             return new ColorMatrixTile(this);
         // Intent tiles.

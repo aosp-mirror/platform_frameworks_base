@@ -1333,4 +1333,13 @@
     <!-- Explanation of the status bar section of the tuner [CHAR LIMIT=NONE] -->
     <string name="tuner_status_bar_explanation">Enable or disable icons from being shown in the status bar.</string>
 
+    <!-- Label for quick settings tile for data saver [CHAR LIMIT=30] -->
+    <string name="data_saver">Data Saver</string>
+
+    <!-- Accessibility description for data saver being on [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_saver_on">Data Saver is on</string>
+
+    <!-- Accessibility description for data saver being off [CHAR LIMIT=NONE] -->
+    <string name="accessibility_data_saver_off">Data Saver is off</string>
+
 </resources>

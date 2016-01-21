@@ -78,6 +78,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final SubscriptionManager mSubscriptionManager;
     private final boolean mHasMobileDataFeature;
     private final SubscriptionDefaults mSubDefaults;
+    private final DataSaverController mDataSaverController;
     private Config mConfig;
 
     // Subcontrollers.
@@ -156,6 +157,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
         mCallbackHandler = callbackHandler;
+        mDataSaverController = new DataSaverController(context);
 
         mSubscriptionManager = subManager;
         mSubDefaults = defaultsHandler;
@@ -187,6 +189,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
+    }
+
+    public DataSaverController getDataSaverController() {
+        return mDataSaverController;
     }
 
     private void registerListeners() {
