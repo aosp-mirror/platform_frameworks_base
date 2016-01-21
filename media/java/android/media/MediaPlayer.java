@@ -2127,6 +2127,12 @@ public class MediaPlayer implements SubtitleController.Listener
      */
     public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
 
+    /**
+     * MIME type for CEA-708 closed caption data.
+     * @hide
+     */
+    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
+
     /*
      * A helper function to check if the mime type is supported by media framework.
      */
