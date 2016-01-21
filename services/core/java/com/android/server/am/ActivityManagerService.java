@@ -21143,7 +21143,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void moveToFront() {
             checkCaller();
             // Will bring task to front if it already has a root activity.
-            startActivityFromRecentsInner(mTaskId, null);
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                startActivityFromRecentsInner(mTaskId, null);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
 
         @Override
