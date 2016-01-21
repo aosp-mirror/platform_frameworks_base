@@ -23,14 +23,11 @@ import android.provider.DocumentsContract.Document;
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.State;
-
-import java.util.List;
 
 @SmallTest
 public class SectionBreakDocumentsAdapterWrapperTest extends AndroidTestCase {
@@ -57,7 +54,7 @@ public class SectionBreakDocumentsAdapterWrapperTest extends AndroidTestCase {
         final Context testContext = TestContext.createStorageTestContext(getContext(), AUTHORITY);
         DocumentsAdapter.Environment env = new TestEnvironment(testContext);
 
-        mModel = new TestModel(testContext, AUTHORITY);
+        mModel = new TestModel(AUTHORITY);
         mAdapter = new SectionBreakDocumentsAdapterWrapper(
             env,
             new ModelBackedDocumentsAdapter(

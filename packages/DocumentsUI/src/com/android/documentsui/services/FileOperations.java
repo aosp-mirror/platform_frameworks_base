@@ -22,6 +22,7 @@ import static com.android.documentsui.Shared.EXTRA_STACK;
 import static com.android.documentsui.Shared.asArrayList;
 import static com.android.documentsui.Shared.getQuantityString;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
+import static com.android.documentsui.services.FileOperationService.EXTRA_DELAY;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
@@ -52,10 +53,12 @@ public final class FileOperations {
 
     private static final String TAG = "FileOperations";
 
+    private static final IdBuilder idBuilder = new IdBuilder();
+
     private FileOperations() {}
 
     public static String createJobId() {
-        return String.valueOf(elapsedRealtime());
+        return idBuilder.getNext();
     }
 
     /**
@@ -73,7 +76,7 @@ public final class FileOperations {
             case OPERATION_MOVE:
                 return FileOperations.move(activity, srcDocs, stack);
             case OPERATION_DELETE:
-                return FileOperations.delete(activity, srcDocs, stack);
+                throw new UnsupportedOperationException("Delete isn't currently supported.");
             default:
                 throw new UnsupportedOperationException("Unknown operation: " + operationType);
         }
@@ -151,14 +154,17 @@ public final class FileOperations {
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
+     * @param delay Number of milliseconds to wait before executing the job.
      * @return Id of the job.
      */
     public static String delete(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentStack location) {
+            Activity activity, List<DocumentInfo> srcDocs, DocumentStack location, int delay) {
         String jobId = createJobId();
-        if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id: " + jobId);
+        if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id " + jobId
+                + " delayed by " + delay + " milliseconds.");
 
         Intent intent = createBaseIntent(OPERATION_DELETE, activity, jobId, srcDocs, location);
+        intent.putExtra(EXTRA_DELAY, delay);
         activity.startService(intent);
 
         return jobId;
@@ -192,5 +198,25 @@ public final class FileOperations {
                 activity,
                 getQuantityString(activity, contentId, fileCount),
                 Snackbar.LENGTH_SHORT);
+    }
+
+    private static final class IdBuilder {
+
+        // Remember last job time so we can guard against collisions.
+        private long mLastJobTime;
+
+        // If we detect a collision, use subId to make distinct.
+        private int mSubId;
+
+        public synchronized String getNext() {
+            long time = elapsedRealtime();
+            if (time == mLastJobTime) {
+                mSubId++;
+            } else {
+                mSubId = 0;
+            }
+            mLastJobTime = time;
+            return String.valueOf(mLastJobTime) + "-" + String.valueOf(mSubId);
+        }
     }
 }

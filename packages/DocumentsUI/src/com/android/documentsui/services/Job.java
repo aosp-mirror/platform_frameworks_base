@@ -16,6 +16,7 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.DocumentsApplication.acquireUnstableProviderOrThrow;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
 import static com.android.documentsui.services.FileOperationService.EXTRA_FAILURE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
@@ -24,18 +25,21 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LI
 import static com.android.documentsui.services.FileOperationService.FAILURE_COPY;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.DrawableRes;
 import android.annotation.PluralsRes;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.PendingIntent;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
+import android.util.Log;
 
 import com.android.documentsui.FilesActivity;
 import com.android.documentsui.R;
@@ -45,7 +49,9 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A mashup of work item and ui progress update factory. Used by {@link FileOperationService}
@@ -53,6 +59,7 @@ import java.util.List;
  */
 abstract class Job implements Runnable {
 
+    private static final String TAG = "Job";
     final Context service;
     final Context appContext;
     final Listener listener;
@@ -64,6 +71,7 @@ abstract class Job implements Runnable {
     final ArrayList<DocumentInfo> failedFiles = new ArrayList<>();
     final Notification.Builder mProgressBuilder;
 
+    private final Map<String, ContentProviderClient> mClients = new HashMap<>();
     private volatile boolean mCanceled;
 
     /**
@@ -118,13 +126,30 @@ abstract class Job implements Runnable {
 
     abstract void start() throws RemoteException;
 
-    // Service will call this when it is done with the job.
-    abstract void cleanup();
-
     abstract Notification getSetupNotification();
     // TODO: Progress notification for deletes.
     // abstract Notification getProgressNotification(long bytesCopied);
     abstract Notification getFailureNotification();
+
+    ContentProviderClient getClient(DocumentInfo doc) throws RemoteException {
+        ContentProviderClient client = mClients.get(doc.authority);
+        if (client == null) {
+            // Acquire content providers.
+            client = acquireUnstableProviderOrThrow(
+                    getContentResolver(),
+                    doc.authority);
+
+            mClients.put(doc.authority, client);
+        }
+
+        return checkNotNull(client);
+    }
+
+    final void cleanup() {
+        for (ContentProviderClient client : mClients.values()) {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
 
     final void cancel() {
         mCanceled = true;
@@ -144,6 +169,17 @@ abstract class Job implements Runnable {
 
     final boolean failed() {
         return !failedFiles.isEmpty();
+    }
+
+    final boolean deleteDocument(DocumentInfo doc) {
+        try {
+            DocumentsContract.deleteDocument(getClient(doc), doc.derivedUri);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to delete file: " + doc.derivedUri, e);
+            return false;
+        }
+
+        return true;  // victory dance!
     }
 
     Notification getSetupNotification(String content) {
@@ -215,6 +251,16 @@ abstract class Job implements Runnable {
         return cancelIntent;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("Job")
+                .append("{")
+                .append("id=" + id)
+                .append("}")
+                .toString();
+    }
+
     /**
      * Factory class that facilitates our testing FileOperationService.
      */
@@ -230,6 +276,11 @@ abstract class Job implements Runnable {
         Job createMove(Context service, Context appContext, Listener listener,
                 String id, DocumentStack stack, List<DocumentInfo> srcs) {
             return new MoveJob(service, appContext, listener, id, stack, srcs);
+        }
+
+        Job createDelete(Context service, Context appContext, Listener listener,
+                String id, DocumentStack stack, List<DocumentInfo> srcs) {
+            return new DeleteJob(service, appContext, listener, id, stack, srcs);
         }
     }
 

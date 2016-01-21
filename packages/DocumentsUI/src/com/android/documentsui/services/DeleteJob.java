@@ -16,14 +16,14 @@
 
 package com.android.documentsui.services;
 
-import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
+import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
 import android.os.RemoteException;
-import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Document;
+import android.util.Log;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -31,9 +31,10 @@ import com.android.documentsui.model.DocumentStack;
 
 import java.util.List;
 
-final class MoveJob extends CopyJob {
+final class DeleteJob extends Job {
 
-    private static final String TAG = "MoveJob";
+    private static final String TAG = "DeleteJob";
+    private List<DocumentInfo> mSrcs;
 
     /**
      * Moves files to a destination identified by {@code destination}.
@@ -42,11 +43,12 @@ final class MoveJob extends CopyJob {
      *
      * @see @link {@link Job} constructor for most param descriptions.
      *
-     * @param srcs List of files to be moved.
+     * @param srcs List of files to delete
      */
-    MoveJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack destination, List<DocumentInfo> srcs) {
-        super(service, appContext, listener, OPERATION_MOVE, id, destination, srcs);
+    DeleteJob(Context service, Context appContext, Listener listener,
+            String id, DocumentStack stack, List<DocumentInfo> srcs) {
+        super(service, appContext, listener, OPERATION_DELETE, id, stack);
+        this.mSrcs = srcs;
     }
 
     @Override
@@ -60,52 +62,34 @@ final class MoveJob extends CopyJob {
 
     @Override
     public Notification getSetupNotification() {
-        return getSetupNotification(service.getString(R.string.move_preparing));
-    }
-
-    @Override
-    public Notification getProgressNotification() {
-        return getProgressNotification(R.string.copy_preparing);
+        return getSetupNotification(service.getString(R.string.delete_preparing));
     }
 
     @Override
     Notification getFailureNotification() {
         return getFailureNotification(
-                R.plurals.move_error_notification_title, R.drawable.ic_menu_copy);
+                R.plurals.delete_error_notification_title, R.drawable.ic_menu_delete);
     }
 
     @Override
-    boolean processDocument(DocumentInfo src, DocumentInfo dest) throws RemoteException {
-
-        // TODO: When optimized move kicks in, we're not making any progress updates. FIX IT!
-
-        // When moving within the same provider, try to use optimized moving.
-        // If not supported, then fallback to byte-by-byte copy/move.
-        if (src.authority.equals(dest.authority)) {
-            if ((src.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
-                if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
-                        dest.derivedUri) == null) {
-                    onFileFailed(src);
-                    return false;
-                }
-                return true;
+    void start() throws RemoteException {
+        for (DocumentInfo doc : mSrcs) {
+            if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
+            if (!deleteDocument(doc)) {
+                Log.w(TAG, "Failed to delete document @ " + doc.derivedUri);
+                onFileFailed(doc);
             }
         }
-
-        // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
-        boolean copied = byteCopyDocument(src, dest);
-
-        return copied && !isCanceled() && deleteDocument(src);
     }
 
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("MoveJob")
+                .append("DeleteJob")
                 .append("{")
                 .append("id=" + id)
                 .append("srcs=" + mSrcs)
-                .append(", destination=" + stack)
+                .append(", location=" + stack)
                 .append("}")
                 .toString();
     }

@@ -146,7 +146,7 @@ public class TestScheduledExecutorService implements ScheduledExecutorService {
         scheduled.get(taskIndex).runnable.run();
     }
 
-    public void isAlive() {
+    public void assertAlive() {
         assertFalse(isShutdown());
     }
 

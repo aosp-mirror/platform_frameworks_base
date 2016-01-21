@@ -16,72 +16,18 @@
 
 package com.android.documentsui.services;
 
-import static com.android.documentsui.StubProvider.ROOT_0_ID;
-import static com.android.documentsui.StubProvider.ROOT_1_ID;
 import static com.google.common.collect.Lists.newArrayList;
 
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.provider.DocumentsContract;
-import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.DocumentsProviderHelper;
-import com.android.documentsui.StubProvider;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.RootInfo;
 
 import java.util.List;
 
 @MediumTest
-public abstract class BaseCopyJobTest extends AndroidTestCase {
-
-    static String AUTHORITY = StubProvider.DEFAULT_AUTHORITY;
-    static final byte[] HAM_BYTES = "ham and cheese".getBytes();
-    static final byte[] FRUITY_BYTES = "I love fruit cakes!".getBytes();
-
-    Context mContext;
-    ContentResolver mResolver;
-    ContentProviderClient mClient;
-    DocumentsProviderHelper mDocs;
-    TestJobListener mJobListener;
-    RootInfo mSrcRoot;
-    RootInfo mDestRoot;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mJobListener = new TestJobListener();
-
-        // NOTE: Must be the "target" context, else security checks in content provider will fail.
-        mContext = getContext();
-        mResolver = mContext.getContentResolver();
-
-        mClient = mResolver.acquireContentProviderClient(AUTHORITY);
-        mDocs = new DocumentsProviderHelper(AUTHORITY, mClient);
-
-        initTestFiles();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        resetStorage();
-        mClient.release();
-        super.tearDown();
-    }
-
-    private void resetStorage() throws RemoteException {
-        mClient.call("clear", null, null);
-    }
-
-    private void initTestFiles() throws RemoteException {
-        mSrcRoot = mDocs.getRoot(ROOT_0_ID);
-        mDestRoot = mDocs.getRoot(ROOT_1_ID);
-    }
+public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJobTest<T> {
 
     public void runCopyFilesTest() throws Exception {
         Uri testFile1 = mDocs.createDocument(mSrcRoot, "text/plain", "test1.txt");
@@ -174,9 +120,9 @@ public abstract class BaseCopyJobTest extends AndroidTestCase {
 
     public void runNoCopyDirToDescendentTest() throws Exception {
         Uri testDir = mDocs.createFolder(mSrcRoot, "someDir");
-        Uri descDir = mDocs.createFolder(testDir, "theDescendent");
+        Uri destDir = mDocs.createFolder(testDir, "theDescendent");
 
-        createJob(newArrayList(testDir), descDir).run();
+        createJob(newArrayList(testDir), destDir).run();
 
         mJobListener.waitForFinished();
         mJobListener.assertFailed();
@@ -201,10 +147,11 @@ public abstract class BaseCopyJobTest extends AndroidTestCase {
         mDocs.assertChildCount(mDestRoot, 0);
     }
 
-    final CopyJob createJob(List<Uri> srcs) throws Exception {
+    /**
+     * Creates a job with a stack consisting to the default destination.
+     */
+    final T createJob(List<Uri> srcs) throws Exception {
         Uri destination = DocumentsContract.buildDocumentUri(AUTHORITY, mDestRoot.documentId);
         return createJob(srcs, destination);
     }
-
-    abstract CopyJob createJob(List<Uri> srcs, Uri destination) throws Exception;
 }

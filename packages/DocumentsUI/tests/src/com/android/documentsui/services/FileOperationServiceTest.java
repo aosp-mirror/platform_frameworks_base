@@ -114,8 +114,11 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
     public void testShutdownStopsExecutor_AfterSuccess() throws Exception {
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
 
-        mExecutor.isAlive();
+        mExecutor.assertAlive();
+
         mExecutor.runAll();
+        shutdownService();
+
         mExecutor.assertShutdown();
     }
 
@@ -126,6 +129,8 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mJobFactory.jobs.get(0).fail(ALPHA_DOC);
 
         mExecutor.runAll();
+        shutdownService();
+
         mExecutor.assertShutdown();
     }
 
@@ -137,6 +142,8 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mJobFactory.jobs.get(1).fail(GAMMA_DOC);
 
         mExecutor.runAll();
+        shutdownService();
+
         mExecutor.assertShutdown();
     }
 

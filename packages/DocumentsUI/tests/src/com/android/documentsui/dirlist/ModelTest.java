@@ -38,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 @SmallTest
 public class ModelTest extends AndroidTestCase {
@@ -96,7 +95,7 @@ public class ModelTest extends AndroidTestCase {
         r.cursor = cursor;
 
         // Instantiate the model with a dummy view adapter and listener that (for now) do nothing.
-        model = new Model(context);
+        model = new Model();
         model.addUpdateListener(new DummyListener());
         model.update(r);
     }
@@ -303,16 +302,6 @@ public class ModelTest extends AndroidTestCase {
         }
     }
 
-    // Tests that Model.delete works correctly.
-    public void testDelete() throws Exception {
-        // Simulate deleting 2 files.
-        List<DocumentInfo> docsBefore = getDocumentInfo(2, 3);
-        delete(2, 3);
-
-        provider.assertWasDeleted(docsBefore.get(0));
-        provider.assertWasDeleted(docsBefore.get(1));
-    }
-
     private void setupTestContext() {
         final MockContentResolver resolver = new MockContentResolver();
         context = new ContextWrapper(getContext()) {
@@ -333,29 +322,6 @@ public class ModelTest extends AndroidTestCase {
             s.add(ids.get(p));
         }
         return s;
-    }
-
-    private void delete(int... positions) throws InterruptedException {
-        Selection s = positionToSelection(positions);
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        model.delete(
-                s,
-                new Model.DeletionListener() {
-                    @Override
-                    public void onError() {
-                        latch.countDown();
-                    }
-                    @Override
-                    void onCompletion() {
-                        latch.countDown();
-                    }
-                });
-        latch.await();
-    }
-
-    private List<DocumentInfo> getDocumentInfo(int... positions) {
-        return model.getDocuments(positionToSelection(positions));
     }
 
     private static class DummyListener implements Model.UpdateListener {

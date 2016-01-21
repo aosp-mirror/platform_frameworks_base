@@ -46,9 +46,6 @@ public class TestJob extends Job {
         assertTrue(mStarted);
     }
 
-    @Override
-    void cleanup() {}
-
     void fail(DocumentInfo doc) {
         onFileFailed(doc);
     }

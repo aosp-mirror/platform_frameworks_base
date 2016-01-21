@@ -16,18 +16,15 @@
 
 package com.android.documentsui.services;
 
-import android.net.Uri;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 
-import com.google.common.collect.Lists;
-
 import java.util.List;
 
 @MediumTest
-public class MoveJobTest extends BaseCopyJobTest {
+public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
 
     public void testMoveFiles() throws Exception {
         runCopyFilesTest();
@@ -82,16 +79,8 @@ public class MoveJobTest extends BaseCopyJobTest {
     }
 
     @Override
-    CopyJob createJob(List<Uri> srcs, Uri destination) throws Exception {
-        DocumentStack stack = new DocumentStack();
-        stack.push(DocumentInfo.fromUri(mResolver, destination));
-
-        List<DocumentInfo> srcDocs = Lists.newArrayList();
-        for (Uri src : srcs) {
-            srcDocs.add(DocumentInfo.fromUri(mResolver, src));
-        }
-
+    MoveJob createJob(List<DocumentInfo> srcs, DocumentStack stack) throws Exception {
         return new MoveJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcDocs);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs);
     }
 }
