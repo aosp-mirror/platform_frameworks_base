@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ILauncherApps;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -123,6 +124,30 @@ public class LauncherApps {
          */
         abstract public void onPackagesUnavailable(String[] packageNames, UserHandle user,
                 boolean replacing);
+
+        /**
+         * Indicates that one or more packages have been suspended. For
+         * example, this can happen when a Device Administrator suspends
+         * an applicaton.
+         *
+         * @param packageNames The names of the packages that have just been
+         *            suspended.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        public void onPackagesSuspended(String[] packageNames, UserHandle user) {
+        }
+
+        /**
+         * Indicates that one or more packages have been unsuspended. For
+         * example, this can happen when a Device Administrator unsuspends
+         * an applicaton.
+         *
+         * @param packageNames The names of the packages that have just been
+         *            unsuspended.
+         * @param user The UserHandle of the profile that generated the change.
+         */
+        public void onPackagesUnsuspended(String[] packageNames, UserHandle user) {
+        }
     }
 
     /** @hide */
@@ -237,6 +262,25 @@ public class LauncherApps {
     public boolean isPackageEnabled(String packageName, UserHandle user) {
         try {
             return mService.isPackageEnabled(packageName, user);
+        } catch (RemoteException re) {
+            throw new RuntimeException("Failed to call LauncherAppsService", re);
+        }
+    }
+
+    /**
+     * Retrieve all of the information we know about a particular package / application.
+     *
+     * @param packageName The package of the application
+     * @param flags Additional option flags {@link PackageManager#getApplicationInfo}
+     * @param user The UserHandle of the profile.
+     *
+     * @return An {@link ApplicationInfo} containing information about the package or
+     *         null of the package isn't found.
+     */
+    public ApplicationInfo getApplicationInfo(String packageName, @ApplicationInfoFlags int flags,
+            UserHandle user) {
+        try {
+            return mService.getApplicationInfo(packageName, flags, user);
         } catch (RemoteException re) {
             throw new RuntimeException("Failed to call LauncherAppsService", re);
         }
@@ -400,7 +444,33 @@ public class LauncherApps {
                 for (CallbackMessageHandler callback : mCallbacks) {
                     callback.postOnPackagesUnavailable(packageNames, user, replacing);
                 }
-           }
+            }
+        }
+
+        @Override
+        public void onPackagesSuspended(UserHandle user, String[] packageNames)
+                throws RemoteException {
+            if (DEBUG) {
+                Log.d(TAG, "onPackagesSuspended " + user.getIdentifier() + "," + packageNames);
+            }
+            synchronized (LauncherApps.this) {
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackagesSuspended(packageNames, user);
+                }
+            }
+        }
+
+        @Override
+        public void onPackagesUnsuspended(UserHandle user, String[] packageNames)
+                throws RemoteException {
+            if (DEBUG) {
+                Log.d(TAG, "onPackagesUnsuspended " + user.getIdentifier() + "," + packageNames);
+            }
+            synchronized (LauncherApps.this) {
+                for (CallbackMessageHandler callback : mCallbacks) {
+                    callback.postOnPackagesUnsuspended(packageNames, user);
+                }
+            }
         }
     };
 
@@ -410,6 +480,8 @@ public class LauncherApps {
         private static final int MSG_CHANGED = 3;
         private static final int MSG_AVAILABLE = 4;
         private static final int MSG_UNAVAILABLE = 5;
+        private static final int MSG_SUSPENDED = 6;
+        private static final int MSG_UNSUSPENDED = 7;
 
         private LauncherApps.Callback mCallback;
 
@@ -446,6 +518,12 @@ public class LauncherApps {
                     break;
                 case MSG_UNAVAILABLE:
                     mCallback.onPackagesUnavailable(info.packageNames, info.user, info.replacing);
+                    break;
+                case MSG_SUSPENDED:
+                    mCallback.onPackagesSuspended(info.packageNames, info.user);
+                    break;
+                case MSG_UNSUSPENDED:
+                    mCallback.onPackagesUnsuspended(info.packageNames, info.user);
                     break;
             }
         }
@@ -487,6 +565,20 @@ public class LauncherApps {
             info.replacing = replacing;
             info.user = user;
             obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
+        }
+
+        public void postOnPackagesSuspended(String[] packageNames, UserHandle user) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageNames = packageNames;
+            info.user = user;
+            obtainMessage(MSG_SUSPENDED, info).sendToTarget();
+        }
+
+        public void postOnPackagesUnsuspended(String[] packageNames, UserHandle user) {
+            CallbackInfo info = new CallbackInfo();
+            info.packageNames = packageNames;
+            info.user = user;
+            obtainMessage(MSG_UNSUSPENDED, info).sendToTarget();
         }
     }
 }

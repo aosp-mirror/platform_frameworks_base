@@ -27,4 +27,6 @@ oneway interface IOnAppsChangedListener {
     void onPackageChanged(in UserHandle user, String packageName);
     void onPackagesAvailable(in UserHandle user, in String[] packageNames, boolean replacing);
     void onPackagesUnavailable(in UserHandle user, in String[] packageNames, boolean replacing);
+    void onPackagesSuspended(in UserHandle user, in String[] packageNames);
+    void onPackagesUnsuspended(in UserHandle user, in String[] packageNames);
 }

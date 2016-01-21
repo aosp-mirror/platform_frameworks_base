@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -40,4 +41,5 @@ interface ILauncherApps {
             in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String packageName, in UserHandle user);
     boolean isActivityEnabled(in ComponentName component, in UserHandle user);
+    ApplicationInfo getApplicationInfo(String packageName, int flags, in UserHandle user);
 }

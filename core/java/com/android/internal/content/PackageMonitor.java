@@ -47,6 +47,8 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         sPackageFilt.addDataScheme("package");
         sNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
         sNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
+        sNonDataFilt.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        sNonDataFilt.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
         sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sExternalFilt.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
     }
@@ -185,7 +187,13 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     
     public void onPackagesUnavailable(String[] packages) {
     }
-    
+
+    public void onPackagesSuspended(String[] packages) {
+    }
+
+    public void onPackagesUnsuspended(String[] packages) {
+    }
+
     public static final int PACKAGE_UNCHANGED = 0;
     public static final int PACKAGE_UPDATING = 1;
     public static final int PACKAGE_TEMPORARY_CHANGE = 2;
@@ -396,8 +404,16 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     onPackageDisappeared(pkgList[i], mChangeType);
                 }
             }
+        } else if (Intent.ACTION_PACKAGES_SUSPENDED.equals(action)) {
+            String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            mSomePackagesChanged = true;
+            onPackagesSuspended(pkgList);
+        } else if (Intent.ACTION_PACKAGES_UNSUSPENDED.equals(action)) {
+            String[] pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+            mSomePackagesChanged = true;
+            onPackagesUnsuspended(pkgList);
         }
-        
+
         if (mSomePackagesChanged) {
             onSomePackagesChanged();
         }
