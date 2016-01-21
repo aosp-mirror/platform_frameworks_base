@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.util.Log;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -90,6 +91,15 @@ final class MoveJob extends CopyJob {
                 }
                 return true;
             }
+        }
+
+        // Moving virtual files by bytes is not supported. This is because, it would involve
+        // conversion, and the source file should not be deleted in such case (as it's a different
+        // file).
+        if (src.isVirtualDocument()) {
+            Log.w(TAG, "Cannot move virtual files byte by byte.");
+            onFileFailed(src);
+            return false;
         }
 
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.

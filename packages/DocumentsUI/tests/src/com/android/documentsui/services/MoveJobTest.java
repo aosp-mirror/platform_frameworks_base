@@ -16,6 +16,9 @@
 
 package com.android.documentsui.services;
 
+import static com.google.common.collect.Lists.newArrayList;
+
+import android.net.Uri;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -33,15 +36,23 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
     }
 
     public void testMoveVirtualTypedFile() throws Exception {
-        runCopyVirtualTypedFileTest();
+        Uri testFile = mDocs.createVirtualFile(
+                mSrcRoot, "/virtual.sth", "virtual/mime-type",
+                FRUITY_BYTES, "application/pdf", "text/html");
+        createJob(newArrayList(testFile)).run();
 
-        mDocs.assertChildCount(mSrcRoot, 0);
+        mJobListener.waitForFinished();
+
+        // Should have failed, source not deleted. Moving by bytes for virtual files
+        // is not supported.
+        mDocs.assertChildCount(mDestRoot, 0);
+        mDocs.assertChildCount(mSrcRoot, 1);
     }
 
     public void testMoveVirtualNonTypedFile() throws Exception {
         runCopyVirtualNonTypedFileTest();
 
-        // should have failed, source not deleted
+        // Should have failed, source not deleted.
         mDocs.assertChildCount(mSrcRoot, 1);
     }
 
