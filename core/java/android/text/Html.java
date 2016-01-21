@@ -54,6 +54,8 @@ import android.text.style.UnderlineSpan;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class processes HTML strings into displayable styled text.
@@ -640,7 +642,7 @@ public class Html {
 
 class HtmlToSpannedConverter implements ContentHandler {
 
-    private static final float[] HEADER_SIZES = {
+    private static final float[] HEADING_SIZES = {
         1.5f, 1.4f, 1.3f, 1.2f, 1.1f, 1f,
     };
 
@@ -650,6 +652,15 @@ class HtmlToSpannedConverter implements ContentHandler {
     private Html.ImageGetter mImageGetter;
     private Html.TagHandler mTagHandler;
     private int mFlags;
+
+    private static Pattern sTextAlignPattern;
+
+    private static Pattern getTextAlignPattern() {
+        if (sTextAlignPattern == null) {
+            sTextAlignPattern = Pattern.compile("(?:\\s+|\\A)text-align\\s*:\\s*(\\S*)\\b");
+        }
+        return sTextAlignPattern;
+    }
 
     public HtmlToSpannedConverter( String source, Html.ImageGetter imageGetter,
             Html.TagHandler tagHandler, Parser parser, int flags) {
@@ -701,11 +712,11 @@ class HtmlToSpannedConverter implements ContentHandler {
     private void handleStartTag(String tag, Attributes attributes) {
         if (tag.equalsIgnoreCase("br")) {
             // We don't need to handle this. TagSoup will ensure that there's a </br> for each <br>
-            // so we can safely emite the linebreaks when we handle the close tag.
+            // so we can safely emit the linebreaks when we handle the close tag.
         } else if (tag.equalsIgnoreCase("p")) {
-            handleP(mSpannableStringBuilder);
+            startBlockElement(mSpannableStringBuilder, attributes, getMarginParagraph());
         } else if (tag.equalsIgnoreCase("div")) {
-            handleP(mSpannableStringBuilder);
+            startBlockElement(mSpannableStringBuilder, attributes, getMarginDiv());
         } else if (tag.equalsIgnoreCase("strong")) {
             start(mSpannableStringBuilder, new Bold());
         } else if (tag.equalsIgnoreCase("b")) {
@@ -725,8 +736,7 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("font")) {
             startFont(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("blockquote")) {
-            handleP(mSpannableStringBuilder);
-            start(mSpannableStringBuilder, new Blockquote());
+            startBlockquote(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("tt")) {
             start(mSpannableStringBuilder, new Monospace());
         } else if (tag.equalsIgnoreCase("a")) {
@@ -744,10 +754,9 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("sub")) {
             start(mSpannableStringBuilder, new Sub());
         } else if (tag.length() == 2 &&
-                   Character.toLowerCase(tag.charAt(0)) == 'h' &&
-                   tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
-            handleP(mSpannableStringBuilder);
-            start(mSpannableStringBuilder, new Header(tag.charAt(1) - '1'));
+                Character.toLowerCase(tag.charAt(0)) == 'h' &&
+                tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
+            startHeading(mSpannableStringBuilder, attributes, tag.charAt(1) - '1');
         } else if (tag.equalsIgnoreCase("img")) {
             startImg(mSpannableStringBuilder, attributes, mImageGetter);
         } else if (mTagHandler != null) {
@@ -759,9 +768,9 @@ class HtmlToSpannedConverter implements ContentHandler {
         if (tag.equalsIgnoreCase("br")) {
             handleBr(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("p")) {
-            handleP(mSpannableStringBuilder);
+            endBlockElement(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("div")) {
-            handleP(mSpannableStringBuilder);
+            endBlockElement(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("strong")) {
             end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD));
         } else if (tag.equalsIgnoreCase("b")) {
@@ -781,11 +790,9 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.equalsIgnoreCase("font")) {
             endFont(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("blockquote")) {
-            handleP(mSpannableStringBuilder);
-            end(mSpannableStringBuilder, Blockquote.class, new QuoteSpan());
+            endBlockquote(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("tt")) {
-            end(mSpannableStringBuilder, Monospace.class,
-                    new TypefaceSpan("monospace"));
+            end(mSpannableStringBuilder, Monospace.class, new TypefaceSpan("monospace"));
         } else if (tag.equalsIgnoreCase("a")) {
             endA(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("u")) {
@@ -803,40 +810,134 @@ class HtmlToSpannedConverter implements ContentHandler {
         } else if (tag.length() == 2 &&
                 Character.toLowerCase(tag.charAt(0)) == 'h' &&
                 tag.charAt(1) >= '1' && tag.charAt(1) <= '6') {
-            handleP(mSpannableStringBuilder);
-            endHeader(mSpannableStringBuilder);
+            endHeading(mSpannableStringBuilder);
         } else if (mTagHandler != null) {
             mTagHandler.handleTag(false, tag, mSpannableStringBuilder, mReader);
         }
     }
 
-    private static void handleP(SpannableStringBuilder text) {
-        int len = text.length();
+    private int getMarginParagraph() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH);
+    }
 
-        if (len >= 1 && text.charAt(len - 1) == '\n') {
-            if (len >= 2 && text.charAt(len - 2) == '\n') {
-                return;
-            }
+    private int getMarginHeading() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING);
+    }
 
-            text.append("\n");
+    private int getMarginDiv() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_DIV);
+    }
+
+    private int getMarginBlockquote() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE);
+    }
+
+    /**
+     * Returns the minimum number of newline characters needed before and after a given block-level
+     * element.
+     *
+     * @param flag the corresponding option flag defined in {@link Html} of a block-level element
+     */
+    private int getMargin(int flag) {
+        if ((flag & mFlags) != 0) {
+            return 1;
+        }
+        return 2;
+    }
+
+    private static void appendNewlines(Editable text, int minNewline) {
+        final int len = text.length();
+
+        if (len == 0) {
             return;
         }
 
-        if (len != 0) {
-            text.append("\n\n");
+        int existingNewlines = 0;
+        for (int i = len - 1; i >= 0 && text.charAt(i) == '\n'; i--) {
+            existingNewlines++;
+        }
+
+        for (int j = existingNewlines; j < minNewline; j++) {
+            text.append("\n");
         }
     }
 
-    private static void handleBr(SpannableStringBuilder text) {
-        text.append("\n");
+    private static void startBlockElement(Editable text, Attributes attributes, int margin) {
+        final int len = text.length();
+        if (margin > 0) {
+            appendNewlines(text, margin);
+            text.setSpan(new Newline(margin), len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+        }
+
+        String style = attributes.getValue("", "style");
+        if (style != null) {
+            Matcher m = getTextAlignPattern().matcher(style);
+            if (m.find()) {
+                String alignment = m.group(1);
+                if (alignment.equalsIgnoreCase("start")) {
+                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_NORMAL),
+                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                } else if (alignment.equalsIgnoreCase("center")) {
+                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_CENTER),
+                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                } else if (alignment.equalsIgnoreCase("end")) {
+                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_OPPOSITE),
+                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
+            }
+        }
     }
 
-    private static Object getLast(Spanned text, Class kind) {
+    private static void endBlockElement(Editable text) {
+        Newline n = getLast(text, Newline.class);
+        if (n != null) {
+            appendNewlines(text, n.mNumNewlines);
+            text.removeSpan(n);
+        }
+
+        Alignment a = getLast(text, Alignment.class);
+        if (a != null) {
+            setSpanFromMark(text, a, new AlignmentSpan.Standard(a.mAlignment));
+        }
+    }
+
+    private static void handleBr(Editable text) {
+        text.append('\n');
+    }
+
+    private void startBlockquote(Editable text, Attributes attributes) {
+        startBlockElement(text, attributes, getMarginBlockquote());
+        start(text, new Blockquote());
+    }
+
+    private static void endBlockquote(Editable text) {
+        endBlockElement(text);
+        end(text, Blockquote.class, new QuoteSpan());
+    }
+
+    private void startHeading(Editable text, Attributes attributes, int level) {
+        startBlockElement(text, attributes, getMarginHeading());
+        start(text, new Heading(level));
+    }
+
+    private static void endHeading(Editable text) {
+        // RelativeSizeSpan and StyleSpan are CharacterStyles
+        // Their ranges should not include the newlines at the end
+        Heading h = getLast(text, Heading.class);
+        if (h != null) {
+            setSpanFromMark(text, h, new RelativeSizeSpan(HEADING_SIZES[h.mLevel]),
+                    new StyleSpan(Typeface.BOLD));
+        }
+
+        endBlockElement(text);
+    }
+
+    private static <T> T getLast(Spanned text, Class<T> kind) {
         /*
          * This knows that the last returned object from getSpans()
          * will be the most recently added.
          */
-        Object[] objs = text.getSpans(0, text.length(), kind);
+        T[] objs = text.getSpans(0, text.length(), kind);
 
         if (objs.length == 0) {
             return null;
@@ -845,26 +946,31 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
     }
 
-    private static void start(SpannableStringBuilder text, Object mark) {
+    private static void setSpanFromMark(Spannable text, Object mark, Object... spans) {
+        int where = text.getSpanStart(mark);
+        text.removeSpan(mark);
+        int len = text.length();
+        if (where != len) {
+            for (Object span : spans) {
+                text.setSpan(span, where, len, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+    }
+
+    private static void start(Editable text, Object mark) {
         int len = text.length();
         text.setSpan(mark, len, len, Spannable.SPAN_MARK_MARK);
     }
 
-    private static void end(SpannableStringBuilder text, Class kind,
-                            Object repl) {
+    private static void end(Editable text, Class kind, Object repl) {
         int len = text.length();
         Object obj = getLast(text, kind);
-        int where = text.getSpanStart(obj);
-
-        text.removeSpan(obj);
-
-        if (where != len) {
-            text.setSpan(repl, where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (obj != null) {
+            setSpanFromMark(text, obj, repl);
         }
     }
 
-    private static void startImg(SpannableStringBuilder text,
-                                 Attributes attributes, Html.ImageGetter img) {
+    private static void startImg(Editable text, Attributes attributes, Html.ImageGetter img) {
         String src = attributes.getValue("", "src");
         Drawable d = null;
 
@@ -885,8 +991,7 @@ class HtmlToSpannedConverter implements ContentHandler {
                      Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
-    private static void startFont(SpannableStringBuilder text,
-                                  Attributes attributes) {
+    private static void startFont(Editable text, Attributes attributes) {
         String color = attributes.getValue("", "color");
         String face = attributes.getValue("", "face");
 
@@ -894,16 +999,13 @@ class HtmlToSpannedConverter implements ContentHandler {
         text.setSpan(new Font(color, face), len, len, Spannable.SPAN_MARK_MARK);
     }
 
-    private static void endFont(SpannableStringBuilder text) {
+    private static void endFont(Editable text) {
         int len = text.length();
-        Object obj = getLast(text, Font.class);
-        int where = text.getSpanStart(obj);
-
-        text.removeSpan(obj);
+        Font f = getLast(text, Font.class);
+        int where = text.getSpanStart(f);
+        text.removeSpan(f);
 
         if (where != len) {
-            Font f = (Font) obj;
-
             if (!TextUtils.isEmpty(f.mColor)) {
                 if (f.mColor.startsWith("@")) {
                     Resources res = Resources.getSystem();
@@ -932,50 +1034,20 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
     }
 
-    private static void startA(SpannableStringBuilder text, Attributes attributes) {
+    private static void startA(Editable text, Attributes attributes) {
         String href = attributes.getValue("", "href");
 
         int len = text.length();
         text.setSpan(new Href(href), len, len, Spannable.SPAN_MARK_MARK);
     }
 
-    private static void endA(SpannableStringBuilder text) {
+    private static void endA(Editable text) {
         int len = text.length();
-        Object obj = getLast(text, Href.class);
-        int where = text.getSpanStart(obj);
-
-        text.removeSpan(obj);
-
-        if (where != len) {
-            Href h = (Href) obj;
-
+        Href h = getLast(text, Href.class);
+        if (h != null) {
             if (h.mHref != null) {
-                text.setSpan(new URLSpan(h.mHref), where, len,
-                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                setSpanFromMark(text, h, new URLSpan((h.mHref)));
             }
-        }
-    }
-
-    private static void endHeader(SpannableStringBuilder text) {
-        int len = text.length();
-        Object obj = getLast(text, Header.class);
-
-        int where = text.getSpanStart(obj);
-
-        text.removeSpan(obj);
-
-        // Back off not to change only the text, not the blank line.
-        while (len > where && text.charAt(len - 1) == '\n') {
-            len--;
-        }
-
-        if (where != len) {
-            Header h = (Header) obj;
-
-            text.setSpan(new RelativeSizeSpan(HEADER_SIZES[h.mLevel]),
-                         where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            text.setSpan(new StyleSpan(Typeface.BOLD),
-                         where, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 
@@ -1079,11 +1151,27 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
     }
 
-    private static class Header {
+    private static class Heading {
         private int mLevel;
 
-        public Header(int level) {
+        public Heading(int level) {
             mLevel = level;
+        }
+    }
+
+    private static class Newline {
+        private int mNumNewlines;
+
+        public Newline(int numNewlines) {
+            mNumNewlines = numNewlines;
+        }
+    }
+
+    private static class Alignment {
+        private Layout.Alignment mAlignment;
+
+        public Alignment(Layout.Alignment alignment) {
+            mAlignment = alignment;
         }
     }
 }
