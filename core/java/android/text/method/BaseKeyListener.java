@@ -16,13 +16,19 @@
 
 package android.text.method;
 
+import android.icu.lang.UCharacter;
+import android.icu.lang.UProperty;
 import android.view.KeyEvent;
 import android.view.View;
 import android.text.*;
 import android.text.method.TextKeyListener.Capitalize;
+import android.text.style.ReplacementSpan;
 import android.widget.TextView;
 
 import java.text.BreakIterator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Abstract base class for key listeners.
@@ -63,6 +69,213 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         return backspaceOrForwardDelete(view, content, keyCode, event, true);
     }
 
+    // Returns true if the given code point is a variation selector.
+    private static boolean isVariationSelector(int codepoint) {
+        return UCharacter.hasBinaryProperty(codepoint, UProperty.VARIATION_SELECTOR);
+    }
+
+    // Returns the offset of the replacement span edge if the offset is inside of the replacement
+    // span.  Otherwise, does nothing and returns the input offset value.
+    private static int adjustReplacementSpan(CharSequence text, int offset, boolean moveToStart) {
+        if (!(text instanceof Spanned)) {
+            return offset;
+        }
+
+        ReplacementSpan[] spans = ((Spanned) text).getSpans(offset, offset, ReplacementSpan.class);
+        for (int i = 0; i < spans.length; i++) {
+            final int start = ((Spanned) text).getSpanStart(spans[i]);
+            final int end = ((Spanned) text).getSpanEnd(spans[i]);
+
+            if (start < offset && end > offset) {
+                offset = moveToStart ? start : end;
+            }
+        }
+        return offset;
+    }
+
+    // Returns the start offset to be deleted by a backspace key from the given offset.
+    private static int getOffsetForBackspaceKey(CharSequence text, int offset) {
+        if (offset <= 1) {
+            return 0;
+        }
+
+        // Initial state
+        final int STATE_START = 0;
+
+        // The offset is immediately before a KEYCAP.
+        final int STATE_BEFORE_KEYCAP = 1;
+        // The offset is immediately before a variation selector and a KEYCAP.
+        final int STATE_BEFORE_VS_AND_KEYCAP = 2;
+
+        // The offset is immediately before an emoji modifier.
+        final int STATE_BEFORE_EMOJI_MODIFIER = 3;
+        // The offset is immediately before a variation selector and an emoji modifier.
+        final int STATE_BEFORE_VS_AND_EMOJI_MODIFIER = 4;
+
+        // The offset is immediately before a variation selector.
+        final int STATE_BEFORE_VS = 5;
+
+        // The offset is immediately before a ZWJ emoji.
+        final int STATE_BEFORE_ZWJ_EMOJI = 6;
+        // The offset is immediately before a ZWJ that were seen before a ZWJ emoji.
+        final int STATE_BEFORE_ZWJ = 7;
+        // The offset is immediately before a variation selector and a ZWJ that were seen before a
+        // ZWJ emoji.
+        final int STATE_BEFORE_VS_AND_ZWJ = 8;
+
+        // The number of following RIS code points is odd.
+        final int STATE_ODD_NUMBERED_RIS = 9;
+        // The number of following RIS code points is even.
+        final int STATE_EVEN_NUMBERED_RIS = 10;
+
+        // The state machine has been stopped.
+        final int STATE_FINISHED = 11;
+
+        int deleteCharCount = 0;  // Char count to be deleted by backspace.
+        int lastSeenVSCharCount = 0;  // Char count of previous variation selector.
+
+        int state = STATE_START;
+
+        int tmpOffset = offset;
+        do {
+            final int codePoint = Character.codePointBefore(text, tmpOffset);
+            tmpOffset -= Character.charCount(codePoint);
+
+            switch (state) {
+                case STATE_START:
+                    deleteCharCount = Character.charCount(codePoint);
+                    if (isVariationSelector(codePoint)) {
+                        state = STATE_BEFORE_VS;
+                    } else if (Emoji.isZwjEmoji(codePoint)) {
+                        state = STATE_BEFORE_ZWJ_EMOJI;
+                    } else if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
+                        state = STATE_ODD_NUMBERED_RIS;
+                    } else if (Emoji.isEmojiModifier(codePoint)) {
+                        state = STATE_BEFORE_EMOJI_MODIFIER;
+                    } else if (codePoint == Emoji.COMBINING_ENCLOSING_KEYCAP) {
+                        state = STATE_BEFORE_KEYCAP;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                case STATE_ODD_NUMBERED_RIS:
+                    if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
+                        deleteCharCount += 2; /* Char count of RIS */
+                        state = STATE_EVEN_NUMBERED_RIS;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                case STATE_EVEN_NUMBERED_RIS:
+                    if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
+                        deleteCharCount -= 2; /* Char count of RIS */
+                        state = STATE_ODD_NUMBERED_RIS;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                case STATE_BEFORE_KEYCAP:
+                    if (isVariationSelector(codePoint)) {
+                        lastSeenVSCharCount = Character.charCount(codePoint);
+                        state = STATE_BEFORE_VS_AND_KEYCAP;
+                        break;
+                    }
+
+                    if (Emoji.isKeycapBase(codePoint)) {
+                        deleteCharCount += Character.charCount(codePoint);
+                    }
+                    state = STATE_FINISHED;
+                    break;
+                case STATE_BEFORE_VS_AND_KEYCAP:
+                    if (Emoji.isKeycapBase(codePoint)) {
+                        deleteCharCount += lastSeenVSCharCount + Character.charCount(codePoint);
+                    }
+                    state = STATE_FINISHED;
+                    break;
+                case STATE_BEFORE_EMOJI_MODIFIER:
+                    if (isVariationSelector(codePoint)) {
+                        lastSeenVSCharCount = Character.charCount(codePoint);
+                        state = STATE_BEFORE_VS_AND_EMOJI_MODIFIER;
+                        break;
+                    } else if (Emoji.isEmojiModifierBase(codePoint)) {
+                        deleteCharCount += Character.charCount(codePoint);
+                    }
+                    state = STATE_FINISHED;
+                    break;
+                case STATE_BEFORE_VS_AND_EMOJI_MODIFIER:
+                    if (Emoji.isEmojiModifierBase(codePoint)) {
+                        deleteCharCount += lastSeenVSCharCount + Character.charCount(codePoint);
+                    }
+                    state = STATE_FINISHED;
+                    break;
+                case STATE_BEFORE_VS:
+                    if (Emoji.isZwjEmoji(codePoint)) {
+                        deleteCharCount += Character.charCount(codePoint);
+                        state = STATE_BEFORE_ZWJ_EMOJI;
+                        break;
+                    }
+
+                    if (!isVariationSelector(codePoint) &&
+                            UCharacter.getCombiningClass(codePoint) == 0) {
+                        deleteCharCount += Character.charCount(codePoint);
+                    }
+                    state = STATE_FINISHED;
+                    break;
+                case STATE_BEFORE_ZWJ_EMOJI:
+                    if (codePoint == Emoji.ZERO_WIDTH_JOINER) {
+                        state = STATE_BEFORE_ZWJ;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                case STATE_BEFORE_ZWJ:
+                    if (Emoji.isZwjEmoji(codePoint)) {
+                        deleteCharCount += Character.charCount(codePoint) + 1;  // +1 for ZWJ.
+                        state = STATE_BEFORE_ZWJ_EMOJI;
+                    } else if (isVariationSelector(codePoint)) {
+                        lastSeenVSCharCount = Character.charCount(codePoint);
+                        state = STATE_BEFORE_VS_AND_ZWJ;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                case STATE_BEFORE_VS_AND_ZWJ:
+                    if (Emoji.isZwjEmoji(codePoint)) {
+                        // +1 for ZWJ.
+                        deleteCharCount += lastSeenVSCharCount + 1 + Character.charCount(codePoint);
+                        lastSeenVSCharCount = 0;
+                        state = STATE_BEFORE_ZWJ_EMOJI;
+                    } else {
+                        state = STATE_FINISHED;
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("state " + state + " is unknown");
+            }
+        } while (tmpOffset > 0 && state != STATE_FINISHED);
+
+        return adjustReplacementSpan(text, offset - deleteCharCount, true /* move to the start */);
+    }
+
+    // Returns the end offset to be deleted by a forward delete key from the given offset.
+    private static int getOffsetForForwardDeleteKey(CharSequence text, int offset) {
+        final int len = text.length();
+
+        if (offset >= len - 1) {
+            return len;
+        }
+
+        int codePoint = Character.codePointAt(text, offset);
+        offset += Character.charCount(codePoint);
+        if (offset == len) {
+            return len;
+        }
+
+        // TODO: Handle emoji, combining chars, etc.
+
+        return adjustReplacementSpan(text, offset, false /* move to the end */);
+    }
+
     private boolean backspaceOrForwardDelete(View view, Editable content, int keyCode,
             KeyEvent event, boolean isForwardDelete) {
         // Ensure the key event does not have modifiers except ALT or SHIFT or CTRL.
@@ -98,9 +311,9 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         final int start = Selection.getSelectionEnd(content);
         final int end;
         if (isForwardDelete) {
-            end = TextUtils.getOffsetAfter(content, start);
+            end = getOffsetForForwardDeleteKey(content, start);
         } else {
-            end = TextUtils.getOffsetBefore(content, start);
+            end = getOffsetForBackspaceKey(content, start);
         }
         if (start != end) {
             content.delete(Math.min(start, end), Math.max(start, end));
