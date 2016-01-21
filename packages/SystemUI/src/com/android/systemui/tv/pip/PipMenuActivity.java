@@ -55,7 +55,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPipManager.showPipOverlay();
+                mPipManager.showPipOverlay(true);
                 finish();
             }
         });
@@ -69,7 +69,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onBackPressed() {
-        mPipManager.showPipOverlay();
+        mPipManager.showPipOverlay(true);
         finish();
     }
 
