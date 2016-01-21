@@ -378,6 +378,16 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getWifiControllerActivity(int type, int which);
 
         /**
+         * Returns the time in milliseconds that this app kept the Bluetooth controller in the
+         * specified state <code>type</code>.
+         * @param type one of {@link #CONTROLLER_IDLE_TIME}, {@link #CONTROLLER_RX_TIME}, or
+         *             {@link #CONTROLLER_TX_TIME}.
+         * @param which one of {@link #STATS_CURRENT}, {@link #STATS_SINCE_CHARGED}, or
+         *              {@link #STATS_SINCE_UNPLUGGED}.
+         */
+        public abstract long getBluetoothControllerActivity(int type, int which);
+
+        /**
          * {@hide}
          */
         public abstract int getUid();
@@ -2014,7 +2024,9 @@ public abstract class BatteryStats implements Parcelable {
     public static final int NETWORK_MOBILE_TX_DATA = 1;
     public static final int NETWORK_WIFI_RX_DATA = 2;
     public static final int NETWORK_WIFI_TX_DATA = 3;
-    public static final int NUM_NETWORK_ACTIVITY_TYPES = NETWORK_WIFI_TX_DATA + 1;
+    public static final int NETWORK_BT_RX_DATA = 4;
+    public static final int NETWORK_BT_TX_DATA = 5;
+    public static final int NUM_NETWORK_ACTIVITY_TYPES = NETWORK_BT_TX_DATA + 1;
 
     public abstract long getNetworkActivityBytes(int type, int which);
     public abstract long getNetworkActivityPackets(int type, int which);
@@ -3284,6 +3296,8 @@ public abstract class BatteryStats implements Parcelable {
         final long mobileTxTotalPackets = getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
         final long wifiRxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
         final long wifiTxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+        final long btRxTotalBytes = getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
+        final long btTxTotalBytes = getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
 
         if (fullWakeLockTimeTotalMicros != 0) {
             sb.setLength(0);
@@ -3516,6 +3530,10 @@ public abstract class BatteryStats implements Parcelable {
                 BatteryStatsHelper.makemAh(wifiPowerDrainMaMs / (double) (1000*60*60)));
         sb.append("mAh");
         pw.println(sb.toString());
+
+        pw.print(prefix);
+        pw.print("  Bluetooth total received: "); pw.print(formatBytesLocked(btRxTotalBytes));
+        pw.print(", sent: "); pw.println(formatBytesLocked(btTxTotalBytes));
 
         final long bluetoothIdleTimeMs =
                 getBluetoothControllerActivity(CONTROLLER_IDLE_TIME, which);
@@ -3838,12 +3856,17 @@ public abstract class BatteryStats implements Parcelable {
             final long mobileTxBytes = u.getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which);
             final long wifiRxBytes = u.getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which);
             final long wifiTxBytes = u.getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which);
+            final long btRxBytes = u.getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
+            final long btTxBytes = u.getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
+
             final long mobileRxPackets = u.getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which);
             final long mobileTxPackets = u.getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
-            final long uidMobileActiveTime = u.getMobileRadioActiveTime(which);
-            final int uidMobileActiveCount = u.getMobileRadioActiveCount(which);
             final long wifiRxPackets = u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
             final long wifiTxPackets = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+
+            final long uidMobileActiveTime = u.getMobileRadioActiveTime(which);
+            final int uidMobileActiveCount = u.getMobileRadioActiveCount(which);
+
             final long fullWifiLockOnTime = u.getFullWifiLockTime(rawRealtime, which);
             final long wifiScanTime = u.getWifiScanTime(rawRealtime, which);
             final int wifiScanCount = u.getWifiScanCount(which);
@@ -3919,6 +3942,37 @@ public abstract class BatteryStats implements Parcelable {
 
                 sb.append(prefix).append("    WiFi Tx time:   "); formatTimeMs(sb, uidWifiTxTimeMs);
                 sb.append("(").append(formatRatioLocked(uidWifiTxTimeMs, uidWifiTotalTimeMs))
+                        .append(")");
+                pw.println(sb.toString());
+            }
+
+            if (btRxBytes > 0 || btTxBytes > 0) {
+                pw.print(prefix); pw.print("    Bluetooth network: ");
+                pw.print(formatBytesLocked(btRxBytes)); pw.print(" received, ");
+                pw.print(formatBytesLocked(btTxBytes));
+                pw.println(" sent");
+            }
+
+            final long uidBtIdleTimeMs = u.getBluetoothControllerActivity(CONTROLLER_IDLE_TIME,
+                    which);
+            final long uidBtRxTimeMs = u.getBluetoothControllerActivity(CONTROLLER_RX_TIME, which);
+            final long uidBtTxTimeMs = u.getBluetoothControllerActivity(CONTROLLER_TX_TIME, which);
+            final long uidBtTotalTimeMs = uidBtIdleTimeMs + uidBtRxTimeMs + uidBtTxTimeMs;
+            if (uidBtTotalTimeMs > 0) {
+                sb.setLength(0);
+                sb.append(prefix).append("    Bluetooth Idle time: ");
+                formatTimeMs(sb, uidBtIdleTimeMs);
+                sb.append("(").append(formatRatioLocked(uidBtIdleTimeMs, uidBtTotalTimeMs))
+                        .append(")\n");
+
+                sb.append(prefix).append("    Bluetooth Rx time:   ");
+                formatTimeMs(sb, uidBtRxTimeMs);
+                sb.append("(").append(formatRatioLocked(uidBtRxTimeMs, uidBtTotalTimeMs))
+                        .append(")\n");
+
+                sb.append(prefix).append("    Bluetooth Tx time:   ");
+                formatTimeMs(sb, uidBtTxTimeMs);
+                sb.append("(").append(formatRatioLocked(uidBtTxTimeMs, uidBtTotalTimeMs))
                         .append(")");
                 pw.println(sb.toString());
             }
