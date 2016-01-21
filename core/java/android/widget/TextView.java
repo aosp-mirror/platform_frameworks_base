@@ -645,6 +645,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private Editor mEditor;
 
+    private static final int DEVICE_PROVISIONED_UNKNOWN = 0;
+    private static final int DEVICE_PROVISIONED_NO = 1;
+    private static final int DEVICE_PROVISIONED_YES = 2;
+
+    /**
+     * Some special options such as sharing selected text should only be shown if the device
+     * is provisioned. Only check the provisioned state once for a given view instance.
+     */
+    private int mDeviceProvisionedState = DEVICE_PROVISIONED_UNKNOWN;
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -9613,7 +9623,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean canShare() {
-        return canCopy();
+        return canCopy() && isDeviceProvisioned();
+    }
+
+    boolean isDeviceProvisioned() {
+        if (mDeviceProvisionedState == DEVICE_PROVISIONED_UNKNOWN) {
+            mDeviceProvisionedState = Settings.Global.getInt(
+                    mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0
+                    ? DEVICE_PROVISIONED_YES
+                    : DEVICE_PROVISIONED_NO;
+        }
+        return mDeviceProvisionedState == DEVICE_PROVISIONED_YES;
     }
 
     boolean canPaste() {
