@@ -291,11 +291,11 @@ bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
     if (CC_LIKELY(err == EGL_SUCCESS)) {
         return true;
     }
-    if (err == EGL_BAD_SURFACE) {
+    if (err == EGL_BAD_SURFACE || err == EGL_BAD_NATIVE_WINDOW) {
         // For some reason our surface was destroyed out from under us
         // This really shouldn't happen, but if it does we can recover easily
         // by just not trying to use the surface anymore
-        ALOGW("swapBuffers encountered EGL_BAD_SURFACE on %p, halting rendering...", surface);
+        ALOGW("swapBuffers encountered EGL error %d on %p, halting rendering...", err, surface);
         return false;
     }
     LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering",
