@@ -20,16 +20,18 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.animation.TimeAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -72,6 +74,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener {
 
+    public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "NotificationStackScrollLayout";
     private static final boolean DEBUG = false;
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
@@ -87,6 +90,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private SwipeHelper mSwipeHelper;
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
+    private final Paint mBackgroundPaint = new Paint();
 
     /**
      * mCurrentStackHeight is the actual stack height, mLastSetStackHeight is the stack height set
@@ -238,7 +242,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private NotificationOverflowContainer mOverflowContainer;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private FalsingManager mFalsingManager;
-    private ColorDrawable mBackground;
     private boolean mAnimationRunning;
     private ViewTreeObserver.OnPreDrawListener mBackgroundUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -254,13 +257,30 @@ public class NotificationStackScrollLayout extends ViewGroup
     private Rect mBackgroundBounds = new Rect();
     private Rect mStartAnimationRect = new Rect();
     private Rect mEndAnimationRect = new Rect();
-    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);;
+    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
     private boolean mAnimateNextBackgroundBottom;
     private boolean mAnimateNextBackgroundTop;
     private ObjectAnimator mBottomAnimator = null;
     private ObjectAnimator mTopAnimator = null;
     private ActivatableNotificationView mFirstVisibleBackgroundChild = null;
     private ActivatableNotificationView mLastVisibleBackgroundChild = null;
+    private int mBgColor;
+    private float mDimAmount;
+    private ValueAnimator mDimAnimator;
+    private Animator.AnimatorListener mDimEndListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mDimAnimator = null;
+        }
+    };
+    private ValueAnimator.AnimatorUpdateListener mDimUpdateListener
+            = new ValueAnimator.AnimatorUpdateListener() {
+
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            setDimAmount((Float) animation.getAnimatedValue());
+        }
+    };
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -277,9 +297,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public NotificationStackScrollLayout(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mBackground = new ColorDrawable(context.getColor(
-                R.color.notification_shade_background_color));
-        mBackground.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        mBgColor = context.getColor(R.color.notification_shade_background_color);
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         mExpandHelper = new ExpandHelper(getContext(), this,
@@ -299,11 +317,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDebugPaint.setStyle(Paint.Style.STROKE);
         }
         mFalsingManager = FalsingManager.getInstance(context);
+        mBackgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        mBackground.draw(canvas);
+        canvas.drawRect(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom, mBackgroundPaint);
         if (DEBUG) {
             int y = mTopPadding;
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
@@ -317,6 +336,20 @@ public class NotificationStackScrollLayout extends ViewGroup
             y = getHeight() - getEmptyBottomMargin();
             canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
         }
+    }
+
+    private void updateBackgroundDimming() {
+        float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
+        // We need to manually blend in the background color
+        int scrimColor = mScrimController.getScrimBehindColor();
+        // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
+        float alphaInv = 1 - alpha;
+        int color = Color.argb((int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
+                (int) (Color.red(mBgColor) + alphaInv * Color.red(scrimColor)),
+                (int) (Color.green(mBgColor) + alphaInv * Color.green(scrimColor)),
+                (int) (Color.blue(mBgColor) + alphaInv * Color.blue(scrimColor)));
+        mBackgroundPaint.setColor(color);
+        invalidate();
     }
 
     private void initView(Context context) {
@@ -1569,7 +1602,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void applyCurrentBackgroundBounds() {
         mScrimController.setExcludedBackgroundArea(mCurrentBounds);
-        mBackground.setBounds(0, mCurrentBounds.top, getWidth(), mCurrentBounds.bottom);
         invalidate();
     }
 
@@ -2663,8 +2695,32 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (animate && mAnimationsEnabled) {
             mDimmedNeedsAnimation = true;
             mNeedsAnimation =  true;
+            animateDimmed(dimmed);
+        } else {
+            setDimAmount(dimmed ? 1.0f : 0.0f);
         }
         requestChildrenUpdate();
+    }
+
+    private void setDimAmount(float dimAmount) {
+        mDimAmount = dimAmount;
+        updateBackgroundDimming();
+    }
+
+    private void animateDimmed(boolean dimmed) {
+        if (mDimAnimator != null) {
+            mDimAnimator.cancel();
+        }
+        float target = dimmed ? 1.0f : 0.0f;
+        if (target == mDimAmount) {
+            return;
+        }
+        mDimAnimator = TimeAnimator.ofFloat(mDimAmount, target);
+        mDimAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_DIMMED_ACTIVATED);
+        mDimAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mDimAnimator.addListener(mDimEndListener);
+        mDimAnimator.addUpdateListener(mDimUpdateListener);
+        mDimAnimator.start();
     }
 
     public void setHideSensitive(boolean hideSensitive, boolean animate) {
@@ -3108,6 +3164,12 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setScrimController(ScrimController scrimController) {
         mScrimController = scrimController;
+        mScrimController.setScrimBehindChangeRunnable(new Runnable() {
+            @Override
+            public void run() {
+                updateBackgroundDimming();
+            }
+        });
     }
 
     public void forceNoOverlappingRendering(boolean force) {

@@ -502,4 +502,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     public void setExcludedBackgroundArea(Rect area) {
         mScrimBehind.setExcludedArea(area);
     }
+
+    public int getScrimBehindColor() {
+        return mScrimBehind.getScrimColorWithAlpha();
+    }
+
+    public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
+        mScrimBehind.setChangeRunnable(changeRunnable);
+    }
 }

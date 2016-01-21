@@ -57,6 +57,7 @@ public class ScrimView extends View
             mAlphaAnimator = null;
         }
     };
+    private Runnable mChangeRunnable;
 
     public ScrimView(Context context) {
         this(context, null);
@@ -78,9 +79,7 @@ public class ScrimView extends View
     protected void onDraw(Canvas canvas) {
         if (mDrawAsSrc || (!mIsEmpty && mViewAlpha > 0f)) {
             PorterDuff.Mode mode = mDrawAsSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
-            int color = mScrimColor;
-            color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
-                    Color.green(color), Color.blue(color));
+            int color = getScrimColorWithAlpha();
             if (!mHasExcludedArea) {
                 canvas.drawColor(color, mode);
             } else {
@@ -106,6 +105,13 @@ public class ScrimView extends View
         }
     }
 
+    public int getScrimColorWithAlpha() {
+        int color = mScrimColor;
+        color = Color.argb((int) (Color.alpha(color) * mViewAlpha), Color.red(color),
+                Color.green(color), Color.blue(color));
+        return color;
+    }
+
     public void setDrawAsSrc(boolean asSrc) {
         mDrawAsSrc = asSrc;
         mPaint.setXfermode(new PorterDuffXfermode(mDrawAsSrc ? PorterDuff.Mode.SRC
@@ -118,6 +124,9 @@ public class ScrimView extends View
             mIsEmpty = Color.alpha(color) == 0;
             mScrimColor = color;
             invalidate();
+            if (mChangeRunnable != null) {
+                mChangeRunnable.run();
+            }
         }
     }
 
@@ -134,8 +143,13 @@ public class ScrimView extends View
         if (mAlphaAnimator != null) {
             mAlphaAnimator.cancel();
         }
-        mViewAlpha = alpha;
-        invalidate();
+        if (alpha != mViewAlpha) {
+            mViewAlpha = alpha;
+            invalidate();
+            if (mChangeRunnable != null) {
+                mChangeRunnable.run();
+            }
+        }
     }
 
     public void animateViewAlpha(float alpha, long durationOut, Interpolator interpolator) {
@@ -163,5 +177,9 @@ public class ScrimView extends View
         mExcludedRect.set(area);
         mHasExcludedArea = area.left < area.right && area.top < area.bottom;
         invalidate();
+    }
+
+    public void setChangeRunnable(Runnable changeRunnable) {
+        mChangeRunnable = changeRunnable;
     }
 }

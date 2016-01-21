@@ -3742,7 +3742,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
         updatePublicMode();
-        updateStackScrollerState(goingToFullShade);
+        updateStackScrollerState(goingToFullShade, fromShadeLocked);
         updateNotifications();
         checkBarModes();
         updateMediaMetaData(false);
@@ -3763,11 +3763,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, animate);
     }
 
-    public void updateStackScrollerState(boolean goingToFullShade) {
+    public void updateStackScrollerState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         mStackScroller.setHideSensitive(isLockscreenPublicMode(), goingToFullShade);
-        mStackScroller.setDimmed(onKeyguard, false /* animate */);
+        mStackScroller.setDimmed(onKeyguard, fromShadeLocked /* animate */);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
         mStackScroller.setActivatedChild(null);
