@@ -2251,7 +2251,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
             // window), we need to clear the replace window settings. Otherwise, we schedule a
             // timeout to remove the old window if the replacing window is not coming in time.
-            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken, !kept);
+            // In case of the pinned stack we don't resize the task during the move, but we will
+            // resize the stack soon after so we want to retain the replacing window.
+            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken,
+                    !kept || stackId == PINNED_STACK_ID);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
