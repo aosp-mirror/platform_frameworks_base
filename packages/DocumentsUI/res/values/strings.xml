@@ -87,7 +87,7 @@
     <!-- Button label that hides the error bar [CHAR LIMIT=24] -->
     <string name="button_dismiss">Dismiss</string>
     <string name="button_retry">Try Again</string>
-    
+
     <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
     <string name="sort_name">By name</string>
     <!-- Mode that sorts documents by their last modified time in descending order; most recent first [CHAR LIMIT=24] -->
@@ -183,4 +183,8 @@
     </plurals>
     <!-- Toast shown when a user tries to paste files into an unsupported location. -->
     <string name="clipboard_files_cannot_paste">Cannot paste the selected files in this location.</string>
+    <!-- Menu item that renames the selected document [CHAR LIMIT=24] -->
+    <string name="menu_rename">Rename</string>
+    <!-- Toast shown when renaming document failed with an error [CHAR LIMIT=48] -->
+    <string name="rename_error">Failed to rename document</string>
 </resources>

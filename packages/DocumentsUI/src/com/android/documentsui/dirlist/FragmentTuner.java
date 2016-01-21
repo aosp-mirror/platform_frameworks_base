@@ -58,7 +58,8 @@ public abstract class FragmentTuner {
     }
 
 
-    public abstract void updateActionMenu(Menu menu, int dirType, boolean canDelete);
+    public abstract void updateActionMenu(Menu menu, int dirType, boolean canDelete,
+            boolean canRename);
 
     // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
     // A folder is enabled such that it may be double clicked, even in settings
@@ -129,7 +130,8 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
+        public void updateActionMenu(Menu menu, int dirType, boolean canDelete,
+                boolean canRename) {
 
             boolean copyEnabled = dirType != DirectoryFragment.TYPE_RECENT_OPEN;
             boolean moveEnabled =
@@ -141,6 +143,7 @@ public abstract class FragmentTuner {
             final MenuItem delete = menu.findItem(R.id.menu_delete);
             final MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
             final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
+            final MenuItem rename = menu.findItem(R.id.menu_rename);
 
             open.setVisible(true);
             share.setVisible(false);
@@ -149,6 +152,7 @@ public abstract class FragmentTuner {
             copyTo.setEnabled(copyEnabled);
             moveTo.setVisible(moveEnabled);
             moveTo.setEnabled(moveEnabled);
+            rename.setVisible(false);
         }
     }
 
@@ -162,7 +166,8 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
+        public void updateActionMenu(Menu menu, int dirType, boolean canDelete,
+                boolean canRename) {
             checkArgument(dirType != DirectoryFragment.TYPE_RECENT_OPEN);
 
             boolean moveEnabled =
@@ -174,6 +179,7 @@ public abstract class FragmentTuner {
             final MenuItem delete = menu.findItem(R.id.menu_delete);
             final MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
             final MenuItem moveTo = menu.findItem(R.id.menu_move_to);
+            final MenuItem rename = menu.findItem(R.id.menu_rename);
 
             open.setVisible(false);
             delete.setVisible(canDelete);
@@ -181,6 +187,7 @@ public abstract class FragmentTuner {
             copyTo.setEnabled(true);
             moveTo.setVisible(moveEnabled);
             moveTo.setEnabled(moveEnabled);
+            rename.setVisible(false);
         }
     }
 
@@ -194,11 +201,16 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public void updateActionMenu(Menu menu, int dirType, boolean canDelete) {
+        public void updateActionMenu(Menu menu, int dirType, boolean canDelete,
+                boolean canRename) {
 
             MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
             MenuItem paste = menu.findItem(R.id.menu_paste_from_clipboard);
             copy.setEnabled(dirType != DirectoryFragment.TYPE_RECENT_OPEN);
+
+            MenuItem rename = menu.findItem(R.id.menu_rename);
+            rename.setVisible(true);
+            rename.setEnabled(canRename);
 
             menu.findItem(R.id.menu_share).setVisible(true);
             menu.findItem(R.id.menu_delete).setVisible(canDelete);

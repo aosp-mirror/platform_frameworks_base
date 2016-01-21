@@ -437,7 +437,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
     }
 
-    void setPending(boolean pending) {
+    public void setPending(boolean pending) {
         final SaveFragment save = SaveFragment.get(getFragmentManager());
         if (save != null) {
             save.setPending(pending);

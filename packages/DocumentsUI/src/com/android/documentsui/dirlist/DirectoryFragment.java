@@ -91,6 +91,7 @@ import com.android.documentsui.R;
 import com.android.documentsui.RecentLoader;
 import com.android.documentsui.RecentsProvider;
 import com.android.documentsui.RecentsProvider.StateColumns;
+import com.android.documentsui.dirlist.RenameDocumentFragment;
 import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
@@ -651,6 +652,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         private Selection mSelected = new Selection();
         private ActionMode mActionMode;
         private int mNoDeleteCount = 0;
+        private int mNoRenameCount = -1;
         private Menu mMenu;
 
         @Override
@@ -673,6 +675,9 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
             if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
+            }
+            if ((docFlags & Document.FLAG_SUPPORTS_RENAME) != 0) {
+                mNoRenameCount += selected ? 1 : -1;
             }
         }
 
@@ -712,6 +717,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             mSelectionManager.clearSelection();
             mSelected.clear();
             mNoDeleteCount = 0;
+            mNoRenameCount = -1;
         }
 
         @Override
@@ -729,10 +735,19 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             return true;
         }
 
+        boolean canRenameSelection() {
+            return mNoRenameCount == 0 && mSelectionManager.getSelection().size() == 1;
+        }
+
+        boolean canDeleteSelection() {
+            return mNoDeleteCount == 0;
+        }
+
         private void updateActionMenu() {
             checkNotNull(mMenu);
+
             // Delegate update logic to our owning action, since specialized logic is desired.
-            mTuner.updateActionMenu(mMenu, mType, mNoDeleteCount == 0);
+            mTuner.updateActionMenu(mMenu, mType, canDeleteSelection(), canRenameSelection());
             Menus.disableHiddenItems(mMenu);
         }
 
@@ -772,11 +787,17 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 case R.id.menu_copy_to_clipboard:
                     if (!selection.isEmpty()) {
                         copySelectionToClipboard(selection);
+                        mode.finish();
                     }
                     return true;
 
                 case R.id.menu_select_all:
                     selectAllFiles();
+                    return true;
+
+                case R.id.menu_rename:
+                    renameDocuments(selection);
+                    mode.finish();
                     return true;
 
                 default:
@@ -920,6 +941,19 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, directoryCopy);
                 intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
                 startActivityForResult(intent, REQUEST_COPY_DESTINATION);
+            }
+        }.execute(selected);
+    }
+
+    private void renameDocuments(Selection selected) {
+        // Batch renaming not supported
+        // Rename option is only available in menu when 1 document selected
+        checkArgument(selected.size() == 1);
+
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                RenameDocumentFragment.show(getFragmentManager(), docs.get(0));
             }
         }.execute(selected);
     }
