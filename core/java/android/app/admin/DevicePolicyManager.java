@@ -3057,6 +3057,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @SystemApi
     public String getDeviceOwnerNameOnAnyUser() {
         if (mService != null) {
             try {
