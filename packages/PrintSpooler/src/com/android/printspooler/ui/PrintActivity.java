@@ -61,6 +61,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -2325,6 +2326,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         private PrinterInfo createFakePdfPrinter() {
+            ArraySet<MediaSize> allMediaSizes = MediaSize.getAllPredefinedSizes();
             MediaSize defaultMediaSize = MediaSizeUtils.getDefault(PrintActivity.this);
 
             PrinterId printerId = new PrinterId(getComponentName(), "PDF printer");
@@ -2332,11 +2334,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             PrinterCapabilitiesInfo.Builder builder =
                     new PrinterCapabilitiesInfo.Builder(printerId);
 
-            String[] mediaSizeIds = getResources().getStringArray(R.array.pdf_printer_media_sizes);
-            final int mediaSizeIdCount = mediaSizeIds.length;
-            for (int i = 0; i < mediaSizeIdCount; i++) {
-                String id = mediaSizeIds[i];
-                MediaSize mediaSize = MediaSize.getStandardMediaSizeById(id);
+            final int mediaSizeCount = allMediaSizes.size();
+            for (int i = 0; i < mediaSizeCount; i++) {
+                MediaSize mediaSize = allMediaSizes.valueAt(i);
                 builder.addMediaSize(mediaSize, mediaSize.equals(defaultMediaSize));
             }
 

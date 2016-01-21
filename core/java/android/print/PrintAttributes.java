@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -870,6 +871,23 @@ public final class PrintAttributes implements Parcelable {
             mHeightMils = heightMils;
             mLabelResId = 0;
             mPackageName = null;
+        }
+
+        /**
+         * Get the Id of all predefined media sizes beside the {@link #UNKNOWN_PORTRAIT} and
+         * {@link #UNKNOWN_LANDSCAPE}.
+         *
+         * @return List of all predefined media sizes
+         *
+         * @hide
+         */
+        public static @NonNull ArraySet<MediaSize> getAllPredefinedSizes() {
+            ArraySet<MediaSize> definedMediaSizes = new ArraySet<>(sIdToMediaSizeMap.values());
+
+            definedMediaSizes.remove(UNKNOWN_PORTRAIT);
+            definedMediaSizes.remove(UNKNOWN_LANDSCAPE);
+
+            return definedMediaSizes;
         }
 
         /** @hide */
