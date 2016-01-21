@@ -301,10 +301,19 @@ public final class LocaleList implements Parcelable {
             // is a pseudo-locale. So this is not a match.
             return 0;
         }
+        final String supportedScr = getLikelyScript(supported);
+        if (supportedScr.isEmpty()) {
+            // If we can't guess a script, we don't know enough about the locales' language to find
+            // if the locales match. So we fall back to old behavior of matching, which considered
+            // locales with different regions different.
+            final String supportedRegion = supported.getCountry();
+            return (supportedRegion.isEmpty() ||
+                    supportedRegion.equals(desired.getCountry()))
+                    ? 1 : 0;
+        }
+        final String desiredScr = getLikelyScript(desired);
         // There is no match if the two locales use different scripts. This will most imporantly
         // take care of traditional vs simplified Chinese.
-        final String supportedScr = getLikelyScript(supported);
-        final String desiredScr = getLikelyScript(desired);
         return supportedScr.equals(desiredScr) ? 1 : 0;
     }
 

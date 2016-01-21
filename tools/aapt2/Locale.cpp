@@ -96,7 +96,7 @@ bool LocaleValue::initFromFilterString(const std::string& str) {
          setRegion(part2.c_str());
      } else if (part2.length() == 4 && isAlpha(part2)) {
          setScript(part2.c_str());
-     } else if (part2.length() >= 5 && part2.length() <= 8) {
+     } else if (part2.length() >= 4 && part2.length() <= 8) {
          setVariant(part2.c_str());
      } else {
          valid = false;
@@ -111,7 +111,7 @@ bool LocaleValue::initFromFilterString(const std::string& str) {
      if (((part3.length() == 2 && isAlpha(part3)) ||
          (part3.length() == 3 && isNumber(part3))) && script[0]) {
          setRegion(part3.c_str());
-     } else if (part3.length() >= 5 && part3.length() <= 8) {
+     } else if (part3.length() >= 4 && part3.length() <= 8) {
          setVariant(part3.c_str());
      } else {
          valid = false;
@@ -122,7 +122,7 @@ bool LocaleValue::initFromFilterString(const std::string& str) {
      }
 
      const std::string& part4 = parts[3];
-     if (part4.length() >= 5 && part4.length() <= 8) {
+     if (part4.length() >= 4 && part4.length() <= 8) {
          setVariant(part4.c_str());
      } else {
          valid = false;
@@ -141,7 +141,7 @@ ssize_t LocaleValue::initFromParts(std::vector<std::string>::iterator iter,
 
     std::string& part = *iter;
     if (part[0] == 'b' && part[1] == '+') {
-        // This is a "modified" BCP-47 language tag. Same semantics as BCP-47 tags,
+        // This is a "modified" BCP 47 language tag. Same semantics as BCP 47 tags,
         // except that the separator is "+" and not "-".
         std::vector<std::string> subtags = util::splitAndLowercase(part, '+');
         subtags.erase(subtags.begin());
@@ -157,8 +157,12 @@ ssize_t LocaleValue::initFromParts(std::vector<std::string>::iterator iter,
                     setRegion(subtags[1].c_str());
                     break;
                 case 4:
-                    setScript(subtags[1].c_str());
-                    break;
+                    if ('0' <= subtags[1][0] && subtags[1][0] <= '9') {
+                        // This is a variant: fall through
+                    } else {
+                        setScript(subtags[1].c_str());
+                        break;
+                    }
                 case 5:
                 case 6:
                 case 7:
@@ -184,7 +188,7 @@ ssize_t LocaleValue::initFromParts(std::vector<std::string>::iterator iter,
 
             // The third tag can either be a region code (if the second tag was
             // a script), else a variant code.
-            if (subtags[2].size() > 4) {
+            if (subtags[2].size() >= 4) {
                 setVariant(subtags[2].c_str());
             } else {
                 setRegion(subtags[2].c_str());
@@ -249,7 +253,7 @@ std::string LocaleValue::toDirName() const {
 void LocaleValue::initFromResTable(const ResTable_config& config) {
     config.unpackLanguage(language);
     config.unpackRegion(region);
-    if (config.localeScript[0]) {
+    if (config.localeScriptWasProvided) {
         memcpy(script, config.localeScript, sizeof(config.localeScript));
     }
 
@@ -264,6 +268,10 @@ void LocaleValue::writeTo(ResTable_config* out) const {
 
     if (script[0]) {
         memcpy(out->localeScript, script, sizeof(out->localeScript));
+        out->localeScriptWasProvided = true;
+    } else {
+        out->computeScript();
+        out->localeScriptWasProvided = false;
     }
 
     if (variant[0]) {
