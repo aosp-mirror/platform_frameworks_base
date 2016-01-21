@@ -82,7 +82,7 @@ final class PackageDexOptimizer {
      * {@link PackageManagerService#mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean inclDependencies, String volumeUuid, boolean useProfiles, boolean extractOnly) {
+            boolean inclDependencies, boolean useProfiles, boolean extractOnly) {
         ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new ArraySet<String>();
@@ -97,7 +97,7 @@ final class PackageDexOptimizer {
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, done, volumeUuid, useProfiles,
+                return performDexOptLI(pkg, instructionSets, done, useProfiles,
                         extractOnly);
             } finally {
                 if (useLock) {
@@ -108,7 +108,7 @@ final class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            ArraySet<String> done, String volumeUuid, boolean useProfiles, boolean extractOnly) {
+            ArraySet<String> done, boolean useProfiles, boolean extractOnly) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -185,7 +185,7 @@ final class PackageDexOptimizer {
                 try {
                     mPackageManagerService.mInstaller.dexopt(path, sharedGid,
                             pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir,
-                            dexFlags, volumeUuid, useProfiles);
+                            dexFlags, pkg.volumeUuid, useProfiles);
                     performedDexOpt = true;
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
@@ -252,8 +252,7 @@ final class PackageDexOptimizer {
             if (libPkg != null && !done.contains(libName)) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 // Currently this will do a full compilation of the library.
-                performDexOptLI(libPkg, instructionSets, done,
-                        StorageManager.UUID_PRIVATE_INTERNAL, /*useProfiles*/ false,
+                performDexOptLI(libPkg, instructionSets, done, /*useProfiles*/ false,
                         /* extractOnly */ false);
             }
         }

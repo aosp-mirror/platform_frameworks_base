@@ -6717,7 +6717,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        true /* inclDependencies */, p.volumeUuid, useProfiles, extractOnly);
+                        true /* inclDependencies */, useProfiles, extractOnly);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6762,7 +6762,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Whoever is calling forceDexOpt wants a fully compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
-                    true /* inclDependencies */, pkg.volumeUuid, false /* useProfiles */,
+                    true /* inclDependencies */, false /* useProfiles */,
                     false /* extractOnly */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -13024,7 +13024,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Do not run PackageDexOptimizer through the local performDexOpt
                 // method because `pkg` is not in `mPackages` yet.
                 int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
-                        false /* inclDependencies */, volumeUuid, false /* useProfiles */,
+                        false /* inclDependencies */, false /* useProfiles */,
                         true /* extractOnly */);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
