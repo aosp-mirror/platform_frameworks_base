@@ -16,22 +16,27 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
-import android.support.v4.graphics.ColorUtils;
 import android.os.CountDownTimer;
+import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewStub;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -39,10 +44,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
-
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
@@ -59,6 +64,8 @@ public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
     private static final float HIGHLIGHT_LIGHTNESS_INCREMENT = 0.125f;
+    private static final float OVERLAY_LIGHTNESS_INCREMENT = -0.0625f;
+    private static final int OVERLAY_REVEAL_DURATION = 250;
     private static final long FOCUS_INDICATOR_INTERVAL_MS = 30;
 
     /**
@@ -68,8 +75,6 @@ public class TaskViewHeader extends FrameLayout
 
         private Paint mHighlightPaint = new Paint();
         private Paint mBackgroundPaint = new Paint();
-
-        private float[] mTmpHSL = new float[3];
 
         public HighlightColorDrawable() {
             mBackgroundPaint.setColor(Color.argb(255, 0, 0, 0));
@@ -122,11 +127,16 @@ public class TaskViewHeader extends FrameLayout
     Task mTask;
 
     // Header views
-    ImageView mMoveTaskButton;
-    ImageView mDismissButton;
     ImageView mIconView;
     TextView mTitleView;
-    int mMoveTaskTargetStackId = INVALID_STACK_ID;
+    ImageView mMoveTaskButton;
+    ImageView mDismissButton;
+    ViewStub mAppOverlayViewStub;
+    FrameLayout mAppOverlayView;
+    ImageView mAppIconView;
+    ImageView mAppInfoView;
+    TextView mAppTitleView;
+    ViewStub mFocusTimerIndicatorStub;
     ProgressBar mFocusTimerIndicator;
 
     // Header drawables
@@ -140,21 +150,26 @@ public class TaskViewHeader extends FrameLayout
     Drawable mDarkFreeformIcon;
     Drawable mLightFullscreenIcon;
     Drawable mDarkFullscreenIcon;
+    Drawable mLightInfoIcon;
+    Drawable mDarkInfoIcon;
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
+    int mMoveTaskTargetStackId = INVALID_STACK_ID;
 
     // Header background
     private HighlightColorDrawable mBackground;
+    private HighlightColorDrawable mOverlayBackground;
+    private float[] mTmpHSL = new float[3];
 
     // Header dim, which is only used when task view hardware layers are not used
     private Paint mDimLayerPaint = new Paint();
 
     Interpolator mFastOutSlowInInterpolator;
     Interpolator mFastOutLinearInInterpolator;
+    Interpolator mLinearOutSlowInInterpolator;
 
-    long mFocusIndicatorProgress;
     private CountDownTimer mFocusTimerCountDown;
-    long mFocusTimerDuration;
+    private long mFocusTimerDuration;
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -184,36 +199,45 @@ public class TaskViewHeader extends FrameLayout
         mDarkFreeformIcon = context.getDrawable(R.drawable.recents_move_task_freeform_dark);
         mLightFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_light);
         mDarkFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_dark);
+        mLightInfoIcon = context.getDrawable(R.drawable.recents_info_light);
+        mDarkInfoIcon = context.getDrawable(R.drawable.recents_info_dark);
 
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_linear_in);
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
 
         // Configure the background and dim
         mBackground = new HighlightColorDrawable();
         mBackground.setColorAndDim(Color.argb(255, 0, 0, 0), 0f);
         setBackground(mBackground);
+        mOverlayBackground = new HighlightColorDrawable();
         mDimLayerPaint.setColor(Color.argb(255, 0, 0, 0));
         mDimLayerPaint.setAntiAlias(true);
         mFocusTimerDuration = res.getInteger(R.integer.recents_auto_advance_duration);
+    }
+
+    /**
+     * Resets this header along with the TaskView.
+     */
+    public void reset() {
+        hideAppOverlay(true /* immediate */);
     }
 
     @Override
     protected void onFinishInflate() {
         // Initialize the icon and description views
         mIconView = (ImageView) findViewById(R.id.icon);
+        mIconView.setClickable(false);
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         mDismissButton.setOnClickListener(this);
         mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
-        mFocusTimerIndicator = (ProgressBar) findViewById(R.id.focus_timer_indicator);
-
-        // Hide the backgrounds if they are ripple drawables
-        if (mIconView.getBackground() instanceof RippleDrawable) {
-            mIconView.setBackground(null);
-        }
+        mFocusTimerIndicatorStub = (ViewStub) findViewById(R.id.focus_timer_indicator_stub);
+        mAppOverlayViewStub = (ViewStub) findViewById(R.id.app_overlay_stub);
     }
 
     /**
@@ -275,11 +299,6 @@ public class TaskViewHeader extends FrameLayout
     }
 
     @Override
-    protected boolean verifyDrawable(Drawable who) {
-        return super.verifyDrawable(who) || (who == mBackground);
-    }
-
-    @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
 
@@ -290,6 +309,10 @@ public class TaskViewHeader extends FrameLayout
 
     /** Starts the focus timer. */
     public void startFocusTimerIndicator() {
+        if (mFocusTimerIndicator == null) {
+            return;
+        }
+
         mFocusTimerIndicator.setVisibility(View.VISIBLE);
         mFocusTimerIndicator.setMax((int) mFocusTimerDuration);
         if (mFocusTimerCountDown == null) {
@@ -310,7 +333,11 @@ public class TaskViewHeader extends FrameLayout
 
     /** Cancels the focus timer. */
     public void cancelFocusTimerIndicator() {
-        if (mFocusTimerCountDown != null && mFocusTimerIndicator != null) {
+        if (mFocusTimerIndicator == null) {
+            return;
+        }
+
+        if (mFocusTimerCountDown != null) {
             mFocusTimerCountDown.cancel();
             mFocusTimerIndicator.setProgress(0);
             mFocusTimerIndicator.setVisibility(View.INVISIBLE);
@@ -339,6 +366,10 @@ public class TaskViewHeader extends FrameLayout
     private void updateBackgroundColor(float dimAlpha) {
         if (mTask != null) {
             mBackground.setColorAndDim(mTask.colorPrimary, dimAlpha);
+            // TODO: Consider using the saturation of the color to adjust the lightness as well
+            ColorUtils.colorToHSL(mTask.colorPrimary, mTmpHSL);
+            mTmpHSL[2] = Math.min(1f, mTmpHSL[2] + OVERLAY_LIGHTNESS_INCREMENT * (1.0f - dimAlpha));
+            mOverlayBackground.setColorAndDim(ColorUtils.HSLToColor(mTmpHSL), dimAlpha);
             mDimLayerPaint.setAlpha((int) (dimAlpha * 255));
         }
     }
@@ -384,10 +415,15 @@ public class TaskViewHeader extends FrameLayout
             mMoveTaskButton.setOnClickListener(this);
         }
 
-        mFocusTimerIndicator.getProgressDrawable()
-                .setColorFilter(
-                        getSecondaryColor(t.colorPrimary, t.useLightOnPrimaryColor),
-                        PorterDuff.Mode.SRC_IN);
+        if (Recents.getDebugFlags().isFastToggleIndicatorEnabled()) {
+            if (mFocusTimerIndicator == null) {
+                mFocusTimerIndicator = (ProgressBar) mFocusTimerIndicatorStub.inflate();
+            }
+            mFocusTimerIndicator.getProgressDrawable()
+                    .setColorFilter(
+                            getSecondaryColor(t.colorPrimary, t.useLightOnPrimaryColor),
+                            PorterDuff.Mode.SRC_IN);
+        }
 
         // In accessibility, a single click on the focused app info button will show it
         if (ssp.isTouchExplorationEnabled()) {
@@ -449,8 +485,11 @@ public class TaskViewHeader extends FrameLayout
     @Override
     public void onClick(View v) {
         if (v == mIconView) {
-            // In accessibility, a single click on the focused app info button will show it
-            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+            SystemServicesProxy ssp = Recents.getSystemServices();
+            if (ssp.isTouchExplorationEnabled()) {
+                // In accessibility, a single click on the focused app info button will show it
+                EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+            }
         } else if (v == mDismissButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
             tv.dismissTask();
@@ -465,15 +504,92 @@ public class TaskViewHeader extends FrameLayout
                     : new Rect();
             EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, bounds,
                     mMoveTaskTargetStackId, false));
+        } else if (v == mAppInfoView) {
+            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+        } else if (v == mAppIconView) {
+            hideAppOverlay(false /* immediate */);
         }
     }
 
     @Override
     public boolean onLongClick(View v) {
         if (v == mIconView) {
-            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
+            showAppOverlay();
+            return true;
+        } else if (v == mAppIconView) {
+            hideAppOverlay(false /* immediate */);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Shows the application overlay.
+     */
+    private void showAppOverlay() {
+        // Skip early if the task is invalid
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ComponentName cn = mTask.key.getComponent();
+        int userId = mTask.key.userId;
+        ActivityInfo activityInfo = ssp.getActivityInfo(cn, userId);
+        if (activityInfo == null) {
+            return;
+        }
+
+        // Inflate the overlay if necessary
+        if (mAppOverlayView == null) {
+            mAppOverlayView = (FrameLayout) mAppOverlayViewStub.inflate();
+            mAppOverlayView.setBackground(mOverlayBackground);
+            mAppIconView = (ImageView) mAppOverlayView.findViewById(R.id.app_icon);
+            mAppIconView.setOnClickListener(this);
+            mAppIconView.setOnLongClickListener(this);
+            mAppInfoView = (ImageView) mAppOverlayView.findViewById(R.id.app_info);
+            mAppInfoView.setOnClickListener(this);
+            mAppTitleView = (TextView) mAppOverlayView.findViewById(R.id.app_title);
+        }
+
+        // Update the overlay contents for the current app
+        mAppTitleView.setText(ssp.getBadgedApplicationLabel(activityInfo.applicationInfo, userId));
+        mAppIconView.setImageDrawable(ssp.getBadgedApplicationIcon(activityInfo.applicationInfo, userId));
+        mAppInfoView.setImageDrawable(mTask.useLightOnPrimaryColor
+                ? mLightInfoIcon
+                : mDarkInfoIcon);
+        mAppOverlayView.setVisibility(View.VISIBLE);
+
+        int x = mIconView.getLeft() + mIconView.getWidth() / 2;
+        int y = mIconView.getTop() + mIconView.getHeight() / 2;
+        Animator revealAnim = ViewAnimationUtils.createCircularReveal(mAppOverlayView, x, y, 0,
+                getWidth());
+        revealAnim.setDuration(OVERLAY_REVEAL_DURATION);
+        revealAnim.setInterpolator(mLinearOutSlowInInterpolator);
+        revealAnim.start();
+    }
+
+    /**
+     * Hide the application overlay.
+     */
+    private void hideAppOverlay(boolean immediate) {
+        // Skip if we haven't even loaded the overlay yet
+        if (mAppOverlayView == null) {
+            return;
+        }
+
+        if (immediate) {
+            mAppOverlayView.setVisibility(View.GONE);
+        } else {
+            int x = mIconView.getLeft() + mIconView.getWidth() / 2;
+            int y = mIconView.getTop() + mIconView.getHeight() / 2;
+            Animator revealAnim = ViewAnimationUtils.createCircularReveal(mAppOverlayView, x, y,
+                    getWidth(), 0);
+            revealAnim.setDuration(OVERLAY_REVEAL_DURATION);
+            revealAnim.setInterpolator(mLinearOutSlowInInterpolator);
+            revealAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAppOverlayView.setVisibility(View.GONE);
+                }
+            });
+            revealAnim.start();
+        }
     }
 }

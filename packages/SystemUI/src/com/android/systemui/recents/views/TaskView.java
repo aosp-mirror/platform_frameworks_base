@@ -162,6 +162,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Resets this TaskView for reuse. */
     void reset() {
+        mHeaderView.reset();
         resetViewProperties();
         resetNoUserInteractionState();
         setClipViewInStack(false);

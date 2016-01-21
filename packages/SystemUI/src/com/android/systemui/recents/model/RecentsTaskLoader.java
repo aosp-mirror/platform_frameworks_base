@@ -436,7 +436,7 @@ public class RecentsTaskLoader {
         // All short paths failed, load the label from the activity info and cache it
         ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
         if (activityInfo != null) {
-            label = ssp.getActivityLabel(activityInfo);
+            label = ssp.getBadgedActivityLabel(activityInfo, taskKey.userId);
             mActivityLabelCache.put(taskKey, label);
             return label;
         }
@@ -449,8 +449,7 @@ public class RecentsTaskLoader {
      * Returns the cached task content description if the task key is not expired, updating the
      * cache if it is.
      */
-    String getAndUpdateContentDescription(Task.TaskKey taskKey, String activityLabel,
-            Resources res) {
+    String getAndUpdateContentDescription(Task.TaskKey taskKey, Resources res) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Return the cached content description if it exists
@@ -458,13 +457,11 @@ public class RecentsTaskLoader {
         if (label != null) {
             return label;
         }
-        // If the given activity label is empty, don't compute or cache the content description
-        if (activityLabel.isEmpty()) {
-            return "";
-        }
 
-        label = ssp.getContentDescription(taskKey.baseIntent, taskKey.userId, activityLabel, res);
-        if (label != null) {
+        // All short paths failed, load the label from the activity info and cache it
+        ActivityInfo activityInfo = getAndUpdateActivityInfo(taskKey);
+        if (activityInfo != null) {
+            label = ssp.getBadgedContentDescription(activityInfo, taskKey.userId, res);
             mContentDescriptionCache.put(taskKey, label);
             return label;
         }

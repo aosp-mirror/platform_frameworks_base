@@ -1549,7 +1549,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Poke the doze trigger on user interaction
         mUIDozeTrigger.poke();
         if (event.showTimerIndicator && mFocusedTask != null) {
-            getChildViewForTask(mFocusedTask).getHeaderView().cancelFocusTimerIndicator();
+            TaskView tv = getChildViewForTask(mFocusedTask);
+            if (tv != null) {
+                tv.getHeaderView().cancelFocusTimerIndicator();
+            }
         }
     }
 

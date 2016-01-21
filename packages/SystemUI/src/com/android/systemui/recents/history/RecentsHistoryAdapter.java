@@ -144,7 +144,6 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
-    private final List<Task> mTasks = new ArrayList<>();
     private final List<Row> mRows = new ArrayList<>();
     private final SparseIntArray mTaskRowCount = new SparseIntArray();
     private TaskStack mStack;
