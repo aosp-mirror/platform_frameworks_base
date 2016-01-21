@@ -814,8 +814,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Reset the last focused task state if changed
         if (mFocusedTask != null) {
-            resetFocusedTask(mFocusedTask);
-
             // Cancel the timer indicator, if applicable
             if (showTimerIndicator) {
                 final TaskView tv = getChildViewForTask(mFocusedTask);
@@ -823,6 +821,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.getHeaderView().cancelFocusTimerIndicator();
                 }
             }
+
+            resetFocusedTask(mFocusedTask);
         }
 
         boolean willScroll = false;
