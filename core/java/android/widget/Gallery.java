@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -1097,15 +1098,15 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     }
     
     @Override
-    public void onLongPress(MotionEvent e) {
-        
+    public void onLongPress(@NonNull MotionEvent e) {
         if (mDownTouchPosition < 0) {
             return;
         }
         
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        long id = getItemIdAtPosition(mDownTouchPosition);
-        dispatchLongPress(mDownTouchView, mDownTouchPosition, id);
+
+        final long id = getItemIdAtPosition(mDownTouchPosition);
+        dispatchLongPress(mDownTouchView, mDownTouchPosition, id, e.getX(), e.getY(), true);
     }
 
     // Unused methods from GestureDetector.OnGestureListener below
@@ -1159,29 +1160,47 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
+        return showContextMenuForChildInternal(originalView, 0, 0, false);
+    }
 
+    @Override
+    public boolean showContextMenuForChild(View originalView, float x, float y) {
+        return showContextMenuForChildInternal(originalView, x, y, true);
+    }
+
+    private boolean showContextMenuForChildInternal(View originalView, float x, float y,
+            boolean useOffsets) {
         final int longPressPosition = getPositionForView(originalView);
         if (longPressPosition < 0) {
             return false;
         }
         
         final long longPressId = mAdapter.getItemId(longPressPosition);
-        return dispatchLongPress(originalView, longPressPosition, longPressId);
+        return dispatchLongPress(originalView, longPressPosition, longPressId, x, y, useOffsets);
     }
 
     @Override
     public boolean showContextMenu() {
-        
+        return showContextMenuInternal(0, 0, false);
+    }
+
+    @Override
+    public boolean showContextMenu(float x, float y) {
+        return showContextMenuInternal(x, y, true);
+    }
+
+    private boolean showContextMenuInternal(float x, float y, boolean useOffsets) {
         if (isPressed() && mSelectedPosition >= 0) {
-            int index = mSelectedPosition - mFirstPosition;
-            View v = getChildAt(index);
-            return dispatchLongPress(v, mSelectedPosition, mSelectedRowId);
+            final int index = mSelectedPosition - mFirstPosition;
+            final View v = getChildAt(index);
+            return dispatchLongPress(v, mSelectedPosition, mSelectedRowId, x, y, useOffsets);
         }        
         
         return false;
     }
 
-    private boolean dispatchLongPress(View view, int position, long id) {
+    private boolean dispatchLongPress(View view, int position, long id, float x, float y,
+            boolean useOffsets) {
         boolean handled = false;
         
         if (mOnItemLongClickListener != null) {
@@ -1191,7 +1210,12 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
         if (!handled) {
             mContextMenuInfo = new AdapterContextMenuInfo(view, position, id);
-            handled = super.showContextMenuForChild(this);
+
+            if (useOffsets) {
+                handled = super.showContextMenuForChild(view, x, y);
+            } else {
+                handled = super.showContextMenuForChild(this);
+            }
         }
 
         if (handled) {
