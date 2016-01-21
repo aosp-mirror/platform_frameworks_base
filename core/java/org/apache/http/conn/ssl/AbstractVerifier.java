@@ -208,8 +208,8 @@ public abstract class AbstractVerifier implements X509HostnameVerifier {
     }
 
     public static String[] getCNs(X509Certificate cert) {
-        DistinguishedNameParser dnParser =
-                new DistinguishedNameParser(cert.getSubjectX500Principal());
+        AndroidDistinguishedNameParser dnParser =
+                new AndroidDistinguishedNameParser(cert.getSubjectX500Principal());
         List<String> cnList = dnParser.getAllMostSpecificFirst("cn");
 
         if(!cnList.isEmpty()) {

@@ -29,7 +29,7 @@ import javax.security.auth.x500.X500Principal;
  * @hide
  */
 @Deprecated
-final class DistinguishedNameParser {
+final class AndroidDistinguishedNameParser {
     private final String dn;
     private final int length;
     private int pos;
@@ -42,7 +42,7 @@ final class DistinguishedNameParser {
     /** distinguished name chars */
     private char[] chars;
 
-    public DistinguishedNameParser(X500Principal principal) {
+    public AndroidDistinguishedNameParser(X500Principal principal) {
         // RFC2253 is used to ensure we get attributes in the reverse
         // order of the underlying ASN.1 encoding, so that the most
         // significant values of repeated attributes occur first.
