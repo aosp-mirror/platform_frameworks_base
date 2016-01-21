@@ -742,6 +742,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    public static final class Lifecycle extends SystemService {
+        private InputMethodManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new InputMethodManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            LocalServices.addService(InputMethodManagerInternal.class,
+                    new LocalServiceImpl(mService.mHandler));
+            publishBinderService(Context.INPUT_METHOD_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                StatusBarManagerService statusBarService = (StatusBarManagerService) ServiceManager
+                        .getService(Context.STATUS_BAR_SERVICE);
+                mService.systemRunning(statusBarService);
+            }
+        }
+    }
+
     public InputMethodManagerService(Context context) {
         mIPackageManager = AppGlobals.getPackageManager();
         mContext = context;
@@ -894,7 +919,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                 }, filter);
-        LocalServices.addService(InputMethodManagerInternal.class, new LocalServiceImpl(mHandler));
     }
 
     private void resetDefaultImeLocked(Context context) {
