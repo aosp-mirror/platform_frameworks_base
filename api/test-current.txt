@@ -22640,6 +22640,7 @@ package android.mtp {
   }
 
   public class MtpDeviceInfo {
+    method public final int[] getEventsSupported();
     method public final java.lang.String getManufacturer();
     method public final java.lang.String getModel();
     method public final int[] getOperationsSupported();

@@ -129,6 +129,7 @@ class MtpManager {
             final String name = device.getProductName();
             MtpRoot[] roots;
             int[] operationsSupported = null;
+            int[] eventsSupported = null;
             if (opened) {
                 try {
                     roots = getRoots(device.getDeviceId());
@@ -142,16 +143,14 @@ class MtpManager {
                 final MtpDeviceInfo info = mtpDevice.getDeviceInfo();
                 if (info != null) {
                     operationsSupported = mtpDevice.getDeviceInfo().getOperationsSupported();
-                }
-                if (operationsSupported == null) {
-                    operationsSupported = new int[0];
+                    eventsSupported = mtpDevice.getDeviceInfo().getEventsSupported();
                 }
             } else {
                 roots = new MtpRoot[0];
-                operationsSupported = new int[0];
             }
             devices.add(new MtpDeviceRecord(
-                    device.getDeviceId(), name, opened, roots, operationsSupported));
+                    device.getDeviceId(), name, opened, roots, operationsSupported,
+                    eventsSupported));
         }
         return devices.toArray(new MtpDeviceRecord[devices.size()]);
     }

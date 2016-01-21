@@ -87,6 +87,13 @@ public class MtpManagerTest extends InstrumentationTestCase {
         getInstrumentation().show(Arrays.toString(records[0].operationsSupported));
     }
 
+    public void testEventsSupported() {
+        final MtpDeviceRecord[] records = mManager.getDevices();
+        assertEquals(1, records.length);
+        assertNotNull(records[0].eventsSupported);
+        getInstrumentation().show(Arrays.toString(records[0].eventsSupported));
+    }
+
     public void testEventObjectAdded() throws Exception {
         while (true) {
             getInstrumentation().show("Please take a photo by using connected MTP device.");
