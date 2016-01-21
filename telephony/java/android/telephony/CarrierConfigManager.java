@@ -341,6 +341,34 @@ public class CarrierConfigManager {
     public static final String KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL =
             "always_show_emergency_alert_onoff_bool";
 
+    /**
+     * The data call APN retry configuration for default type APN.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING =
+            "carrier_data_call_retry_config_default_string";
+
+    /**
+     * The data call APN retry configuration for other type APNs.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING =
+            "carrier_data_call_retry_config_others_string";
+
+    /**
+     * Delay between trying APN from the pool
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
+            "carrier_data_call_apn_delay_default_long";
+
+    /**
+     * Faster delay between trying APN from the pool
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
+            "carrier_data_call_apn_delay_faster_long";
+
     /* The following 3 fields are related to carrier visual voicemail. */
 
     /**
@@ -588,6 +616,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
+        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_DEFAULT_STRING,
+                "default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000");
+        sDefaults.putString(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_OTHERS_STRING,
+                "max_retries=3, 5000, 5000, 5000");
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
