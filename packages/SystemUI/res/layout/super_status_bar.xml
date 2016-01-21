@@ -80,7 +80,7 @@
     </FrameLayout>
 
     <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
-              android:layout="@layout/fullscreen_user_switcher"
+              android:layout="@layout/car_fullscreen_user_switcher"
               android:layout_width="match_parent"
               android:layout_height="match_parent"/>
 

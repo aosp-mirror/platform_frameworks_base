@@ -137,7 +137,7 @@ public class UserGridView extends GridView {
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater)getContext().getSystemService
                         (Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.fullscreen_user_pod, null);
+                convertView = inflater.inflate(R.layout.car_fullscreen_user_pod, null);
             }
             UserSwitcherController.UserRecord record = getItem(position);
 
