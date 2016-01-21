@@ -194,10 +194,12 @@ public class PhoneStateListener {
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE}
-     *
      * @see #onDataConnectionRealTimeInfoChanged(DataConnectionRealTimeInfo)
+     *
+     * @deprecated Use {@link TelephonyManager#getModemActivityInfo()}
      * @hide
      */
+    @Deprecated
     public static final int LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
 
     /**
