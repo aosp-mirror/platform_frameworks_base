@@ -196,7 +196,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
 
     public String toString(boolean loggable) {
         StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mDevice: ");
-        builder.append(loggable ? mDevice.hashCode() : mDevice);
+        builder.append(loggable ? mDevice : mDevice.hashCode());
         builder.append(", mId: ");
         builder.append(mId);
         builder.append(", mUUID: ");
@@ -214,7 +214,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
             default: builder.append(mState); break;
         }
         builder.append(", mNumber: ");
-        builder.append(loggable ? mNumber.hashCode() : mNumber);
+        builder.append(loggable ? mNumber : mNumber.hashCode());
         builder.append(", mMultiParty: ");
         builder.append(mMultiParty);
         builder.append(", mOutgoing: ");
