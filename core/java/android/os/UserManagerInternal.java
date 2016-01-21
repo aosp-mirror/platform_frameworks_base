@@ -17,6 +17,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Bitmap;
 
 /**
  * @hide Only for use within the system server.
@@ -81,4 +82,13 @@ public abstract class UserManagerInternal {
      * whether the user is managed by profile owner.
      */
     public abstract void setUserManaged(int userId, boolean isManaged);
+
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to omit
+     * restriction check, because DevicePolicyManager must always be able to set user icon
+     * regardless of any restriction.
+     * Also called by {@link com.android.server.pm.UserManagerService} because the logic of setting
+     * the icon is in this method.
+     */
+    public abstract void setUserIcon(int userId, Bitmap bitmap);
 }

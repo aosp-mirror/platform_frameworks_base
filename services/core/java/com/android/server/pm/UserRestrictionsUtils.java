@@ -92,7 +92,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RECORD_AUDIO,
             UserManager.DISALLOW_CAMERA,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
-            UserManager.DISALLOW_DATA_ROAMING
+            UserManager.DISALLOW_DATA_ROAMING,
+            UserManager.DISALLOW_SET_USER_ICON
     );
 
     /**

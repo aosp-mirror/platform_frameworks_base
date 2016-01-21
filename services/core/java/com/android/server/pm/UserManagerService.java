@@ -730,22 +730,14 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserIcon(int userId, Bitmap bitmap) {
         checkManageUsersPermission("update users");
-        long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mPackagesLock) {
-                UserData userData = getUserDataNoChecks(userId);
-                if (userData == null || userData.info.partial) {
-                    Slog.w(LOG_TAG, "setUserIcon: unknown user #" + userId);
-                    return;
-                }
-                writeBitmapLP(userData.info, bitmap);
-                writeUserLP(userData);
-            }
-            sendUserInfoChangedBroadcast(userId);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+        if (hasUserRestriction(UserManager.DISALLOW_SET_USER_ICON, userId)) {
+            Log.w(LOG_TAG, "Cannot set user icon. DISALLOW_SET_USER_ICON is enabled.");
+            return;
         }
+        mLocalService.setUserIcon(userId, bitmap);
     }
+
+
 
     private void sendUserInfoChangedBroadcast(int userId) {
         Intent changedIntent = new Intent(Intent.ACTION_USER_INFO_CHANGED);
@@ -2899,6 +2891,25 @@ public class UserManagerService extends IUserManager.Stub {
         public void setUserManaged(int userId, boolean isManaged) {
             synchronized (mUsersLock) {
                 mIsUserManaged.put(userId, isManaged);
+            }
+        }
+
+        @Override
+        public void setUserIcon(int userId, Bitmap bitmap) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mPackagesLock) {
+                    UserData userData = getUserDataNoChecks(userId);
+                    if (userData == null || userData.info.partial) {
+                        Slog.w(LOG_TAG, "setUserIcon: unknown user #" + userId);
+                        return;
+                    }
+                    writeBitmapLP(userData.info, bitmap);
+                    writeUserLP(userData);
+                }
+                sendUserInfoChangedBroadcast(userId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
