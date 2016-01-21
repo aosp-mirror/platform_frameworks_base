@@ -102,9 +102,8 @@ page.article=true
   group (in API level 23 and higher), which is composed of the
   <code>READ_PHONE_STATE</code>, <code>CALL_PHONE</code>,
    <code>READ_CALL_LOG</code>, <code>WRITE_CALL_LOG</code>,
-  <code>ADD_VOICEMAIL</code>,  <code>USE_SIP</code>,
-  <code>PROCESS_OUTGOING_CALLS</code>  <code>GET_ACCOUNTS</code>,
-   <code>READ_PROFILE</code>, and <code>WRITE_PROFILE</code> permissions, and
+  <code>ADD_VOICEMAIL</code>,  <code>USE_SIP</code>, and
+  <code>PROCESS_OUTGOING_CALLS</code> permissions, and
   all their associated methods.
 </p>
 
