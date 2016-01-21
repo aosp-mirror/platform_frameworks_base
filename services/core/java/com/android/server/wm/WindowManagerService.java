@@ -2679,20 +2679,11 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 winAnimator.mEnterAnimationPending = false;
                 winAnimator.mEnteringAnimation = false;
-                if (winAnimator.mSurfaceController != null &&
-                        winAnimator.mSurfaceController.hasSurface()) {
+                if (winAnimator.hasSurface() && !win.mExiting) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Relayout invis " + win
                             + ": mExiting=" + win.mExiting);
-                    // If we are using a saved surface to do enter animation, just let the
-                    // animation run and don't destroy the surface. This could happen when
-                    // the app sets visibility to invisible for the first time after resume,
-                    // or when the user exits immediately after a resume. In both cases, we
-                    // don't want to destroy the saved surface.
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
-                    final boolean notExitingOrAnimating =
-                            !win.mExiting && !win.isAnimatingWithSavedSurface();
-                    result |= notExitingOrAnimating ? RELAYOUT_RES_SURFACE_CHANGED : 0;
                     // We don't want to animate visibility of windows which are pending
                     // replacement. In the case of activity relaunch child windows
                     // could request visibility changes as they are detached from the main
@@ -2700,11 +2691,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     // these visibility changes though, we would cause a visual glitch
                     // hiding the window before it's replacement was available.
                     // So we just do nothing on our side.
-                    if (notExitingOrAnimating && win.mWillReplaceWindow == false) {
-                        focusMayChange = tryStartingAnimation(win, winAnimator, isDefaultDisplay,
-                                focusMayChange);
-
+                    if (!win.mWillReplaceWindow) {
+                        focusMayChange = tryStartExitingAnimation(
+                                win, winAnimator, isDefaultDisplay, focusMayChange);
                     }
+                    result |= RELAYOUT_RES_SURFACE_CHANGED;
                 }
 
                 outSurface.release();
@@ -2787,7 +2778,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return result;
     }
 
-    private boolean tryStartingAnimation(WindowState win, WindowStateAnimator winAnimator,
+    private boolean tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator,
             boolean isDefaultDisplay, boolean focusMayChange) {
         // Try starting an animation; if there isn't one, we
         // can destroy the surface right away.
@@ -4240,6 +4231,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 } else {
+                    wtoken.markSurfacesExiting();
                     mClosingApps.add(wtoken);
                     wtoken.mEnteringAnimation = false;
                 }
@@ -10276,10 +10268,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     static int dipToPixel(int dip, DisplayMetrics displayMetrics) {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dip, displayMetrics);
-    }
-
-    void scheduleSurfaceDestroy(WindowState win) {
-        mDestroySurface.add(win);
     }
 
     @Override

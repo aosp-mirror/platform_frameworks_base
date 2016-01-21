@@ -302,6 +302,13 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void markSurfacesExiting() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            WindowState win = allAppWindows.get(i);
+            win.mExiting = true;
+        }
+    }
+
     /**
      * Checks whether we should save surfaces for this app.
      *
@@ -329,15 +336,14 @@ class AppWindowToken extends WindowToken {
         if (!hasSavedSurface()) {
             return;
         }
-
-        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG_WM,
-                "Restoring saved surfaces: " + this + ", allDrawn=" + allDrawn);
-
         mAnimatingWithSavedSurface = true;
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState ws = windows.get(i);
             ws.restoreSavedSurface();
         }
+        // Mark the app allDrawn since it must be allDrawn at the time
+        // it was first saved.
+        allDrawn = true;
     }
 
     void destroySavedSurfaces() {

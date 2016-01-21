@@ -1161,6 +1161,9 @@ class WindowSurfacePlacer {
                 appAnimator.animation = null;
             }
             wtoken.inPendingTransaction = false;
+
+            wtoken.restoreSavedSurfaces();
+
             if (!mService.setTokenVisibilityLocked(
                     wtoken, animLp, true, transit, false, voiceInteraction)){
                 // This token isn't going to be animating. Add it to the list of tokens to
@@ -1217,8 +1220,6 @@ class WindowSurfacePlacer {
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 createThumbnailAppAnimator(transit, wtoken, topOpeningLayer, topClosingLayer);
             }
-
-            wtoken.restoreSavedSurfaces();
         }
         return topOpeningApp;
     }
