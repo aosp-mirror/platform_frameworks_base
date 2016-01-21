@@ -3717,14 +3717,15 @@ public class DevicePolicyManager {
 
     /**
      * Start Quick Contact on the managed profile for the user, if the policy allows.
+     *
      * @hide
      */
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
-            long directoryId, Intent originalIntent) {
+            boolean isContactIdIgnored, long directoryId, Intent originalIntent) {
         if (mService != null) {
             try {
-                mService.startManagedQuickContact(
-                        actualLookupKey, actualContactId, directoryId, originalIntent);
+                mService.startManagedQuickContact(actualLookupKey, actualContactId,
+                        isContactIdIgnored, directoryId, originalIntent);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -3737,7 +3738,7 @@ public class DevicePolicyManager {
      */
     public void startManagedQuickContact(String actualLookupKey, long actualContactId,
             Intent originalIntent) {
-        startManagedQuickContact(actualLookupKey, actualContactId, Directory.DEFAULT,
+        startManagedQuickContact(actualLookupKey, actualContactId, false, Directory.DEFAULT,
                 originalIntent);
     }
 
