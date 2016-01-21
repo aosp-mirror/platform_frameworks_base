@@ -84,6 +84,7 @@ import com.android.documentsui.DocumentClipper;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
+import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.MimePredicate;
@@ -138,7 +139,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private Model mModel;
     private MultiSelectManager mSelectionManager;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
-    private ItemClickListener mItemClickListener = new ItemClickListener();
+    private ItemEventListener mItemEventListener = new ItemEventListener();
 
     private IconHelper mIconHelper;
 
@@ -297,19 +298,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mRecView.setAdapter(mAdapter);
 
-        GestureDetector.SimpleOnGestureListener listener =
-                new GestureDetector.SimpleOnGestureListener() {
-                    @Override
-                    public boolean onSingleTapUp(MotionEvent e) {
-                        return DirectoryFragment.this.onSingleTapUp(e);
-                    }
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        Log.d(TAG, "Handling double tap.");
-                        return DirectoryFragment.this.onDoubleTap(e);
-                    }
-                };
-
+        GestureListener listener = new GestureListener();
         final GestureDetector detector = new GestureDetector(this.getContext(), listener);
         detector.setOnDoubleTapListener(listener);
 
@@ -466,22 +455,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 operationType);
     }
 
-    private boolean onSingleTapUp(MotionEvent e) {
-        // Only respond to touch events.  Single-click mouse events are selection events and are
-        // handled by the selection manager.  Tap events that occur while the selection manager is
-        // active are also selection events.
-        if (Events.isTouchEvent(e) && !mSelectionManager.hasSelection()) {
-            String id = getModelId(e);
-            if (id != null) {
-                return handleViewItem(id);
-            }
-        }
-        return false;
-    }
-
     protected boolean onDoubleTap(MotionEvent e) {
         if (Events.isMouseEvent(e)) {
-            Log.d(TAG, "Handling double tap from mouse.");
             String id = getModelId(e);
             if (id != null) {
                 return handleViewItem(id);
@@ -926,7 +901,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     @Override
     public void initDocumentHolder(DocumentHolder holder) {
-        holder.addClickListener(mItemClickListener);
+        holder.addEventListener(mItemEventListener);
         holder.addOnKeyListener(mSelectionManager);
     }
 
@@ -1330,15 +1305,18 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         return mSelectionManager.getSelection().contains(modelId);
     }
 
-    private class ItemClickListener implements DocumentHolder.ClickListener {
+    private class ItemEventListener implements DocumentHolder.EventListener {
         @Override
-        public void onClick(DocumentHolder doc) {
-            if (mSelectionManager.hasSelection()) {
-                mSelectionManager.toggleSelection(doc.modelId);
-                mSelectionManager.setSelectionRangeBegin(doc.getAdapterPosition());
-            } else {
-                handleViewItem(doc.modelId);
-            }
+        public boolean onActivate(DocumentHolder doc) {
+            handleViewItem(doc.modelId);
+            return true;
+        }
+
+        @Override
+        public boolean onSelect(DocumentHolder doc) {
+            mSelectionManager.toggleSelection(doc.modelId);
+            mSelectionManager.setSelectionRangeBegin(doc.getAdapterPosition());
+            return true;
         }
     }
 
@@ -1364,6 +1342,56 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         @Override
         public void onModelUpdateFailed(Exception e) {
             showErrorView();
+        }
+    }
+
+    /**
+     * The gesture listener for items in the list/grid view. Interprets gestures and sends the
+     * events to the target DocumentHolder, whence they are routed to the appropriate listener.
+     */
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            // Single tap logic:
+            // If the selection manager is active, it gets first whack at handling tap
+            // events. Otherwise, tap events are routed to the target DocumentHolder.
+            boolean handled = mSelectionManager.onSingleTapUp(
+                        new MotionInputEvent(e, mRecView));
+
+            if (handled) {
+                return handled;
+            }
+
+            // Give the DocumentHolder a crack at the event.
+            DocumentHolder holder = getTarget(e);
+            if (holder != null) {
+                handled = holder.onSingleTapUp(e);
+            }
+
+            return handled;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            // Long-press events get routed directly to the selection manager. They can be
+            // changed to route through the DocumentHolder if necessary.
+            mSelectionManager.onLongPress(new MotionInputEvent(e, mRecView));
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            // Double-tap events are handled directly by the DirectoryFragment. They can be changed
+            // to route through the DocumentHolder if necessary.
+            return DirectoryFragment.this.onDoubleTap(e);
+        }
+
+        private @Nullable DocumentHolder getTarget(MotionEvent e) {
+            View childView = mRecView.findChildViewUnder(e.getX(), e.getY());
+            if (childView != null) {
+                return (DocumentHolder) mRecView.getChildViewHolder(childView);
+            } else {
+                return null;
+            }
         }
     }
 }

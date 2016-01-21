@@ -16,17 +16,21 @@
 
 package com.android.documentsui.dirlist;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.documentsui.Events;
 import com.android.documentsui.R;
 import com.android.documentsui.State;
 
@@ -41,8 +45,9 @@ public abstract class DocumentHolder
     final boolean mAlwaysShowSummary;
     final Context mContext;
 
-    private ListDocumentHolder.ClickListener mClickListener;
+    DocumentHolder.EventListener mEventListener;
     private View.OnKeyListener mKeyListener;
+    private View mSelectionHotspot;
 
     public DocumentHolder(Context context, ViewGroup parent, int layout) {
         this(context, inflateLayout(context, parent, layout));
@@ -58,6 +63,8 @@ public abstract class DocumentHolder
         mDefaultItemColor = context.getColor(R.color.item_doc_background);
         mSelectedItemColor = context.getColor(R.color.item_doc_background_selected);
         mAlwaysShowSummary = context.getResources().getBoolean(R.bool.always_show_summary);
+
+        mSelectionHotspot = itemView.findViewById(R.id.icon_check);
     }
 
     /**
@@ -75,23 +82,21 @@ public abstract class DocumentHolder
 
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
+        // Event listener should always be set.
+        checkNotNull(mEventListener);
         // Intercept enter key-up events, and treat them as clicks.  Forward other events.
-        if (event.getAction() == KeyEvent.ACTION_UP &&
-                keyCode == KeyEvent.KEYCODE_ENTER) {
-            if (mClickListener != null) {
-                mClickListener.onClick(this);
-            }
-            return true;
+        if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
+            return mEventListener.onActivate(this);
         } else if (mKeyListener != null) {
             return mKeyListener.onKey(v, keyCode, event);
         }
         return false;
     }
 
-    public void addClickListener(ListDocumentHolder.ClickListener listener) {
+    public void addEventListener(DocumentHolder.EventListener listener) {
         // Just handle one for now; switch to a list if necessary.
-        checkState(mClickListener == null);
-        mClickListener = listener;
+        checkState(mEventListener == null);
+        mEventListener = listener;
     }
 
     public void addOnKeyListener(View.OnKeyListener listener) {
@@ -102,6 +107,33 @@ public abstract class DocumentHolder
 
     public void setEnabled(boolean enabled) {
         setEnabledRecursive(itemView, enabled);
+    }
+
+    public boolean onSingleTapUp(MotionEvent event) {
+        if (Events.isMouseEvent(event)) {
+            // Mouse clicks select.
+            // TODO:  && input.isPrimaryButtonPressed(), but it is returning false.
+            if (mEventListener != null) {
+                return mEventListener.onSelect(this);
+            }
+        } else if (Events.isTouchEvent(event)) {
+            // Touch events select if they occur in the selection hotspot, otherwise they activate.
+            if (mEventListener == null) {
+                return false;
+            }
+
+            // Do everything in global coordinates - it makes things simpler.
+            Rect rect = new Rect();
+            mSelectionHotspot.getGlobalVisibleRect(rect);
+
+            // If the tap occurred within the icon rect, consider it a selection.
+            if (rect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                return mEventListener.onSelect(this);
+            } else {
+                return mEventListener.onActivate(this);
+            }
+        }
+        return false;
     }
 
     static void setEnabledRecursive(View itemView, boolean enabled) {
@@ -122,7 +154,20 @@ public abstract class DocumentHolder
         return inflater.inflate(layout, parent, false);
     }
 
-    interface ClickListener {
-        public void onClick(DocumentHolder doc);
+    /**
+     * Implement this in order to be able to respond to events coming from DocumentHolders.
+     */
+    interface EventListener {
+        /**
+         * @param doc The target DocumentHolder
+         * @return Whether the event was handled.
+         */
+        public boolean onActivate(DocumentHolder doc);
+
+        /**
+         * @param doc The target DocumentHolder
+         * @return Whether the event was handled.
+         */
+        public boolean onSelect(DocumentHolder doc);
     }
 }
