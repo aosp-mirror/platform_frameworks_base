@@ -3020,6 +3020,12 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.android.internal.app.UnlaunchableAppActivity"
+                android:theme="@style/Theme.Material.DayNight.Dialog.Alert"
+                android:excludeFromRecents="true"
+                android:process=":ui">
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:systemUserOnly="true">
             <intent-filter android:priority="1000">
