@@ -1287,14 +1287,14 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ASSIST_INPUT_DEVICE_ID";
 
     /**
-     * Activity Action: List all available applications
+     * Activity Action: List all available applications.
      * <p>Input: Nothing.
      * <p>Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     /**
-     * Activity Action: Show settings for choosing wallpaper
+     * Activity Action: Show settings for choosing wallpaper.
      * <p>Input: Nothing.
      * <p>Output: Nothing.
      */
@@ -1856,7 +1856,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An existing application package has been removed from
      * the device.  The data contains the name of the package.  The package
-     * that is being installed does <em>not</em> receive this Intent.
+     * that is being removed does <em>not</em> receive this Intent.
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid previously assigned
      * to the package.
