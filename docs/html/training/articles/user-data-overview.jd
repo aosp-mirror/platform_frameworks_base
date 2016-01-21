@@ -97,15 +97,19 @@ page.article=true
   This also means that when you request access to a particular API call or
   query a content provider behind a permission, the user will be presented with
   a request to grant permission for the whole group rather than the specific
-  API call. For example, if you request the <code>MANAGE_ACOUNTS</code>
-  permission, the user will be asked to grant access to the <em>Identity</em>
-  group (in API level 22 and lower), which is composed of the <code>GET_ACCOUNTS</code>,
-  <code>READ_PROFILE</code>, and <code>WRITE_PROFILE</code> permissions, and
+  API call. For example, if you request the <code>WRITE_CALL_LOG</code>
+  permission, the user will be asked to grant access to the <em>PHONE</em>
+  group (in API level 23 and higher), which is composed of the
+  <code>READ_PHONE_STATE</code>, <code>CALL_PHONE</code>,
+   <code>READ_CALL_LOG</code>, <code>WRITE_CALL_LOG</code>,
+  <code>ADD_VOICEMAIL</code>,  <code>USE_SIP</code>,
+  <code>PROCESS_OUTGOING_CALLS</code>  <code>GET_ACCOUNTS</code>,
+   <code>READ_PROFILE</code>, and <code>WRITE_PROFILE</code> permissions, and
   all their associated methods.
 </p>
 
 <div class="wrap">
-   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-flow02.jpg">
+   <img src="{@docRoot}images/training/articles/user-data-overview-permissions-flow02.png">
 </div>
 
 <p>
@@ -142,7 +146,7 @@ TelephonyManager.getVoiceMailNumber()
 <p>
   To use these methods, the <code>READ_PHONE_STATE</code> permission must be
   declared in the app's manifest, and the associated permission group,
-  <em>Device ID and Call information</em>, will be surfaced to the user. This
+  <em>PHONE</em>, will be surfaced to the user. This
   is important, because it means the user will be asked to grant permission for
   the relevant group and all its associated permissions and API calls, rather
   than for the specific API call you're requesting.
@@ -166,7 +170,7 @@ please refer to the appropriate version-specific documentation below:</p>
 media player when there's a call, and to resume playback when the call is over.
 The permission seems to scare a lot of people</em>...<span
 style="font-size:.8em;color:#777"><sup><em><a
-href="#references" style="color:#777;padding-left:.1em;">1</a></em></span></p>
+href="#references" style="color:#777;padding-left:.1em;">1</a></em></sup></span></p>
 </div>
 </div>
 
@@ -182,23 +186,23 @@ href="#references" style="color:#777;padding-left:.1em;">1</a></em></span></p>
 <p>
   One study<span style="font-size:.8em;color:#777"><sup><em><a href=
   "#references" style=
-  "color:#777;padding-left:.1em;">2</a></em></sup></span><sup>, in which users
+  "color:#777;padding-left:.1em;">2</a></em></sup></span>, in which users
   were shown two unbranded apps with similar ratings that had the same
   functionality but different sets of permission requests, showed that users
   were, on average, 3 times more likely to install the app with fewer
-  permissions requests. And a similar study<span style=
+  permissions requests. And a similar study <span style=
   "font-size:.8em;color:#777"><sup><em><a href="#references" style=
-  "color:#777;padding-left:.1em;">3</a></em></sup> showed that users are 1.7
+  "color:#777;padding-left:.1em;">3</a></em></sup></span> showed that users are 1.7
   times more likely, on average, to select the application with fewer
-  permission requests.</span></sup>
+  permission requests.
 </p>
 
 <p>
-  <sup>Finally, permissions usage is not evenly distributed across apps within
+  Finally, permissions usage is not evenly distributed across apps within
   a similar category of Play apps. For example, 39.3% of arcade game apps in
   the Play store request no permissions that are surfaced to the user while
   only 1.5% of arcade games request the Phone permission group (see Figure
-  1).</sup>
+  1).
 </p>
 
 <div class="wrap">
