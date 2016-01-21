@@ -78,17 +78,18 @@ final class MoveJob extends CopyJob {
     @Override
     boolean processDocument(DocumentInfo srcInfo, DocumentInfo dstDirInfo) throws RemoteException {
 
-        // TODO: When optimized copy kicks in, we're not making any progress updates. FIX IT!
+        // TODO: When optimized move kicks in, we're not making any progress updates. FIX IT!
 
-        // When copying within the same provider, try to use optimized copying and moving.
+        // When moving within the same provider, try to use optimized moving.
         // If not supported, then fallback to byte-by-byte copy/move.
         if (srcInfo.authority.equals(dstDirInfo.authority)) {
             if ((srcInfo.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
                 if (DocumentsContract.moveDocument(srcClient, srcInfo.derivedUri,
                         dstDirInfo.derivedUri) == null) {
                     onFileFailed(srcInfo);
+                    return false;
                 }
-                return false;
+                return true;
             }
         }
 
