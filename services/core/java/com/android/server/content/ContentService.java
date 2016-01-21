@@ -28,6 +28,7 @@ import android.content.SyncAdapterType;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
+import android.content.pm.PackageManager;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -654,13 +655,26 @@ public final class ContentService extends IContentService.Stub {
     }
 
     public List<SyncInfo> getCurrentSyncs() {
+        return getCurrentSyncsAsUser(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * If the user id supplied is different to the calling user, the caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission.
+     */
+    public List<SyncInfo> getCurrentSyncsAsUser(int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read the sync settings for user " + userId);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_STATS,
                 "no permission to read the sync stats");
 
-        int userId = UserHandle.getCallingUserId();
+        final boolean canAccessAccounts =
+            mContext.checkCallingOrSelfPermission(Manifest.permission.GET_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
         long identityToken = clearCallingIdentity();
         try {
-            return getSyncManager().getSyncStorageEngine().getCurrentSyncsCopy(userId);
+            return getSyncManager().getSyncStorageEngine()
+                .getCurrentSyncsCopy(userId, canAccessAccounts);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -732,6 +746,21 @@ public final class ContentService extends IContentService.Stub {
         ContentService service = new ContentService(context, factoryTest);
         ServiceManager.addService(ContentResolver.CONTENT_SERVICE_NAME, service);
         return service;
+    }
+
+    /**
+     * Checks if the request is from the system or an app that has INTERACT_ACROSS_USERS_FULL
+     * permission, if the userHandle is not for the caller.
+     *
+     * @param userHandle the user handle of the user we want to act on behalf of.
+     * @param message the message to log on security exception.
+     */
+    private void enforceCrossUserPermission(int userHandle, String message) {
+        final int callingUser = UserHandle.getCallingUserId();
+        if (callingUser != userHandle) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, message);
+        }
     }
 
     /**
