@@ -356,6 +356,20 @@
     <protected-broadcast android:name="android.intent.action.WALLPAPER_CHANGED" />
 
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_MANAGER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.app.action.CHOOSE_PRIVATE_KEY_ALIAS" />
+    <protected-broadcast android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+    <protected-broadcast android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+    <protected-broadcast android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+    <protected-broadcast android:name="android.app.action.LOCK_TASK_ENTERING" />
+    <protected-broadcast android:name="android.app.action.LOCK_TASK_EXITING" />
+    <protected-broadcast android:name="android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE" />
+    <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_CHANGED" />
+    <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_EXPIRING" />
+    <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_FAILED" />
+    <protected-broadcast android:name="android.app.action.ACTION_PASSWORD_SUCCEEDED" />
+    <protected-broadcast android:name="com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_ADDED" />
+
     <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_STATE_CHANGED" />
     <protected-broadcast android:name="android.content.jobscheduler.JOB_DELAY_EXPIRED" />
     <protected-broadcast android:name="android.content.syncmanager.SYNC_ALARM" />
