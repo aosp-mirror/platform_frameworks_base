@@ -81,6 +81,7 @@ public class TunerFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
+        getActivity().setTitle(R.string.system_ui_tuner);
         updateBatteryPct();
         getContext().getContentResolver().registerContentObserver(
                 System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);

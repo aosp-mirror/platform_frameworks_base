@@ -151,4 +151,7 @@
     <color name="qs_tile_tint_unavailable">#40ffffff</color>
     <color name="qs_tile_tint_inactive">#4dffffff</color>
     <color name="qs_tile_tint_active">#ffffffff</color>
+
+    <color name="switch_bar_background">#ff37474f</color>
+    <color name="switch_accent_color">#ff7fcac3</color>
 </resources>

@@ -76,6 +76,22 @@ public class TunerService extends SystemUI {
         mUserTracker.startTracking();
     }
 
+    public String getValue(String setting) {
+        return Settings.Secure.getStringForUser(mContentResolver, setting, mCurrentUser);
+    }
+
+    public void setValue(String setting, String value) {
+         Settings.Secure.putStringForUser(mContentResolver, setting, value, mCurrentUser);
+    }
+
+    public int getValue(String setting, int def) {
+        return Settings.Secure.getIntForUser(mContentResolver, setting, def, mCurrentUser);
+    }
+
+    public void setValue(String setting, int value) {
+         Settings.Secure.putIntForUser(mContentResolver, setting, value, mCurrentUser);
+    }
+
     public void addTunable(Tunable tunable, String... keys) {
         for (String key : keys) {
             addTunable(tunable, key);

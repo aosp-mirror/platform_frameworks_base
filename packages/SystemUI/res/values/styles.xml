@@ -345,4 +345,8 @@
         <item name="android:textColor">@*android:color/material_deep_teal_500</item>
     </style>
 
+    <style name="ThemeOverlay.SwitchBar" parent="@android:style/ThemeOverlay">
+        <item name="android:colorAccent">@color/switch_accent_color</item>
+    </style>
+
 </resources>

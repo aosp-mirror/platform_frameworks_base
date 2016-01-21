@@ -20,14 +20,16 @@ import android.provider.Settings;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
-import libcore.util.Objects;
+import com.android.systemui.statusbar.policy.DisplayController;
 
-public class ColorMatrixTile extends QSTile<QSTile.State> implements TunerService.Tunable {
+import java.util.Objects;
 
-    public static final String COLOR_MATRIX_CUSTOM_ENABLED = "tuner_color_custom_enabled";
-    public static final String COLOR_MATRIX_CUSTOM_VALUES = "tuner_color_custom_values";
+
+public class ColorMatrixTile extends QSTile<QSTile.State> implements DisplayController.Listener {
 
     public static final String COLOR_MATRIX_SPEC = "colors";
+
+    private final DisplayController mDisplayController;
 
     private int mIndex;
     private String mCurrentValue;
@@ -38,18 +40,17 @@ public class ColorMatrixTile extends QSTile<QSTile.State> implements TunerServic
 
     public ColorMatrixTile(Host host) {
         super(host);
+        mDisplayController = host.getDisplayController();
     }
 
     @Override
     public void setListening(boolean listening) {
         if (listening) {
-            mValues = ColorMatrixFragment.getColorTransforms();
-            mValueTitles = ColorMatrixFragment.getColorTitles(mContext);
-            TunerService.get(mContext).addTunable(this, COLOR_MATRIX_CUSTOM_ENABLED,
-                    COLOR_MATRIX_CUSTOM_VALUES,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX);
+            mValues = DisplayController.getColorTransforms(mContext);
+            mValueTitles = DisplayController.getColorTitles(mContext);
+            mDisplayController.addListener(this);
         } else {
-            TunerService.get(mContext).removeTunable(this);
+            mDisplayController.removeListener(this);
         }
     }
 
@@ -61,43 +62,41 @@ public class ColorMatrixTile extends QSTile<QSTile.State> implements TunerServic
     @Override
     protected void handleClick() {
         mIndex++;
-        if (!mCustomEnabled && (mIndex == ColorMatrixFragment.CUSTOM_INDEX)) {
-            mIndex++;
-        }
-        if (mIndex == mValues.length - 1) {
-            mIndex = 0;
-        }
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, mValues[mIndex],
-                ActivityManager.getCurrentUser());
-        refreshState();
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (COLOR_MATRIX_CUSTOM_ENABLED.equals(key)) {
-            mCustomEnabled = newValue != null && Integer.parseInt(newValue) != 0;
-        } else if (COLOR_MATRIX_CUSTOM_VALUES.equals(key)) {
-            mValues[ColorMatrixFragment.CUSTOM_INDEX] = newValue;
+        if (mIndex == DisplayController.AUTO_INDEX) {
+            mDisplayController.setAuto(true);
         } else {
-            mCurrentValue = newValue;
-        }
-        // Last value is unknown, default to that.
-        mIndex = mValues.length - 1;
-        for (int i = 0; i < mValues.length - 1; i++) {
-            if (Objects.equal(mCurrentValue, mValues[i])) {
-                mIndex = i;
-                break;
+            mDisplayController.setAuto(false);
+            if (!mDisplayController.isCustomEnabled()
+                    && (mIndex == DisplayController.CUSTOM_INDEX)) {
+                mIndex++;
             }
+            if (mIndex == mValues.length - 1) {
+                mIndex = 0;
+            }
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, mValues[mIndex],
+                    ActivityManager.getCurrentUser());
         }
         refreshState();
     }
 
     @Override
     protected void handleUpdateState(State state, Object arg) {
+        if (mDisplayController.isAuto()) {
+            mIndex = DisplayController.AUTO_INDEX;
+        } else if (mDisplayController.isCustomSet()) {
+            mIndex = DisplayController.CUSTOM_INDEX;
+        } else {
+            mIndex = Objects.equals(mDisplayController.getCurrentMatrix(), mValues[1]) ? 1 : 0;
+        }
         state.icon = ResourceIcon.get(R.drawable.ic_colorize);
         state.label = mValueTitles[mIndex];
         state.contentDescription = mValueTitles[mIndex];
+    }
+
+    @Override
+    public void onCurrentMatrixChanged() {
+        refreshState();
     }
 
     @Override

@@ -43,6 +43,7 @@ public class TunerActivity extends SettingsDrawerActivity implements
             Class<?> cls = Class.forName(pref.getFragment());
             Fragment fragment = (Fragment) cls.newInstance();
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            setTitle(pref.getTitle());
             transaction.replace(R.id.content_frame, fragment);
             transaction.addToBackStack("PreferenceFragment");
             transaction.commit();

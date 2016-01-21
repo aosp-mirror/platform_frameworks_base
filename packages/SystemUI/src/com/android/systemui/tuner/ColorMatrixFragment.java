@@ -19,6 +19,7 @@ import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -28,15 +29,15 @@ import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.DropDownPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceViewHolder;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Switch;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.policy.DisplayController;
 
 import java.util.Objects;
 
@@ -44,21 +45,6 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
 
     private static final String TAG = "ColorMatrixFragment";
 
-    public static final int CUSTOM_INDEX = 2;
-
-    // Night mode ~= 3400 K
-    private static final float[] NIGHT_VALUES = new float[] {
-        1, 0,     0,     0,
-        0, .754f, 0,     0,
-        0, 0,     .516f, 0,
-        0, 0,     0,     1,
-    };
-    public static final float[] IDENTITY_MATRIX = new float[]{
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1,
-    };
     private static final long RESET_DELAY = 10000;
 
     private boolean mCustomEnabled;
@@ -67,17 +53,26 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
     private String mCustomValues;
     private SwitchPreference mEnableCustomPreference;
     private MatrixPreference mCustomPreference;
-    private SwitchPreference mShowQs;
-    private String mTiles;
+    private int mState;
+    private Switch mSwitch;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Context context = getContext();
-        TunerService.get(context).addTunable(this, ColorMatrixTile.COLOR_MATRIX_CUSTOM_ENABLED,
-                ColorMatrixTile.COLOR_MATRIX_CUSTOM_VALUES, QSTileHost.TILES_SETTING,
+        TunerService.get(context).addTunable(this, DisplayController.COLOR_MATRIX_CUSTOM_ENABLED,
+                DisplayController.COLOR_MATRIX_CUSTOM_VALUES, DisplayController.COLOR_STATE,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        final View view = LayoutInflater.from(getContext()).inflate(
+                R.layout.color_matrix_settings, container, false);
+        ((ViewGroup) view).addView(super.onCreateView(inflater, container, savedInstanceState));
+        return view;
     }
 
     @Override
@@ -88,39 +83,32 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
         mSelectPreference = new DropDownPreference(context);
         mSelectPreference.setTitle(R.string.color_transform);
         mSelectPreference.setSummary("%s");
-        mSelectPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        mSelectPreference.setOnPreferenceChangeListener(
+                new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                int index = Integer.parseInt((String) newValue);
+                if (Objects.equals(newValue, DisplayController.AUTO_STRING)) {
+                    Settings.Secure.putInt(context.getContentResolver(),
+                            DisplayController.COLOR_STATE,
+                            DisplayController.COLOR_STATE_AUTO);
+                    return true;
+                }
+                if (Objects.equals(newValue, DisplayController.NONE_STRING)) {
+                    Settings.Secure.putString(context.getContentResolver(),
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, null);
+                    return true;
+                }
+                Settings.Secure.putInt(context.getContentResolver(),
+                        DisplayController.COLOR_STATE,
+                        DisplayController.COLOR_STATE_ENABLED);
+                final String value = (String) newValue;
                 Settings.Secure.putString(context.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, getValues()[index]);
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX,
+                        value);
                 return true;
             }
         });
         getPreferenceScreen().addPreference(mSelectPreference);
-
-        mShowQs = new SwitchPreference(context);
-        mShowQs.setTitle(R.string.color_matrix_show_qs);
-        mShowQs.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                boolean showTile = (Boolean) newValue;
-                String newTiles;
-                if (showTile) {
-                    newTiles = mTiles != null ? mTiles + "," + ColorMatrixTile.COLOR_MATRIX_SPEC
-                            : "default," + ColorMatrixTile.COLOR_MATRIX_SPEC;
-                } else {
-                    newTiles =
-                            mTiles.replace(mTiles.contains(ColorMatrixTile.COLOR_MATRIX_SPEC+ ",")
-                            ? ColorMatrixTile.COLOR_MATRIX_SPEC + ","
-                            : "," + ColorMatrixTile.COLOR_MATRIX_SPEC, "");
-                }
-                Settings.Secure.putString(context.getContentResolver(), QSTileHost.TILES_SETTING,
-                        newTiles);
-                return true;
-            }
-        });
-        getPreferenceScreen().addPreference(mShowQs);
 
         mEnableCustomPreference = new SwitchPreference(context);
         mEnableCustomPreference.setTitle(R.string.color_enable_custom);
@@ -129,8 +117,12 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 boolean enabled = (Boolean) newValue;
+                if (!enabled && Objects.equals(mCurrentValue, mCustomValues)) {
+                    Settings.Secure.putString(context.getContentResolver(),
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, null);
+                }
                 Settings.Secure.putInt(context.getContentResolver(),
-                        ColorMatrixTile.COLOR_MATRIX_CUSTOM_ENABLED, enabled ? 1 : 0);
+                        DisplayController.COLOR_MATRIX_CUSTOM_ENABLED, enabled ? 1 : 0);
                 return true;
             }
         });
@@ -141,6 +133,38 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        View switchBar = view.findViewById(R.id.switch_bar);
+        mSwitch = (Switch) switchBar.findViewById(android.R.id.switch_widget);
+        mSwitch.setChecked(mState != DisplayController.COLOR_STATE_DISABLED);
+        switchBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int newState = mState != DisplayController.COLOR_STATE_DISABLED
+                        ? DisplayController.COLOR_STATE_DISABLED
+                        : DisplayController.COLOR_STATE_ENABLED;
+                ContentResolver contentResolver = getContext().getContentResolver();
+                if (newState == DisplayController.COLOR_STATE_DISABLED) {
+                    String tiles = Settings.Secure.getString(contentResolver,
+                            QSTileHost.TILES_SETTING);
+                    if (tiles != null) {
+                        if (tiles.contains(",colors")) {
+                            tiles = tiles.replace(",colors", "");
+                        } else if (tiles.contains("colors,")) {
+                            tiles = tiles.replace("colors,", "");
+                        }
+                        Settings.Secure.putString(contentResolver, QSTileHost.TILES_SETTING,
+                                tiles);
+                    }
+                }
+                Settings.Secure.putInt(contentResolver,
+                        DisplayController.COLOR_STATE, newState);
+            }
+        });
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         TunerService.get(getContext()).removeTunable(this);
@@ -148,20 +172,28 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (ColorMatrixTile.COLOR_MATRIX_CUSTOM_ENABLED.equals(key)) {
+        if (DisplayController.COLOR_MATRIX_CUSTOM_ENABLED.equals(key)) {
             mCustomEnabled = newValue != null && Integer.parseInt(newValue) != 0;
             mEnableCustomPreference.setChecked(mCustomEnabled);
-            mCustomPreference.setEnabled(mCustomEnabled);
+            mCustomPreference.setEnabled(mCustomEnabled
+                    && mState != DisplayController.COLOR_STATE_DISABLED);
             updateSelectOptions();
-        } else if (ColorMatrixTile.COLOR_MATRIX_CUSTOM_VALUES.equals(key)) {
+        } else if (DisplayController.COLOR_MATRIX_CUSTOM_VALUES.equals(key)) {
             mCustomValues = newValue;
+            if (mCustomValues == null) {
+                mCustomValues = DisplayController.toString(DisplayController.IDENTITY_MATRIX);
+            }
             mCustomPreference.setValues(mCustomValues);
             updateSelectOptions();
-        } else if (QSTileHost.TILES_SETTING.equals(key)) {
-            mTiles = newValue;
-            boolean hasTile = newValue != null
-                    && newValue.contains(ColorMatrixTile.COLOR_MATRIX_SPEC);
-            mShowQs.setChecked(hasTile);
+        } else if (DisplayController.COLOR_STATE.equals(key)) {
+            mState = newValue != null ? Integer.parseInt(newValue) : 0;
+            if (mSwitch != null) {
+                mSwitch.setChecked(mState != DisplayController.COLOR_STATE_DISABLED);
+            }
+            mSelectPreference.setEnabled(mState != DisplayController.COLOR_STATE_DISABLED);
+            mEnableCustomPreference.setEnabled(mState != DisplayController.COLOR_STATE_DISABLED);
+            mCustomPreference.setEnabled(mCustomEnabled
+                    && mState != DisplayController.COLOR_STATE_DISABLED);
         } else {
             mCurrentValue = newValue;
             updateSelectOptions();
@@ -169,32 +201,29 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
     }
 
     private void updateSelectOptions() {
-        final int N = CUSTOM_INDEX + (mCustomEnabled ? 1 : 0);
+        final int N = DisplayController.CUSTOM_INDEX + (mCustomEnabled ? 1 : 0);
         String[] values = new String[N];
-        CharSequence[] totalNames = getColorTitles(getContext());
         CharSequence[] names = new CharSequence[N];
+        CharSequence[] totalNames = DisplayController.getColorTitles(getContext());
+        String[] entries = DisplayController.getColorTransforms(getContext());
+        entries[DisplayController.CUSTOM_INDEX] = mCustomValues != null ? mCustomValues : "";
         for (int i = 0; i < N; i++) {
-            values[i] = String.valueOf(i);
+            values[i] = entries[i];
             names[i] = totalNames[i];
         }
         mSelectPreference.setEntries(names);
         mSelectPreference.setEntryValues(values);
-        String[] entries = getValues();
-        for (int i = 0; i < values.length; i++) {
-            if (Objects.equals(entries[i], mCurrentValue)) {
-                mSelectPreference.setValueIndex(i);
-                return;
-            }
+        int index = 0;
+        if (mState == DisplayController.COLOR_STATE_AUTO) {
+            index = DisplayController.AUTO_INDEX;
+        } else if (mCustomValues != null && Objects.equals(mCurrentValue, mCustomValues)) {
+            index = DisplayController.CUSTOM_INDEX;
+        } else if (Objects.equals(mCurrentValue, entries[1])) {
+            index = 1;
         }
-        mSelectPreference.setSummary(R.string.color_matrix_unknown);
+        mSelectPreference.setValueIndex(index);
+        mSelectPreference.setSummary("%s");
         return;
-    }
-
-    private String[] getValues() {
-        String[] ret = getColorTransforms();
-        // Fill in custom based on tuner settings.
-        ret[CUSTOM_INDEX] = mCustomValues;
-        return ret;
     }
 
     private void startRevertTimer() {
@@ -203,42 +232,13 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
 
     private void onApply() {
         Settings.Secure.putString(getContext().getContentResolver(),
-                ColorMatrixTile.COLOR_MATRIX_CUSTOM_VALUES, mCurrentValue);
+                DisplayController.COLOR_MATRIX_CUSTOM_VALUES, mCurrentValue);
         getView().removeCallbacks(mResetColorMatrix);
     }
 
     private void onRevert() {
         getView().removeCallbacks(mResetColorMatrix);
         mResetColorMatrix.run();
-    }
-
-    public static String[] getColorTransforms() {
-        return new String[] {
-                null,
-                toString(NIGHT_VALUES),
-                null, // Blank spot for custom values
-                null, // Unknown
-        };
-    }
-
-    public static CharSequence[] getColorTitles(Context context) {
-        return new CharSequence[] {
-                context.getString(R.string.color_matrix_none),
-                context.getString(R.string.color_matrix_night),
-                context.getString(R.string.color_matrix_custom),
-                context.getString(R.string.color_matrix_unknown),
-        };
-    }
-
-    private static String toString(float[] values) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            if (builder.length() != 0) {
-                builder.append(',');
-            }
-            builder.append(values[i]);
-        }
-        return builder.toString();
     }
 
     private final Runnable mResetColorMatrix = new Runnable() {
@@ -259,14 +259,10 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
         }
 
         public void setValues(String customValues) {
-            if (customValues == null) {
-                mValues = IDENTITY_MATRIX;
-            } else {
-                String[] strValues = customValues.split(",");
-                mValues = new float[strValues.length];
-                for (int i = 0; i < mValues.length; i++) {
-                    mValues[i] = Float.parseFloat(strValues[i]);
-                }
+            String[] strValues = customValues.split(",");
+            mValues = new float[strValues.length];
+            for (int i = 0; i < mValues.length; i++) {
+                mValues[i] = Float.parseFloat(strValues[i]);
             }
             notifyChanged();
         }
@@ -274,48 +270,38 @@ public class ColorMatrixFragment extends PreferenceFragment implements TunerServ
         @Override
         public void onBindViewHolder(PreferenceViewHolder holder) {
             super.onBindViewHolder(holder);
-            ViewGroup vg = (ViewGroup) holder.itemView.findViewById(R.id.edit_group);
-            if (mValues == null) {
-                return;
-            }
-            int childIndex = 0;
-            for (int i = 0; i < mValues.length; i++) {
-                final int index = i;
-                while (!(vg.getChildAt(childIndex) instanceof EditText)) {
-                    childIndex++;
+            bindView(holder.findViewById(R.id.r_group), 0);
+            bindView(holder.findViewById(R.id.g_group), 5);
+            bindView(holder.findViewById(R.id.b_group), 10);
+            holder.findViewById(R.id.apply).setOnClickListener(this);
+        }
+
+        private void bindView(View view, final int index) {
+            SeekBar seekBar = (SeekBar) view.findViewById(com.android.internal.R.id.seekbar);
+            seekBar.setMax(1000);
+            seekBar.setProgress((int) (1000 * mValues[index]));
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    mValues[index] = progress / 1000f;
                 }
-                final EditText editText = (EditText) vg.getChildAt(childIndex++);
-                editText.setText(String.valueOf(mValues[i]));
-                editText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (TextUtils.isEmpty(s.toString())) {
-                            return;
-                        }
-                        try {
-                            mValues[index] = Float.parseFloat(s.toString());
-                        } catch (NumberFormatException e) {
-                            mValues[index] = 0;
-                        }
-                    }
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
 
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-                });
-            }
-            ((Button) holder.itemView.findViewById(R.id.apply)).setOnClickListener(this);
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
         }
 
         @Override
         public void onClick(View v) {
+            startRevertTimer();
             Settings.Secure.putString(getContext().getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX,
-                    ColorMatrixFragment.toString(mValues));
+                    DisplayController.toString(mValues));
             RevertWarning.show(ColorMatrixFragment.this);
         }
 

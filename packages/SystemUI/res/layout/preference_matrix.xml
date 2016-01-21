@@ -19,82 +19,86 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
-    <GridLayout
-        android:id="@+id/edit_group"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:rowCount="5"
-        android:columnCount="5">
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:orientation="vertical">
 
-        <Space android:layout_width="40dp" />
+    <LinearLayout
+        android:id="@+id/r_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
 
         <TextView
-            android:layout_width="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/color_modification_r"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <SeekBar android:id="@*android:id/seekbar"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/g_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
+
         <TextView
-            android:layout_width="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/color_modification_g"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <SeekBar android:id="@*android:id/seekbar"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/b_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:orientation="horizontal">
+
         <TextView
-            android:layout_width="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/color_modification_b"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <Space android:layout_width="40dp" />
+        <SeekBar android:id="@*android:id/seekbar"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
 
-        <TextView
-            android:layout_width="40dp"
-            android:text="@string/color_modification_r"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-
-        <TextView
-            android:layout_width="40dp"
-            android:text="@string/color_modification_g"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-
-        <TextView
-            android:layout_width="40dp"
-            android:text="@string/color_modification_b"
-            android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-
-        <Space android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-        <EditText android:inputType="numberDecimal" android:layout_width="40dp" />
-
-    </GridLayout>
     <Button
         android:id="@+id/apply"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_gravity="bottom"
+        android:layout_gravity="end"
         android:text="@string/color_apply" />
+
 </LinearLayout>

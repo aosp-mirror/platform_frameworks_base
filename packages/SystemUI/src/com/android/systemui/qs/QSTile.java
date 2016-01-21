@@ -35,6 +35,7 @@ import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.DisplayController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -389,6 +390,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         UserInfoController getUserInfoController();
         BatteryController getBatteryController();
         TileServices getTileServices();
+        DisplayController getDisplayController();
         void removeTile(String tileSpec);
 
 

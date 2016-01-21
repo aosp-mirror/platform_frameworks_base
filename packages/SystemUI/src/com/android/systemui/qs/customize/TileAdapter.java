@@ -72,8 +72,9 @@ public class TileAdapter extends BaseAdapter {
             }
             mCurrentTiles = tileSpecs;
             final TileGroup group = new TileGroup("com.android.settings", mContext);
+            boolean hasColorMod = host.getDisplayController().isEnabled();
             String possible = mContext.getString(R.string.quick_settings_tiles_default)
-                    + ",hotspot,inversion,saver";
+                    + ",hotspot,inversion,saver" + (hasColorMod ? ",colors" : "");
             String[] possibleTiles = possible.split(",");
             for (int i = 0; i < possibleTiles.length; i++) {
                 final String spec = possibleTiles[i];

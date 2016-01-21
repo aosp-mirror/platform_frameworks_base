@@ -51,6 +51,7 @@ import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.DisplayController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -101,6 +102,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     private final TileServices mServices;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
+    private final DisplayController mDisplayController;
     private View mHeader;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
@@ -127,6 +129,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         mSecurity = security;
         mBattery = battery;
         mIconController = iconController;
+        mDisplayController = new DisplayController(mContext);
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -275,6 +278,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
 
     public StatusBarIconController getIconController() {
         return mIconController;
+    }
+
+    public DisplayController getDisplayController() {
+        return mDisplayController;
     }
 
     @Override

@@ -1251,6 +1251,9 @@
     <!-- Label for custom color transform [CHAR LIMIT=30] -->
     <string name="color_matrix_custom">Custom colors</string>
 
+    <!-- Label for auto color transforms [CHAR LIMIT=30] -->
+    <string name="color_matrix_auto">Auto</string>
+
     <!-- Label for unknown color transform [CHAR LIMIT=30] -->
     <string name="color_matrix_unknown">Unknown colors</string>
 
@@ -1344,5 +1347,8 @@
     <string name="pin_target">Pin</string>
     <string name="unpin_target">Unpin</string>
     <string name="app_info">App info</string>
+
+    <!-- Label for feature switch [CHAR LIMIT=30] -->
+    <string name="switch_bar_on">On</string>
 
 </resources>
