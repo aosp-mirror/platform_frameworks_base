@@ -1053,6 +1053,18 @@ public class DevicePolicyManager {
     public static final int PASSWORD_QUALITY_COMPLEX = 0x60000;
 
     /**
+     * Constant for {@link #setPasswordQuality}: the user is not allowed to
+     * modify password. In case this password quality is set, the password is
+     * managed by a profile owner. The profile owner can set any password,
+     * as if {@link #PASSWORD_QUALITY_UNSPECIFIED} is used. Note
+     * that quality constants are ordered so that higher values are more
+     * restrictive. The value of {@link #PASSWORD_QUALITY_MANAGED} is
+     * the highest.
+     * @hide
+     */
+    public static final int PASSWORD_QUALITY_MANAGED = 0x80000;
+
+    /**
      * Called by an application that is administering the device to set the
      * password restrictions it is imposing.  After setting this, the user
      * will not be able to enter a new password that is not at least as
