@@ -147,6 +147,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     private View mEmptyView;
     private RecyclerView mRecView;
+    private ListeningGestureDetector mGestureDetector;
 
     private int mType = TYPE_NORMAL;
     private String mStateKey;
@@ -300,24 +301,9 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mRecView.setAdapter(mAdapter);
 
-        GestureListener listener = new GestureListener();
-        final GestureDetector detector = new GestureDetector(this.getContext(), listener);
-        detector.setOnDoubleTapListener(listener);
+        mGestureDetector = new ListeningGestureDetector(this.getContext(), new GestureListener());
 
-        mRecView.addOnItemTouchListener(
-                new OnItemTouchListener() {
-                    @Override
-                    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                        detector.onTouchEvent(e);
-                        return false;
-                    }
-
-                    @Override
-                    public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
-
-                    @Override
-                    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
-                });
+        mRecView.addOnItemTouchListener(mGestureDetector);
 
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
@@ -1129,11 +1115,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             view.setOnDragListener(mOnDragListener);
         }
 
-        // Temporary: attaching the listener to the title only.
-        // Attaching to the entire item conflicts with the item long click handler responsible
-        // for item selection.
-        final View title = view.findViewById(android.R.id.title);
-        title.setOnLongClickListener(mLongClickListener);
+        view.setOnLongClickListener(mLongClickListener);
     }
 
     private View.OnDragListener mOnDragListener = new View.OnDragListener() {
@@ -1207,24 +1189,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             view = (View) parent;
         }
     }
-
-    private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            final List<DocumentInfo> docs = getDraggableDocuments(v);
-            if (docs.isEmpty()) {
-                return false;
-            }
-            v.startDrag(
-                    getClipDataFromDocuments(docs),
-                    new DrawableShadowBuilder(getDragShadowIcon(docs)),
-                    null,
-                    View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
-                            View.DRAG_FLAG_GLOBAL_URI_WRITE
-            );
-            return true;
-        }
-    };
 
     private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
         String modelId = getModelId(currentItemView);
@@ -1347,6 +1311,63 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         public void onModelUpdateFailed(Exception e) {
             showErrorView();
         }
+    }
+
+    private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            if (mGestureDetector.mouseSpawnedLastEvent()) {
+                List<DocumentInfo> docs = getDraggableDocuments(v);
+                if (docs.isEmpty()) {
+                    return false;
+                }
+                v.startDrag(
+                        getClipDataFromDocuments(docs),
+                        new DrawableShadowBuilder(getDragShadowIcon(docs)),
+                        null,
+                        View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
+                                View.DRAG_FLAG_GLOBAL_URI_WRITE
+                );
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    // Previously we listened to events with one class, only to bounce them forward
+    // to GestureDetector. We're still doing that here, but with a single class
+    // that reduces overall complexity in our glue code.
+    private static final class ListeningGestureDetector extends GestureDetector
+            implements OnItemTouchListener {
+
+        private int mLastTool = -1;
+
+        public ListeningGestureDetector(Context context, GestureListener listener) {
+            super(context, listener);
+            setOnDoubleTapListener(listener);
+        }
+
+        boolean mouseSpawnedLastEvent() {
+            return Events.isMouseType(mLastTool);
+        }
+
+        boolean touchSpawnedLastEvent() {
+            return Events.isTouchType(mLastTool);
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+            mLastTool = e.getToolType(0);
+            onTouchEvent(e);  // bounce this forward to our detecty heart
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
     }
 
     /**
