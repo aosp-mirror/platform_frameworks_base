@@ -128,15 +128,17 @@ public class RestrictedLockUtils {
         boolean isDisabledByMultipleAdmins = false;
         ComponentName adminComponent = null;
         List<ComponentName> admins = dpm.getActiveAdmins();
-        int disabledKeyguardFeatures;
-        for (ComponentName admin : admins) {
-            disabledKeyguardFeatures = dpm.getKeyguardDisabledFeatures(admin);
-            if ((disabledKeyguardFeatures & keyguardNotificationFeatures) != 0) {
-                if (adminComponent == null) {
-                    adminComponent = admin;
-                } else {
-                    isDisabledByMultipleAdmins = true;
-                    break;
+        if (admins != null) {
+            int disabledKeyguardFeatures;
+            for (ComponentName admin : admins) {
+                disabledKeyguardFeatures = dpm.getKeyguardDisabledFeatures(admin);
+                if ((disabledKeyguardFeatures & keyguardNotificationFeatures) != 0) {
+                    if (adminComponent == null) {
+                        adminComponent = admin;
+                    } else {
+                        isDisabledByMultipleAdmins = true;
+                        break;
+                    }
                 }
             }
         }
