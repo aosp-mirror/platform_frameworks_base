@@ -21,6 +21,7 @@ import android.os.Process;
 import android.os.storage.StorageManager;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.mtp.annotations.UsedByNative;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,22 +40,18 @@ public class AppFuse {
 
     private final String mName;
     private final Callback mCallback;
-    private final Thread mMessageThread;
+    private Thread mMessageThread;
     private ParcelFileDescriptor mDeviceFd;
 
     AppFuse(String name, Callback callback) {
         mName = name;
         mCallback = callback;
-        mMessageThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                native_start_app_fuse_loop(mDeviceFd.getFd());
-            }
-        });
     }
 
-    void mount(StorageManager storageManager) {
+    void mount(StorageManager storageManager) throws IOException {
+        Preconditions.checkState(mDeviceFd == null);
         mDeviceFd = storageManager.mountAppFuse(mName);
+        mMessageThread = new AppFuseMessageThread(mDeviceFd.dup().detachFd());
         mMessageThread.start();
     }
 
@@ -80,7 +77,6 @@ public class AppFuse {
                 ParcelFileDescriptor.MODE_READ_ONLY);
     }
 
-    @VisibleForTesting
     File getMountPoint() {
         return new File("/mnt/appfuse/" + Process.myUid() + "_" + mName);
     }
@@ -112,4 +108,22 @@ public class AppFuse {
     }
 
     private native boolean native_start_app_fuse_loop(int fd);
+
+    private class AppFuseMessageThread extends Thread {
+        /**
+         * File descriptor used by native loop.
+         * It's owned by native loop and does not need to close here.
+         */
+        private final int mRawFd;
+
+        AppFuseMessageThread(int fd) {
+            super("AppFuseMessageThread");
+            mRawFd = fd;
+        }
+
+        @Override
+        public void run() {
+            native_start_app_fuse_loop(mRawFd);
+        }
+    }
 }

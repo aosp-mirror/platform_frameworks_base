@@ -92,7 +92,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         // TODO: Mount AppFuse on demands.
-        mAppFuse.mount(getContext().getSystemService(StorageManager.class));
+        try {
+            mAppFuse.mount(getContext().getSystemService(StorageManager.class));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to start app fuse.", e);
+            return false;
+        }
         resume();
         return true;
     }
