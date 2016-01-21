@@ -3213,7 +3213,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     /**
      * Update given flags when being used to request {@link ResolveInfo}.
      */
-    private int updateFlagsForResolve(int flags, int userId, Object cookie) {
+    int updateFlagsForResolve(int flags, int userId, Object cookie) {
         return updateFlagsForComponent(flags, userId, cookie);
     }
 
