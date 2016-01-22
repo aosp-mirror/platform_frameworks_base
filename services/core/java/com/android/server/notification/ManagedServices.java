@@ -297,7 +297,6 @@ abstract public class ManagedServices {
         checkType(guest.service);
         if (registerServiceImpl(guest) != null) {
             onServiceAdded(guest);
-            onServiceAdded(guest);
         }
     }
 
