@@ -1659,10 +1659,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     && isChildrenDrawingOrderEnabled();
             final View[] children = mChildren;
             for (int i = childrenCount - 1; i >= 0; i--) {
-                final int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
-                final View child = (preorderedList == null)
-                        ? children[childIndex] : preorderedList.get(childIndex);
-                PointF point = getLocalPoint();
+                final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+                final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
+                final PointF point = getLocalPoint();
                 if (isTransformedTouchPointInView(x, y, child, point)) {
                     final PointerIcon pointerIcon = child.getPointerIcon(event, point.x, point.y);
                     if (pointerIcon != null) {
@@ -1676,6 +1675,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // The pointer is not a child or the child has no preferences, returning the default
         // implementation.
         return super.getPointerIcon(event, x, y);
+    }
+
+    private int getAndVerifyPreorderedIndex(int childrenCount, int i, boolean customOrder) {
+        final int childIndex;
+        if (customOrder) {
+            final int childIndex1 = getChildDrawingOrder(childrenCount, i);
+            if (childIndex1 >= childrenCount) {
+                throw new IndexOutOfBoundsException("getChildDrawingOrder() "
+                        + "returned invalid index " + childIndex1
+                        + " (child count is " + childrenCount + ")");
+            }
+            childIndex = childIndex1;
+        } else {
+            childIndex = i;
+        }
+        return childIndex;
     }
 
     @SuppressWarnings({"ConstantConditions"})
@@ -1705,9 +1720,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final View[] children = mChildren;
                 HoverTarget lastHoverTarget = null;
                 for (int i = childrenCount - 1; i >= 0; i--) {
-                    int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
-                    final View child = (preorderedList == null)
-                            ? children[childIndex] : preorderedList.get(childIndex);
+                    final int childIndex = getAndVerifyPreorderedIndex(
+                            childrenCount, i, customOrder);
+                    final View child = getAndVerifyPreorderedView(
+                            preorderedList, children, childIndex);
                     if (!canViewReceivePointerEvents(child)
                             || !isTransformedTouchPointInView(x, y, child, null)) {
                         continue;
@@ -1989,9 +2005,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     && isChildrenDrawingOrderEnabled();
             final View[] children = mChildren;
             for (int i = childrenCount - 1; i >= 0; i--) {
-                int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
-                final View child = (preorderedList == null)
-                        ? children[childIndex] : preorderedList.get(childIndex);
+                final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+                final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
                 if (!canViewReceivePointerEvents(child)
                         || !isTransformedTouchPointInView(x, y, child, null)) {
                     continue;
@@ -2138,10 +2153,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 && isChildrenDrawingOrderEnabled();
                         final View[] children = mChildren;
                         for (int i = childrenCount - 1; i >= 0; i--) {
-                            final int childIndex = customOrder
-                                    ? getChildDrawingOrder(childrenCount, i) : i;
-                            final View child = (preorderedList == null)
-                                    ? children[childIndex] : preorderedList.get(childIndex);
+                            final int childIndex = getAndVerifyPreorderedIndex(
+                                    childrenCount, i, customOrder);
+                            final View child = getAndVerifyPreorderedView(
+                                    preorderedList, children, childIndex);
 
                             // If there is a view that has accessibility focus we want it
                             // to get the event first and if not handled we will perform a
@@ -2319,7 +2334,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Resets the cancel next up flag.
      * Returns true if the flag was previously set.
      */
-    private static boolean resetCancelNextUpFlag(View view) {
+    private static boolean resetCancelNextUpFlag(@NonNull View view) {
         if ((view.mPrivateFlags & PFLAG_CANCEL_NEXT_UP_EVENT) != 0) {
             view.mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
             return true;
@@ -2372,7 +2387,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Gets the touch target for specified child view.
      * Returns null if not found.
      */
-    private TouchTarget getTouchTarget(View child) {
+    private TouchTarget getTouchTarget(@NonNull View child) {
         for (TouchTarget target = mFirstTouchTarget; target != null; target = target.next) {
             if (target.child == child) {
                 return target;
@@ -2385,8 +2400,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Adds a touch target for specified child to the beginning of the list.
      * Assumes the target child is not already present.
      */
-    private TouchTarget addTouchTarget(View child, int pointerIdBits) {
-        TouchTarget target = TouchTarget.obtain(child, pointerIdBits);
+    private TouchTarget addTouchTarget(@NonNull View child, int pointerIdBits) {
+        final TouchTarget target = TouchTarget.obtain(child, pointerIdBits);
         target.next = mFirstTouchTarget;
         mFirstTouchTarget = target;
         return target;
@@ -2448,7 +2463,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if a child view can receive pointer events.
      * @hide
      */
-    private static boolean canViewReceivePointerEvents(View child) {
+    private static boolean canViewReceivePointerEvents(@NonNull View child) {
         return (child.mViewFlags & VISIBILITY_MASK) == VISIBLE
                 || child.getAnimation() != null;
     }
@@ -2894,7 +2909,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     for (int i=0; i<childrenCount; i++) {
                         int childIndex;
                         try {
-                            childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
+                            childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
                         } catch (IndexOutOfBoundsException e) {
                             childIndex = i;
                             if (mContext.getApplicationInfo().targetSdkVersion
@@ -2939,14 +2954,30 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 throw e;
                             }
                         }
-                        final View child = (preorderedList == null)
-                                ? children[childIndex] : preorderedList.get(childIndex);
-                        ViewStructure cstructure = structure.newChild(i);
+
+                        final View child = getAndVerifyPreorderedView(
+                                preorderedList, children, childIndex);
+                        final ViewStructure cstructure = structure.newChild(i);
                         child.dispatchProvideStructure(cstructure);
                     }
                 }
             }
         }
+    }
+
+    private static View getAndVerifyPreorderedView(ArrayList<View> preorderedList, View[] children,
+            int childIndex) {
+        final View child;
+        if (preorderedList != null) {
+            child = preorderedList.get(childIndex);
+            if (child == null) {
+                throw new RuntimeException("Invalid preorderedList contained null child at index "
+                        + childIndex);
+            }
+        } else {
+            child = children[childIndex];
+        }
+        return child;
     }
 
     /** @hide */
@@ -3386,9 +3417,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     transientIndex = -1;
                 }
             }
-            int childIndex = customOrder ? getChildDrawingOrder(childrenCount, i) : i;
-            final View child = (preorderedList == null)
-                    ? children[childIndex] : preorderedList.get(childIndex);
+
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null) {
                 more |= drawChild(canvas, child, drawingTime);
             }
@@ -3508,21 +3539,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * children.
      */
     ArrayList<View> buildOrderedChildList() {
-        final int count = mChildrenCount;
-        if (count <= 1 || !hasChildWithZ()) return null;
+        final int childrenCount = mChildrenCount;
+        if (childrenCount <= 1 || !hasChildWithZ()) return null;
 
         if (mPreSortedChildren == null) {
-            mPreSortedChildren = new ArrayList<View>(count);
+            mPreSortedChildren = new ArrayList<>(childrenCount);
         } else {
-            mPreSortedChildren.ensureCapacity(count);
+            mPreSortedChildren.ensureCapacity(childrenCount);
         }
 
-        final boolean useCustomOrder = isChildrenDrawingOrderEnabled();
-        for (int i = 0; i < mChildrenCount; i++) {
+        final boolean customOrder = isChildrenDrawingOrderEnabled();
+        for (int i = 0; i < childrenCount; i++) {
             // add next child (in child order) to end of list
-            int childIndex = useCustomOrder ? getChildDrawingOrder(mChildrenCount, i) : i;
-            View nextChild = mChildren[childIndex];
-            float currentZ = nextChild.getZ();
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View nextChild = mChildren[childIndex];
+            final float currentZ = nextChild.getZ();
 
             // insert ahead of any Views with greater Z
             int insertIndex = i;
@@ -7481,7 +7512,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private TouchTarget() {
         }
 
-        public static TouchTarget obtain(View child, int pointerIdBits) {
+        public static TouchTarget obtain(@NonNull View child, int pointerIdBits) {
+            if (child == null) {
+                throw new IllegalArgumentException("child must be non-null");
+            }
+
             final TouchTarget target;
             synchronized (sRecycleLock) {
                 if (sRecycleBin == null) {
@@ -7499,6 +7534,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         public void recycle() {
+            if (child == null) {
+                throw new IllegalStateException("already recycled once");
+            }
+
             synchronized (sRecycleLock) {
                 if (sRecycledCount < MAX_RECYCLED) {
                     next = sRecycleBin;
@@ -7528,7 +7567,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         private HoverTarget() {
         }
 
-        public static HoverTarget obtain(View child) {
+        public static HoverTarget obtain(@NonNull View child) {
+            if (child == null) {
+                throw new IllegalArgumentException("child must be non-null");
+            }
+
             final HoverTarget target;
             synchronized (sRecycleLock) {
                 if (sRecycleBin == null) {
@@ -7536,7 +7579,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 } else {
                     target = sRecycleBin;
                     sRecycleBin = target.next;
-                     sRecycledCount--;
+                    sRecycledCount--;
                     target.next = null;
                 }
             }
@@ -7545,6 +7588,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         public void recycle() {
+            if (child == null) {
+                throw new IllegalStateException("already recycled once");
+            }
+
             synchronized (sRecycleLock) {
                 if (sRecycledCount < MAX_RECYCLED) {
                     next = sRecycleBin;
