@@ -1351,4 +1351,31 @@
     <!-- Label for feature switch [CHAR LIMIT=30] -->
     <string name="switch_bar_on">On</string>
 
+    <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
+    <string name="nav_bar">Navigation bar</string>
+
+    <!-- SysUI Tuner: Group of buttons that show on the start of the screen [CHAR LIMIT=30] -->
+    <string name="start">Start</string>
+    <!-- SysUI Tuner: Group of buttons that show on the center of the screen [CHAR LIMIT=30] -->
+    <string name="center">Center</string>
+    <!-- SysUI Tuner: Group of buttons that show on the end of the screen [CHAR LIMIT=30] -->
+    <string name="end">End</string>
+    <!-- SysUI Tuner: Name of space used in custom navigation bar layouts [CHAR LIMIT=30] -->
+    <string name="space">Spacer</string>
+    <!-- SysUI Tuner: Name of Combination Menu / Keyboard Switcher button [CHAR LIMIT=30] -->
+    <string name="menu_ime">Menu / Keyboard Switcher</string>
+    <!-- SysUI Tuner: Title for dialog to add a button [CHAR LIMIT=30] -->
+    <string name="select_button">Select button to add</string>
+    <!-- SysUI Tuner: Button to add a button [CHAR LIMIT=30] -->
+    <string name="add_button">Add button</string>
+    <!-- SysUI Tuner: Save the current settings [CHAR LIMIT=30] -->
+    <string name="save">Save</string>
+    <!-- SysUI Tuner: Reset to default settings [CHAR LIMIT=30] -->
+    <string name="reset">Reset</string>
+
+    <!-- SysUI Tuner: Title of no home warning dialog [CHAR LIMIT=30] -->
+    <string name="no_home_title">No home button found</string>
+    <!-- SysUI Tuner: Message of no home warning dialog [CHAR LIMIT=NONE] -->
+    <string name="no_home_message">A home button is required to be able to navigate this device. Please add a home button before saving.</string>
+
 </resources>

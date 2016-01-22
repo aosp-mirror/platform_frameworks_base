@@ -38,11 +38,11 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     public static final String NAV_BAR_VIEWS = "sysui_nav_bar";
 
-    protected static final String MENU_IME = "menu_ime";
-    protected static final String BACK = "back";
-    protected static final String HOME = "home";
-    protected static final String RECENT = "recent";
-    protected static final String NAVSPACE = "space";
+    public static final String MENU_IME = "menu_ime";
+    public static final String BACK = "back";
+    public static final String HOME = "home";
+    public static final String RECENT = "recent";
+    public static final String NAVSPACE = "space";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
