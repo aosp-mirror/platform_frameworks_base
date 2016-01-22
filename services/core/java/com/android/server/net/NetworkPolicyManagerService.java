@@ -31,6 +31,9 @@ import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
+import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
+import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkPolicy.CYCLE_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
@@ -1869,6 +1872,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + mRestrictBackgroundWhitelistUids);
             }
             return whitelist;
+        }
+    }
+
+    @Override
+    public int getRestrictBackgroundByCaller() {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        final int uid = Binder.getCallingUid();
+        synchronized (mRulesLock) {
+            if (!mRestrictBackground) {
+                return RESTRICT_BACKGROUND_STATUS_DISABLED;
+            }
+            return mRestrictBackgroundWhitelistUids.get(uid)
+                    ? RESTRICT_BACKGROUND_STATUS_WHITELISTED
+                    : RESTRICT_BACKGROUND_STATUS_ENABLED;
         }
     }
 
