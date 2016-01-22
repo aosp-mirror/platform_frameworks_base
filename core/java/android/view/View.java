@@ -3702,6 +3702,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private ViewPropertyAnimator mAnimator = null;
 
     /**
+     * List of FrameStatsObservers pending registration when mAttachInfo is null.
+     */
+    private ArrayList<FrameStatsObserver> mPendingFrameStatsObservers;
+
+    /**
      * Flag indicating that a drag can cross window boundaries.  When
      * {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)} is called
      * with this flag set, all visible applications will be able to participate
@@ -5390,11 +5395,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (mAttachInfo.mHardwareRenderer != null) {
                 mAttachInfo.mHardwareRenderer.addFrameStatsObserver(fso);
             } else {
-                throw new IllegalStateException("View must be hardware-accelerated");
+                Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
             }
         } else {
-            // TODO: store as pending registration and merge when we are attached to a surface
-            throw new IllegalStateException("View not yet attached");
+            if (mPendingFrameStatsObservers == null) {
+                mPendingFrameStatsObservers = new ArrayList<>();
+            }
+
+            mPendingFrameStatsObservers.add(fso);
         }
     }
 
@@ -5405,8 +5413,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void removeFrameStatsObserver(FrameStatsObserver fso) {
         ThreadedRenderer renderer = getHardwareRenderer();
+
+        if (mPendingFrameStatsObservers != null) {
+            mPendingFrameStatsObservers.remove(fso);
+        }
+
         if (renderer != null) {
             renderer.removeFrameStatsObserver(fso);
+        }
+    }
+
+    private void registerPendingFrameStatsObservers() {
+        if (mPendingFrameStatsObservers != null) {
+            ThreadedRenderer renderer = getHardwareRenderer();
+            if (renderer != null) {
+                for (FrameStatsObserver fso : mPendingFrameStatsObservers) {
+                    renderer.addFrameStatsObserver(fso);
+                }
+            } else {
+                Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
+            }
+            mPendingFrameStatsObservers = null;
         }
     }
 
@@ -14933,6 +14960,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             info.mTreeObserver.merge(mFloatingTreeObserver);
             mFloatingTreeObserver = null;
         }
+
+        registerPendingFrameStatsObservers();
+
         if ((mPrivateFlags&PFLAG_SCROLL_CONTAINER) != 0) {
             mAttachInfo.mScrollContainers.add(this);
             mPrivateFlags |= PFLAG_SCROLL_CONTAINER_ADDED;
