@@ -263,4 +263,8 @@ interface IDevicePolicyManager {
     String getLongSupportMessageForUser(in ComponentName admin, int userHandle);
 
     boolean isSeparateProfileChallengeAllowed(int userHandle);
+
+    void setOrganizationColor(in ComponentName admin, in int color);
+    int getOrganizationColor(in ComponentName admin);
+    int getOrganizationColorForUser(int userHandle);
 }
