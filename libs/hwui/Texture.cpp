@@ -180,6 +180,10 @@ static void colorTypeToGlFormatAndType(SkColorType colorType,
         *outFormat = GL_RGBA;
         *outType = GL_UNSIGNED_BYTE;
         break;
+    case kGray_8_SkColorType:
+        *outFormat = GL_LUMINANCE;
+        *outType = GL_UNSIGNED_BYTE;
+        break;
     default:
         LOG_ALWAYS_FATAL("Unsupported bitmap colorType: %d", colorType);
         break;
