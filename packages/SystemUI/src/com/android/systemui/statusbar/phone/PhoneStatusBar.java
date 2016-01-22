@@ -1185,25 +1185,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void prepareNavigationBarView() {
         mNavigationBarView.reorient();
 
-        View recentsButton = mNavigationBarView.getRecentsButton();
-        if (recentsButton != null) {
-            recentsButton.setOnClickListener(mRecentsClickListener);
-            recentsButton.setOnTouchListener(mRecentsPreloadOnTouchListener);
-            recentsButton.setLongClickable(true);
-            recentsButton.setOnLongClickListener(mRecentsLongClickListener);
-        }
+        ButtonDispatcher recentsButton = mNavigationBarView.getRecentsButton();
+        recentsButton.setOnClickListener(mRecentsClickListener);
+        recentsButton.setOnTouchListener(mRecentsPreloadOnTouchListener);
+        recentsButton.setLongClickable(true);
+        recentsButton.setOnLongClickListener(mRecentsLongClickListener);
 
-        View backButton = mNavigationBarView.getBackButton();
-        if (backButton != null) {
-            backButton.setLongClickable(true);
-            backButton.setOnLongClickListener(mLongPressBackListener);
-        }
+        ButtonDispatcher backButton = mNavigationBarView.getBackButton();
+        backButton.setLongClickable(true);
+        backButton.setOnLongClickListener(mLongPressBackListener);
 
-        View homeButton = mNavigationBarView.getHomeButton();
-        if (homeButton != null) {
-            homeButton.setOnTouchListener(mHomeActionListener);
-            homeButton.setOnLongClickListener(mLongPressHomeListener);
-        }
+        ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
+        homeButton.setOnTouchListener(mHomeActionListener);
+        homeButton.setOnLongClickListener(mLongPressHomeListener);
 
         mAssistManager.onConfigurationChanged();
     }

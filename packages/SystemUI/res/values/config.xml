@@ -288,5 +288,8 @@
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
 
+    <!-- Nav bar button default ordering/layout -->
+    <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
+
 </resources>
 

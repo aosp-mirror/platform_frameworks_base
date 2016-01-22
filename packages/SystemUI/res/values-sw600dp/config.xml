@@ -42,4 +42,8 @@
          while the stack is not focused. -->
     <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
     <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
+
+    <!-- Nav bar button default ordering/layout -->
+    <string name="config_navBarLayout" translatable="false">space;back,home,recent;menu_ime</string>
+
 </resources>

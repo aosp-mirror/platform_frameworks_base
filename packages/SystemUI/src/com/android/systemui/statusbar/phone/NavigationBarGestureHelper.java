@@ -164,12 +164,14 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mTouchDownY = (int) event.getY();
 
         if (mNavigationBarView != null) {
-            View recentsButton = mNavigationBarView.getRecentsButton();
+            View recentsButton = mNavigationBarView.getRecentsButton().getCurrentView();
             if (recentsButton != null) {
                 mDownOnRecents = mTouchDownX >= recentsButton.getLeft()
                         && mTouchDownX <= recentsButton.getRight()
                         && mTouchDownY >= recentsButton.getTop()
                         && mTouchDownY <= recentsButton.getBottom();
+            } else {
+                mDownOnRecents = false;
             }
         }
     }
