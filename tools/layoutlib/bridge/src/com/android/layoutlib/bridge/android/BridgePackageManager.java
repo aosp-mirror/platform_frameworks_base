@@ -492,6 +492,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public Drawable getUserBadgeForDensityNoBackground(UserHandle user, int density) {
+        return null;
+    }
+
+    @Override
     public CharSequence getUserBadgedLabel(CharSequence label, UserHandle user) {
         return null;
     }
