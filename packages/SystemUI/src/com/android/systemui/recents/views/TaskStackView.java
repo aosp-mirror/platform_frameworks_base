@@ -88,6 +88,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
         TaskView.TaskViewCallbacks, TaskStackViewScroller.TaskStackViewScrollerCallbacks,
+        TaskStackLayoutAlgorithm.TaskStackLayoutAlgorithmCallbacks,
         ViewPool.ViewPoolConsumer<TaskView, Task> {
 
     private final static String KEY_SAVED_STATE_SUPER = "saved_instance_state_super";
@@ -192,9 +193,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         setStack(stack);
         mViewPool = new ViewPool<>(context, this);
         mInflater = LayoutInflater.from(context);
-        mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context);
-        mStackScroller = new TaskStackViewScroller(context, mLayoutAlgorithm);
-        mStackScroller.setCallbacks(this);
+        mLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, this);
+        mStackScroller = new TaskStackViewScroller(context, this, mLayoutAlgorithm);
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
         mAnimationHelper = new TaskStackAnimationHelper(context, this);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -623,7 +623,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     void relayoutTaskViewsOnNextFrame(TaskViewAnimation animation) {
         mDeferredTaskViewLayoutAnimation = animation;
-        postInvalidateOnAnimation();
+        invalidate();
     }
 
     /**
@@ -852,17 +852,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             };
 
             if (scrollToTask) {
+                // Cancel any running enter animations at this point when we scroll or change focus
+                if (!mEnterAnimationComplete) {
+                    cancelAllTaskViewAnimations();
+                }
+
                 // TODO: Center the newly focused task view, only if not freeform
                 float newScroll = mLayoutAlgorithm.getStackScrollForTask(newFocusedTask);
                 if (Float.compare(newScroll, mStackScroller.getStackScroll()) != 0) {
                     mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
                             focusTaskRunnable);
                     willScroll = true;
-
-                    // Cancel any running enter animations at this point when we scroll as well
-                    if (!mEnterAnimationComplete) {
-                        cancelAllTaskViewAnimations();
-                    }
                 } else {
                     focusTaskRunnable.run();
                 }
@@ -902,7 +902,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
                                        boolean cancelWindowAnimations) {
-        setRelativeFocusedTask(forward, stackTasksOnly, animated, false, false);
+        setRelativeFocusedTask(forward, stackTasksOnly, animated, cancelWindowAnimations, false);
     }
 
     /**
@@ -1445,6 +1445,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (!mTaskViewsClipDirty) {
             mTaskViewsClipDirty = true;
             invalidate();
+        }
+    }
+
+    /**** TaskStackLayoutAlgorithm.TaskStackLayoutAlgorithmCallbacks ****/
+
+    @Override
+    public void onFocusStateChanged(float prevFocusState, float curFocusState) {
+        if (mDeferredTaskViewLayoutAnimation == null) {
+            mUIDozeTrigger.poke();
+            relayoutTaskViewsOnNextFrame(TaskViewAnimation.IMMEDIATE);
         }
     }
 
