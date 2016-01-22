@@ -602,7 +602,6 @@ public final class SystemServer {
 
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
-        InputMethodManagerService imm = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
@@ -613,14 +612,7 @@ public final class SystemServer {
 
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-            traceBeginAndSlog("StartInputMethodManagerService");
-            try {
-                imm = new InputMethodManagerService(context);
-                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
-            } catch (Throwable e) {
-                reportWtf("starting Input Manager Service", e);
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+            mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
 
             traceBeginAndSlog("StartAccessibilityManagerService");
             try {
@@ -1207,7 +1199,6 @@ public final class SystemServer {
         final ConnectivityService connectivityF = connectivity;
         final NetworkScoreService networkScoreF = networkScore;
         final WallpaperManagerService wallpaperF = wallpaper;
-        final InputMethodManagerService immF = imm;
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
@@ -1302,11 +1293,6 @@ public final class SystemServer {
                     if (wallpaperF != null) wallpaperF.systemRunning();
                 } catch (Throwable e) {
                     reportWtf("Notifying WallpaperService running", e);
-                }
-                try {
-                    if (immF != null) immF.systemRunning(statusBarF);
-                } catch (Throwable e) {
-                    reportWtf("Notifying InputMethodService running", e);
                 }
                 try {
                     if (locationF != null) locationF.systemRunning();
