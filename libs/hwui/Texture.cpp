@@ -95,7 +95,6 @@ bool Texture::updateSize(uint32_t width, uint32_t height, GLint format) {
 void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
     GL_CHECKPOINT();
-    mCaches.textureState().activateTexture(0);
     bool needsAlloc = updateSize(width, height, internalformat);
     if (!mId) {
         glGenTextures(1, &mId);
