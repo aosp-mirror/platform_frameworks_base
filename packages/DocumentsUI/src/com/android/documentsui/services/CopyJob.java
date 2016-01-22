@@ -21,17 +21,23 @@ import static android.provider.DocumentsContract.buildChildDocumentsUri;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.getDocumentId;
 import static android.provider.DocumentsContract.isChildDocument;
+import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_CONVERTED;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
+import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG_TYPE;
+import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
+import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
 import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import android.annotation.StringRes;
 import android.app.Notification;
 import android.app.Notification.Builder;
+import android.app.PendingIntent;
 import android.content.ContentProviderClient;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
@@ -56,12 +62,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 class CopyJob extends Job {
     private static final String TAG = "CopyJob";
     private static final int PROGRESS_INTERVAL_MILLIS = 1000;
     final List<DocumentInfo> mSrcs;
+    final ArrayList<DocumentInfo> convertedFiles = new ArrayList<>();
 
     private long mStartTime = -1;
     private long mBatchSize;
@@ -176,6 +184,29 @@ class CopyJob extends Job {
     }
 
     @Override
+    Notification getWarningNotification() {
+        final Intent navigateIntent = buildNavigateIntent();
+        navigateIntent.putExtra(EXTRA_DIALOG_TYPE, DIALOG_TYPE_CONVERTED);
+        navigateIntent.putExtra(EXTRA_OPERATION, operationType);
+
+        navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, convertedFiles);
+
+        // TODO: Consider adding a dialog on tapping the notification with a list of
+        // converted files.
+        final Notification.Builder warningBuilder = new Notification.Builder(service)
+                .setContentTitle(service.getResources().getString(
+                        R.string.notification_copy_files_converted_title))
+                .setContentText(service.getString(
+                        R.string.notification_touch_for_details))
+                .setContentIntent(PendingIntent.getActivity(appContext, 0, navigateIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT))
+                .setCategory(Notification.CATEGORY_ERROR)
+                .setSmallIcon(R.drawable.ic_menu_copy)
+                .setAutoCancel(true);
+        return warningBuilder.build();
+    }
+
+    @Override
     void start() throws RemoteException {
         mStartTime = elapsedRealtime();
 
@@ -201,6 +232,11 @@ class CopyJob extends Job {
 
             processDocument(srcInfo, null, dstInfo);
         }
+    }
+
+    @Override
+    boolean hasWarnings() {
+        return !convertedFiles.isEmpty();
     }
 
     /**
@@ -423,6 +459,10 @@ class CopyJob extends Job {
                 Log.w(TAG, "Failed to cleanup after copy error: " + src.derivedUri, e);
                 throw e;
             }
+        }
+
+        if (src.isVirtualDocument() && success) {
+           convertedFiles.add(src);
         }
 
         return success;

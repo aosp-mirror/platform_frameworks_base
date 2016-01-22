@@ -75,6 +75,11 @@ final class DeleteJob extends Job {
     }
 
     @Override
+    Notification getWarningNotification() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     void start() throws RemoteException {
         for (DocumentInfo doc : mSrcs) {
             if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
