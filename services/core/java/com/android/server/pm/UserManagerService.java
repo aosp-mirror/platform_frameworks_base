@@ -109,7 +109,7 @@ import libcore.util.Objects;
  */
 public class UserManagerService extends IUserManager.Stub {
     private static final String LOG_TAG = "UserManagerService";
-    static final boolean DBG = true; // DO NOT SUBMIT WITH TRUE
+    static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
     private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG_NAME = "name";
