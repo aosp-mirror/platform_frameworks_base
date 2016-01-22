@@ -179,6 +179,27 @@ public final class MtpDevice {
     }
 
     /**
+     * Obtains object bytes in the specified range and writes it to an array.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices.
+     *
+     * This is a vender-extended operation supported by Android that enables us to pass
+     * unsigned 64-bit offset. Check if the MTP device supports the operation by using
+     * {@link MtpDeviceInfo#getOperationsSupported()}.
+     *
+     * @param objectHandle handle of the object to read
+     * @param offset Start index of reading range. It must be a non-negative value.
+     * @param size Size of reading range. It must be a non-negative value at most 0xffffffff.
+     * @param buffer Array to write data.
+     * @return Size of bytes that are actually read.
+     * @see MtpConstants#OPERATION_GET_PARTIAL_OBJECT_64
+     */
+    public long getPartialObject64(int objectHandle, long offset, long size, byte[] buffer)
+            throws IOException {
+        return native_get_partial_object_64(objectHandle, offset, size, buffer);
+    }
+
+    /**
      * Returns the thumbnail data for an object as a byte array.
      * The size and format of the thumbnail data can be determined via
      * {@link MtpObjectInfo#getThumbCompressedSize} and
@@ -345,6 +366,8 @@ public final class MtpDevice {
     private native MtpObjectInfo native_get_object_info(int objectHandle);
     private native byte[] native_get_object(int objectHandle, int objectSize);
     private native long native_get_partial_object(
+            int objectHandle, long offset, long objectSize, byte[] buffer) throws IOException;
+    private native int native_get_partial_object_64(
             int objectHandle, long offset, long objectSize, byte[] buffer) throws IOException;
     private native byte[] native_get_thumbnail(int objectHandle);
     private native boolean native_delete_object(int objectHandle);
