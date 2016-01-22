@@ -399,7 +399,7 @@ class DragState {
                 }
                 // force DRAG_EXITED_EVENT if appropriate
                 DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
-                        x, y, null, null, null, null, false);
+                        0, 0, null, null, null, null, false);
                 mTargetWindow.mClient.dispatchDragEvent(evt);
                 if (myPid != mTargetWindow.mSession.mPid) {
                     evt.recycle();
