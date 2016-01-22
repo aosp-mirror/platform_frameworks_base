@@ -24,6 +24,7 @@ import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -21563,6 +21564,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private static final int MODE_SHIFT = 30;
         private static final int MODE_MASK  = 0x3 << MODE_SHIFT;
 
+        /** @hide */
+        @IntDef({UNSPECIFIED, EXACTLY, AT_MOST})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface MeasureSpecMode {}
+
         /**
          * Measure specification mode: The parent has not imposed any constraint
          * on the child. It can be whatever size it wants.
@@ -21603,7 +21609,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @param mode the mode of the measure specification
          * @return the measure specification based on size and mode
          */
-        public static int makeMeasureSpec(int size, int mode) {
+        public static int makeMeasureSpec(@IntRange(from = 0, to = (1 << MeasureSpec.MODE_SHIFT) - 1) int size,
+                                          @MeasureSpecMode int mode) {
             if (sUseBrokenMakeMeasureSpec) {
                 return size + mode;
             } else {
@@ -21632,7 +21639,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          *         {@link android.view.View.MeasureSpec#AT_MOST} or
          *         {@link android.view.View.MeasureSpec#EXACTLY}
          */
+        @MeasureSpecMode
         public static int getMode(int measureSpec) {
+            //noinspection ResourceType
             return (measureSpec & MODE_MASK);
         }
 

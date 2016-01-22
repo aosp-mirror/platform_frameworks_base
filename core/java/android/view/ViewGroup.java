@@ -6090,6 +6090,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             break;
         }
+        //noinspection ResourceType
         return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
     }
 
