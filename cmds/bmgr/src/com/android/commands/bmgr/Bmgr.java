@@ -16,8 +16,11 @@
 
 package com.android.commands.bmgr;
 
+import android.app.backup.BackupManager;
+import android.app.backup.BackupProgress;
 import android.app.backup.RestoreSet;
 import android.app.backup.IBackupManager;
+import android.app.backup.IBackupObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
 import android.os.RemoteException;
@@ -108,6 +111,11 @@ public final class Bmgr {
             return;
         }
 
+        if ("backupnow".equals(op)) {
+            doBackupNow();
+            return;
+        }
+
         System.err.println("Unknown command");
         showUsage();
     }
@@ -182,6 +190,88 @@ public final class Bmgr {
         if (allPkgs.size() > 0) {
             try {
                 mBmgr.fullTransportBackup(allPkgs.toArray(new String[allPkgs.size()]));
+            } catch (RemoteException e) {
+                System.err.println(e.toString());
+                System.err.println(BMGR_NOT_RUNNING_ERR);
+            }
+        }
+    }
+
+    class BackupObserver extends IBackupObserver.Stub {
+        boolean done = false;
+
+        @Override
+        public void onUpdate(String currentPackage, BackupProgress backupProgress) {
+            System.out.println(
+                "onUpdate: " + currentPackage + " with progress: " + backupProgress.bytesTransferred
+                    + "/" + backupProgress.bytesExpected);
+        }
+
+        @Override
+        public void onResult(String currentPackage, int status) {
+            System.out.println("onResult: " + currentPackage + " with result: "
+                    + convertBackupStatusToString(status));
+        }
+
+        @Override
+        public void backupFinished(int status) {
+            System.out.println("backupFinished: " + convertBackupStatusToString(status));
+            synchronized (this) {
+                done = true;
+                this.notify();
+            }
+        }
+
+        public void waitForCompletion() {
+            // The backupFinished() callback will throw the 'done' flag; we
+            // just sit and wait on that notification.
+            synchronized (this) {
+                while (!this.done) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+        }
+
+    }
+
+    private static String convertBackupStatusToString(int errorCode) {
+        switch (errorCode) {
+            case BackupManager.SUCCESS:
+                return "Success";
+            case BackupManager.ERROR_BACKUP_NOT_ALLOWED:
+                return "Backup is not allowed";
+            case BackupManager.ERROR_PACKAGE_NOT_FOUND:
+                return "Package not found";
+            case BackupManager.ERROR_TRANSPORT_ABORTED:
+                return "Transport error";
+            case BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED:
+                return "Transport rejected package";
+            case BackupManager.ERROR_AGENT_FAILURE:
+                return "Agent error";
+            default:
+                return "Unknown error";
+        }
+    }
+
+    private void doBackupNow() {
+        String pkg;
+        ArrayList<String> allPkgs = new ArrayList<String>();
+        while ((pkg = nextArg()) != null) {
+            allPkgs.add(pkg);
+        }
+        if (allPkgs.size() > 0) {
+            try {
+                BackupObserver observer = new BackupObserver();
+                int err = mBmgr.requestBackup(allPkgs.toArray(new String[allPkgs.size()]), observer);
+                if (err == 0) {
+                    // Off and running -- wait for the backup to complete
+                    observer.waitForCompletion();
+                } else {
+                    System.err.println("Unable to run backup");
+                }
             } catch (RemoteException e) {
                 System.err.println(e.toString());
                 System.err.println(BMGR_NOT_RUNNING_ERR);
@@ -528,5 +618,10 @@ public final class Bmgr {
         System.err.println("");
         System.err.println("The 'fullbackup' command induces a full-data stream backup for one or more");
         System.err.println("packages.  The data is sent via the currently active transport.");
+        System.err.println("");
+        System.err.println("The 'backupnow' command runs an immediate backup for one or more packages.");
+        System.err.println("For each package it will run key/value or full data backup ");
+        System.err.println("depending on the package's manifest declarations.");
+        System.err.println("The data is sent via the currently active transport.");
     }
 }
