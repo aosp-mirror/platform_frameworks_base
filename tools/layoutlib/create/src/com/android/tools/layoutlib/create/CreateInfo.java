@@ -200,7 +200,6 @@ public final class CreateInfo implements ICreateInfo {
         "libcore.io.MemoryMappedFile#mmapRO",
         "libcore.io.MemoryMappedFile#close",
         "libcore.io.MemoryMappedFile#bigEndianIterator",
-        "libcore.util.ZoneInfo$WallTime#createGregorianCalendar",
     };
 
     /**
