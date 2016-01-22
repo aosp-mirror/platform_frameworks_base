@@ -34,7 +34,6 @@ import java.util.ArrayList;
  */
 public class VrManagerService extends SystemService {
 
-    public static final boolean DEBUG = false;
     public static final String TAG = "VrManagerService";
 
     private final Object mLock = new Object();
@@ -88,7 +87,8 @@ public class VrManagerService extends SystemService {
         synchronized (mLock) {
             if (mVrModeEnabled != enabled) {
                 mVrModeEnabled = enabled;
-                if (DEBUG) Slog.d(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
+                // Log mode change event.
+                Slog.i(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
                 onVrModeChangedLocked();
             }
         }
