@@ -190,7 +190,6 @@ public class TaskViewThumbnail extends View {
             if (!mInvisible) {
                 updateThumbnailPaintFilter();
             }
-            invalidate();
         }
     }
 

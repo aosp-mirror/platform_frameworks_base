@@ -245,11 +245,7 @@ public class TaskViewHeader extends FrameLayout
      * to match the frame changes.
      */
     public void onTaskViewSizeChanged(int width, int height) {
-        // Return early if the bounds have not changed
-        if (mTaskViewRect.width() == width && mTaskViewRect.height() == height) {
-            return;
-        }
-
+        // TODO: Optimize this path
         mTaskViewRect.set(0, 0, width, height);
         boolean updateMoveTaskButton = mMoveTaskButton.getVisibility() != View.GONE;
         boolean isFreeformTask = (mTask != null) && mTask.isFreeformTask();
