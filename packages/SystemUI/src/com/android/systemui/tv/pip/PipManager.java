@@ -84,9 +84,8 @@ public class PipManager {
                 return;
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
-            mState = STATE_PIP_OVERLAY;
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
-            launchPipOverlayActivity();
+            showPipOverlay(false);
         }
     };
     private final Runnable mOnTaskStackChanged = new Runnable() {
@@ -208,17 +207,17 @@ public class PipManager {
      * stack to the default PIP bound {@link com.android.internal.R.string
      * .config_defaultPictureInPictureBounds}.
      */
-    public void showPipOverlay() {
+    public void showPipOverlay(boolean resizeStack) {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
-        try {
-            mActivityManager.resizeStack(PINNED_STACK_ID, mPipBound, false);
-        } catch (Exception e) {
-            Log.e(TAG, "resizeStack failed", e);
-            closePip();
-            return;
-        }
         mState = STATE_PIP_OVERLAY;
-        launchPipOverlayActivity();
+        Intent intent = new Intent(mContext, PipOverlayActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchStackId(PINNED_STACK_ID);
+        if (resizeStack) {
+            options.setLaunchBounds(mPipBound);
+        }
+        mContext.startActivity(intent, options.toBundle());
     }
 
     /**
@@ -228,13 +227,6 @@ public class PipManager {
      */
     public void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu()");
-        try {
-            mActivityManager.resizeStack(PINNED_STACK_ID, mMenuModePipBound, false);
-        } catch (Exception e) {
-            Log.e(TAG, "resizeStack failed", e);
-            closePip();
-            return;
-        }
         mState = STATE_PIP_MENU;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onShowPipMenu();
@@ -243,6 +235,7 @@ public class PipManager {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchStackId(PINNED_STACK_ID);
+        options.setLaunchBounds(mMenuModePipBound);
         mContext.startActivity(intent, options.toBundle());
     }
 
@@ -258,14 +251,6 @@ public class PipManager {
      */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
-    }
-
-    private void launchPipOverlayActivity() {
-        Intent intent = new Intent(mContext, PipOverlayActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(PINNED_STACK_ID);
-        mContext.startActivity(intent, options.toBundle());
     }
 
     private boolean hasPipTasks() {
