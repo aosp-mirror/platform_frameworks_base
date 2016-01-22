@@ -558,6 +558,7 @@ public class UsageStatsService extends SystemService implements
             }
             mRealTimeSnapshot = actualRealtime;
             mSystemTimeSnapshot = actualSystemTime;
+            postCheckIdleStates(UserHandle.USER_ALL);
         }
         return actualSystemTime;
     }
@@ -602,7 +603,7 @@ public class UsageStatsService extends SystemService implements
                     || event.mEventType == Event.SYSTEM_INTERACTION
                     || event.mEventType == Event.USER_INTERACTION)) {
                 if (previouslyIdle) {
-                    // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
+                    //Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                             /* idle = */ 0, event.mPackage));
                     notifyBatteryStats(event.mPackage, userId, false);
