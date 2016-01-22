@@ -44108,6 +44108,30 @@ package android.webkit {
     method public abstract android.view.View getFullScreenView(int, android.content.Context);
   }
 
+  public class ServiceWorkerClient {
+    ctor public ServiceWorkerClient();
+    method public android.webkit.WebResourceResponse shouldInterceptRequest(android.webkit.WebResourceRequest);
+  }
+
+  public abstract class ServiceWorkerController {
+    ctor public ServiceWorkerController();
+    method public static android.webkit.ServiceWorkerController getInstance();
+    method public abstract android.webkit.ServiceWorkerWebSettings getServiceWorkerWebSettings();
+    method public abstract void setServiceWorkerClient(android.webkit.ServiceWorkerClient);
+  }
+
+  public abstract class ServiceWorkerWebSettings {
+    ctor public ServiceWorkerWebSettings();
+    method public abstract boolean getAllowContentAccess();
+    method public abstract boolean getAllowFileAccess();
+    method public abstract boolean getBlockNetworkLoads();
+    method public abstract int getCacheMode();
+    method public abstract void setAllowContentAccess(boolean);
+    method public abstract void setAllowFileAccess(boolean);
+    method public abstract void setBlockNetworkLoads(boolean);
+    method public abstract void setCacheMode(int);
+  }
+
   public class SslErrorHandler extends android.os.Handler {
     method public void cancel();
     method public void proceed();
