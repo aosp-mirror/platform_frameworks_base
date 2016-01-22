@@ -2163,7 +2163,7 @@ public class AudioManager {
      * audio service.
      */
     private final ServiceEventHandlerDelegate mServiceEventHandlerDelegate =
-            new ServiceEventHandlerDelegate();
+            new ServiceEventHandlerDelegate(null);
 
     /**
      * Event types
@@ -2177,10 +2177,14 @@ public class AudioManager {
     private class ServiceEventHandlerDelegate {
         private final Handler mHandler;
 
-        ServiceEventHandlerDelegate() {
+        ServiceEventHandlerDelegate(Handler handler) {
             Looper looper;
-            if ((looper = Looper.myLooper()) == null) {
-                looper = Looper.getMainLooper();
+            if (handler == null) {
+                if ((looper = Looper.myLooper()) == null) {
+                    looper = Looper.getMainLooper();
+                }
+            } else {
+                looper = handler.getLooper();
             }
 
             if (looper != null) {
@@ -2201,27 +2205,9 @@ public class AudioManager {
                                 }
                                 break;
                             case MSSG_RECORDING_CONFIG_CHANGE:
-                                // optimizing for the case of a single callback
-                                AudioRecordingCallback singleCallback = null;
-                                ArrayList<AudioRecordingCallback> multipleCallbacks = null;
-                                synchronized(mRecordCallbackLock) {
-                                    if ((mRecordCallbackList != null)
-                                            && (mRecordCallbackList.size() != 0)) {
-                                        if (mRecordCallbackList.size() == 1) {
-                                            singleCallback = mRecordCallbackList.get(0);
-                                        } else {
-                                            multipleCallbacks =
-                                                    new ArrayList<AudioRecordingCallback>(
-                                                            mRecordCallbackList);
-                                        }
-                                    }
-                                }
-                                if (singleCallback != null) {
-                                    singleCallback.onRecordConfigChanged();
-                                } else if (multipleCallbacks != null) {
-                                    for (int i=0 ; i < multipleCallbacks.size() ; i++) {
-                                        multipleCallbacks.get(i).onRecordConfigChanged();
-                                    }
+                                final AudioRecordingCallback cb = (AudioRecordingCallback) msg.obj;
+                                if (cb != null) {
+                                    cb.onRecordConfigChanged();
                                 }
                                 break;
                             default:
@@ -2798,34 +2784,51 @@ public class AudioManager {
     //====================================================================
     // Recording configuration
     /**
-     * @hide
-     * candidate for public API
+     * Interface for receiving update notifications about the recording configuration. Extend
+     * this abstract class and register it with
+     * {@link AudioManager#registerAudioRecordingCallback(AudioRecordingCallback, Handler)}
+     * to be notified.
+     * Use {@link AudioManager#getActiveRecordConfigurations()} to query the current configuration.
      */
     public static abstract class AudioRecordingCallback {
         /**
-         * @hide
-         * candidate for public API
+         * Called whenever the device recording configuration has changed.
          */
         public void onRecordConfigChanged() {}
     }
 
+    private static class AudioRecordingCallbackInfo {
+        final AudioRecordingCallback mCb;
+        final Handler mHandler;
+        AudioRecordingCallbackInfo(AudioRecordingCallback cb, Handler handler) {
+            mCb = cb;
+            mHandler = handler;
+        }
+    }
+
     /**
-     * @hide
-     * candidate for public API
-     * @param non-null callback
+     * Register a callback to be notified of audio recording changes through
+     * {@link AudioRecordingCallback}
+     * @param cb non-null callback to register
+     * @param handler the {@link Handler} object for the thread on which to execute
+     * the callback. If <code>null</code>, the {@link Handler} associated with the main
+     * {@link Looper} will be used.
      */
-    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb) {
+    public void registerAudioRecordingCallback(@NonNull AudioRecordingCallback cb, Handler handler)
+    {
         if (cb == null) {
             throw new IllegalArgumentException("Illegal null AudioRecordingCallback argument");
         }
+
         synchronized(mRecordCallbackLock) {
             // lazy initialization of the list of recording callbacks
             if (mRecordCallbackList == null) {
-                mRecordCallbackList = new ArrayList<AudioRecordingCallback>();
+                mRecordCallbackList = new ArrayList<AudioRecordingCallbackInfo>();
             }
             final int oldCbCount = mRecordCallbackList.size();
-            if (!mRecordCallbackList.contains(cb)) {
-                mRecordCallbackList.add(cb);
+            if (!hasRecordCallback_sync(cb)) {
+                mRecordCallbackList.add(new AudioRecordingCallbackInfo(cb,
+                        new ServiceEventHandlerDelegate(handler).getHandler()));
                 final int newCbCount = mRecordCallbackList.size();
                 if ((oldCbCount == 0) && (newCbCount > 0)) {
                     // register binder for callbacks
@@ -2844,9 +2847,9 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * candidate for public API
-     * @param non-null callback
+     * Unregister an audio recording callback previously registered with
+     * {@link #registerAudioRecordingCallback(AudioRecordingCallback, Handler)}.
+     * @param cb non-null callback to unregister
      */
     public void unregisterAudioRecordingCallback(@NonNull AudioRecordingCallback cb) {
         if (cb == null) {
@@ -2857,7 +2860,7 @@ public class AudioManager {
                 return;
             }
             final int oldCbCount = mRecordCallbackList.size();
-            if (mRecordCallbackList.remove(cb)) {
+            if (removeRecordCallback_sync(cb)) {
                 final int newCbCount = mRecordCallbackList.size();
                 if ((oldCbCount > 0) && (newCbCount == 0)) {
                     // unregister binder for callbacks
@@ -2876,8 +2879,7 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * candidate for public API
+     * Returns the current active audio recording configurations of the device.
      * @return a non-null array of recording configurations. An array of length 0 indicates there is
      *     no recording active when queried.
      */
@@ -2902,18 +2904,57 @@ public class AudioManager {
 
     /**
      * All operations on this list are sync'd on mRecordCallbackLock.
-     * List is lazy-initialized in {@link #registerAudioRecordingCallback(AudioRecordingCallback)}.
+     * List is lazy-initialized in
+     * {@link #registerAudioRecordingCallback(AudioRecordingCallback, Handler)}.
      * List can be null.
      */
-    private List<AudioRecordingCallback> mRecordCallbackList;
+    private List<AudioRecordingCallbackInfo> mRecordCallbackList;
     private final Object mRecordCallbackLock = new Object();
+
+    /**
+     * Must be called synchronized on mRecordCallbackLock
+     */
+    private boolean hasRecordCallback_sync(@NonNull AudioRecordingCallback cb) {
+        if (mRecordCallbackList != null) {
+            for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                if (cb.equals(mRecordCallbackList.get(i).mCb)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Must be called synchronized on mRecordCallbackLock
+     */
+    private boolean removeRecordCallback_sync(@NonNull AudioRecordingCallback cb) {
+        if (mRecordCallbackList != null) {
+            for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                if (cb.equals(mRecordCallbackList.get(i).mCb)) {
+                    mRecordCallbackList.remove(i);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
 
         public void dispatchRecordingConfigChange() {
-            final Message m = mServiceEventHandlerDelegate.getHandler().obtainMessage(
-                    MSSG_RECORDING_CONFIG_CHANGE/*what*/);
-            mServiceEventHandlerDelegate.getHandler().sendMessage(m);
+            synchronized(mRecordCallbackLock) {
+                if (mRecordCallbackList != null) {
+                    for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
+                        final AudioRecordingCallbackInfo arci = mRecordCallbackList.get(i);
+                        if (arci.mHandler != null) {
+                            final Message m = arci.mHandler.obtainMessage(
+                                    MSSG_RECORDING_CONFIG_CHANGE/*what*/, arci.mCb/*obj*/);
+                            arci.mHandler.sendMessage(m);
+                        }
+                    }
+                }
+            }
         }
 
     };
