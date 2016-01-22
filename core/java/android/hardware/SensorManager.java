@@ -407,25 +407,18 @@ public abstract class SensorManager {
      * @see Sensor
      */
     public List<Sensor> getSensorList(int type) {
-        // cache the returned lists the first time
         List<Sensor> list;
         final List<Sensor> fullList = getFullSensorList();
-        synchronized (mSensorListByType) {
-            list = mSensorListByType.get(type);
-            if (list == null) {
-                if (type == Sensor.TYPE_ALL) {
-                    list = fullList;
-                } else {
-                    list = new ArrayList<Sensor>();
-                    for (Sensor i : fullList) {
-                        if (i.getType() == type)
-                            list.add(i);
-                    }
-                }
-                list = Collections.unmodifiableList(list);
-                mSensorListByType.append(type, list);
+        if (type == Sensor.TYPE_ALL) {
+            list = fullList;
+        } else {
+            list = new ArrayList<Sensor>();
+            for (Sensor i : fullList) {
+                if (i.getType() == type)
+                    list.add(i);
             }
         }
+        list = Collections.unmodifiableList(list);
         return list;
     }
 
@@ -446,7 +439,6 @@ public abstract class SensorManager {
      */
     public Sensor getDefaultSensor(int type) {
         // TODO: need to be smarter, for now, just return the 1st sensor
-        List<Sensor> l = getSensorList(type);
         boolean wakeUpSensor = false;
         // For the following sensor types, return a wake-up sensor. These types are by default
         // defined as wake-up sensors. For the rest of the SDK defined sensor types return a
@@ -457,11 +449,7 @@ public abstract class SensorManager {
                 type == Sensor.TYPE_WRIST_TILT_GESTURE) {
             wakeUpSensor = true;
         }
-
-        for (Sensor sensor : l) {
-            if (sensor.isWakeUpSensor() == wakeUpSensor) return sensor;
-        }
-        return null;
+        return getDefaultSensor(type, wakeUpSensor);
     }
 
     /**
@@ -491,9 +479,9 @@ public abstract class SensorManager {
      * @see Sensor#isWakeUpSensor()
      */
     public Sensor getDefaultSensor(int type, boolean wakeUp) {
-        List<Sensor> l = getSensorList(type);
+        final List<Sensor> l = getFullSensorList();
         for (Sensor sensor : l) {
-            if (sensor.isWakeUpSensor() == wakeUp)
+            if (sensor.getType() == type && sensor.isWakeUpSensor() == wakeUp)
                 return sensor;
         }
         return null;
