@@ -99,7 +99,8 @@
                     android:src="@*android:drawable/ic_notification_block"
                     android:layout_gravity="center_vertical|start"
                     android:layout_width="24dp"
-                    android:layout_height="24dp" />
+                    android:layout_height="24dp"
+                    android:tint="@color/notification_guts_icon_tint"/>
 
             <SeekBar
                     android:id="@+id/seekbar"
@@ -121,7 +122,8 @@
                     android:src="@*android:drawable/ic_notification_alert"
                     android:layout_gravity="center_vertical|end"
                     android:layout_width="24dp"
-                    android:layout_height="24dp"/>
+                    android:layout_height="24dp"
+                    android:tint="@color/notification_guts_icon_tint" />
 
         </FrameLayout>
 
