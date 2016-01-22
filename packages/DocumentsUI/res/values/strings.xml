@@ -178,7 +178,7 @@
         <item quantity="other">Couldn\'t delete <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
-    <string name="notification_touch_for_details">Touch to view details</string>
+    <string name="notification_touch_for_details">Tap to view details</string>
     <!-- Label of a dialog button for retrying a failed operation [CHAR LIMIT=24] -->
     <string name="retry">Retry</string>
     <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
