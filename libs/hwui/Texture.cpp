@@ -41,9 +41,7 @@ static int bytesPerPixel(GLint glFormat) {
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force,
         GLenum renderTarget) {
 
-    if (mFirstWrap || force || wrapS != mWrapS || wrapT != mWrapT) {
-        mFirstWrap = false;
-
+    if (force || wrapS != mWrapS || wrapT != mWrapT) {
         mWrapS = wrapS;
         mWrapT = wrapT;
 
@@ -59,9 +57,7 @@ void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force
 void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool force,
         GLenum renderTarget) {
 
-    if (mFirstFilter || force || min != mMinFilter || mag != mMagFilter) {
-        mFirstFilter = false;
-
+    if (force || min != mMinFilter || mag != mMagFilter) {
         mMinFilter = min;
         mMagFilter = mag;
 
@@ -92,6 +88,13 @@ bool Texture::updateSize(uint32_t width, uint32_t height, GLint format) {
     return true;
 }
 
+void Texture::resetCachedParams() {
+    mWrapS = GL_REPEAT;
+    mWrapT = GL_REPEAT;
+    mMinFilter = GL_NEAREST_MIPMAP_LINEAR;
+    mMagFilter = GL_LINEAR;
+}
+
 void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
     GL_CHECKPOINT();
@@ -99,6 +102,7 @@ void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
     if (!mId) {
         glGenTextures(1, &mId);
         needsAlloc = true;
+        resetCachedParams();
     }
     mCaches.textureState().bindTexture(GL_TEXTURE_2D, mId);
     if (needsAlloc) {
@@ -202,10 +206,12 @@ void Texture::upload(const SkBitmap& bitmap) {
     // If the texture had mipmap enabled but not anymore,
     // force a glTexImage2D to discard the mipmap levels
     bool needsAlloc = canMipMap && mipMap && !bitmap.hasHardwareMipMap();
+    bool setDefaultParams = false;
 
     if (!mId) {
         glGenTextures(1, &mId);
         needsAlloc = true;
+        setDefaultParams = true;
     }
 
     GLint format, type;
@@ -240,11 +246,8 @@ void Texture::upload(const SkBitmap& bitmap) {
         }
     }
 
-    if (mFirstFilter) {
+    if (setDefaultParams) {
         setFilter(GL_NEAREST);
-    }
-
-    if (mFirstWrap) {
         setWrap(GL_CLAMP_TO_EDGE);
     }
 }
