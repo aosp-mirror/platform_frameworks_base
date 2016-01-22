@@ -339,6 +339,7 @@ public final class ViewRootImpl implements ViewParent,
     volatile Object mLocalDragState;
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
+    int mLastTouchSource;
 
     private boolean mProfileRendering;
     private Choreographer.FrameCallback mRenderProfiler;
@@ -4124,6 +4125,7 @@ public final class ViewRootImpl implements ViewParent,
             if (event.isTouchEvent()) {
                 mLastTouchPoint.x = event.getRawX();
                 mLastTouchPoint.y = event.getRawY();
+                mLastTouchSource = event.getSource();
             }
             return FORWARD;
         }
@@ -5475,6 +5477,10 @@ public final class ViewRootImpl implements ViewParent,
     public void getLastTouchPoint(Point outLocation) {
         outLocation.x = (int) mLastTouchPoint.x;
         outLocation.y = (int) mLastTouchPoint.y;
+    }
+
+    public int getLastTouchSource() {
+        return mLastTouchSource;
     }
 
     public void setDragFocus(View newDragTarget) {

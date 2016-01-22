@@ -148,7 +148,7 @@ public final class BridgeWindowSession implements IWindowSession {
 
     @Override
     public boolean performDrag(IWindow window, IBinder dragToken,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data)
             throws RemoteException {
         // pass for now

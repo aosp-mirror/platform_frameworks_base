@@ -28,6 +28,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.hardware.input.InputManager;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
@@ -36,6 +37,8 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.InputChannel;
+import android.view.InputDevice;
+import android.view.PointerIcon;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
@@ -72,6 +75,7 @@ class DragState {
     int mUid;
     ClipData mData;
     ClipDescription mDataDescription;
+    int mTouchSource;
     boolean mDragResult;
     float mOriginalAlpha;
     float mOriginalX, mOriginalY;
@@ -342,6 +346,7 @@ class DragState {
 
     private void cleanUpDragLw() {
         broadcastDragEndedLw();
+        restorePointerIconLw();
 
         // stop intercepting input
         unregister();
@@ -572,5 +577,22 @@ class DragState {
         set.initialize(0, 0, 0, 0);
         set.start();  // Will start on the first call to getTransformation.
         return set;
+    }
+
+    private boolean isFromSource(int source) {
+        return (mTouchSource & source) == source;
+    }
+
+    void overridePointerIconLw(int touchSource) {
+        mTouchSource = touchSource;
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_GRAB);
+        }
+    }
+
+    private void restorePointerIconLw() {
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
+        }
     }
 }
