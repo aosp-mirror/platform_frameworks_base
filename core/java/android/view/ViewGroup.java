@@ -1401,6 +1401,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 root.setDragFocus(target);
 
                 final int action = event.mAction;
+                // Position should not be available for ACTION_DRAG_ENTERED and ACTION_DRAG_EXITED.
+                event.mX = 0;
+                event.mY = 0;
+
                 // If we've dragged off of a child view or this window, send it the EXITED message
                 if (mCurrentDragView != null) {
                     final View view = mCurrentDragView;
@@ -1429,6 +1433,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     }
                 }
                 event.mAction = action;  // restore the event's original state
+                event.mX = tx;
+                event.mY = ty;
             }
 
             // Dispatch the actual drag location notice, localized into its coordinates
