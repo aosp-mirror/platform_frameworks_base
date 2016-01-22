@@ -77,8 +77,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
     }
 
     /**
-     * Loads the persistent recentTasks for {@code userId} into {@link #mRecentTasks} from
-     * persistent storage. Does nothing if they are already loaded.
+     * Loads the persistent recentTasks for {@code userId} into this list from persistent storage.
+     * Does nothing if they are already loaded.
      *
      * @param userId the user Id
      */

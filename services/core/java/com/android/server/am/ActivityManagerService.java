@@ -20899,7 +20899,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public boolean isUserStopped(int userId) {
-        return mUserController.getStartedUserStateLocked(userId) == null;
+        synchronized (this) {
+            return mUserController.getStartedUserStateLocked(userId) == null;
+        }
     }
 
     ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId) {
