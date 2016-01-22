@@ -176,7 +176,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     
     /**
      * Value for {@link #flags}: this is set if this application has been
-     * install as an update to a built-in system application.
+     * installed as an update to a built-in system application.
      */
     public static final int FLAG_UPDATED_SYSTEM_APP = 1<<7;
     
