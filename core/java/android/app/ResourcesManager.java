@@ -27,6 +27,7 @@ import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -34,7 +35,6 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import java.lang.ref.WeakReference;
-import java.util.Locale;
 
 /** @hide */
 public class ResourcesManager {
@@ -284,8 +284,9 @@ public class ResourcesManager {
         }
 
         // set it for java, this also affects newly created Resources
-        if (config.locale != null) {
-            Locale.setDefault(config.locale);
+        final LocaleList localeList = config.getLocales();
+        if (!localeList.isEmpty()) {
+            LocaleList.setDefault(localeList);
         }
 
         Resources.updateSystemConfiguration(config, defaultDisplayMetrics, compat);
