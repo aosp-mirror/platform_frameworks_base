@@ -393,7 +393,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
-        getRecentsButton().setVisibility(disableHome   ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
 
         // The app shelf, if it exists, follows the visibility of the home button.
