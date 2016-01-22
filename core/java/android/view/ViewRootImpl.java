@@ -3712,7 +3712,8 @@ public final class ViewRootImpl implements ViewParent,
                 return true;
             } else if ((!mAttachInfo.mHasWindowFocus
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) || mStopped
-                    || mIsAmbientMode || (mPausedForTransition && !isBack(q.mEvent))) {
+                    || (mIsAmbientMode && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_BUTTON))
+                    || (mPausedForTransition && !isBack(q.mEvent))) {
                 // This is a focus event and the window doesn't currently have input focus or
                 // has stopped. This could be an event that came back from the previous stage
                 // but the window has lost focus or stopped in the meantime.
