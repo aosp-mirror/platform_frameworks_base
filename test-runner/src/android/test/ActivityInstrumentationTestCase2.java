@@ -25,26 +25,26 @@ import java.lang.reflect.Method;
  * This class provides functional testing of a single activity.  The activity under test will
  * be created using the system infrastructure (by calling InstrumentationTestCase.launchActivity())
  * and you will then be able to manipulate your Activity directly.
- * 
+ *
  * <p>Other options supported by this test case include:
  * <ul>
  * <li>You can run any test method on the UI thread (see {@link android.test.UiThreadTest}).</li>
- * <li>You can inject custom Intents into your Activity (see 
+ * <li>You can inject custom Intents into your Activity (see
  * {@link #setActivityIntent(Intent)}).</li>
  * </ul>
- * 
+ *
  * <p>This class replaces {@link android.test.ActivityInstrumentationTestCase}, which is deprecated.
  * New tests should be written using this base class.
- * 
+ *
  * <p>If you prefer an isolated unit test, see {@link android.test.ActivityUnitTestCase}.
  *
- * <div class="special reference">
- * <h3>Developer Guides</h3>
- * <p>For more information about application testing, read the
- * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
- * </div>
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
+ * ActivityTestRule</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
-public abstract class ActivityInstrumentationTestCase2<T extends Activity> 
+@Deprecated
+public abstract class ActivityInstrumentationTestCase2<T extends Activity>
         extends ActivityTestCase {
     Class<T> mActivityClass;
     boolean mInitialTouchMode = false;
@@ -78,18 +78,18 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
      * Get the Activity under test, starting it if necessary.
      *
      * For each test method invocation, the Activity will not actually be created until the first
-     * time this method is called. 
-     * 
-     * <p>If you wish to provide custom setup values to your Activity, you may call 
-     * {@link #setActivityIntent(Intent)} and/or {@link #setActivityInitialTouchMode(boolean)} 
-     * before your first call to getActivity().  Calling them after your Activity has 
+     * time this method is called.
+     *
+     * <p>If you wish to provide custom setup values to your Activity, you may call
+     * {@link #setActivityIntent(Intent)} and/or {@link #setActivityInitialTouchMode(boolean)}
+     * before your first call to getActivity().  Calling them after your Activity has
      * started will have no effect.
      *
      * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
      * If your test method is annotated with {@link android.test.UiThreadTest}, then your Activity
      * will be started automatically just before your test method is run.  You still call this
      * method in order to get the Activity under test.
-     * 
+     *
      * @return the Activity under test
      */
     @Override
@@ -113,10 +113,10 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
     /**
      * Call this method before the first call to {@link #getActivity} to inject a customized Intent
      * into the Activity under test.
-     * 
+     *
      * <p>If you do not call this, the default intent will be provided.  If you call this after
      * your Activity has been started, it will have no effect.
-     * 
+     *
      * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
      * If your test method is annotated with {@link android.test.UiThreadTest}, then you must call
      * {@link #setActivityIntent(Intent)} from {@link #setUp()}.
@@ -131,28 +131,28 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
     public void setActivityIntent(Intent i) {
         mActivityIntent = i;
     }
-    
+
     /**
      * Call this method before the first call to {@link #getActivity} to set the initial touch
      * mode for the Activity under test.
-     * 
+     *
      * <p>If you do not call this, the touch mode will be false.  If you call this after
      * your Activity has been started, it will have no effect.
-     * 
+     *
      * <p><b>NOTE:</b> Activities under test may not be started from within the UI thread.
      * If your test method is annotated with {@link android.test.UiThreadTest}, then you must call
      * {@link #setActivityInitialTouchMode(boolean)} from {@link #setUp()}.
-     * 
+     *
      * @param initialTouchMode true if the Activity should be placed into "touch mode" when started
      */
     public void setActivityInitialTouchMode(boolean initialTouchMode) {
         mInitialTouchMode = initialTouchMode;
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         mInitialTouchMode = false;
         mActivityIntent = null;
     }
@@ -165,8 +165,8 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
             a.finish();
             setActivity(null);
         }
-        
-        // Scrub out members - protects against memory leaks in the case where someone 
+
+        // Scrub out members - protects against memory leaks in the case where someone
         // creates a non-static inner class (thus referencing the test case) and gives it to
         // someone else to hold onto
         scrubClass(ActivityInstrumentationTestCase2.class);

@@ -26,6 +26,7 @@ import android.os.Bundle;
  *
  * @hide
  */
+@Deprecated
 public class LaunchPerformanceBase extends Instrumentation {
 
     public static final String LOG_TAG = "Launch Performance";
@@ -39,7 +40,7 @@ public class LaunchPerformanceBase extends Instrumentation {
         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         setAutomaticPerformanceSnapshots();
     }
-   
+
     /**
      * Launches intent, and waits for idle before returning.
      *

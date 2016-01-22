@@ -23,7 +23,13 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a test that should run as part of the large tests.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/filters/LargeTest.html">
+ * LargeTest</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface LargeTest {

@@ -19,6 +19,7 @@ package android.test;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 abstract class SimpleCache<K, V> {
     private Map<K, V> map = new HashMap<K, V>();
 

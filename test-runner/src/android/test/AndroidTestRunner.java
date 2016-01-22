@@ -33,6 +33,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+/**
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+ * AndroidJUnitRunner</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+ */
+@Deprecated
 public class AndroidTestRunner extends BaseTestRunner {
 
     private TestResult mTestResult;

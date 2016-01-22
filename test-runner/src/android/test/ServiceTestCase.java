@@ -92,7 +92,13 @@ import java.util.Random;
  *      {@link android.test.RenamingDelegatingContext RenamingDelegatingContext},
  *      {@link android.content.ContextWrapper ContextWrapper}, and
  *      {@link android.test.IsolatedContext}.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/rule/ServiceTestRule.html">
+ * ServiceTestRule</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public abstract class ServiceTestCase<T extends Service> extends AndroidTestCase {
 
     Class<T> mServiceClass;
