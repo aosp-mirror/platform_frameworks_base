@@ -41,6 +41,7 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
         , texture(caches) {
     uint32_t width = computeIdealDimension(viewportWidth);
     uint32_t height = computeIdealDimension(viewportHeight);
+    caches.textureState().activateTexture(0);
     texture.resize(width, height, GL_RGBA);
     texture.blend = true;
     texture.setWrap(GL_CLAMP_TO_EDGE);
