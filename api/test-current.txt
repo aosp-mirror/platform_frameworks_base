@@ -47937,10 +47937,8 @@ package java.io {
   }
 
   public final class Console implements java.io.Flushable {
-    method public static java.io.Console console();
     method public void flush();
     method public java.io.Console format(java.lang.String, java.lang.Object...);
-    method public static synchronized java.io.Console getConsole();
     method public java.io.Console printf(java.lang.String, java.lang.Object...);
     method public java.lang.String readLine(java.lang.String, java.lang.Object...);
     method public java.lang.String readLine();
@@ -48224,7 +48222,6 @@ package java.io {
   public class InterruptedIOException extends java.io.IOException {
     ctor public InterruptedIOException();
     ctor public InterruptedIOException(java.lang.String);
-    ctor public InterruptedIOException(java.lang.Throwable);
     field public int bytesTransferred;
   }
 
@@ -48895,7 +48892,6 @@ package java.lang {
     method public long longValue();
     method public static byte parseByte(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static byte parseByte(java.lang.String) throws java.lang.NumberFormatException;
-    method public static java.lang.String toHexString(byte, boolean);
     method public static java.lang.String toString(byte);
     method public static java.lang.Byte valueOf(byte);
     method public static java.lang.Byte valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
@@ -51047,7 +51043,6 @@ package java.net {
   public class BindException extends java.net.SocketException {
     ctor public BindException(java.lang.String);
     ctor public BindException();
-    ctor public BindException(java.lang.String, java.lang.Throwable);
   }
 
   public abstract class CacheRequest {
@@ -51065,7 +51060,6 @@ package java.net {
   public class ConnectException extends java.net.SocketException {
     ctor public ConnectException(java.lang.String);
     ctor public ConnectException();
-    ctor public ConnectException(java.lang.String, java.lang.Throwable);
   }
 
   public abstract class ContentHandler {
@@ -51145,7 +51139,6 @@ package java.net {
     method public void disconnect();
     method public synchronized boolean getBroadcast() throws java.net.SocketException;
     method public java.nio.channels.DatagramChannel getChannel();
-    method public final java.io.FileDescriptor getFileDescriptor$();
     method public java.net.InetAddress getInetAddress();
     method public java.net.InetAddress getLocalAddress();
     method public int getLocalPort();
@@ -51222,7 +51215,6 @@ package java.net {
     method public boolean hasExpired();
     method public boolean isHttpOnly();
     method public static java.util.List<java.net.HttpCookie> parse(java.lang.String);
-    method public static java.util.List<java.net.HttpCookie> parse(java.lang.String, boolean);
     method public void setComment(java.lang.String);
     method public void setCommentURL(java.lang.String);
     method public void setDiscard(boolean);
@@ -51315,9 +51307,6 @@ package java.net {
   }
 
   public final class Inet4Address extends java.net.InetAddress {
-    field public static final java.net.InetAddress ALL;
-    field public static final java.net.InetAddress ANY;
-    field public static final java.net.InetAddress LOOPBACK;
   }
 
   public final class Inet6Address extends java.net.InetAddress {
@@ -51326,8 +51315,6 @@ package java.net {
     method public int getScopeId();
     method public java.net.NetworkInterface getScopedInterface();
     method public boolean isIPv4CompatibleAddress();
-    field public static final java.net.InetAddress ANY;
-    field public static final java.net.InetAddress LOOPBACK;
   }
 
   public class InetAddress implements java.io.Serializable {
@@ -51455,13 +51442,11 @@ package java.net {
   public class PortUnreachableException extends java.net.SocketException {
     ctor public PortUnreachableException(java.lang.String);
     ctor public PortUnreachableException();
-    ctor public PortUnreachableException(java.lang.String, java.lang.Throwable);
   }
 
   public class ProtocolException extends java.io.IOException {
     ctor public ProtocolException(java.lang.String);
     ctor public ProtocolException();
-    ctor public ProtocolException(java.lang.String, java.lang.Throwable);
   }
 
   public abstract interface ProtocolFamily {
@@ -51596,8 +51581,6 @@ package java.net {
   public class SocketException extends java.io.IOException {
     ctor public SocketException(java.lang.String);
     ctor public SocketException();
-    ctor public SocketException(java.lang.Throwable);
-    ctor public SocketException(java.lang.String, java.lang.Throwable);
   }
 
   public abstract class SocketImpl implements java.net.SocketOptions {
@@ -51667,8 +51650,6 @@ package java.net {
   public class SocketTimeoutException extends java.io.InterruptedIOException {
     ctor public SocketTimeoutException(java.lang.String);
     ctor public SocketTimeoutException();
-    ctor public SocketTimeoutException(java.lang.Throwable);
-    ctor public SocketTimeoutException(java.lang.String, java.lang.Throwable);
   }
 
   public final class StandardProtocolFamily extends java.lang.Enum implements java.net.ProtocolFamily {
@@ -59613,7 +59594,6 @@ package java.util.jar {
     ctor public JarFile(java.io.File, boolean, int) throws java.io.IOException;
     method public java.util.jar.JarEntry getJarEntry(java.lang.String);
     method public java.util.jar.Manifest getManifest() throws java.io.IOException;
-    method public boolean hasClassPathAttribute() throws java.io.IOException;
     field public static final java.lang.String MANIFEST_NAME = "META-INF/MANIFEST.MF";
   }
 
