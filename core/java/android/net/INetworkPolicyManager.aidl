@@ -56,6 +56,12 @@ interface INetworkPolicyManager {
     void addRestrictBackgroundWhitelistedUid(int uid);
     void removeRestrictBackgroundWhitelistedUid(int uid);
     int[] getRestrictBackgroundWhitelistedUids();
+    /** Gets the restrict background status based on the caller's UID:
+        1 - disabled
+        2 - whitelisted
+        3 - enabled
+    */
+    int getRestrictBackgroundByCaller();
 
     void setDeviceIdleMode(boolean enabled);
 

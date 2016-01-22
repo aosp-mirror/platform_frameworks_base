@@ -22769,6 +22769,7 @@ package android.net {
     method public android.net.NetworkInfo getNetworkInfo(android.net.Network);
     method public deprecated int getNetworkPreference();
     method public static deprecated android.net.Network getProcessDefaultNetwork();
+    method public int getRestrictBackgroundStatus();
     method public boolean isActiveNetworkMetered();
     method public boolean isDefaultNetworkActive();
     method public static deprecated boolean isNetworkTypeValid(int);
@@ -22803,6 +22804,9 @@ package android.net {
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
+    field public static final int RESTRICT_BACKGROUND_STATUS_DISABLED = 1; // 0x1
+    field public static final int RESTRICT_BACKGROUND_STATUS_ENABLED = 3; // 0x3
+    field public static final int RESTRICT_BACKGROUND_STATUS_WHITELISTED = 2; // 0x2
     field public static final int TYPE_BLUETOOTH = 7; // 0x7
     field public static final int TYPE_DUMMY = 8; // 0x8
     field public static final int TYPE_ETHERNET = 9; // 0x9
@@ -22827,6 +22831,9 @@ package android.net {
 
   public static abstract interface ConnectivityManager.OnNetworkActiveListener {
     method public abstract void onNetworkActive();
+  }
+
+  public static abstract class ConnectivityManager.RestrictBackgroundStatus implements java.lang.annotation.Annotation {
   }
 
   public class Credentials {

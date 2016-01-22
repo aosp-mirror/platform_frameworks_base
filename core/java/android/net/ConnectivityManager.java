@@ -16,7 +16,7 @@
 package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
-
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -49,6 +49,8 @@ import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -512,6 +514,7 @@ public class ConnectivityManager {
     private final Context mContext;
 
     private INetworkManagementService mNMService;
+    private INetworkPolicyManager mNPManager;
 
     /**
      * Tests if a given integer represents a valid network type.
@@ -3024,5 +3027,59 @@ public class ConnectivityManager {
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         return NetworkUtils.bindProcessToNetworkForHostResolution(
                 network == null ? NETID_UNSET : network.netId);
+    }
+
+    /**
+     * Device is not restricting metered network activity while application is running on
+     * background.
+     */
+    public static final int RESTRICT_BACKGROUND_STATUS_DISABLED = 1;
+
+    /**
+     * Device is restricting metered network activity while application is running on background,
+     * but application is allowed to bypass it.
+     * <p>
+     * In this state, application should take action to mitigate metered network access.
+     * For example, a music streaming application should switch to a low-bandwidth bitrate.
+     */
+    public static final int RESTRICT_BACKGROUND_STATUS_WHITELISTED = 2;
+
+    /**
+     * Device is restricting metered network activity while application is running on background.
+     * In this state, application should not try to use the network while running on background,
+     * because it would be denied.
+     */
+    public static final int RESTRICT_BACKGROUND_STATUS_ENABLED = 3;
+
+    @IntDef(flag = false, value = {
+            RESTRICT_BACKGROUND_STATUS_DISABLED,
+            RESTRICT_BACKGROUND_STATUS_WHITELISTED,
+            RESTRICT_BACKGROUND_STATUS_ENABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictBackgroundStatus {
+    }
+
+    private INetworkPolicyManager getNetworkPolicyManager() {
+        synchronized (this) {
+            if (mNPManager != null) {
+                return mNPManager;
+            }
+            mNPManager = INetworkPolicyManager.Stub.asInterface(ServiceManager
+                    .getService(Context.NETWORK_POLICY_SERVICE));
+            return mNPManager;
+        }
+    }
+
+    /**
+     * Determines if the calling application is subject to metered network restrictions while
+     * running on background.
+     */
+    public @RestrictBackgroundStatus int getRestrictBackgroundStatus() {
+        try {
+            return getNetworkPolicyManager().getRestrictBackgroundByCaller();
+        } catch (RemoteException e) {
+            return RESTRICT_BACKGROUND_STATUS_DISABLED;
+        }
     }
 }
