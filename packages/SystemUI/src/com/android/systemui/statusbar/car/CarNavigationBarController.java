@@ -39,6 +39,10 @@ import java.util.List;
  * the navigation buttons by updating arrays_car.xml appropriately in an overlay.
  */
 class CarNavigationBarController {
+    private static final String EXTRA_FACET_CATEGORIES = "categories";
+    private static final String EXTRA_FACET_PACKAGES = "packages";
+    private static final String EXTRA_FACET_ID = "filter_id";
+    private static final String EXTRA_FACET_LAUNCH_PICKER = "launch_picker";
 
     // Each facet of the navigation bar maps to a set of package names or categories defined in
     // arrays_car.xml. Package names for a given facet are delimited by ";"
@@ -64,6 +68,7 @@ class CarNavigationBarController {
     private List<CarNavigationButton> mNavButtons = new ArrayList<CarNavigationButton>();
 
     private int mCurrentFacetIndex;
+    private String mCurrentPackageName;
 
     public CarNavigationBarController(Context context,
                                       CarNavigationBarView navBar,
@@ -75,6 +80,7 @@ class CarNavigationBarController {
     }
 
     public void taskChanged(String packageName) {
+        mCurrentPackageName = packageName;
         // If the package name belongs to a filter, then highlight appropriate button in
         // the navigation bar.
         if (mFacetPackageMap.containsKey(packageName)) {
@@ -121,7 +127,8 @@ class CarNavigationBarController {
 
                 CarNavigationButton button = createNavButton(icon, i, hasLongpress);
                 mNavButtons.add(button);
-                mNavBar.addButton(button, createNavButton(icon, i, hasLongpress));
+                mNavBar.addButton(button,
+                        createNavButton(icon, i, hasLongpress) /* lightsOutButton */);
 
                 initFacetFilterMaps(i,
                         facetPackageNames.getString(i).split(FACET_FILTER_DEMILITER),
@@ -132,7 +139,7 @@ class CarNavigationBarController {
         }
     }
 
-    private void initFacetFilterMaps(int id, String[] packageNames, String[] categories){
+    private void initFacetFilterMaps(int id, String[] packageNames, String[] categories) {
         mFacetCategories.add(categories);
         for (int i = 0; i < categories.length; i++) {
             mFacetCategoryMap.put(categories[i], id);
@@ -234,7 +241,6 @@ class CarNavigationBarController {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setCurrentFacet(id);
                 onFacetClicked(id);
             }
         });
@@ -245,13 +251,13 @@ class CarNavigationBarController {
                 @Override
                 public boolean onLongClick(View v) {
                     onFacetLongClicked(id);
-                    setCurrentFacet(id);
                     return true;
                 }
             });
         } else {
             button.setLongClickable(false);
         }
+
         return button;
     }
 
@@ -262,14 +268,35 @@ class CarNavigationBarController {
     }
 
     private void onFacetClicked(int index) {
-        // TODO: determine what data to pass to the trampoline, so it can start
-        // the default app or the lens picker.
-        startActivity(mIntents.get(index));
+        Intent intent = mIntents.get(index);
+        String packageName = intent.getPackage();
+
+        if (packageName == null) {
+            return;
+        }
+
+        // Don't launch the lens picker if it's already running and the
+        // user clicks the same facet
+        if (packageName.equals(mCurrentPackageName) && index == mCurrentFacetIndex) {
+            return;
+        }
+
+        intent.putExtra(EXTRA_FACET_CATEGORIES, mFacetCategories.get(index));
+        intent.putExtra(EXTRA_FACET_PACKAGES, mFacetPackages.get(index));
+        // The facet is identified by the index in which it was added to the nav bar.
+        // This value can be used to determine which facet was selected
+        intent.putExtra(EXTRA_FACET_ID, Integer.toString(index));
+
+        // If the current facet is clicked, we want to launch the picker by default
+        // rather than the "preferred/last run" app.
+        intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, index == mCurrentFacetIndex);
+
+        setCurrentFacet(index);
+        startActivity(intent);
     }
 
     private void onFacetLongClicked(int index) {
-        // TODO: determine what data to pass to the trampoline, so it can start
-        // the default app or the lens picker.
+        setCurrentFacet(index);
         startActivity(mLongPressIntents.get(index));
     }
 }
