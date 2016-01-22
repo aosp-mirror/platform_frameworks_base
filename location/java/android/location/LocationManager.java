@@ -20,6 +20,7 @@ import com.android.internal.location.ProviderProperties;
 
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -1905,6 +1906,21 @@ public class LocationManager {
             status.setStatus(mGnssStatus, mTimeToFirstFix);
         }
         return status;
+    }
+
+    /**
+     * Returns the system information of the GPS hardware.
+     * May return 0 if GPS hardware is earlier than 2016.
+     * @hide
+     */
+    @TestApi
+    public int getGpsYearOfHardware() {
+        try {
+            return mService.getGpsYearOfHardware();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getGpsSystemInfo: ", e);
+            return 0;
+        }
     }
 
     /**

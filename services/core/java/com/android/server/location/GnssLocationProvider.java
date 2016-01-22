@@ -406,6 +406,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     private GeofenceHardwareImpl mGeofenceHardwareImpl;
 
+    private int mYearOfHardware = 0;
+
     private final IGnssStatusProvider mGnssStatusProvider = new IGnssStatusProvider.Stub() {
         @Override
         public void registerGnssStatusCallback(IGnssStatusListener callback) {
@@ -1679,6 +1681,33 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 (capabilities & GPS_CAPABILITY_MEASUREMENTS) == GPS_CAPABILITY_MEASUREMENTS);
         mGpsNavigationMessageProvider.onCapabilitiesUpdated(
                 (capabilities & GPS_CAPABILITY_NAV_MESSAGES) == GPS_CAPABILITY_NAV_MESSAGES);
+    }
+
+    /**
+     * Called from native code to inform us the hardware information.
+     */
+    private void setGpsYearOfHardware(int yearOfHardware) {
+        if (DEBUG) Log.d(TAG, "setGpsYearOfHardware called with " + yearOfHardware);
+        mYearOfHardware = yearOfHardware;
+    }
+
+    public interface GpsSystemInfoProvider {
+        /**
+         * Returns the year of GPS hardware.
+         */
+        int getGpsYearOfHardware();
+    }
+
+    /**
+     * @hide
+     */
+    public GpsSystemInfoProvider getGpsSystemInfoProvider() {
+        return new GpsSystemInfoProvider() {
+            @Override
+            public int getGpsYearOfHardware() {
+                return mYearOfHardware;
+            }
+        };
     }
 
     /**

@@ -42,6 +42,7 @@ static jmethodID method_reportSvStatus;
 static jmethodID method_reportAGpsStatus;
 static jmethodID method_reportNmea;
 static jmethodID method_setEngineCapabilities;
+static jmethodID method_setGpsYearOfHardware;
 static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
 static jmethodID method_requestRefLocation;
@@ -177,6 +178,14 @@ static void nmea_callback(GpsUtcTime timestamp, const char* nmea, int length)
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
+static void set_system_info_callback(const GpsSystemInfo* info) {
+    ALOGD("set_system_info_callback: year_of_hw=%d\n", info->year_of_hw);
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setGpsYearOfHardware,
+                        info->year_of_hw);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
 static void set_capabilities_callback(uint32_t capabilities)
 {
     ALOGD("set_capabilities_callback: %du\n", capabilities);
@@ -218,7 +227,7 @@ GpsCallbacks sGpsCallbacks = {
     release_wakelock_callback,
     create_thread_callback,
     request_utc_time_callback,
-    NULL,
+    set_system_info_callback,
 };
 
 static void xtra_download_request_callback()
@@ -506,6 +515,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
+    method_setGpsYearOfHardware = env->GetMethodID(clazz, "setGpsYearOfHardware", "(I)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");

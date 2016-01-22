@@ -19228,6 +19228,7 @@ package android.location {
     method public java.util.List<java.lang.String> getAllProviders();
     method public java.lang.String getBestProvider(android.location.Criteria, boolean);
     method public deprecated android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
+    method public int getGpsYearOfHardware();
     method public android.location.Location getLastKnownLocation(java.lang.String);
     method public android.location.LocationProvider getProvider(java.lang.String);
     method public java.util.List<java.lang.String> getProviders(boolean);
