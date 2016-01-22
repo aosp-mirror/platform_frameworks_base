@@ -78,6 +78,15 @@
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>
 
+    <!-- Size of gear icon displayed behind a notification -->
+    <dimen name="notification_gear_size">24dp</dimen>
+
+    <!-- The space above the gear icon displayed behind a notification -->
+    <dimen name="notification_gear_top_margin">30dp</dimen>
+
+    <!-- The space on either side of the gear icon displayed behind a notification  -->
+    <dimen name="notification_gear_side_margin">20dp</dimen>
+
     <!-- size at which Notification icons will be drawn in the status bar -->
     <dimen name="status_bar_icon_drawing_size">17dip</dimen>
 

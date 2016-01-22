@@ -23,6 +23,14 @@
     android:clickable="true"
     >
 
+    <ViewStub
+        android:layout="@layout/notification_settings_icon_row"
+        android:id="@+id/settings_icon_row_stub"
+        android:inflatedId="@+id/notification_settings_icon_row"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
     <com.android.systemui.statusbar.NotificationBackgroundView
         android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
