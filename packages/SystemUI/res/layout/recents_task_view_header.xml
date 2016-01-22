@@ -23,12 +23,10 @@
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/icon"
         android:contentDescription="@string/recents_app_info_button_label"
-        android:layout_width="@dimen/recents_task_view_application_icon_size"
-        android:layout_height="@dimen/recents_task_view_application_icon_size"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/recents_task_view_header_icon_width"
+        android:layout_height="@dimen/recents_task_view_header_icon_height"
         android:layout_gravity="center_vertical|start"
-        android:padding="8dp"
-        android:background="@drawable/recents_button_bg" />
+        android:padding="9dp" />
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
@@ -46,21 +44,20 @@
         android:fadingEdge="horizontal" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/move_task"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="52dp"
+        android:layout_width="@dimen/recents_task_view_header_button_width"
+        android:layout_height="@dimen/recents_task_view_header_button_height"
+        android:layout_marginEnd="@dimen/recents_task_view_header_button_width"
         android:layout_gravity="center_vertical|end"
-        android:padding="12dp"
+        android:padding="15dp"
         android:background="@drawable/recents_button_bg"
         android:src="@drawable/star"
         android:visibility="gone" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/dismiss_task"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="@dimen/recents_task_view_header_button_width"
+        android:layout_height="@dimen/recents_task_view_header_button_height"
         android:layout_gravity="center_vertical|end"
-        android:padding="12dp"
+        android:padding="15dp"
         android:background="@drawable/recents_button_bg"
         android:visibility="invisible"
         android:src="@drawable/recents_dismiss_light" />

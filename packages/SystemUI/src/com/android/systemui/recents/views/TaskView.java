@@ -162,7 +162,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
 
     /** Resets this TaskView for reuse. */
     void reset() {
-        mHeaderView.reset();
         resetViewProperties();
         resetNoUserInteractionState();
         setClipViewInStack(false);
@@ -291,6 +290,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setDim(0);
         setVisibility(View.VISIBLE);
         getViewBounds().reset();
+        getHeaderView().reset();
         TaskViewTransform.reset(this);
 
         mActionButtonView.setScaleX(1f);

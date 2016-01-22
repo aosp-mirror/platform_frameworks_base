@@ -550,7 +550,10 @@ public class TaskViewHeader extends FrameLayout
 
         // Update the overlay contents for the current app
         mAppTitleView.setText(ssp.getBadgedApplicationLabel(activityInfo.applicationInfo, userId));
-        mAppIconView.setImageDrawable(ssp.getBadgedApplicationIcon(activityInfo.applicationInfo, userId));
+        mAppTitleView.setTextColor(mTask.useLightOnPrimaryColor ?
+                mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
+        mAppIconView.setImageDrawable(ssp.getBadgedApplicationIcon(activityInfo.applicationInfo,
+                userId));
         mAppInfoView.setImageDrawable(mTask.useLightOnPrimaryColor
                 ? mLightInfoIcon
                 : mDarkInfoIcon);
