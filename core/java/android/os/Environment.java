@@ -390,7 +390,7 @@ public class Environment {
      * type.
      */
     public static String DIRECTORY_MUSIC = "Music";
-    
+
     /**
      * Standard directory in which to place any audio files that should be
      * in the list of podcasts that the user can select (not as regular
@@ -479,6 +479,37 @@ public class Environment {
     public static String DIRECTORY_DOCUMENTS = "Documents";
 
     /**
+     * List of standard storage directories.
+     * <p>
+     * Each of its values have its own constant:
+     * <ul>
+     *   <li>{@link #DIRECTORY_MUSIC}
+     *   <li>{@link #DIRECTORY_PODCASTS}
+     *   <li>{@link #DIRECTORY_ALARMS}
+     *   <li>{@link #DIRECTORY_RINGTONES}
+     *   <li>{@link #DIRECTORY_NOTIFICATIONS}
+     *   <li>{@link #DIRECTORY_PICTURES}
+     *   <li>{@link #DIRECTORY_MOVIES}
+     *   <li>{@link #DIRECTORY_DOWNLOADS}
+     *   <li>{@link #DIRECTORY_DCIM}
+     *   <li>{@link #DIRECTORY_DOCUMENTS}
+     * </ul>
+     * @hide
+     */
+    public static final String[] STANDARD_DIRECTORIES = {
+            DIRECTORY_MUSIC,
+            DIRECTORY_PODCASTS,
+            DIRECTORY_RINGTONES,
+            DIRECTORY_ALARMS,
+            DIRECTORY_NOTIFICATIONS,
+            DIRECTORY_PICTURES,
+            DIRECTORY_MOVIES,
+            DIRECTORY_DOWNLOADS,
+            DIRECTORY_DCIM,
+            DIRECTORY_DOCUMENTS
+    };
+
+    /**
      * Get a top-level shared/external storage directory for placing files of a
      * particular type. This is where the user will typically place and manage
      * their own files, so you should be careful about what you put here to
@@ -495,13 +526,13 @@ public class Environment {
      * </p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * public_picture}
-     * 
+     *
      * @param type The type of storage directory to return. Should be one of
      *            {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
      *            {@link #DIRECTORY_RINGTONES}, {@link #DIRECTORY_ALARMS},
      *            {@link #DIRECTORY_NOTIFICATIONS}, {@link #DIRECTORY_PICTURES},
-     *            {@link #DIRECTORY_MOVIES}, {@link #DIRECTORY_DOWNLOADS}, or
-     *            {@link #DIRECTORY_DCIM}. May not be null.
+     *            {@link #DIRECTORY_MOVIES}, {@link #DIRECTORY_DOWNLOADS},
+     *            {@link #DIRECTORY_DCIM}, or {@link #DIRECTORY_DOCUMENTS}. May not be null.
      * @return Returns the File path for the directory. Note that this directory
      *         may not yet exist, so you must make sure it exists before using
      *         it such as with {@link File#mkdirs File.mkdirs()}.
@@ -657,7 +688,7 @@ public class Environment {
 
     /**
      * Returns the current state of the primary shared/external storage media.
-     * 
+     *
      * @see #getExternalStorageDirectory()
      * @return one of {@link #MEDIA_UNKNOWN}, {@link #MEDIA_REMOVED},
      *         {@link #MEDIA_UNMOUNTED}, {@link #MEDIA_CHECKING},
