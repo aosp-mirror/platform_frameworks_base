@@ -29,18 +29,21 @@ public class ViewState {
     public float yTranslation;
     public float zTranslation;
     public boolean gone;
+    public boolean hidden;
 
     public void copyFrom(ViewState viewState) {
         alpha = viewState.alpha;
         yTranslation = viewState.yTranslation;
         zTranslation = viewState.zTranslation;
         gone = viewState.gone;
+        hidden = viewState.hidden;
     }
 
     public void initFrom(View view) {
-        alpha = view.getVisibility() == View.INVISIBLE ? 0.0f : view.getAlpha();
+        alpha = view.getAlpha();
         yTranslation = view.getTranslationY();
         zTranslation = view.getTranslationZ();
         gone = view.getVisibility() == View.GONE;
+        hidden = false;
     }
 }

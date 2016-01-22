@@ -82,8 +82,10 @@ public class StackScrollState {
         // initialize with the default values of the view
         viewState.height = view.getIntrinsicHeight();
         viewState.gone = view.getVisibility() == View.GONE;
-        viewState.alpha = 1;
+        viewState.alpha = 1f;
+        viewState.shadowAlpha = 1f;
         viewState.notGoneIndex = -1;
+        viewState.hidden = false;
     }
 
     public StackViewState getViewStateForView(View requestedView) {
@@ -143,6 +145,14 @@ public class StackScrollState {
             view.setActualHeight(newHeight, false /* notifyListeners */);
         }
 
+        float shadowAlpha = view.getShadowAlpha();
+        float newShadowAlpha = state.shadowAlpha;
+
+        // apply shadowAlpha
+        if (shadowAlpha != newShadowAlpha) {
+            view.setShadowAlpha(newShadowAlpha);
+        }
+
         // apply dimming
         view.setDimmed(state.dimmed, false /* animate */);
 
@@ -183,7 +193,7 @@ public class StackScrollState {
         float newAlpha = state.alpha;
         float newYTranslation = state.yTranslation;
         float newZTranslation = state.zTranslation;
-        boolean becomesInvisible = newAlpha == 0.0f;
+        boolean becomesInvisible = newAlpha == 0.0f || state.hidden;
         if (alpha != newAlpha && xTranslation == 0) {
             // apply layer type
             boolean becomesFullyVisible = newAlpha == 1.0f;

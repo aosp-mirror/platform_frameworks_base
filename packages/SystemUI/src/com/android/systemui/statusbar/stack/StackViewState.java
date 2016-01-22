@@ -42,6 +42,7 @@ public class StackViewState extends ViewState {
     public boolean dark;
     public boolean hideSensitive;
     public boolean belowSpeedBump;
+    public float shadowAlpha;
 
     /**
      * The amount which the view should be clipped from the top. This is calculated to
@@ -74,6 +75,7 @@ public class StackViewState extends ViewState {
             StackViewState svs = (StackViewState) viewState;
             height = svs.height;
             dimmed = svs.dimmed;
+            shadowAlpha = svs.shadowAlpha;
             dark = svs.dark;
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;

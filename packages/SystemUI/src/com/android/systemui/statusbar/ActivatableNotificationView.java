@@ -153,6 +153,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             updateOutlineAlpha();
         }
     };
+    private float mShadowAlpha = 1.0f;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -415,6 +416,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
+        alpha *= mShadowAlpha;
         if (mFadeInFromDarkAnimator != null) {
             alpha *= mFadeInFromDarkAnimator.getAnimatedFraction();
         }
@@ -827,6 +829,19 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {
         return getBgColor() == otherView.getBgColor();
+    }
+
+    @Override
+    public float getShadowAlpha() {
+        return mShadowAlpha;
+    }
+
+    @Override
+    public void setShadowAlpha(float shadowAlpha) {
+        if (shadowAlpha != mShadowAlpha) {
+            mShadowAlpha = shadowAlpha;
+            updateOutlineAlpha();
+        }
     }
 
     public interface OnActivatedListener {

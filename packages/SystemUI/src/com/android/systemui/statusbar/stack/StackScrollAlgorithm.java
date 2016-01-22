@@ -102,8 +102,8 @@ public class StackScrollAlgorithm {
                 .getDimensionPixelSize(R.dimen.top_stack_peek_amount);
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
-        mZDistanceBetweenElements = context.getResources()
-                .getDimensionPixelSize(R.dimen.z_distance_between_notifications);
+        mZDistanceBetweenElements = Math.max(1, context.getResources()
+                .getDimensionPixelSize(R.dimen.z_distance_between_notifications));
         mZBasicHeight = (MAX_ITEMS_IN_BOTTOM_STACK + 1) * mZDistanceBetweenElements;
         mBottomStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
@@ -296,7 +296,8 @@ public class StackScrollAlgorithm {
                             nextChild);
                     // The child below the dragged one must be fully visible
                     if (ambientState.isShadeExpanded()) {
-                        viewState.alpha = 1;
+                        viewState.shadowAlpha = 1;
+                        viewState.hidden = false;
                     }
                 }
 
@@ -448,7 +449,8 @@ public class StackScrollAlgorithm {
 
             // The first card is always rendered.
             if (i == 0) {
-                childViewState.alpha = 1.0f;
+                childViewState.hidden = false;
+                childViewState.shadowAlpha = 1.0f;
                 childViewState.yTranslation = Math.max(
                         mFirstChildMinHeight - algorithmState.scrollY, 0);
                 if (childViewState.yTranslation + childViewState.height
@@ -608,10 +610,11 @@ public class StackScrollAlgorithm {
         } else {
             // we are fully inside the stack
             if (algorithmState.itemsInBottomStack > MAX_ITEMS_IN_BOTTOM_STACK + 2) {
-                childViewState.alpha = 0.0f;
+                childViewState.hidden = true;
+                childViewState.shadowAlpha = 0.0f;
             } else if (algorithmState.itemsInBottomStack
                     > MAX_ITEMS_IN_BOTTOM_STACK + 1) {
-                childViewState.alpha = 1.0f - algorithmState.partialInBottom;
+                childViewState.shadowAlpha = 1.0f - algorithmState.partialInBottom;
             }
             childViewState.location = StackViewState.LOCATION_BOTTOM_STACK_HIDDEN;
             currentYPosition = ambientState.getInnerHeight();
@@ -658,10 +661,11 @@ public class StackScrollAlgorithm {
             childViewState.location = StackViewState.LOCATION_TOP_STACK_PEEKING;
         } else {
             if (paddedIndex == -1) {
-                childViewState.alpha = 1.0f - algorithmState.partialInTop;
+                childViewState.shadowAlpha = 1.0f - algorithmState.partialInTop;
             } else {
                 // We are hidden behind the top card and faded out, so we can hide ourselves.
-                childViewState.alpha = 0.0f;
+                childViewState.hidden = true;
+                childViewState.shadowAlpha = 0.0f;
             }
             childViewState.yTranslation = mFirstChildMinHeight - childHeight;
             childViewState.location = StackViewState.LOCATION_TOP_STACK_HIDDEN;

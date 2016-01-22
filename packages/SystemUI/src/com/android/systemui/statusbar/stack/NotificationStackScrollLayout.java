@@ -3237,7 +3237,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_ADD
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3246,7 +3246,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_REMOVE
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3255,7 +3255,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_REMOVE_SWIPED_OUT
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3264,7 +3264,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_TOP_PADDING_CHANGED
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3273,16 +3273,16 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_START_DRAG
                 new AnimationFilter()
-                        .animateAlpha(),
+                        .animateShadowAlpha(),
 
                 // ANIMATION_TYPE_SNAP_BACK
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight(),
 
                 // ANIMATION_TYPE_ACTIVATED_CHILD
                 new AnimationFilter()
-                        .animateAlpha(),
+                        .animateZ(),
 
                 // ANIMATION_TYPE_DIMMED
                 new AnimationFilter()
@@ -3291,7 +3291,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_CHANGE_POSITION
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateAlpha() // maybe the children change positions
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3304,7 +3305,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3318,7 +3319,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_VIEW_RESIZE
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3327,6 +3328,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // ANIMATION_TYPE_GROUP_EXPANSION_CHANGED
                 new AnimationFilter()
                         .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3334,7 +3336,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_HEADS_UP_APPEAR
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3342,7 +3344,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3350,7 +3352,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3359,7 +3361,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_HEADS_UP_OTHER
                 new AnimationFilter()
-                        .animateAlpha()
+                        .animateShadowAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -3368,6 +3370,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // ANIMATION_TYPE_EVERYTHING
                 new AnimationFilter()
                         .animateAlpha()
+                        .animateShadowAlpha()
                         .animateDark()
                         .animateDimmed()
                         .animateHideSensitive()

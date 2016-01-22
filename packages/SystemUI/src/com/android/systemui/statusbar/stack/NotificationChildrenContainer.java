@@ -383,30 +383,8 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @param state the new state we animate to
      */
     public void prepareExpansionChanged(StackScrollState state) {
-        if (true) {
-            // TODO: do something that makes sense
-            return;
-        }
-        int childCount = mChildren.size();
-        StackViewState sourceState = new StackViewState();
-        ViewState dividerState = new ViewState();
-        for (int i = 0; i < childCount; i++) {
-            ExpandableNotificationRow child = mChildren.get(i);
-            StackViewState viewState = state.getViewStateForView(child);
-            sourceState.copyFrom(viewState);
-            sourceState.alpha = 0;
-            sourceState.yTranslation += mNotificationAppearDistance;
-            state.applyState(child, sourceState);
-
-            // layout the divider
-            View divider = mDividers.get(i);
-            dividerState.initFrom(divider);
-            dividerState.yTranslation = viewState.yTranslation - mDividerHeight
-                    + mNotificationAppearDistance;
-            dividerState.alpha = 0;
-            state.applyViewState(divider, dividerState);
-
-        }
+        // TODO: do something that makes sense, like placing the invisible views correctly
+        return;
     }
 
     public void startAnimationToState(StackScrollState state, StackStateAnimator stateAnimator,
