@@ -545,7 +545,7 @@ public class Instrumentation {
          * returning the resulting activity or till the timeOut period expires.
          * If the timeOut expires before the activity is started, return null. 
          * 
-         * @param timeOut Time to wait before the activity is created.
+         * @param timeOut Time to wait in milliseconds before the activity is created.
          * 
          * @return Activity
          */
