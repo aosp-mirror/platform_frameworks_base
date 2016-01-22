@@ -20,6 +20,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -122,7 +124,10 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         notificationIconArea.addView(mNotificationIconAreaInner);
 
         mStatusIconsKeyguard = (LinearLayout) keyguardStatusBar.findViewById(R.id.statusIcons);
+
         mBatteryMeterView = (BatteryMeterView) statusBar.findViewById(R.id.battery);
+        maybeScaleBatteryMeterView(context);
+
         mClock = (TextView) statusBar.findViewById(R.id.clock);
         mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
@@ -134,6 +139,30 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         updateResources();
 
         TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
+    }
+
+    /**
+     * Looks up the scale factor for status bar icons and scales the battery view by that amount
+     * if appropriate.
+     */
+    private void maybeScaleBatteryMeterView(Context context) {
+        Resources res = context.getResources();
+        TypedValue typedValue = new TypedValue();
+
+        res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        float iconScaleFactor = typedValue.getFloat();
+
+        if (iconScaleFactor == 1.f) {
+            return;
+        }
+
+        float batteryHeight = res.getDimension(R.dimen.status_bar_battery_icon_height);
+        float batteryWidth = res.getDimension(R.dimen.status_bar_battery_icon_width);
+
+        LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(
+                (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
+
+        mBatteryMeterView.setLayoutParams(scaledLayoutParams);
     }
 
     @Override
@@ -174,8 +203,12 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         boolean blocked = mIconBlacklist.contains(slot);
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
-        mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+        lp.setMargins(mIconHPadding, 0, mIconHPadding, 0);
+        mStatusIcons.addView(view, viewIndex, lp);
+
         view = new StatusBarIconView(mContext, slot, null, blocked);
         view.set(icon);
         mStatusIconsKeyguard.addView(view, viewIndex, new LinearLayout.LayoutParams(

@@ -16,16 +16,18 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,10 +88,11 @@ public class SignalClusterView
     View mWifiSignalSpacer;
     LinearLayout mMobileSignalGroup;
 
-    private int mWideTypeIconStartPadding;
-    private int mSecondaryTelephonyPadding;
-    private int mEndPadding;
-    private int mEndPaddingNothingVisible;
+    private final int mWideTypeIconStartPadding;
+    private final int mSecondaryTelephonyPadding;
+    private final int mEndPadding;
+    private final int mEndPaddingNothingVisible;
+    private final float mIconScaleFactor;
 
     private boolean mBlockAirplane;
     private boolean mBlockMobile;
@@ -106,6 +109,17 @@ public class SignalClusterView
 
     public SignalClusterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        Resources res = getResources();
+        mWideTypeIconStartPadding = res.getDimensionPixelSize(R.dimen.wide_type_icon_start_padding);
+        mSecondaryTelephonyPadding = res.getDimensionPixelSize(R.dimen.secondary_telephony_padding);
+        mEndPadding = res.getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
+        mEndPaddingNothingVisible = res.getDimensionPixelSize(
+                R.dimen.no_signal_cluster_battery_padding);
+
+        TypedValue typedValue = new TypedValue();
+        res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
+        mIconScaleFactor = typedValue.getFloat();
     }
 
     @Override
@@ -146,19 +160,6 @@ public class SignalClusterView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mWideTypeIconStartPadding = getContext().getResources().getDimensionPixelSize(
-                R.dimen.wide_type_icon_start_padding);
-        mSecondaryTelephonyPadding = getContext().getResources().getDimensionPixelSize(
-                R.dimen.secondary_telephony_padding);
-        mEndPadding = getContext().getResources().getDimensionPixelSize(
-                R.dimen.signal_cluster_battery_padding);
-        mEndPaddingNothingVisible = getContext().getResources().getDimensionPixelSize(
-                R.dimen.no_signal_cluster_battery_padding);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
 
         mVpn            = (ImageView) findViewById(R.id.vpn);
         mEthernetGroup  = (ViewGroup) findViewById(R.id.ethernet_combo);
@@ -174,6 +175,32 @@ public class SignalClusterView
         mWifiAirplaneSpacer =         findViewById(R.id.wifi_airplane_spacer);
         mWifiSignalSpacer =           findViewById(R.id.wifi_signal_spacer);
         mMobileSignalGroup = (LinearLayout) findViewById(R.id.mobile_signal_group);
+
+        maybeScaleVpnAndNoSimsIcons();
+    }
+
+    /**
+     * Extracts the icon off of the VPN and no sims views and maybe scale them by
+     * {@link #mIconScaleFactor}. Note that the other icons are not scaled here because they are
+     * dynamic. As such, they need to be scaled each time the icon changes in {@link #apply()}.
+     */
+    private void maybeScaleVpnAndNoSimsIcons() {
+        if (mIconScaleFactor == 1.f) {
+            return;
+        }
+
+        mVpn.setImageDrawable(new ScalingDrawableWrapper(mVpn.getDrawable(), mIconScaleFactor));
+
+        mNoSims.setImageDrawable(
+                new ScalingDrawableWrapper(mNoSims.getDrawable(), mIconScaleFactor));
+        mNoSimsDark.setImageDrawable(
+                new ScalingDrawableWrapper(mNoSimsDark.getDrawable(), mIconScaleFactor));
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
         for (PhoneState state : mPhoneStates) {
             mMobileSignalGroup.addView(state.mMobileGroup);
         }
@@ -185,14 +212,7 @@ public class SignalClusterView
 
     @Override
     protected void onDetachedFromWindow() {
-        mVpn            = null;
-        mEthernetGroup  = null;
-        mEthernet       = null;
-        mWifiGroup      = null;
-        mWifi           = null;
-        mAirplane       = null;
         mMobileSignalGroup.removeAllViews();
-        mMobileSignalGroup = null;
         TunerService.get(mContext).removeTunable(this);
 
         super.onDetachedFromWindow();
@@ -383,8 +403,8 @@ public class SignalClusterView
 
         if (mEthernetVisible) {
             if (mLastEthernetIconId != mEthernetIconId) {
-                mEthernet.setImageResource(mEthernetIconId);
-                mEthernetDark.setImageResource(mEthernetIconId);
+                setIconForView(mEthernet, mEthernetIconId);
+                setIconForView(mEthernetDark, mEthernetIconId);
                 mLastEthernetIconId = mEthernetIconId;
             }
             mEthernetGroup.setContentDescription(mEthernetDescription);
@@ -397,11 +417,10 @@ public class SignalClusterView
                 String.format("ethernet: %s",
                     (mEthernetVisible ? "VISIBLE" : "GONE")));
 
-
         if (mWifiVisible) {
             if (mWifiStrengthId != mLastWifiStrengthId) {
-                mWifi.setImageResource(mWifiStrengthId);
-                mWifiDark.setImageResource(mWifiStrengthId);
+                setIconForView(mWifi, mWifiStrengthId);
+                setIconForView(mWifiDark, mWifiStrengthId);
                 mLastWifiStrengthId = mWifiStrengthId;
             }
             mWifiGroup.setContentDescription(mWifiDescription);
@@ -428,7 +447,7 @@ public class SignalClusterView
 
         if (mIsAirplaneMode) {
             if (mLastAirplaneIconId != mAirplaneIconId) {
-                mAirplane.setImageResource(mAirplaneIconId);
+                setIconForView(mAirplane, mAirplaneIconId);
                 mLastAirplaneIconId = mAirplaneIconId;
             }
             mAirplane.setContentDescription(mAirplaneContentDescription);
@@ -454,6 +473,21 @@ public class SignalClusterView
         boolean anythingVisible = mNoSimsVisible || mWifiVisible || mIsAirplaneMode
                 || anyMobileVisible || mVpnVisible || mEthernetVisible;
         setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
+    }
+
+    /**
+     * Sets the given drawable id on the view. This method will also scale the icon by
+     * {@link #mIconScaleFactor} if appropriate.
+     */
+    private void setIconForView(ImageView imageView, @DrawableRes int iconId) {
+        // Using the imageView's context to retrieve the Drawable so that theme is preserved.
+        Drawable icon = imageView.getContext().getDrawable(iconId);
+
+        if (mIconScaleFactor == 1.f) {
+            imageView.setImageDrawable(icon);
+        } else {
+            imageView.setImageDrawable(new ScalingDrawableWrapper(icon, mIconScaleFactor));
+        }
     }
 
     public void setIconTint(int tint, float darkIntensity) {

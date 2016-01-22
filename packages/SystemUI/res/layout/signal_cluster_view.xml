@@ -77,7 +77,7 @@
     </FrameLayout>
     <View
         android:id="@+id/wifi_signal_spacer"
-        android:layout_width="4dp"
+        android:layout_width="@dimen/status_bar_wifi_signal_spacer_width"
         android:layout_height="4dp"
         android:visibility="gone"
         />
@@ -112,7 +112,7 @@
     </FrameLayout>
     <View
         android:id="@+id/wifi_airplane_spacer"
-        android:layout_width="4dp"
+        android:layout_width="@dimen/status_bar_airplane_spacer_width"
         android:layout_height="4dp"
         android:visibility="gone"
         />
