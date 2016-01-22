@@ -98,6 +98,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled by the user banning the topic. */
     public static final int REASON_TOPIC_BANNED = 14;
 
+    /** Notification was canceled by the device administrator suspending the package. */
+    public static final int REASON_PACKAGE_SUSPENDED = 15;
+
     public class Adjustment {
         int mImportance;
         CharSequence mExplanation;

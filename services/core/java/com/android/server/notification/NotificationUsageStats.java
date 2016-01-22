@@ -198,6 +198,14 @@ public class NotificationUsageStats {
         releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
 
+    public synchronized void registerSuspendedByAdmin(NotificationRecord notification) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numSuspendedByAdmin++;
+        }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
+    }
+
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
         if (!ENABLE_AGGREGATED_IN_MEMORY_STATS) {
@@ -298,6 +306,7 @@ public class NotificationUsageStats {
         public int numWithStaredPeople;
         public int numWithValidPeople;
         public int numBlocked;
+        public int numSuspendedByAdmin;
         public int numWithActions;
         public int numPrivate;
         public int numSecret;
@@ -414,6 +423,7 @@ public class NotificationUsageStats {
             maybeCount("people_cache_hit", (numPeopleCacheHit - mPrevious.numPeopleCacheHit));
             maybeCount("people_cache_miss", (numPeopleCacheMiss - mPrevious.numPeopleCacheMiss));
             maybeCount("note_blocked", (numBlocked - mPrevious.numBlocked));
+            maybeCount("note_suspended", (numSuspendedByAdmin - mPrevious.numSuspendedByAdmin));
             maybeCount("note_with_actions", (numWithActions - mPrevious.numWithActions));
             maybeCount("note_private", (numPrivate - mPrevious.numPrivate));
             maybeCount("note_secret", (numSecret - mPrevious.numSecret));
@@ -442,6 +452,7 @@ public class NotificationUsageStats {
             mPrevious.numWithStaredPeople = numWithStaredPeople;
             mPrevious.numWithValidPeople = numWithValidPeople;
             mPrevious.numBlocked = numBlocked;
+            mPrevious.numSuspendedByAdmin = numSuspendedByAdmin;
             mPrevious.numWithActions = numWithActions;
             mPrevious.numPrivate = numPrivate;
             mPrevious.numSecret = numSecret;
@@ -501,6 +512,8 @@ public class NotificationUsageStats {
             output.append(indentPlusTwo);
             output.append("numBlocked=").append(numBlocked).append(",\n");
             output.append(indentPlusTwo);
+            output.append("numSuspendedByAdmin=").append(numSuspendedByAdmin).append(",\n");
+            output.append(indentPlusTwo);
             output.append("numWithActions=").append(numWithActions).append(",\n");
             output.append(indentPlusTwo);
             output.append("numPrivate=").append(numPrivate).append(",\n");
@@ -551,6 +564,7 @@ public class NotificationUsageStats {
             maybePut(dump, "numWithStaredPeople", numWithStaredPeople);
             maybePut(dump, "numWithValidPeople", numWithValidPeople);
             maybePut(dump, "numBlocked", numBlocked);
+            maybePut(dump, "numSuspendedByAdmin", numSuspendedByAdmin);
             maybePut(dump, "numWithActions", numWithActions);
             maybePut(dump, "numPrivate", numPrivate);
             maybePut(dump, "numSecret", numSecret);
