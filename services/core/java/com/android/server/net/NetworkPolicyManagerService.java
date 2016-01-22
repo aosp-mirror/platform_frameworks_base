@@ -652,9 +652,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case ACTION_USER_REMOVED:
                 case ACTION_USER_ADDED:
                     synchronized (mRulesLock) {
-                        // Remove any policies for given user; both cleaning up after a
+                        // Remove any persistable state for the given user; both cleaning up after a
                         // USER_REMOVED, and one last sanity check during USER_ADDED
-                        removePoliciesForUserLocked(userId);
+                        removeUserStateLocked(userId);
                         // Update global restrict for new user
                         updateRulesForGlobalChangeLocked(true);
                     }
@@ -1666,12 +1666,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Remove any policies associated with given {@link UserHandle}, persisting
+     * Remove any persistable state associated with given {@link UserHandle}, persisting
      * if any changes are made.
      */
-    void removePoliciesForUserLocked(int userId) {
-        if (LOGV) Slog.v(TAG, "removePoliciesForUserLocked()");
+    void removeUserStateLocked(int userId) {
+        if (LOGV) Slog.v(TAG, "removeUserStateLocked()");
+        boolean writePolicy = false;
 
+        // Remove entries from restricted background UID whitelist
+        int[] wlUids = new int[0];
+        for (int i = 0; i < mRestrictBackgroundWhitelistUids.size(); i++) {
+            final int uid = mRestrictBackgroundWhitelistUids.keyAt(i);
+            if (UserHandle.getUserId(uid) == userId) {
+                wlUids = appendInt(wlUids, uid);
+            }
+        }
+
+        if (wlUids.length > 0) {
+            for (int uid : wlUids) {
+                removeRestrictBackgroundWhitelistedUidLocked(uid, false);
+            }
+            writePolicy = true;
+        }
+
+        // Remove associated UID policies
         int[] uids = new int[0];
         for (int i = 0; i < mUidPolicy.size(); i++) {
             final int uid = mUidPolicy.keyAt(i);
@@ -1685,6 +1703,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mUidPolicy.delete(uid);
                 updateRulesForUidLocked(uid);
             }
+            writePolicy = true;
+        }
+
+        if (writePolicy) {
             writePolicyLocked();
         }
     }
@@ -1849,14 +1871,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
         Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
         synchronized (mRulesLock) {
-            removeRestrictBackgroundWhitelistedUidLocked(uid);
+            removeRestrictBackgroundWhitelistedUidLocked(uid, true);
         }
     }
 
-    private void removeRestrictBackgroundWhitelistedUidLocked(int uid) {
+    private void removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean writePolicy) {
         mRestrictBackgroundWhitelistUids.delete(uid);
-        writePolicyLocked();
-        // TODO: call other update methods like updateNetworkRulesLocked?
+        if (writePolicy) {
+            writePolicyLocked();
+        }
     }
 
     @Override
@@ -2777,7 +2800,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onPackageRemoved(String packageName, int uid) {
             if (LOGV) Slog.v(TAG, "onPackageRemoved: " + packageName + " ->" + uid);
             synchronized (mRulesLock) {
-                removeRestrictBackgroundWhitelistedUidLocked(uid);
+                removeRestrictBackgroundWhitelistedUidLocked(uid, true);
             }
         }
 
@@ -2785,7 +2808,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onPackageRemovedAllUsers(String packageName, int uid) {
             if (LOGV) Slog.v(TAG, "onPackageRemovedAllUsers: " + packageName + " ->" + uid);
             synchronized (mRulesLock) {
-                removeRestrictBackgroundWhitelistedUidLocked(uid);
+                removeRestrictBackgroundWhitelistedUidLocked(uid, true);
             }
         }
     }
