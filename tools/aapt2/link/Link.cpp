@@ -56,6 +56,7 @@ struct LinkOptions {
     Maybe<std::string> generateProguardRulesPath;
     bool noAutoVersion = false;
     bool staticLib = false;
+    bool generateNonFinalIds = false;
     bool verbose = false;
     bool outputToDirectory = false;
     bool autoAddOverlay = false;
@@ -835,7 +836,7 @@ public:
             JavaClassGeneratorOptions options;
             options.types = JavaClassGeneratorOptions::SymbolTypes::kAll;
 
-            if (mOptions.staticLib) {
+            if (mOptions.staticLib || mOptions.generateNonFinalIds) {
                 options.useFinal = false;
             }
 
@@ -933,6 +934,9 @@ int link(const std::vector<StringPiece>& args) {
             .optionalFlag("--version-name", "Version name to inject into the AndroidManifest.xml "
                           "if none is present", &versionName)
             .optionalSwitch("--static-lib", "Generate a static Android library", &options.staticLib)
+            .optionalSwitch("--non-final-ids", "Generates R.java without the final modifier.\n"
+                            "This is implied when --static-lib is specified.",
+                            &options.generateNonFinalIds)
             .optionalFlag("--private-symbols", "Package name to use when generating R.java for "
                           "private symbols.\n"
                           "If not specified, public and private symbols will use the application's "
