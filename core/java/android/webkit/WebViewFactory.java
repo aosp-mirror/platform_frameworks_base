@@ -295,15 +295,27 @@ public final class WebViewFactory {
 
             Application initialApplication = AppGlobals.getInitialApplication();
             Context webViewContext = null;
-            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "initialApplication.createPackageContext()");
+            Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "PackageManager.getApplicationInfo()");
             try {
                 // Construct a package context to load the Java code into the current app.
                 // This is done as early as possible since by constructing a package context we
                 // register the WebView package as a dependency for the current application so that
                 // when the WebView package is updated this application will be killed.
-                webViewContext = initialApplication.createPackageContext(
-                        sPackageInfo.packageName,
-                        Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                ApplicationInfo applicationInfo =
+                    initialApplication.getPackageManager().getApplicationInfo(
+                        sPackageInfo.packageName, PackageManager.GET_SHARED_LIBRARY_FILES
+                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                        // make sure that we fetch the current provider even if its not installed
+                        // for the current user
+                        | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW,
+                        "initialApplication.createApplicationContext");
+                try {
+                    webViewContext = initialApplication.createApplicationContext(applicationInfo,
+                            Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                }
             } catch (PackageManager.NameNotFoundException e) {
                 throw new MissingWebViewPackageException(e);
             } finally {
