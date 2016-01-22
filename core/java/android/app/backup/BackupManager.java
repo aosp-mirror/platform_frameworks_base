@@ -426,6 +426,29 @@ public class BackupManager {
     }
 
     /**
+     * Ask the framework whether this app is eligible for backup.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packageName The name of the package.
+     * @return Whether this app is eligible for backup.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isAppEligibleForBackup(String packageName) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.isAppEligibleForBackup(packageName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "isAppEligibleForBackup(pkg) couldn't connect");
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Request an immediate backup, providing an observer to which results of the backup operation
      * will be published. The Android backup system will decide for each package whether it will
      * be full app data backup or key/value-pair-based backup.
