@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -341,20 +342,26 @@ public class EditorInfo implements InputType, Parcelable {
     public Bundle extras;
 
     /**
-     * Additional context information that tells what languages are expected by the user.
+     * List of the languages that the user is supposed to switch to no matter what input method
+     * subtype is currently used.  This special "hint" can be used mainly for, but not limited to,
+     * multilingual users who want IMEs to switch language context automatically.
      *
-     * <p><strong>IME authors:</strong> Possible use cases for IME developers would be:</p>
-     * <ul>
-     *     <li>Automatically switching keyboard layout.</li>
-     *     <li>Changing language model for better typing experience.</li>
-     * </ul>
+     * <p>{@code null} means that no special language "hint" is needed.</p>
      *
-     * <p><strong>Editor authors:</strong> Providing this context information can help IMEs to
-     * improve text input experience.  For example, chat applications can remember what language is
-     * used in the last conversation for each chat session, and put the last used language at the
-     * top of {@link #locales}.</p>
+     * <p><strong>Editor authors:</strong> Specify this only when you are confident that the user
+     * will switch to certain languages in this context no matter what input method subtype is
+     * currently selected.  Otherwise, keep this {@code null}.  Explicit user actions and/or
+     * preferences would be good signals to specify this special "hint",  For example, a chat
+     * application may be able to put the last used language at the top of {@link #hintLocales}
+     * based on whom the user is going to talk, by remembering what language is used in the last
+     * conversation.  Do not specify {@link android.widget.TextView#getTextLocales()} only because
+     * it is used for text rendering.</p>
+     *
+     * @see android.widget.TextView#setImeHintLocales(LocaleList)
+     * @see android.widget.TextView#getImeHintLocales()
      */
-    public LocaleList locales = LocaleList.getEmptyLocaleList();
+    @Nullable
+    public LocaleList hintLocales = null;
 
     /**
      * Ensure that the data in this EditorInfo is compatible with an application
@@ -410,7 +417,7 @@ public class EditorInfo implements InputType, Parcelable {
                 + " fieldId=" + fieldId
                 + " fieldName=" + fieldName);
         pw.println(prefix + "extras=" + extras);
-        pw.println(prefix + "locales=" + locales);
+        pw.println(prefix + "hintLocales=" + hintLocales);
     }
 
     /**
@@ -434,7 +441,11 @@ public class EditorInfo implements InputType, Parcelable {
         dest.writeInt(fieldId);
         dest.writeString(fieldName);
         dest.writeBundle(extras);
-        locales.writeToParcel(dest, flags);
+        if (hintLocales != null) {
+            hintLocales.writeToParcel(dest, flags);
+        } else {
+            LocaleList.getEmptyLocaleList().writeToParcel(dest, flags);
+        }
     }
 
     /**
@@ -458,7 +469,8 @@ public class EditorInfo implements InputType, Parcelable {
                     res.fieldId = source.readInt();
                     res.fieldName = source.readString();
                     res.extras = source.readBundle();
-                    res.locales = LocaleList.CREATOR.createFromParcel(source);
+                    LocaleList hintLocales = LocaleList.CREATOR.createFromParcel(source);
+                    res.hintLocales = hintLocales.isEmpty() ? null : hintLocales;
                     return res;
                 }
 
