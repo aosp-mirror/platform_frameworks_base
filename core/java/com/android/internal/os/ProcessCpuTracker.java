@@ -67,10 +67,10 @@ public class ProcessCpuTracker {
     static final int PROCESS_STAT_UTIME = 2;
     static final int PROCESS_STAT_STIME = 3;
 
-    /** Stores user time and system time in 100ths of a second. */
+    /** Stores user time and system time in jiffies. */
     private final long[] mProcessStatsData = new long[4];
 
-    /** Stores user time and system time in 100ths of a second.  Used for
+    /** Stores user time and system time in jiffies.  Used for
      * public API to retrieve CPU use for a process.  Must lock while in use. */
     private final long[] mSinglePidStatsData = new long[4];
 
