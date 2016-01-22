@@ -127,6 +127,7 @@ import android.os.IDeviceIdleController;
 import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.Message;
+import android.os.ResultReceiver;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -2116,6 +2117,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             fout.decreaseIndent();
         }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        (new NetworkPolicyManagerShellCommand(this)).exec(
+                this, in, out, err, args, resultReceiver);
     }
 
     @Override
