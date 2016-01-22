@@ -3203,42 +3203,74 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return mContextMenuInfo;
     }
 
-    /** @hide */
+    @Override
+    public boolean showContextMenu() {
+        return showContextMenuInternal(0, 0, false);
+    }
+
     @Override
     public boolean showContextMenu(float x, float y) {
+        return showContextMenuInternal(x, y, true);
+    }
+
+    private boolean showContextMenuInternal(float x, float y, boolean useOffsets) {
         final int position = pointToPosition((int)x, (int)y);
         if (position != INVALID_POSITION) {
             final long id = mAdapter.getItemId(position);
             View child = getChildAt(position - mFirstPosition);
             if (child != null) {
                 mContextMenuInfo = createContextMenuInfo(child, position, id);
-                return super.showContextMenuForChild(AbsListView.this, x, y);
+                if (useOffsets) {
+                    return super.showContextMenuForChild(this, x, y);
+                } else {
+                    return super.showContextMenuForChild(this);
+                }
             }
         }
-        return super.showContextMenu(x, y);
+        if (useOffsets) {
+            return super.showContextMenu(x, y);
+        } else {
+            return super.showContextMenu();
+        }
     }
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
-        final int longPressPosition = getPositionForView(originalView);
-        if (longPressPosition >= 0) {
-            final long longPressId = mAdapter.getItemId(longPressPosition);
-            boolean handled = false;
+        return showContextMenuForChildInternal(originalView, 0, 0, false);
+    }
 
-            if (mOnItemLongClickListener != null) {
-                handled = mOnItemLongClickListener.onItemLongClick(AbsListView.this, originalView,
-                        longPressPosition, longPressId);
-            }
-            if (!handled) {
-                mContextMenuInfo = createContextMenuInfo(
-                        getChildAt(longPressPosition - mFirstPosition),
-                        longPressPosition, longPressId);
+    @Override
+    public boolean showContextMenuForChild(View originalView, float x, float y) {
+        return showContextMenuForChildInternal(originalView,x, y, true);
+    }
+
+    private boolean showContextMenuForChildInternal(View originalView, float x, float y,
+            boolean useOffsets) {
+        final int longPressPosition = getPositionForView(originalView);
+        if (longPressPosition < 0) {
+            return false;
+        }
+
+        final long longPressId = mAdapter.getItemId(longPressPosition);
+        boolean handled = false;
+
+        if (mOnItemLongClickListener != null) {
+            handled = mOnItemLongClickListener.onItemLongClick(this, originalView,
+                    longPressPosition, longPressId);
+        }
+
+        if (!handled) {
+            final View child = getChildAt(longPressPosition - mFirstPosition);
+            mContextMenuInfo = createContextMenuInfo(child, longPressPosition, longPressId);
+
+            if (useOffsets) {
+                handled = super.showContextMenuForChild(originalView, x, y);
+            } else {
                 handled = super.showContextMenuForChild(originalView);
             }
-
-            return handled;
         }
-        return false;
+
+        return handled;
     }
 
     @Override
