@@ -732,7 +732,8 @@ public class AppTransition implements Dump {
         float scaleW = appWidth / thumbWidth;
         float unscaledHeight = thumbHeight * scaleW;
         getNextAppTransitionStartRect(taskId, mTmpRect);
-        float unscaledStartY = mTmpRect.top - (unscaledHeight - thumbHeight) / 2f;
+        final float unscaledStartY = mTmpRect.top - (unscaledHeight - thumbHeight) / 2f;
+        final float toY = appRect.top + mNextAppTransitionInsets.top + -unscaledStartY;
         if (mNextAppTransitionScaleUp) {
             // Animation up from the thumbnail to the full screen
             Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
@@ -744,7 +745,6 @@ public class AppTransition implements Dump {
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
             final float toX = appRect.left + appRect.width() / 2 -
                     (mTmpRect.left + thumbWidth / 2);
-            final float toY = appRect.top + mNextAppTransitionInsets.top + -unscaledStartY;
             Animation translate = new TranslateAnimation(0, toX, 0, toY);
             translate.setInterpolator(mTouchResponseInterpolator);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
@@ -764,8 +764,9 @@ public class AppTransition implements Dump {
             Animation alpha = new AlphaAnimation(0f, 1f);
             alpha.setInterpolator(mThumbnailFadeInInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
-            Animation translate = new TranslateAnimation(0, 0, -unscaledStartY +
-                    mNextAppTransitionInsets.top, 0);
+            final float toX = appRect.left + appRect.width() / 2 -
+                    (mTmpRect.left + thumbWidth / 2);
+            Animation translate = new TranslateAnimation(toX, 0, toY, 0);
             translate.setInterpolator(mTouchResponseInterpolator);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
