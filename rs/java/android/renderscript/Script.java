@@ -284,7 +284,7 @@ public class Script extends BaseObj {
     }
 
     /**
-     * Only intended for use by generated reflected code.
+     * Only intended for use by generated reflected code.  (Simple reduction)
      *
      * @hide
      */
@@ -310,6 +310,46 @@ public class Script extends BaseObj {
         }
 
         mRS.nScriptReduce(getID(mRS), slot, in_id, out_id, limits);
+    }
+
+    /**
+     * Only intended for use by generated reflected code.  (General reduction)
+     *
+     * @hide
+     */
+    protected void reduce(int slot, Allocation[] ains, Allocation aout, LaunchOptions sc) {
+        mRS.validate();
+        if (ains == null || ains.length < 1) {
+            throw new RSIllegalArgumentException(
+                "At least one input is required.");
+        }
+        if (aout == null) {
+            throw new RSIllegalArgumentException(
+                "aout is required to be non-null.");
+        }
+        for (Allocation ain : ains) {
+            mRS.validateObject(ain);
+        }
+
+        long[] in_ids = new long[ains.length];
+        for (int index = 0; index < ains.length; ++index) {
+            in_ids[index] = ains[index].getID(mRS);
+        }
+        long out_id = aout.getID(mRS);
+
+        int[] limits = null;
+        if (sc != null) {
+            limits = new int[6];
+
+            limits[0] = sc.xstart;
+            limits[1] = sc.xend;
+            limits[2] = sc.ystart;
+            limits[3] = sc.yend;
+            limits[4] = sc.zstart;
+            limits[5] = sc.zend;
+        }
+
+        mRS.nScriptReduceNew(getID(mRS), slot, in_ids, out_id, limits);
     }
 
     long[] mInIdsBuffer;
