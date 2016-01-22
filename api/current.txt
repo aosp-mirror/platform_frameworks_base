@@ -9336,6 +9336,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_MIDI = "android.software.midi";
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
     field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
+    field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION_NFCF = "android.hardware.nfc.hcef";
     field public static final java.lang.String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";
     field public static final java.lang.String FEATURE_PRINTING = "android.software.print";
     field public static final java.lang.String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
@@ -23871,6 +23872,28 @@ package android.nfc.cardemulation {
     field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
     field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_APDU_SERVICE";
     field public static final java.lang.String SERVICE_META_DATA = "android.nfc.cardemulation.host_apdu_service";
+  }
+
+  public abstract class HostNfcFService extends android.app.Service {
+    ctor public HostNfcFService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onDeactivated(int);
+    method public abstract byte[] processNfcFPacket(byte[], android.os.Bundle);
+    method public final void sendResponsePacket(byte[]);
+    field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
+    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_NFCF_SERVICE";
+    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.cardemulation.host_nfcf_service";
+  }
+
+  public final class NfcFCardEmulation {
+    method public boolean disableNfcFForegroundService(android.app.Activity);
+    method public boolean enableNfcFForegroundService(android.app.Activity, android.content.ComponentName);
+    method public static synchronized android.nfc.cardemulation.NfcFCardEmulation getInstance(android.nfc.NfcAdapter);
+    method public java.lang.String getNfcid2ForService(android.content.ComponentName);
+    method public java.lang.String getSystemCodeForService(android.content.ComponentName);
+    method public boolean registerSystemCodeForService(android.content.ComponentName, java.lang.String);
+    method public boolean removeSystemCodeForService(android.content.ComponentName);
+    method public boolean setNfcid2ForService(android.content.ComponentName, java.lang.String);
   }
 
   public abstract class OffHostApduService extends android.app.Service {
