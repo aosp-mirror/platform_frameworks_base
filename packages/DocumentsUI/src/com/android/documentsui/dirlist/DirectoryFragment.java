@@ -28,6 +28,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Fragment;
@@ -131,6 +132,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private static final int LOADER_ID = 42;
     private static final int DELETE_UNDO_TIMEOUT = 5000;
     private static final int DELETE_JOB_DELAY = 5500;
+    private static final int EMPTY_REVEAL_DURATION = 250;
 
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_ROOT = "root";
@@ -166,63 +168,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     private MessageBar mMessageBar;
     private View mProgressBar;
-
-    public static void showDirectory(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
-        show(fm, TYPE_NORMAL, root, doc, null, anim);
-    }
-
-    public static void showSearch(FragmentManager fm, RootInfo root, String query, int anim) {
-        show(fm, TYPE_SEARCH, root, null, query, anim);
-    }
-
-    public static void showRecentsOpen(FragmentManager fm, int anim) {
-        show(fm, TYPE_RECENT_OPEN, null, null, null, anim);
-    }
-
-    private static void show(FragmentManager fm, int type, RootInfo root, DocumentInfo doc,
-            String query, int anim) {
-        final Bundle args = new Bundle();
-        args.putInt(EXTRA_TYPE, type);
-        args.putParcelable(EXTRA_ROOT, root);
-        args.putParcelable(EXTRA_DOC, doc);
-        args.putString(EXTRA_QUERY, query);
-
-        final FragmentTransaction ft = fm.beginTransaction();
-        switch (anim) {
-            case ANIM_SIDE:
-                args.putBoolean(EXTRA_IGNORE_STATE, true);
-                break;
-            case ANIM_DOWN:
-                args.putBoolean(EXTRA_IGNORE_STATE, true);
-                ft.setCustomAnimations(R.animator.dir_down, R.animator.dir_frozen);
-                break;
-            case ANIM_UP:
-                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_up);
-                break;
-        }
-
-        final DirectoryFragment fragment = new DirectoryFragment();
-        fragment.setArguments(args);
-
-        ft.replace(R.id.container_directory, fragment);
-        ft.commitAllowingStateLoss();
-    }
-
-    private static String buildStateKey(RootInfo root, DocumentInfo doc) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append(root != null ? root.authority : "null").append(';');
-        builder.append(root != null ? root.rootId : "null").append(';');
-        builder.append(doc != null ? doc.documentId : "null");
-        return builder.toString();
-    }
-
-    public static @Nullable DirectoryFragment get(FragmentManager fm) {
-        // TODO: deal with multiple directories shown at once
-        Fragment fragment = fm.findFragmentById(R.id.container_directory);
-        return fragment instanceof DirectoryFragment
-                ? (DirectoryFragment) fragment
-                : null;
-    }
 
     @Override
     public View onCreateView(
@@ -917,25 +862,43 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         return mTuner.isDocumentEnabled(docMimeType, docFlags);
     }
 
-    void showEmptyView() {
-        mEmptyView.setVisibility(View.VISIBLE);
-        mRecView.setVisibility(View.GONE);
-        TextView msg = (TextView) mEmptyView.findViewById(R.id.message);
-        msg.setText(R.string.empty);
-        // No retry button for the empty view.
-        mEmptyView.findViewById(R.id.button_retry).setVisibility(View.GONE);
+    private void showEmptyDirectory() {
+        showEmptyView(R.string.empty);
     }
 
-    void showErrorView() {
-        mEmptyView.setVisibility(View.VISIBLE);
-        mRecView.setVisibility(View.GONE);
-        TextView msg = (TextView) mEmptyView.findViewById(R.id.message);
-        msg.setText(R.string.query_error);
-        // TODO: Enable this once the retry button does something.
-        mEmptyView.findViewById(R.id.button_retry).setVisibility(View.GONE);
+    private void showNoResults(RootInfo root) {
+        CharSequence msg = getContext().getResources().getText(R.string.no_results);
+        showEmptyView(String.format(String.valueOf(msg), root.title));
     }
 
-    void showRecyclerView() {
+    // Shows an error indicating documents couldn't be queried.
+    private void showQueryError() {
+        showEmptyView(R.string.query_error);
+    }
+
+    private void showEmptyView(@StringRes int id) {
+        showEmptyView(getContext().getResources().getText(id));
+    }
+
+    private void showEmptyView(CharSequence msg) {
+        View content = mEmptyView.findViewById(R.id.content);
+        TextView msgView = (TextView) mEmptyView.findViewById(R.id.message);
+        msgView.setText(msg);
+
+        content.animate().cancel();  // cancel any ongoing animations
+
+        content.setAlpha(0);
+        mEmptyView.setVisibility(View.VISIBLE);
+        mRecView.setVisibility(View.GONE);
+
+        // fade in the content, so it looks purdy like
+        content.animate()
+                .alpha(1f)
+                .setDuration(EMPTY_REVEAL_DURATION)
+                .setListener(null);
+    }
+
+    private void showDirectory() {
         mEmptyView.setVisibility(View.GONE);
         mRecView.setVisibility(View.VISIBLE);
     }
@@ -1300,16 +1263,20 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             mProgressBar.setVisibility(model.isLoading() ? View.VISIBLE : View.GONE);
 
             if (model.isEmpty()) {
-                showEmptyView();
+                if (getDisplayState().currentSearch != null) {
+                    showNoResults(getDisplayState().stack.root);
+                } else {
+                    showEmptyDirectory();
+                }
             } else {
-                showRecyclerView();
+                showDirectory();
                 mAdapter.notifyDataSetChanged();
             }
         }
 
         @Override
         public void onModelUpdateFailed(Exception e) {
-            showErrorView();
+            showQueryError();
         }
     }
 
@@ -1418,5 +1385,63 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 return null;
             }
         }
+    }
+
+    public static void showDirectory(
+            FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
+        show(fm, TYPE_NORMAL, root, doc, null, anim);
+    }
+
+    public static void showSearch(FragmentManager fm, RootInfo root, String query, int anim) {
+        show(fm, TYPE_SEARCH, root, null, query, anim);
+    }
+
+    public static void showRecentsOpen(FragmentManager fm, int anim) {
+        show(fm, TYPE_RECENT_OPEN, null, null, null, anim);
+    }
+
+    private static void show(FragmentManager fm, int type, RootInfo root, DocumentInfo doc,
+            String query, int anim) {
+        final Bundle args = new Bundle();
+        args.putInt(EXTRA_TYPE, type);
+        args.putParcelable(EXTRA_ROOT, root);
+        args.putParcelable(EXTRA_DOC, doc);
+        args.putString(EXTRA_QUERY, query);
+
+        final FragmentTransaction ft = fm.beginTransaction();
+        switch (anim) {
+            case ANIM_SIDE:
+                args.putBoolean(EXTRA_IGNORE_STATE, true);
+                break;
+            case ANIM_DOWN:
+                args.putBoolean(EXTRA_IGNORE_STATE, true);
+                ft.setCustomAnimations(R.animator.dir_down, R.animator.dir_frozen);
+                break;
+            case ANIM_UP:
+                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_up);
+                break;
+        }
+
+        final DirectoryFragment fragment = new DirectoryFragment();
+        fragment.setArguments(args);
+
+        ft.replace(R.id.container_directory, fragment);
+        ft.commitAllowingStateLoss();
+    }
+
+    private static String buildStateKey(RootInfo root, DocumentInfo doc) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(root != null ? root.authority : "null").append(';');
+        builder.append(root != null ? root.rootId : "null").append(';');
+        builder.append(doc != null ? doc.documentId : "null");
+        return builder.toString();
+    }
+
+    public static @Nullable DirectoryFragment get(FragmentManager fm) {
+        // TODO: deal with multiple directories shown at once
+        Fragment fragment = fm.findFragmentById(R.id.container_directory);
+        return fragment instanceof DirectoryFragment
+                ? (DirectoryFragment) fragment
+                : null;
     }
 }

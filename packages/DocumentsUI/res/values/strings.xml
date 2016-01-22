@@ -123,6 +123,8 @@
 
     <!-- Text shown when a directory of documents is empty [CHAR LIMIT=24] -->
     <string name="empty">No items</string>
+    <!-- Text shown when a file search returns no items [CHAR LIMIT=32] -->
+    <string name="no_results">No matches in %1$s</string>
 
     <!-- Toast shown when no app can be found to open the selected document [CHAR LIMIT=48] -->
     <string name="toast_no_application">Can\'t open file</string>
