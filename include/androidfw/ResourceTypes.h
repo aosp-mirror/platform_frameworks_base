@@ -1128,7 +1128,6 @@ struct ResTable_config
     // configuration. (eg. Hant, Latn, etc.). Interpreted in conjunction with
     // the locale field.
     char localeScript[4];
-    bool localeScriptWasProvided;
 
     // A single BCP-47 variant subtag. Will vary in length between 4 and 8
     // chars. Interpreted in conjunction with the locale field.
@@ -1151,6 +1150,10 @@ struct ResTable_config
         };
         uint32_t screenConfig2;
     };
+
+    // If true, it means that the script of the locale was explicitly provided.
+    // If false, it means that the script was automatically computed.
+    bool localeScriptWasProvided;
 
     void copyFromDeviceNoSwap(const ResTable_config& o);
     
