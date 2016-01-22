@@ -527,9 +527,9 @@ public class TaskStack {
      */
     public void removeTask(Task t, TaskViewAnimation animation) {
         if (mStackTaskList.contains(t)) {
-            boolean wasFrontMostTask = (getStackFrontMostTask() == t);
+            boolean wasFrontMostTask = (getStackFrontMostTask(false /* includeFreeform */) == t);
             removeTaskImpl(mStackTaskList, t);
-            Task newFrontMostTask = getStackFrontMostTask();
+            Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation);
@@ -616,14 +616,14 @@ public class TaskStack {
     /**
      * Gets the front-most task in the stack.
      */
-    public Task getStackFrontMostTask() {
+    public Task getStackFrontMostTask(boolean includeFreeformTasks) {
         ArrayList<Task> stackTasks = mStackTaskList.getTasks();
         if (stackTasks.isEmpty()) {
             return null;
         }
         for (int i = stackTasks.size() - 1; i >= 0; i--) {
             Task task = stackTasks.get(i);
-            if (!task.isFreeformTask()) {
+            if (!task.isFreeformTask() || includeFreeformTasks) {
                 return task;
             }
         }
