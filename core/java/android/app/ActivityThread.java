@@ -83,6 +83,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
+import android.util.LocaleList;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -128,7 +129,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -4887,9 +4887,9 @@ public final class ActivityThread {
         TimeZone.setDefault(null);
 
         /*
-         * Initialize the default locale in this process for the reasons we set the time zone.
+         * Initialize the default locales in this process for the reasons we set the time zone.
          */
-        Locale.setDefault(data.config.locale);
+        LocaleList.setDefault(data.config.getLocales());
 
         /*
          * Update the system configuration since its preloaded and might not
