@@ -651,7 +651,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         mDummyStackView.updateLayoutForStack(stack);
         final Task toTask = new Task();
         final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
-                topTask.id, toTask);
+                toTask);
         ForegroundThread.getHandler().postAtFrontOfQueue(new Runnable() {
             @Override
             public void run() {
@@ -721,7 +721,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             // Update the destination rect
             Task toTask = new Task();
             TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
-                    topTask.id, toTask);
+                    toTask);
             RectF toTaskRect = toTransform.rect;
             Bitmap thumbnail = getThumbnailBitmap(topTask, toTask, toTransform);
             if (thumbnail != null) {
@@ -754,14 +754,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
      * Returns the transition rect for the given task id.
      */
     private TaskViewTransform getThumbnailTransitionTransform(TaskStack stack,
-            TaskStackView stackView, int runningTaskId, Task runningTaskOut) {
+            TaskStackView stackView, Task runningTaskOut) {
         // Find the running task in the TaskStack
         Task launchTask = stack.getLaunchTarget();
         if (launchTask != null) {
             runningTaskOut.copyFrom(launchTask);
         } else {
             // If no task is specified or we can not find the task just use the front most one
-            launchTask = stack.getStackFrontMostTask();
+            launchTask = stack.getStackFrontMostTask(true /* includeFreeform */);
             runningTaskOut.copyFrom(launchTask);
         }
 

@@ -1427,7 +1427,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Restore the action button visibility if it is the front most task view
-        if (mScreenPinningEnabled && tv.getTask() == mStack.getStackFrontMostTask()) {
+        if (mScreenPinningEnabled && tv.getTask() ==
+                mStack.getStackFrontMostTask(false /* includeFreeform */)) {
             tv.showActionButton(false /* fadeIn */, 0 /* fadeInDuration */);
         }
     }
