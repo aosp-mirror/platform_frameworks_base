@@ -77,6 +77,7 @@ import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
 import android.view.DisplayListCanvas;
 import android.view.DragEvent;
+import android.view.DropPermissions;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
@@ -2292,11 +2293,24 @@ public class Editor {
 
     void onDrop(DragEvent event) {
         StringBuilder content = new StringBuilder("");
-        ClipData clipData = event.getClipData();
-        final int itemCount = clipData.getItemCount();
-        for (int i=0; i < itemCount; i++) {
-            Item item = clipData.getItemAt(i);
-            content.append(item.coerceToStyledText(mTextView.getContext()));
+
+        final DropPermissions dropPermissions = DropPermissions.obtain(event);
+        if (dropPermissions != null) {
+            dropPermissions.takeTransient();
+        }
+
+        try {
+            ClipData clipData = event.getClipData();
+            final int itemCount = clipData.getItemCount();
+            for (int i=0; i < itemCount; i++) {
+                Item item = clipData.getItemAt(i);
+                content.append(item.coerceToStyledText(mTextView.getContext()));
+            }
+        }
+        finally {
+            if (dropPermissions != null) {
+                dropPermissions.release();
+            }
         }
 
         final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
