@@ -149,26 +149,22 @@ private:
 
     // Returns true if the size changed, false if it was the same
     bool updateSize(uint32_t width, uint32_t height, GLint format);
+    void resetCachedParams();
 
     GLuint mId = 0;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
     GLint mFormat = 0;
 
-    /**
-     * Last wrap modes set on this texture.
+    /* See GLES spec section 3.8.14
+     * "In the initial state, the value assigned to TEXTURE_MIN_FILTER is
+     * NEAREST_MIPMAP_LINEAR and the value for TEXTURE_MAG_FILTER is LINEAR.
+     * s, t, and r wrap modes are all set to REPEAT."
      */
-    GLenum mWrapS = GL_CLAMP_TO_EDGE;
-    GLenum mWrapT = GL_CLAMP_TO_EDGE;
-
-    /**
-     * Last filters set on this texture.
-     */
-    GLenum mMinFilter = GL_NEAREST;
-    GLenum mMagFilter = GL_NEAREST;
-
-    bool mFirstFilter = true;
-    bool mFirstWrap = true;
+    GLenum mWrapS = GL_REPEAT;
+    GLenum mWrapT = GL_REPEAT;
+    GLenum mMinFilter = GL_NEAREST_MIPMAP_LINEAR;
+    GLenum mMagFilter = GL_LINEAR;
 
     Caches& mCaches;
 }; // struct Texture
