@@ -48,4 +48,9 @@
         android:title="@string/menu_move"
         android:showAsAction="never"
         android:visible="false" />
+    <item
+        android:id="@+id/menu_rename"
+        android:title="@string/menu_rename"
+        android:showAsAction="never"
+        android:visible="false" />
 </menu>

@@ -660,7 +660,7 @@ public class StubProvider extends DocumentsProvider {
             this.documentId = getDocumentIdForFile(file);
             this.mimeType = Document.MIME_TYPE_DIR;
             this.streamTypes = new ArrayList<String>();
-            this.flags = Document.FLAG_DIR_SUPPORTS_CREATE;
+            this.flags = Document.FLAG_DIR_SUPPORTS_CREATE | Document.FLAG_SUPPORTS_RENAME;
             this.parentId = null;
             this.rootInfo = rootInfo;
         }

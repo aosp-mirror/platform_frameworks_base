@@ -192,4 +192,8 @@
     </plurals>
     <!-- Toast shown when a user tries to paste files into an unsupported location. -->
     <string name="clipboard_files_cannot_paste">Cannot paste the selected files in this location.</string>
+    <!-- Menu item that renames the selected document [CHAR LIMIT=24] -->
+    <string name="menu_rename">Rename</string>
+    <!-- Toast shown when renaming document failed with an error [CHAR LIMIT=48] -->
+    <string name="rename_error">Failed to rename document</string>
 </resources>
