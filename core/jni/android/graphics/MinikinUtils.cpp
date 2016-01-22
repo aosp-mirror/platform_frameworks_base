@@ -62,6 +62,15 @@ void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 
+float MinikinUtils::measureText(const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
+        const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
+    FontCollection *font;
+    MinikinPaint minikinPaint;
+    FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
+    return Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint,
+            font, advances);
+}
+
 bool MinikinUtils::hasVariationSelector(TypefaceImpl* typeface, uint32_t codepoint, uint32_t vs) {
     const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
     return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
