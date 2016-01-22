@@ -167,8 +167,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public boolean startDragging(boolean animate) {
         mHandle.setTouching(true, animate);
         mDockSide = mWindowManagerProxy.getDockSide();
-        mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(),
-                mFlingAnimationUtils.getMinVelocityPxPerSecond(), mDisplayWidth,
+        mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(), mDisplayWidth,
                 mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
         if (mDockSide != WindowManager.DOCKED_INVALID) {
             mWindowManagerProxy.setResizing(true);
@@ -180,9 +179,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    public void stopDragging(int position, float velocity) {
+    public void stopDragging(int position, float velocity, boolean avoidDismissStart) {
         mHandle.setTouching(false, true /* animate */);
-        fling(position, velocity);
+        fling(position, velocity, avoidDismissStart);
         mWindowManager.setSlippery(true);
         releaseBackground();
     }
@@ -225,7 +224,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 if (mMoving && mDockSide != WindowManager.DOCKED_INVALID) {
                     int position = calculatePosition(x, y);
                     SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position,
-                            0 /* velocity */);
+                            0 /* velocity */, false /* hardDismiss */);
                     resizeStack(calculatePosition(x, y), snapTarget.position, snapTarget);
                 }
                 break;
@@ -239,7 +238,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mVelocityTracker.computeCurrentVelocity(1000);
                 int position = calculatePosition(x, y);
                 stopDragging(position, isHorizontalDivision() ? mVelocityTracker.getYVelocity()
-                        : mVelocityTracker.getXVelocity());
+                        : mVelocityTracker.getXVelocity(), false /* avoidDismissStart */);
                 mMoving = false;
                 break;
         }
@@ -250,8 +249,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         event.setLocation(event.getRawX(), event.getRawY());
     }
 
-    private void fling(int position, float velocity) {
-        final SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position, velocity);
+    private void fling(int position, float velocity, boolean avoidDismissStart) {
+        SnapTarget snapTarget = mSnapAlgorithm.calculateSnapTarget(position, velocity);
+        if (avoidDismissStart && snapTarget == mSnapAlgorithm.getDismissStartTarget()) {
+            snapTarget = mSnapAlgorithm.getFirstSplitTarget();
+        }
+        final SnapTarget finalTarget = snapTarget;
 
         ValueAnimator anim = ValueAnimator.ofInt(position, snapTarget.position);
         anim.addUpdateListener(new AnimatorUpdateListener() {
@@ -260,13 +263,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 resizeStack((Integer) animation.getAnimatedValue(),
                         animation.getAnimatedFraction() == 1f
                                 ? TASK_POSITION_SAME
-                                : snapTarget.position, snapTarget);
+                                : finalTarget.position, finalTarget);
             }
         });
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                commitSnapFlags(snapTarget);
+                commitSnapFlags(finalTarget);
                 mWindowManagerProxy.setResizing(false);
                 mDockSide = WindowManager.DOCKED_INVALID;
             }

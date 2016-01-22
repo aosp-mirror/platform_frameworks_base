@@ -4243,6 +4243,14 @@ final class ActivityStack {
 
     private int getTaskConfigurationChanges(ActivityRecord record, Configuration taskConfig,
             Configuration oldTaskOverride) {
+
+        // If we went from full-screen to non-full-screen, make sure to use the correct
+        // configuration task diff, so the diff stays as small as possible.
+        if (Configuration.EMPTY.equals(oldTaskOverride)
+                && !Configuration.EMPTY.equals(taskConfig)) {
+            oldTaskOverride = record.task.extractOverrideConfig(record.configuration);
+        }
+
         // Determine what has changed.  May be nothing, if this is a config
         // that has come back from the app after going idle.  In that case
         // we just want to leave the official config object now in the

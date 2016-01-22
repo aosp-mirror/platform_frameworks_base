@@ -19,6 +19,7 @@ package com.android.internal.policy;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,9 @@ import java.util.ArrayList;
  * @hide
  */
 public class DividerSnapAlgorithm {
+
+    private static final int MIN_FLING_VELOCITY_DP_PER_SECOND = 400;
+    private static final int MIN_DISMISS_VELOCITY_DP_PER_SECOND = 600;
 
     /**
      * 3 snap targets: left/top has 16:9 ratio (for videos), 1:1, and right/bottom has 16:9 ratio
@@ -46,6 +50,7 @@ public class DividerSnapAlgorithm {
     private static final int SNAP_ONLY_1_1 = 2;
 
     private final float mMinFlingVelocityPxPerSecond;
+    private final float mMinDismissVelocityPxPerSecond;
     private final int mDisplayWidth;
     private final int mDisplayHeight;
     private final int mDividerSize;
@@ -64,10 +69,12 @@ public class DividerSnapAlgorithm {
     private final SnapTarget mDismissEndTarget;
     private final SnapTarget mMiddleTarget;
 
-    public DividerSnapAlgorithm(Resources res, float minFlingVelocityPxPerSecond,
-            int displayWidth, int displayHeight, int dividerSize, boolean isHorizontalDivision,
-            Rect insets) {
-        mMinFlingVelocityPxPerSecond = minFlingVelocityPxPerSecond;
+    public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
+            boolean isHorizontalDivision, Rect insets) {
+        mMinFlingVelocityPxPerSecond =
+                MIN_FLING_VELOCITY_DP_PER_SECOND * res.getDisplayMetrics().density;
+        mMinDismissVelocityPxPerSecond =
+                MIN_DISMISS_VELOCITY_DP_PER_SECOND * res.getDisplayMetrics().density;
         mDividerSize = dividerSize;
         mDisplayWidth = displayWidth;
         mDisplayHeight = displayHeight;
@@ -85,14 +92,23 @@ public class DividerSnapAlgorithm {
     }
 
     public SnapTarget calculateSnapTarget(int position, float velocity) {
-        if (Math.abs(velocity) < mMinFlingVelocityPxPerSecond) {
-            return snap(position);
-        }
-        if (position < mFirstSplitTarget.position && velocity < 0) {
+        return calculateSnapTarget(position, velocity, true /* hardDismiss */);
+    }
+
+    /**
+     * @param position the top/left position of the divider
+     * @param velocity current dragging velocity
+     * @param hardDismiss if set, make it a bit harder to get reach the dismiss targets
+     */
+    public SnapTarget calculateSnapTarget(int position, float velocity, boolean hardDismiss) {
+        if (position < mFirstSplitTarget.position && velocity < -mMinDismissVelocityPxPerSecond) {
             return mDismissStartTarget;
         }
-        if (position > mLastSplitTarget.position && velocity > 0) {
+        if (position > mLastSplitTarget.position && velocity > mMinDismissVelocityPxPerSecond) {
             return mDismissEndTarget;
+        }
+        if (Math.abs(velocity) < mMinFlingVelocityPxPerSecond) {
+            return snap(position, hardDismiss);
         }
         if (velocity < 0) {
             return mFirstSplitTarget;
@@ -102,7 +118,7 @@ public class DividerSnapAlgorithm {
     }
 
     public SnapTarget calculateNonDismissingSnapTarget(int position) {
-        SnapTarget target = snap(position);
+        SnapTarget target = snap(position, false /* hardDismiss */);
         if (target == mDismissStartTarget) {
             return mFirstSplitTarget;
         } else if (target == mDismissEndTarget) {
@@ -146,12 +162,16 @@ public class DividerSnapAlgorithm {
         return mDismissEndTarget;
     }
 
-    private SnapTarget snap(int position) {
+    private SnapTarget snap(int position, boolean hardDismiss) {
         int minIndex = -1;
-        int minDistance = Integer.MAX_VALUE;
+        float minDistance = Float.MAX_VALUE;
         int size = mTargets.size();
         for (int i = 0; i < size; i++) {
-            int distance = Math.abs(position - mTargets.get(i).position);
+            SnapTarget target = mTargets.get(i);
+            float distance = Math.abs(position - target.position);
+            if (hardDismiss) {
+                distance /= target.distanceMultiplier;
+            }
             if (distance < minDistance) {
                 minIndex = i;
                 minDistance = distance;
@@ -165,7 +185,7 @@ public class DividerSnapAlgorithm {
         int dividerMax = isHorizontalDivision
                 ? mDisplayHeight
                 : mDisplayWidth;
-        mTargets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START));
+        mTargets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START, 0.35f));
         switch (mSnapMode) {
             case SNAP_MODE_16_9:
                 addRatio16_9Targets(isHorizontalDivision);
@@ -177,7 +197,7 @@ public class DividerSnapAlgorithm {
                 addMiddleTarget(isHorizontalDivision);
                 break;
         }
-        mTargets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END));
+        mTargets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END, 0.35f));
     }
 
     private void addFixedDivisionTargets(boolean isHorizontalDivision) {
@@ -232,9 +252,20 @@ public class DividerSnapAlgorithm {
         public final int position;
         public final int flag;
 
+        /**
+         * Multiplier used to calculate distance to snap position. The lower this value, the harder
+         * it's to snap on this target
+         */
+        private final float distanceMultiplier;
+
         public SnapTarget(int position, int flag) {
+            this(position, flag, 1f);
+        }
+
+        public SnapTarget(int position, int flag, float distanceMultiplier) {
             this.position = position;
             this.flag = flag;
+            this.distanceMultiplier = distanceMultiplier;
         }
     }
 }

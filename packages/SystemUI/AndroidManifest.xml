@@ -229,7 +229,7 @@
                   android:resumeWhilePausing="true"
                   android:screenOrientation="behind"
                   android:resizeableActivity="true"
-                  android:configChanges="orientation|screenSize|smallestScreenSize"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|layoutDirection"
                   android:theme="@style/RecentsTheme.Wallpaper">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
