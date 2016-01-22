@@ -1920,7 +1920,9 @@ public class BackupManagerService {
                 synchronized (mBackupParticipants) {
                     if (replacing) {
                         // This is the package-replaced case; we just remove the entry
-                        // under the old uid and fall through to re-add.
+                        // under the old uid and fall through to re-add.  If an app
+                        // just added key/value backup participation, this picks it up
+                        // as a known participant.
                         removePackageParticipantsLocked(pkgList, uid);
                     }
                     addPackageParticipantsLocked(pkgList);
@@ -1933,6 +1935,14 @@ public class BackupManagerService {
                         if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob(0);
+                        } else {
+                            // The app might have just transitioned out of full-data into
+                            // doing key/value backups, or might have just disabled backups
+                            // entirely.  Make sure it is no longer in the full-data queue.
+                            synchronized (mQueueLock) {
+                                dequeueFullBackupLocked(packageName);
+                            }
+                            writeFullBackupScheduleAsync();
                         }
 
                         // Transport maintenance: rebind to known existing transports that have
@@ -1964,6 +1974,9 @@ public class BackupManagerService {
                 if (replacing) {
                     // The package is being updated.  We'll receive a PACKAGE_ADDED shortly.
                 } else {
+                    // Outright removal.  In the full-data case, the app will be dropped
+                    // from the queue when its (now obsolete) name comes up again for
+                    // backup.
                     synchronized (mBackupParticipants) {
                         removePackageParticipantsLocked(pkgList, uid);
                     }
@@ -4190,10 +4203,20 @@ public class BackupManagerService {
                         // as well as any explicit mention of the 'special' shared-storage agent
                         // package (we handle that one at the end).
                         if (MORE_DEBUG) {
-                            Slog.d(TAG, "Ignoring not eligible package " + pkg);
+                            Slog.d(TAG, "Ignoring ineligible package " + pkg);
                         }
                         sendBackupOnResult(mBackupObserver, pkg,
                             BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                        continue;
+                    } else if (!appGetsFullBackup(info)) {
+                        // Cull any packages that are found in the queue but now aren't supposed
+                        // to get full-data backup operations.
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "Ignoring full-data backup of key/value participant "
+                                    + pkg);
+                        }
+                        sendBackupOnResult(mBackupObserver, pkg,
+                                BackupManager.ERROR_BACKUP_NOT_ALLOWED);
                         continue;
                     } else if (appIsStopped(info.applicationInfo)) {
                         // Cull any packages in the 'stopped' state: they've either just been
@@ -4592,21 +4615,28 @@ public class BackupManagerService {
     }
 
     /**
+     * Remove a package from the full-data queue.
+     */
+    void dequeueFullBackupLocked(String packageName) {
+        final int N = mFullBackupQueue.size();
+        for (int i = N-1; i >= 0; i--) {
+            final FullBackupEntry e = mFullBackupQueue.get(i);
+            if (packageName.equals(e.packageName)) {
+                mFullBackupQueue.remove(i);
+            }
+        }
+    }
+
+    /**
      * Enqueue full backup for the given app, with a note about when it last ran.
      */
     void enqueueFullBackup(String packageName, long lastBackedUp) {
         FullBackupEntry newEntry = new FullBackupEntry(packageName, lastBackedUp);
         synchronized (mQueueLock) {
-            int N = mFullBackupQueue.size();
             // First, sanity check that we aren't adding a duplicate.  Slow but
             // straightforward; we'll have at most on the order of a few hundred
             // items in this list.
-            for (int i = N-1; i >= 0; i--) {
-                final FullBackupEntry e = mFullBackupQueue.get(i);
-                if (packageName.equals(e.packageName)) {
-                    mFullBackupQueue.remove(i);
-                }
-            }
+            dequeueFullBackupLocked(packageName);
 
             // This is also slow but easy for modest numbers of apps: work backwards
             // from the end of the queue until we find an item whose last backup
@@ -4700,21 +4730,24 @@ public class BackupManagerService {
                 return false;
             }
 
-            if (mFullBackupQueue.size() == 0) {
-                // no work to do so just bow out
-                if (DEBUG) {
-                    Slog.i(TAG, "Backup queue empty; doing nothing");
-                }
-                return false;
-            }
-
-            // At this point we know that we have work to do, but possibly not right now.
+            // At this point we think that we have work to do, but possibly not right now.
             // Any exit without actually running backups will also require that we
             // reschedule the job.
             boolean runBackup = true;
             boolean headBusy;
 
             do {
+                // Recheck each time, because culling due to ineligibility may
+                // have emptied the queue.
+                if (mFullBackupQueue.size() == 0) {
+                    // no work to do so just bow out
+                    if (DEBUG) {
+                        Slog.i(TAG, "Backup queue empty; doing nothing");
+                    }
+                    runBackup = false;
+                    break;
+                }
+
                 headBusy = false;
 
                 if (!fullBackupAllowable(getTransport(mCurrentTransport))) {
@@ -4744,6 +4777,19 @@ public class BackupManagerService {
 
                     try {
                         PackageInfo appInfo = mPackageManager.getPackageInfo(entry.packageName, 0);
+                        if (!appGetsFullBackup(appInfo)) {
+                            // The head app isn't supposed to get full-data backups [any more];
+                            // so we cull it and force a loop around to consider the new head
+                            // app.
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Culling package " + entry.packageName
+                                        + " in full-backup queue but not eligible");
+                            }
+                            mFullBackupQueue.remove(0);
+                            headBusy = true; // force the while() condition
+                            continue;
+                        }
+
                         headBusy = mActivityManager.isAppForeground(appInfo.applicationInfo.uid);
 
                         if (headBusy) {
@@ -4762,7 +4808,6 @@ public class BackupManagerService {
                             enqueueFullBackup(entry.packageName,
                                     nextEligible - MIN_FULL_BACKUP_INTERVAL);
                         }
-
                     } catch (NameNotFoundException nnf) {
                         // So, we think we want to back this up, but it turns out the package
                         // in question is no longer installed.  We want to drop it from the
