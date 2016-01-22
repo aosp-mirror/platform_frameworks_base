@@ -1996,6 +1996,8 @@
   <java-symbol type="drawable" name="decor_close_button_light" />
   <java-symbol type="drawable" name="decor_maximize_button_dark" />
   <java-symbol type="drawable" name="decor_maximize_button_light" />
+  <java-symbol type="color" name="decor_button_dark_color" />
+  <java-symbol type="color" name="decor_button_light_color" />
 
   <!-- From TelephonyProvider -->
   <java-symbol type="xml" name="apns" />
@@ -2365,6 +2367,7 @@
   <java-symbol type="string" name="ext_media_unsupported_notification_title" />
   <java-symbol type="plurals" name="selected_count" />
   <java-symbol type="drawable" name="ic_dialog_alert_material" />
+
 
   <java-symbol type="string" name="lockscreen_access_pattern_area" />
 
