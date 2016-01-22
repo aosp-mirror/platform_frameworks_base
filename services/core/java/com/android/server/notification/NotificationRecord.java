@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
@@ -88,8 +89,8 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
-    private int mTopicImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-    private int mImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+    private int mTopicImportance = IMPORTANCE_UNSPECIFIED;
+    private int mImportance = IMPORTANCE_UNSPECIFIED;
     private CharSequence mImportanceExplanation = null;
 
     private int mSuppressedVisualEffects = 0;
@@ -509,5 +510,9 @@ public final class NotificationRecord {
 
     public String getGroupKey() {
         return sbn.getGroupKey();
+    }
+
+    public boolean isImportanceFromUser() {
+        return mImportance == mTopicImportance;
     }
 }
