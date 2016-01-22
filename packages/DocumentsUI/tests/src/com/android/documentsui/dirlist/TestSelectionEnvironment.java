@@ -110,4 +110,9 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     @Override
     public void focusItem(int position) {
     }
+
+    @Override
+    public boolean isLayoutItem(int adapterPosition) {
+        return false;
+    }
 }

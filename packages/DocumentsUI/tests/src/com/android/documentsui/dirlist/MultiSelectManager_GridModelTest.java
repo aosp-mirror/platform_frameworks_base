@@ -334,5 +334,10 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         public void focusItem(int i) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean isLayoutItem(int adapterPosition) {
+            return false;
+        }
     }
 }

@@ -17,6 +17,8 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DIRECTORY;
+import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DOCUMENT;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
@@ -788,6 +790,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         int getChildCount();
         int getVisibleChildCount();
         void focusItem(int position);
+        /**
+         * Layout items are excluded from the GridModel.
+         */
+        boolean isLayoutItem(int adapterPosition);
     }
 
     /** Recycler view facade implementation backed by good ol' RecyclerView. */
@@ -942,6 +948,20 @@ public final class MultiSelectManager implements View.OnKeyListener {
                             }
                         }
                     });
+            }
+        }
+
+        @Override
+        public boolean isLayoutItem(int pos) {
+            // The band selection model only operates on documents and directories. Exclude other
+            // types of adapter items (e.g. whitespace items like dividers).
+            RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(pos);
+            switch (vh.getItemViewType()) {
+                case ITEM_TYPE_DOCUMENT:
+                case ITEM_TYPE_DIRECTORY:
+                    return false;
+                default:
+                    return true;
             }
         }
     }
@@ -1407,7 +1427,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
         private void recordVisibleChildren() {
             for (int i = 0; i < mHelper.getVisibleChildCount(); i++) {
                 int adapterPosition = mHelper.getAdapterPositionAt(i);
-                if (!mKnownPositions.get(adapterPosition)) {
+                if (!mHelper.isLayoutItem(adapterPosition) &&
+                        !mKnownPositions.get(adapterPosition)) {
                     mKnownPositions.put(adapterPosition, true);
                     recordItemData(mHelper.getAbsoluteRectForChildViewAt(i), adapterPosition);
                 }
@@ -1493,31 +1514,29 @@ public final class MultiSelectManager implements View.OnKeyListener {
          * @param rect Rectangle including all covered items.
          */
         private void updateSelection(Rect rect) {
-            int columnStartIndex =
+            int columnStart =
                     Collections.binarySearch(mColumnBounds, new Limits(rect.left, rect.left));
-            checkState(columnStartIndex >= 0);
-            int columnEndIndex = columnStartIndex;
+            checkState(columnStart >= 0);
+            int columnEnd = columnStart;
 
-            for (int i = columnStartIndex; i < mColumnBounds.size()
+            for (int i = columnStart; i < mColumnBounds.size()
                     && mColumnBounds.get(i).lowerLimit <= rect.right; i++) {
-                columnEndIndex = i;
+                columnEnd = i;
             }
 
-            SparseIntArray firstColumn =
-                    mColumns.get(mColumnBounds.get(columnStartIndex).lowerLimit);
-            int rowStartIndex = firstColumn.indexOfKey(rect.top);
-            if (rowStartIndex < 0) {
+            int rowStart = Collections.binarySearch(mRowBounds, new Limits(rect.top, rect.top));
+            if (rowStart < 0) {
                 mPositionNearestOrigin = NOT_SET;
                 return;
             }
 
-            int rowEndIndex = rowStartIndex;
-            for (int i = rowStartIndex;
-                    i < firstColumn.size() && firstColumn.keyAt(i) <= rect.bottom; i++) {
-                rowEndIndex = i;
+            int rowEnd = rowStart;
+            for (int i = rowStart; i < mRowBounds.size()
+                    && mRowBounds.get(i).lowerLimit <= rect.bottom; i++) {
+                rowEnd = i;
             }
 
-            updateSelection(columnStartIndex, columnEndIndex, rowStartIndex, rowEndIndex);
+            updateSelection(columnStart, columnEnd, rowStart, rowEnd);
         }
 
         /**
@@ -1526,13 +1545,17 @@ public final class MultiSelectManager implements View.OnKeyListener {
          */
         private void updateSelection(
                 int columnStartIndex, int columnEndIndex, int rowStartIndex, int rowEndIndex) {
+            if (DEBUG) Log.d(TAG, String.format("updateSelection: %d, %d, %d, %d",
+                    columnStartIndex, columnEndIndex, rowStartIndex, rowEndIndex));
+
             mSelection.clear();
             for (int column = columnStartIndex; column <= columnEndIndex; column++) {
                 SparseIntArray items = mColumns.get(mColumnBounds.get(column).lowerLimit);
                 for (int row = rowStartIndex; row <= rowEndIndex; row++) {
                     // The default return value for SparseIntArray.get is 0, which is a valid
                     // position. Use a sentry value to prevent erroneously selecting item 0.
-                    int position = items.get(items.keyAt(row), NOT_SET);
+                    final int rowKey = mRowBounds.get(row).lowerLimit;
+                    int position = items.get(rowKey, NOT_SET);
                     if (position != NOT_SET) {
                         String id = mAdapter.getModelId(position);
                         if (id != null) {
