@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.systemui.statusbar.car;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -22,8 +22,8 @@ import android.view.View;
 import android.view.ViewStub;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.UserGridView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 /**
  * Manages the fullscreen user switcher.

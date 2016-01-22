@@ -24,11 +24,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewStub;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
@@ -41,6 +43,7 @@ public class CarStatusBar extends PhoneStatusBar {
 
     private CarNavigationBarView mCarNavigationBar;
     private CarNavigationBarController mController;
+    private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     @Override
     public void start() {
@@ -118,6 +121,36 @@ public class CarStatusBar extends PhoneStatusBar {
         private void ensureMainThread() {
             if (!Looper.getMainLooper().isCurrentThread()) {
                 throw new RuntimeException("Must be called on the UI thread");
+            }
+        }
+    }
+
+    @Override
+    protected void createUserSwitcher() {
+        if (mUserSwitcherController.useFullscreenUserSwitcher()) {
+            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
+                    (ViewStub) mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
+        } else {
+            super.createUserSwitcher();
+        }
+    }
+
+    @Override
+    public void userSwitched(int newUserId) {
+        super.userSwitched(newUserId);
+        if (mFullscreenUserSwitcher != null) {
+            mFullscreenUserSwitcher.onUserSwitched(newUserId);
+        }
+    }
+
+    @Override
+    public void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
+        super.updateKeyguardState(goingToFullShade, fromShadeLocked);
+        if (mFullscreenUserSwitcher != null) {
+            if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+                mFullscreenUserSwitcher.show();
+            } else {
+                mFullscreenUserSwitcher.hide();
             }
         }
     }

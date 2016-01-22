@@ -39,13 +39,13 @@
             android:paddingStart="@dimen/car_lockscreen_disclaimer_text_padding_start"
             android:paddingEnd="@dimen/car_lockscreen_disclaimer_text_padding_end"
             android:paddingTop="@dimen/car_lockscreen_disclaimer_text_padding_top" />
-        <com.android.systemui.statusbar.UserGridView
+        <com.android.systemui.statusbar.car.UserGridView
             android:id="@+id/user_grid"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/car_lockscreen_user_grid_view_padding_top"
             android:stretchMode="columnWidth">
-        </com.android.systemui.statusbar.UserGridView>
+        </com.android.systemui.statusbar.car.UserGridView>
     </LinearLayout>
 </FrameLayout>

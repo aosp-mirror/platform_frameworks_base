@@ -141,7 +141,6 @@ import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
-import com.android.systemui.statusbar.policy.FullscreenUserSwitcher;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HotspotControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -285,7 +284,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected KeyguardMonitor mKeyguardMonitor;
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
-    FullscreenUserSwitcher mFullscreenUserSwitcher;
     FingerprintUnlockController mFingerprintUnlockController;
 
     int mNaturalBarHeight = -1;
@@ -854,16 +852,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
                     mHandler, this);
-            if (mUserSwitcherController.useFullscreenUserSwitcher()) {
-                mFullscreenUserSwitcher = new FullscreenUserSwitcher(this, mUserSwitcherController,
-                        (ViewStub) mStatusBarWindow.findViewById(
-                                R.id.fullscreen_user_switcher_stub));
-            } else {
-                // Fullscreen user switcher does not show keyguard. Hence no KeyguardUserSwitcher.
-                mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
-                        (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
-                        mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
-            }
+            createUserSwitcher();
         }
 
         // Set up the quick settings tile panel
@@ -932,6 +921,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
+    }
+
+    protected void createUserSwitcher() {
+        mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
+                (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
+                mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
     }
 
     protected void inflateStatusBarWindow(Context context) {
@@ -3093,9 +3088,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setControllerUsers();
         clearCurrentMediaNotification();
         updateMediaMetaData(true);
-        if (mFullscreenUserSwitcher != null) {
-            mFullscreenUserSwitcher.onUserSwitched(newUserId);
-        }
     }
 
     private void setControllerUsers() {
@@ -3720,7 +3712,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         .isSecure(mCurrentUserId));
     }
 
-    private void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
+    protected void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
             mNotificationPanel.resetViews();
@@ -3744,13 +3736,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mScrimController.setKeyguardShowing(false);
             mIconPolicy.setKeyguardShowing(false);
         }
-        if (mFullscreenUserSwitcher != null) {
-            if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-                mFullscreenUserSwitcher.show();
-            } else {
-                mFullscreenUserSwitcher.hide();
-            }
-        }
+
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
         updatePublicMode();
