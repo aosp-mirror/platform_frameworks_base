@@ -191,8 +191,13 @@
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
-    <!-- The size of the application icon in the recents task view. -->
-    <dimen name="recents_task_view_application_icon_size">48dp</dimen>
+    <!-- The size of the icon in the recents task view header. -->
+    <dimen name="recents_task_view_header_icon_width">64dp</dimen>
+    <dimen name="recents_task_view_header_icon_height">@dimen/recents_task_bar_height</dimen>
+
+    <!-- The size of a button in the recents task view header. -->
+    <dimen name="recents_task_view_header_button_width">@dimen/recents_task_bar_height</dimen>
+    <dimen name="recents_task_view_header_button_height">@dimen/recents_task_bar_height</dimen>
 
     <!-- The radius of the rounded corners on a task view. -->
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>

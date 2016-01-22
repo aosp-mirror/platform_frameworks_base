@@ -77,7 +77,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
      * @return whether we are enabling the fast toggle indicator.
      */
     public boolean isFastToggleIndicatorEnabled() {
-        return mFastToggleIndicator;
+        return mFastToggleRecents && mFastToggleIndicator;
     }
 
     /**
