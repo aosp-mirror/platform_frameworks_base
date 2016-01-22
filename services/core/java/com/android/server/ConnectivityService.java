@@ -87,6 +87,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -2684,6 +2685,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mTethering.getTetherableWifiRegexs().length != 0 ||
                 mTethering.getTetherableBluetoothRegexs().length != 0) &&
                 mTethering.getUpstreamIfaceTypes().length != 0);
+    }
+
+    public void startTethering(int type, ResultReceiver receiver,
+            boolean showProvisioningUi) {
+        ConnectivityManager.enforceTetherChangePermission(mContext);
+        if (!isTetheringSupported()) {
+            receiver.send(ConnectivityManager.TETHER_ERROR_UNSUPPORTED, null);
+            return;
+        }
+        mTethering.startTethering(type, receiver, showProvisioningUi);
+    }
+
+    public void stopTethering(int type) {
+        ConnectivityManager.enforceTetherChangePermission(mContext);
+        mTethering.stopTethering(type);
     }
 
     // Called when we lose the default network and have no replacement yet.

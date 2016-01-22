@@ -29,12 +29,6 @@ import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
 
-    // Types of tethering.
-    public static final int TETHERING_INVALID   = -1;
-    public static final int TETHERING_WIFI      = 0;
-    public static final int TETHERING_USB       = 1;
-    public static final int TETHERING_BLUETOOTH = 2;
-
     // Extras used for communicating with the TetherService.
     public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
@@ -43,14 +37,6 @@ public class TetherUtil {
      * Tells the service to run a provision check now.
      */
     public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
-    /**
-     * Enables wifi tethering if the provision check is successful. Used by
-     * QS to enable tethering.
-     */
-    public static final String EXTRA_ENABLE_WIFI_TETHER = "extraEnableWifiTether";
-
-    public static ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(Resources
-            .getSystem().getString(com.android.internal.R.string.config_wifi_tether_enable));
 
     public static boolean setWifiTethering(boolean enable, Context context) {
         final WifiManager wifiManager =

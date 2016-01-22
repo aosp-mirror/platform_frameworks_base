@@ -76,6 +76,10 @@ interface IConnectivityManager
 
     boolean isTetheringSupported();
 
+    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi);
+
+    void stopTethering(int type);
+
     String[] getTetherableIfaces();
 
     String[] getTetheredIfaces();

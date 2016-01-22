@@ -16,6 +16,7 @@
 package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -37,6 +39,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
@@ -336,6 +339,71 @@ public class ConnectivityManager {
      * @hide
      */
     public static final String ACTION_PROMPT_UNVALIDATED = "android.net.conn.PROMPT_UNVALIDATED";
+
+    /**
+     * Invalid tethering type.
+     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @hide
+     */
+    public static final int TETHERING_INVALID   = -1;
+
+    /**
+     * Wifi tethering type.
+     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @hide
+     */
+    @SystemApi
+    public static final int TETHERING_WIFI      = 0;
+
+    /**
+     * USB tethering type.
+     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @hide
+     */
+    @SystemApi
+    public static final int TETHERING_USB       = 1;
+
+    /**
+     * Bluetooth tethering type.
+     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @hide
+     */
+    @SystemApi
+    public static final int TETHERING_BLUETOOTH = 2;
+
+    /**
+     * Extra used for communicating with the TetherService. Includes the type of tethering to
+     * enable if any.
+     * @hide
+     */
+    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+
+    /**
+     * Extra used for communicating with the TetherService. Includes the type of tethering for
+     * which to cancel provisioning.
+     * @hide
+     */
+    public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
+
+    /**
+     * Extra used for communicating with the TetherService. True to schedule a recheck of tether
+     * provisioning.
+     * @hide
+     */
+    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+
+    /**
+     * Tells the TetherService to run a provision check now.
+     * @hide
+     */
+    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+
+    /**
+     * Extra used for communicating with the TetherService. Contains the {@link ResultReceiver}
+     * which will receive provisioning results. Can be left empty.
+     * @hide
+     */
+    public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
 
     /**
      * The absence of a connection type.
@@ -1789,6 +1857,11 @@ public class ConnectivityManager {
      * or the ability to modify system settings as determined by
      * {@link android.provider.Settings.System#canWrite}.</p>
      *
+     * <p>WARNING: New clients should not use this function. The only usages should be in PanService
+     * and WifiStateMachine which need direct access. All other clients should use
+     * {@link #startTethering} and {@link #stopTethering} which encapsulate proper provisioning
+     * logic.</p>
+     *
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
@@ -1809,6 +1882,11 @@ public class ConnectivityManager {
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
      * or the ability to modify system settings as determined by
      * {@link android.provider.Settings.System#canWrite}.</p>
+     *
+     * <p>WARNING: New clients should not use this function. The only usages should be in PanService
+     * and WifiStateMachine which need direct access. All other clients should use
+     * {@link #startTethering} and {@link #stopTethering} which encapsulate proper provisioning
+     * logic.</p>
      *
      * @param iface the interface name to untether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
@@ -1834,11 +1912,100 @@ public class ConnectivityManager {
      *
      * {@hide}
      */
+    @SystemApi
     public boolean isTetheringSupported() {
         try {
             return mService.isTetheringSupported();
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Callback for use with {@link #startTethering} to find out whether tethering succeeded.
+     * @hide
+     */
+    @SystemApi
+    public static abstract class OnStartTetheringCallback {
+        /**
+         * Called when tethering has been successfully started.
+         */
+        public void onTetheringStarted() {};
+
+        /**
+         * Called when starting tethering failed.
+         */
+        public void onTetheringFailed() {};
+    }
+
+    /**
+     * Convenient overload for
+     * {@link #startTethering(int, boolean, OnStartTetheringCallback, Handler)} which passes a null
+     * handler to run on the current thread's {@link Looper}.
+     * @hide
+     */
+    @SystemApi
+    public void startTethering(int type, boolean showProvisioningUi,
+            final OnStartTetheringCallback callback) {
+        startTethering(type, showProvisioningUi, callback, null);
+    }
+
+    /**
+     * Runs tether provisioning for the given type if needed and then starts tethering if
+     * the check succeeds. If no carrier provisioning is required for tethering, tethering is
+     * enabled immediately. If provisioning fails, tethering will not be enabled. It also
+     * schedules tether provisioning re-checks if appropriate.
+     *
+     * @param type The type of tethering to start. Must be one of
+     *         {@link ConnectivityManager.TETHERING_WIFI},
+     *         {@link ConnectivityManager.TETHERING_USB}, or
+     *         {@link ConnectivityManager.TETHERING_BLUETOOTH}.
+     * @param showProvisioningUi a boolean indicating to show the provisioning app UI if there
+     *         is one. This should be true the first time this function is called and also any time
+     *         the user can see this UI. It gives users information from their carrier about the
+     *         check failing and how they can sign up for tethering if possible.
+     * @param callback an {@link OnStartTetheringCallback} which will be called to notify the caller
+     *         of the result of trying to tether.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @hide
+     */
+    @SystemApi
+    public void startTethering(int type, boolean showProvisioningUi,
+            final OnStartTetheringCallback callback, Handler handler) {
+        ResultReceiver wrappedCallback = new ResultReceiver(handler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode == TETHER_ERROR_NO_ERROR) {
+                    callback.onTetheringStarted();
+                } else {
+                    callback.onTetheringFailed();
+                }
+            }
+        };
+        try {
+            mService.startTethering(type, wrappedCallback, showProvisioningUi);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception trying to start tethering.", e);
+            wrappedCallback.send(TETHER_ERROR_SERVICE_UNAVAIL, null);
+        }
+    }
+
+    /**
+     * Stops tethering for the given type. Also cancels any provisioning rechecks for that type if
+     * applicable.
+     *
+     * @param type The type of tethering to stop. Must be one of
+     *         {@link ConnectivityManager.TETHERING_WIFI},
+     *         {@link ConnectivityManager.TETHERING_USB}, or
+     *         {@link ConnectivityManager.TETHERING_BLUETOOTH}.
+     * @hide
+     */
+    @SystemApi
+    public void stopTethering(int type) {
+        try {
+            mService.stopTethering(type);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception trying to stop tethering.", e);
         }
     }
 
@@ -1949,6 +2116,8 @@ public class ConnectivityManager {
     public static final int TETHER_ERROR_DISABLE_NAT_ERROR    = 9;
     /** {@hide} */
     public static final int TETHER_ERROR_IFACE_CFG_ERROR      = 10;
+    /** {@hide} */
+    public static final int TETHER_ERROR_PROVISION_FAILED     = 11;
 
     /**
      * Get a more detailed error code after a Tethering or Untethering
