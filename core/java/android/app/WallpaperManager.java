@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.annotation.RawRes;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -60,6 +61,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -144,7 +147,33 @@ public class WallpaperManager {
      * and y arguments are the location of the drop.
      */
     public static final String COMMAND_DROP = "android.home.drop";
-    
+
+    /**
+     * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
+     * @hide
+     */
+    public static final String EXTRA_NEW_WALLPAPER_ID = "android.service.wallpaper.extra.ID";
+
+    // flags for which kind of wallpaper to set
+
+    /** @hide */
+    @IntDef(flag = true, value = {
+            FLAG_SET_SYSTEM,
+            FLAG_SET_LOCK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetWallpaperFlags {}
+
+    /**
+     * Flag: use the supplied imagery as the general system wallpaper.
+     */
+    public static final int FLAG_SET_SYSTEM = 1 << 0;
+
+    /**
+     * Flag: use the supplied imagery as the lock-screen wallpaper.
+     */
+    public static final int FLAG_SET_LOCK = 1 << 1;
+
     private final Context mContext;
     
     /**
@@ -717,20 +746,41 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void setResource(@RawRes int resid) throws IOException {
+        setResource(resid, FLAG_SET_SYSTEM);
+    }
+
+    /**
+     * Version of {@link #setResource(int)} that takes an optional Bundle for returning
+     * metadata about the operation to the caller.
+     *
+     * @param resid
+     * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
+     *
+     * @see #FLAG_SET_LOCK
+     * @see #FLAG_SET_SYSTEM
+     *
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
+     *
+     * @throws IOException
+     */
+    public int setResource(@RawRes int resid, @SetWallpaperFlags int which)
+            throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return;
+            return 0;
         }
+        final Bundle result = new Bundle();
         try {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
-                    "res:" + resources.getResourceName(resid), mContext.getOpPackageName());
+                    "res:" + resources.getResourceName(resid),
+                    mContext.getOpPackageName(), result, which);
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                    setWallpaper(resources.openRawResource(resid), fos);
+                    copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
                 } finally {
                     IoUtils.closeQuietly(fos);
                 }
@@ -738,6 +788,7 @@ public class WallpaperManager {
         } catch (RemoteException e) {
             // Ignore
         }
+        return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
 
     /**
@@ -753,7 +804,7 @@ public class WallpaperManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param bitmap The bitmap to save.
+     * @param bitmap The bitmap to be used as the new system wallpaper.
      *
      * @throws IOException If an error occurs when attempting to set the wallpaper
      *     to the provided image.
@@ -775,42 +826,72 @@ public class WallpaperManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param fullImage A bitmap that will supply the wallpaper imagery. 
+     * @param fullImage A bitmap that will supply the wallpaper imagery.
      * @param visibleCropHint The rectangular subregion of {@code fullImage} that should be
      *     displayed as wallpaper.  Passing {@code null} for this parameter means that
      *     the full image should be displayed if possible given the image's and device's
-     *     aspect ratios, etc. 
+     *     aspect ratios, etc.
      * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
      *     image for restore to a future device; {@code false} otherwise.
+     *
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      *
      * @throws IOException If an error occurs when attempting to set the wallpaper
      *     to the provided image.
      * @throws IllegalArgumentException If the {@code visibleCropHint} rectangle is
      *     empty or invalid.
      */
-    public void setBitmap(Bitmap fullImage, Rect visibleCropHint, boolean allowBackup)
+    public int setBitmap(Bitmap fullImage, Rect visibleCropHint, boolean allowBackup)
+            throws IOException {
+        return setBitmap(fullImage, visibleCropHint, allowBackup, FLAG_SET_SYSTEM);
+    }
+
+    /**
+    /**
+     * Version of {@link #setBitmap(Bitmap, Rect, boolean)} that allows the caller
+     * to specify which of the supported wallpaper categories to set.
+     *
+     * @param fullImage A bitmap that will supply the wallpaper imagery.
+     * @param visibleCropHint The rectangular subregion of {@code fullImage} that should be
+     *     displayed as wallpaper.  Passing {@code null} for this parameter means that
+     *     the full image should be displayed if possible given the image's and device's
+     *     aspect ratios, etc.
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *     image for restore to a future device; {@code false} otherwise.
+     * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
+     *
+     * @see #FLAG_SET_LOCK_WALLPAPER
+     * @see #FLAG_SET_SYSTEM_WALLPAPER
+     *
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
+     *
+     * @throws IOException
+     */
+    public int setBitmap(Bitmap fullImage, Rect visibleCropHint,
+            boolean allowBackup, @SetWallpaperFlags int which)
             throws IOException {
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return;
+            return 0;
         }
+        final Bundle result = new Bundle();
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName());
-            if (fd == null) {
-                return;
-            }
-            FileOutputStream fos = null;
-            try {
-                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                fullImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
-            } finally {
-                IoUtils.closeQuietly(fos);
+                    mContext.getOpPackageName(), result, which);
+            if (fd != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    fullImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                } finally {
+                    IoUtils.closeQuietly(fos);
+                }
             }
         } catch (RemoteException e) {
             // Ignore
         }
+        return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
 
     private final void validateRect(Rect rect) {
@@ -843,7 +924,7 @@ public class WallpaperManager {
         setStream(bitmapData, null, true);
     }
 
-    private void setWallpaper(InputStream data, FileOutputStream fos)
+    private void copyStreamToWallpaperFile(InputStream data, FileOutputStream fos)
             throws IOException {
         byte[] buffer = new byte[32768];
         int amt;
@@ -877,29 +958,55 @@ public class WallpaperManager {
      * @throws IllegalArgumentException If the {@code visibleCropHint} rectangle is
      *     empty or invalid.
      */
-    public void setStream(InputStream bitmapData, Rect visibleCropHint, boolean allowBackup)
+    public int setStream(InputStream bitmapData, Rect visibleCropHint, boolean allowBackup)
             throws IOException {
+        return setStream(bitmapData, visibleCropHint, allowBackup, FLAG_SET_SYSTEM);
+    }
+
+    /**
+     * Version of {@link #setStream(InputStream, Rect, boolean)} that allows the caller
+     * to specify which of the supported wallpaper categories to set.
+     *
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.
+     * @param visibleCropHint The rectangular subregion of the streamed image that should be
+     *     displayed as wallpaper.  Passing {@code null} for this parameter means that
+     *     the full image should be displayed if possible given the image's and device's
+     *     aspect ratios, etc.
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *     image for restore to a future device; {@code false} otherwise.
+     * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
+     *
+     * @see #FLAG_SET_LOCK_WALLPAPER
+     * @see #FLAG_SET_SYSTEM_WALLPAPER
+     *
+     * @throws IOException
+     */
+    public int setStream(InputStream bitmapData, Rect visibleCropHint,
+            boolean allowBackup, @SetWallpaperFlags int which)
+                    throws IOException {
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return;
+            return 0;
         }
+        final Bundle result = new Bundle();
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName());
-            if (fd == null) {
-                return;
-            }
-            FileOutputStream fos = null;
-            try {
-                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                setWallpaper(bitmapData, fos);
-            } finally {
-                IoUtils.closeQuietly(fos);
+                    mContext.getOpPackageName(), result, which);
+            if (fd != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(bitmapData, fos);
+                } finally {
+                    IoUtils.closeQuietly(fos);
+                }
             }
         } catch (RemoteException e) {
             // Ignore
         }
+
+        return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
 
     /**

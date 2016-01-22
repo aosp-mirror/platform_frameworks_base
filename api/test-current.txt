@@ -5688,10 +5688,13 @@ package android.app {
     method public android.graphics.drawable.Drawable peekFastDrawable();
     method public void sendWallpaperCommand(android.os.IBinder, java.lang.String, int, int, int, android.os.Bundle);
     method public void setBitmap(android.graphics.Bitmap) throws java.io.IOException;
-    method public void setBitmap(android.graphics.Bitmap, android.graphics.Rect, boolean) throws java.io.IOException;
+    method public int setBitmap(android.graphics.Bitmap, android.graphics.Rect, boolean) throws java.io.IOException;
+    method public int setBitmap(android.graphics.Bitmap, android.graphics.Rect, boolean, int) throws java.io.IOException;
     method public void setResource(int) throws java.io.IOException;
+    method public int setResource(int, int) throws java.io.IOException;
     method public void setStream(java.io.InputStream) throws java.io.IOException;
-    method public void setStream(java.io.InputStream, android.graphics.Rect, boolean) throws java.io.IOException;
+    method public int setStream(java.io.InputStream, android.graphics.Rect, boolean) throws java.io.IOException;
+    method public int setStream(java.io.InputStream, android.graphics.Rect, boolean, int) throws java.io.IOException;
     method public void setWallpaperOffsetSteps(float, float);
     method public void setWallpaperOffsets(android.os.IBinder, float, float);
     method public void suggestDesiredDimensions(int, int);
@@ -5702,6 +5705,8 @@ package android.app {
     field public static final java.lang.String COMMAND_SECONDARY_TAP = "android.wallpaper.secondaryTap";
     field public static final java.lang.String COMMAND_TAP = "android.wallpaper.tap";
     field public static final java.lang.String EXTRA_LIVE_WALLPAPER_COMPONENT = "android.service.wallpaper.extra.LIVE_WALLPAPER_COMPONENT";
+    field public static final int FLAG_SET_LOCK = 2; // 0x2
+    field public static final int FLAG_SET_SYSTEM = 1; // 0x1
     field public static final java.lang.String WALLPAPER_PREVIEW_META_DATA = "android.wallpaper.preview";
   }
 
