@@ -115,48 +115,80 @@ public class RestrictedLockUtils {
     }
 
     /**
-     * Checks if lock screen notification features are disabled by policy. This should be
-     * only used for keyguard notification features but not the keyguard features
-     * (e.g. KEYGUARD_DISABLE_FINGERPRINT) where a profile owner can set them on the parent user
-     * as it won't work for that case.
+     * Checks if keyguard features are disabled by policy.
      *
-     * @param keyguardNotificationFeatures Could be any of notification features that can be
+     * @param keyguardFeatures Could be any of keyguard features that can be
      * disabled by {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures}.
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
      * or {@code null} If the notification features are not disabled. If the restriction is set by
      * multiple admins, then the admin component will be set to {@code null} and userId to
      * {@link UserHandle#USER_NULL}.
      */
-    public static EnforcedAdmin checkIfKeyguardNotificationFeaturesDisabled(Context context,
-            int keyguardNotificationFeatures) {
+    public static EnforcedAdmin checkIfKeyguardFeaturesDisabled(Context context,
+            int keyguardFeatures) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
             return null;
         }
-        boolean isDisabledByMultipleAdmins = false;
-        ComponentName adminComponent = null;
-        List<ComponentName> admins = dpm.getActiveAdmins();
-        if (admins != null) {
-            int disabledKeyguardFeatures;
+        final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
+        EnforcedAdmin enforcedAdmin = null;
+        final int userId = UserHandle.myUserId();
+        if (um.getUserInfo(userId).isManagedProfile()) {
+            final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userId);
+            if (admins == null) {
+                return null;
+            }
             for (ComponentName admin : admins) {
-                disabledKeyguardFeatures = dpm.getKeyguardDisabledFeatures(admin);
-                if ((disabledKeyguardFeatures & keyguardNotificationFeatures) != 0) {
-                    if (adminComponent == null) {
-                        adminComponent = admin;
+                if ((dpm.getKeyguardDisabledFeatures(admin, userId) & keyguardFeatures) != 0) {
+                    if (enforcedAdmin == null) {
+                        enforcedAdmin = new EnforcedAdmin(admin, userId);
                     } else {
-                        isDisabledByMultipleAdmins = true;
-                        break;
+                        return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                     }
                 }
             }
-        }
-        EnforcedAdmin enforcedAdmin = null;
-        if (adminComponent != null) {
-            if (!isDisabledByMultipleAdmins) {
-                enforcedAdmin = new EnforcedAdmin(adminComponent, UserHandle.myUserId());
-            } else {
-                enforcedAdmin = new EnforcedAdmin();
+        } else {
+            // Consider all admins for this user and the profiles that are visible from this
+            // user that do not use a separate work challenge.
+            for (UserInfo userInfo : um.getProfiles(userId)) {
+                final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
+                if (admins == null) {
+                    return null;
+                }
+                final boolean isSeparateProfileChallengeEnabled =
+                        lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id);
+                for (ComponentName admin : admins) {
+                    if (!isSeparateProfileChallengeEnabled) {
+                        if ((dpm.getKeyguardDisabledFeatures(admin, userInfo.id)
+                                    & keyguardFeatures) != 0) {
+                            if (enforcedAdmin == null) {
+                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            } else {
+                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                            }
+                            // This same admins could have set policies both on the managed profile
+                            // and on the parent. So, if the admin has set the policy on the
+                            // managed profile here, we don't need to further check if that admin
+                            // has set policy on the parent admin.
+                            continue;
+                        }
+                    }
+                    if (userInfo.isManagedProfile()) {
+                        // If userInfo.id is a managed profile, we also need to look at
+                        // the policies set on the parent.
+                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(admin);
+                        if ((parentDpm.getKeyguardDisabledFeatures(admin, userInfo.id)
+                                & keyguardFeatures) != 0) {
+                            if (enforcedAdmin == null) {
+                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            } else {
+                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                            }
+                        }
+                    }
+                }
             }
         }
         return enforcedAdmin;
@@ -323,8 +355,10 @@ public class RestrictedLockUtils {
                 if (admins == null) {
                     return null;
                 }
+                final boolean isSeparateProfileChallengeEnabled =
+                        lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id);
                 for (ComponentName admin : admins) {
-                    if (!lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id)) {
+                    if (!isSeparateProfileChallengeEnabled) {
                         if (dpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
                             if (enforcedAdmin == null) {
                                 enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
