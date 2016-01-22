@@ -340,6 +340,9 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     SkiaShader::apply(*mCaches, fill.skiaShaderData);
 
     GL_CHECKPOINT();
+    Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?
+            fill.skiaShaderData.bitmapData.bitmapTexture : nullptr;
+    const AutoTexture autoCleanup(texture);
 
     // ------------------------------------
     // ---------- GL state setup ----------
