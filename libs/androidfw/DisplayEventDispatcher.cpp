@@ -103,7 +103,7 @@ int DisplayEventDispatcher::handleEvent(int, int events, void*) {
     int32_t vsyncDisplayId;
     uint32_t vsyncCount;
     if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        ALOGE("dispatcher %p ~ Vsync pulse: timestamp=%" PRId64 ", id=%d, count=%d",
+        ALOGV("dispatcher %p ~ Vsync pulse: timestamp=%" PRId64 ", id=%d, count=%d",
                 this, ns2ms(vsyncTimestamp), vsyncDisplayId, vsyncCount);
         mWaitingForVsync = false;
         dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
