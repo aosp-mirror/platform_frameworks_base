@@ -367,6 +367,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
+                updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
                 mCallback.onChildDismissed(view);
                 if (endAction != null) {
                     endAction.run();
@@ -381,7 +382,15 @@ public class SwipeHelper implements Gefingerpoken {
                 updateSwipeProgressFromOffset(animView, canAnimViewBeDismissed);
             }
         });
+        prepareDismissAnimation(animView, anim);
         anim.start();
+    }
+
+    /**
+     * Called to update the dismiss animation.
+     */
+    protected void prepareDismissAnimation(View view, Animator anim) {
+        // Do nothing
     }
 
     public void snapChild(final View view, float velocity) {
@@ -401,14 +410,14 @@ public class SwipeHelper implements Gefingerpoken {
                 mCallback.onChildSnappedBack(animView);
             }
         });
-        updateSnapBackAnimation(anim);
+        prepareSnapBackAnimation(animView, anim);
         anim.start();
     }
 
     /**
      * Called to update the snap back animation.
      */
-    protected void updateSnapBackAnimation(Animator anim) {
+    protected void prepareSnapBackAnimation(View view, Animator anim) {
         // Do nothing
     }
 

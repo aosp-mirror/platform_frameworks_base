@@ -118,7 +118,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
 
                 // Load the next task only if we aren't svelte
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, true);
+                loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
                 // This callback is made when a new activity is launched and the old one is paused
                 // so ignore the current activity and try and preload the thumbnail for the
@@ -198,7 +198,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
@@ -370,7 +370,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         sInstanceLoadPlan = loader.createLoadPlan(mContext);
         if (topTask != null && !ssp.isRecentsTopMost(topTask, topTaskHome)) {
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
-            loader.preloadTasks(sInstanceLoadPlan, topTaskHome.value);
+            loader.preloadTasks(sInstanceLoadPlan, topTask.id, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
             if (stack.getTaskCount() > 0) {
                 // We try and draw the thumbnail transition bitmap in parallel before
@@ -399,7 +399,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -451,7 +451,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        loader.preloadTasks(plan, -1, true /* isTopTaskHome */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -756,29 +756,18 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
     private TaskViewTransform getThumbnailTransitionTransform(TaskStack stack,
             TaskStackView stackView, int runningTaskId, Task runningTaskOut) {
         // Find the running task in the TaskStack
-        Task task = null;
-        ArrayList<Task> tasks = stack.getStackTasks();
-        if (runningTaskId != -1) {
-            // Otherwise, try and find the task with the
-            int taskCount = tasks.size();
-            for (int i = taskCount - 1; i >= 0; i--) {
-                Task t = tasks.get(i);
-                if (t.key.id == runningTaskId) {
-                    task = t;
-                    runningTaskOut.copyFrom(t);
-                    break;
-                }
-            }
-        }
-        if (task == null) {
+        Task launchTask = stack.getLaunchTarget();
+        if (launchTask != null) {
+            runningTaskOut.copyFrom(launchTask);
+        } else {
             // If no task is specified or we can not find the task just use the front most one
-            task = tasks.get(tasks.size() - 1);
-            runningTaskOut.copyFrom(task);
+            launchTask = stack.getStackFrontMostTask();
+            runningTaskOut.copyFrom(launchTask);
         }
 
         // Get the transform for the running task
         stackView.getScroller().setStackScrollToInitialState();
-        mTmpTransform = stackView.getStackAlgorithm().getStackTransform(task,
+        mTmpTransform = stackView.getStackAlgorithm().getStackTransform(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;
     }
@@ -826,7 +815,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mReloadTasks || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
+            loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 

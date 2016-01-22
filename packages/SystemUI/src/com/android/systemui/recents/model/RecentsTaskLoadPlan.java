@@ -25,7 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
-
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -92,7 +93,7 @@ public class RecentsTaskLoadPlan {
     }
 
     /**
-     * An optimization to preload the raw list of tasks.  The raw tasks are saved in least-recent
+     * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
      * to most-recent order.
      */
     public synchronized void preloadRawTasks(boolean isTopTaskHome) {
@@ -107,7 +108,7 @@ public class RecentsTaskLoadPlan {
     }
 
     /**
-     * Preloads the list of recent tasks from the system.  After this call, the TaskStack will
+     * Preloads the list of recent tasks from the system. After this call, the TaskStack will
      * have a list of all the recent tasks with their metadata, not including icons or
      * thumbnails which were not cached and have to be loaded.
      *
@@ -115,13 +116,16 @@ public class RecentsTaskLoadPlan {
      * - least-recent to most-recent stack tasks
      * - least-recent to most-recent freeform tasks
      */
-    public synchronized void preloadPlan(RecentsTaskLoader loader, boolean isTopTaskHome) {
+    public synchronized void preloadPlan(RecentsTaskLoader loader, int topTaskId,
+            boolean isTopTaskHome) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
             preloadRawTasks(isTopTaskHome);
         }
 
+        SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();
+        SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
         long lastStackActiveTime = Prefs.getLong(mContext,
@@ -130,6 +134,17 @@ public class RecentsTaskLoadPlan {
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
+
+            // Affiliated tasks are returned in a specific order from ActivityManager but without a
+            // lastActiveTime since it hasn't yet been started. However, we later sort the task list
+            // by lastActiveTime, which rearranges the tasks. For now, we need to workaround this
+            // by updating the lastActiveTime of this task to the lastActiveTime of the task it is
+            // affiliated with, in the same order that we encounter it in the original list (just
+            // its index in the task group for the task it is affiliated with).
+            if (t.persistentId != t.affiliatedTaskId) {
+                t.lastActiveTime = affiliatedTasks.get(t.affiliatedTaskId).lastActiveTime +
+                        affiliatedTaskCounts.get(t.affiliatedTaskId, 0) + 1;
+            }
 
             // Compose the task key
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
@@ -140,13 +155,14 @@ public class RecentsTaskLoadPlan {
             boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
             boolean isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
                     (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS)));
+            boolean isLaunchTarget = taskKey.id == topTaskId;
             if (isStackTask && newLastStackActiveTime < 0) {
                 newLastStackActiveTime = t.lastActiveTime;
             }
 
             // Load the title, icon, and color
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
-            String contentDescription = loader.getAndUpdateContentDescription(taskKey, title, res);
+            String contentDescription = loader.getAndUpdateContentDescription(taskKey, res);
             String dismissDescription = String.format(dismissDescFormat, contentDescription);
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
@@ -157,9 +173,11 @@ public class RecentsTaskLoadPlan {
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    !isStackTask, t.bounds, t.taskDescription);
+                    !isStackTask, isLaunchTarget, t.bounds, t.taskDescription);
 
             allTasks.add(task);
+            affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
+            affiliatedTasks.put(taskKey.id, taskKey);
         }
         if (newLastStackActiveTime != -1) {
             Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,

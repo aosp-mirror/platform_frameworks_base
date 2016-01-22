@@ -42,6 +42,7 @@ import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.views.DropTarget;
+import com.android.systemui.recents.views.TaskViewAnimation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -226,12 +227,12 @@ public class TaskStack {
          * Notifies when a task has been removed from the stack.
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask);
+            Task newFrontMostTask, TaskViewAnimation animation);
 
         /**
          * Notifies when a task has been removed from the history.
          */
-        void onHistoryTaskRemoved(TaskStack stack, Task removedTask);
+        void onHistoryTaskRemoved(TaskStack stack, Task removedTask, TaskViewAnimation animation);
     }
 
     /**
@@ -520,21 +521,24 @@ public class TaskStack {
         }
     }
 
-    /** Removes a task */
-    public void removeTask(Task t) {
+    /**
+     * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
+     * how they should update themselves.
+     */
+    public void removeTask(Task t, TaskViewAnimation animation) {
         if (mStackTaskList.contains(t)) {
             boolean wasFrontMostTask = (getStackFrontMostTask() == t);
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask();
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask);
+                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation);
             }
         } else if (mHistoryTaskList.contains(t)) {
             removeTaskImpl(mHistoryTaskList, t);
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onHistoryTaskRemoved(this, t);
+                mCb.onHistoryTaskRemoved(this, t, animation);
             }
         }
         mRawTaskList.remove(t);
@@ -564,7 +568,8 @@ public class TaskStack {
             Task task = mRawTaskList.get(i);
             if (!newTasksMap.containsKey(task.key)) {
                 if (notifyStackChanges) {
-                    mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null);
+                    mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null,
+                            TaskViewAnimation.IMMEDIATE);
                 }
             }
             task.setGroup(null);
@@ -843,12 +848,17 @@ public class TaskStack {
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 TaskGrouping group;
-                int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
-                        IndividualTaskIdOffset + t.key.id;
-                if (mAffinitiesGroups.containsKey(affiliation)) {
-                    group = getGroupWithAffiliation(affiliation);
+                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
+                    int affiliation = t.affiliationTaskId > 0 ? t.affiliationTaskId :
+                            IndividualTaskIdOffset + t.key.id;
+                    if (mAffinitiesGroups.containsKey(affiliation)) {
+                        group = getGroupWithAffiliation(affiliation);
+                    } else {
+                        group = new TaskGrouping(affiliation);
+                        addGroup(group);
+                    }
                 } else {
-                    group = new TaskGrouping(affiliation);
+                    group = new TaskGrouping(t.key.id);
                     addGroup(group);
                 }
                 group.addTask(t);

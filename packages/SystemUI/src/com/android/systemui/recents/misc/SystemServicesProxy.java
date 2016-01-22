@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -554,39 +555,41 @@ public class SystemServicesProxy {
         }
     }
 
-    /** Returns the activity label */
-    public String getActivityLabel(ActivityInfo info) {
+    /**
+     * Returns the activity label, badging if necessary.
+     */
+    public String getBadgedActivityLabel(ActivityInfo info, int userId) {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
         if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
-            return "Recent Task";
+            return "Recent Task: " + userId;
         }
 
-        return info.loadLabel(mPm).toString();
+        return getBadgedLabel(info.loadLabel(mPm).toString(), userId);
     }
 
-    /** Returns the application label */
-    public String getApplicationLabel(Intent baseIntent, int userId) {
+    /**
+     * Returns the application label, badging if necessary.
+     */
+    public String getBadgedApplicationLabel(ApplicationInfo appInfo, int userId) {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
         if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
-            return "Recent Task";
+            return "Recent Task App: " + userId;
         }
 
-        ResolveInfo ri = mPm.resolveActivityAsUser(baseIntent, 0, userId);
-        CharSequence label = (ri != null) ? ri.loadLabel(mPm) : null;
-        return (label != null) ? label.toString() : null;
+        return getBadgedLabel(appInfo.loadLabel(mPm).toString(), userId);
     }
 
-    /** Returns the content description for a given task */
-    public String getContentDescription(Intent baseIntent, int userId, String activityLabel,
-            Resources res) {
-        String applicationLabel = getApplicationLabel(baseIntent, userId);
-        if (applicationLabel == null) {
-            return getBadgedLabel(activityLabel, userId);
-        }
+    /**
+     * Returns the content description for a given task, badging it if necessary.  The content
+     * description joins the app and activity labels.
+     */
+    public String getBadgedContentDescription(ActivityInfo info, int userId, Resources res) {
+        String activityLabel = info.loadLabel(mPm).toString();
+        String applicationLabel = info.applicationInfo.loadLabel(mPm).toString();
         String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
         return applicationLabel.equals(activityLabel) ? badgedApplicationLabel
                 : res.getString(R.string.accessibility_recents_task_header,
@@ -606,6 +609,22 @@ public class SystemServicesProxy {
         }
 
         Drawable icon = info.loadIcon(mPm);
+        return getBadgedIcon(icon, userId);
+    }
+
+    /**
+     * Returns the application icon for the ApplicationInfo for a user, badging if
+     * necessary.
+     */
+    public Drawable getBadgedApplicationIcon(ApplicationInfo appInfo, int userId) {
+        if (mPm == null) return null;
+
+        // If we are mocking, then return a mock label
+        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+            return new ColorDrawable(0xFF666666);
+        }
+
+        Drawable icon = appInfo.loadIcon(mPm);
         return getBadgedIcon(icon, userId);
     }
 

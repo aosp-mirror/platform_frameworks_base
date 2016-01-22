@@ -151,6 +151,7 @@ public class TaskStackViewScroller {
 
     /** Animates the stack scroll into bounds */
     ObjectAnimator animateBoundScroll() {
+        // TODO: Take duration for snap back
         float curScroll = getStackScroll();
         float newScroll = getBoundedStackScroll(curScroll);
         if (Float.compare(newScroll, curScroll) != 0) {

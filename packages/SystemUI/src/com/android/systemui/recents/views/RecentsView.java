@@ -513,7 +513,7 @@ public class RecentsView extends FrameLayout {
                     taskViewRect.right, taskViewRect.bottom);
 
             // Remove the task view after it is docked
-            mTaskStackView.updateLayout(false /* boundScroll */);
+            mTaskStackView.updateLayoutAlgorithm(false /* boundScroll */);
             stackLayout.getStackTransform(event.task, stackScroller.getStackScroll(), tmpTransform,
                     null);
             tmpTransform.alpha = 0;
@@ -529,10 +529,13 @@ public class RecentsView extends FrameLayout {
                                     ssp.startTaskInDockedMode(getContext(), event.taskView,
                                             event.task.key.id, dockState.createMode);
 
-                                    mTaskStackView.getStack().removeTask(event.task);
+                                    // Animate the stack accordingly
+                                    TaskViewAnimation stackAnim = new TaskViewAnimation(
+                                            TaskStackView.DEFAULT_SYNC_STACK_DURATION,
+                                            mFastOutSlowInInterpolator);
+                                    mTaskStackView.getStack().removeTask(event.task, stackAnim);
                                 }
                             }));
-
 
             MetricsLogger.action(mContext,
                     MetricsLogger.ACTION_WINDOW_DOCK_DRAG_DROP);

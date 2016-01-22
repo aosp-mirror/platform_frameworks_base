@@ -36,6 +36,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.TaskViewAnimation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -143,7 +144,6 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
-    private final List<Task> mTasks = new ArrayList<>();
     private final List<Row> mRows = new ArrayList<>();
     private final SparseIntArray mTaskRowCount = new SparseIntArray();
     private TaskStack mStack;
@@ -268,8 +268,8 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
 
     public void onTaskRemoved(Task task, int position) {
         // Since this is removed from the history, we need to update the stack as well to ensure
-        // that the model is correct
-        mStack.removeTask(task);
+        // that the model is correct. Since the stack is hidden, we can update it immediately.
+        mStack.removeTask(task, TaskViewAnimation.IMMEDIATE);
         removeTaskRow(position);
         if (mRows.isEmpty()) {
             dismissHistory();

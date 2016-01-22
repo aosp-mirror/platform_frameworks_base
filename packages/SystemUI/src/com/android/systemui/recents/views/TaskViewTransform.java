@@ -88,10 +88,37 @@ public class TaskViewTransform {
     public float alpha = 1f;
 
     public boolean visible = false;
-    float p = 0f;
+
+    // This is the relative task progress of this task, relative to the stack scroll at which this
+    // transform was computed
+    public float p = 0f;
 
     // This is a window-space rect used for positioning the task in the stack and freeform workspace
     public RectF rect = new RectF();
+
+    /**
+     * Fills int this transform from the state of the given TaskView.
+     */
+    public void fillIn(TaskView tv) {
+        translationZ = tv.getTranslationZ();
+        scale = tv.getScaleX();
+        alpha = tv.getAlpha();
+        visible = true;
+        p = tv.getTaskProgress();
+        rect.set(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
+    }
+
+    /**
+     * Copies the transform state from another {@link TaskViewTransform}.
+     */
+    public void copyFrom(TaskViewTransform other) {
+        translationZ = other.translationZ;
+        scale = other.scale;
+        alpha = other.alpha;
+        visible = other.visible;
+        p = other.p;
+        rect.set(other.rect);
+    }
 
     /**
      * Resets the current transform.

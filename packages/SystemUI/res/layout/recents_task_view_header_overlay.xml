@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,23 +13,21 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.recents.views.TaskViewHeader
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/task_view_bar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/recents_task_bar_height"
-    android:layout_gravity="top|center_horizontal">
+    android:layout_height="match_parent"
+    android:visibility="gone">
     <com.android.systemui.recents.views.FixedSizeImageView
-        android:id="@+id/icon"
+        android:id="@+id/app_icon"
         android:contentDescription="@string/recents_app_info_button_label"
         android:layout_width="@dimen/recents_task_view_application_icon_size"
         android:layout_height="@dimen/recents_task_view_application_icon_size"
         android:layout_marginStart="8dp"
         android:layout_gravity="center_vertical|start"
-        android:padding="8dp"
-        android:background="@drawable/recents_button_bg" />
+        android:padding="8dp" />
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/app_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|start"
@@ -45,38 +42,12 @@
         android:ellipsize="marquee"
         android:fadingEdge="horizontal" />
     <com.android.systemui.recents.views.FixedSizeImageView
-        android:id="@+id/move_task"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="52dp"
-        android:layout_gravity="center_vertical|end"
-        android:padding="12dp"
-        android:background="@drawable/recents_button_bg"
-        android:src="@drawable/star"
-        android:visibility="gone" />
-    <com.android.systemui.recents.views.FixedSizeImageView
-        android:id="@+id/dismiss_task"
+        android:id="@+id/app_info"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="4dp"
         android:layout_gravity="center_vertical|end"
         android:padding="12dp"
         android:background="@drawable/recents_button_bg"
-        android:visibility="invisible"
-        android:src="@drawable/recents_dismiss_light" />
-
-    <!-- The progress indicator shows if auto-paging is enabled -->
-    <ViewStub android:id="@+id/focus_timer_indicator_stub"
-               android:inflatedId="@+id/focus_timer_indicator"
-               android:layout="@layout/recents_task_view_header_progress_bar"
-               android:layout_width="match_parent"
-               android:layout_height="5dp"
-               android:layout_gravity="bottom" />
-
-    <!-- The app overlay shows as the user long-presses on the app icon -->
-    <ViewStub android:id="@+id/app_overlay_stub"
-               android:inflatedId="@+id/app_overlay"
-               android:layout="@layout/recents_task_view_header_overlay"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent" />
-</com.android.systemui.recents.views.TaskViewHeader>
+        android:src="@drawable/recents_info_light" />
+</FrameLayout>
