@@ -29,6 +29,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -132,6 +133,10 @@ public class NotificationGuts extends LinearLayout {
             systemApp = Utils.isSystemPackage(pm, info);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
+        }
+        if (systemApp) {
+            ((ImageView) row.findViewById(R.id.low_importance)).getDrawable().setTint(
+                    mContext.getColor(R.color.notification_guts_disabled_icon_tint));
         }
         final int minProgress = systemApp ?
                 NotificationListenerService.Ranking.IMPORTANCE_LOW
