@@ -422,8 +422,8 @@ public class NotificationPanelView extends PanelView implements
     public int computeMaxKeyguardNotifications(int maximum) {
         float minPadding = mClockPositionAlgorithm.getMinStackScrollerPadding(getHeight(),
                 mKeyguardStatusView.getHeight());
-        int notificationPadding = getResources().getDimensionPixelSize(
-                R.dimen.notification_padding);
+        int notificationPadding = Math.max(1, getResources().getDimensionPixelSize(
+                R.dimen.notification_divider_height));
         final int overflowheight = getResources().getDimensionPixelSize(
                 R.dimen.notification_summary_height);
         float bottomStackSize = mNotificationStackScroller.getKeyguardBottomStackSize();

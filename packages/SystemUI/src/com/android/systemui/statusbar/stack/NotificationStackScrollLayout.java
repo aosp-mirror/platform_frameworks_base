@@ -367,8 +367,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mStackScrollAlgorithm.initView(context);
-        mPaddingBetweenElementsNormal = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_padding);
+        mPaddingBetweenElementsNormal = Math.max(1, context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_divider_height));
         mPaddingBetweenElements = mPaddingBetweenElementsNormal;
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(

@@ -87,9 +87,6 @@
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
-    <!-- half the distance between notifications in the panel -->
-    <dimen name="notification_divider_height">2dp</dimen>
-
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 
@@ -301,8 +298,8 @@
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">1dp</dimen>
 
-    <!-- The padding between the individual notification cards. -->
-    <dimen name="notification_padding">0.5dp</dimen>
+    <!-- The height of the divider between the individual notifications. -->
+    <dimen name="notification_divider_height">0.5dp</dimen>
 
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
@@ -371,9 +368,6 @@
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
-
-    <!-- The height of the divider between the notfication children -->
-    <dimen name="notification_children_divider_height">1dp</dimen>
 
     <!-- The vertical distance from which the notification appear when children are expanded -->
     <dimen name="notification_appear_distance">140dp</dimen>

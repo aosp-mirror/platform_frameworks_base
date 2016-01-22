@@ -76,8 +76,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         super(context, attrs, defStyleAttr, defStyleRes);
         mChildPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_children_padding);
-        mDividerHeight = getResources().getDimensionPixelSize(
-                R.dimen.notification_children_divider_height);
+        mDividerHeight = Math.max(1, getResources().getDimensionPixelSize(
+                R.dimen.notification_divider_height));
         mMaxNotificationHeight = getResources().getDimensionPixelSize(
                 R.dimen.notification_max_height);
         mNotificationAppearDistance = getResources().getDimensionPixelSize(

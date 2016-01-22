@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,8 +94,8 @@ public class StackScrollAlgorithm {
     }
 
     private void initConstants(Context context) {
-        mPaddingBetweenElementsNormal = context.getResources()
-                .getDimensionPixelSize(R.dimen.notification_padding);
+        mPaddingBetweenElementsNormal = Math.max(1, context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_divider_height));
         mCollapsedSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_min_height);
         mTopStackPeekSize = context.getResources()
