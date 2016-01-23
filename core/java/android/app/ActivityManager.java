@@ -85,16 +85,16 @@ public class ActivityManager {
     private final Context mContext;
     private final Handler mHandler;
 
+    /**
+     * Defines acceptable types of bugreports.
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             BUGREPORT_OPTION_FULL,
             BUGREPORT_OPTION_INTERACTIVE,
             BUGREPORT_OPTION_REMOTE
     })
-    /**
-     * Defines acceptable types of bugreports.
-     * @hide
-     */
     public @interface BugreportMode {}
     /**
      * Takes a bugreport without user interference (and hence causing less

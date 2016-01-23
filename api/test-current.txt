@@ -3670,9 +3670,6 @@ package android.app {
     method public void startActivity(android.content.Context, android.content.Intent, android.os.Bundle);
   }
 
-  public static abstract class ActivityManager.BugreportMode implements java.lang.annotation.Annotation {
-  }
-
   public static class ActivityManager.MemoryInfo implements android.os.Parcelable {
     ctor public ActivityManager.MemoryInfo();
     method public int describeContents();
@@ -5777,9 +5774,6 @@ package android.app.admin {
     field public static final java.lang.String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
     field public static final java.lang.String EXTRA_DISABLE_WARNING = "android.app.extra.DISABLE_WARNING";
     field public static final java.lang.String EXTRA_LOCK_TASK_PACKAGE = "android.app.extra.LOCK_TASK_PACKAGE";
-  }
-
-  public static abstract class DeviceAdminReceiver.BugreportFailureCode implements java.lang.annotation.Annotation {
   }
 
   public class DevicePolicyManager {

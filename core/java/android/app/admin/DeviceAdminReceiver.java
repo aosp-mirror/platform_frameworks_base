@@ -283,17 +283,17 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String EXTRA_BUGREPORT_FAILURE_REASON =
             "android.app.extra.BUGREPORT_FAILURE_REASON";
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        BUGREPORT_FAILURE_FAILED_COMPLETING,
-        BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
-    })
     /**
      * An interface representing reason of bugreport failure.
      *
      * @see #EXTRA_BUGREPORT_FAILURE_REASON
      * @hide
      */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        BUGREPORT_FAILURE_FAILED_COMPLETING,
+        BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+    })
     public @interface BugreportFailureCode {}
     /** Bugreport completion process failed. */
     public static final int BUGREPORT_FAILURE_FAILED_COMPLETING = 0;
