@@ -223,7 +223,8 @@ public class SearchViewUiTest extends InstrumentationTestCase {
 
         assertFalse(mDocsList.exists());
         assertTrue(mMessageTextView.exists());
-        assertEquals(mContext.getString(R.string.empty), mMessageTextView.getText());
+        String msg = String.valueOf(mContext.getString(R.string.no_results));
+        assertEquals(String.format(msg, "TEST_ROOT_0"), mMessageTextView.getText());
         assertSearchTextField(false, query);
     }
 
