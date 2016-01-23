@@ -1036,6 +1036,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mChoiceActionMode = startActionMode(mMultiChoiceModeCallback);
         }
 
+        final boolean itemCheckChanged;
         if (mChoiceMode == CHOICE_MODE_MULTIPLE || mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL) {
             boolean oldValue = mCheckStates.get(position);
             mCheckStates.put(position, value);
@@ -1046,7 +1047,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mCheckedIdStates.delete(mAdapter.getItemId(position));
                 }
             }
-            if (oldValue != value) {
+            itemCheckChanged = oldValue != value;
+            if (itemCheckChanged) {
                 if (value) {
                     mCheckedItemCount++;
                 } else {
@@ -1062,6 +1064,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             boolean updateIds = mCheckedIdStates != null && mAdapter.hasStableIds();
             // Clear all values if we're checking something, or unchecking the currently
             // selected item
+            itemCheckChanged = isItemChecked(position) != value;
             if (value || isItemChecked(position)) {
                 mCheckStates.clear();
                 if (updateIds) {
@@ -1081,8 +1084,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
         }
 
-        // Do not generate a data change while we are in the layout phase
-        if (!mInLayout && !mBlockLayoutRequests) {
+        // Do not generate a data change while we are in the layout phase or data has not changed
+        if (!mInLayout && !mBlockLayoutRequests && itemCheckChanged) {
             mDataChanged = true;
             rememberSyncState();
             requestLayout();
