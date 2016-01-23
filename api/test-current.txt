@@ -50805,6 +50805,7 @@ package java.lang.reflect {
     method public java.lang.Object invoke(java.lang.Object, java.lang.Object...) throws java.lang.IllegalAccessException, java.lang.IllegalArgumentException, java.lang.reflect.InvocationTargetException;
     method public boolean isAnnotationPresent(java.lang.Class<? extends java.lang.annotation.Annotation>);
     method public boolean isBridge();
+    method public boolean isDefault();
     method public boolean isSynthetic();
     method public boolean isVarArgs();
     method public java.lang.String toGenericString();
