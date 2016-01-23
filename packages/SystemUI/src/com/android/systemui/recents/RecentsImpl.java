@@ -41,6 +41,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
@@ -532,7 +533,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         boolean screenPinningActive = ssp.isScreenPinningActive();
-        boolean isTopTaskHome = SystemServicesProxy.isHomeStack(topTask.stackId);
+        boolean isTopTaskHome = topTask != null && SystemServicesProxy.isHomeStack(topTask.stackId);
         if (topTask != null && !isTopTaskHome && !screenPinningActive) {
             ssp.moveTaskToDockedStack(topTask.id, stackCreateMode, initialBounds);
             showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */,

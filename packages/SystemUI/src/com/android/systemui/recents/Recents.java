@@ -38,6 +38,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 
@@ -508,6 +509,25 @@ public class Recents extends SystemUI
                 public void run() {
                     try {
                         mCallbacksToSystemUser.startScreenPinning();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Handle screen pinning request.
+     */
+    public final void onBusEvent(final RecentsDrawnEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (!sSystemServicesProxy.isSystemUser(processUser)) {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mCallbacksToSystemUser.sendRecentsDrawnEvent();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }

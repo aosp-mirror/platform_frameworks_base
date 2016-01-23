@@ -212,7 +212,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                 if (docked) {
                     mDragMode = dragMode;
                     if (mDragMode == DRAG_MODE_DIVIDER) {
-                        mDivider.getView().startDragging(false /* animate */);
+                        mDivider.getView().startDragging(false /* animate */, true /* touching*/);
                     }
                     mDockWindowTouchSlopExceeded = true;
                     MetricsLogger.action(mContext,

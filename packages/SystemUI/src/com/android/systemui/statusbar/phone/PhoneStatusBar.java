@@ -47,6 +47,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioAttributes;
 import android.media.MediaMetadata;
@@ -114,6 +115,8 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
@@ -1108,12 +1111,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean onLongClick(View v) {
             if (mRecents != null) {
+                Point realSize = new Point();
+                mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
+                        .getRealSize(realSize);
+                Rect initialBounds;
+
+                // Hack level over 9000: Make it one pixel smaller so activity manager doesn't
+                // dismiss it immediately again. Remove once b/26777526 is fixed.
+                if (mContext.getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_LANDSCAPE) {
+                    initialBounds = new Rect(0, 0, realSize.x - 1, realSize.y);
+                } else {
+                    initialBounds = new Rect(0, 0, realSize.x, realSize.y - 1);
+                }
                 boolean docked = mRecents.dockTopTask(false /* draggingInRecents */,
                         ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                        null /* initialBounds */);
+                        initialBounds);
                 if (docked) {
                     MetricsLogger.action(mContext,
                             MetricsLogger.ACTION_WINDOW_DOCK_LONGPRESS);
+                    EventBus.getDefault().send(new DockingTopTaskEvent());
                     return true;
                 }
             }
