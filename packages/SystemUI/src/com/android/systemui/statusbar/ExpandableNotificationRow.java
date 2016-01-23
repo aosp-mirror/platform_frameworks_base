@@ -652,8 +652,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setClipToActualHeight(boolean clipToActualHeight) {
-        super.setClipToActualHeight(clipToActualHeight);
-        getShowingLayout().setClipToActualHeight(clipToActualHeight);
+        super.setClipToActualHeight(clipToActualHeight || isUserLocked());
+        getShowingLayout().setClipToActualHeight(clipToActualHeight || isUserLocked());
     }
 
     /**
