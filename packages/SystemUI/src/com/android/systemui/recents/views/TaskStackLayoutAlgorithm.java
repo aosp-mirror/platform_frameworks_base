@@ -110,6 +110,10 @@ public class TaskStackLayoutAlgorithm {
     public static final float STATE_FOCUSED = 1f;
     public static final float STATE_UNFOCUSED = 0f;
 
+    public interface TaskStackLayoutAlgorithmCallbacks {
+        void onFocusStateChanged(float prevFocusState, float curFocusState);
+    }
+
     /**
      * The various stack/freeform states.
      */
@@ -210,6 +214,7 @@ public class TaskStackLayoutAlgorithm {
     Context mContext;
     private Interpolator mLinearOutSlowInInterpolator;
     private StackState mState = StackState.SPLIT;
+    private TaskStackLayoutAlgorithmCallbacks mCb;
 
     // The task bounds (untransformed) for layout.  This rect is anchored at mTaskRoot.
     public Rect mTaskRect = new Rect();
@@ -279,8 +284,10 @@ public class TaskStackLayoutAlgorithm {
     TaskViewTransform mBackOfStackTransform = new TaskViewTransform();
     TaskViewTransform mFrontOfStackTransform = new TaskViewTransform();
 
-    public TaskStackLayoutAlgorithm(Context context) {
+    public TaskStackLayoutAlgorithm(Context context, TaskStackLayoutAlgorithmCallbacks cb) {
         Resources res = context.getResources();
+        mContext = context;
+        mCb = cb;
 
         mFocusedRange = new Range(res.getFloat(R.integer.recents_layout_focused_range_min),
                 res.getFloat(R.integer.recents_layout_focused_range_max));
@@ -291,7 +298,6 @@ public class TaskStackLayoutAlgorithm {
 
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
-        mContext = context;
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
@@ -315,8 +321,12 @@ public class TaskStackLayoutAlgorithm {
      * Sets the focused state.
      */
     public void setFocusState(float focusState) {
+        float prevFocusState = mFocusState;
         mFocusState = focusState;
         updateFrontBackTransforms();
+        if (mCb != null) {
+            mCb.onFocusStateChanged(prevFocusState, focusState);
+        }
     }
 
     /**

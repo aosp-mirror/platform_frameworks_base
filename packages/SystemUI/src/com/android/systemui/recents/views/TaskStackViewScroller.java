@@ -20,7 +20,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.util.FloatProperty;
 import android.util.Log;
+import android.util.Property;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -37,6 +39,24 @@ public class TaskStackViewScroller {
         void onScrollChanged(float prevScroll, float curScroll, TaskViewAnimation animation);
     }
 
+    /**
+     * A Property wrapper around the <code>stackScroll</code> functionality handled by the
+     * {@link #setStackScroll(float)} and
+     * {@link #getStackScroll()} methods.
+     */
+    private static final Property<TaskStackViewScroller, Float> STACK_SCROLL =
+            new FloatProperty<TaskStackViewScroller>("stackScroll") {
+                @Override
+                public void setValue(TaskStackViewScroller object, float value) {
+                    object.setStackScroll(value);
+                }
+
+                @Override
+                public Float get(TaskStackViewScroller object) {
+                    return object.getStackScroll();
+                }
+            };
+
     Context mContext;
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScrollerCallbacks mCb;
@@ -51,8 +71,10 @@ public class TaskStackViewScroller {
 
     private Interpolator mLinearOutSlowInInterpolator;
 
-    public TaskStackViewScroller(Context context, TaskStackLayoutAlgorithm layoutAlgorithm) {
+    public TaskStackViewScroller(Context context, TaskStackViewScrollerCallbacks cb,
+            TaskStackLayoutAlgorithm layoutAlgorithm) {
         mContext = context;
+        mCb = cb;
         mScroller = new OverScroller(context);
         mLayoutAlgorithm = layoutAlgorithm;
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -62,11 +84,6 @@ public class TaskStackViewScroller {
     /** Resets the task scroller. */
     void reset() {
         mStackScrollP = 0f;
-    }
-
-    /** Sets the callbacks */
-    void setCallbacks(TaskStackViewScrollerCallbacks cb) {
-        mCb = cb;
     }
 
     /** Gets the current stack scroll */
@@ -172,7 +189,7 @@ public class TaskStackViewScroller {
         stopBoundScrollAnimation();
 
         mFinalAnimatedScroll = newScroll;
-        mScrollAnimator = ObjectAnimator.ofFloat(this, "stackScroll", curScroll, newScroll);
+        mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, curScroll, newScroll);
         mScrollAnimator.setDuration(mContext.getResources().getInteger(
                 R.integer.recents_animate_task_stack_scroll_duration));
         mScrollAnimator.setInterpolator(mLinearOutSlowInInterpolator);
