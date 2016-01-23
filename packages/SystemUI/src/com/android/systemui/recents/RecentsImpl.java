@@ -108,6 +108,10 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         public void onActivityPinned() {
         }
 
+        @Override
+        public void onPinnedActivityRestartAttempt() {
+        }
+
         /** Preloads the next task */
         public void run() {
             RecentsConfiguration config = Recents.getConfiguration();

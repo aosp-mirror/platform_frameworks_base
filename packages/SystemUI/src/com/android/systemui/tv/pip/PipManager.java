@@ -29,7 +29,6 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -38,7 +37,6 @@ import java.util.List;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 
 /**
@@ -313,6 +311,10 @@ public class PipManager {
         public void onActivityPinned()  throws RemoteException {
             // Post the message back to the UI thread.
             mHandler.post(mOnActivityPinnedRunnable);
+        }
+
+        @Override
+        public void onPinnedActivityRestartAttempt() {
         }
     }
 

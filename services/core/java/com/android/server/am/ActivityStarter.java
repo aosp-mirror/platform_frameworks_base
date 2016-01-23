@@ -504,18 +504,45 @@ class ActivityStarter {
 
         err = startActivityUnchecked(
                 r, sourceRecord, voiceSession, voiceInteractor, startFlags, true, options, inTask);
+        postStartActivityUncheckedProcessing(r, err, stack.mStackId);
+        return err;
+    }
 
-        if (err < 0) {
-            // If someone asked to have the keyguard dismissed on the next
-            // activity start, but we are not actually doing an activity
-            // switch...  just dismiss the keyguard now, because we
-            // probably want to see whatever is behind it.
+    void postStartActivityUncheckedProcessing(
+            ActivityRecord r, int result, int prevFocusedStackId) {
+
+        if (result < START_SUCCESS) {
+            // If someone asked to have the keyguard dismissed on the next activity start,
+            // but we are not actually doing an activity switch...  just dismiss the keyguard now,
+            // because we probably want to see whatever is behind it.
             mSupervisor.notifyActivityDrawnForKeyguard();
-        } else {
-            launchRecentsAppIfNeeded(stack);
+            return;
         }
 
-        return err;
+        int startedActivityStackId = INVALID_STACK_ID;
+        if (r.task != null && r.task.stack != null) {
+            startedActivityStackId = r.task.stack.mStackId;
+        } else if (mTargetStack != null) {
+            startedActivityStackId = mTargetStack.mStackId;
+        }
+
+        if (startedActivityStackId == DOCKED_STACK_ID && prevFocusedStackId == HOME_STACK_ID) {
+            // We launch an activity while being in home stack, which means either launcher or
+            // recents into docked stack. We don't want the launched activity to be alone in a
+            // docked stack, so we want to immediately launch recents too.
+            if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
+            mWindowManager.showRecentApps();
+            return;
+        }
+
+        if (startedActivityStackId == PINNED_STACK_ID
+                && (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP)) {
+            // The activity was already running in the pinned stack so it wasn't started, but either
+            // brought to the front or the new intent was delivered to it since it was already in
+            // front. Notify anyone interested in this piece of information.
+            mService.notifyPinnedActivityRestartAttemptLocked();
+            return;
+        }
     }
 
     void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {
@@ -983,17 +1010,6 @@ class ActivityStarter {
         }
 
         return START_SUCCESS;
-    }
-
-    private void launchRecentsAppIfNeeded(ActivityStack topStack) {
-        if (topStack.mStackId == HOME_STACK_ID && mTargetStack != null
-                && mTargetStack.mStackId == DOCKED_STACK_ID) {
-            // We launch an activity while being in home stack, which means either launcher or
-            // recents into docked stack. We don't want the launched activity to be alone in a
-            // docked stack, so we want to immediately launch recents too.
-            if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-            mWindowManager.showRecentApps();
-        }
     }
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,
@@ -1557,11 +1573,13 @@ class ActivityStarter {
 
     final void doPendingActivityLaunchesLocked(boolean doResume) {
         while (!mPendingActivityLaunches.isEmpty()) {
-            PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
-
+            final PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
+            final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
             try {
-                startActivityUnchecked(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                        doResume && mPendingActivityLaunches.isEmpty(), null, null);
+                final int result = startActivityUnchecked(
+                        pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null, null);
+                postStartActivityUncheckedProcessing(
+                        pal.r, result, mSupervisor.mFocusedStack.mStackId);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());

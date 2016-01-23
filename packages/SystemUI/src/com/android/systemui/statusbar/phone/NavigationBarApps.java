@@ -1108,6 +1108,10 @@ class NavigationBarApps extends LinearLayout
         @Override
         public void onActivityPinned() {
         }
+
+        @Override
+        public void onPinnedActivityRestartAttempt() {
+        }
     }
 
     @Override

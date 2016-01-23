@@ -105,6 +105,10 @@ public class CarStatusBar extends PhoneStatusBar {
         }
 
         @Override
+        public void onPinnedActivityRestartAttempt() {
+        }
+
+        @Override
         public void onTaskStackChanged() {
             mHandler.removeCallbacks(this);
             mHandler.post(this);

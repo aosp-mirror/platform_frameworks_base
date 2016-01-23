@@ -203,7 +203,6 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
@@ -1473,6 +1472,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int LOG_STACK_STATE = 62;
     static final int VR_MODE_CHANGE_MSG = 63;
     static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
+    static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 65;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -2048,6 +2048,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             // Make a one-way callback to the listener
                             mTaskStackListeners.getBroadcastItem(i).onActivityPinned();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onPinnedActivityRestartAttempt();
                         } catch (RemoteException e){
                             // Handled by the RemoteCallbackList
                         }
@@ -11282,6 +11296,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     void notifyActivityPinnedLocked() {
         mHandler.removeMessages(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG);
         mHandler.obtainMessage(NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG).sendToTarget();
+    }
+
+    /**
+     * Notifies all listeners when an attempt was made to start an an activity that is already
+     * running in the pinned stack and the activity was not actually started, but the task is
+     * either brought to the front or a new Intent is delivered to it.
+     */
+    void notifyPinnedActivityRestartAttemptLocked() {
+        mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
+        mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG).sendToTarget();
     }
 
     @Override
