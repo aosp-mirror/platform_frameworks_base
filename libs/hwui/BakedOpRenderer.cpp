@@ -49,7 +49,8 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
     // attach the texture to the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
             offscreenBuffer->texture.id(), 0);
-    LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "startLayer FAILED");
+    GL_CHECKPOINT(LOW);
+
     LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
             "framebuffer incomplete!");
 
@@ -63,7 +64,7 @@ void BakedOpRenderer::endLayer() {
     if (mRenderTarget.stencil) {
         // if stencil was used for clipping, detach it and return it to pool
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "glfbrb endlayer failed");
+        GL_CHECKPOINT(MODERATE);
         mCaches.renderBufferCache.put(mRenderTarget.stencil);
         mRenderTarget.stencil = nullptr;
     }
@@ -74,8 +75,7 @@ void BakedOpRenderer::endLayer() {
 
     // Detach the texture from the FBO
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-    LOG_ALWAYS_FATAL_IF(GLUtils::dumpGLErrors(), "endLayer FAILED, bound fbo = %u",
-            mRenderState.getFramebuffer());
+    GL_CHECKPOINT(LOW);
     mRenderState.deleteFramebuffer(mRenderTarget.frameBufferId);
     mRenderTarget.frameBufferId = 0;
 }
@@ -138,8 +138,6 @@ void BakedOpRenderer::endFrame(const Rect& repaintRect) {
     mCaches.clearGarbage();
     mCaches.pathCache.trim();
     mCaches.tessellationCache.trim();
-
-    GL_CHECKPOINT();
 
 #if DEBUG_MEMORY_USAGE
     mCaches.dumpMemoryUsage();

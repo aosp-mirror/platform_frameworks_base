@@ -4,6 +4,11 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 HWUI_NEW_OPS := true
 
+# Enables fine-grained GLES error checking
+# If set to true, every GLES call is wrapped & error checked
+# Has moderate overhead
+HWUI_ENABLE_OPENGL_VALIDATION := false
+
 hwui_src_files := \
     font/CacheTexture.cpp \
     font/Font.cpp \
@@ -157,6 +162,13 @@ ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
         frameworks/rs
 endif
 
+ifeq (true, $(HWUI_ENABLE_OPENGL_VALIDATION))
+    hwui_cflags += -include debug/wrap_gles.h
+    hwui_src_files += debug/wrap_gles.cpp
+    hwui_c_includes += frameworks/native/opengl/libs/GLES2
+    hwui_cflags += -DDEBUG_OPENGL=3
+endif
+
 
 # ------------------------
 # static library
@@ -188,8 +200,8 @@ LOCAL_CFLAGS := \
         -DHWUI_NULL_GPU
 LOCAL_SRC_FILES := \
         $(hwui_src_files) \
-        tests/common/nullegl.cpp \
-        tests/common/nullgles.cpp
+        debug/nullegl.cpp \
+        debug/nullgles.cpp
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
 

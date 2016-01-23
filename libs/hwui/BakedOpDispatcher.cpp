@@ -784,9 +784,7 @@ void BakedOpDispatcher::onCopyFromLayerOp(BakedOpRenderer& renderer, const CopyF
                 .build();
         renderer.renderGlop(state, glop);
     }
-    GL_CHECKPOINT();
     renderer.renderState().layerPool().putOrDelete(*op.layerHandle);
-    GL_CHECKPOINT();
 }
 
 } // namespace uirenderer
