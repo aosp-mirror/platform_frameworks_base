@@ -26,10 +26,9 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/start_group"
+            android:id="@+id/ends_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="start"
             android:orientation="horizontal" />
 
         <LinearLayout
@@ -37,13 +36,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal" />
-
-        <LinearLayout
-            android:id="@+id/end_group"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="end"
             android:orientation="horizontal" />
 
     </FrameLayout>
@@ -54,10 +46,9 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/start_group_lightsout"
+            android:id="@+id/ends_group_lightsout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="start"
             android:orientation="horizontal" />
 
         <LinearLayout
@@ -65,13 +56,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal" />
-
-        <LinearLayout
-            android:id="@+id/end_group_lightsout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="end"
             android:orientation="horizontal" />
 
     </FrameLayout>
