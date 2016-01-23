@@ -283,7 +283,7 @@ final class Session extends IWindowSession.Stub
     }
 
     public boolean performDrag(IWindow window, IBinder dragToken,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "perform drag: win=" + window + " data=" + data);
@@ -336,6 +336,7 @@ final class Session extends IWindowSession.Stub
 
             mService.mDragState.mData = data;
             mService.mDragState.broadcastDragStartedLw(touchX, touchY);
+            mService.mDragState.overridePointerIconLw(touchSource);
 
             // remember the thumb offsets for later
             mService.mDragState.mThumbOffsetX = thumbCenterX;

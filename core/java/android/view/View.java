@@ -20059,7 +20059,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 root.getLastTouchPoint(shadowSize);
 
                 okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, mAttachInfo.mDragToken,
-                        shadowSize.x, shadowSize.y,
+                        root.getLastTouchSource(), shadowSize.x, shadowSize.y,
                         shadowTouchPoint.x, shadowTouchPoint.y, data);
                 if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
             }

@@ -186,8 +186,8 @@ interface IWindowSession {
     /**
      * Initiate the drag operation itself
      */
-    boolean performDrag(IWindow window, IBinder dragToken, float touchX, float touchY,
-            float thumbCenterX, float thumbCenterY, in ClipData data);
+    boolean performDrag(IWindow window, IBinder dragToken, int touchSource,
+            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
    /**
      * Report the result of a drop action targeted to the given window.
