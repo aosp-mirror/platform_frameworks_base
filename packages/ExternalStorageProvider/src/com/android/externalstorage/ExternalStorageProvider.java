@@ -25,6 +25,7 @@ import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.FileObserver;
 import android.os.FileUtils;
@@ -234,7 +235,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
 
+
     private String getDocIdForFile(File file) throws FileNotFoundException {
+        return getDocIdForFileMaybeCreate(file, false);
+    }
+
+    private String getDocIdForFileMaybeCreate(File file, boolean createNewDir)
+            throws FileNotFoundException {
         String path = file.getAbsolutePath();
 
         // Find the most-specific root path
@@ -264,6 +271,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
             path = path.substring(rootPath.length());
         } else {
             path = path.substring(rootPath.length() + 1);
+        }
+
+        if (!file.exists() && createNewDir) {
+            Log.i(TAG, "Creating new directory " + file);
+            if (!file.mkdir()) {
+                Log.e(TAG, "Could not create directory " + file);
+            }
         }
 
         return mostSpecificId + ':' + path;
@@ -607,6 +621,34 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 pw.println();
             }
         }
+    }
+
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        Bundle bundle = super.call(method, arg, extras);
+        if (bundle == null && !TextUtils.isEmpty(method)) {
+            switch (method) {
+                case "getDocIdForFileCreateNewDir": {
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.MANAGE_DOCUMENTS, null);
+                    if (TextUtils.isEmpty(arg)) {
+                        return null;
+                    }
+                    try {
+                        final String docId = getDocIdForFileMaybeCreate(new File(arg), true);
+                        bundle = new Bundle();
+                        bundle.putString("DOC_ID", docId);
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "file '" + arg + "' not found");
+                        return null;
+                    }
+                    break;
+                }
+                default:
+                    Log.w(TAG, "unknown method passed to call(): " + method);
+            }
+        }
+        return bundle;
     }
 
     private static String getTypeForFile(File file) {
