@@ -43,6 +43,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String HOME = "home";
     public static final String RECENT = "recent";
     public static final String NAVSPACE = "space";
+    public static final String CLIPBOARD = "clipboard";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -233,6 +234,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             v = inflater.inflate(R.layout.menu_ime, parent, false);
         } else if (NAVSPACE.equals(button)) {
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
+        } else if (CLIPBOARD.equals(button)) {
+            v = inflater.inflate(R.layout.clipboard, parent, false);
         } else {
             return null;
         }

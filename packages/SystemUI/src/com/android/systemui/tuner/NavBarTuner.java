@@ -45,6 +45,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.CLIPBOARD;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
@@ -158,6 +159,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             return context.getString(R.string.space);
         } else if (button.startsWith(MENU_IME)) {
             return context.getString(R.string.menu_ime);
+        } else if (button.startsWith(CLIPBOARD)) {
+            return context.getString(R.string.clipboard);
         }
         return button;
     }
@@ -348,9 +351,9 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             });
         }
 
-        private void showAddDialog(Context context) {
+        private void showAddDialog(final Context context) {
             final String[] options = new String[] {
-                    BACK, HOME, RECENT, MENU_IME, NAVSPACE,
+                    BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD,
             };
             final CharSequence[] labels = new CharSequence[options.length];
             for (int i = 0; i < options.length; i++) {
@@ -362,12 +365,23 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             int index = mButtons.size() - 1;
+                            showAddedMessage(context, options[which]);
                             mButtons.add(index, options[which]);
                             mLabels.add(index, labels[which]);
                             notifyItemInserted(index);
                         }
                     }).setNegativeButton(android.R.string.cancel, null)
                     .show();
+        }
+
+        private void showAddedMessage(Context context, String button) {
+            if (CLIPBOARD.equals(button)) {
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.clipboard)
+                        .setMessage(R.string.clipboard_description)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+            }
         }
 
         private void bindClick(View view, Holder holder) {
