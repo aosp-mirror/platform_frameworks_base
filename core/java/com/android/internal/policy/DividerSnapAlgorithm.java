@@ -237,6 +237,22 @@ public class DividerSnapAlgorithm {
         return mMiddleTarget;
     }
 
+    public SnapTarget getNextTarget(SnapTarget snapTarget) {
+        int index = mTargets.indexOf(snapTarget);
+        if (index != -1 && index < mTargets.size() - 1) {
+            return mTargets.get(index + 1);
+        }
+        return snapTarget;
+    }
+
+    public SnapTarget getPreviousTarget(SnapTarget snapTarget) {
+        int index = mTargets.indexOf(snapTarget);
+        if (index != -1 && index > 0) {
+            return mTargets.get(index - 1);
+        }
+        return snapTarget;
+    }
+
     /**
      * Represents a snap target for the divider.
      */
