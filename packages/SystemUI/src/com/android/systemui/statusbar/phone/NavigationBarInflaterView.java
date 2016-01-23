@@ -50,6 +50,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     protected final LayoutInflater mLayoutInflater;
     protected final LayoutInflater mLandscapeInflater;
 
+    public static final String SIZE_MOD_START = "[";
+    public static final String SIZE_MOD_END = "]";
+
     protected FrameLayout mRot0;
     protected FrameLayout mRot90;
     private SparseArray<ButtonDispatcher> mButtonDispatchers;
@@ -206,9 +209,11 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     @Nullable
-    protected View inflateButton(String button, ViewGroup parent, boolean landscape) {
-        View v;
+    protected View inflateButton(String buttonSpec, ViewGroup parent, boolean landscape) {
         LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
+        float size = extractSize(buttonSpec);
+        String button = extractButton(buttonSpec);
+        View v = null;
         if (HOME.equals(button)) {
             v = inflater.inflate(R.layout.home, parent, false);
             if (landscape && isSw600Dp()) {
@@ -232,9 +237,29 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             return null;
         }
 
+        if (size != 0) {
+            ViewGroup.LayoutParams params = v.getLayoutParams();
+            params.width = (int) (params.width * size);
+        }
         parent.addView(v);
         addToDispatchers(v);
         return v;
+    }
+
+    public static float extractSize(String buttonSpec) {
+        if (!buttonSpec.contains(SIZE_MOD_START)) {
+            return 1;
+        }
+        final int sizeStart = buttonSpec.indexOf(SIZE_MOD_START);
+        String sizeStr = buttonSpec.substring(sizeStart + 1, buttonSpec.indexOf(SIZE_MOD_END));
+        return Float.parseFloat(sizeStr);
+    }
+
+    public static String extractButton(String buttonSpec) {
+        if (!buttonSpec.contains(SIZE_MOD_START)) {
+            return buttonSpec;
+        }
+        return buttonSpec.substring(0, buttonSpec.indexOf(SIZE_MOD_START));
     }
 
     private void addToDispatchers(View v) {

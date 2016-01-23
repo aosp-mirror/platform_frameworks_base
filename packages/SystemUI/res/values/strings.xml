@@ -1378,4 +1378,7 @@
     <!-- SysUI Tuner: Message of no home warning dialog [CHAR LIMIT=NONE] -->
     <string name="no_home_message">A home button is required to be able to navigate this device. Please add a home button before saving.</string>
 
+    <!-- SysUI Tuner: Adjust button width dialog title [CHAR LIMIT=60] -->
+    <string name="adjust_button_width">Adjust button width</string>
+
 </resources>

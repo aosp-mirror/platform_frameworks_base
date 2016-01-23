@@ -39,11 +39,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BACK;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BUTTON_SEPARATOR;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.GRAVITY_SEPARATOR;
@@ -143,15 +148,15 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
     }
 
     private static CharSequence getLabel(String button, Context context) {
-        if (HOME.equals(button)) {
+        if (button.startsWith(HOME)) {
             return context.getString(R.string.accessibility_home);
-        } else if (BACK.equals(button)) {
+        } else if (button.startsWith(BACK)) {
             return context.getString(R.string.accessibility_back);
-        } else if (RECENT.equals(button)) {
+        } else if (button.startsWith(RECENT)) {
             return context.getString(R.string.accessibility_recent);
-        } else if (NAVSPACE.equals(button)) {
+        } else if (button.startsWith(NAVSPACE)) {
             return context.getString(R.string.space);
-        } else if (MENU_IME.equals(button)) {
+        } else if (button.startsWith(MENU_IME)) {
             return context.getString(R.string.menu_ime);
         }
         return button;
@@ -238,7 +243,13 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         }
 
         public boolean hasHomeButton() {
-            return mButtons.contains(HOME);
+            final int N = mButtons.size();
+            for (int i = 0; i < N; i++) {
+                if (mButtons.get(i).startsWith(HOME)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public String getNavString() {
@@ -367,14 +378,44 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         @Override
         public void onClick(View v) {
             Holder holder = (Holder) v.getTag();
-            int position = holder.getAdapterPosition();
             if (v.getId() == R.id.width) {
-                // TODO: Handle width control.
+                showWidthDialog(holder, v.getContext());
             } else if (v.getId() == R.id.close) {
+                int position = holder.getAdapterPosition();
                 mButtons.remove(position);
                 mLabels.remove(position);
                 notifyItemRemoved(position);
             }
+        }
+
+        private void showWidthDialog(final Holder holder, Context context) {
+            final String buttonSpec = mButtons.get(holder.getAdapterPosition());
+            float amount = extractSize(buttonSpec);
+            final AlertDialog dialog = new AlertDialog.Builder(context)
+                    .setTitle(R.string.adjust_button_width)
+                    .setView(R.layout.nav_width_view)
+                    .setNegativeButton(android.R.string.cancel, null).create();
+            dialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                    context.getString(android.R.string.ok),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface d, int which) {
+                            final String button = extractButton(buttonSpec);
+                            SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekbar);
+                            if (seekBar.getProgress() == 75) {
+                                mButtons.set(holder.getAdapterPosition(), button);
+                            } else {
+                                float amount = (seekBar.getProgress() + 25) / 100f;
+                                mButtons.set(holder.getAdapterPosition(), button
+                                        + SIZE_MOD_START + amount + SIZE_MOD_END);
+                            }
+                        }
+                    });
+            dialog.show();
+            SeekBar seekBar = (SeekBar) dialog.findViewById(R.id.seekbar);
+            // Range is .25 - 1.75.
+            seekBar.setMax(150);
+            seekBar.setProgress((int) ((amount - .25f) * 100));
         }
 
         @Override
