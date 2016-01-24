@@ -17,14 +17,17 @@ package com.android.systemui.tuner;
 import com.android.systemui.R;
 
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
@@ -46,6 +49,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.CLIPBOARD;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_END;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_START;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_IMAGE_DELIM;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
@@ -63,6 +70,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
     private static final int SAVE = Menu.FIRST + 1;
     private static final int RESET = Menu.FIRST + 2;
+    private static final int READ_REQUEST = 42;
 
     private NavBarAdapter mNavBarAdapter;
 
@@ -161,6 +169,8 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             return context.getString(R.string.menu_ime);
         } else if (button.startsWith(CLIPBOARD)) {
             return context.getString(R.string.clipboard);
+        } else if (button.startsWith(KEY)) {
+            return context.getString(R.string.keycode);
         }
         return button;
     }
@@ -202,7 +212,23 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         }
     }
 
-    private static class NavBarAdapter extends RecyclerView.Adapter<Holder>
+    private void selectImage() {
+        startActivityForResult(KeycodeSelectionHelper.getSelectImageIntent(), READ_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == READ_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
+            final Uri uri = data.getData();
+            final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            getContext().getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            mNavBarAdapter.onImageSelected(uri);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private class NavBarAdapter extends RecyclerView.Adapter<Holder>
             implements View.OnClickListener {
 
         private static final String START = "start";
@@ -219,6 +245,9 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         private int mCategoryLayout;
         private int mButtonLayout;
         private ItemTouchHelper mTouchHelper;
+
+        // Stored keycode while we wait for image selection on a KEY.
+        private int mKeycode;
 
         public NavBarAdapter(Context context) {
             TypedArray attrs = context.getTheme().obtainStyledAttributes(null,
@@ -353,7 +382,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
 
         private void showAddDialog(final Context context) {
             final String[] options = new String[] {
-                    BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD,
+                    BACK, HOME, RECENT, MENU_IME, NAVSPACE, CLIPBOARD, KEY,
             };
             final CharSequence[] labels = new CharSequence[options.length];
             for (int i = 0; i < options.length; i++) {
@@ -364,14 +393,48 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                     .setItems(labels, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            int index = mButtons.size() - 1;
-                            showAddedMessage(context, options[which]);
-                            mButtons.add(index, options[which]);
-                            mLabels.add(index, labels[which]);
-                            notifyItemInserted(index);
+                            if (KEY.equals(options[which])) {
+                                showKeyDialogs(context);
+                            } else {
+                                int index = mButtons.size() - 1;
+                                showAddedMessage(context, options[which]);
+                                mButtons.add(index, options[which]);
+                                mLabels.add(index, labels[which]);
+
+                                notifyItemInserted(index);
+                            }
                         }
                     }).setNegativeButton(android.R.string.cancel, null)
                     .show();
+        }
+
+        private void onImageSelected(Uri uri) {
+            int index = mButtons.size() - 1;
+            mButtons.add(index, KEY + KEY_CODE_START + mKeycode + KEY_IMAGE_DELIM + uri.toString()
+                    + KEY_CODE_END);
+            mLabels.add(index, getLabel(KEY, getContext()));
+
+            notifyItemInserted(index);
+        }
+
+        private void showKeyDialogs(final Context context) {
+            final KeycodeSelectionHelper.OnSelectionComplete listener =
+                    new KeycodeSelectionHelper.OnSelectionComplete() {
+                        @Override
+                        public void onSelectionComplete(int code) {
+                            mKeycode = code;
+                            selectImage();
+                        }
+                    };
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.keycode)
+                    .setMessage(R.string.keycode_description)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            KeycodeSelectionHelper.showKeycodeSelect(context, listener);
+                        }
+                    }).show();
         }
 
         private void showAddedMessage(Context context, String button) {

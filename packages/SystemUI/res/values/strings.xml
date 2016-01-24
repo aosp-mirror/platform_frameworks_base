@@ -1387,4 +1387,19 @@
     <!-- SysUI Tuner: Description of nav bar button that holds the clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_description">The Clipboard allows items to be dragged directly to the clipboard. Items can also be dragged directly out of the clipboard when present.</string>
 
+    <!-- SysUI Tuner: Accessibility description for custom nav key [CHAR LIMIT=NONE] -->
+    <string name="accessibility_key">Custom navigation button</string>
+
+    <!-- SysUI Tuner: Nav bar button that emulates a keycode [CHAR LIMIT=30] -->
+    <string name="keycode">Keycode</string>
+
+    <!-- SysUI Tuner: Description of nav bar button that emulates a keycode [CHAR LIMIT=NONE] -->
+    <string name="keycode_description">Keycode buttons allow keyboard keys to
+        be added to the Navigation Bar. When pressed they emulate the selected
+        keyboard key. First the key must be selected for the button, followed
+        by an image to be shown on the button.</string>
+
+    <!-- SysUI Tuner: Title of dialog to select which key to emulate [CHAR LIMIT=60] -->
+    <string name="select_keycode">Select Keyboard Button</string>
+
 </resources>

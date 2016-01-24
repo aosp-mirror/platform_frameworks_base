@@ -18,7 +18,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,8 +31,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
+import java.io.File;
 import java.util.Objects;
 
 public class NavigationBarInflaterView extends FrameLayout implements TunerService.Tunable {
@@ -44,18 +49,24 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String RECENT = "recent";
     public static final String NAVSPACE = "space";
     public static final String CLIPBOARD = "clipboard";
+    public static final String KEY = "key";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
 
-    protected final LayoutInflater mLayoutInflater;
-    protected final LayoutInflater mLandscapeInflater;
-
     public static final String SIZE_MOD_START = "[";
     public static final String SIZE_MOD_END = "]";
 
+    public static final String KEY_CODE_START = "(";
+    public static final String KEY_IMAGE_DELIM = ":";
+    public static final String KEY_CODE_END = ")";
+
+    protected final LayoutInflater mLayoutInflater;
+    protected final LayoutInflater mLandscapeInflater;
+
     protected FrameLayout mRot0;
     protected FrameLayout mRot90;
+
     private SparseArray<ButtonDispatcher> mButtonDispatchers;
     private String mCurrentLayout;
 
@@ -236,6 +247,14 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
         } else if (CLIPBOARD.equals(button)) {
             v = inflater.inflate(R.layout.clipboard, parent, false);
+        } else if (button.startsWith(KEY)) {
+            String uri = extractImage(button);
+            int code = extractKeycode(button);
+            v = inflater.inflate(R.layout.custom_key, parent, false);
+            ((KeyButtonView) v).setCode(code);
+            if (uri != null) {
+                ((KeyButtonView) v).loadAsync(uri);
+            }
         } else {
             return null;
         }
@@ -247,6 +266,24 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         parent.addView(v);
         addToDispatchers(v);
         return v;
+    }
+
+    public static String extractImage(String buttonSpec) {
+        if (!buttonSpec.contains(KEY_IMAGE_DELIM)) {
+            return null;
+        }
+        final int start = buttonSpec.indexOf(KEY_IMAGE_DELIM);
+        String subStr = buttonSpec.substring(start + 1, buttonSpec.indexOf(KEY_CODE_END));
+        return subStr;
+    }
+
+    public static int extractKeycode(String buttonSpec) {
+        if (!buttonSpec.contains(KEY_CODE_START)) {
+            return 1;
+        }
+        final int start = buttonSpec.indexOf(KEY_CODE_START);
+        String subStr = buttonSpec.substring(start + 1, buttonSpec.indexOf(KEY_IMAGE_DELIM));
+        return Integer.parseInt(subStr);
     }
 
     public static float extractSize(String buttonSpec) {
