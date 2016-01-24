@@ -4888,8 +4888,10 @@ public final class ActivityThread {
 
         /*
          * Initialize the default locales in this process for the reasons we set the time zone.
+         *
+         * We do this through ResourcesManager, since we need to do locale negotiation.
          */
-        LocaleList.setDefault(data.config.getLocales());
+        mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
 
         /*
          * Update the system configuration since its preloaded and might not

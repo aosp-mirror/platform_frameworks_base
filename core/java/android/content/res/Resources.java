@@ -162,10 +162,6 @@ public class Resources {
 
     private final Configuration mConfiguration = new Configuration();
 
-    // Invariant: mResolvedLocale is the resolved locale of mLocalesForResolved
-    private LocaleList mLocalesForResolved = null;
-    private Locale mResolvedLocale = null;
-
     private PluralRules mPluralRule;
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
@@ -321,16 +317,6 @@ public class Resources {
     }
 
     /**
-     * Return the Locale resulting from locale negotiation between the Resources and the
-     * Configuration objects used to construct the Resources. The locale is used for retrieving
-     * resources as well as for determining plural rules.
-     */
-    @NonNull
-    public Locale getResolvedLocale() {
-        return mResolvedLocale;
-    }
-
-    /**
      * Return the string value associated with a particular resource ID.  The
      * returned object will be a String if this is a plain string; it will be
      * some other type of CharSequence if it is styled.
@@ -394,7 +380,7 @@ public class Resources {
     private PluralRules getPluralRule() {
         synchronized (sSync) {
             if (mPluralRule == null) {
-                mPluralRule = PluralRules.forLocale(mResolvedLocale);
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
             }
             return mPluralRule;
         }
@@ -457,7 +443,7 @@ public class Resources {
     @NonNull
     public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
         final String raw = getString(id);
-        return String.format(mResolvedLocale, raw, formatArgs);
+        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
     }
 
     /**
@@ -488,7 +474,7 @@ public class Resources {
     public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
-        return String.format(mResolvedLocale, raw, formatArgs);
+        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
     }
 
     /**
@@ -1955,7 +1941,7 @@ public class Resources {
 
             LocaleList locales = mConfiguration.getLocales();
             if (locales.isEmpty()) {
-                locales = LocaleList.getDefault();
+                locales = LocaleList.getAdjustedDefault();
                 mConfiguration.setLocales(locales);
             }
             if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
@@ -1983,26 +1969,8 @@ public class Resources {
                 keyboardHidden = mConfiguration.keyboardHidden;
             }
 
-            if (locales != mLocalesForResolved) {
-                if (locales.size() == 1) {
-                    // This is an optimization to avoid the JNI call(s) when the result of
-                    // getFirstMatchWithEnglishSupported() does not depend on the supported locales.
-                    mResolvedLocale = locales.getPrimary();
-                } else {
-                    String[] supportedLocales = mAssets.getNonSystemLocales();
-                    if (LocaleList.isPseudoLocalesOnly(supportedLocales)) {
-                        // We fallback to all locales (including system locales) if there was no
-                        // locale specifically supported by the assets. This is to properly support
-                        // apps that only rely on the shared system assets and don't need assets of
-                        // their own.
-                        supportedLocales = mAssets.getLocales();
-                    }
-                    mResolvedLocale = locales.getFirstMatchWithEnglishSupported(supportedLocales);
-                }
-                mLocalesForResolved = locales;
-            }
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                    adjustLanguageTag(mResolvedLocale.toLanguageTag()),
+                    adjustLanguageTag(locales.getPrimary().toLanguageTag()),
                     mConfiguration.orientation,
                     mConfiguration.touchscreen,
                     mConfiguration.densityDpi, mConfiguration.keyboard,
@@ -2027,7 +1995,7 @@ public class Resources {
         }
         synchronized (sSync) {
             if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(mResolvedLocale);
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
             }
         }
     }
