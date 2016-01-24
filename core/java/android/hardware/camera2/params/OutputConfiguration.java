@@ -17,6 +17,7 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.SystemApi;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -32,39 +33,58 @@ import static com.android.internal.util.Preconditions.*;
  * A class for describing camera output, which contains a {@link Surface} and its specific
  * configuration for creating capture session.
  *
- * @see CameraDevice#createCaptureSession
+ * @see CameraDevice#createCaptureSessionByOutputConfiguration
  *
- * @hide
  */
 public final class OutputConfiguration implements Parcelable {
 
     /**
      * Rotation constant: 0 degree rotation (no rotation)
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_0 = 0;
 
     /**
      * Rotation constant: 90 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_90 = 1;
 
     /**
      * Rotation constant: 180 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_180 = 2;
 
     /**
      * Rotation constant: 270 degree counterclockwise rotation.
+     *
+     * @hide
      */
+    @SystemApi
     public static final int ROTATION_270 = 3;
 
     /**
-     * Create a new immutable SurfaceConfiguration instance.
+     * Invalid surface set ID.
+     *
+     *<p>An {@link OutputConfiguration} with this value indicates that the included surface
+     *doesn't belong to any surface set.</p>
+     */
+    public static final int SURFACE_SET_ID_INVALID = -1;
+
+    /**
+     * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
      *
      * @param surface
      *          A Surface for camera to output to.
      *
-     * <p>This constructor creates a default configuration</p>
+     * <p>This constructor creates a default configuration.</p>
      *
      */
     public OutputConfiguration(Surface surface) {
@@ -72,7 +92,7 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
-     * Create a new immutable SurfaceConfiguration instance.
+     * Create a new {@link OutputConfiguration} instance.
      *
      * <p>This constructor takes an argument for desired camera rotation</p>
      *
@@ -87,11 +107,13 @@ public final class OutputConfiguration implements Parcelable {
      *          application should set rotation to {@code ROTATION_90} and make sure the
      *          corresponding Surface size is 720x1280. Note that {@link CameraDevice} might
      *          throw {@code IllegalArgumentException} if device cannot perform such rotation.
-     *
+     * @hide
      */
+    @SystemApi
     public OutputConfiguration(Surface surface, int rotation) {
         checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        mSurfaceSetId = SURFACE_SET_ID_INVALID;
         mSurface = surface;
         mRotation = rotation;
         mConfiguredSize = SurfaceUtils.getSurfaceSize(surface);
@@ -100,13 +122,37 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
+     * instance.
+     *
+     * @param other Another {@link OutputConfiguration} instance to be copied.
+     *
+     * @hide
+     */
+    @SystemApi
+    public OutputConfiguration(OutputConfiguration other) {
+        if (other == null) {
+            throw new IllegalArgumentException("OutputConfiguration shouldn't be null");
+        }
+
+        this.mSurface = other.mSurface;
+        this.mRotation = other.mRotation;
+        this.mSurfaceSetId = other.mSurfaceSetId;
+        this.mConfiguredDataspace = other.mConfiguredDataspace;
+        this.mConfiguredFormat = other.mConfiguredFormat;
+        this.mConfiguredSize = other.mConfiguredSize;
+    }
+
+    /**
      * Create an OutputConfiguration from Parcel.
      */
     private OutputConfiguration(Parcel source) {
         int rotation = source.readInt();
+        int surfaceSetId = source.readInt();
         Surface surface = Surface.CREATOR.createFromParcel(source);
         checkNotNull(surface, "Surface must not be null");
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
+        mSurfaceSetId = surfaceSetId;
         mSurface = surface;
         mRotation = rotation;
         mConfiguredSize = SurfaceUtils.getSurfaceSize(mSurface);
@@ -128,9 +174,44 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @return the rotation associated with this {@link OutputConfiguration}.
      *         Value will be one of ROTATION_[0, 90, 180, 270]
+     *
+     * @hide
      */
+    @SystemApi
     public int getRotation() {
         return mRotation;
+    }
+
+    /**
+     * Set the surface set ID to this {@link OutputConfiguration}.
+     *
+     * <p>
+     * A surface set ID is used to identify which surface set this output surface belongs to. A
+     * surface set is a group of output surfaces that are not intended to receive camera output
+     * buffer streams simultaneously. The {@link CameraDevice} may be able to share the buffers used
+     * by all the surfaces from the same surface set, therefore may save the overall memory
+     * footprint. The application should only set the same set ID for the streams that are not
+     * simultaneously streaming. A negative ID indicates that this surface doesn't belong to any
+     * surface set. The default value will be {@value #SURFACE_SET_ID_INVALID}.
+     * </p>
+     *
+     * @param setId
+     */
+    public void setSurfaceSetId(int setId) {
+        if (setId < 0) {
+            setId = SURFACE_SET_ID_INVALID;
+        }
+        mSurfaceSetId = setId;
+    }
+
+    /**
+     * Get the surface set Id associated with this {@link OutputConfiguration}.
+     *
+     * @return the surface set Id associated with this {@link OutputConfiguration}.
+     *         Value will be one of ROTATION_[0, 90, 180, 270]
+     */
+    public int getSurfaceSetId() {
+        return mSurfaceSetId;
     }
 
     public static final Parcelable.Creator<OutputConfiguration> CREATOR =
@@ -163,6 +244,7 @@ public final class OutputConfiguration implements Parcelable {
             throw new IllegalArgumentException("dest must not be null");
         }
         dest.writeInt(mRotation);
+        dest.writeInt(mSurfaceSetId);
         mSurface.writeToParcel(dest, flags);
     }
 
@@ -187,7 +269,8 @@ public final class OutputConfiguration implements Parcelable {
                    mRotation == other.mRotation &&
                    mConfiguredSize.equals(other.mConfiguredSize) &&
                    mConfiguredFormat == other.mConfiguredFormat &&
-                   mConfiguredDataspace == other.mConfiguredDataspace;
+                   mConfiguredDataspace == other.mConfiguredDataspace &&
+                   mSurfaceSetId == other.mSurfaceSetId;
         }
         return false;
     }
@@ -203,6 +286,7 @@ public final class OutputConfiguration implements Parcelable {
     private static final String TAG = "OutputConfiguration";
     private final Surface mSurface;
     private final int mRotation;
+    private int mSurfaceSetId;
 
     // The size, format, and dataspace of the surface when OutputConfiguration is created.
     private final Size mConfiguredSize;

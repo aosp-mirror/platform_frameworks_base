@@ -421,8 +421,6 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see #createCaptureSession
      * @see OutputConfiguration
-     *
-     * @hide
      */
     public abstract void createCaptureSessionByOutputConfiguration(
             List<OutputConfiguration> outputConfigurations,
@@ -583,6 +581,22 @@ public abstract class CameraDevice implements AutoCloseable {
      */
     public abstract void createReprocessableCaptureSession(@NonNull InputConfiguration inputConfig,
             @NonNull List<Surface> outputs, @NonNull CameraCaptureSession.StateCallback callback,
+            @Nullable Handler handler)
+            throws CameraAccessException;
+
+    /**
+     * Create a new reprocessable camera capture session by providing the desired reprocessing
+     * input configuration and output {@link OutputConfiguration}
+     * to the camera device.
+     *
+     * @see #createReprocessableCaptureSession
+     * @see OutputConfiguration
+     *
+     */
+    public abstract void createReprocessableCaptureSessionWithConfigurations(
+            @NonNull InputConfiguration inputConfig,
+            @NonNull List<OutputConfiguration> outputs,
+            @NonNull CameraCaptureSession.StateCallback callback,
             @Nullable Handler handler)
             throws CameraAccessException;
 
