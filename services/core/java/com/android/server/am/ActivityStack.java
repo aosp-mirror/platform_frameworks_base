@@ -1567,7 +1567,7 @@ final class ActivityStack {
                         behindTranslucentActivity = true;
                     }
                 } else {
-                    if (DEBUG_VISIBILITY || true) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
                             + " finishing=" + r.finishing + " state=" + r.state + " stackInvisible="
                             + stackInvisible + " behindFullscreenActivity="
                             + behindFullscreenActivity + " mLaunchTaskBehind="
