@@ -2193,7 +2193,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // need to see about starting one.
             wasVisible = win.isWinVisibleLw();
 
-            if (wasVisible && appToken != null && appToken.appDied) {
+            if (win.shouldKeepVisibleDeadAppWindow()) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                         "Not removing " + win + " because app died while it's visible");
 
