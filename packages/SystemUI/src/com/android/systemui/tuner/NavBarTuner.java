@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -33,12 +34,15 @@ import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -72,18 +76,66 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
     private static final int RESET = Menu.FIRST + 2;
     private static final int READ_REQUEST = 42;
 
+    private static final float PREVIEW_SCALE = .95f;
+    private static final float PREVIEW_SCALE_LANDSCAPE = .75f;
+
     private NavBarAdapter mNavBarAdapter;
+    private PreviewNavInflater mPreview;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        return new RecyclerView(getContext());
+        final View view = inflater.inflate(R.layout.nav_bar_tuner, container, false);
+        inflatePreview((ViewGroup) view.findViewById(R.id.nav_preview_frame));
+        return view;
+    }
+
+    private void inflatePreview(ViewGroup view) {
+        Display display = getActivity().getWindowManager().getDefaultDisplay();
+        boolean isRotated = display.getRotation() == Surface.ROTATION_90
+                || display.getRotation() == Surface.ROTATION_270;
+
+        Configuration config = new Configuration(getContext().getResources().getConfiguration());
+        boolean isPhoneLandscape = isRotated && (config.smallestScreenWidthDp < 600);
+        final float scale = isPhoneLandscape ? PREVIEW_SCALE_LANDSCAPE : PREVIEW_SCALE;
+        config.densityDpi = (int) (config.densityDpi * scale);
+
+        mPreview = (PreviewNavInflater) LayoutInflater.from(getContext().createConfigurationContext(
+                config)).inflate(R.layout.nav_bar_tuner_inflater, view, false);
+        final ViewGroup.LayoutParams layoutParams = mPreview.getLayoutParams();
+        layoutParams.width = (int) ((isPhoneLandscape ? display.getHeight() : display.getWidth())
+                * scale);
+        // Not sure why, but the height dimen is not being scaled with the dp, set it manually
+        // for now.
+        layoutParams.height = (int) (layoutParams.height * scale);
+        if (isPhoneLandscape) {
+            int width = layoutParams.width;
+            layoutParams.width = layoutParams.height;
+            layoutParams.height = width;
+        }
+        view.addView(mPreview);
+
+        if (isRotated) {
+            mPreview.findViewById(R.id.rot0).setVisibility(View.GONE);
+            final View rot90 = mPreview.findViewById(R.id.rot90);
+            rot90.findViewById(R.id.ends_group_lightsout).setVisibility(View.GONE);
+            rot90.findViewById(R.id.center_group_lightsout).setVisibility(View.GONE);
+        } else {
+            mPreview.findViewById(R.id.rot90).setVisibility(View.GONE);
+            final View rot0 = mPreview.findViewById(R.id.rot0);
+            rot0.findViewById(R.id.ends_group_lightsout).setVisibility(View.GONE);
+            rot0.findViewById(R.id.center_group_lightsout).setVisibility(View.GONE);
+        }
+    }
+
+    private void notifyChanged() {
+        mPreview.onTuningChanged(NAV_BAR_VIEWS, mNavBarAdapter.getNavString());
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        RecyclerView recyclerView = (RecyclerView) view;
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(android.R.id.list);
         final Context context = getContext();
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         mNavBarAdapter = new NavBarAdapter(context);
@@ -272,6 +324,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             mButtons.add(button);
             mLabels.add(label);
             notifyItemInserted(mLabels.size() - 1);
+            notifyChanged();
         }
 
         public boolean hasHomeButton() {
@@ -402,6 +455,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                                 mLabels.add(index, labels[which]);
 
                                 notifyItemInserted(index);
+                                notifyChanged();
                             }
                         }
                     }).setNegativeButton(android.R.string.cancel, null)
@@ -415,6 +469,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
             mLabels.add(index, getLabel(KEY, getContext()));
 
             notifyItemInserted(index);
+            notifyChanged();
         }
 
         private void showKeyDialogs(final Context context) {
@@ -462,6 +517,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                 mButtons.remove(position);
                 mLabels.remove(position);
                 notifyItemRemoved(position);
+                notifyChanged();
             }
         }
 
@@ -486,6 +542,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                                 mButtons.set(holder.getAdapterPosition(), button
                                         + SIZE_MOD_START + amount + SIZE_MOD_END);
                             }
+                            notifyChanged();
                         }
                     });
             dialog.show();
@@ -532,6 +589,7 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
                 }
                 move(from, to, mButtons);
                 move(from, to, mLabels);
+                notifyChanged();
                 notifyItemMoved(from, to);
                 return true;
             }

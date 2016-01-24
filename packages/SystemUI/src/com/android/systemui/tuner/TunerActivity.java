@@ -30,11 +30,15 @@ public class TunerActivity extends SettingsDrawerActivity implements
         PreferenceFragment.OnPreferenceStartFragmentCallback,
         PreferenceFragment.OnPreferenceStartScreenCallback {
 
+    private static final String TAG_TUNER = "tuner";
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, new TunerFragment())
-                .commit();
+        if (getFragmentManager().findFragmentByTag(TAG_TUNER) == null) {
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, new TunerFragment(),
+                    TAG_TUNER).commit();
+        }
     }
 
     @Override

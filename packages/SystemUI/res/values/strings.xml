@@ -1402,4 +1402,7 @@
     <!-- SysUI Tuner: Title of dialog to select which key to emulate [CHAR LIMIT=60] -->
     <string name="select_keycode">Select Keyboard Button</string>
 
+    <!-- SysUI Tuner: Label for preview area in navigation bar tuner [CHAR LIMIT=NONE] -->
+    <string name="preview">Preview</string>
+
 </resources>
