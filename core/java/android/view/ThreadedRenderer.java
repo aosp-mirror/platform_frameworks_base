@@ -24,7 +24,9 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -34,12 +36,14 @@ import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
 import com.android.internal.R;
+import com.android.internal.util.VirtualRefBasePtr;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashSet;
 
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
@@ -338,6 +342,8 @@ public final class ThreadedRenderer {
 
     private boolean mEnabled;
     private boolean mRequested = true;
+
+    private HashSet<FrameStatsObserver> mFrameStatsObservers;
 
     ThreadedRenderer(Context context, boolean translucent) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
@@ -947,6 +953,31 @@ public final class ThreadedRenderer {
         }
     }
 
+    void addFrameStatsObserver(FrameStatsObserver fso) {
+        if (mFrameStatsObservers == null) {
+            mFrameStatsObservers = new HashSet<>();
+        }
+
+        long nativeFso = nAddFrameStatsObserver(mNativeProxy, fso);
+        fso.mRenderer = this;
+        fso.mNative = new VirtualRefBasePtr(nativeFso);
+        mFrameStatsObservers.add(fso);
+    }
+
+    void removeFrameStatsObserver(FrameStatsObserver fso) {
+        if (!mFrameStatsObservers.remove(fso)) {
+            throw new IllegalArgumentException("attempt to remove FrameStatsObserver that was never added");
+        }
+
+        nRemoveFrameStatsObserver(mNativeProxy, fso.mNative.get());
+        fso.mRenderer = null;
+        fso.mNative = null;
+    }
+
+    long getDroppedFrameReportCount() {
+        return nGetDroppedFrameReportCount(mNativeProxy);
+    }
+
     static native void setupShadersDiskCache(String cacheFile);
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
@@ -1000,4 +1031,8 @@ public final class ThreadedRenderer {
     private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
+
+    private static native long nAddFrameStatsObserver(long nativeProxy, FrameStatsObserver fso);
+    private static native void nRemoveFrameStatsObserver(long nativeProxy, long nativeFso);
+    private static native long nGetDroppedFrameReportCount(long nativeProxy);
 }

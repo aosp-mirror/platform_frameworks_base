@@ -20,6 +20,7 @@
 #include "DamageAccumulator.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
+#include "FrameStatsReporter.h"
 #include "IContextFactory.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
@@ -139,6 +140,31 @@ public:
         return mRenderThread.renderState();
     }
 
+    void addFrameStatsObserver(FrameStatsObserver* observer) {
+        if (mFrameStatsReporter.get() == nullptr) {
+            mFrameStatsReporter.reset(new FrameStatsReporter());
+        }
+
+        mFrameStatsReporter->addObserver(observer);
+    }
+
+    void removeFrameStatsObserver(FrameStatsObserver* observer) {
+        if (mFrameStatsReporter.get() != nullptr) {
+            mFrameStatsReporter->removeObserver(observer);
+            if (!mFrameStatsReporter->hasObservers()) {
+                mFrameStatsReporter.reset(nullptr);
+            }
+        }
+    }
+
+    long getDroppedFrameReportCount() {
+        if (mFrameStatsReporter.get() != nullptr) {
+            return mFrameStatsReporter->getDroppedReports();
+        }
+
+        return 0;
+    }
+
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
@@ -187,6 +213,7 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
+    std::unique_ptr<FrameStatsReporter> mFrameStatsReporter;
 
     std::set<RenderNode*> mPrefetechedLayers;
 

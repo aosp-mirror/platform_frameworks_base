@@ -235,7 +235,8 @@ LOCAL_SRC_FILES += \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/VectorDrawableTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
-    tests/unit/StringUtilsTests.cpp
+    tests/unit/StringUtilsTests.cpp \
+    tests/unit/BufferPoolTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
