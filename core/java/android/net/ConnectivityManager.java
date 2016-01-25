@@ -3051,12 +3051,13 @@ public class ConnectivityManager {
      */
     public static final int RESTRICT_BACKGROUND_STATUS_ENABLED = 3;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = false, value = {
             RESTRICT_BACKGROUND_STATUS_DISABLED,
             RESTRICT_BACKGROUND_STATUS_WHITELISTED,
             RESTRICT_BACKGROUND_STATUS_ENABLED,
     })
-    @Retention(RetentionPolicy.SOURCE)
     public @interface RestrictBackgroundStatus {
     }
 
