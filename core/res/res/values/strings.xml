@@ -559,6 +559,9 @@
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
 
+    <!-- Text shown in place of notification contents when the notification is hidden by policy on a secure lockscreen -->
+    <string name="notification_hidden_by_policy_text">Contents hidden by policy</string>
+
     <!-- Displayed to the user to tell them that they have started up the phone in "safe mode" -->
     <string name="safeMode">Safe mode</string>
 

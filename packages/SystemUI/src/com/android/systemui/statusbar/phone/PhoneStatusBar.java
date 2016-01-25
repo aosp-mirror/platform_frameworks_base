@@ -1373,6 +1373,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             boolean sensitivePackage = packageHasVisibilityOverride(ent.notification.getKey());
             boolean sensitive = (sensitiveNote && hideSensitive) || sensitivePackage;
             boolean showingPublic = sensitive && isLockscreenPublicMode();
+            if (showingPublic) {
+                updatePublicContentView(ent, ent.notification);
+            }
             ent.row.setSensitive(sensitive);
             if (ent.autoRedacted && ent.legacy) {
                 // TODO: Also fade this? Or, maybe easier (and better), provide a dark redacted form
