@@ -463,7 +463,8 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public String moveDocument(String sourceDocumentId, String targetParentDocumentId)
+    public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
+            String targetParentDocumentId)
             throws FileNotFoundException {
         final File before = getFileForDocId(sourceDocumentId);
         final File after = new File(getFileForDocId(targetParentDocumentId), before.getName());

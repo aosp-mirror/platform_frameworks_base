@@ -21,6 +21,7 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_MO
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -85,7 +86,7 @@ final class MoveJob extends CopyJob {
         if (src.authority.equals(dest.authority)) {
             if ((src.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
                 if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
-                        dest.derivedUri) == null) {
+                        Uri.EMPTY /* Not used yet */, dest.derivedUri) == null) {
                     onFileFailed(src);
                     return false;
                 }
