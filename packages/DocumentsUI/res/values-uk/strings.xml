@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Пристрої"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Інші програми"</string>
     <string name="empty" msgid="7858882803708117596">"Нічого немає"</string>
+    <string name="no_results" msgid="6622510343880730446">"Немає збігів для запиту \"%1$s\""</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Не вдалося відкрити файл"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Не вдалося видалити деякі документи"</string>
     <string name="share_via" msgid="8966594246261344259">"Надіслати через"</string>
@@ -90,6 +91,7 @@
     <string name="undo" msgid="7905788502491742328">"Відмінити"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Підготовка до копіювання…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Підготовка до переміщення…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Підготовка до видалення…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
       <item quantity="few">Не вдалося скопіювати <xliff:g id="COUNT_1">%1$d</xliff:g> файли</item>
@@ -102,7 +104,13 @@
       <item quantity="many">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів</item>
       <item quantity="other">Не вдалося перемістити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Торкніться, щоб дізнатися більше"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">Не вдалося видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
+      <item quantity="few">Не вдалося видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файли</item>
+      <item quantity="many">Не вдалося видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлів</item>
+      <item quantity="other">Не вдалося видалити <xliff:g id="COUNT_1">%1$d</xliff:g> файлу</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Торкніться, щоб переглянути деталі"</string>
     <string name="retry" msgid="7564024179122207376">"Повторити"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ці файли не скопійовано: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Не переміщено ці файли: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -113,4 +121,6 @@
       <item quantity="other">У буфер обміну скопійовано <xliff:g id="COUNT_1">%1$d</xliff:g> файла.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Не вдається вставити вибрані файли в цю папку."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Перейменувати"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Не вдалося перейменувати документ"</string>
 </resources>

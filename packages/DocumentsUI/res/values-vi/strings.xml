@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Thiết bị"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Các ứng dụng khác"</string>
     <string name="empty" msgid="7858882803708117596">"Không có mục nào"</string>
+    <string name="no_results" msgid="6622510343880730446">"Không có kết quả phù hợp trong %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Không thể mở tệp"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Không thể xóa một số tài liệu"</string>
     <string name="share_via" msgid="8966594246261344259">"Chia sẻ qua"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Hoàn tác"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Đang chuẩn bị sao chép…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Đang chuẩn bị di chuyển…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Đang chuẩn bị xóa…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Không thể sao chép <xliff:g id="COUNT_1">%1$d</xliff:g> tệp</item>
       <item quantity="one">Không thể sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp</item>
@@ -92,7 +94,11 @@
       <item quantity="other">Không thể di chuyển <xliff:g id="COUNT_1">%1$d</xliff:g> tệp</item>
       <item quantity="one">Không thể di chuyển <xliff:g id="COUNT_0">%1$d</xliff:g> tệp</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Chạm để xem chi tiết"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Không thể xóa <xliff:g id="COUNT_1">%1$d</xliff:g> tệp</item>
+      <item quantity="one">Không thể xóa <xliff:g id="COUNT_0">%1$d</xliff:g> tệp</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Nhấn để xem chi tiết"</string>
     <string name="retry" msgid="7564024179122207376">"Thử lại"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Những tệp này chưa được sao chép: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Những tệp này chưa được di chuyển: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">Đã sao chép <xliff:g id="COUNT_0">%1$d</xliff:g> tệp vào khay nhớ tạm.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Không thể dán các tệp đã chọn vào vị trí này."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Đổi tên"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Không đổi được tên tài liệu"</string>
 </resources>

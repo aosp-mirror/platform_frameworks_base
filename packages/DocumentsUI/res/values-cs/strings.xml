@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"Zařízení"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Další aplikace"</string>
     <string name="empty" msgid="7858882803708117596">"Žádné položky"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"Soubor nelze otevřít"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Některé dokumenty nelze smazat"</string>
     <string name="share_via" msgid="8966594246261344259">"Sdílet pomocí"</string>
@@ -90,6 +92,7 @@
     <string name="undo" msgid="7905788502491742328">"Vrátit zpět"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Příprava na kopírování…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Příprava na přesunutí…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Příprava na mazání…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> soubory</item>
       <item quantity="many">Nepodařilo se zkopírovat <xliff:g id="COUNT_1">%1$d</xliff:g> souboru</item>
@@ -102,7 +105,14 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> souborů nelze přesunout</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> soubor nelze přesunout</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Podrobnosti zobrazíte klepnutím"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> soubory se smazat nepodařilo</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> souboru se smazat nepodařilo</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> souborů se smazat nepodařilo</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> soubor se smazat nepodařilo</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"Opakovat"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tyto soubory nebyly zkopírovány: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Následující soubory nebyly přesunuty: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -113,4 +123,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> soubor byl zkopírován do schránky.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Vybrané soubory nelze vložit do tohoto umístění."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

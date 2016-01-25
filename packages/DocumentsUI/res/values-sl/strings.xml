@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"Naprave"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Več aplikacij"</string>
     <string name="empty" msgid="7858882803708117596">"Ni elementov"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"Datoteke ni mogoče odpreti"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nekaterih dokumentov ni mogoče izbrisati"</string>
     <string name="share_via" msgid="8966594246261344259">"Deli z drugimi prek"</string>
@@ -90,6 +92,7 @@
     <string name="undo" msgid="7905788502491742328">"Razveljavi"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravljanje na kopiranje …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprava na premikanje …"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Pripravljanje na izbris …"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče kopirati</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
@@ -102,7 +105,14 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Dotaknite se za ogled podrobnosti"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče izbrisati</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče izbrisati</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče izbrisati</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče izbrisati</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"Poskusi znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Te datoteke niso bile kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Te datoteke niso bile premaknjene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -113,4 +123,8 @@
       <item quantity="other">V odložišče je bilo kopiranih <xliff:g id="COUNT_1">%1$d</xliff:g> datotek.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Izbranih datotek ni mogoče prilepiti sem."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"ਡਿਵਾਈਸਾਂ"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"ਹੋਰ ਐਪਸ"</string>
     <string name="empty" msgid="7858882803708117596">"ਕੋਈ ਆਈਟਮਾਂ ਨਹੀਂ"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s ਵਿੱਚ ਕੋਈ ਮੇਲ ਨਹੀਂ"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ਫਾਈਲ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦਾ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ਕੁਝ ਦਸਤਾਵੇਜ਼ ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਮਰੱਥ"</string>
     <string name="share_via" msgid="8966594246261344259">"ਇਸ ਰਾਹੀਂ ਸ਼ੇਅਰ ਕਰੋ"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"ਪਹਿਲਾਂ ਵਰਗਾ ਕਰੋ"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾ ਸਕਿਆ</item>
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾ ਸਕਿਆ</item>
@@ -92,7 +94,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਿਆ</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"ਵੇਰਵੇ ਵੇਖਣ ਲਈ ਸਪਰਸ਼ ਕਰੋ"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"ਵੇਰਵਿਆਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="retry" msgid="7564024179122207376">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾਈ ਗਈ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕੀਤਾ ਗਿਆ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other">ਕਲਿੱਪਬੋਰਡ ਵਿੱਚ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਬਣਾਈ ਗਈ।</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ਇਸ ਸਥਾਨ ਵਿੱਚ ਚੁਣੀਆਂ ਗਈਆਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਪੇਸਟ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"ਮੁੜ-ਨਾਮਕਰਨ ਕਰੋ"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ਦਸਤਾਵੇਜ਼ ਦਾ ਮੁੜ-ਨਾਮਕਰਨ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
 </resources>

@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"උපාංග"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"තවත් යෙදුම්"</string>
     <string name="empty" msgid="7858882803708117596">"අයිතම නැත"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s හි තරඟ නැත"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ගොනුව විවෘත කළ නොහැක"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"සමහර ලේඛන මැකීමට නොහැකි විය"</string>
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"අස් කරන්න"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"ගෙන යාම සඳහා පිළියෙළ කරමින් ..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"මැකීම සඳහා සූදානම් කරමින්..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
@@ -92,7 +94,11 @@
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යාමට නොහැකි විය</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යාමට නොහැකි විය</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"විස්තර බැලීමට ස්පර්ශ කරන්න"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"විස්තර බැලීමට තට්ටු කරන්න"</string>
     <string name="retry" msgid="7564024179122207376">"නැවත උත්සාහ කරන්න"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"මෙම ගොනු ගෙන නොයන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"මෙම ස්ථානය තුළ තෝරාගත් ගොනු ඇලවිය නොහැක."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"යළි නම් කරන්න"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ලේඛනය යළි නම් කිරීම අසාර්ථක විය"</string>
 </resources>

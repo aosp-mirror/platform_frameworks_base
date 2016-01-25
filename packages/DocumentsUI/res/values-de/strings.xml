@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"Geräte"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Weitere Apps"</string>
     <string name="empty" msgid="7858882803708117596">"Keine Dokumente"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"Datei kann nicht geöffnet werden."</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Einige Dokumente konnten nicht gelöscht werden."</string>
     <string name="share_via" msgid="8966594246261344259">"Teilen über"</string>
@@ -84,6 +86,7 @@
     <string name="undo" msgid="7905788502491742328">"Rückgängig machen"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Kopieren wird vorbereitet…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Verschieben wird vorbereitet…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Löschvorgang wird vorbereitet…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> Dateien konnten nicht kopiert werden.</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> Datei konnte nicht kopiert werden.</item>
@@ -92,7 +95,12 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> Dateien konnten nicht verschoben werden.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> Datei konnte nicht verschoben werden.</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Zum Einblenden von Details tippen"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> Dateien konnten nicht gelöscht werden</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> Datei konnte nicht gelöscht werden</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"Erneut versuchen"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Diese Dateien wurden nicht kopiert: <xliff:g id="LIST">%1$s</xliff:g>."</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Diese Dateien wurden nicht verschoben: <xliff:g id="LIST">%1$s</xliff:g>."</string>
@@ -101,4 +109,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> Datei wurde in die Zwischenablage kopiert.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Die ausgewählten Dateien können an diesem Ort nicht eingefügt werden."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

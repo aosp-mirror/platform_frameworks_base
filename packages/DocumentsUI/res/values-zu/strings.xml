@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Amadivayisi"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Izinhlelo zokusebenza eziningi"</string>
     <string name="empty" msgid="7858882803708117596">"Azikho izinto"</string>
+    <string name="no_results" msgid="6622510343880730446">"Akukho okufanayo ku-%1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Ayikwazi ukuvula ifayela"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ayikwazi ukususa amanye amadokhumenti"</string>
     <string name="share_via" msgid="8966594246261344259">"Yabelana nge-"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Hlehlisa"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Ilungiselela ukukopisha..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Ilungiselela ukuhambisa…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Ilungiselela ukususa…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Ayikwazanga ukukopisha amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ayikwazanga ukukopisha amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
@@ -92,7 +94,11 @@
       <item quantity="one">Ayikwazanga ukuhambisa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ayikwazanga ukuhambisa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Thinta ukuze ubuke imininingwane"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">Ayikwazanga ukususa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="other">Ayikwazanga ukususa amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g></item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Thepha ukuze ubuke imininingwane"</string>
     <string name="retry" msgid="7564024179122207376">"Zama futhi"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Lawa mafayela awazange akopishwe: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Lawa mafayela awazange ahanjiswe: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other">Kukopishwe amafayela angu-<xliff:g id="COUNT_1">%1$d</xliff:g> kubhodi lokunamathisela.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Ayikwazi ukunamathisela amafayela akhethiwe kule ndawo."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Qamba kabusha"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Yehlulekile ukuqamba kabusha idokhumenti"</string>
 </resources>

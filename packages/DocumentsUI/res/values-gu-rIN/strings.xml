@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"ઉપકરણો"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશનો"</string>
     <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s માં કોઇ મેળ નથી"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ફાઇલ ખોલી શકાતી નથી"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"કેટલાક દસ્તાવેજો કાઢી નાખવામાં અસમર્થ"</string>
     <string name="share_via" msgid="8966594246261344259">"આના દ્વારા શેર કરો"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"પૂર્વવત્ કરો"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ખસેડવા માટે તૈયાર કરી રહ્યું છે…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"કાઢી નાખવાની તૈયારી કરી રહ્યાં છે…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
@@ -92,7 +94,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી શકાઈ નથી</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી શકાઈ નથી</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"વિગતો જોવા માટે ટચ કરો"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી શક્યાં નથી</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી શક્યાં નથી</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"વિગતો જોવા માટે ટૅપ કરો"</string>
     <string name="retry" msgid="7564024179122207376">"ફરી પ્રયાસ કરો"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"આ ફાઇલો ખસેડી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other">ક્લિપબોર્ડ પર <xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"આ સ્થાનમાં પસંદ કરેલ ફાઇલો પેસ્ટ કરી શકાતી નથી."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"નામ બદલો"</string>
+    <string name="rename_error" msgid="4203041674883412606">"દસ્તાવેજનું નામ બદલવામાં નિષ્ફળ થયાં"</string>
 </resources>

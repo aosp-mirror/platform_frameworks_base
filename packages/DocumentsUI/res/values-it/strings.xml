@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivi"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Altre app"</string>
     <string name="empty" msgid="7858882803708117596">"Nessun elemento"</string>
+    <string name="no_results" msgid="6622510343880730446">"Nessuna corrispondenza in %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Impossibile aprire il file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Impossibile eliminare alcuni documenti"</string>
     <string name="share_via" msgid="8966594246261344259">"Condividi via"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Annulla"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Preparazione alla copia…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Preparazione dello spostamento…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Preparazione eliminazione…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Impossibile copiare <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Impossibile copiare <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
@@ -92,7 +94,11 @@
       <item quantity="other">Impossibile spostare <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Impossibile spostare <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Tocca per visualizzare i dettagli"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Impossibile eliminare <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
+      <item quantity="one">Impossibile eliminare <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Tocca per vedere i dettagli"</string>
     <string name="retry" msgid="7564024179122207376">"Riprova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"I seguenti file non sono stati copiati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"I seguenti file non sono stati spostati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> file copiato negli appunti.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Impossibile incollare i file selezionati in questa posizione."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Rinomina"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Ridenominazione documento non riuscita"</string>
 </resources>

@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"Уређаји"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Још апликација"</string>
     <string name="empty" msgid="7858882803708117596">"Нема ставки"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"Није могуће отворити датотеку"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Није могуће избрисати неке документе"</string>
     <string name="share_via" msgid="8966594246261344259">"Делите преко"</string>
@@ -87,6 +89,7 @@
     <string name="undo" msgid="7905788502491742328">"Опозови"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Припрема се копирање…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Припрема се премештање..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Припрема се брисање…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Нисмо успели да копирамо <xliff:g id="COUNT_1">%1$d</xliff:g> датотеку</item>
       <item quantity="few">Нисмо успели да копирамо <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке</item>
@@ -97,7 +100,13 @@
       <item quantity="few">Није успело премештање <xliff:g id="COUNT_1">%1$d</xliff:g> датотекe</item>
       <item quantity="other">Није успело премештање <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Додирните да бисте видели детаље"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">Брисање <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке није успело</item>
+      <item quantity="few">Брисање <xliff:g id="COUNT_1">%1$d</xliff:g> датотеке није успело</item>
+      <item quantity="other">Брисање <xliff:g id="COUNT_1">%1$d</xliff:g> датотека није успело</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"Покушај поново"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Следеће датотеке нису копиране: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Ове датотеке нису премештене: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -107,4 +116,8 @@
       <item quantity="other">Копирали сте <xliff:g id="COUNT_1">%1$d</xliff:g> датотека у привремену меморију.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Изабране датотеке не могу да се налепе на овој локацији."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

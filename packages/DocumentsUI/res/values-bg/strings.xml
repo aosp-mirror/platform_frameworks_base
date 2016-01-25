@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Устройства"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Още приложения"</string>
     <string name="empty" msgid="7858882803708117596">"Няма елементи"</string>
+    <string name="no_results" msgid="6622510343880730446">"В/ъв „%1$s“ няма съответствия"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Файлът не може да се отвори"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Някои документи не могат да бъдат изтрити"</string>
     <string name="share_via" msgid="8966594246261344259">"Споделяне чрез"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Отмяна"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Подготвя се за копиране…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Преместването се подготвя…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Подготвя се за изтриване..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да се копират</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да се копира</item>
@@ -92,7 +94,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да бъдат преместени</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да бъде преместен</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Докоснете, за да видите подробностите"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да бъдат изтрити</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да бъде изтрит</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Докоснете, за да видите подробности"</string>
     <string name="retry" msgid="7564024179122207376">"Нов опит"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Следните файлове не бяха копирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Следните файлове не бяха преместени: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">Копирахте <xliff:g id="COUNT_0">%1$d</xliff:g> файл в буферната памет.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Избраните файлове не могат да се поставят на това място."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Преименуване"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Преименуването на документа не бе успешно"</string>
 </resources>
