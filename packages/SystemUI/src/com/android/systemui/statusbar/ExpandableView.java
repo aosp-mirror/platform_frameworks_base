@@ -395,6 +395,10 @@ public abstract class ExpandableView extends FrameLayout {
     public void setShadowAlpha(float shadowAlpha) {
     }
 
+    public boolean needsIncreasedPadding() {
+        return false;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

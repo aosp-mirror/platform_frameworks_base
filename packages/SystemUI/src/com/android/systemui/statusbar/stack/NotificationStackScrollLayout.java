@@ -121,7 +121,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBottomStackSlowDownHeight;
     private int mBottomStackPeekSize;
     private int mPaddingBetweenElements;
-    private int mPaddingBetweenElementsNormal;
+    private int mIncreasedPaddingBetweenElements;
     private int mTopPadding;
     private int mCollapseSecondCardPadding;
 
@@ -367,9 +367,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomStackPeekSize = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_peek_amount);
         mStackScrollAlgorithm.initView(context);
-        mPaddingBetweenElementsNormal = Math.max(1, context.getResources()
+        mPaddingBetweenElements = Math.max(1, context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height));
-        mPaddingBetweenElements = mPaddingBetweenElementsNormal;
+        mIncreasedPaddingBetweenElements = context.getResources()
+                .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
+
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
@@ -1445,17 +1447,19 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void updateContentHeight() {
         int height = 0;
+        boolean previousNeedsIncreasedPaddings = false;
         for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE) {
+            ExpandableView expandableView = (ExpandableView) getChildAt(i);
+            if (expandableView.getVisibility() != View.GONE) {
+                boolean needsIncreasedPaddings = expandableView.needsIncreasedPadding();
                 if (height != 0) {
-                    // add the padding before this element
-                    height += mPaddingBetweenElements;
+                    int padding = needsIncreasedPaddings || previousNeedsIncreasedPaddings
+                            ? mIncreasedPaddingBetweenElements
+                            : mPaddingBetweenElements;
+                    height += padding;
                 }
-                if (child instanceof ExpandableView) {
-                    ExpandableView expandableView = (ExpandableView) child;
-                    height += expandableView.getIntrinsicHeight();
-                }
+                previousNeedsIncreasedPaddings = needsIncreasedPaddings;
+                height += expandableView.getIntrinsicHeight();
             }
         }
         mContentHeight = height + mTopPadding;
@@ -1911,7 +1915,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         ((ExpandableView) child).setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
-        updateScrollStateForRemovedChild(child);
+        updateScrollStateForRemovedChild((ExpandableView) child);
         boolean animationGenerated = generateRemoveAnimation(child);
         if (animationGenerated && !mSwipedOutViews.contains(child)) {
             // Add this view to an overlay in order to ensure that it will still be temporary
@@ -2010,9 +2014,12 @@ public class NotificationStackScrollLayout extends ViewGroup
      *
      * @param removedChild the removed child
      */
-    private void updateScrollStateForRemovedChild(View removedChild) {
+    private void updateScrollStateForRemovedChild(ExpandableView removedChild) {
         int startingPosition = getPositionInLinearLayout(removedChild);
-        int childHeight = getIntrinsicHeight(removedChild) + mPaddingBetweenElements;
+        int padding = removedChild.needsIncreasedPadding()
+                ? mIncreasedPaddingBetweenElements :
+                mPaddingBetweenElements;
+        int childHeight = getIntrinsicHeight(removedChild) + padding;
         int endPosition = startingPosition + childHeight;
         if (endPosition <= mOwnScrollY) {
             // This child is fully scrolled of the top, so we have to deduct its height from the
@@ -2035,16 +2042,25 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private int getPositionInLinearLayout(View requestedChild) {
         int position = 0;
+        boolean previousNeedsIncreasedPaddings = false;
         for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            boolean notGone = child.getVisibility() != View.GONE;
+            if (notGone) {
+                boolean needsIncreasedPaddings = child.needsIncreasedPadding();
+                if (position != 0) {
+                    int padding = needsIncreasedPaddings || previousNeedsIncreasedPaddings
+                            ? mIncreasedPaddingBetweenElements :
+                            mPaddingBetweenElements;
+                    position += padding;
+                }
+                previousNeedsIncreasedPaddings = needsIncreasedPaddings;
+            }
             if (child == requestedChild) {
                 return position;
             }
-            if (child.getVisibility() != View.GONE) {
+            if (notGone) {
                 position += getIntrinsicHeight(child);
-                if (i < getChildCount()-1) {
-                    position += mPaddingBetweenElements;
-                }
             }
         }
         return 0;
@@ -3014,7 +3030,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getDismissViewHeight() {
-        int height = mDismissView.getHeight() + mPaddingBetweenElementsNormal;
+        int height = mDismissView.getHeight() + mPaddingBetweenElements;
 
         // Hack: Accommodate for additional distance when we only have one notification and the
         // dismiss all button.
