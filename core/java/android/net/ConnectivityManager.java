@@ -1460,7 +1460,7 @@ public class ConnectivityManager {
         if (b != null) {
             try {
                 ITelephony it = ITelephony.Stub.asInterface(b);
-                int subId = SubscriptionManager.getDefaultDataSubId();
+                int subId = SubscriptionManager.getDefaultDataSubscriptionId();
                 Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
                 boolean retVal = it.getDataEnabled(subId);
                 Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
