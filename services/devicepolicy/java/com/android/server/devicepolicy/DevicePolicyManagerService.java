@@ -175,12 +175,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_STATUS_BAR = "statusbar";
 
-    private static final String TAG_AFFILIATION_ID = "affiliation-id";
-
     private static final String ATTR_DISABLED = "disabled";
 
     private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
             "do-not-ask-credentials-on-boot";
+
+    private static final String TAG_AFFILIATION_ID = "affiliation-id";
+
+    private static final String TAG_ADMIN_BROADCAST_PENDING = "admin-broadcast-pending";
+
+    private static final String ATTR_VALUE = "value";
+
+    private static final String TAG_INITIALIZATION_BUNDLE = "initialization-bundle";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -379,6 +385,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         Set<String> mAffiliationIds = new ArraySet<>();
 
+        // Used for initialization of users created by createAndManageUsers.
+        boolean mAdminBroadcastPending = false;
+        PersistableBundle mInitBundle = null;
+
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
         }
@@ -427,15 +437,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 removeUserData(userHandle);
-            } else if (Intent.ACTION_USER_STARTED.equals(action)
-                    || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
-
-                if (Intent.ACTION_USER_STARTED.equals(action)) {
+            } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                synchronized (DevicePolicyManagerService.this) {
                     // Reset the policy data
-                    synchronized (DevicePolicyManagerService.this) {
-                        mUserData.remove(userHandle);
-                    }
+                    mUserData.remove(userHandle);
+                    sendAdminEnabledBroadcastLocked(userHandle);
                 }
+                handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 handlePackagesChanged(null /* check all admins */, userHandle);
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
                     || (Intent.ACTION_PACKAGE_ADDED.equals(action)
@@ -2085,6 +2094,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, TAG_AFFILIATION_ID);
             }
 
+            if (policy.mAdminBroadcastPending) {
+                out.startTag(null, TAG_ADMIN_BROADCAST_PENDING);
+                out.attribute(null, ATTR_VALUE,
+                        Boolean.toString(policy.mAdminBroadcastPending));
+                out.endTag(null, TAG_ADMIN_BROADCAST_PENDING);
+            }
+
+            if (policy.mInitBundle != null) {
+                out.startTag(null, TAG_INITIALIZATION_BUNDLE);
+                policy.mInitBundle.saveToXml(out);
+                out.endTag(null, TAG_INITIALIZATION_BUNDLE);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -2093,7 +2115,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             stream.close();
             journal.commit();
             sendChangedNotification(userHandle);
-        } catch (IOException e) {
+        } catch (XmlPullParserException | IOException e) {
             Slog.w(LOG_TAG, "failed writing file", e);
             try {
                 if (stream != null) {
@@ -2219,6 +2241,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     policy.doNotAskCredentialsOnBoot = true;
                 } else if (TAG_AFFILIATION_ID.equals(tag)) {
                     policy.mAffiliationIds.add(parser.getAttributeValue(null, "id"));
+                } else if (TAG_ADMIN_BROADCAST_PENDING.equals(tag)) {
+                    String pending = parser.getAttributeValue(null, ATTR_VALUE);
+                    policy.mAdminBroadcastPending = Boolean.toString(true).equals(pending);
+                } else if (TAG_INITIALIZATION_BUNDLE.equals(tag)) {
+                    policy.mInitBundle = PersistableBundle.restoreFromXml(parser);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -6338,6 +6365,85 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             setActiveAdmin(profileOwnerComponent, true, userHandle, adminExtras);
             setProfileOwner(profileOwnerComponent, ownerName, userHandle);
+            return user;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    private void sendAdminEnabledBroadcastLocked(int userHandle) {
+        DevicePolicyData policyData = getUserData(userHandle);
+        if (policyData.mAdminBroadcastPending) {
+            // Send the initialization data to profile owner and delete the data
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userHandle);
+            if (admin != null) {
+                PersistableBundle initBundle = policyData.mInitBundle;
+                sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
+                        initBundle == null ? null : new Bundle(initBundle), null);
+            }
+            policyData.mInitBundle = null;
+            policyData.mAdminBroadcastPending = false;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    @Override
+    public UserHandle createAndManageUser(ComponentName admin, String name,
+            PersistableBundle adminExtras, int flags) {
+        // Create user.
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+        UserHandle user = null;
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            final long id = mInjector.binderClearCallingIdentity();
+            try {
+                UserInfo userInfo = mUserManager.createUser(name, 0 /* flags */);
+                if (userInfo != null) {
+                    user = userInfo.getUserHandle();
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+        }
+        if (user == null) {
+            return null;
+        }
+        // Set admin.
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            final String adminPkg = admin.getPackageName();
+
+            final int userHandle = user.getIdentifier();
+            try {
+                // Install the profile owner if not present.
+                if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
+                    mIPackageManager.installExistingPackageAsUser(adminPkg, userHandle);
+                }
+            } catch (RemoteException e) {
+                Slog.e(LOG_TAG, "Failed to make remote calls for createAndManageUser, "
+                        + "removing created user", e);
+                mUserManager.removeUser(user.getIdentifier());
+                return null;
+            }
+
+            setActiveAdmin(admin, true, userHandle);
+            // User is not started yet, the broadcast by setActiveAdmin will not be received.
+            // So we store adminExtras for broadcasting when the user starts for first time.
+            synchronized(this) {
+                DevicePolicyData policyData = getUserData(userHandle);
+                policyData.mInitBundle = adminExtras;
+                policyData.mAdminBroadcastPending = true;
+                saveSettingsLocked(userHandle);
+            }
+            final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
+            setProfileOwner(admin, ownerName, userHandle);
+
+            if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
+            }
+
             return user;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
