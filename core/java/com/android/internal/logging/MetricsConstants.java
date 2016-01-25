@@ -22,8 +22,7 @@ package com.android.internal.logging;
  */
 public interface MetricsConstants {
     // These constants must match those in the analytic pipeline, do not edit.
-    // Add temporary values to the top of MetricsLogger instead.
-    public static final int VIEW_UNKNOWN = 0;
+    // define metric categories in frameworks/base/core/proto/src/metrics_constants.proto.
     public static final int MAIN_SETTINGS = 1;
     public static final int ACCESSIBILITY = 2;
     public static final int ACCESSIBILITY_CAPTION_PROPERTIES = 3;
@@ -65,7 +64,7 @@ public interface MetricsConstants {
     public static final int DEVELOPMENT = 39;
     public static final int DEVICEINFO = 40;
     public static final int DEVICEINFO_IMEI_INFORMATION = 41;
-    public static final int DEVICEINFO_MEMORY = 42;
+    public static final int DEVICEINFO_STORAGE = 42;
     public static final int DEVICEINFO_SIM_STATUS = 43;
     public static final int DEVICEINFO_STATUS = 44;
     public static final int DEVICEINFO_USB = 45;
@@ -134,7 +133,6 @@ public interface MetricsConstants {
     public static final int WIFI_INFO = 108;
     public static final int WIFI_P2P = 109;
     public static final int WIRELESS = 110;
-    public static final int QS_PANEL = 111;
     public static final int QS_AIRPLANEMODE = 112;
     public static final int QS_BLUETOOTH = 113;
     public static final int QS_CAST = 114;
@@ -282,10 +280,55 @@ public interface MetricsConstants {
     public static final int ACTION_WIGGLE_CAMERA_GESTURE = 256;
     public static final int QS_WORKMODE = 257;
     public static final int BACKGROUND_CHECK_SUMMARY = 258;
+    public static final int QS_LOCK_TILE = 259;
+    public static final int QS_USER_TILE = 260;
+    public static final int QS_BATTERY_TILE = 261;
+    public static final int NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 262;
+    public static final int ACTION_ZEN_ALLOW_PEEK = 263;
+    public static final int ACTION_ZEN_ALLOW_LIGHTS = 264;
+    public static final int NOTIFICATION_TOPIC_NOTIFICATION = 265;
+    public static final int ACTION_DEFAULT_SMS_APP_CHANGED = 266;
+    public static final int QS_COLOR_MATRIX = 267;
+    public static final int QS_CUSTOM = 268;
+    public static final int ACTION_ZEN_ALLOW_SCREEN_ON = 269;
 
-    // These constants must match those in the analytic pipeline, do not edit.
-    // Add temporary values to the top of MetricsLogger instead.
+    /**
+     * Logged when the user docks a window from recents by longpressing a task and dragging it to
+     * the dock area.
+     */
+    public static final int ACTION_WINDOW_DOCK_DRAG_DROP = 270;
 
-    //aliases
-    public static final int DEVICEINFO_STORAGE = DEVICEINFO_MEMORY;
+    /**
+     * Logged when the user docks a fullscreen window by long pressing recents which also opens
+     * recents on the lower/right side.
+     */
+    public static final int ACTION_WINDOW_DOCK_LONGPRESS = 271;
+
+    /**
+     * Logged when the user docks a window by dragging from the navbar which also opens recents on
+     * the lower/right side.
+     */
+    public static final int ACTION_WINDOW_DOCK_SWIPE = 272;
+
+    /**
+     * Logged when the user launches a profile-specific app and we intercept it with the confirm
+     * credentials UI.
+     */
+    public static final int PROFILE_CHALLENGE = 273;
+    public static final int QS_BATTERY_DETAIL = 274;
+
+    /**
+     * Logged when the user goes into the overview history.
+     */
+    public static final int OVERVIEW_HISTORY = 275;
+
+    /**
+     * Logged when the user pages through overview.
+     */
+    public static final int ACTION_OVERVIEW_PAGE = 276;
+
+    /**
+     * Logged when the user launches a task from overview.
+     */
+    public static final int ACTION_OVERVIEW_SELECT = 277;
 }
