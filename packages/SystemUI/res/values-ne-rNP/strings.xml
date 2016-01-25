@@ -332,8 +332,7 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"प्राथमिकता \nमात्र"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"अलार्महरू \nमात्र"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सबै"</string>
-    <!-- no translation found for interruption_level_all_twoline (3719402899156124780) -->
-    <skip />
+    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"सबै\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"चार्ज हुँदै (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण भएसम्म)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"छिटो चार्ज हुँदै (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण नभएसम्म)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"बिस्तारै चार्ज हुँदै (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण नभएसम्म)"</string>
@@ -483,14 +482,15 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"गृह"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"हालैका"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"पछाडि"</string>
-    <!-- no translation found for tuner_full_zen_title (5905081395132280054) -->
-    <skip />
-    <!-- no translation found for tuner_full_zen_summary (6883568374520596402) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3114580364524650941) -->
-    <skip />
-    <!-- no translation found for volume_down_silent (66962568467719591) -->
-    <skip />
-    <!-- no translation found for volume_up_silent (7141255269783588286) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="5905081395132280054">"भोल्युममा बाधा नपुर्याउनुहोस् देखाउनुहोस्"</string>
+    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"भोल्युमको संवादमा बाधा नपुर्याउनुहोस् को पूर्ण नियन्त्रणलाई अनुमति दिनुहोस्"</string>
+    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"भोल्युम र बाधा नपुर्याउनुहोस्"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"भोल्युम कम गर्नेमा बाधा नपुर्याउनुहोस् प्रविष्ट गर्नुहोस्"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"भोल्युम बढाउनेमा बाधा नपुर्याउनुहोस् प्रविष्ट गर्नुहोस्"</string>
+    <string name="battery" msgid="7498329822413202973">"ब्याट्री"</string>
+    <string name="clock" msgid="7416090374234785905">"घडी"</string>
+    <string name="headset" msgid="4534219457597457353">"हेडसेट"</string>
+    <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफोनहरू जडान गरियो"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट जडान गरियो"</string>
+    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"वस्तुस्थिति पट्टीमा देखाउने हुनबाट आइकनहरूलाई सक्रिय वा निष्क्रिय गर्नुहोस्।"</string>
 </resources>

@@ -332,8 +332,7 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवळ\nप्राधान्य"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवळ\nअलार्म"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"सर्व"</string>
-    <!-- no translation found for interruption_level_all_twoline (3719402899156124780) -->
-    <skip />
+    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"सर्व\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण होईपर्यंत) चार्ज होत आहे"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण होईपर्यंत) वेगाने चार्ज होत आहे"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"(<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> पूर्ण होईपर्यंत) हळूहळू चार्ज होत आहे"</string>
@@ -483,14 +482,15 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"मुख्यपृष्ठ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"अलीकडील"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"परत"</string>
-    <!-- no translation found for tuner_full_zen_title (5905081395132280054) -->
-    <skip />
-    <!-- no translation found for tuner_full_zen_summary (6883568374520596402) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3114580364524650941) -->
-    <skip />
-    <!-- no translation found for volume_down_silent (66962568467719591) -->
-    <skip />
-    <!-- no translation found for volume_up_silent (7141255269783588286) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="5905081395132280054">"आवाजामध्‍ये व्यत्यय आणू नका दर्शवा"</string>
+    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"आवाज संवादामधील व्यत्यय आणू नका च्या पूर्ण नियंत्रणास अनुमती द्या."</string>
+    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"आवाज आणि व्यत्यय आणू नका"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"आवाज कमी केल्यावर व्यत्यय आणू नका प्रविष्‍ट करा"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"आवाज वाढविल्यावर व्यत्यय आणू नका मधून बाहेर पडा"</string>
+    <string name="battery" msgid="7498329822413202973">"बॅटरी"</string>
+    <string name="clock" msgid="7416090374234785905">"घड्याळ"</string>
+    <string name="headset" msgid="4534219457597457353">"हेडसेट"</string>
+    <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफोन कनेक्ट केले"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट कनेक्ट केला"</string>
+    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"चिन्हे स्टेटस बारमध्ये दर्शविले जाण्‍यापासून प्रतिबंधित करण्‍यासाठी ती सक्षम किंवा अक्षम करा."</string>
 </resources>
