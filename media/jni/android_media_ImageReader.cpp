@@ -574,6 +574,7 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
         case HAL_PIXEL_FORMAT_Y8:
             // Single plane 8bpp data.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pixelStride = 1;
             break;
         case HAL_PIXEL_FORMAT_YV12:
             pixelStride = 1;
