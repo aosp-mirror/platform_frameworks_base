@@ -1,11 +1,9 @@
 package com.android.server.am;
 
 import static android.app.Activity.RESULT_CANCELED;
-import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FLAG_ONLY_IF_NEEDED;
-import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
@@ -17,16 +15,8 @@ import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
-import static android.app.PendingIntent.FLAG_IMMUTABLE;
-import static android.app.PendingIntent.FLAG_ONE_SHOT;
-import static android.content.Context.KEYGUARD_SERVICE;
-import static android.content.Intent.EXTRA_INTENT;
-import static android.content.Intent.EXTRA_PACKAGE_NAME;
-import static android.content.Intent.EXTRA_TASK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -43,7 +33,6 @@ import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
-import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -76,7 +65,6 @@ import android.app.AppGlobals;
 import android.app.IActivityContainer;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
-import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
@@ -86,7 +74,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
-import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -96,7 +83,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
@@ -124,6 +110,7 @@ class ActivityStarter {
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
+    private ActivityStartInterceptor mInterceptor;
     private WindowManagerService mWindowManager;
 
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches = new ArrayList<>();
@@ -204,6 +191,7 @@ class ActivityStarter {
     ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
         mService = service;
         mSupervisor = supervisor;
+        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
     }
 
     final int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
@@ -226,17 +214,6 @@ class ActivityStarter {
                 Slog.w(TAG, "Unable to find app for caller " + caller
                         + " (pid=" + callingPid + ") when starting: "
                         + intent.toString());
-                err = ActivityManager.START_PERMISSION_DENIED;
-            }
-        }
-
-        if (aInfo != null) {
-            if ((aInfo.applicationInfo.flags & FLAG_SUSPENDED) != 0) {
-                Slog.w(TAG, "Application \"" + aInfo.applicationInfo.packageName
-                        + "\" is suspended. Refusing to start: " + intent.toString());
-                // TODO: show a dialog/activity informing the user that the application is suspended 
-                // and redirect the launch to it. Do not return START_PERMISSION_DENIED because 
-                // it is wrong.
                 err = ActivityManager.START_PERMISSION_DENIED;
             }
         }
@@ -381,26 +358,15 @@ class ActivityStarter {
             }
         }
 
-        final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(intent,
-                resolvedType, aInfo, callingPackage, userId);
-        if (interceptingIntent != null) {
-            intent = interceptingIntent;
-            callingPid = realCallingPid;
-            callingUid = realCallingUid;
-            resolvedType = null;
-            // If we are intercepting and there was a task, convert it into an extra for the
-            // ConfirmCredentials intent and unassign it, as otherwise the task will move to
-            // front even if ConfirmCredentials is cancelled.
-            if (inTask != null) {
-                intent.putExtra(EXTRA_TASK_ID, inTask.taskId);
-                inTask = null;
-            }
-
-            final UserInfo parent = UserManager.get(mService.mContext).getProfileParent(userId);
-            rInfo = mSupervisor.resolveIntent(intent, resolvedType, parent.id);
-            aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
-                    null /*profilerInfo*/);
-        }
+        mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage);
+        mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid, callingUid);
+        intent = mInterceptor.mIntent;
+        rInfo = mInterceptor.mRInfo;
+        aInfo = mInterceptor.mAInfo;
+        resolvedType = mInterceptor.mResolvedType;
+        inTask = mInterceptor.mInTask;
+        callingPid = mInterceptor.mCallingPid;
+        callingUid = mInterceptor.mCallingUid;
 
         if (abort) {
             if (resultRecord != null) {
@@ -550,34 +516,6 @@ class ActivityStarter {
         }
 
         return err;
-    }
-
-    /**
-     * Creates an intent to intercept the current activity start with Confirm Credentials if needed.
-     *
-     * @return The intercepting intent if needed.
-     */
-    private Intent interceptWithConfirmCredentialsIfNeeded(Intent intent, String resolvedType,
-            ActivityInfo aInfo, String callingPackage, int userId) {
-        if (!mService.mUserController.shouldConfirmCredentials(userId)) {
-            return null;
-        }
-        final IIntentSender target = mService.getIntentSenderLocked(
-                INTENT_SENDER_ACTIVITY, callingPackage,
-                Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
-                new String[]{ resolvedType },
-                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE, null);
-        final int flags = intent.getFlags();
-        final KeyguardManager km = (KeyguardManager) mService.mContext
-                .getSystemService(KEYGUARD_SERVICE);
-        final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
-        if (newIntent == null) {
-            return null;
-        }
-        newIntent.setFlags(flags | FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        newIntent.putExtra(EXTRA_PACKAGE_NAME, aInfo.packageName);
-        newIntent.putExtra(EXTRA_INTENT, new IntentSender(target));
-        return newIntent;
     }
 
     void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {
