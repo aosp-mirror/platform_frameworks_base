@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
 import com.android.systemui.tuner.TunerService;
@@ -41,6 +42,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     private static final String HOME = "home";
     private static final String RECENT = "recent";
     private static final String NAVSPACE = "space";
+
+    private static final String APP_SHELF = "app_shelf";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -108,12 +111,10 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     private void initiallyFill(ButtonDispatcher buttonDispatcher) {
-        addAll(buttonDispatcher, (ViewGroup) mRot0.findViewById(R.id.start_group));
+        addAll(buttonDispatcher, (ViewGroup) mRot0.findViewById(R.id.ends_group));
         addAll(buttonDispatcher, (ViewGroup) mRot0.findViewById(R.id.center_group));
-        addAll(buttonDispatcher, (ViewGroup) mRot0.findViewById(R.id.end_group));
-        addAll(buttonDispatcher, (ViewGroup) mRot90.findViewById(R.id.start_group));
+        addAll(buttonDispatcher, (ViewGroup) mRot90.findViewById(R.id.ends_group));
         addAll(buttonDispatcher, (ViewGroup) mRot90.findViewById(R.id.center_group));
-        addAll(buttonDispatcher, (ViewGroup) mRot90.findViewById(R.id.end_group));
     }
 
     private void addAll(ButtonDispatcher buttonDispatcher, ViewGroup parent) {
@@ -135,18 +136,41 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         String[] start = sets[0].split(BUTTON_SEPARATOR);
         String[] center = sets[1].split(BUTTON_SEPARATOR);
         String[] end = sets[2].split(BUTTON_SEPARATOR);
-        inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.start_group),
-                (ViewGroup) mRot0.findViewById(R.id.start_group_lightsout), false);
-        inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.start_group),
-                (ViewGroup) mRot90.findViewById(R.id.start_group_lightsout), true);
-        inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group),
-                (ViewGroup) mRot0.findViewById(R.id.start_group_lightsout), false);
-        inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group),
-                (ViewGroup) mRot90.findViewById(R.id.start_group_lightsout), true);
-        inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.end_group),
-                (ViewGroup) mRot0.findViewById(R.id.start_group_lightsout), false);
-        inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.end_group),
-                (ViewGroup) mRot90.findViewById(R.id.start_group_lightsout), true);
+        inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.ends_group),
+                (ViewGroup) mRot0.findViewById(R.id.ends_group_lightsout), false);
+        inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group),
+                (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
+
+        if (center.length == 1 && APP_SHELF.equals(center[0])) {
+            inflateShelf((LinearLayout) mRot0.findViewById(R.id.ends_group),
+                    (LinearLayout) mRot0.findViewById(R.id.ends_group_lightsout), false);
+            inflateShelf((LinearLayout) mRot90.findViewById(R.id.ends_group),
+                    (LinearLayout) mRot90.findViewById(R.id.ends_group_lightsout), true);
+        } else {
+            inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group),
+                    (ViewGroup) mRot0.findViewById(R.id.center_group_lightsout), false);
+            inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group),
+                    (ViewGroup) mRot90.findViewById(R.id.center_group_lightsout), true);
+            addGravitySpacer((LinearLayout) mRot0.findViewById(R.id.ends_group));
+            addGravitySpacer((LinearLayout) mRot90.findViewById(R.id.ends_group));
+        }
+
+        inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.ends_group),
+                (ViewGroup) mRot0.findViewById(R.id.ends_group_lightsout), false);
+        inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.ends_group),
+                (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
+    }
+
+    private void inflateShelf(LinearLayout layout, LinearLayout lightsOut, boolean landscape) {
+        View v = (landscape ? mLandscapeInflater : mLayoutInflater)
+                .inflate(R.layout.apps_bar, layout, false);
+        layout.addView(v);
+        addToDispatchers(v);
+        copyToLightsout(v, lightsOut);
+    }
+
+    private void addGravitySpacer(LinearLayout layout) {
+        layout.addView(new Space(mContext), new LinearLayout.LayoutParams(0, 0, 1));
     }
 
     private void inflateButtons(String[] buttons, ViewGroup parent, ViewGroup lightsOutParent,
@@ -187,6 +211,10 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     private ViewGroup.LayoutParams copy(ViewGroup.LayoutParams layoutParams) {
+        if (layoutParams instanceof LinearLayout.LayoutParams) {
+            return new LinearLayout.LayoutParams(layoutParams.width, layoutParams.height,
+                    ((LinearLayout.LayoutParams) layoutParams).weight);
+        }
         return new LayoutParams(layoutParams.width, layoutParams.height);
     }
 
@@ -220,13 +248,17 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             throw new IllegalArgumentException("Unknown button " + button);
         }
         parent.addView(v);
+        addToDispatchers(v);
+        return v;
+    }
+
+    private void addToDispatchers(View v) {
         if (mButtonDispatchers != null) {
             final int indexOfKey = mButtonDispatchers.indexOfKey(v.getId());
             if (indexOfKey >= 0) {
                 mButtonDispatchers.valueAt(indexOfKey).addView(v);
             }
         }
-        return v;
     }
 
     private boolean isSw600Dp() {
