@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raporti i defekteve në kod"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Merr raportin e defekteve në kod"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktiv"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Përdore këtë në shumicën e rrethanave. Të lejon të gjurmosh progresin e raportit dhe të fusësh më shumë detaje rreth problemit. Mund të fshijë disa seksione që përdoren më pak të cilat kërkojnë shumë kohë për t\'u raportuar."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Raporti i plotë"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_1">%d</xliff:g> sekonda.</item>
+      <item quantity="one">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_0">%d</xliff:g> sekondë.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modaliteti \"në heshtje\""</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zëri është çaktivizuar"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zëri është i aktivizuar"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Prek për ta anuluar"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Ndërro tastierë"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Zgjidh tastierat"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Shfaq metodën e hyrjes"</string>
-    <string name="hardware" msgid="7517821086888990278">"Harduer"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
+    <string name="hardware" msgid="194658061510127999">"Shfaq tastierën virtuale"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Përzgjidh planin e tastierës"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Prek për të përzgjedhur tastierën."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po përpiqet të shtojë një përdorues të ri, por është arritur limiti i përdoruesve."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po provon të shtojë një përdorues të ri, por llogaria "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ekziston tashmë në këtë pajisje. Dëshiron të vazhdosh gjithsesi?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po provon të shtojë një përdorues të ri për llogarinë "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Dëshiron të vazhdosh?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Preferenca për gjuhën"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Preferenca e rajonit"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Shkruaj emrin e gjuhës"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugjeruar"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
 </resources>

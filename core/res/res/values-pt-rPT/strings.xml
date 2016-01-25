@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Relatório de erros"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Criar relatório de erros"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Relatório interativo"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Utilize esta opção na maioria das circunstâncias. Permite monitorizar o progresso do relatório e introduzir mais detalhes acerca do problema. Pode omitir algumas secções menos utilizadas que demoram muito tempo a comunicar."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Relatório completo"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
+      <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som desativado"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"O som está ativado"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Toque para cancelar"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Escolher teclados"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
-    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>
+    <string name="hardware" msgid="194658061510127999">"Mostrar o teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecionar esquema de teclado"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toque para selecionar um esquema de teclado."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1527,8 +1527,14 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diversos"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Definiu a importância destas notificações."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está a tentar adicionar um novo utilizador, mas está atualmente proibido."</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está a tentar adicionar um novo utilizador, mas está atualmente proibido(a)."</string>
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está a tentar adicionar um novo utilizador, mas foi atingido o limite de utilizadores."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está a tentar adicionar um novo utilizador, mas a conta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" já existe neste dispositivo. Pretende continuar mesmo assim?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está a tentar adicionar um novo utilizador à conta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Pretende continuar?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Preferência de idioma"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Preferência de região"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Intr. nome do idioma"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugeridos"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Pesquisa"</string>
 </resources>

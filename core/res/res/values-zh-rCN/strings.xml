@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"错误报告"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"提交错误报告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互动式报告"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，以及输入与相应问题相关的更多详细信息。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整报告"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">系统将在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后对错误报告进行截屏。</item>
+      <item quantity="one">系统将在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒后对错误报告进行截屏。</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"静音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"声音已开启"</string>
@@ -238,9 +238,9 @@
     <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"工作"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"通讯录"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"使用您的通讯录"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"访问您的通讯录"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"使用此设备的位置信息"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"获取此设备的位置信息"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"短信"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"触摸可取消"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"选择键盘"</string>
-    <string name="show_ime" msgid="9157568568695230830">"显示输入法"</string>
-    <string name="hardware" msgid="7517821086888990278">"硬件"</string>
+    <string name="show_ime" msgid="2506087537466597099">"连接到实体键盘时使其在屏幕上保持显示状态"</string>
+    <string name="hardware" msgid="194658061510127999">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"选择键盘布局"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"触摸可选择键盘布局。"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但已达到用户人数上限。"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但这个设备上已经存在"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号。仍要继续吗？"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试为"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号添加新用户，要继续吗？"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"语言偏好设置"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"区域偏好设置"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"建议语言"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"所有语言"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"搜索"</string>
 </resources>

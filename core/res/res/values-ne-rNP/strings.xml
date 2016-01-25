@@ -146,7 +146,7 @@
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL भेटाउन सकेन।"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"साइटको आधिकारिकता योजना समर्थित छैन।"</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"प्रमाणीकरण गर्न सकेन।"</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रोक्सी सर्भरको माध्यमद्वारा प्रमाणिकरण असफल भएको छ।"</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रोक्सी सर्भरको माध्यमद्वारा प्रमाणीकरण असफल भएको छ।"</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"सर्भरसँग जोड्न सकेन।"</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"सर्भरसँग संचार गर्न सकेन। फेरि पछि कोसिस गर्नुहोस्।"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्भर संगको सम्पर्क प्रक्रिया समय सकियो।"</string>
@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रिपोर्ट"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"बग रिपोर्ट लिनुहोस्"</string>
     <string name="bugreport_message" msgid="398447048750350456">"एउटा इमेल सन्देशको रूपमा पठाउनलाई यसले तपाईँको हालैको उपकरणको अवस्थाको बारेमा सूचना जम्मा गर्ने छ। बग रिपोर्ट सुरु गरेदेखि पठाउन तयार नभएसम्म यसले केही समय लिन्छ; कृपया धैर्य गर्नुहोस्।"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"पारस्परिक रिपोर्ट"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"यसलाई धेरै परिस्थिति भन्दा मुनि प्रयोग गर्नुहोस्। यसले तपाईंलाई रिपोर्टको प्रगति ट्र्याक गर्न र समस्या सम्बन्धी थप विवरणहरू प्रविष्ट गर्न अनुमति दिन्छ। यसले रिपोर्ट गर्न धेरै नै समय लिने केही कम प्रयोग भएका खण्डहरू मेटाउन सक्छ।"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other"> बग रिपोर्टको लागि <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
+      <item quantity="one"> बग रिपोर्टको लागि <xliff:g id="NUMBER_0">%d</xliff:g> सेकेन्डमा स्क्रिनशट लिँदै।</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मौन मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"आवाज बन्द छ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्वनि खुल्ला छ"</string>
@@ -1047,7 +1047,7 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"व्यवस्थापकसँग बग रिपोर्ट साझेदारी गर्ने हो?"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"प्रशासकसँग बग रिपोर्ट साझेदारी गर्ने हो?"</string>
     <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"तपाईंको IT व्यवस्थापकले समस्या निवारणमा मद्दत गर्न बग रिपोर्ट अनुरोध गर्नुभयो"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार गर्नुहोस्"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार गर्नुहोस्"</string>
@@ -1055,8 +1055,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"रद्द गर्न छुनुहोस्"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड छान्नुहोस्"</string>
-    <string name="show_ime" msgid="9157568568695230830">"आगत विधि देखाउनुहोस्"</string>
-    <string name="hardware" msgid="7517821086888990278">"हार्डवेयर"</string>
+    <string name="show_ime" msgid="2506087537466597099">"भौतिक किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राख्नुहोस्"</string>
+    <string name="hardware" msgid="194658061510127999">"भर्चुअल किबोर्ड देखाउनुहोस्"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"किबोर्ड रूपरेखा चयन गर्नुहोस्"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"किबोर्ड रूपरेखा चयन गर्न टच गर्नुहोस्।"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1533,8 +1533,14 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"विविध"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहुन्छ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर हाललाई निषेध छ।"</string>
+    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर हाललाई निषेधित छ।"</string>
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर प्रयोगकर्ताको सीमा पुगेको छ।"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ तर यो यन्त्रमा खाता "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" पहिले नै अवस्थित छ। जे भए पनि अगाडि बढ्ने हो?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ले खाता "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" मा नयाँ प्रयोगकर्ता थप्ने प्रयास गरिरहेको छ। अगाडि बढ्ने हो?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"भाषाको प्राथमिकता"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"क्षेत्रको प्राथमिकता"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"भाषाको नाम टाइप गर्नुहोस्"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सुझाव दिइयो"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"सम्पूर्ण भाषाहरू"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"खोज"</string>
 </resources>

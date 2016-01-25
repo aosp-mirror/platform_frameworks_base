@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de erros"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crear informe de erros"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Este informe recompilará información acerca do estado actual do teu dispositivo para enviala en forma de mensaxe de correo electrónico. O informe de erros tardará un pouco en completarse desde o seu inicio ata que estea preparado para enviarse, polo que che recomendamos que teñas paciencia."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Usa esta opción na maioría das circunstancias. Permíteche realizar un seguimento do progreso do informe e introducir máis detalles sobre o problema. Pode que omita algunhas seccións menos usadas para as que se tarda máis en facer o informe."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Informe completo"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">Facendo captura de pantalla para informe de erros en <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
+      <item quantity="one">Facendo captura de pantalla para informe de erros en <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo de silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"O son está desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"O son está activado"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Tocar para cancelar o informe de erros"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Seleccionar teclados"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Mostra método de entrada"</string>
-    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Manteno na pantalla mentres o teclado físico estea activo"</string>
+    <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Seleccionar deseño de teclado"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toca para seleccionar un deseño de teclado."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está tentando engadir un usuario novo, pero alcanzouse o límite de usuarios."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está tentando engadir un usuario novo, pero a conta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" xa existe neste dispositivo. Queres continuar igualmente?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" está tentando engadir un usuario novo á conta "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Queres continuar?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Preferencia de idioma"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Preferencia de rexión"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Escribe o nome"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Suxeridos"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Buscar"</string>
 </resources>

@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"දෝෂ වාර්තාවක් ගන්න"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ඊ-තැපැල් පණිවිඩයක් ලෙස යැවීමට මෙය ඔබගේ වත්මන් උපාංග තත්වය ගැන තොරතුරු එකතු කරනු ඇත. දෝෂ වාර්තාව ආරම්භ කර එය යැවීමට සූදානම් කරන තෙක් එයට කිසියම් කාලයක් ගතවනු ඇත; කරුණාකර ඉවසන්න."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"අන්තර්ක්‍රියා වාර්."</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"බොහොමයක් වාතාවරණ යටතේ මෙය භාවිත කරන්න. එය ඔබට වාර්තාවේ ප්‍රගතිය හඹා යාමට සහ ගැටලුව පිළිබඳ වැඩිපුර විස්තර ඇතුළත් කිරීමට ඉඩ දෙයි. එය වාර්තා කිරීමට දිගු වේලාවක් ගන්නා සමහර අඩුවෙන්-භාවිත වන කොටස් මග හැරීමට හැකිය."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"සම්පූර්ණ වාර්තාව"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">තත්පර <xliff:g id="NUMBER_1">%d</xliff:g>කින් දෝෂ වාර්තාව සඳහා තිර රුවක් ලබා ගනිමින්</item>
+      <item quantity="other">තත්පර <xliff:g id="NUMBER_1">%d</xliff:g>කින් දෝෂ වාර්තාව සඳහා තිර රුවක් ලබා ගනිමින්</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"නිහඬ ආකාරය"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ශබ්දය අක්‍රියයි"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"හඬ සක්‍රියයි"</string>
@@ -1051,8 +1051,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"අවලංගු කිරීමට ස්පර්ශ කරන්න"</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"යතුරු පුවරු තෝරන්න"</string>
-    <string name="show_ime" msgid="9157568568695230830">"ආදාන ක්‍රමය පෙන්වන්න"</string>
-    <string name="hardware" msgid="7517821086888990278">"දෘඨාංග"</string>
+    <string name="show_ime" msgid="2506087537466597099">"භෞතික යතුරු පුවරුව සක්‍රිය අතරතුර එය තිරය මත තබා ගන්න"</string>
+    <string name="hardware" msgid="194658061510127999">"අතථ්‍ය යතුරු පුවරුව පෙන්වන්න"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"යතුරු පුවරුවට පිරිසැලැස්ම තෝරන්න"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"යතුරු පුවරුවට පිරිසැලැස්මක් තේරීමට ස්පර්ශ කරන්න."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1533,4 +1533,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" නව පරිශීලකයෙකු එක් කිරීමට උත්සාහ කරමින් සිටින නමුත්, පරිශීලක සීමාවට ළඟා වී ඇත."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" නව පරිශීලකයෙකු එක් කිරීමට උත්සාහ කරමින් සිටී, නමුත් "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ගිණුම මෙම උපාංගය මත දැනටමත් පවතී. කෙසේ වෙතත් ඉදිරියට යන්නද?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" නව පරිශීලකයෙකු "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ගිණුම සඳහා එක් කිරීමට උත්සාහ කරමින් සිටී. ඉදිරියට යන්නද?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"භාෂා මනාප"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"ප්‍රදේශ මනාපය"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"භාෂා නම ටයිප් කරන්න"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"යෝජිත"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"සියලු භාෂා"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"සෙවීම"</string>
 </resources>

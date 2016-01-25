@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ബഗ് റിപ്പോർട്ട് എടുക്കുക"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"മിക്ക സാഹചര്യങ്ങളിലും ഇത് ഉപയോഗിക്കുക. റിപ്പോർട്ടിന്റെ പുരോഗതി കാണാനും പ്രശ്നത്തിന്റെ കൂടുതൽ വിശദാംശങ്ങളിലേക്ക് പ്രവേശിക്കാനും ഇത് അനുവദിക്കുന്നു. റിപ്പോർട്ടുചെയ്യാൻ നീണ്ട സമയം എടുക്കുന്ന, നിങ്ങൾ കുറവായി ഉപയോഗിക്കുന്ന ചില വിഭാഗങ്ങളെ ഇത് വിട്ടുകളഞ്ഞേക്കാം."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"പൂർണ്ണ റിപ്പോർട്ട്"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
+      <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"നിശബ്‌ദ മോഡ്"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ശബ്‌ദം ഓഫാണ്"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ശബ്‌ദം ഓണാണ്"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"റദ്ദാക്കുന്നതിന് സ്പർശിക്കുക"</string>
     <string name="select_input_method" msgid="8547250819326693584">"കീബോഡ് മാറ്റുക"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"കീബോർഡുകൾ തിരഞ്ഞെടുക്കുക"</string>
-    <string name="show_ime" msgid="9157568568695230830">"ടൈപ്പുചെയ്യൽ രീതി കാണിക്കുക"</string>
-    <string name="hardware" msgid="7517821086888990278">"ഹാർഡ്‌വെയർ"</string>
+    <string name="show_ime" msgid="2506087537466597099">"ഭൗതിക കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
+    <string name="hardware" msgid="194658061510127999">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കുക"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ഒരു കീബോർഡ് ലേഔട്ട് തിരഞ്ഞെടുക്കാൻ സ്‌പർശിക്കുക."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"പുതിയൊരു ഉപയോക്താവിനെ ചേർക്കാൻ "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ശ്രമിക്കുന്നു, എന്നാൽ ഉപയോക്തൃ പരിധി എത്തിക്കഴിഞ്ഞിരിക്കുന്നു."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789">"പുതിയൊരു ഉപയോക്താവിനെ ചേർക്കാൻ "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ശ്രമിക്കുന്നു, എന്നാൽ "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" എന്ന അക്കൗണ്ട് ഇതിനകം തന്നെ ഈ ഉപകരണത്തിൽ നിലവിലുണ്ട്. എന്തായാലും തുടരണോ?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" എന്ന അക്കൗണ്ടിനായി പുതിയൊരു ഉപയോക്താവിനെ ചേർക്കാൻ "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ശ്രമിക്കുന്നു. തുടരണോ?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"ഭാഷാ മുൻഗണന"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"മേഖലാ മുൻഗണന"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"ഭാഷയുടെ പേര് ടൈപ്പുചെയ്യുക"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
 </resources>

@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ত্রুটির প্রতিবেদন"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির প্রতিবেদন করুন"</string>
     <string name="bugreport_message" msgid="398447048750350456">"এটি একটি ই-মেল বার্তা পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; দয়া করে ধৈর্য রাখুন৷"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ইন্টারেক্টিভ প্রতিবেদন"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"বেশিভাগ পরিস্থিতিতে এটিকে ব্যবহার করুন৷ এটি আপনাকে প্রতিবেদনের কাজ কতটা হয়েছে তার উপর নজর রাখতে দেয় এবং সমস্যাটির সম্পর্কে আরো অনেক কিছু লিখতে দেয়৷ এটি হয়ত প্রতিবেদন করতে খুব বেশি সময় নেয় এমন কম-ব্যবহৃত বিভাগগুলি সরিয়ে দিতে পারে৷"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"সম্পূর্ণ প্রতিবেদন"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রীনশট নেওয়া হচ্ছে৷</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রীনশট নেওয়া হচ্ছে৷</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"নীরব মোড"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"শব্দ বন্ধ করা আছে"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"শব্দ চালু করা আছে"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"বাতিল করতে স্পর্শ করুন"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"কীবোর্ড চয়ন করুন"</string>
-    <string name="show_ime" msgid="9157568568695230830">"ইনপুট পদ্ধতি দেখান"</string>
-    <string name="hardware" msgid="7517821086888990278">"হার্ডওয়্যার"</string>
+    <string name="show_ime" msgid="2506087537466597099">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
+    <string name="hardware" msgid="194658061510127999">"ভার্চুয়াল কীবোর্ড দেখান"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"কীবোর্ডের লেআউট নির্বাচন করুন"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"একটি কীবোর্ডের লেআউট নির্বাচন করতে স্পর্শ করুন৷"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" একজন নতুন ব্যবহারকারী যোগ করার চেষ্টা করছে, তবে ব্যবহারকারীর সীমা অতিক্রান্ত হয়েছে।"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" একজন নতুন ব্যবহারকারীকে যোগ করার চেষ্টা করছে, তবে "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" অ্যাকাউন্ট আগে থেকেই এই ডিভাইসটিতে বিদ্যমান আছে। তবুও এগোতে চান?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" অ্যাকাউন্টের জন্য একজন নতুন ব্যবহারকারীকে যোগ করার চেষ্টা করছে। এগোতে চান?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"পছন্দের ভাষা"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"পছন্দের অঞ্চল"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"ভাষার নাম লিখুন"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"প্রস্তাবিত"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"সকল ভাষা"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"অনুসন্ধান করুন"</string>
 </resources>

@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээллэх"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ихэнх тохиолдолд үүнийг хэрэглэнэ үү. Энэ нь танд тайлангийн явцыг хянах болон асуудлын талаар дэлгэрэнгүйг мэдэх боломж олгоно. Таны бага ашигладаг, тайлагнахад хугацаа их шаарддаг зарим хэсгийг алгана."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Бүрэн тайлан"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_1">%d</xliff:g> секундад авна.</item>
+      <item quantity="one">Алдааны тайлангийн дэлгэцийн зургийг <xliff:g id="NUMBER_0">%d</xliff:g> секундад авна.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Чимээгүй горим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Дуу хаагдсан"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Дуу асав"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Цуцлахын тулд хүрэх"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Гарыг өөрчлөх"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Гар сонгох"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Оруулах аргыг харуулах"</string>
-    <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Бодит гар идэвхтэй үед үүнийг дэлгэцэнд харуулна уу"</string>
+    <string name="hardware" msgid="194658061510127999">"Хийсвэр гарыг харуулах"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Гарын схемийг сонгох"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Гарын схемийг сонгох бол хүрнэ үү."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1527,6 +1527,12 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Оролцсон хүмүүсээс шалтгаалан энэ нь өндөр ач холбогдолтой."</string>
     <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" шинэ хэрэглэгч нэмэхээр оролдож байгаа боловч одоогоор боломжгүй байна."</string>
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" шинэ хэрэглэгч нэмэхээр оролдож байгаа ч хэрэглэгчийн тооны хязгаарт хүрсэн байна."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" шинэ хэрэглэгч нэмэх гэсэн боловч "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" бүртгэл нь энэ төхөөрөмжид аль хэдийн байна. Гэсэн хэдий ч үргэлжлүүлэх үү?"</string>
+    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" шинэ хэрэглэгч нэмэх гэсэн боловч "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" бүртгэл нь энэ төхөөрөмжид аль хэдийн бүртгэгдсэн байна. Үргэлжлүүлэх үү?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" нь "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" бүртгэлд шинэ хэрэглэгч нэмэх гэж байна. Үргэлжлүүлэх үү?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Хэлний тохиргоо"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Бүс нутгийн тохиргоо"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Улсын хэлийг бичнэ үү"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Санал болгосон"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Бүх хэл"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Хайх"</string>
 </resources>

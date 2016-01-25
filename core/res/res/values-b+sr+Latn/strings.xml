@@ -212,15 +212,16 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izveštaj o grešci"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Napravi izveštaj o grešci"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupiti informacije o trenutnom stanju uređaja kako bi bile poslate u poruci e-pošte. Od započinjanja izveštaja o grešci do trenutka za njegovo slanje proći će neko vreme; budite strpljivi."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv. izveštaj"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Koristite ovo u većini slučajeva. To vam omogućava da pratite napredak izveštaja i da unosite dodatne detalje o problemu. Verovatno će izostaviti neke manje korišćene odeljke za koje pravljenje izveštaja dugo traje."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Kompletan izveštaj"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekundu.</item>
+      <item quantity="few">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekunde.</item>
+      <item quantity="other">Napravićemo snimak ekrana radi izveštaja o grešci za <xliff:g id="NUMBER_1">%d</xliff:g> sekundi.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Nečujni režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je ISKLJUČEN"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je UKLJUČEN"</string>
@@ -1056,8 +1057,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Dodirnite da biste otkazali"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promenite tastaturu"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izaberite tastature"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Prikazivanje metoda unosa"</string>
-    <string name="hardware" msgid="7517821086888990278">"Hardver"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Zadrži ga na ekranu dok je fizička tastatura aktivna"</string>
+    <string name="hardware" msgid="194658061510127999">"Prikaži virtuelnu tastaturu"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Izbor rasporeda tastature"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Dodirnite da biste izabrali raspored tastature."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1549,4 +1550,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" pokušava da doda novog korisnika, ali je ograničenje za broj korisnika dostignuto."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" pokušava da doda novog korisnika, ali nalog "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" već postoji na ovom uređaju. Želite li ipak da nastavite?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" pokušava da doda novog korisnika za nalog "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Želite li da nastavite?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Podešavanje jezika"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Podešavanje regiona"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predloženi"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Svi jezici"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Pretraži"</string>
 </resources>

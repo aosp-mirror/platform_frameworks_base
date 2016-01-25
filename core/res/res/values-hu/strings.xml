@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Programhiba bejelentése"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Hibajelentés készítése"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ezzel információt fog gyűjteni az eszköz jelenlegi állapotáról, amelyet a rendszer e-mailben fog elküldeni. Kérjük, legyen türelemmel, amíg a hibajelentés elkészül, és küldhető állapotba kerül."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktív jelentés"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ezt használja a legtöbb esetben. Segítségével nyomon követheti a jelentés folyamatát, és további információkat kaphat a problémáról. A folyamat során kimaradhatnak az olyan kevésbé használt részek, amelyek jelentése túl sok időt igényel."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Teljes jelentés"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_1">%d</xliff:g> másodpercen belül.</item>
+      <item quantity="one">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_0">%d</xliff:g> másodpercen belül.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Néma üzemmód"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Hang kikapcsolva"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Hang bekapcsolva"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"A visszavonáshoz érintse meg"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Billentyűzet megváltoztatása"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Billentyűzetek kiválasztása"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Beviteli mód megjelenítése"</string>
-    <string name="hardware" msgid="7517821086888990278">"Hardver"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Maradjon a képernyőn, amíg a billentyűzet aktív"</string>
+    <string name="hardware" msgid="194658061510127999">"Virtuális billentyűzet"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Válasszon billentyűzetkiosztást"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Érintse meg az egyik billentyűzetkiosztás kiválasztásához."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne megadni, azonban Ön elérte a felhasználók számára vonatkozó felső korlátot."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne megadni, de a(z) "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" fiók már létezik ezen az eszközön. Ettől függetlenül is folytatja?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne hozzáadni a(z) "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" fiókhoz. Folytatja a műveletet?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Nyelvi beállítás"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Régió beállítása"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Adja meg a nyelvet"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Javasolt"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Minden nyelv"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Keresés"</string>
 </resources>

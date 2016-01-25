@@ -213,15 +213,17 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Poročilo o napakah"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ustvari poročilo o napakah"</string>
     <string name="bugreport_message" msgid="398447048750350456">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivno poročilo"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"To možnost uporabite v večini primerov. Omogoča sledenje napredka poročila in vnos več podrobnosti o težavi. Morda bodo izpuščeni nekateri redkeje uporabljani razdelki, za katere je poročanje dolgotrajno."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Celotno poročilo"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
+      <item quantity="two">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
+      <item quantity="few">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
+      <item quantity="other">Posnetek zaslona za poročilo o napakah bo narejen čez <xliff:g id="NUMBER_1">%d</xliff:g> s.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tihi način"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvok je IZKLOPLJEN"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvok je VKLOPLJEN"</string>
@@ -1063,8 +1065,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Če želite prekiniti, se dotaknite"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Sprememba tipkovnice"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izbira tipkovnic"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Pokaži način vnosa"</string>
-    <string name="hardware" msgid="7517821086888990278">"Strojna oprema"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Ohrani na zaslonu, dokler je aktivna fizična tipkovnica"</string>
+    <string name="hardware" msgid="194658061510127999">"Pokaži navidezno tipkovnico"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Izberite razporeditev tipkovnice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Dotaknite se, da izberete razporeditev tipkovnice"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1567,4 +1569,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"Aplikacija "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" poskuša dodati novega uporabnika, vendar je dosežena omejitev števila uporabnikov."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789">"Aplikacija "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" poskuša dodati novega uporabnika, vendar račun "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" v napravi že obstaja. Ali želite kljub temu nadaljevati?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392">"Aplikacija "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" poskuša dodati novega uporabnika za račun "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Ali želite nadaljevati?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Nastavitev jezika"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Nastavitev območja"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Vnesite ime jezika"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Predlagano"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Vsi jeziki"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Išči"</string>
 </resources>

@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"گزارش اشکال"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"گرفتن گزارش اشکال"</string>
     <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
+      <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"حالت ساکت"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"صدا خاموش است"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"صدا روشن است"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"برای لغو کردن لمس کنید"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"انتخاب صفحه‌کلیدها"</string>
-    <string name="show_ime" msgid="9157568568695230830">"نمایش روش ورودی"</string>
-    <string name="hardware" msgid="7517821086888990278">"سخت‌افزار"</string>
+    <string name="show_ime" msgid="2506087537466597099">"وقتی صفحه‌کلید فیزیکی فعال است این ویرایشگر را روی صفحه نگه‌می‌دارد"</string>
+    <string name="hardware" msgid="194658061510127999">"نمایش صفحه‌کلید مجازی"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"انتخاب طرح‌بندی صفحه‌کلید"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"برای انتخاب یک طرح‌بندی صفحه‌کلید لمس کنید…"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی اضافه کند، اما تعداد کاربران به حداکثر مجاز رسیده است."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی اضافه کند، اما حساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" از قبل در این دستگاه وجود دارد. در هر صورت ادامه داده شود؟"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی برای حساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" اضافه کند. ادامه می‌دهید؟"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"اولویت‌های زبان"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"اولویت‌های منطقه"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"نام زبان را تایپ کنید"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"پیشنهادشده"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"همه زبان‌ها"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"جستجو"</string>
 </resources>
