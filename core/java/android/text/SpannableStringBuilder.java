@@ -965,10 +965,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         (spanStart != queryEnd && spanEnd != queryStart)) &&
                         (Object.class == kind || kind.isInstance(mSpans[i]))) {
                 int spanPriority = mSpanFlags[i] & SPAN_PRIORITY;
-                if(sort) {
-                    ret[count] = (T) mSpans[i];
-                    priority[count] = spanPriority;
-                    insertionOrder[count] = mSpanOrder[i];
+                int target = count;
+                if (sort) {
+                    priority[target] = spanPriority;
+                    insertionOrder[target] = mSpanOrder[i];
                 } else if (spanPriority != 0) {
                     //insertion sort for elements with priority
                     int j = 0;
@@ -977,8 +977,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         if (spanPriority > p) break;
                     }
                     System.arraycopy(ret, j, ret, j + 1, count - j);
-                    ret[j] = (T) mSpans[i];
+                    target = j;
                 }
+                ret[target] = (T) mSpans[i];
                 count++;
             }
             if (count < ret.length && (i & 1) != 0) {
