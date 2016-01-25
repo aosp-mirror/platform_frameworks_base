@@ -338,9 +338,6 @@ injunctive remedies (or an equivalent type of urgent legal relief) in any jurisd
   NDK Revision History.</a></p>
 
 
-<h2 id="Downloads">Downloading</h2>
-
-
 <script>
 $('#Downloads').after($('#download-table'));
 </script>
