@@ -259,7 +259,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED, userHandle, 0));
             } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
                 Integer newDefaultSubIdObj = new Integer(intent.getIntExtra(
-                        PhoneConstants.SUBSCRIPTION_KEY, SubscriptionManager.getDefaultSubId()));
+                        PhoneConstants.SUBSCRIPTION_KEY,
+                        SubscriptionManager.getDefaultSubscriptionId()));
                 int newDefaultPhoneId = intent.getIntExtra(PhoneConstants.SLOT_KEY,
                     SubscriptionManager.getPhoneId(mDefaultSubId));
                 if (DBG) {

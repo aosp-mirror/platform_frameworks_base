@@ -228,7 +228,7 @@ public class DataUsageController {
     private static String getActiveSubscriberId(Context context) {
         final TelephonyManager tele = TelephonyManager.from(context);
         final String actualSubscriberId = tele.getSubscriberId(
-                SubscriptionManager.getDefaultDataSubId());
+                SubscriptionManager.getDefaultDataSubscriptionId());
         return actualSubscriberId;
     }
 
