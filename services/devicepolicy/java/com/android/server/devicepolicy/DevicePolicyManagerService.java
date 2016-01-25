@@ -509,6 +509,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_LONG_SUPPORT_MESSAGE = "long-support-message";
         private static final String TAG_PARENT_ADMIN = "parent-admin";
         private static final String TAG_ORGANIZATION_COLOR = "organization-color";
+        private static final String TAG_ORGANIZATION_NAME = "organization-name";
 
         final DeviceAdminInfo info;
 
@@ -606,6 +607,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Background color of confirm credentials screen. Default: gray.
         static final int DEF_ORGANIZATION_COLOR = Color.GRAY;
         int organizationColor = DEF_ORGANIZATION_COLOR;
+
+        // Default title of confirm credentials screen
+        String organizationName = null;
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -830,6 +834,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Integer.toString(organizationColor));
                 out.endTag(null, TAG_ORGANIZATION_COLOR);
             }
+            if (organizationName != null) {
+                out.startTag(null, TAG_ORGANIZATION_NAME);
+                out.text(organizationName);
+                out.endTag(null, TAG_ORGANIZATION_NAME);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -971,6 +980,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_ORGANIZATION_COLOR.equals(tag)) {
                     organizationColor = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_ORGANIZATION_NAME.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        organizationName = parser.getText();
+                    } else {
+                        Log.w(LOG_TAG, "Missing text when loading organization name");
+                    }
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1178,6 +1194,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (keepUninstalledPackages != null) {
                 pw.print(prefix); pw.print("keepUninstalledPackages=");
                     pw.println(keepUninstalledPackages);
+            }
+            pw.print(prefix); pw.print("organizationColor=");
+                    pw.println(organizationColor);
+            if (organizationName != null) {
+                pw.print(prefix); pw.print("organizationName=");
+                    pw.println(organizationName);
             }
             pw.print(prefix); pw.println("userRestrictions:");
             UserRestrictionsUtils.dumpRestrictions(pw, prefix + "  ", userRestrictions);
@@ -8097,11 +8119,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setOrganizationColor(@NonNull ComponentName who, int color) {
-        final int userHandle = mInjector.userHandleGetCallingUserId();
-        if (!mHasFeature || !isManagedProfile(userHandle)) {
+        if (!mHasFeature) {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        enforceManagedProfile(userHandle, "set organization color");
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -8112,11 +8135,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getOrganizationColor(@NonNull ComponentName who) {
-        final int userHandle = mInjector.userHandleGetCallingUserId();
-        if (!mHasFeature || !isManagedProfile(userHandle)) {
+        if (!mHasFeature) {
             return ActiveAdmin.DEF_ORGANIZATION_COLOR;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceManagedProfile(mInjector.userHandleGetCallingUserId(), "get organization color");
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -8126,15 +8149,63 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getOrganizationColorForUser(int userHandle) {
-        if (!mHasFeature || !isManagedProfile(userHandle)) {
+        if (!mHasFeature) {
             return ActiveAdmin.DEF_ORGANIZATION_COLOR;
         }
-        enforceCrossUsersPermission(userHandle);
+        enforceFullCrossUsersPermission(userHandle);
+        enforceManagedProfile(userHandle, "get organization color");
         synchronized (this) {
             ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userHandle);
             return (profileOwner != null)
                     ? profileOwner.organizationColor
                     : ActiveAdmin.DEF_ORGANIZATION_COLOR;
+        }
+    }
+
+    @Override
+    public void setOrganizationName(@NonNull ComponentName who, String text) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        final int userHandle = mInjector.userHandleGetCallingUserId();
+        enforceManagedProfile(userHandle, "set organization name");
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!TextUtils.equals(admin.organizationName, text)) {
+                admin.organizationName = TextUtils.nullIfEmpty(text);
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
+
+    @Override
+    public String getOrganizationName(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        enforceManagedProfile(mInjector.userHandleGetCallingUserId(), "get organization name");
+        synchronized(this) {
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.organizationName;
+        }
+    }
+
+    @Override
+    public String getOrganizationNameForUser(int userHandle) {
+        if (!mHasFeature) {
+            return null;
+        }
+        enforceFullCrossUsersPermission(userHandle);
+        enforceManagedProfile(userHandle, "get organization name");
+        synchronized (this) {
+            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userHandle);
+            return (profileOwner != null)
+                    ? profileOwner.organizationName
+                    : null;
         }
     }
 
