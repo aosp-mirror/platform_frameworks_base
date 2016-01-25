@@ -49,7 +49,8 @@ import com.android.internal.os.SomeArgs;
 import java.util.List;
 
 /**
- * An accessibility service runs in the background and receives callbacks by the system
+ * Accessibility services are intended to assist users with disabilities in using
+ * Android devices and apps. They run in the background and receive callbacks by the system
  * when {@link AccessibilityEvent}s are fired. Such events denote some state transition
  * in the user interface, for example, the focus has changed, a button has been clicked,
  * etc. Such a service can optionally request the capability for querying the content
@@ -66,22 +67,31 @@ import java.util.List;
  * <h3>Lifecycle</h3>
  * <p>
  * The lifecycle of an accessibility service is managed exclusively by the system and
- * follows the established service life cycle. Additionally, starting or stopping an
- * accessibility service is triggered exclusively by an explicit user action through
- * enabling or disabling it in the device settings. After the system binds to a service it
- * calls {@link AccessibilityService#onServiceConnected()}. This method can be
- * overriden by clients that want to perform post binding setup.
+ * follows the established service life cycle. Starting an accessibility service is triggered
+ * exclusively by the user explicitly turning the service on in device settings. After the system
+ * binds to a service, it calls {@link AccessibilityService#onServiceConnected()}. This method can
+ * be overriden by clients that want to perform post binding setup.
+ * </p>
+ * <p>
+ * An accessibility service stops either when the user turns it off in device settings or when
+ * it calls {@link AccessibilityService#disableSelf()}.
  * </p>
  * <h3>Declaration</h3>
  * <p>
- * An accessibility is declared as any other service in an AndroidManifest.xml but it
- * must also specify that it handles the "android.accessibilityservice.AccessibilityService"
- * {@link android.content.Intent}. Failure to declare this intent will cause the system to
- * ignore the accessibility service. Additionally an accessibility service must request the
- * {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission to ensure
- * that only the system
- * can bind to it. Failure to declare this intent will cause the system to ignore the
- * accessibility service. Following is an example declaration:
+ * An accessibility is declared as any other service in an AndroidManifest.xml, but it
+ * must do two things:
+ * <ul>
+ *     <ol>
+ *         Specify that it handles the "android.accessibilityservice.AccessibilityService"
+ *         {@link android.content.Intent}.
+ *     </ol>
+ *     <ol>
+ *         Request the {@link android.Manifest.permission#BIND_ACCESSIBILITY_SERVICE} permission to
+ *         ensure that only the system can bind to it.
+ *     </ol>
+ * </ul>
+ * If either of these items is missing, the system will ignore the accessibility service.
+ * Following is an example declaration:
  * </p>
  * <pre> &lt;service android:name=".MyAccessibilityService"
  *         android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"&gt;
@@ -135,48 +145,24 @@ import java.util.List;
  * </ul>
  * <h3>Retrieving window content</h3>
  * <p>
- * A service can specify in its declaration that it can retrieve the active window
- * content which is represented as a tree of {@link AccessibilityNodeInfo}. Note that
+ * A service can specify in its declaration that it can retrieve window
+ * content which is represented as a tree of {@link AccessibilityWindowInfo} and
+ * {@link AccessibilityNodeInfo} objects. Note that
  * declaring this capability requires that the service declares its configuration via
  * an XML resource referenced by {@link #SERVICE_META_DATA}.
  * </p>
  * <p>
- * For security purposes an accessibility service can retrieve only the content of the
- * currently active window. The currently active window is defined as the window from
- * which was fired the last event of the following types:
- * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
- * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
- * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT},
- * In other words, the last window that was shown or the last window that the user has touched
- * during touch exploration.
- * </p>
- * <p>
- * The entry point for retrieving window content is through calling
- * {@link AccessibilityEvent#getSource() AccessibilityEvent.getSource()} of the last received
- * event of the above types or a previous event from the same window
- * (see {@link AccessibilityEvent#getWindowId() AccessibilityEvent.getWindowId()}). Invoking
- * this method will return an {@link AccessibilityNodeInfo} that can be used to traverse the
- * window content which represented as a tree of such objects.
+ * Window content may be retrieved with
+ * {@link AccessibilityEvent#getSource() AccessibilityEvent.getSource()},
+ * {@link AccessibilityService#findFocus(int)},
+ * {@link AccessibilityService#getWindows()}, or
+ * {@link AccessibilityService#getRootInActiveWindow()}.
  * </p>
  * <p class="note">
  * <strong>Note</strong> An accessibility service may have requested to be notified for
- * a subset of the event types, thus be unaware that the active window has changed. Therefore
- * accessibility service that would like to retrieve window content should:
- * <ul>
- * <li>
- * Register for all event types with no notification timeout and keep track for the active
- * window by calling {@link AccessibilityEvent#getWindowId()} of the last received event and
- * compare this with the {@link AccessibilityNodeInfo#getWindowId()} before calling retrieval
- * methods on the latter.
- * </li>
- * <li>
- * Prepare that a retrieval method on {@link AccessibilityNodeInfo} may fail since the
- * active window has changed and the service did not get the accessibility event yet. Note
- * that it is possible to have a retrieval method failing even adopting the strategy
- * specified in the previous bullet because the accessibility event dispatch is asynchronous
- * and crosses process boundaries.
- * </li>
- * </ul>
+ * a subset of the event types, and thus be unaware when the node hierarchy has changed. It is also
+ * possible for a node to contain outdated information because the window content may change at any
+ * time.
  * </p>
  * <h3>Notification strategy</h3>
  * <p>
@@ -328,7 +314,6 @@ public abstract class AccessibilityService extends Service {
      *     android:settingsActivity="foo.bar.TestBackActivity"
      *     android:canRetrieveWindowContent="true"
      *     android:canRequestTouchExplorationMode="true"
-     *     android:canRequestEnhancedWebAccessibility="true"
      *     . . .
      * /&gt;</pre>
      */
@@ -528,6 +513,14 @@ public abstract class AccessibilityService extends Service {
      * is currently touching or the window with input focus, if the user is not
      * touching any window.
      * <p>
+     * The currently active window is defined as the window that most recently fired one
+     * of the following events:
+     * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
+     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
+     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}.
+     * In other words, the last window shown that also has input focus.
+     * </p>
+     * <p>
      * <strong>Note:</strong> In order to access the root node your service has
      * to declare the capability to retrieve window content by setting the
      * {@link android.R.styleable#AccessibilityService_canRetrieveWindowContent}
@@ -541,8 +534,8 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * This method allows accessibility service turn itself off
-     * and the service will become disabled from the Settings.
+     * Disables the service. After calling this method, the service will be disabled and settings
+     * will show that it is turned off.
      */
     public final void disableSelf() {
         final IAccessibilityServiceConnection connection =
@@ -1054,7 +1047,7 @@ public abstract class AccessibilityService extends Service {
      * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
      * Also the service has to opt-in to retrieve the interactive windows by
      * setting the {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS}
-     * flag.Otherwise, the search will be performed only in the active window.
+     * flag. Otherwise, the search will be performed only in the active window.
      * </p>
      *
      * @param focus The focus to find. One of {@link AccessibilityNodeInfo#FOCUS_INPUT} or

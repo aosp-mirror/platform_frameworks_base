@@ -38,8 +38,8 @@ import java.util.List;
 /**
  * This class represents a node of the window content as well as actions that
  * can be requested from its source. From the point of view of an
- * {@link android.accessibilityservice.AccessibilityService} a window content is
- * presented as tree of accessibility node info which may or may not map one-to-one
+ * {@link android.accessibilityservice.AccessibilityService} a window's content is
+ * presented as a tree of accessibility node infos, which may or may not map one-to-one
  * to the view hierarchy. In other words, a custom view is free to report itself as
  * a tree of accessibility node info.
  * </p>
@@ -50,7 +50,7 @@ import java.util.List;
  * <p>
  * Please refer to {@link android.accessibilityservice.AccessibilityService} for
  * details about how to obtain a handle to window content as a tree of accessibility
- * node info as well as familiarizing with the security model.
+ * node info as well as details about the security model.
  * </p>
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -2422,18 +2422,30 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets the text selection start.
+     * Gets the text selection start or the cursor position.
+     * <p>
+     * If no text is selected, both this method and
+     * {@link AccessibilityNodeInfo#getTextSelectionEnd()} return the same value:
+     * the current location of the cursor.
+     * </p>
      *
-     * @return The text selection start if there is selection or -1.
+     * @return The text selection start, the cursor location if there is no selection, or -1 if
+     *         there is no text selection and no cursor.
      */
     public int getTextSelectionStart() {
         return mTextSelectionStart;
     }
 
     /**
-     * Gets the text selection end.
+     * Gets the text selection end if text is selected.
+     * <p>
+     * If no text is selected, both this method and
+     * {@link AccessibilityNodeInfo#getTextSelectionStart()} return the same value:
+     * the current location of the cursor.
+     * </p>
      *
-     * @return The text selection end if there is selection or -1.
+     * @return The text selection end, the cursor location if there is no selection, or -1 if
+     *         there is no text selection and no cursor.
      */
     public int getTextSelectionEnd() {
         return mTextSelectionEnd;
