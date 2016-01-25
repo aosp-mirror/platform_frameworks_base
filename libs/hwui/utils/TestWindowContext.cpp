@@ -138,8 +138,8 @@ public:
 
         // Move the pixels into the destination SkBitmap
 
-        SK_ALWAYSBREAK(nativeBuffer.format == android::PIXEL_FORMAT_RGBA_8888 &&
-                       "Native buffer not RGBA!");
+        LOG_ALWAYS_FATAL_IF(nativeBuffer.format != android::PIXEL_FORMAT_RGBA_8888,
+                            "Native buffer not RGBA!");
         SkImageInfo nativeConfig =
             SkImageInfo::Make(nativeBuffer.width, nativeBuffer.height,
                               kRGBA_8888_SkColorType, kPremul_SkAlphaType);
@@ -153,8 +153,8 @@ public:
             return false;
         }
 
-        SK_ALWAYSBREAK(bmp->colorType() == kRGBA_8888_SkColorType &&
-                       "Destination buffer not RGBA!");
+        LOG_ALWAYS_FATAL_IF(bmp->colorType() != kRGBA_8888_SkColorType,
+                            "Destination buffer not RGBA!");
         success =
             nativeWrapper.readPixels(destinationConfig, bmp->getPixels(), bmp->rowBytes(), 0, 0);
         if (!success) {
