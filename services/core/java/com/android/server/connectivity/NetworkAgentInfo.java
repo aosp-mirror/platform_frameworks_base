@@ -248,10 +248,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     public String toString() {
-        return "NetworkAgentInfo{ ni{" + networkInfo + "}  network{" +
-                network + "}  lp{" +
-                linkProperties + "}  nc{" +
-                networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
+        return "NetworkAgentInfo{ ni{" + networkInfo + "}  " +
+                "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  " +
+                "lp{" + linkProperties + "}  " +
+                "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
                 "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
                 "created{" + created + "} lingering{" + lingering + "} " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} " +
