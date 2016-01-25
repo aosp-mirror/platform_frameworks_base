@@ -18,4 +18,9 @@
     <declare-styleable name="RestrictedPreference">
         <attr name="userRestriction" format="string"/>
     </declare-styleable>
+    <declare-styleable name="WifiEncryptionState">
+        <attr name="state_encrypted" format="boolean" />
+    </declare-styleable>
+    <attr name="wifi_signal" format="reference" />
+
 </resources>
