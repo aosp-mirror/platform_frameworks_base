@@ -208,4 +208,16 @@ public class TestMtpManager extends MtpManager {
     byte[] getObject(int deviceId, int objectHandle, int expectedSize) throws IOException {
         return mImportFileBytes.get(pack(deviceId, objectHandle));
     }
+
+    @Override
+    long getPartialObject(int deviceId, int objectHandle, long offset, long size, byte[] buffer)
+            throws IOException {
+        final byte[] bytes = mImportFileBytes.get(pack(deviceId, objectHandle));
+        int i = 0;
+        while (i < size && i + offset < bytes.length) {
+            buffer[i] = bytes[(int) (i + offset)];
+            i++;
+        }
+        return i;
+    }
 }

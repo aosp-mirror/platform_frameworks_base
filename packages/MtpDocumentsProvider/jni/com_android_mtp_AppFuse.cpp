@@ -332,23 +332,20 @@ private:
             uint64_t offset,
             uint32_t size,
             void* buf) {
-        const uint32_t read_size = static_cast<uint32_t>(std::min(
-                static_cast<uint64_t>(size),
-                get_file_size(inode) - offset));
         ScopedLocalRef<jbyteArray> array(env_, static_cast<jbyteArray>(env_->CallObjectMethod(
                 self_,
                 app_fuse_get_object_bytes,
                 inode,
                 offset,
-                read_size)));
+                size)));
         if (array.get() == nullptr) {
             return -1;
         }
         ScopedByteArrayRO bytes(env_, array.get());
-        if (bytes.size() != read_size || bytes.get() == nullptr) {
+        if (bytes.get() == nullptr) {
             return -1;
         }
-
+        const uint32_t read_size = std::min(static_cast<uint32_t>(bytes.size()), size);
         memcpy(buf, bytes.get(), read_size);
         return read_size;
     }
