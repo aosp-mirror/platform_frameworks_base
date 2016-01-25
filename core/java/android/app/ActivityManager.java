@@ -608,6 +608,14 @@ public class ActivityManager {
         public static boolean resizeStackWithLaunchBounds(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if any visible windows belonging to apps in this stack should be kept on
+         * screen when the app is killed due to something like the low memory killer.
+         */
+        public static boolean keepVisibleDeadAppWindowOnScreen(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
     }
 
     /**

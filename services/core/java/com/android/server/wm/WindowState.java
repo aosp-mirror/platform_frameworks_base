@@ -1615,6 +1615,27 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    /**
+     * Returns true if this window is visible and belongs to a dead app and shouldn't be removed,
+     * because we want to preserve its location on screen to be re-activated later when the user
+     * interacts with it.
+     */
+    boolean shouldKeepVisibleDeadAppWindow() {
+        if (!isWinVisibleLw() || mAppToken == null || !mAppToken.appDied) {
+            // Not a visible app window or the app isn't dead.
+            return false;
+        }
+
+        if (mAttrs.type == TYPE_APPLICATION_STARTING) {
+            // We don't keep starting windows since they were added by the window manager before
+            // the app even launched.
+            return false;
+        }
+
+        final TaskStack stack = getStack();
+        return stack != null && StackId.keepVisibleDeadAppWindowOnScreen(stack.mStackId);
+    }
+
     /** @return true if this window desires key events. */
     boolean canReceiveKeys() {
         return isVisibleOrAdding()
