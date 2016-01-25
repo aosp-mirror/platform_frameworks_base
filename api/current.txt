@@ -22849,9 +22849,6 @@ package android.net {
     method public abstract void onNetworkActive();
   }
 
-  public static abstract class ConnectivityManager.RestrictBackgroundStatus implements java.lang.annotation.Annotation {
-  }
-
   public class Credentials {
     ctor public Credentials(int, int, int);
     method public int getGid();
