@@ -16,19 +16,23 @@
 
 package com.android.mtp;
 
+import android.annotation.Nullable;
+
 class MtpDeviceRecord {
     public final int deviceId;
     public final String name;
     public final boolean opened;
     public final MtpRoot[] roots;
-    public final int[] operationsSupported;
+    public final @Nullable int[] operationsSupported;
+    public final @Nullable int[] eventsSupported;
 
-    MtpDeviceRecord(
-            int deviceId, String name, boolean opened, MtpRoot[] roots, int[] operationsSupported) {
+    MtpDeviceRecord(int deviceId, String name, boolean opened, MtpRoot[] roots,
+                    @Nullable int[] operationsSupported, @Nullable int[] eventsSupported) {
         this.deviceId = deviceId;
         this.name = name;
         this.opened = opened;
         this.roots = roots;
         this.operationsSupported = operationsSupported;
+        this.eventsSupported = eventsSupported;
     }
 }

@@ -25,6 +25,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <memory>
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "ScopedPrimitiveArray.h"
@@ -66,6 +68,7 @@ static jfieldID field_deviceInfo_model;
 static jfieldID field_deviceInfo_version;
 static jfieldID field_deviceInfo_serialNumber;
 static jfieldID field_deviceInfo_operationsSupported;
+static jfieldID field_deviceInfo_eventsSupported;
 
 // MtpStorageInfo fields
 static jfieldID field_storageInfo_storageId;
@@ -216,7 +219,7 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
         ALOGD("android_mtp_MtpDevice_get_device_info device is null");
         return NULL;
     }
-    MtpDeviceInfo* deviceInfo = device->getDeviceInfo();
+    std::unique_ptr<MtpDeviceInfo> deviceInfo(device->getDeviceInfo());
     if (!deviceInfo) {
         ALOGD("android_mtp_MtpDevice_get_device_info deviceInfo is null");
         return NULL;
@@ -224,7 +227,6 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
     jobject info = env->NewObject(clazz_deviceInfo, constructor_deviceInfo);
     if (info == NULL) {
         ALOGE("Could not create a MtpDeviceInfo object");
-        delete deviceInfo;
         return NULL;
     }
 
@@ -242,17 +244,35 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
             env->NewStringUTF(deviceInfo->mSerial));
     if (deviceInfo->mOperations) {
         const size_t size = deviceInfo->mOperations->size();
-        const jintArray operations = env->NewIntArray(size);
+        ScopedLocalRef<jintArray> operations(env, static_cast<jintArray>(env->NewIntArray(size)));
         {
-            ScopedIntArrayRW elements(env, operations);
+            ScopedIntArrayRW elements(env, operations.get());
+            if (elements.get() == NULL) {
+                ALOGE("Could not create operationsSupported element.");
+                return NULL;
+            }
             for (size_t i = 0; i < size; ++i) {
                 elements[i] = deviceInfo->mOperations->itemAt(i);
             }
+            env->SetObjectField(info, field_deviceInfo_operationsSupported, operations.get());
         }
-        env->SetObjectField(info, field_deviceInfo_operationsSupported, operations);
+    }
+    if (deviceInfo->mEvents) {
+        const size_t size = deviceInfo->mEvents->size();
+        ScopedLocalRef<jintArray> events(env, static_cast<jintArray>(env->NewIntArray(size)));
+        {
+            ScopedIntArrayRW elements(env, events.get());
+            if (elements.get() == NULL) {
+                ALOGE("Could not create eventsSupported element.");
+                return NULL;
+            }
+            for (size_t i = 0; i < size; ++i) {
+                elements[i] = deviceInfo->mEvents->itemAt(i);
+            }
+            env->SetObjectField(info, field_deviceInfo_eventsSupported, events.get());
+        }
     }
 
-    delete deviceInfo;
     return info;
 }
 
@@ -684,6 +704,11 @@ int register_android_mtp_MtpDevice(JNIEnv *env)
     field_deviceInfo_operationsSupported = env->GetFieldID(clazz, "mOperationsSupported", "[I");
     if (field_deviceInfo_operationsSupported == NULL) {
         ALOGE("Can't find MtpDeviceInfo.mOperationsSupported");
+        return -1;
+    }
+    field_deviceInfo_eventsSupported = env->GetFieldID(clazz, "mEventsSupported", "[I");
+    if (field_deviceInfo_eventsSupported == NULL) {
+        ALOGE("Can't find MtpDeviceInfo.mEventsSupported");
         return -1;
     }
     clazz_deviceInfo = (jclass)env->NewGlobalRef(clazz);

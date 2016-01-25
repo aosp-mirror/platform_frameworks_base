@@ -77,7 +77,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
     public void testPutSingleStorageDocuments() throws Exception {
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -425,9 +425,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
         };
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device A", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device A", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(1, "Device B", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(1, "Device B", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -562,7 +562,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device",  false,  new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device",  false,  new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -640,7 +640,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
     public void testReplaceExistingRoots() {
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         // The client code should be able to replace existing rows with new information.
@@ -691,7 +691,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add one.
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -745,7 +745,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add device document.
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device", false, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(0, "Device", false, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         // It the device does not have storages, it shows a device root.
@@ -895,7 +895,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
     public void testGetDocumentIdForDevice() {
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(100, "Device", true, new MtpRoot[0], new int[0]));
+                new MtpDeviceRecord(100, "Device", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
         assertEquals("1", mDatabase.getDocumentIdForDevice(100));
     }
