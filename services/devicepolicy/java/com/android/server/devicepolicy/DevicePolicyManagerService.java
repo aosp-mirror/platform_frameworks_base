@@ -7721,6 +7721,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature || !isManagedProfile(userHandle)) {
             return ActiveAdmin.DEF_ORGANIZATION_COLOR;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
