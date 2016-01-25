@@ -94,6 +94,12 @@ public class PipManager {
             }
         }
     };
+    private final Runnable mOnPinnedActivityRestartAttempt = new Runnable() {
+        @Override
+        public void run() {
+            movePipToFullscreen();
+        }
+    };
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -315,6 +321,8 @@ public class PipManager {
 
         @Override
         public void onPinnedActivityRestartAttempt() {
+            // Post the message back to the UI thread.
+            mHandler.post(mOnPinnedActivityRestartAttempt);
         }
     }
 
