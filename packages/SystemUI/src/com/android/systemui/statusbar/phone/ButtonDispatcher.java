@@ -76,11 +76,11 @@ public class ButtonDispatcher {
     }
 
     public int getVisibility() {
-        return mVisibility;
+        return mVisibility != null ? mVisibility : View.VISIBLE;
     }
 
     public float getAlpha() {
-        return mAlpha;
+        return mAlpha != null ? mAlpha : 1;
     }
 
     public void setImageDrawable(Drawable drawable) {
