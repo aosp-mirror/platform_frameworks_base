@@ -155,7 +155,7 @@ public class TrustManager {
     }
 
     /**
-     * @return whether {@userId} has enabled and configured trust agents. Ignores short-term
+     * @return whether {@param userId} has enabled and configured trust agents. Ignores short-term
      * unavailability of trust due to {@link LockPatternUtils.StrongAuthTracker}.
      */
     @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
