@@ -6389,9 +6389,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public UserHandle createAndManageUser(ComponentName admin, String name,
-            PersistableBundle adminExtras, int flags) {
+            ComponentName profileOwner, PersistableBundle adminExtras, int flags) {
+        Preconditions.checkNotNull(admin, "admin is null");
+        Preconditions.checkNotNull(profileOwner, "profileOwner is null");
+        if (!admin.getPackageName().equals(profileOwner.getPackageName())) {
+            throw new IllegalArgumentException("profileOwner " + profileOwner + " and admin "
+                    + admin + " are not in the same package");
+        }
         // Create user.
-        Preconditions.checkNotNull(admin, "ComponentName is null");
         UserHandle user = null;
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -6427,7 +6432,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return null;
             }
 
-            setActiveAdmin(admin, true, userHandle);
+            setActiveAdmin(profileOwner, true, userHandle);
             // User is not started yet, the broadcast by setActiveAdmin will not be received.
             // So we store adminExtras for broadcasting when the user starts for first time.
             synchronized(this) {
@@ -6437,7 +6442,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 saveSettingsLocked(userHandle);
             }
             final String ownerName = getProfileOwnerName(Process.myUserHandle().getIdentifier());
-            setProfileOwner(admin, ownerName, userHandle);
+            setProfileOwner(profileOwner, ownerName, userHandle);
 
             if ((flags & DevicePolicyManager.SKIP_SETUP_WIZARD) != 0) {
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
