@@ -45,7 +45,7 @@ import java.util.Set;
  * countries for all the other German locales, but not Switzerland
  * (Austria, Belgium, Germany, Liechtenstein, Luxembourg)</p>
  */
-class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
+public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private static final int TYPE_HEADER_SUGGESTED = 0;
     private static final int TYPE_HEADER_ALL_OTHERS = 1;
     private static final int TYPE_LOCALE = 2;
@@ -56,7 +56,7 @@ class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     private final boolean mCountryMode;
     private LayoutInflater mInflater;
 
-    SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
+    public SuggestedLocaleAdapter(Set<LocaleStore.LocaleInfo> localeOptions, boolean countryMode) {
         mCountryMode = countryMode;
         mLocaleOptions = new ArrayList<>(localeOptions.size());
         for (LocaleStore.LocaleInfo li : localeOptions) {
@@ -169,11 +169,14 @@ class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
         return convertView;
     }
 
-
     private boolean showHeaders() {
         return mSuggestionCount != 0 && mSuggestionCount != mLocaleOptions.size();
     }
 
+    /**
+     * Sorts the items in the adapter using a locale-aware comparator.
+     * @param comp The locale-aware comparator to use.
+     */
     public void sort(LocaleHelper.LocaleInfoComparator comp) {
         Collections.sort(mLocaleOptions, comp);
     }
@@ -222,7 +225,7 @@ class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
         // TODO: decide if this is enough, or we want to use a BreakIterator...
         boolean wordMatches(String valueText, String prefixString) {
-            // First match against the whole, non-splitted value
+            // First match against the whole, non-split value
             if (valueText.startsWith(prefixString)) {
                 return true;
             }
@@ -239,7 +242,6 @@ class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void publishResults(CharSequence constraint, FilterResults results) {
             mLocaleOptions = (ArrayList<LocaleStore.LocaleInfo>) results.values;
 

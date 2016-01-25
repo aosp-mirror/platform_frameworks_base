@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 /**
- * This class implements some handy methods to proces with locales.
+ * This class implements some handy methods to process with locales.
  */
 public class LocaleHelper {
 
@@ -55,7 +55,7 @@ public class LocaleHelper {
      *       source, breakIterator, UCharacter.TITLECASE_NO_LOWERCASE);
      * }}
      *
-     * <p>That also means creating BreakIteratos for each locale. Expensive...</p>
+     * <p>That also means creating a BreakIterator for each locale. Expensive...</p>
      *
      * @param str the string to sentence-case.
      * @param locale the locale used for the case conversion.
@@ -180,7 +180,7 @@ public class LocaleHelper {
      *
      * <p>Gives priority to suggested locales (to sort them at the top).</p>
      */
-    static final class LocaleInfoComparator implements Comparator<LocaleStore.LocaleInfo> {
+    public static final class LocaleInfoComparator implements Comparator<LocaleStore.LocaleInfo> {
         private final Collator mCollator;
 
         /**

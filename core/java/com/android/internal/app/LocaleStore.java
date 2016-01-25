@@ -179,6 +179,34 @@ public class LocaleStore {
         return result;
     }
 
+    /*
+     * This method is added for SetupWizard, to force an update of the suggested locales
+     * when the SIM is initialized.
+     *
+     * <p>When the device is freshly started, it sometimes gets to the language selection
+     * before the SIM is properly initialized.
+     * So at the time the cache is filled, the info from the SIM might not be available.
+     * The SetupWizard has a SimLocaleMonitor class to detect onSubscriptionsChanged events.
+     * SetupWizard will call this function when that happens.</p>
+     *
+     * <p>TODO: decide if it is worth moving such kind of monitoring in this shared code.
+     * The user might change the SIM or might cross border and connect to a network
+     * in a different country, without restarting the Settings application or the phone.</p>
+     */
+    public static void updateSimCountries(Context context) {
+        Set<String> simCountries = getSimCountries(context);
+
+        for (LocaleInfo li : sLocaleCache.values()) {
+            // This method sets the suggestion flags for the (new) SIM locales, but it does not
+            // try to clean up the old flags. After all, if the user replaces a German SIM
+            // with a French one, it is still possible that they are speaking German.
+            // So both French and German are reasonable suggestions.
+            if (simCountries.contains(li.getLocale().getCountry())) {
+                li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
+            }
+        }
+    }
+
     public static void fillCache(Context context) {
         if (sFullyInitialized) {
             return;
@@ -242,11 +270,11 @@ public class LocaleStore {
     /**
      * Returns a list of locales for language or region selection.
      * If the parent is null, then it is the language list.
-     * If it is not null, then the list will contain all the locales that belong to that perent.
+     * If it is not null, then the list will contain all the locales that belong to that parent.
      * Example: if the parent is "ar", then the region list will contain all Arabic locales.
      * (this is not language based, but language-script, so that it works for zh-Hant and so on.
      */
-    /* package */ static Set<LocaleInfo> getLevelLocales(Context context, Set<String> ignorables,
+    public static Set<LocaleInfo> getLevelLocales(Context context, Set<String> ignorables,
             LocaleInfo parent, boolean translatedOnly) {
         fillCache(context);
         String parentId = parent == null ? null : parent.getId();
