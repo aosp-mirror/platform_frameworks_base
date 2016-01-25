@@ -16,6 +16,7 @@
 
 <resources>
     <declare-styleable name="RestrictedPreference">
-        <attr name="userRestriction" format="string"/>
+        <attr name="userRestriction" format="string" />
+        <attr name="useAdminDisabledSummary" format="boolean" />
     </declare-styleable>
 </resources>

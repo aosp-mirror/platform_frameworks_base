@@ -765,4 +765,7 @@
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Full</string>
 
+    <!-- Summary for settings preference disabled by administrator [CHAR LIMIT=50] -->
+    <string name="disabled_by_admin_summary_text">Disabled by administrator</string>
+
 </resources>

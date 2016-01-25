@@ -27,6 +27,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.TextView;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
@@ -44,6 +45,7 @@ public class RestrictedPreferenceHelper {
     private boolean mDisabledByAdmin;
     private EnforcedAdmin mEnforcedAdmin;
     private String mAttrUserRestriction = null;
+    private boolean mUseAdminDisabledSummary = false;
 
     public RestrictedPreferenceHelper(Context context, Preference preference,
             AttributeSet attrs) {
@@ -68,6 +70,14 @@ public class RestrictedPreferenceHelper {
                 }
             }
             mAttrUserRestriction = data == null ? null : data.toString();
+
+            final TypedValue useAdminDisabledSummary =
+                    attributes.peekValue(R.styleable.RestrictedPreference_useAdminDisabledSummary);
+            if (useAdminDisabledSummary != null) {
+                mUseAdminDisabledSummary =
+                        (useAdminDisabledSummary.type == TypedValue.TYPE_INT_BOOLEAN
+                                && useAdminDisabledSummary.data != 0);
+            }
         }
     }
 
@@ -82,6 +92,21 @@ public class RestrictedPreferenceHelper {
                 holder.itemView.setEnabled(true);
             }
         }
+        if (mUseAdminDisabledSummary) {
+            final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
+            if (summaryView != null) {
+                if (mDisabledByAdmin) {
+                    summaryView.setText(R.string.disabled_by_admin_summary_text);
+                    summaryView.setVisibility(View.VISIBLE);
+                } else {
+                    summaryView.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    public void useAdminDisabledSummary(boolean useSummary) {
+        mUseAdminDisabledSummary = useSummary;
     }
 
     /**
