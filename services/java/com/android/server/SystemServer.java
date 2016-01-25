@@ -84,6 +84,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.restrictions.RestrictionsManagerService;
+import com.android.server.soundtrigger.SoundTriggerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -958,6 +959,8 @@ public final class SystemServer {
             mSystemServiceManager.startService(TwilightService.class);
 
             mSystemServiceManager.startService(JobSchedulerService.class);
+
+            mSystemServiceManager.startService(SoundTriggerService.class);
 
             if (!disableNonCoreServices) {
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BACKUP)) {

@@ -31,6 +31,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.media.AudioFormat;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -616,7 +617,11 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onDetected(KeyphraseRecognitionEvent event) {
+        public void onDetected(RecognitionEvent event) {
+            if (! (event instanceof KeyphraseRecognitionEvent)) {
+                Slog.e(TAG, "onDetected() called for a soundtrigger event.");
+                return;
+            }
             if (DBG) {
                 Slog.d(TAG, "onDetected(" + event + ")");
             } else {

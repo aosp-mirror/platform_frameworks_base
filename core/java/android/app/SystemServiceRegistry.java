@@ -17,6 +17,7 @@
 package android.app;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.IDropBoxManagerService;
 
@@ -61,6 +62,7 @@ import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
+import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.net.ConnectivityManager;
@@ -708,11 +710,21 @@ final class SystemServiceRegistry {
             public RadioManager createService(ContextImpl ctx) {
                 return new RadioManager(ctx);
             }});
+
         registerService(Context.HARDWARE_PROPERTIES_SERVICE, HardwarePropertiesManager.class,
                 new CachedServiceFetcher<HardwarePropertiesManager>() {
             @Override
             public HardwarePropertiesManager createService(ContextImpl ctx) {
                 return new HardwarePropertiesManager();
+            }});
+
+        registerService(Context.SOUND_TRIGGER_SERVICE, SoundTriggerManager.class,
+                new CachedServiceFetcher<SoundTriggerManager>() {
+            @Override
+            public SoundTriggerManager createService(ContextImpl ctx) {
+                IBinder b = ServiceManager.getService(Context.SOUND_TRIGGER_SERVICE);
+                Log.i(TAG, "Creating new instance of SoundTriggerManager object.");
+                return new SoundTriggerManager(ctx, ISoundTriggerService.Stub.asInterface(b));
             }});
     }
 

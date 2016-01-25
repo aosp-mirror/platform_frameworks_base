@@ -2613,6 +2613,7 @@ public abstract class Context {
             MIDI_SERVICE,
             RADIO_SERVICE,
             HARDWARE_PROPERTIES_SERVICE,
+            //@hide: SOUND_TRIGGER_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3193,6 +3194,16 @@ public abstract class Context {
      * @see #getSystemService
      */
     public static final String VOICE_INTERACTION_MANAGER_SERVICE = "voiceinteraction";
+
+    /**
+     * Use with {@link #getSystemService} to access the
+     * {@link com.android.server.voiceinteraction.SoundTriggerService}.
+     *
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
+
 
     /**
      * Use with {@link #getSystemService} to retrieve an

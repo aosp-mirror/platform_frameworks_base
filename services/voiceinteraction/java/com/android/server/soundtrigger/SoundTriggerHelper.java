@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.voiceinteraction;
+package com.android.server.soundtrigger;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

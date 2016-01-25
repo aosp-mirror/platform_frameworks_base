@@ -25,9 +25,12 @@ oneway interface IRecognitionStatusCallback {
     /**
      * Called when the keyphrase is spoken.
      *
-     * @param data Optional trigger audio data, if it was requested and is available.
+     * @param recognitionEvent Object containing data relating to the
+     *                         recognition event such as trigger audio data, if it was requested
+     *                         and is available.
      */
-    void onDetected(in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent);
+    void onDetected(in SoundTrigger.RecognitionEvent recognitionEvent);
+
     /**
      * Called when the detection fails due to an error.
      *
