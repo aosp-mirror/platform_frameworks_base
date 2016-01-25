@@ -5795,8 +5795,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>A View should call this if it maintains some notion of which part
      * of its content is interesting.  For example, a text editing view
      * should call this when its cursor moves.
+     * <p>The Rectangle passed into this method should be in the View's content coordinate space.
+     * It should not be affected by which part of the View is currently visible or its scroll
+     * position.
      *
-     * @param rectangle The rectangle.
+     * @param rectangle The rectangle in the View's content coordinate space
      * @return Whether any parent scrolled.
      */
     public boolean requestRectangleOnScreen(Rect rectangle) {
@@ -5810,11 +5813,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>A View should call this if it maintains some notion of which part
      * of its content is interesting.  For example, a text editing view
      * should call this when its cursor moves.
-     *
+     * <p>The Rectangle passed into this method should be in the View's content coordinate space.
+     * It should not be affected by which part of the View is currently visible or its scroll
+     * position.
      * <p>When <code>immediate</code> is set to true, scrolling will not be
      * animated.
      *
-     * @param rectangle The rectangle.
+     * @param rectangle The rectangle in the View's content coordinate space
      * @param immediate True to forbid animated scrolling, false otherwise
      * @return Whether any parent scrolled.
      */
@@ -5834,24 +5839,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             rectangle.set((int) position.left, (int) position.top,
                     (int) position.right, (int) position.bottom);
 
-            scrolled |= parent.requestChildRectangleOnScreen(child,
-                    rectangle, immediate);
-
-            if (!child.hasIdentityMatrix()) {
-                child.getMatrix().mapRect(position);
-            }
-
-            position.offset(child.mLeft, child.mTop);
+            scrolled |= parent.requestChildRectangleOnScreen(child, rectangle, immediate);
 
             if (!(parent instanceof View)) {
                 break;
             }
 
-            View parentView = (View) parent;
+            // move it from child's content coordinate space to parent's content coordinate space
+            position.offset(child.mLeft - child.getScrollX(), child.mTop -child.getScrollY());
 
-            position.offset(-parentView.getScrollX(), -parentView.getScrollY());
-
-            child = parentView;
+            child = (View) parent;
             parent = child.getParent();
         }
 
