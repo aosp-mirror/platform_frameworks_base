@@ -487,4 +487,10 @@
     <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Hangvezérlő és „Ne zavarjanak” funkció"</string>
     <string name="volume_down_silent" msgid="66962568467719591">"„Ne zavarjanak” aktiválása hangerőcsökkentéskor"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"„Ne zavarjanak” deaktiválása hangerőnöveléskor"</string>
+    <string name="battery" msgid="7498329822413202973">"Akkumulátor"</string>
+    <string name="clock" msgid="7416090374234785905">"Óra"</string>
+    <string name="headset" msgid="4534219457597457353">"Headset"</string>
+    <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Fejhallgató csatlakoztatva"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset csatlakoztatva"</string>
+    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Ikonok megjelenítése és elrejtése az állapotsoron."</string>
 </resources>

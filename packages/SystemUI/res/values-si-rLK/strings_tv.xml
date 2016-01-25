@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_exit" msgid="6423523158795119008">"PIP වසන්න"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"පූර්ණ තිරය"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"සම්පූර්ණ තිරය"</string>
     <string name="pip_play" msgid="674145557658227044">"ධාවනය කරන්න"</string>
     <string name="pip_pause" msgid="8412075640017218862">"විරාමය"</string>
     <string name="pip_cancel" msgid="5173898361050559462">"අවලංගු කරන්න"</string>

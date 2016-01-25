@@ -487,4 +487,10 @@
     <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"वॉल्यूम और परेशान न करें"</string>
     <string name="volume_down_silent" msgid="66962568467719591">"वॉल्यूम कम करें पर परेशान न करें डालें"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"वॉल्यूम बढ़ाएं पर परेशान न करें से बाहर निकलें"</string>
+    <string name="battery" msgid="7498329822413202973">"बैटरी"</string>
+    <string name="clock" msgid="7416090374234785905">"घड़ी"</string>
+    <string name="headset" msgid="4534219457597457353">"हैडसेट"</string>
+    <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफ़ोन कनेक्‍ट किए गए"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हैडसेट कनेक्‍ट किया गया"</string>
+    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"आइकन को स्‍थिति बार में दिखाए जाने से सक्षम या अक्षम करें."</string>
 </resources>

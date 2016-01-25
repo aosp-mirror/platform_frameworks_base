@@ -487,4 +487,10 @@
     <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"వాల్యూమ్ మరియు అంతరాయం కలిగించవద్దు"</string>
     <string name="volume_down_silent" msgid="66962568467719591">"వాల్యూమ్ తగ్గిస్తే అంతరాయం కలిగించవద్దులోకి ప్రవేశిస్తుంది"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"వాల్యూమ్ పెంచితే అంతరాయం కలిగించవద్దు నుండి నిష్క్రమిస్తుంది"</string>
+    <string name="battery" msgid="7498329822413202973">"బ్యాటరీ"</string>
+    <string name="clock" msgid="7416090374234785905">"గడియారం"</string>
+    <string name="headset" msgid="4534219457597457353">"హెడ్‌సెట్"</string>
+    <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"హెడ్‌ఫోన్‌లు కనెక్ట్ చేయబడ్డాయి"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"హెడ్‌సెట్ కనెక్ట్ చేయబడింది"</string>
+    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"స్థితి పట్టీలో చిహ్నాలు ప్రదర్శించడాన్ని ప్రారంభించండి లేదా నిలిపివేయండి."</string>
 </resources>

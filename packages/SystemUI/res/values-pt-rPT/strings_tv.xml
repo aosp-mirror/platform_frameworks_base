@@ -24,5 +24,5 @@
     <string name="pip_play" msgid="674145557658227044">"Reproduzir"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Interromper"</string>
     <string name="pip_cancel" msgid="5173898361050559462">"Cancelar"</string>
-    <string name="pip_hold_home" msgid="883546189749854120">"Prima sem soltar HOME para controlar o PIP"</string>
+    <string name="pip_hold_home" msgid="883546189749854120">"Prima sem soltar a tecla HOME para controlar o PIP"</string>
 </resources>
