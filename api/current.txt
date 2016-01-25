@@ -5790,6 +5790,7 @@ package android.app.admin {
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
+    method public android.os.UserHandle createAndManageUser(android.content.ComponentName, java.lang.String, android.content.ComponentName, android.os.PersistableBundle, int);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
     method public void enableSystemApp(android.content.ComponentName, java.lang.String);
     method public int enableSystemApp(android.content.ComponentName, android.content.Intent);
@@ -5982,6 +5983,7 @@ package android.app.admin {
     field public static final int PERMISSION_POLICY_PROMPT = 0; // 0x0
     field public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
+    field public static final int SKIP_SETUP_WIZARD = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
   }

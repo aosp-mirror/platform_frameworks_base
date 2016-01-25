@@ -4125,21 +4125,21 @@ public class DevicePolicyManager {
     }
 
     /**
-      * Flag used by {@link createAndManageUser} to skip setup wizard after creating a new user.
-      * @hide
+      * Flag used by {@link #createAndManageUser} to skip setup wizard after creating a new user.
       */
     public static final int SKIP_SETUP_WIZARD = 0x0001;
 
     /**
-     * Called by a device owner to create a user with the specified name and the caller as profile
-     * owner. The UserHandle returned by this method should not be persisted as user handles are
-     * recycled as users are removed and created. If you need to persist an identifier for this
-     * user, use {@link UserManager#getSerialNumberForUser}. The new user will not be started in the
-     * background.
+     * Called by a device owner to create a user with the specified name and a given component of
+     * the calling package as profile owner. The UserHandle returned by this method should not be
+     * persisted as user handles are recycled as users are removed and created. If you need to
+     * persist an identifier for this user, use {@link UserManager#getSerialNumberForUser}. The new
+     * user will not be started in the background.
      *
-     * <p> admin is the {@link DeviceAdminReceiver} which is the device owner, and will become the
-     * profile owner and will be registered as an active admin on the new user. The profile owner
-     * package will be installed on the new user.
+     * <p>admin is the {@link DeviceAdminReceiver} which is the device owner. profileOwner is also
+     * a DeviceAdminReceiver in the same package as admin, and will become the profile owner and
+     * will be registered as an active admin on the new user. The profile owner package will be
+     * installed on the new user.
      *
      * <p>If the adminExtras are not null, they will be stored on the device until the user is
      * started for the first time. Then the extras will be passed to the admin when
@@ -4147,18 +4147,21 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param name The user's name.
+     * @param profileOwner Which {@link DeviceAdminReceiver} will be profile owner. Has to be in the
+     *      same package as admin, otherwise no user is created and an IllegalArgumentException is
+     *      thrown.
      * @param adminExtras Extras that will be passed to onEnable of the admin receiver on the new
      *      user.
-     * @param flags {@link SKIP_SETUP_WIZARD} is supported.
+     * @param flags {@link #SKIP_SETUP_WIZARD} is supported.
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
-     * @hide
      */
     public UserHandle createAndManageUser(@NonNull ComponentName admin, @NonNull String name,
-            @Nullable PersistableBundle adminExtras, int flags) {
+            @NonNull ComponentName profileOwner, @Nullable PersistableBundle adminExtras,
+            int flags) {
         try {
-            return mService.createAndManageUser(admin, name, adminExtras, flags);
+            return mService.createAndManageUser(admin, name, profileOwner, adminExtras, flags);
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
         }
