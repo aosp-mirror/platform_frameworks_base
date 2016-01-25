@@ -179,6 +179,7 @@ interface IDevicePolicyManager {
 
     UserHandle createUser(in ComponentName who, in String name);
     UserHandle createAndInitializeUser(in ComponentName who, in String name, in String profileOwnerName, in ComponentName profileOwnerComponent, in Bundle adminExtras);
+    UserHandle createAndManageUser(in ComponentName who, in String name, in PersistableBundle adminExtras, in int flags);
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
     boolean switchUser(in ComponentName who, in UserHandle userHandle);
 
