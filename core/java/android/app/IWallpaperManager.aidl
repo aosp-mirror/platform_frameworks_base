@@ -35,10 +35,16 @@ interface IWallpaperManager {
      * 'which' is some combination of:
      *   FLAG_SET_SYSTEM
      *   FLAG_SET_LOCK
+     *
+     * A 'null' cropHint rectangle is explicitly permitted as a sentinel for "whatever
+     * the source image's bounding rect is."
+     *
+     * The completion callback's "onWallpaperChanged()" method is invoked when the
+     * new wallpaper content is ready to display.
      */
     ParcelFileDescriptor setWallpaper(String name, in String callingPackage,
-            out Bundle extras, int which);
-    
+            in Rect cropHint, out Bundle extras, int which, IWallpaperManagerCallback completion);
+
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
      */
@@ -54,14 +60,14 @@ interface IWallpaperManager {
      */
     ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
             out Bundle outParams);
-    
+
     /**
      * If the current system wallpaper is a live wallpaper component, return the
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
      */
     WallpaperInfo getWallpaperInfo();
-    
+
     /**
      * Clear the system wallpaper.
      */

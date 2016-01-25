@@ -42,6 +42,9 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -71,6 +74,7 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
+import java.io.BufferedOutputStream;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,7 +100,7 @@ import libcore.io.IoUtils;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
-    static final boolean DEBUG = false;
+    static final boolean DEBUG = true;
 
     final Object mLock = new Object[0];
 
@@ -106,7 +110,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
      */
     static final long MIN_WALLPAPER_CRASH_TIME = 10000;
     static final int MAX_WALLPAPER_COMPONENT_LOG_LENGTH = 128;
-    static final String WALLPAPER = "wallpaper";
+    static final String WALLPAPER = "wallpaper_orig";
+    static final String WALLPAPER_CROP = "wallpaper";
     static final String WALLPAPER_INFO = "wallpaper_info.xml";
 
     /**
@@ -120,6 +125,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         final WallpaperData mWallpaper;
         final File mWallpaperDir;
         final File mWallpaperFile;
+        final File mWallpaperCropFile;
         final File mWallpaperInfoFile;
 
         public WallpaperObserver(WallpaperData wallpaper) {
@@ -128,6 +134,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             mWallpaperDir = getWallpaperDir(wallpaper.userId);
             mWallpaper = wallpaper;
             mWallpaperFile = new File(mWallpaperDir, WALLPAPER);
+            mWallpaperCropFile = new File(mWallpaperDir, WALLPAPER_CROP);
             mWallpaperInfoFile = new File(mWallpaperDir, WALLPAPER_INFO);
         }
 
@@ -136,8 +143,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (path == null) {
                 return;
             }
+            final boolean written = (event == CLOSE_WRITE || event == MOVED_TO);
+            final File changedFile = new File(mWallpaperDir, path);
+
             synchronized (mLock) {
-                File changedFile = new File(mWallpaperDir, path);
                 if (mWallpaperFile.equals(changedFile)
                         || mWallpaperInfoFile.equals(changedFile)) {
                     // changing the wallpaper means we'll need to back up the new one
@@ -148,18 +157,107 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 if (mWallpaperFile.equals(changedFile)) {
                     notifyCallbacksLocked(mWallpaper);
-                    final boolean written = (event == CLOSE_WRITE || event == MOVED_TO);
                     if (mWallpaper.wallpaperComponent == null
                             || event != CLOSE_WRITE // includes the MOVED_TO case
                             || mWallpaper.imageWallpaperPending) {
                         if (written) {
+                            // The image source has finished writing the source image,
+                            // so we now produce the crop rect (in the background), and
+                            // only publish the new displayable (sub)image as a result
+                            // of that work.
+                            generateCrop(mWallpaper);
                             mWallpaper.imageWallpaperPending = false;
+                            if (mWallpaper.setComplete != null) {
+                                try {
+                                    mWallpaper.setComplete.onWallpaperChanged();
+                                } catch (RemoteException e) {
+                                    // if this fails we don't really care; the setting app may just
+                                    // have crashed and that sort of thing is a fact of life.
+                                }
+                            }
+                            bindWallpaperComponentLocked(mImageWallpaper, true,
+                                    false, mWallpaper, null);
+                            saveSettingsLocked(mWallpaper);
                         }
-                        bindWallpaperComponentLocked(mImageWallpaper, true,
-                                false, mWallpaper, null);
-                        saveSettingsLocked(mWallpaper);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Once a new wallpaper has been written via setWallpaper(...), it needs to be cropped
+     * for display.
+     */
+    private void generateCrop(WallpaperData wallpaper) {
+        boolean success = false;
+        boolean needCrop = false;
+
+        // Analyse the source; needed in multiple cases
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(wallpaper.wallpaperFile.getAbsolutePath(), options);
+
+        // Legacy case uses an empty crop rect here, so we just preserve the
+        // source image verbatim
+        if (!wallpaper.cropHint.isEmpty()) {
+            // ...clamp the crop rect to the measured bounds...
+            wallpaper.cropHint.right = Math.min(wallpaper.cropHint.right, options.outWidth);
+            wallpaper.cropHint.bottom = Math.min(wallpaper.cropHint.bottom, options.outHeight);
+            // ...and don't bother cropping if what we're left with is identity
+            needCrop = (options.outHeight >= wallpaper.cropHint.height()
+                    && options.outWidth >= wallpaper.cropHint.width());
+        }
+
+        if (!needCrop) {
+            // Simple case:  the nominal crop is at least as big as the source image,
+            // so we take the whole thing and just copy the image file directly.
+            if (DEBUG) {
+                Slog.v(TAG, "Null crop of new wallpaper; copying");
+            }
+            success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
+            if (!success) {
+                wallpaper.cropFile.delete();
+                // TODO: fall back to default wallpaper in this case
+            }
+        } else {
+            // Fancy case: the crop is a subrect of the source
+            FileOutputStream f = null;
+            BufferedOutputStream bos = null;
+            try {
+                BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(
+                        wallpaper.wallpaperFile.getAbsolutePath(), false);
+                Bitmap cropped = decoder.decodeRegion(wallpaper.cropHint, null);
+                decoder.recycle();
+
+                if (cropped == null) {
+                    Slog.e(TAG, "Could not decode new wallpaper");
+                } else {
+                    f = new FileOutputStream(wallpaper.cropFile);
+                    bos = new BufferedOutputStream(f, 32*1024);
+                    cropped.compress(Bitmap.CompressFormat.PNG, 90, bos);
+                    bos.flush();  // don't rely on the implicit flush-at-close when noting success
+                    success = true;
+                }
+            } catch (IOException e) {
+                if (DEBUG) {
+                    Slog.e(TAG, "I/O error decoding crop: " + e.getMessage());
+                }
+            } finally {
+                IoUtils.closeQuietly(bos);
+                IoUtils.closeQuietly(f);
+            }
+        }
+
+        if (!success) {
+            Slog.e(TAG, "Unable to apply new wallpaper");
+            wallpaper.cropFile.delete();
+        }
+
+        if (wallpaper.cropFile.exists()) {
+            boolean didRestorecon = SELinux.restorecon(wallpaper.cropFile.getAbsoluteFile());
+            if (DEBUG) {
+                Slog.v(TAG, "restorecon() of crop file returned " + didRestorecon);
             }
         }
     }
@@ -191,12 +289,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         int userId;
 
-        File wallpaperFile;
+        final File wallpaperFile;
+        final File cropFile;
 
         /**
          * Client is currently writing a new image wallpaper.
          */
         boolean imageWallpaperPending;
+
+        /**
+         * Callback once the set + crop is finished
+         */
+        IWallpaperManagerCallback setComplete;
 
         /**
          * Resource name if using a picture from the wallpaper gallery
@@ -232,11 +336,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         int width = -1;
         int height = -1;
 
+        /**
+         * The crop hint supplied for displaying a subset of the source image
+         */
+        final Rect cropHint = new Rect(0, 0, 0, 0);
+
         final Rect padding = new Rect(0, 0, 0, 0);
 
         WallpaperData(int userId) {
             this.userId = userId;
             wallpaperFile = new File(getWallpaperDir(userId), WALLPAPER);
+            cropFile = new File(getWallpaperDir(userId), WALLPAPER_CROP);
+        }
+
+        // Only called in single-threaded boot sequence mode
+        boolean ensureCropExists() {
+            // if the crop file is not present, copy over the source image to use verbatim
+            if (!cropFile.exists()) {
+                return FileUtils.copyFile(wallpaperFile, cropFile);
+            }
+            return true;
         }
     }
 
@@ -524,6 +643,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public void systemRunning() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
+        if (!wallpaper.ensureCropExists()) {
+            clearWallpaperLocked(false, UserHandle.USER_SYSTEM, null);
+        }
         switchWallpaper(wallpaper, null);
         wallpaper.wallpaperObserver = new WallpaperObserver(wallpaper);
         wallpaper.wallpaperObserver.startWatching();
@@ -602,6 +724,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             onStoppingUser(userId);
             File wallpaperFile = new File(getWallpaperDir(userId), WALLPAPER);
             wallpaperFile.delete();
+            File cropFile = new File(getWallpaperDir(userId), WALLPAPER_CROP);
+            cropFile.delete();
             File wallpaperInfoFile = new File(getWallpaperDir(userId), WALLPAPER_INFO);
             wallpaperInfoFile.delete();
         }
@@ -653,9 +777,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (wallpaper == null) {
             return;
         }
-        File f = new File(getWallpaperDir(userId), WALLPAPER);
-        if (f.exists()) {
-            f.delete();
+        if (wallpaper.wallpaperFile.exists()) {
+            wallpaper.wallpaperFile.delete();
+            wallpaper.cropFile.delete();
         }
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -844,11 +968,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     outParams.putInt("height", wallpaper.height);
                 }
                 wallpaper.callbacks.register(cb);
-                File f = new File(getWallpaperDir(wallpaperUserId), WALLPAPER);
-                if (!f.exists()) {
+                if (!wallpaper.cropFile.exists()) {
                     return null;
                 }
-                return ParcelFileDescriptor.open(f, MODE_READ_ONLY);
+                return ParcelFileDescriptor.open(wallpaper.cropFile, MODE_READ_ONLY);
             } catch (FileNotFoundException e) {
                 /* Shouldn't happen as we check to see if the file exists */
                 Slog.w(TAG, "Error getting wallpaper", e);
@@ -869,8 +992,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public ParcelFileDescriptor setWallpaper(String name, String callingPackage, Bundle extras,
-            int which) {
+    public ParcelFileDescriptor setWallpaper(String name, String callingPackage,
+            Rect cropHint, Bundle extras, int which, IWallpaperManagerCallback completion) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
 
         if (which == 0) {
@@ -879,6 +1002,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         if (!isWallpaperSupported(callingPackage)) {
             return null;
+        }
+
+        // "null" means the no-op crop, preserving the full input image
+        if (cropHint == null) {
+            cropHint = new Rect(0, 0, 0, 0);
+        } else {
+            if (cropHint.isEmpty()
+                    || cropHint.left < 0
+                    || cropHint.top < 0) {
+                return null;
+            }
         }
 
         synchronized (mLock) {
@@ -890,6 +1024,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 ParcelFileDescriptor pfd = updateWallpaperBitmapLocked(name, wallpaper, extras);
                 if (pfd != null) {
                     wallpaper.imageWallpaperPending = true;
+                    wallpaper.setComplete = completion;
+                    wallpaper.cropHint.set(cropHint);
                 }
                 return pfd;
             } finally {
@@ -1196,6 +1332,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
             out.attribute(null, "width", Integer.toString(wallpaper.width));
             out.attribute(null, "height", Integer.toString(wallpaper.height));
+
+            out.attribute(null, "cropLeft", Integer.toString(wallpaper.cropHint.left));
+            out.attribute(null, "cropTop", Integer.toString(wallpaper.cropHint.top));
+            out.attribute(null, "cropRight", Integer.toString(wallpaper.cropHint.right));
+            out.attribute(null, "cropBottom", Integer.toString(wallpaper.cropHint.bottom));
+
             if (wallpaper.padding.left != 0) {
                 out.attribute(null, "paddingLeft", Integer.toString(wallpaper.padding.left));
             }
@@ -1208,6 +1350,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (wallpaper.padding.bottom != 0) {
                 out.attribute(null, "paddingBottom", Integer.toString(wallpaper.padding.bottom));
             }
+
             out.attribute(null, "name", wallpaper.name);
             if (wallpaper.wallpaperComponent != null
                     && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
@@ -1304,6 +1447,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         wallpaper.width = Integer.parseInt(parser.getAttributeValue(null, "width"));
                         wallpaper.height = Integer.parseInt(parser
                                 .getAttributeValue(null, "height"));
+                        wallpaper.cropHint.left = getAttributeInt(parser, "cropLeft", 0);
+                        wallpaper.cropHint.top = getAttributeInt(parser, "cropTop", 0);
+                        wallpaper.cropHint.right = getAttributeInt(parser, "cropRight", 0);
+                        wallpaper.cropHint.bottom = getAttributeInt(parser, "cropBottom", 0);
                         wallpaper.padding.left = getAttributeInt(parser, "paddingLeft", 0);
                         wallpaper.padding.top = getAttributeInt(parser, "paddingTop", 0);
                         wallpaper.padding.right = getAttributeInt(parser, "paddingRight", 0);
@@ -1322,6 +1469,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         if (DEBUG) {
                             Slog.v(TAG, "mWidth:" + wallpaper.width);
                             Slog.v(TAG, "mHeight:" + wallpaper.height);
+                            Slog.v(TAG, "cropRect:" + wallpaper.cropHint);
                             Slog.v(TAG, "mName:" + wallpaper.name);
                             Slog.v(TAG, "mNextWallpaperComponent:"
                                     + wallpaper.nextWallpaperComponent);
@@ -1348,6 +1496,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (!success) {
             wallpaper.width = -1;
             wallpaper.height = -1;
+            wallpaper.cropHint.set(0, 0, 0, 0);
             wallpaper.padding.set(0, 0, 0, 0);
             wallpaper.name = "";
         } else {
@@ -1367,6 +1516,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
         if (wallpaper.height < baseSize) {
             wallpaper.height = baseSize;
+        }
+        // and crop, if not previously specified
+        if (wallpaper.cropHint.width() <= 0
+                || wallpaper.cropHint.height() <= 0) {
+            wallpaper.cropHint.set(0, 0, wallpaper.width, wallpaper.height);
         }
     }
 
@@ -1431,6 +1585,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    // Restore the named resource bitmap to both source + crop files
     boolean restoreNamedResourceLocked(WallpaperData wallpaper) {
         if (wallpaper.name.length() > 4 && "res:".equals(wallpaper.name.substring(0, 4))) {
             String resName = wallpaper.name.substring(4);
@@ -1456,6 +1611,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 int resId = -1;
                 InputStream res = null;
                 FileOutputStream fos = null;
+                FileOutputStream cos = null;
                 try {
                     Context c = mContext.createPackageContext(pkg, Context.CONTEXT_RESTRICTED);
                     Resources r = c.getResources();
@@ -1469,13 +1625,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     res = r.openRawResource(resId);
                     if (wallpaper.wallpaperFile.exists()) {
                         wallpaper.wallpaperFile.delete();
+                        wallpaper.cropFile.delete();
                     }
                     fos = new FileOutputStream(wallpaper.wallpaperFile);
+                    cos = new FileOutputStream(wallpaper.cropFile);
 
                     byte[] buffer = new byte[32768];
                     int amt;
                     while ((amt=res.read(buffer)) > 0) {
                         fos.write(buffer, 0, amt);
+                        cos.write(buffer, 0, amt);
                     }
                     // mWallpaperObserver will notice the close and send the change broadcast
 
@@ -1491,8 +1650,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     IoUtils.closeQuietly(res);
                     if (fos != null) {
                         FileUtils.sync(fos);
-                        IoUtils.closeQuietly(fos);
                     }
+                    if (cos != null) {
+                        FileUtils.sync(cos);
+                    }
+                    IoUtils.closeQuietly(fos);
+                    IoUtils.closeQuietly(cos);
                 }
             }
         }
@@ -1520,6 +1683,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     pw.print(wallpaper.width);
                     pw.print(" mHeight=");
                     pw.println(wallpaper.height);
+                pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
                 pw.print("  mPadding="); pw.println(wallpaper.padding);
                 pw.print("  mName=");  pw.println(wallpaper.name);
                 pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);

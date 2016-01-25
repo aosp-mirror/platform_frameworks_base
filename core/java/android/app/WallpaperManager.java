@@ -64,6 +64,8 @@ import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides access to the system wallpaper. With WallpaperManager, you can
@@ -770,18 +772,26 @@ public class WallpaperManager {
             return 0;
         }
         final Bundle result = new Bundle();
+        final WallpaperSetCompletion completion = new WallpaperSetCompletion();
         try {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
                     "res:" + resources.getResourceName(resid),
-                    mContext.getOpPackageName(), result, which);
+                    mContext.getOpPackageName(), null, result, which, completion);
             if (fd != null) {
                 FileOutputStream fos = null;
+                boolean ok = false;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
+                    // The 'close()' is the trigger for any server-side image manipulation,
+                    // so we must do that before waiting for completion.
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
+                    // Might be redundant but completion shouldn't wait unless the write
+                    // succeeded; this is a fallback if it threw past the close+wait.
                     IoUtils.closeQuietly(fos);
                 }
             }
@@ -876,14 +886,17 @@ public class WallpaperManager {
             return 0;
         }
         final Bundle result = new Bundle();
+        final WallpaperSetCompletion completion = new WallpaperSetCompletion();
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName(), result, which);
+                    mContext.getOpPackageName(), visibleCropHint, result, which, completion);
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     fullImage.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     IoUtils.closeQuietly(fos);
                 }
@@ -990,14 +1003,17 @@ public class WallpaperManager {
             return 0;
         }
         final Bundle result = new Bundle();
+        final WallpaperSetCompletion completion = new WallpaperSetCompletion();
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
-                    mContext.getOpPackageName(), result, which);
+                    mContext.getOpPackageName(), visibleCropHint, result, which, completion);
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     copyStreamToWallpaperFile(bitmapData, fos);
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     IoUtils.closeQuietly(fos);
                 }
@@ -1384,5 +1400,29 @@ public class WallpaperManager {
         }
 
         return null;
+    }
+
+    // Private completion callback for setWallpaper() synchronization
+    private class WallpaperSetCompletion extends IWallpaperManagerCallback.Stub {
+        final CountDownLatch mLatch;
+
+        public WallpaperSetCompletion() {
+            mLatch = new CountDownLatch(1);
+        }
+
+        public void waitForCompletion() {
+            try {
+                mLatch.await(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                // This might be legit: the crop may take a very long time. Don't sweat
+                // it in that case; we are okay with display lagging behind in order to
+                // keep the caller from locking up indeterminately.
+            }
+        }
+
+        @Override
+        public void onWallpaperChanged() throws RemoteException {
+            mLatch.countDown();
+        }
     }
 }
