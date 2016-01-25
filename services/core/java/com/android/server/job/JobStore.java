@@ -294,7 +294,8 @@ public class JobStore {
                     addAttributesToJobTag(out, jobStatus);
                     writeConstraintsToXml(out, jobStatus);
                     writeExecutionCriteriaToXml(out, jobStatus);
-                    writeBundleToXml(jobStatus.getExtras(), out);
+                    // Only unparcel our own copy because others may use it.
+                    writeBundleToXml(new PersistableBundle(jobStatus.getExtras()), out);
                     out.endTag(null, "job");
                 }
                 out.endTag(null, "job-info");
