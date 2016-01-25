@@ -52,6 +52,7 @@ import android.os.Parcel;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -464,8 +465,20 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private void runUiTetherProvisioningAndEnable(int type, ResultReceiver receiver) {
-        // TODO: Fill in for real.
-        enableTetheringInternal(type, true, receiver);
+        ResultReceiver proxyReceiver = getProxyReceiver(type, receiver);
+        sendUiTetherProvisionIntent(type, proxyReceiver);
+    }
+
+    private void sendUiTetherProvisionIntent(int type, ResultReceiver receiver) {
+        Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
+        intent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, type);
+        intent.putExtra(ConnectivityManager.EXTRA_PROVISION_CALLBACK, receiver);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     /**

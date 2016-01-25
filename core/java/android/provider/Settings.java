@@ -129,6 +129,27 @@ public final class Settings {
             "android.settings.WIRELESS_SETTINGS";
 
     /**
+     * Activity Action: Show tether provisioning activity.
+     *
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: {@link ConnectivityManager.EXTRA_TETHER_TYPE} should be included to specify which type
+     * of tethering should be checked. {@link ConnectivityManager.EXTRA_PROVISION_CALLBACK} should
+     * contain a {@link ResultReceiver} which will be called back with a tether result code.
+     * <p>
+     * Output: The result of the provisioning check.
+     * {@link ConnectivityManager.TETHER_ERROR_NO_ERROR} if successful,
+     * {@link ConnectivityManager.TETHER_ERROR_PROVISION_FAILED} for failure.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TETHER_PROVISIONING =
+            "android.settings.TETHER_PROVISIONING_UI";
+
+    /**
      * Activity Action: Show settings to allow entering/exiting airplane mode.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
