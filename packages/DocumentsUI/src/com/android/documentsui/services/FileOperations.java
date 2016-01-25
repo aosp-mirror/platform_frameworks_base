@@ -26,6 +26,7 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_DELAY;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
+import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_PARENT;
 import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
 import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
@@ -35,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Parcelable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
@@ -65,8 +67,8 @@ public final class FileOperations {
      * Tries to start the activity. Returns the job id.
      */
     public static String start(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentStack stack,
-            int operationType) {
+            Activity activity, List<DocumentInfo> srcDocs,
+            DocumentStack stack, int operationType) {
 
         if (DEBUG) Log.d(TAG, "Handling generic 'start' call.");
 
@@ -74,7 +76,7 @@ public final class FileOperations {
             case OPERATION_COPY:
                 return FileOperations.copy(activity, srcDocs, stack);
             case OPERATION_MOVE:
-                return FileOperations.move(activity, srcDocs, stack);
+                throw new IllegalArgumentException("Moving requires providing the source parent.");
             case OPERATION_DELETE:
                 throw new UnsupportedOperationException("Delete isn't currently supported.");
             default:
@@ -83,14 +85,27 @@ public final class FileOperations {
     }
 
     /**
-     * Makes a best effort to cancel operation identified by jobId.
-     *
-     * @param context Context for the intent.
-     * @param jobId The id of the job to cancel.
-     *     Use {@link #createJobId} if you don't have one handy.
-     * @param srcDocs A list of src files to copy.
-     * @param dstStack The copy destination stack.
+     * Tries to start the activity. Returns the job id.
      */
+    public static String start(
+            Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
+            DocumentStack stack, int operationType) {
+
+        if (DEBUG) Log.d(TAG, "Handling generic 'start' call.");
+
+        switch (operationType) {
+            case OPERATION_COPY:
+                return FileOperations.copy(activity, srcDocs, stack);
+            case OPERATION_MOVE:
+                return FileOperations.move(activity, srcDocs, srcParent, stack);
+            case OPERATION_DELETE:
+                throw new UnsupportedOperationException("Delete isn't currently supported.");
+            default:
+                throw new UnsupportedOperationException("Unknown operation: " + operationType);
+        }
+    }
+
+    @VisibleForTesting
     public static void cancel(Activity activity, String jobId) {
         if (DEBUG) Log.d(TAG, "Attempting to canceling operation: " + jobId);
 
@@ -101,15 +116,7 @@ public final class FileOperations {
         activity.startService(intent);
     }
 
-    /**
-     * Starts the service for a copy operation.
-     *
-     * @param context Context for the intent.
-     * @param jobId A unique jobid for this job.
-     *     Use {@link #createJobId} if you don't have one handy.
-     * @param srcDocs A list of src files to copy.
-     * @param destination The copy destination stack.
-     */
+    @VisibleForTesting
     public static String copy(
             Activity activity, List<DocumentInfo> srcDocs, DocumentStack destination) {
         String jobId = createJobId();
@@ -131,14 +138,17 @@ public final class FileOperations {
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
+     * @param srcParent Parent of all the source documents.
      * @param destination The move destination stack.
      */
     public static String move(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentStack destination) {
+            Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
+            DocumentStack destination) {
         String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'move' operation id: " + jobId);
 
-        Intent intent = createBaseIntent(OPERATION_MOVE, activity, jobId, srcDocs, destination);
+        Intent intent = createBaseIntent(OPERATION_MOVE, activity, jobId, srcDocs, srcParent,
+                destination);
 
         createSharedSnackBar(activity, R.plurals.move_begin, srcDocs.size())
                 .show();
@@ -154,16 +164,19 @@ public final class FileOperations {
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
+     * @param srcParent Parent of all the source documents.
      * @param delay Number of milliseconds to wait before executing the job.
      * @return Id of the job.
      */
     public static String delete(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentStack location, int delay) {
+            Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
+            DocumentStack location, int delay) {
         String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id " + jobId
                 + " delayed by " + delay + " milliseconds.");
 
-        Intent intent = createBaseIntent(OPERATION_DELETE, activity, jobId, srcDocs, location);
+        Intent intent = createBaseIntent(OPERATION_DELETE, activity, jobId, srcDocs, srcParent,
+                location);
         intent.putExtra(EXTRA_DELAY, delay);
         activity.startService(intent);
 
@@ -171,7 +184,7 @@ public final class FileOperations {
     }
 
     /**
-     * Starts the service for a move operation.
+     * Starts the service for an operation.
      *
      * @param jobId A unique jobid for this job.
      *     Use {@link #createJobId} if you don't have one handy.
@@ -179,13 +192,35 @@ public final class FileOperations {
      * @return Id of the job.
      */
     public static Intent createBaseIntent(
-            @OpType int operationType, Context context, String jobId,
-            List<DocumentInfo> srcDocs, DocumentStack localeStack) {
+            @OpType int operationType, Context context, String jobId, List<DocumentInfo> srcDocs,
+            DocumentStack localeStack) {
 
         Intent intent = new Intent(context, FileOperationService.class);
         intent.putExtra(EXTRA_JOB_ID, jobId);
-        intent.putParcelableArrayListExtra(
-                EXTRA_SRC_LIST, asArrayList(srcDocs));
+        intent.putParcelableArrayListExtra(EXTRA_SRC_LIST, asArrayList(srcDocs));
+        intent.putExtra(EXTRA_STACK, (Parcelable) localeStack);
+        intent.putExtra(EXTRA_OPERATION, operationType);
+
+        return intent;
+    }
+
+    /**
+     * Starts the service for an operation.
+     *
+     * @param jobId A unique jobid for this job.
+     *     Use {@link #createJobId} if you don't have one handy.
+     * @param srcDocs A list of src files to copy.
+     * @param srcParent Parent of all the source documents.
+     * @return Id of the job.
+     */
+    public static Intent createBaseIntent(
+            @OpType int operationType, Context context, String jobId,
+            List<DocumentInfo> srcDocs, DocumentInfo srcParent, DocumentStack localeStack) {
+
+        Intent intent = new Intent(context, FileOperationService.class);
+        intent.putExtra(EXTRA_JOB_ID, jobId);
+        intent.putParcelableArrayListExtra(EXTRA_SRC_LIST, asArrayList(srcDocs));
+        intent.putExtra(EXTRA_SRC_PARENT, srcParent);
         intent.putExtra(EXTRA_STACK, (Parcelable) localeStack);
         intent.putExtra(EXTRA_OPERATION, operationType);
 

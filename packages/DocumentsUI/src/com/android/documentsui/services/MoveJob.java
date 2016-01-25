@@ -33,9 +33,11 @@ import com.android.documentsui.model.DocumentStack;
 
 import java.util.List;
 
+// TODO: Stop extending CopyJob.
 final class MoveJob extends CopyJob {
 
     private static final String TAG = "MoveJob";
+    final DocumentInfo mSrcParent;
 
     /**
      * Moves files to a destination identified by {@code destination}.
@@ -45,10 +47,12 @@ final class MoveJob extends CopyJob {
      * @see @link {@link Job} constructor for most param descriptions.
      *
      * @param srcs List of files to be moved.
+     * @param srcParent Parent of all source files.
      */
     MoveJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack destination, List<DocumentInfo> srcs) {
+            String id, DocumentStack destination, List<DocumentInfo> srcs, DocumentInfo srcParent) {
         super(service, appContext, listener, OPERATION_MOVE, id, destination, srcs);
+        this.mSrcParent = srcParent;
     }
 
     @Override
@@ -76,8 +80,8 @@ final class MoveJob extends CopyJob {
                 R.plurals.move_error_notification_title, R.drawable.ic_menu_copy);
     }
 
-    @Override
-    boolean processDocument(DocumentInfo src, DocumentInfo dest) throws RemoteException {
+    boolean processDocument(DocumentInfo src, DocumentInfo srcParent, DocumentInfo dest)
+            throws RemoteException {
 
         // TODO: When optimized move kicks in, we're not making any progress updates. FIX IT!
 
@@ -86,7 +90,8 @@ final class MoveJob extends CopyJob {
         if (src.authority.equals(dest.authority)) {
             if ((src.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
                 if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
-                        Uri.EMPTY /* Not used yet */, dest.derivedUri) == null) {
+                        srcParent != null ? srcParent.derivedUri : mSrcParent.derivedUri,
+                        dest.derivedUri) == null) {
                     onFileFailed(src);
                     return false;
                 }
@@ -106,6 +111,7 @@ final class MoveJob extends CopyJob {
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
         boolean copied = byteCopyDocument(src, dest);
 
+        // TODO: Replace deleteDocument() with removeDocument() once implemented.
         return copied && !isCanceled() && deleteDocument(src);
     }
 
@@ -115,7 +121,8 @@ final class MoveJob extends CopyJob {
                 .append("MoveJob")
                 .append("{")
                 .append("id=" + id)
-                .append("srcs=" + mSrcs)
+                .append(", srcs=" + mSrcs)
+                .append(", srcParent=" + mSrcParent)
                 .append(", destination=" + stack)
                 .append("}")
                 .toString();

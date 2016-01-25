@@ -59,7 +59,9 @@ public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
     }
 
     @Override
-    CopyJob createJob(List<DocumentInfo> srcs, DocumentStack stack) throws Exception {
+    // TODO: Stop passing srcParent here, as it's not used for copying.
+    CopyJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+            throws Exception {
         return new CopyJob(
                 mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs);
     }

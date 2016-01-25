@@ -385,6 +385,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         FileOperations.start(
                 getActivity(),
                 getDisplayState().selectedDocumentsForCopy,
+                getDisplayState().stack.peek(),
                 (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
                 operationType);
     }
@@ -782,20 +783,21 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     private void deleteDocuments(final Selection selected) {
 
-            checkArgument(!selected.isEmpty());
-            new GetDocumentsTask() {
-                @Override
-                void onDocumentsReady(List<DocumentInfo> docs) {
-                    // Hide the files in the UI.
-                    final SparseArray<String> hidden = mAdapter.hide(selected.getAll());
+        checkArgument(!selected.isEmpty());
+        final DocumentInfo srcParent = getDisplayState().stack.peek();
+        new GetDocumentsTask() {
+            @Override
+            void onDocumentsReady(List<DocumentInfo> docs) {
+                // Hide the files in the UI.
+                final SparseArray<String> hidden = mAdapter.hide(selected.getAll());
 
-                    checkState(DELETE_JOB_DELAY > DELETE_UNDO_TIMEOUT);
-                    String operationId = FileOperations.delete(
-                            getActivity(), docs, getDisplayState().stack,
-                            DELETE_JOB_DELAY);
-                    showDeleteSnackbar(hidden, operationId);
-                }
-            }.execute(selected);
+                checkState(DELETE_JOB_DELAY > DELETE_UNDO_TIMEOUT);
+                String operationId = FileOperations.delete(
+                        getActivity(), docs, srcParent, getDisplayState().stack,
+                        DELETE_JOB_DELAY);
+                showDeleteSnackbar(hidden, operationId);
+            }
+        }.execute(selected);
     }
 
     private void showDeleteSnackbar(final SparseArray<String> hidden, final String jobId) {

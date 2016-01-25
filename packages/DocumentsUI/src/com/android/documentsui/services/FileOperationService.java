@@ -65,6 +65,11 @@ public class FileOperationService extends Service implements Job.Listener {
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
     public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
 
+    // This extra is used only for moving and deleting. Currently it's not the case,
+    // but in the future those files may be from multiple different parents. In
+    // such case, this needs to be replaced with pairs of parent and child.
+    public static final String EXTRA_SRC_PARENT = "com.android.documentsui.SRC_PARENT";
+
     public static final int OPERATION_UNKNOWN = -1;
     public static final int OPERATION_COPY = 1;
     public static final int OPERATION_MOVE = 2;
@@ -152,14 +157,14 @@ public class FileOperationService extends Service implements Job.Listener {
         Job job = null;
         synchronized (mRunning) {
             if (mWakeLock == null) {
-                mWakeLock = mPowerManager.newWakeLock(
-                        PowerManager.PARTIAL_WAKE_LOCK, TAG);
+                mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             }
 
             List<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
+            DocumentInfo srcParent = intent.getParcelableExtra(EXTRA_SRC_PARENT);
             DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
 
-            job = createJob(operationType, jobId, srcs, stack);
+            job = createJob(operationType, jobId, srcs, srcParent, stack);
 
             if (job == null) {
                 return;
@@ -222,7 +227,8 @@ public class FileOperationService extends Service implements Job.Listener {
      */
     @GuardedBy("mRunning")
     private @Nullable Job createJob(
-            @OpType int operationType, String id, List<DocumentInfo> srcs, DocumentStack stack) {
+            @OpType int operationType, String id, List<DocumentInfo> srcs, DocumentInfo srcParent,
+            DocumentStack stack) {
 
         if (mRunning.containsKey(id)) {
             Log.w(TAG, "Duplicate job id: " + id
@@ -236,10 +242,12 @@ public class FileOperationService extends Service implements Job.Listener {
                 job = jobFactory.createCopy(this, getApplicationContext(), this, id, stack, srcs);
                 break;
             case OPERATION_MOVE:
-                job = jobFactory.createMove(this, getApplicationContext(), this, id, stack, srcs);
+                job = jobFactory.createMove(this, getApplicationContext(), this, id, stack, srcs,
+                        srcParent);
                 break;
             case OPERATION_DELETE:
-                job = jobFactory.createDelete(this, getApplicationContext(), this, id, stack, srcs);
+                job = jobFactory.createDelete(this, getApplicationContext(), this, id, stack, srcs,
+                        srcParent);
                 break;
             default:
                 throw new UnsupportedOperationException();
