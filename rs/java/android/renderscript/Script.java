@@ -315,7 +315,6 @@ public class Script extends BaseObj {
     /**
      * Only intended for use by generated reflected code.  (General reduction)
      *
-     * @hide
      */
     protected void reduce(int slot, Allocation[] ains, Allocation aout, LaunchOptions sc) {
         mRS.validate();

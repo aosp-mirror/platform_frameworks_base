@@ -32855,6 +32855,7 @@ package android.renderscript {
     method public void getVarV(int, android.renderscript.FieldPacker);
     method protected void invoke(int);
     method protected void invoke(int, android.renderscript.FieldPacker);
+    method protected void reduce(int, android.renderscript.Allocation[], android.renderscript.Allocation, android.renderscript.Script.LaunchOptions);
     method public void setTimeZone(java.lang.String);
     method public void setVar(int, float);
     method public void setVar(int, double);
