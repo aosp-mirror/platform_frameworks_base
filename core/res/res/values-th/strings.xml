@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"รายงานข้อบกพร่อง"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ใช้รายงานข้อบกพร่อง"</string>
     <string name="bugreport_message" msgid="398447048750350456">"การดำเนินการนี้จะรวบรวมข้อมูลเกี่ยวกับสถานะปัจจุบันของอุปกรณ์ของคุณ โดยจะส่งไปในรูปแบบข้อความอีเมล อาจใช้เวลาสักครู่ตั้งแต่เริ่มการสร้างรายงานข้อบกพร่องจนกระทั่งเสร็จสมบูรณ์ โปรดอดทนรอ"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"รายงานแบบอินเทอร์แอกทีฟ"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ใช้ตัวเลือกนี้ได้เกือบทุกสถานการณ์ โดยจะอนุญาตให้คุณติดตามความคืบหน้าของรายงานและป้อนรายละเอียดเพิ่มเติมของปัญหา หัวข้อที่ใช้งานน้อยแต่ใช้เวลานานในการรายงานอาจถูกข้ามไป"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"รายงานฉบับเต็ม"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที</item>
+      <item quantity="one">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_0">%d</xliff:g> วินาที</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"โหมดปิดเสียง"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ปิดเสียงไว้"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"เปิดเสียงแล้ว"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"แตะเพื่อยกเลิก"</string>
     <string name="select_input_method" msgid="8547250819326693584">"เปลี่ยนแป้นพิมพ์"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"เลือกแป้นพิมพ์"</string>
-    <string name="show_ime" msgid="9157568568695230830">"แสดงวิธีการป้อนข้อมูล"</string>
-    <string name="hardware" msgid="7517821086888990278">"ฮาร์ดแวร์"</string>
+    <string name="show_ime" msgid="2506087537466597099">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
+    <string name="hardware" msgid="194658061510127999">"แสดงแป้นพิมพ์เสมือน"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"เลือกรูปแบบแป้นพิมพ์"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"แตะเพื่อเลือกรูปแบบแป้นพิมพ์"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่ แต่ถึงขีดจำกัดของผู้ใช้แล้ว"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่ แต่มีบัญชี "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" อยู่แล้วบนอุปกรณ์เครื่องนี้ ดำเนินการต่อไหม"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่สำหรับบัญชี "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ดำเนินการต่อไหม"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"ค่ากำหนดภาษา"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"ค่ากำหนดภูมิภาค"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"พิมพ์ชื่อภาษา"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"แนะนำ"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
 </resources>

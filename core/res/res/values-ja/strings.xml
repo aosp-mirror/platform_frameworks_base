@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"バグレポート"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"バグレポートを取得"</string>
     <string name="bugreport_message" msgid="398447048750350456">"現在の端末の状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"対話型レポート"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報を確認することができます。レポート作成に時間がかかってもあまり使用されないセクションは省略されることがあります。"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"完全レポート"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"サウンドOFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"サウンドON"</string>
@@ -246,13 +246,13 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMSメッセージの送信と表示"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"端末上の写真、メディア、ファイルへのアクセス"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"端末内の写真、メディア、ファイルへのアクセス"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真の撮影と動画の記録"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"通話の発信と管理"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"電話の発信と管理"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ボディーセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"バイタルサインに関するセンサーデータへのアクセス"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"キャンセルするにはタップしてください"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
-    <string name="show_ime" msgid="9157568568695230830">"スクリーンキーボードを表示する"</string>
-    <string name="hardware" msgid="7517821086888990278">"ハードウェア"</string>
+    <string name="show_ime" msgid="2506087537466597099">"物理キーボードが有効になっている間は、画面に表示されます"</string>
+    <string name="hardware" msgid="194658061510127999">"仮想キーボードの表示"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"キーボードレイアウトの選択"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"タップしてキーボードレイアウトを選択してください。"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" で新しいユーザーを追加しようとしていますが、ユーザー数の上限に達しています。"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" で新しいユーザーを追加しようとしていますが、アカウント "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" は既にこの端末に存在します。続行しますか？"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" でアカウント "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" に新しいユーザーを追加しようとしています。続行しますか？"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"言語設定"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"地域設定"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"言語名を入力"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"言語の候補"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
 </resources>

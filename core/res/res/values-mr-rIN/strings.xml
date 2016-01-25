@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"दोष अहवाल"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"दोष अहवाल घ्या"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे आपल्या वर्तमान डिव्हाइस स्थितीविषयी माहिती संकलित करेल. दोष अहवाल प्रारंभ करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"बहुतांश प्रसंगांमध्‍ये याचा वापर करा. ते आपल्‍याला अहवालाच्या प्रगतीचा मागोवा घेण्‍याची आणि समस्येविषयी अधिक तपशील प्रविष्‍ट करण्‍याची अनुमती देतात. ते अहवाल देण्‍यासाठी बराच वेळ घेणार्‍या कमी वापरलेल्या विभागांना कदाचित वगळेल."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
+      <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"मूक मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ध्वनी बंद आहे"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्वनी चालू आहे"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"रद्द करण्यासाठी स्पर्श करा"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदला"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड निवडा"</string>
-    <string name="show_ime" msgid="9157568568695230830">"इनपुट पद्धत दर्शवा"</string>
-    <string name="hardware" msgid="7517821086888990278">"हार्डवेअर"</string>
+    <string name="show_ime" msgid="2506087537466597099">"भौतिक कीबोर्ड सक्रिय असताना त्यास स्क्रीनवर ठेवा"</string>
+    <string name="hardware" msgid="194658061510127999">"व्हर्च्युअल कीबोर्ड दर्शवा"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"कीबोर्ड लेआउट निवडा"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"कीबोर्ड लेआउट निवडण्यासाठी स्पर्श करा."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्यासाठी प्रयत्न करीत आहे परंतु वापरकर्ता मर्यादा गाठली गेली आहे."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्‍याचा प्रयत्न करीत आहे परंतु या डिव्‍हाइसवर "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" खाते आधीपासून अस्तित्वात आहे. तरीही पुढे सुरु ठेवायचे?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" खात्यासाठी "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्याचा प्रयत्न करीत आहे. पुढे सुरु ठेवायचे?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"भाषा प्राधान्य"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"सूचित केलेले"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"सर्व भाषा"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"शोध"</string>
 </resources>

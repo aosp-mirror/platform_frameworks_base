@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Αναφορά σφαλμάτων"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Λήψη αναφοράς σφάλματος"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Θα συλλέξει πληροφορίες σχετικά με την τρέχουσα κατάσταση της συσκευής σας και θα τις στείλει μέσω μηνύματος ηλεκτρονικού ταχυδρομείου. Απαιτείται λίγος χρόνος για τη σύνταξη της αναφοράς σφάλματος και την αποστολή της. Κάντε λίγη υπομονή."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Διαδραστική αναφορά"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Χρησιμοποιήστε αυτήν την επιλογή στις περισσότερες περιπτώσεις. Σας επιτρέπει να παρακολουθείτε την πρόοδο της αναφοράς και να εισάγετε περισσότερες λεπτομέρειες σχετικά με το πρόβλημα που αντιμετωπίζετε. Ενδέχεται να παραλείψει ορισμένες ενότητες που δεν χρησιμοποιούνται συχνά και για τις οποίες απαιτείται μεγάλο χρονικό διάστημα για τη δημιουργία αναφορών."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Πλήρης αναφορά"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα.</item>
+      <item quantity="one">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_0">%d</xliff:g> δευτερόλεπτο.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Λειτουργία σίγασης"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ο ήχος είναι απενεργοποιημένος"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ο ήχος είναι ενεργοποιημένος"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Αγγίξτε για ακύρωση"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Αλλαγή πληκτρολογίου"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Επιλογή πληκτρολογίων"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Εμφάνιση μεθόδου εισαγ."</string>
-    <string name="hardware" msgid="7517821086888990278">"Υλικό"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Να παραμένει στην οθόνη όταν είναι ενεργό το φυσικό πληκτρολόγιο"</string>
+    <string name="hardware" msgid="194658061510127999">"Εμφάνιση εικονικού πληκτρολ."</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Επιλογή διάταξης πληκτρολογίου"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Αγγίξτε για να επιλέξετε διάταξη πληκτρολογίου."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"Το "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" προσπαθεί να προσθέσει έναν νέο χρήστη, αλλά έχετε φτάσει το όριο χρηστών."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789">"Το "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" προσπαθεί να προσθέσει έναν νέο χρήστη, αλλά ο λογαριασμός "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" υπάρχει ήδη σε αυτήν τη συσκευή. Θέλετε να συνεχίσετε ούτως ή άλλως;"</string>
     <string name="user_creation_adding" msgid="3206420861363021392">"Το "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" προσπαθεί να προσθέσει έναν νέο χρήστη για το λογαριασμό "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Θέλετε να συνεχίσετε;"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Προτίμηση γλώσσας"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Προτίμηση περιοχής"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Εισαγ. όνομα γλώσσας"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Προτεινόμενες"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Όλες οι γλώσσες"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Αναζήτηση"</string>
 </resources>

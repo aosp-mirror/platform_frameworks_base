@@ -213,15 +213,17 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlášení chyb"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Vytvořit chybové hlášení"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivní přehled"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Tato možnost se používá ve většině případů. Umožňuje sledovat průběh přehledu a zadat další podrobnosti o problému. Mohou být vynechány některé méně používané sekce, jejichž kontrola trvá dlouho."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Úplný přehled"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="few">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
+      <item quantity="many">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekundy.</item>
+      <item quantity="other">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
+      <item quantity="one">Snímek obrazovky pro zprávu o chybě bude pořízen za <xliff:g id="NUMBER_0">%d</xliff:g> sekundu.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tichý režim"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Zvuk je VYPNUTÝ."</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Zvuk je zapnutý"</string>
@@ -1063,8 +1065,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Klepnutím zrušíte"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Vybrat klávesnici"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Zobrazit metodu zadávání"</string>
-    <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Ponechat na obrazovce, když je aktivní fyzická klávesnice"</string>
+    <string name="hardware" msgid="194658061510127999">"Zobrazit virtuální klávesnici"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Výběr rozložení klávesnice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Dotykem vyberte rozložení klávesnice."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AÁBCČDĎEÉĚFGHCHIÍJKLMNŇOÓPQRŘSŠTŤUÚVWXYÝZŽ"</string>
@@ -1567,4 +1569,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"Aplikace "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" se pokouší přidat nového uživatele, avšak byl dosažen maximální počet uživatelů."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789">"Aplikace "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" se pokouší přidat nového uživatele, avšak účet "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" již v zařízení existuje. Chcete přesto pokračovat?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392">"Aplikace "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" se pro účet "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" pokouší přidat nového uživatele. Pokračovat?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Preferovaný jazyk"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Preferovaná oblast"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Zadejte název jazyka"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Navrhované"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Všechny jazyky"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Vyhledávání"</string>
 </resources>

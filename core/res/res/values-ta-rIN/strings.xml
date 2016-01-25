@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"பிழை அறிக்கையை எடு"</string>
     <string name="bugreport_message" msgid="398447048750350456">"உங்கள் நடப்புச் சாதன நிலையை மின்னஞ்சல் செய்தியாக அனுப்ப, அது குறித்த தகவலை இது சேகரிக்கும். பிழை அறிக்கையைத் தொடங்குவதில் இருந்து, அது அனுப்புவதற்குத் தயாராகும் வரை, இதற்குச் சிறிது நேரம் ஆகும்; பொறுமையாகக் காத்திருக்கவும்."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ஊடாடத்தக்க அறிக்கை"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"பெரும்பாலான சூழ்நிலைகளில் இதைப் பயன்படுத்தவும். இது அறிக்கையின் நிலையைக் கண்காணிக்கவும், சிக்கலைப் பற்றிய மேலும் விவரங்களை உள்ளிடவும் அனுமதிக்கும். அறிக்கையிட நீண்ட நேரம் எடுக்கக்கூடிய குறைவாகப் பயன்படுத்தப்படும் பிரிவுகள் சிலவற்றை இது தவிர்க்கக்கூடும்."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"முழு அறிக்கை"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> வினாடிகளில் பிழை அறிக்கைக்கான ஸ்கிரீன் ஷாட் எடுக்கப்படும்.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> வினாடியில் பிழை அறிக்கைக்கான ஸ்கிரீன் ஷாட் எடுக்கப்படும்.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"நிசப்த பயன்முறை"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ஒலி முடக்கத்தில் உள்ளது"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ஒலி இயக்கத்தில் உள்ளது"</string>
@@ -1044,13 +1044,13 @@
     <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"பிழை அறிக்கையை நிர்வாகியுடன் பகிரவா?"</string>
     <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"பிழைகாண்பதற்கு உதவ, உங்கள் ஐடி நிர்வாகி பிழை அறிக்கையைக் கோரியுள்ளார்"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"சரி"</string>
-    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"நிராகரி"</string>
+    <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"வேண்டாம்"</string>
     <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"பிழை அறிக்கையை எடுக்கிறது…"</string>
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"ரத்துசெய்ய, தொடவும்"</string>
     <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"விசைப்பலகைகளைத் தேர்வுசெய்க"</string>
-    <string name="show_ime" msgid="9157568568695230830">"உள்ளீட்டு முறையைக் காட்டு"</string>
-    <string name="hardware" msgid="7517821086888990278">"வன்பொருள்"</string>
+    <string name="show_ime" msgid="2506087537466597099">"கைமுறை விசைப்பலகை இயக்கத்தில் இருக்கும் போது IMEஐ திரையில் வைத்திரு"</string>
+    <string name="hardware" msgid="194658061510127999">"விர்ச்சுவல் விசைப்பலகையை காட்டு"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"விசைப்பலகைத் தளவமைப்பைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"விசைப்பலகைத் தளவமைப்பைத் தேர்ந்தெடுக்க தொடவும்."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" பயன்பாடு புதிய பயனரைச் சேர்க்க முயல்கிறது, ஆனால் பயனருக்கான வரம்பு முடிந்துவிட்டது."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" பயன்பாடு புதிய பயனரைச் சேர்க்க முயல்கிறது. ஆனால் "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" கணக்கு ஏற்கனவே இந்தச் சாதனத்தில் உள்ளது. தொடரவா?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" பயன்பாடு "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" கணக்கிற்குப் புதிய பயனரைச் சேர்க்க முயல்கிறது. தொடரவா?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"மொழி விருப்பம்"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"மண்டல விருப்பம்"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"மொழி பெயரை உள்ளிடுக"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"பரிந்துரைகள்"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"எல்லா மொழிகளும்"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"தேடு"</string>
 </resources>

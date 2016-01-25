@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај за грешка"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот и да внесете повеќе детали во врска со проблемот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Целосен извештај"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунда.</item>
+      <item quantity="other">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Тивок режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Звукот е исклучен"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Звукот е вклучен"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Допрете за да откажете"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Избери тастатури"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Прикажи влезен метод"</string>
-    <string name="hardware" msgid="7517821086888990278">"Хардвер"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>
+    <string name="hardware" msgid="194658061510127999">"Прикажи виртуелна тастатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Избери изглед на тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Допри за да избереш изглед на тастатура."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1533,4 +1533,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник, но ограничувањето за корисници е достигнато."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник, но сметката "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" веќе постои на уредот. Сепак продолжете?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник за сметката "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Продолжете?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Претпочитувања за јазик"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Претпочитувања за регион"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Внеси име на јазик"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Предложени"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Сите јазици"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Пребарај"</string>
 </resources>

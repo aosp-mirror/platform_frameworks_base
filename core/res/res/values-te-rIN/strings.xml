@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"బగ్ నివేదిక"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"చాలా సందర్భాల్లో ఇది ఉపయోగించబడుతుంది. ఇది మిమ్మల్ని నివేదిక ప్రోగ్రెస్ ట్రాక్ చేయడానికి మరియు సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి అనుమతిస్తుంది. ఇది నివేదించడానికి అధిక సమయం పట్టే తక్కువగా వినియోగించే విభాగాలను విడిచిపెట్టవచ్చు."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"పూర్తి నివేదిక"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
+      <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"నిశ్శబ్ద మోడ్"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"ధ్వని ఆఫ్‌లో ఉంది"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ధ్వని ఆన్‌లో ఉంది"</string>
@@ -1049,8 +1049,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"రద్దు చేయడానికి తాకండి"</string>
     <string name="select_input_method" msgid="8547250819326693584">"కీబోర్డ్‌ను మార్చు"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"కీబోర్డ్‌లను ఎంచుకోండి"</string>
-    <string name="show_ime" msgid="9157568568695230830">"ఇన్‌పుట్ పద్ధతిని చూపు"</string>
-    <string name="hardware" msgid="7517821086888990278">"హార్డ్‌వేర్"</string>
+    <string name="show_ime" msgid="2506087537466597099">"దీన్ని భౌతిక కీబోర్డ్ సక్రియంగా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
+    <string name="hardware" msgid="194658061510127999">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"కీబోర్డ్ లేఅవుట్‌ను ఎంచుకోవడానికి తాకండి."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1531,4 +1531,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది, కానీ వినియోగదారు పరిమితి చేరుకుంది."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది, కానీ ఖాతా "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ఇప్పటికే ఈ పరికరంలో ఉంది. ఏదేమైనా కొనసాగించాలా?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ఖాతా "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" కోసం కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది. కొనసాగించాలా?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"భాష ప్రాధాన్యత"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"సూచించినవి"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"శోధించు"</string>
 </resources>

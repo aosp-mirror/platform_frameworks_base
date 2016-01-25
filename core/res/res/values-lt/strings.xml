@@ -213,15 +213,17 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Pranešimas apie riktą"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Pranešti apie riktą"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bus surinkta informacija apie dabartinę įrenginio būseną ir išsiųsta el. pašto pranešimu. Šiek tiek užtruks, kol pranešimas apie riktą bus paruoštas siųsti; būkite kantrūs."</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. ataskaita"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Naudokite tai esant daugumai aplinkybių. Galite stebėti ataskaitos eigą ir įvesti daugiau išsamios informacijos apie problemą. Gali būti praleidžiamos kelios nelabai naudingos skiltys, kurių ataskaitų teikimas ilgai trunka."</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"Išsami ataskaita"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="one">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundės.</item>
+      <item quantity="few">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundžių.</item>
+      <item quantity="many">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundės.</item>
+      <item quantity="other">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundžių.</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Tylus režimas"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Garsas IŠJUNGTAS"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Garsas ĮJUNGTAS"</string>
@@ -1063,8 +1065,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Palieskite, kad atšauktumėte"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviatūros keitimas"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Pasirinkti klaviatūras"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Rodyti įvesties metodą"</string>
-    <string name="hardware" msgid="7517821086888990278">"Apar. įr."</string>
+    <string name="show_ime" msgid="2506087537466597099">"Palikti ekrane, kol fizinė klaviatūra aktyvi"</string>
+    <string name="hardware" msgid="194658061510127999">"Rodyti virtualiąją klaviatūrą"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Pasirinkite klaviatūros išdėstymą"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Palieskite, kad pasirinktumėte klaviatūros išdėstymą."</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" AĄBCČDEĘĖFGHIĮYJKLMNOPRSŠTUŲŪVZŽ"</string>
@@ -1567,4 +1569,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau pasiektas naudotojų skaičiaus apribojimas."</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau paskyra "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" jau yra šiame įrenginyje. Vis tiek tęsti?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują paskyros "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" naudotoją. Tęsti?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"Kalbos nuostata"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"Regiono nuostata"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Siūloma"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"Visos kalbos"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Paieška"</string>
 </resources>

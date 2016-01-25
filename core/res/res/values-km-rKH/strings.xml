@@ -211,15 +211,15 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"របាយការណ៍​កំហុស"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"យក​របាយការណ៍​កំហុស"</string>
     <string name="bugreport_message" msgid="398447048750350456">"វា​នឹង​​ប្រមូល​ព័ត៌មាន​អំពី​ស្ថានភាព​ឧបករណ៍​របស់​អ្នក ដើម្បី​ផ្ញើ​ជា​សារ​អ៊ីមែល។ វា​នឹង​ចំណាយ​ពេល​តិច​ពី​ពេល​ចាប់ផ្ដើម​របាយការណ៍​រហូត​ដល់​ពេល​វា​រួចរាល់​ដើម្បី​ផ្ញើ សូម​អត់ធ្មត់។"</string>
-    <!-- no translation found for bugreport_option_interactive_title (8635056131768862479) -->
+    <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"របាយការណ៍អន្តរកម្ម"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ប្រើវាគ្រប់កាលៈទេសៈទាំងអស់។ វាអនុញ្ញាតឲ្យអ្នកតាមដានដំណើរការនៃរបាយការណ៍ និងចូលទៅព័ត៌មានលម្អិតបន្ថែមអំពីបញ្ហានេះ។ វាអាចនឹងលុបផ្នែកមួយចំនួនដែលមិនសូវប្រើចេញ ដែលធ្វើឲ្យចំណាយពេលយូរក្នុងការរាយការណ៍។"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"របាយការណ៍ពេញលេញ"</string>
+    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
     <skip />
-    <!-- no translation found for bugreport_option_interactive_summary (8180152634022797629) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
-    <skip />
-    <!-- no translation found for bugreport_option_full_summary (6440582052207304578) -->
-    <skip />
-    <!-- no translation found for bugreport_countdown (6878900193900090368) -->
+    <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
+      <item quantity="other">នឹងថតរូបអេក្រង់សម្រាប់របាយការណ៍កំហុសក្នុងរយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> វិនាទីទៀត។</item>
+      <item quantity="one">នឹងថតរូបអេក្រង់សម្រាប់របាយការណ៍កំហុសក្នុងរយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> វិនាទីទៀត។</item>
+    </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"របៀប​ស្ងាត់"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"បើក​សំឡេង"</string>
@@ -1051,8 +1051,8 @@
     <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"ប៉ះដើម្បីបោះបង់"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ជ្រើស​ក្ដារចុច"</string>
-    <string name="show_ime" msgid="9157568568695230830">"បង្ហាញ​វិធី​សាស្ត្រ​បញ្ចូល"</string>
-    <string name="hardware" msgid="7517821086888990278">"ផ្នែក​រឹង"</string>
+    <string name="show_ime" msgid="2506087537466597099">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
+    <string name="hardware" msgid="194658061510127999">"បង្ហាញក្ដារចុចនិម្មិត"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"ជ្រើស​ប្លង់​ក្ដារ​ចុច"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"ប៉ះ ​ដើម្បី​ជ្រើស​ប្លង់​​ក្ដារចុច។"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1533,4 +1533,10 @@
     <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" កំពុងព្យាយាមបន្ថែមអ្នកប្រើថ្មី ប៉ុន្តែបានឈានដល់ចំនួនកំណត់អ្នកប្រើហើយ។"</string>
     <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" កំពុងព្យាយាមបន្ថែមអ្នកប្រើថ្មី ប៉ុន្តែគណនី "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" មានរួចទៅហើយនៅលើឧបករណ៍នេះ។ បន្តទោះយ៉ាងណាក៏ដោយ?"</string>
     <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" កំពុងព្យាយាមបន្ថែមអ្នកប្រើថ្មីសម្រាប់គណនី "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"។ បន្តឬ?"</string>
+    <string name="language_selection_title" msgid="7181332986330337171">"ចំណូល​ចិត្ត​ភាសា"</string>
+    <string name="country_selection_title" msgid="2954859441620215513">"ចំណូលចិត្តតំបន់"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"វាយបញ្ចូលឈ្មោះភាសា"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"បាន​ស្នើ"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
 </resources>
