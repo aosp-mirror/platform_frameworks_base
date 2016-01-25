@@ -84,6 +84,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -550,14 +554,28 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public int getBouncerPromptReason() {
             int currentUser = ActivityManager.getCurrentUser();
-            if ((mUpdateMonitor.getUserTrustIsManaged(currentUser)
-                    || mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser))
-                    && !mUpdateMonitor.getStrongAuthTracker().hasUserAuthenticatedSinceBoot()) {
+            boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
+            boolean fingerprint = mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser);
+            boolean any = trust || fingerprint;
+            KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                    mUpdateMonitor.getStrongAuthTracker();
+            int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
+
+            if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
                 return KeyguardSecurityView.PROMPT_REASON_RESTART;
-            } else if (mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser)
-                    && mUpdateMonitor.hasFingerprintUnlockTimedOut(currentUser)) {
+            } else if (fingerprint && mUpdateMonitor.hasFingerprintUnlockTimedOut(currentUser)) {
                 return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
+            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_WRONG_CREDENTIAL;
             }
+
+
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
     };

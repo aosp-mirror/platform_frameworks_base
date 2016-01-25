@@ -60,7 +60,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
@@ -103,6 +102,9 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_CLEANUP_USER = 8;
     private static final int MSG_SWITCH_USER = 9;
     private static final int MSG_SET_DEVICE_LOCKED = 10;
+    private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 11;
+
+    public static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
@@ -119,6 +121,9 @@ public class TrustManagerService extends SystemService {
 
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
+
+    @GuardedBy("mDeviceLockedForUser")
+    private final SparseBooleanArray mTrustUsuallyManagedForUser = new SparseBooleanArray();
 
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
@@ -187,7 +192,12 @@ public class TrustManagerService extends SystemService {
     }
 
     public void updateTrust(int userId, int flags) {
-        dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
+        boolean managed = aggregateIsTrustManaged(userId);
+        dispatchOnTrustManagedChanged(managed, userId);
+        if (mStrongAuthTracker.isTrustAllowedForUser(userId)
+                && isTrustUsuallyManagedInternal(userId) != managed) {
+            updateTrustUsuallyManaged(userId, managed);
+        }
         boolean trusted = aggregateIsTrusted(userId);
         boolean changed;
         synchronized (mUserIsTrusted) {
@@ -198,6 +208,18 @@ public class TrustManagerService extends SystemService {
         if (changed) {
             refreshDeviceLockedForUser(userId);
         }
+    }
+
+    private void updateTrustUsuallyManaged(int userId, boolean managed) {
+        synchronized (mTrustUsuallyManagedForUser) {
+            mTrustUsuallyManagedForUser.put(userId, managed);
+        }
+        // Wait a few minutes before committing to flash, in case the trust agent is transiently not
+        // managing trust (crashed, needs to acknowledge DPM restrictions, etc).
+        mHandler.removeMessages(MSG_FLUSH_TRUST_USUALLY_MANAGED);
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(MSG_FLUSH_TRUST_USUALLY_MANAGED),
+                TRUST_USUALLY_MANAGED_FLUSH_DELAY);
     }
 
     void refreshAgentList(int userId) {
@@ -787,7 +809,36 @@ public class TrustManagerService extends SystemService {
             mHandler.obtainMessage(MSG_SET_DEVICE_LOCKED, value ? 1 : 0, userId)
                     .sendToTarget();
         }
+
+        @Override
+        public boolean isTrustUsuallyManaged(int userId) {
+            mContext.enforceCallingPermission(Manifest.permission.TRUST_LISTENER,
+                    "query trust state");
+            return isTrustUsuallyManagedInternal(userId);
+        }
     };
+
+    private boolean isTrustUsuallyManagedInternal(int userId) {
+        synchronized (mTrustUsuallyManagedForUser) {
+            int i = mTrustUsuallyManagedForUser.indexOfKey(userId);
+            if (i >= 0) {
+                return mTrustUsuallyManagedForUser.valueAt(i);
+            }
+        }
+        // It's not in memory yet, get the value from persisted storage instead
+        boolean persistedValue = mLockPatternUtils.isTrustUsuallyManaged(userId);
+        synchronized (mTrustUsuallyManagedForUser) {
+            int i = mTrustUsuallyManagedForUser.indexOfKey(userId);
+            if (i >= 0) {
+                // Someone set the trust usually managed in the mean time. Better use that.
+                return mTrustUsuallyManagedForUser.valueAt(i);
+            } else {
+                // .. otherwise it's safe to cache the fetched value now.
+                mTrustUsuallyManagedForUser.put(userId, persistedValue);
+                return persistedValue;
+            }
+        }
+    }
 
     private int resolveProfileParent(int userId) {
         long identity = Binder.clearCallingIdentity();
@@ -834,6 +885,19 @@ public class TrustManagerService extends SystemService {
                 case MSG_SET_DEVICE_LOCKED:
                     setDeviceLockedForUser(msg.arg2, msg.arg1 != 0);
                     break;
+                case MSG_FLUSH_TRUST_USUALLY_MANAGED:
+                    SparseBooleanArray usuallyManaged;
+                    synchronized (mTrustUsuallyManagedForUser) {
+                        usuallyManaged = mTrustUsuallyManagedForUser.clone();
+                    }
+
+                    for (int i = 0; i < usuallyManaged.size(); i++) {
+                        int userId = usuallyManaged.keyAt(i);
+                        boolean value = usuallyManaged.valueAt(i);
+                        if (value != mLockPatternUtils.isTrustUsuallyManaged(userId)) {
+                            mLockPatternUtils.setTrustUsuallyManaged(value, userId);
+                        }
+                    }
             }
         }
     };
