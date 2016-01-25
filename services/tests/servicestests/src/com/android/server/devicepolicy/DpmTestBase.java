@@ -65,6 +65,22 @@ public abstract class DpmTestBase extends AndroidTestCase {
         return mMockContext;
     }
 
+    protected void markPackageAsInstalled(String packageName, ApplicationInfo ai, int userId)
+            throws Exception {
+        final PackageInfo pi = DpmTestUtils.cloneParcelable(
+                mRealTestContext.getPackageManager().getPackageInfo(
+                        mRealTestContext.getPackageName(), 0));
+        assertTrue(pi.applicationInfo.flags != 0);
+
+        if (ai != null) {
+            pi.applicationInfo = ai;
+        }
+
+        doReturn(pi).when(mMockContext.ipackageManager).getPackageInfo(
+                eq(packageName),
+                eq(0),
+                eq(userId));
+    }
 
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid)
             throws Exception {
@@ -124,17 +140,6 @@ public abstract class DpmTestBase extends AndroidTestCase {
                 eq(UserHandle.getUserId(packageUid)));
 
         // Set up getPackageInfo().
-
-        final PackageInfo pi = DpmTestUtils.cloneParcelable(
-                mRealTestContext.getPackageManager().getPackageInfo(
-                        admin.getPackageName(), 0));
-        assertTrue(pi.applicationInfo.flags != 0);
-
-        pi.applicationInfo = ai;
-
-        doReturn(pi).when(mMockContext.ipackageManager).getPackageInfo(
-                eq(admin.getPackageName()),
-                eq(0),
-                eq(UserHandle.getUserId(packageUid)));
+        markPackageAsInstalled(admin.getPackageName(), ai, UserHandle.getUserId(packageUid));
     }
 }

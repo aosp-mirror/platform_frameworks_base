@@ -176,6 +176,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final String TAG_STATUS_BAR = "statusbar";
 
+    private static final String TAG_AFFILIATION_ID = "affiliation-id";
+
     private static final String ATTR_DISABLED = "disabled";
 
     private static final String DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML =
@@ -371,6 +373,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean doNotAskCredentialsOnBoot = false;
 
         String mApplicationRestrictionsManagingPackage;
+
+        Set<String> mAffiliationIds = new ArraySet<>();
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -2026,6 +2030,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.endTag(null, DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML);
             }
 
+            for (String id : policy.mAffiliationIds) {
+                out.startTag(null, TAG_AFFILIATION_ID);
+                out.attribute(null, "id", id);
+                out.endTag(null, TAG_AFFILIATION_ID);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -2100,6 +2110,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             policy.mLockTaskPackages.clear();
             policy.mAdminList.clear();
             policy.mAdminMap.clear();
+            policy.mAffiliationIds.clear();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -2157,6 +2168,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             parser.getAttributeValue(null, ATTR_DISABLED));
                 } else if (DO_NOT_ASK_CREDENTIALS_ON_BOOT_XML.equals(tag)) {
                     policy.doNotAskCredentialsOnBoot = true;
+                } else if (TAG_AFFILIATION_ID.equals(tag)) {
+                    policy.mAffiliationIds.add(parser.getAttributeValue(null, "id"));
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -7740,5 +7753,49 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     ? profileOwner.organizationColor
                     : ActiveAdmin.DEF_ORGANIZATION_COLOR;
         }
+    }
+
+    @Override
+    public void setAffiliationIds(ComponentName admin, List<String> ids) {
+        final Set<String> affiliationIds = new ArraySet<String>(ids);
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+
+        synchronized (this) {
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            getUserData(callingUserId).mAffiliationIds = affiliationIds;
+            saveSettingsLocked(callingUserId);
+            if (callingUserId != UserHandle.USER_SYSTEM && isDeviceOwner(admin, callingUserId)) {
+                // Affiliation ids specified by the device owner are additionally stored in
+                // UserHandle.USER_SYSTEM's DevicePolicyData.
+                getUserData(UserHandle.USER_SYSTEM).mAffiliationIds = affiliationIds;
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
+        }
+    }
+
+    @Override
+    public boolean isAffiliatedUser() {
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+
+        synchronized (this) {
+            if (mOwners.getDeviceOwnerUserId() == callingUserId) {
+                // The user that the DO is installed on is always affiliated.
+                return true;
+            }
+            final ComponentName profileOwner = getProfileOwner(callingUserId);
+            if (profileOwner == null
+                    || !profileOwner.getPackageName().equals(mOwners.getDeviceOwnerPackageName())) {
+                return false;
+            }
+            final Set<String> userAffiliationIds = getUserData(callingUserId).mAffiliationIds;
+            final Set<String> deviceAffiliationIds =
+                    getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
+            for (String id : userAffiliationIds) {
+                if (deviceAffiliationIds.contains(id)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

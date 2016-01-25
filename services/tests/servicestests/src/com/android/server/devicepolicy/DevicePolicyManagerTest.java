@@ -34,6 +34,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.MoreAsserts;
+import android.util.ArraySet;
 import android.util.Pair;
 
 import org.mockito.ArgumentCaptor;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -1475,5 +1477,70 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setLongSupportMessage(admin1, null);
             assertNull(dpm.getLongSupportMessage(admin1));
         }
+    }
+
+    /**
+     * Test for:
+     * {@link DevicePolicyManager#setAffiliationIds}
+     * {@link DevicePolicyManager#isAffiliatedUser}
+     */
+    public void testUserAffiliation() throws Exception {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS_FULL);
+
+        // Check that the system user is unaffiliated.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        assertFalse(dpm.isAffiliatedUser());
+
+        // Set a device owner on the system user. Check that the system user becomes affiliated.
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        assertTrue(dpm.setDeviceOwner(admin1, "owner-name"));
+        assertTrue(dpm.isAffiliatedUser());
+
+        // Install a profile owner whose package name matches the device owner on a test user. Check
+        // that the test user is unaffiliated.
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setAsProfileOwner(admin2);
+        assertFalse(dpm.isAffiliatedUser());
+
+        // Have the profile owner specify a set of affiliation ids. Check that the test user remains
+        // unaffiliated.
+        final Set<String> userAffiliationIds = new ArraySet<>();
+        userAffiliationIds.add("red");
+        userAffiliationIds.add("green");
+        userAffiliationIds.add("blue");
+        dpm.setAffiliationIds(admin2, userAffiliationIds);
+        assertFalse(dpm.isAffiliatedUser());
+
+        // Have the device owner specify a set of affiliation ids that do not intersect with those
+        // specified by the profile owner. Check that the test user remains unaffiliated.
+        final Set<String> deviceAffiliationIds = new ArraySet<>();
+        deviceAffiliationIds.add("cyan");
+        deviceAffiliationIds.add("yellow");
+        deviceAffiliationIds.add("magenta");
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        dpm.setAffiliationIds(admin1, deviceAffiliationIds);
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        assertFalse(dpm.isAffiliatedUser());
+
+        // Have the profile owner specify a set of affiliation ids that intersect with those
+        // specified by the device owner. Check that the test user becomes affiliated.
+        userAffiliationIds.add("yellow");
+        dpm.setAffiliationIds(admin2, userAffiliationIds);
+        assertTrue(dpm.isAffiliatedUser());
+
+        // Change the profile owner to one whose package name does not match the device owner. Check
+        // that the test user is not affiliated anymore.
+        dpm.clearProfileOwner(admin2);
+        final ComponentName admin = new ComponentName("test", "test");
+        markPackageAsInstalled(admin.getPackageName(), null, DpmMockContext.CALLER_USER_HANDLE);
+        assertTrue(dpm.setProfileOwner(admin, "owner-name", DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(dpm.isAffiliatedUser());
+
+        // Check that the system user remains affiliated.
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        assertTrue(dpm.isAffiliatedUser());
     }
 }

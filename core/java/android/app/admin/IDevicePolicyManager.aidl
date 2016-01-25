@@ -267,4 +267,7 @@ interface IDevicePolicyManager {
     void setOrganizationColor(in ComponentName admin, in int color);
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
+
+    void setAffiliationIds(in ComponentName admin, in List<String> ids);
+    boolean isAffiliatedUser();
 }

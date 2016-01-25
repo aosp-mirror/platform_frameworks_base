@@ -67,6 +67,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
@@ -5191,6 +5192,48 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return 0;
+        }
+    }
+
+    /**
+     * @hide
+     * Indicates the entity that controls the device or profile owner. A user/profile is considered
+     * affiliated if it is managed by the same entity as the device.
+     *
+     * <p> By definition, the user that the device owner runs on is always affiliated. Any other
+     * user/profile is considered affiliated if the following conditions are both met:
+     * <ul>
+     * <li>The device owner and the user's/profile's profile owner have called this method,
+     *   specifying a set of opaque affiliation ids each. If the sets specified by the device owner
+     *   and a profile owner intersect, they must have come from the same source, which means that
+     *   the device owner and profile owner are controlled by the same entity.</li>
+     * <li>The device owner's and profile owner's package names are the same.</li>
+     * </ul>
+     *
+     * @param admin Which profile or device owner this request is associated with.
+     * @param ids A set of opaque affiliation ids.
+     */
+    public void setAffiliationIds(@NonNull ComponentName admin, Set<String> ids) {
+        try {
+            mService.setAffiliationIds(admin, new ArrayList<String>(ids));
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether this user/profile is affiliated with the device. See
+     * {@link #setAffiliationIds} for the definition of affiliation.
+     *
+     * @return whether this user/profile is affiliated with the device.
+     */
+    public boolean isAffiliatedUser() {
+        try {
+            return mService != null && mService.isAffiliatedUser();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed talking with device policy service", e);
+            return false;
         }
     }
 }
