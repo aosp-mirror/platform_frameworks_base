@@ -40,6 +40,8 @@ public final class CellIdentityLte implements Parcelable {
     private final int mPci;
     // 16-bit tracking area code
     private final int mTac;
+    // 18-bit Absolute RF Channel Number
+    private final int mEarfcn;
 
     /**
      * @hide
@@ -50,6 +52,7 @@ public final class CellIdentityLte implements Parcelable {
         mCi = Integer.MAX_VALUE;
         mPci = Integer.MAX_VALUE;
         mTac = Integer.MAX_VALUE;
+        mEarfcn = Integer.MAX_VALUE;
     }
 
     /**
@@ -63,11 +66,27 @@ public final class CellIdentityLte implements Parcelable {
      * @hide
      */
     public CellIdentityLte (int mcc, int mnc, int ci, int pci, int tac) {
+        this(mcc, mnc, ci, pci, tac, Integer.MAX_VALUE);
+    }
+
+    /**
+     *
+     * @param mcc 3-digit Mobile Country Code, 0..999
+     * @param mnc 2 or 3-digit Mobile Network Code, 0..999
+     * @param ci 28-bit Cell Identity
+     * @param pci Physical Cell Id 0..503
+     * @param tac 16-bit Tracking Area Code
+     * @param earfcn 18-bit LTE Absolute RF Channel Number
+     *
+     * @hide
+     */
+    public CellIdentityLte (int mcc, int mnc, int ci, int pci, int tac, int earfcn) {
         mMcc = mcc;
         mMnc = mnc;
         mCi = ci;
         mPci = pci;
         mTac = tac;
+        mEarfcn = earfcn;
     }
 
     private CellIdentityLte(CellIdentityLte cid) {
@@ -76,6 +95,7 @@ public final class CellIdentityLte implements Parcelable {
         mCi = cid.mCi;
         mPci = cid.mPci;
         mTac = cid.mTac;
+        mEarfcn = cid.mEarfcn;
     }
 
     CellIdentityLte copy() {
@@ -117,6 +137,13 @@ public final class CellIdentityLte implements Parcelable {
         return mTac;
     }
 
+    /**
+     * @return 18-bit Absolute RF Channel Number, Integer.MAX_VALUE if unknown
+     */
+    public int getEarfcn() {
+        return mEarfcn;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(mMcc, mMnc, mCi, mPci, mTac);
@@ -137,7 +164,8 @@ public final class CellIdentityLte implements Parcelable {
                 mMnc == o.mMnc &&
                 mCi == o.mCi &&
                 mPci == o.mPci &&
-                mTac == o.mTac;
+                mTac == o.mTac &&
+                mEarfcn == o.mEarfcn;
     }
 
     @Override
@@ -148,6 +176,7 @@ public final class CellIdentityLte implements Parcelable {
         sb.append(" mCi="); sb.append(mCi);
         sb.append(" mPci="); sb.append(mPci);
         sb.append(" mTac="); sb.append(mTac);
+        sb.append(" mEarfcn="); sb.append(mEarfcn);
         sb.append("}");
 
         return sb.toString();
@@ -168,6 +197,7 @@ public final class CellIdentityLte implements Parcelable {
         dest.writeInt(mCi);
         dest.writeInt(mPci);
         dest.writeInt(mTac);
+        dest.writeInt(mEarfcn);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -177,6 +207,7 @@ public final class CellIdentityLte implements Parcelable {
         mCi = in.readInt();
         mPci = in.readInt();
         mTac = in.readInt();
+        mEarfcn = in.readInt();
         if (DBG) log("CellIdentityLte(Parcel): " + toString());
     }
 
