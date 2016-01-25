@@ -366,7 +366,7 @@ public final class LoadedApk {
                     }
                 }
 
-                String libraryPermittedPath = mAppDir + File.pathSeparator + mDataDir;
+                String libraryPermittedPath = mDataDir;
                 boolean isBundledApp = false;
 
                 if (mApplicationInfo.isSystemApp()) {
