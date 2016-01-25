@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Apparaten"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Meer apps"</string>
     <string name="empty" msgid="7858882803708117596">"Geen items"</string>
+    <string name="no_results" msgid="6622510343880730446">"Geen overeenkomsten in %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Kan bestand niet openen"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Kan bepaalde documenten niet verwijderen"</string>
     <string name="share_via" msgid="8966594246261344259">"Delen via"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Ongedaan maken"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Kopiëren voorbereiden…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Verplaatsen voorbereiden…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Verwijderen voorbereiden…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Kan <xliff:g id="COUNT_1">%1$d</xliff:g> bestanden niet kopiëren</item>
       <item quantity="one">Kan <xliff:g id="COUNT_0">%1$d</xliff:g> bestand niet kopiëren</item>
@@ -92,7 +94,11 @@
       <item quantity="other">Kan <xliff:g id="COUNT_1">%1$d</xliff:g> bestanden niet verplaatsen</item>
       <item quantity="one">Kan <xliff:g id="COUNT_0">%1$d</xliff:g> bestand niet verplaatsen</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Tik om details weer te geven"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Kan <xliff:g id="COUNT_1">%1$d</xliff:g> bestanden niet verwijderen</item>
+      <item quantity="one">Kan <xliff:g id="COUNT_0">%1$d</xliff:g> bestand niet verwijderen</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Tik om details te bekijken"</string>
     <string name="retry" msgid="7564024179122207376">"Opnieuw proberen"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Deze bestanden zijn niet gekopieerd: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Deze bestanden zijn niet verplaatst: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> bestand gekopieerd naar klembord.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Kan de geselecteerde bestanden niet plakken op deze locatie."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Naam wijzigen"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Kan naam van document niet wijzigen"</string>
 </resources>

@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"기기"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"앱 더보기"</string>
     <string name="empty" msgid="7858882803708117596">"항목 없음"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s에 일치하는 항목이 없습니다."</string>
     <string name="toast_no_application" msgid="1339885974067891667">"파일을 열 수 없음"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"일부 문서를 삭제할 수 없음"</string>
     <string name="share_via" msgid="8966594246261344259">"공유 방법"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"실행취소"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"사본 준비 중…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"이동 준비 중…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"삭제 준비 중..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사할 수 없습니다.</item>
       <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 복사할 수 없습니다.</item>
@@ -92,7 +94,11 @@
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g>개 파일을 이동할 수 없습니다.</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g>개 파일을 이동할 수 없습니다.</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"세부정보를 보려면 터치하세요."</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제할 수 없습니다.</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제할 수 없습니다.</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"세부정보를 보려면 탭하세요."</string>
     <string name="retry" msgid="7564024179122207376">"다시 시도"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"다음 파일이 복사되지 않았습니다. <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"다음 파일이 이동되지 않았습니다. <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 클립보드에 복사함</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"선택한 파일을 이 위치에 붙여넣을 수 없습니다."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"이름 바꾸기"</string>
+    <string name="rename_error" msgid="4203041674883412606">"문서 이름을 변경하지 못했습니다."</string>
 </resources>

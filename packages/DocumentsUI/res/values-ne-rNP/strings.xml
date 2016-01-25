@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"उपकरणहरू"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"थप अनुप्रयोगहरू"</string>
     <string name="empty" msgid="7858882803708117596">"कुनै वस्तु छैन।"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$s मा कुनै पनि मेल खानेहरू छैन"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"फाइल खोल्न सक्दैन"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"केही कागजातहरू मेट्न असमर्थ छ"</string>
     <string name="share_via" msgid="8966594246261344259">"माध्यमबाट साझेदारी गर्नुहोस्"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"अनडू गर्नुहोस्"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"प्रतिलिपिको लागि तयारी गर्दै ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"सार्नको लागि तयारी गर्दै ..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"मेटाउन तयारी गर्दै..."</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि गर्न सकेन</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल प्रतिलिपि गर्न सकेन</item>
@@ -92,7 +94,11 @@
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू सार्न सकिएन</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल सार्न सकिएन</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"विवरणहरू हेर्न छुनुहोस्"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू मेट्न सकेन</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> फाइल मेट्न सकेन</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"विवरणहरू हेर्न ट्याप गर्नुहोस्"</string>
     <string name="retry" msgid="7564024179122207376">"पुनःप्रयास गर्नुहोस्"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"यी फाइलहरू प्रतिलिपि गरिएको थिएनः <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"यी फाइलहरू सारिएनन्: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one"> क्लिपबोर्डमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइलहरूका प्रतिलिपि बनाइए।</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"यो स्थानमा चयन गरिएका फाइलहरू टाँस्न सकिँदैन।"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"पुन: नामाकरण गर्नुहोस्"</string>
+    <string name="rename_error" msgid="4203041674883412606">"कागजात पुन: नामाकरण गर्न असफल भयो"</string>
 </resources>

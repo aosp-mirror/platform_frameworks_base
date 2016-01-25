@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Zariadenia"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Ďalšie aplikácie"</string>
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
+    <string name="no_results" msgid="6622510343880730446">"Žiadne zhody – %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Súbor sa nepodarilo otvoriť"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
     <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
@@ -90,6 +91,7 @@
     <string name="undo" msgid="7905788502491742328">"Späť"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Prebieha príprava na presunutie…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Príprava na odstránenie…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="few">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
       <item quantity="many">Zlyhalo kopírovanie <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
@@ -102,7 +104,13 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> súborov nie je možné presunúť</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> súbor nie je možné presunúť</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Klepnutím zobrazíte podrobné informácie"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="few">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súbory</item>
+      <item quantity="many">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
+      <item quantity="other">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="one">Nepodarilo sa odstrániť <xliff:g id="COUNT_0">%1$d</xliff:g> súbor</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Klepnutím zobrazíte podrobnosti"</string>
     <string name="retry" msgid="7564024179122207376">"Skúsiť znova"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Tieto súbory neboli presunuté: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -113,4 +121,6 @@
       <item quantity="one">Do schránky bol skopírovaný <xliff:g id="COUNT_0">%1$d</xliff:g> súbor.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Do tohto umiestnenia nie je možné prilepiť vybrané súbory"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Premenovať"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Premenovanie dokumentu zlyhalo"</string>
 </resources>

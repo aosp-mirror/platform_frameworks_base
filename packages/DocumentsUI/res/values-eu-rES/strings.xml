@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Gailuak"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Aplikazio gehiago"</string>
     <string name="empty" msgid="7858882803708117596">"Ez dago elementurik"</string>
+    <string name="no_results" msgid="6622510343880730446">"Ez da aurkitu ezer %1$s atalean"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Ezin da fitxategia ireki"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ezin izan dira dokumentu batzuk ezabatu"</string>
     <string name="share_via" msgid="8966594246261344259">"Partekatu honen bidez:"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Desegin"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Kopiatzeko prestatzen…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Mugitzeko prestatzen…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Ezabatzeko prestatzen…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Ezin izan dira kopiatu <xliff:g id="COUNT_1">%1$d</xliff:g> fitxategi</item>
       <item quantity="one">Ezin izan da kopiatu <xliff:g id="COUNT_0">%1$d</xliff:g> fitxategi</item>
@@ -92,7 +94,11 @@
       <item quantity="other">Ezin izan dira mugitu <xliff:g id="COUNT_1">%1$d</xliff:g> fitxategi</item>
       <item quantity="one">Ezin izan da mugitu <xliff:g id="COUNT_0">%1$d</xliff:g> fitxategi</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Xehetasunak ikusteko, ukitu hau."</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Ezin izan dira ezabatu <xliff:g id="COUNT_1">%1$d</xliff:g> fitxategi</item>
+      <item quantity="one">Ezin izan da ezabatu <xliff:g id="COUNT_0">%1$d</xliff:g> fitxategi</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Sakatu xehetasunak ikusteko"</string>
     <string name="retry" msgid="7564024179122207376">"Saiatu berriro"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ez dira kopiatu fitxategi hauek: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Ez dira mugitu fitxategi hauek: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fitxategi kopiatu da arbelean.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Ezin dira itsatsi hautatutako fitxategiak kokapen honetan."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Aldatu izena"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Ezin izan zaio aldatu izena dokumentuari"</string>
 </resources>

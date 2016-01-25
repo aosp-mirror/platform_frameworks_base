@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"მოწყობილობები"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"მეტი აპები"</string>
     <string name="empty" msgid="7858882803708117596">"ერთეულები არ არის"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"ფაილის გახსნა ვერ ხერხდება"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ზოგიერთი დოკუმენტის წაშლა ვერ ხერხდება"</string>
     <string name="share_via" msgid="8966594246261344259">"გაზიარება:"</string>
@@ -84,6 +86,7 @@
     <string name="undo" msgid="7905788502491742328">"დაბრუნება"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"მომზადება კოპირებისთვის…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"გადაადგილება მზადდება..."</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"მზადდება წასაშლელად…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">ვერ მოხდა <xliff:g id="COUNT_1">%1$d</xliff:g> ფაილის კოპირება</item>
       <item quantity="one">ვერ მოხდა <xliff:g id="COUNT_0">%1$d</xliff:g> ფაილის კოპირება.</item>
@@ -92,7 +95,12 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ფაილი ვერ გადაადგილდა</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ფაილი ვერ გადაადგილდა</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"შეეხეთ მონაცემების სანახავად."</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ფაილი ვერ წაიშალა</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ფაილი ვერ წაიშალა</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"ხელახლა ცდა"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ეს ფაილები არ იყო გადაწერილი: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ეს ფაილები ვერ გადაადგილდა: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +109,8 @@
       <item quantity="one">მოხდა <xliff:g id="COUNT_0">%1$d</xliff:g> ფაილის გაცვლის ბუფერში კოპირება.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ამ მდებარეობაში შერჩეული ფაილების ჩასმა შეუძლებელია."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

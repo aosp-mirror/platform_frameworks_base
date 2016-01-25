@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"裝置"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"更多應用程式"</string>
     <string name="empty" msgid="7858882803708117596">"沒有任何項目"</string>
+    <string name="no_results" msgid="6622510343880730446">"沒有與「%1$s」相符的結果"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"無法開啟檔案"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"復原"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"正在準備複製…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"準備移動…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"正在準備刪除…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">無法複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法複製 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
@@ -92,7 +94,11 @@
       <item quantity="other">無法移動 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法移動 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"輕觸即可查看詳細資料"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">無法刪除 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
+      <item quantity="one">無法刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"輕按即可查看詳細資訊"</string>
     <string name="retry" msgid="7564024179122207376">"重試"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"未複製這些檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"未移動以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">已將 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案複製到剪貼簿。</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"無法將所選檔案貼到這個位置。"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"重新命名"</string>
+    <string name="rename_error" msgid="4203041674883412606">"無法重新命名文件"</string>
 </resources>

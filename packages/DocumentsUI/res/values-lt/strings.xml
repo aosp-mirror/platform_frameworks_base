@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Įrenginiai"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Daugiau programų"</string>
     <string name="empty" msgid="7858882803708117596">"Nėra elementų"</string>
+    <string name="no_results" msgid="6622510343880730446">"Nėra jokių atitikčių pagal %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Nepavyksta atidaryti failo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nepavyko ištrinti kai kurių dokumentų"</string>
     <string name="share_via" msgid="8966594246261344259">"Bendrinti naudojant"</string>
@@ -90,6 +91,7 @@
     <string name="undo" msgid="7905788502491742328">"Anuliuoti"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Ruošiamasi kopijuoti…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Ruošiamasi perkelti…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Ruošiama ištrinti…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">Nepavyko nukopijuoti <xliff:g id="COUNT_1">%1$d</xliff:g> failo</item>
       <item quantity="few">Nepavyko nukopijuoti <xliff:g id="COUNT_1">%1$d</xliff:g> failų</item>
@@ -102,7 +104,13 @@
       <item quantity="many">Nepavyko perkelti <xliff:g id="COUNT_1">%1$d</xliff:g> failo</item>
       <item quantity="other">Nepavyko perkelti <xliff:g id="COUNT_1">%1$d</xliff:g> failų</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Palieskite, kad peržiūr. išsamią informaciją"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">Nepavyko ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failo</item>
+      <item quantity="few">Nepavyko ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failų</item>
+      <item quantity="many">Nepavyko ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failo</item>
+      <item quantity="other">Nepavyko ištrinti <xliff:g id="COUNT_1">%1$d</xliff:g> failų</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Palieskite, kad peržiūrėtumėte informaciją"</string>
     <string name="retry" msgid="7564024179122207376">"Bandyti dar kartą"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Šie failai nenukopijuoti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Šie failai nebuvo perkelti: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -113,4 +121,6 @@
       <item quantity="other">Nukopijuota <xliff:g id="COUNT_1">%1$d</xliff:g> failų į iškarpinę.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Nepavyko įklijuoti pasirinktų failų šioje vietoje."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Pervardyti"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Nepavyko pervardyti dokumento"</string>
 </resources>

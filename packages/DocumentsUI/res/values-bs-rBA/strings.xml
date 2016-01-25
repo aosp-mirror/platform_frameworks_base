@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_label (2783841764617238354) -->
+    <skip />
+    <!-- no translation found for files_label (6051402950202690279) -->
+    <skip />
+    <!-- no translation found for downloads_label (959113951084633612) -->
+    <skip />
+    <!-- no translation found for title_open (4353228937663917801) -->
+    <skip />
+    <!-- no translation found for title_save (2433679664882857999) -->
+    <skip />
+    <!-- no translation found for menu_create_dir (2547620241173881754) -->
+    <skip />
+    <!-- no translation found for menu_grid (6878021334497835259) -->
+    <skip />
+    <!-- no translation found for menu_list (7279285939892417279) -->
+    <skip />
+    <!-- no translation found for menu_sort (7677740407158414452) -->
+    <skip />
+    <!-- no translation found for menu_search (3816712084502856974) -->
+    <skip />
+    <!-- no translation found for menu_settings (6008033148948428823) -->
+    <skip />
+    <!-- no translation found for menu_open (432922957274920903) -->
+    <skip />
+    <!-- no translation found for menu_save (2394743337684426338) -->
+    <skip />
+    <!-- no translation found for menu_share (3075149983979628146) -->
+    <skip />
+    <!-- no translation found for menu_delete (8138799623850614177) -->
+    <skip />
+    <!-- no translation found for menu_select_all (8323579667348729928) -->
+    <skip />
+    <!-- no translation found for menu_copy (3612326052677229148) -->
+    <skip />
+    <!-- no translation found for menu_move (1828090633118079817) -->
+    <skip />
+    <!-- no translation found for menu_new_window (1226032889278727538) -->
+    <skip />
+    <!-- no translation found for menu_copy_to_clipboard (489311381979634291) -->
+    <skip />
+    <!-- no translation found for menu_paste_from_clipboard (2071583031180257091) -->
+    <skip />
+    <!-- no translation found for menu_advanced_show (4693652895715631401) -->
+    <skip />
+    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
+    <skip />
+    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
+    <skip />
+    <!-- no translation found for menu_file_size_show (3240323619260823076) -->
+    <skip />
+    <!-- no translation found for menu_file_size_hide (8881975928502581042) -->
+    <skip />
+    <!-- no translation found for button_select (527196987259139214) -->
+    <skip />
+    <!-- no translation found for button_copy (8706475544635021302) -->
+    <skip />
+    <!-- no translation found for button_move (2202666023104202232) -->
+    <skip />
+    <!-- no translation found for button_dismiss (3714065566893946085) -->
+    <skip />
+    <!-- no translation found for button_retry (4392027584153752797) -->
+    <skip />
+    <!-- no translation found for sort_name (9183560467917256779) -->
+    <skip />
+    <!-- no translation found for sort_date (586080032956151448) -->
+    <skip />
+    <!-- no translation found for sort_size (3350681319735474741) -->
+    <skip />
+    <!-- no translation found for drawer_open (4545466532430226949) -->
+    <skip />
+    <!-- no translation found for drawer_close (7602734368552123318) -->
+    <skip />
+    <!-- no translation found for save_error (6167009778003223664) -->
+    <skip />
+    <!-- no translation found for create_error (3735649141335444215) -->
+    <skip />
+    <!-- no translation found for query_error (1222448261663503501) -->
+    <skip />
+    <!-- no translation found for root_recent (4470053704320518133) -->
+    <skip />
+    <!-- no translation found for root_available_bytes (8568452858617033281) -->
+    <skip />
+    <!-- no translation found for root_type_service (2178854894416775409) -->
+    <skip />
+    <!-- no translation found for root_type_shortcut (3318760609471618093) -->
+    <skip />
+    <!-- no translation found for root_type_device (7121342474653483538) -->
+    <skip />
+    <!-- no translation found for root_type_apps (8838065367985945189) -->
+    <skip />
+    <!-- no translation found for empty (7858882803708117596) -->
+    <skip />
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
+    <!-- no translation found for toast_no_application (1339885974067891667) -->
+    <skip />
+    <!-- no translation found for toast_failed_delete (2180678019407244069) -->
+    <skip />
+    <!-- no translation found for share_via (8966594246261344259) -->
+    <skip />
+    <!-- no translation found for copy_notification_title (6374299806748219777) -->
+    <skip />
+    <!-- no translation found for move_notification_title (6193835179777284805) -->
+    <skip />
+    <!-- no translation found for copy_remaining (6283790937387975095) -->
+    <skip />
+    <!-- no translation found for copy_begin (9071199452634086365) -->
+    <!-- no translation found for move_begin (8430330882138871643) -->
+    <!-- no translation found for deleting (5054338566802559411) -->
+    <!-- no translation found for undo (7905788502491742328) -->
+    <skip />
+    <!-- no translation found for copy_preparing (3896202461003039386) -->
+    <skip />
+    <!-- no translation found for move_preparing (2772219441375531410) -->
+    <skip />
+    <string name="delete_preparing" msgid="5655813182533491992">"Pripremanje za brisanje…"</string>
+    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
+    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku</item>
+      <item quantity="few">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>
+      <item quantity="other">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
+    <!-- no translation found for retry (7564024179122207376) -->
+    <skip />
+    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
+    <skip />
+    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <skip />
+    <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
+    <!-- no translation found for clipboard_files_cannot_paste (2878324825602325706) -->
+    <skip />
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
+</resources>

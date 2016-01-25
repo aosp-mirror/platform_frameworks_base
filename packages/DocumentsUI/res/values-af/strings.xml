@@ -63,6 +63,8 @@
     <string name="root_type_device" msgid="7121342474653483538">"Toestelle"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Nog programme"</string>
     <string name="empty" msgid="7858882803708117596">"Geen items nie"</string>
+    <!-- no translation found for no_results (6622510343880730446) -->
+    <skip />
     <string name="toast_no_application" msgid="1339885974067891667">"Kan lêer nie oopmaak nie"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Kan sommige dokumente nie uitvee nie"</string>
     <string name="share_via" msgid="8966594246261344259">"Deel via"</string>
@@ -84,6 +86,7 @@
     <string name="undo" msgid="7905788502491742328">"Ontdoen"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Maak tans gereed vir kopieer …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Berei tans voor vir skuif …"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Maak tans gereed om uit te vee …"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie kopieer nie</item>
       <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie kopieer nie</item>
@@ -92,7 +95,12 @@
       <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie skuif nie</item>
       <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie skuif nie</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Raak om besonderhede te bekyk"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie uitvee nie</item>
+      <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie uitvee nie</item>
+    </plurals>
+    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <skip />
     <string name="retry" msgid="7564024179122207376">"Herprobeer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hierdie lêers is nie gekopieer nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Hierdie lêers is nie geskuif nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +109,8 @@
       <item quantity="one">Het <xliff:g id="COUNT_0">%1$d</xliff:g> lêer na die knipbord gekopieer.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Kan nie die geselekteerde lêers in hierdie ligging plak nie."</string>
+    <!-- no translation found for menu_rename (7678802479104285353) -->
+    <skip />
+    <!-- no translation found for rename_error (4203041674883412606) -->
+    <skip />
 </resources>

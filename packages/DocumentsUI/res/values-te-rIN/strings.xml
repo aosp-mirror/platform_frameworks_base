@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"పరికరాలు"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"మరిన్ని అనువర్తనాలు"</string>
     <string name="empty" msgid="7858882803708117596">"అంశాలు లేవు"</string>
+    <string name="no_results" msgid="6622510343880730446">"%1$sలో సరిపోలినవి లేవు"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ఫైల్‌ను తెరవడం సాధ్యపడదు"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"కొన్ని పత్రాలను తొలగించడం సాధ్యపడలేదు"</string>
     <string name="share_via" msgid="8966594246261344259">"దీని ద్వారా భాగస్వామ్యం చేయండి"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"చర్య రద్దు చేయి"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"కాపీ చేయడానికి సిద్ధం చేస్తోంది…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"తరలించడానికి సిద్ధమవుతోంది…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"తొలగించడానికి సిద్ధం చేస్తోంది…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది</item>
@@ -92,7 +94,11 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తరలించలేకపోయింది</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తరలించలేకపోయింది</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"వివరాలను వీక్షించడానికి తాకండి"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తొలగించడం సాధ్యపడలేదు</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తొలగించడం సాధ్యపడలేదు</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"వివరాలను వీక్షించడానికి నొక్కండి"</string>
     <string name="retry" msgid="7564024179122207376">"మళ్లీ ప్రయత్నించు"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ఈ ఫైల్‌లు తరలించబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">క్లిప్‌బోర్డ్‌కి <xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేసారు.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ఎంచుకున్న ఫైల్‌లను ఈ స్థానంలోకి తీసుకురావడం సాధ్యపడదు."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"పేరు మార్చు"</string>
+    <string name="rename_error" msgid="4203041674883412606">"పత్రం పేరు మార్చడంలో విఫలమైంది"</string>
 </resources>

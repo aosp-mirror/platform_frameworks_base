@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Enheder"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Flere apps"</string>
     <string name="empty" msgid="7858882803708117596">"Ingen elementer"</string>
+    <string name="no_results" msgid="6622510343880730446">"Ingen kampe i %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Filen kan ikke åbnes"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nogle dokumenter kan ikke slettes"</string>
     <string name="share_via" msgid="8966594246261344259">"Del via"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Fortryd"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Forbereder kopiering…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Forbereder flytning…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Forbereder til sletning…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev ikke kopieret</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev ikke kopieret</item>
@@ -92,7 +94,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev ikke flyttet</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev ikke flyttet</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Tryk for at se yderligere oplysninger."</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> fil kunne ikke slettes</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer kunne ikke slettes</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Tryk for at se oplysninger"</string>
     <string name="retry" msgid="7564024179122207376">"Prøv igen"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Disse filer blev ikke kopieret: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Følgende filer blev ikke flyttet: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer blev kopieret til udklipsholder.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"De valgte filer kan ikke indsættes på denne placering."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Omdøb"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Dokumentet kunne ikke omdøbes"</string>
 </resources>

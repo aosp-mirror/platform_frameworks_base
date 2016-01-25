@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"دستگاه‌ها"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"برنامه‌های بیشتر"</string>
     <string name="empty" msgid="7858882803708117596">"موردی موجود نیست"</string>
+    <string name="no_results" msgid="6622510343880730446">"‏مورد منطبقی در %1$s وجود ندارد"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"فایل باز نمی‌شود"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"برخی از اسناد حذف نمی‌شوند"</string>
     <string name="share_via" msgid="8966594246261344259">"اشتراک‌گذاری از طریق"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"لغو"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"در حال آماده‌سازی برای کپی..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"درحال آماده‌سازی برای انتقال…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"درحال آماده‌سازی برای حذف…‏"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> فایل کپی نشد</item>
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> فایل کپی نشد</item>
@@ -92,7 +94,11 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل منتقل نشد</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل منتقل نشد</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"برای مشاهده جزئیات لمس کنید"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل حذف نشد</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل حذف نشد</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"برای مشاهده جزئیات ضربه بزنید"</string>
     <string name="retry" msgid="7564024179122207376">"امتحان مجدد"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"این فایل‌ها کپی نشدند: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"این فایل‌ها منتقل نشدند: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فایل در بریده‌دان کپی شد.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"نمی‌توان فایل‌های انتخابی را در این مکان جای‌گذاری کرد."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"تغییر نام"</string>
+    <string name="rename_error" msgid="4203041674883412606">"نام سند تغییر نکرد"</string>
 </resources>

@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivos"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Más aplicaciones"</string>
     <string name="empty" msgid="7858882803708117596">"No hay elementos"</string>
+    <string name="no_results" msgid="6622510343880730446">"Sin coincidencias en %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Error al abrir el archivo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es posible eliminar algunos documentos"</string>
     <string name="share_via" msgid="8966594246261344259">"Compartir a través de"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Deshacer"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Preparando para copiar..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Preparando para mover…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Preparando para eliminar…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">No se han podido copiar <xliff:g id="COUNT_1">%1$d</xliff:g> archivos</item>
       <item quantity="one">No se ha podido copiar <xliff:g id="COUNT_0">%1$d</xliff:g> archivo</item>
@@ -92,7 +94,11 @@
       <item quantity="other">No se han podido mover <xliff:g id="COUNT_1">%1$d</xliff:g> archivos</item>
       <item quantity="one">No se ha podido mover <xliff:g id="COUNT_0">%1$d</xliff:g> archivo</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca para ver más información"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">No se han podido eliminar <xliff:g id="COUNT_1">%1$d</xliff:g> archivos</item>
+      <item quantity="one">No se ha podido eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> archivo</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Toca para ver detalles"</string>
     <string name="retry" msgid="7564024179122207376">"Volver a intentar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Archivos que no se han copiado: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Archivos que no se han movido: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">Se ha copiado <xliff:g id="COUNT_0">%1$d</xliff:g> archivo al portapapeles.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Los archivos seleccionados no se pueden pegar en esta ubicación."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Cambiar nombre"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Error al cambiar el nombre del documento"</string>
 </resources>

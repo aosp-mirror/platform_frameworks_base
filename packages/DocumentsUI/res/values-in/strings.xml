@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Perangkat"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Aplikasi lain"</string>
     <string name="empty" msgid="7858882803708117596">"Tidak ada item"</string>
+    <string name="no_results" msgid="6622510343880730446">"Tidak ada kecocokan dalam %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Tidak dapat membuka file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Tidak dapat menghapus beberapa dokumen"</string>
     <string name="share_via" msgid="8966594246261344259">"Bagikan melalui"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"Urungkan"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Menyiapkan salinan..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Menyiapkan pemindahan…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Bersiap menghapus…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">Tidak dapat menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
@@ -92,7 +94,11 @@
       <item quantity="other">Tidak dapat memindahkan <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat memindahkan <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"Sentuh untuk melihat detail"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">Tidak dapat menghapus <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
+      <item quantity="one">Tidak dapat menghapus <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Ketuk untuk melihat detail"</string>
     <string name="retry" msgid="7564024179122207376">"Coba lagi"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Semua file ini tidak disalin: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Semua file ini tidak dipindahkan: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> file disalin ke papan klip.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Tidak dapat menempel file yang dipilih di lokasi ini."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"Ganti nama"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Gagal mengganti nama dokumen"</string>
 </resources>

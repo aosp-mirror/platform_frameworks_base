@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"أجهزة"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"المزيد من التطبيقات"</string>
     <string name="empty" msgid="7858882803708117596">"ليس هناك أي عناصر"</string>
+    <string name="no_results" msgid="6622510343880730446">"‏لا نتائج مطابقة في %1$s."</string>
     <string name="toast_no_application" msgid="1339885974067891667">"لا يمكن فتح الملف"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"تعذر حذف بعض المستندات"</string>
     <string name="share_via" msgid="8966594246261344259">"مشاركة عبر"</string>
@@ -96,6 +97,7 @@
     <string name="undo" msgid="7905788502491742328">"تراجع"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"جارٍ التحضير للنسخ ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"جارٍ التحضير للنقل…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"جارٍ الإعداد للحذف…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="zero">لم يتعذر نسخ أية ملفات (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
       <item quantity="two">تعذر نسخ ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
@@ -112,7 +114,15 @@
       <item quantity="other">تعذر نقل <xliff:g id="COUNT_1">%1$d</xliff:g> من الملفات</item>
       <item quantity="one">تعذر نقل ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>)</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"المس لعرض التفاصيل"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="zero">تعذر حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف</item>
+      <item quantity="two">تعذر حذف ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)</item>
+      <item quantity="few">تعذر حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات</item>
+      <item quantity="many">تعذر حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا</item>
+      <item quantity="other">تعذر حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف</item>
+      <item quantity="one">تعذر حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"انقر لعرض التفاصيل."</string>
     <string name="retry" msgid="7564024179122207376">"إعادة المحاولة"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"لم يتم نقل الملفات التالية: <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -125,4 +135,6 @@
       <item quantity="one">تم نسخ ملف واحد (<xliff:g id="COUNT_0">%1$d</xliff:g>) إلى الحافظة.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"يتعذر لصق الملفات المحددة في هذا الموقع."</string>
+    <string name="menu_rename" msgid="7678802479104285353">"إعادة تسمية"</string>
+    <string name="rename_error" msgid="4203041674883412606">"أخفقت إعادة تسمية المستند."</string>
 </resources>

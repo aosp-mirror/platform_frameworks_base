@@ -63,6 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"ឧបករណ៍"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"កម្ម​វិធី​​ច្រើន​ទៀត"</string>
     <string name="empty" msgid="7858882803708117596">"គ្មានធាតុ​"</string>
+    <string name="no_results" msgid="6622510343880730446">"មិនមានការប្រកួតនៅក្នុង %1$s ទេ"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"មិន​អាច​បើក​ឯកសារ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"មិន​អាច​លុប​ឯកសារ​មួយ​ចំនួន"</string>
     <string name="share_via" msgid="8966594246261344259">"ចែករំលែក​តាម"</string>
@@ -84,6 +85,7 @@
     <string name="undo" msgid="7905788502491742328">"មិនធ្វើវិញ"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"កំពុងរៀបចំចម្លង…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"កំពុងរៀបចំផ្លាស់ទី…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"កំពុងរៀបចំលុប…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
       <item quantity="other">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
@@ -92,7 +94,11 @@
       <item quantity="other">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="4483108577842961665">"ប៉ះ ដើម្បីមើលព័ត៌មានលម្អិត"</string>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+      <item quantity="other">មិនអាចលុបឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> បានទេ</item>
+      <item quantity="one">មិនអាចលុបឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> បានទេ</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"ប៉ះដើម្បីមើលព័ត៌មានលម្អិត"</string>
     <string name="retry" msgid="7564024179122207376">"ព្យាយាមម្ដងទៀត"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ឯកសារទាំងនេះមិនបានចម្លងទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ឯកសារទាំងនេះមិនអាចផ្លាស់ទីបានទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
@@ -101,4 +107,6 @@
       <item quantity="one">បានចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"មិនអាចបិទភ្ជាប់ឯកសារដែលបានជ្រើសនៅក្នុងទីតាំងនេះបានទេ។"</string>
+    <string name="menu_rename" msgid="7678802479104285353">"ប្ដូរឈ្មោះ"</string>
+    <string name="rename_error" msgid="4203041674883412606">"បានបរាជ័យក្នុងការប្តូរឈ្មោះឯកសារ"</string>
 </resources>
