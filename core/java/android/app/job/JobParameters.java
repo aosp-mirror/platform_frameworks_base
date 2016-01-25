@@ -17,6 +17,7 @@
 package android.app.job;
 
 import android.app.job.IJobCallback;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -43,15 +44,21 @@ public class JobParameters implements Parcelable {
     private final PersistableBundle extras;
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
+    private final Uri[] mTriggeredContentUris;
+    private final String[] mTriggeredContentAuthorities;
+
     private int stopReason; // Default value of stopReason is REASON_CANCELED
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
-                         boolean overrideDeadlineExpired) {
+                boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
+            String[] triggeredContentAuthorities) {
         this.jobId = jobId;
         this.extras = extras;
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
+        this.mTriggeredContentUris = triggeredContentUris;
+        this.mTriggeredContentAuthorities = triggeredContentAuthorities;
     }
 
     /**
@@ -88,6 +95,30 @@ public class JobParameters implements Parcelable {
         return overrideDeadlineExpired;
     }
 
+    /**
+     * For jobs with {@link android.app.job.JobInfo.Builder#addTriggerContentUri} set, this
+     * reports which URIs have triggered the job.  This will be null if either no URIs have
+     * triggered it (it went off due to a deadline or other reason), or the number of changed
+     * URIs is too large to report.  Whether or not the number of URIs is too large, you can
+     * always use {@link #getTriggeredContentAuthorities()} to determine whether the job was
+     * triggered due to any content changes and the authorities they are associated with.
+     */
+    public Uri[] getTriggeredContentUris() {
+        return mTriggeredContentUris;
+    }
+
+    /**
+     * For jobs with {@link android.app.job.JobInfo.Builder#addTriggerContentUri} set, this
+     * reports which content authorities have triggered the job.  It will only be null if no
+     * authorities have triggered it -- that is, the job executed for some other reason, such
+     * as a deadline expiring.  If this is non-null, you can use {@link #getTriggeredContentUris()}
+     * to retrieve the details of which URIs changed (as long as that has not exceeded the maximum
+     * number it can reported).
+     */
+    public String[] getTriggeredContentAuthorities() {
+        return mTriggeredContentAuthorities;
+    }
+
     /** @hide */
     public IJobCallback getCallback() {
         return IJobCallback.Stub.asInterface(callback);
@@ -98,6 +129,8 @@ public class JobParameters implements Parcelable {
         extras = in.readPersistableBundle();
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
+        mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
+        mTriggeredContentAuthorities = in.createStringArray();
         stopReason = in.readInt();
     }
 
@@ -117,6 +150,8 @@ public class JobParameters implements Parcelable {
         dest.writePersistableBundle(extras);
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
+        dest.writeTypedArray(mTriggeredContentUris, flags);
+        dest.writeStringArray(mTriggeredContentAuthorities);
         dest.writeInt(stopReason);
     }
 

@@ -66,7 +66,7 @@ public class IdleController extends StateController {
      * StateController interface
      */
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus) {
+    public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasIdleConstraint()) {
             synchronized (mTrackedTasks) {
                 mTrackedTasks.add(taskStatus);
@@ -76,7 +76,7 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus) {
+    public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.remove(taskStatus);
         }

@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -170,7 +171,18 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
                             (job.getLatestRunTimeElapsed() < SystemClock.elapsedRealtime());
-            mParams = new JobParameters(this, job.getJobId(), job.getExtras(), isDeadlineExpired);
+            Uri[] triggeredUris = null;
+            if (job.changedUris != null) {
+                triggeredUris = new Uri[job.changedUris.size()];
+                job.changedUris.toArray(triggeredUris);
+            }
+            String[] triggeredAuthorities = null;
+            if (job.changedAuthorities != null) {
+                triggeredAuthorities = new String[job.changedAuthorities.size()];
+                job.changedAuthorities.toArray(triggeredAuthorities);
+            }
+            mParams = new JobParameters(this, job.getJobId(), job.getExtras(), isDeadlineExpired,
+                    triggeredUris, triggeredAuthorities);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
             mVerb = VERB_BINDING;

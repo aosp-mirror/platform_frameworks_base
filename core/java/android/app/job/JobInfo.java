@@ -16,10 +16,15 @@
 
 package android.app.job;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+
+import java.util.ArrayList;
 
 /**
  * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
@@ -80,6 +85,7 @@ public class JobInfo implements Parcelable {
     private final ComponentName service;
     private final boolean requireCharging;
     private final boolean requireDeviceIdle;
+    private final TriggerContentUri[] triggerContentUris;
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
     private final int networkType;
@@ -131,6 +137,15 @@ public class JobInfo implements Parcelable {
      */
     public boolean isRequireDeviceIdle() {
         return requireDeviceIdle;
+    }
+
+    /**
+     * Which content: URIs must change for the job to be scheduled.  Returns null
+     * if there are none required.
+     */
+    @Nullable
+    public TriggerContentUri[] getTriggerContentUris() {
+        return triggerContentUris;
     }
 
     /**
@@ -232,6 +247,7 @@ public class JobInfo implements Parcelable {
         service = in.readParcelable(null);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
+        triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
         networkType = in.readInt();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
@@ -252,6 +268,9 @@ public class JobInfo implements Parcelable {
         service = b.mJobService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
+        triggerContentUris = b.mTriggerContentUris != null
+                ? b.mTriggerContentUris.toArray(new TriggerContentUri[b.mTriggerContentUris.size()])
+                : null;
         networkType = b.mNetworkType;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
@@ -278,6 +297,7 @@ public class JobInfo implements Parcelable {
         out.writeParcelable(service, flags);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
+        out.writeTypedArray(triggerContentUris, flags);
         out.writeInt(networkType);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
@@ -309,6 +329,75 @@ public class JobInfo implements Parcelable {
         return "(job:" + jobId + "/" + service.flattenToShortString() + ")";
     }
 
+    /**
+     * Information about a content URI modification that a job would like to
+     * trigger on.
+     */
+    public static final class TriggerContentUri implements Parcelable {
+        private final Uri mUri;
+        private final int mFlags;
+
+        /**
+         * Flag for trigger: also trigger if any descendants of the given URI change.
+         * Corresponds to the <var>notifyForDescendants</var> of
+         * {@link android.content.ContentResolver#registerContentObserver}.
+         */
+        public static final int FLAG_NOTIFY_FOR_DESCENDANTS = 1<<0;
+
+        /**
+         * Create a new trigger description.
+         * @param uri The URI to observe.  Must be non-null.
+         * @param flags Optional flags for the observer, either 0 or
+         * {@link #FLAG_NOTIFY_FOR_DESCENDANTS}.
+         */
+        public TriggerContentUri(@NonNull Uri uri, int flags) {
+            mUri = uri;
+            mFlags = flags;
+        }
+
+        /**
+         * Return the Uri this trigger was created for.
+         */
+        public Uri getUri() {
+            return mUri;
+        }
+
+        /**
+         * Return the flags supplied for the trigger.
+         */
+        public int getFlags() {
+            return mFlags;
+        }
+
+        private TriggerContentUri(Parcel in) {
+            mUri = Uri.CREATOR.createFromParcel(in);
+            mFlags = in.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            mUri.writeToParcel(out, flags);
+            out.writeInt(mFlags);
+        }
+
+        public static final Creator<TriggerContentUri> CREATOR = new Creator<TriggerContentUri>() {
+            @Override
+            public TriggerContentUri createFromParcel(Parcel in) {
+                return new TriggerContentUri(in);
+            }
+
+            @Override
+            public TriggerContentUri[] newArray(int size) {
+                return new TriggerContentUri[size];
+            }
+        };
+    }
+
     /** Builder class for constructing {@link JobInfo} objects. */
     public static final class Builder {
         private int mJobId;
@@ -319,6 +408,7 @@ public class JobInfo implements Parcelable {
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
         private int mNetworkType;
+        private ArrayList<TriggerContentUri> mTriggerContentUris;
         private boolean mIsPersisted;
         // One-off parameters.
         private long mMinLatencyMillis;
@@ -399,6 +489,25 @@ public class JobInfo implements Parcelable {
          */
         public Builder setRequiresDeviceIdle(boolean requiresDeviceIdle) {
             mRequiresDeviceIdle = requiresDeviceIdle;
+            return this;
+        }
+
+        /**
+         * Add a new content: URI that will be monitored with a
+         * {@link android.database.ContentObserver}, and will cause the job to execute if changed.
+         * If you have any trigger content URIs associated with a job, it will not execute until
+         * there has been a change report for one or more of them.
+         * <p>Note that trigger URIs can not be used in combination with
+         * {@link #setPeriodic(long)} or {@link #setPersisted(boolean)}.  To continually monitor
+         * for content changes, you need to schedule a new JobInfo observing the same URIs
+         * before you finish execution of the JobService handling the most recent changes.</p>
+         * @param uri The content: URI to monitor.
+         */
+        public Builder addTriggerContentUri(@NonNull TriggerContentUri uri) {
+            if (mTriggerContentUris == null) {
+                mTriggerContentUris = new ArrayList<>();
+            }
+            mTriggerContentUris.add(uri);
             return this;
         }
 
@@ -498,7 +607,8 @@ public class JobInfo implements Parcelable {
         public JobInfo build() {
             // Allow jobs with no constraints - What am I, a database?
             if (!mHasEarlyConstraint && !mHasLateConstraint && !mRequiresCharging &&
-                    !mRequiresDeviceIdle && mNetworkType == NETWORK_TYPE_NONE) {
+                    !mRequiresDeviceIdle && mNetworkType == NETWORK_TYPE_NONE &&
+                    mTriggerContentUris == null) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
             }
@@ -511,6 +621,14 @@ public class JobInfo implements Parcelable {
             if (mIsPeriodic && (mMinLatencyMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setMinimumLatency() on a " +
                         "periodic job");
+            }
+            if (mIsPeriodic && (mTriggerContentUris != null)) {
+                throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
+                        "periodic job");
+            }
+            if (mIsPersisted && (mTriggerContentUris != null)) {
+                throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
+                        "persisted job");
             }
             if (mBackoffPolicySet && mRequiresDeviceIdle) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +

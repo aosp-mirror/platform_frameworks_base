@@ -62,7 +62,7 @@ public class AppIdleController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus jobStatus) {
+    public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.add(jobStatus);
             String packageName = jobStatus.getSourcePackageName();
@@ -77,7 +77,7 @@ public class AppIdleController extends StateController {
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus jobStatus) {
+    public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
         synchronized (mTrackedTasks) {
             mTrackedTasks.remove(jobStatus);
         }

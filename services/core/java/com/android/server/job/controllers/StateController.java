@@ -49,11 +49,21 @@ public abstract class StateController {
      * Also called when updating a task, so implementing controllers have to be aware of
      * preexisting tasks.
      */
-    public abstract void maybeStartTrackingJob(JobStatus jobStatus);
+    public abstract void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob);
+    /**
+     * Optionally implement logic here to prepare the job to be executed.
+     */
+    public void prepareForExecution(JobStatus jobStatus) {
+    }
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
-    public abstract void maybeStopTrackingJob(JobStatus jobStatus);
+    public abstract void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate);
+    /**
+     * Called when a new job is being created to reschedule an old failed job.
+     */
+    public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
+    }
 
     public abstract void dumpControllerState(PrintWriter pw);
 }

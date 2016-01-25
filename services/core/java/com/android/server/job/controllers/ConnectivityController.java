@@ -82,7 +82,7 @@ public class ConnectivityController extends StateController implements
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus jobStatus) {
+    public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
             synchronized (mTrackedJobs) {
                 jobStatus.connectivityConstraintSatisfied.set(mNetworkConnected);
@@ -93,7 +93,7 @@ public class ConnectivityController extends StateController implements
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus jobStatus) {
+    public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
             synchronized (mTrackedJobs) {
                 mTrackedJobs.remove(jobStatus);
