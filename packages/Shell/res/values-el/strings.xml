@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"Κέλυφος"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Δημιουργείται αναφορά σφάλματος"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Η λήψη της αναφοράς ήταν επιτυχής"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Προσθήκη λεπτομερειών στην αναφορά σφάλματος"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Περιμένετε…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Σύρετε προς τα αριστερά για κοινή χρήση της αναφοράς σφαλμάτων"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Αγγίξτε για να μοιραστείτε τη αναφορά σφαλμάτων"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Οι αναφορές σφαλμάτων περιέχουν δεδομένα από τα διάφορα αρχεία καταγραφής του συστήματος, συμπεριλαμβανομένων προσωπικών και ιδιωτικών πληροφοριών. Να μοιράζεστε αναφορές σφαλμάτων μόνο με εφαρμογές και άτομα που εμπιστεύεστε."</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Η λήψη του στιγμιότυπου οθόνης ολοκληρώθηκε με επιτυχία."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Δεν ήταν δυνατή η λήψη του στιγμιότυπου οθόνης."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Λεπτομέρειες αναφοράς σφαλμάτων"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Όνομα αρχείου"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Τίτλος"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Αναλυτική περιγραφή"</string>
 </resources>

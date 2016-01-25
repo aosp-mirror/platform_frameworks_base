@@ -19,6 +19,10 @@
     <string name="app_label" msgid="3701846017049540910">"מעטפת"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"מופק דוח על באג"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"דוח הבאגים צולם"</string>
+    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
+    <skip />
+    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
+    <skip />
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"החלק שמאלה כדי לשתף את דוח הבאגים"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"גע כדי לשתף את דוח הבאגים שלך"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, כולל מידע אישי ופרטי. שתף דוחות באגים רק עם אפליקציות ואנשים שאתה סומך עליהם."</string>
@@ -31,9 +35,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"צילום המסך בוצע בהצלחה."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"לא ניתן היה לצלם מסך."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"פרטי דוח על באג"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"שם קובץ"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"כותרת"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"תיאור מפורט"</string>
 </resources>

@@ -19,6 +19,10 @@
     <string name="app_label" msgid="3701846017049540910">"Խեցի"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Վրիպակի զեկույցը ստեղծվում է"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Վրիպակի զեկույց է ստացվել"</string>
+    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
+    <skip />
+    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
+    <skip />
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Սահեցրեք ձախ՝ սխալի հաշվետվությունը համօգտագործելու համար"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Հպեք` ձեր վրիպակի մասին զեկույցը տարածելու համար"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մուտքի ֆայլերից, այդ թվում նաև անհատական ​​և գաղտնի տեղեկություններ: Վրիպակի զեկույցները կիսեք միայն այն հավելվածների և մարդկանց հետ, որոնց վստահում եք:"</string>
@@ -31,9 +35,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Էկրանի պատկերը հաջողությամբ ստացվեց:"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Չհաջողվեց ստանալ էկրանի պատկերը:"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Վրիպակի զեկույցի մանրամասները"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Ֆայլի անունը"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Անվանումը"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Մանրամասն նկարագրություն"</string>
 </resources>

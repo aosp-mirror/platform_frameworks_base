@@ -19,6 +19,10 @@
     <string name="app_label" msgid="3701846017049540910">"Kabuk"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Hata raporu oluşturuluyor"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Hata raporu kaydedildi"</string>
+    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
+    <skip />
+    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
+    <skip />
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Hata raporunuzu paylaşmak için hızlıca sola kaydırın"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Hata raporunuzu paylaşmak için dokunun"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Hata raporları, kişisel ve özel bilgiler dahil olmak üzere sistemin çeşitli günlük dosyalarından veriler içerir. Hata raporlarını sadece güvendiğiniz uygulamalar ve kişilerle paylaşın."</string>
@@ -31,9 +35,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Ekran görüntüsü başarıyla alındı."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Ekran görüntüsü alınamadı."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Hata raporu ayrıntıları"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Dosya adı"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Başlık"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Ayrıntılı açıklama"</string>
 </resources>

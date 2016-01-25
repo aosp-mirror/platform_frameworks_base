@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"Ganda"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Inatayarisha ripoti ya hitilafu"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Ripoti ya hitilafu imenaswa"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Inaongeza maelezo kwenye ripoti ya hitilafu"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Tafadhali subiri…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Telezesha kidole kushoto ili ushiriki ripoti yako ya hitilafu"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Gusa ili ushiriki ripoti yako ya hitilafu"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Ripoti ya hitilafu ina data kutoka kwenye faili za kumbukumbu mbalimbali za mfumo, pamoja na maelezo ya kibinafsi na faragha. Shiriki ripoti ya hitilafu na programu na watu unaowaamini pekee."</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Imepiga picha ya skrini."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Haikupiga picha ya skrini."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Maelezo kuhusu ripoti ya hitilafu"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Jina la faili"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Kichwa"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Maelezo ya kina"</string>
 </resources>

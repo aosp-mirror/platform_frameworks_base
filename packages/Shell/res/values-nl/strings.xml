@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Bugrapport wordt gegenereerd"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Foutenrapport vastgelegd"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Details toevoegen aan het bugrapport"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Even geduld…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Veeg naar links om je bugmelding te delen"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Raak aan om je foutenrapport te delen"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Foutenrapporten bevatten gegevens uit de verschillende logbestanden van het systeem, waaronder persoonlijke en privégegevens. Deel foutenrapporten alleen met apps en mensen die u vertrouwt."</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Screenshot is gemaakt."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Screenshot kan niet worden gemaakt."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Details van bugrapport"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Bestandsnaam"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Titel"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Gedetailleerde beschrijving"</string>
 </resources>
