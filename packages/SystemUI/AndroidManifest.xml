@@ -229,7 +229,7 @@
                   android:resumeWhilePausing="true"
                   android:screenOrientation="behind"
                   android:resizeableActivity="true"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|layoutDirection"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
                   android:theme="@style/RecentsTheme.Wallpaper">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
@@ -321,7 +321,7 @@
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:resizeable="true"
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
@@ -331,7 +331,7 @@
             android:exported="true"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|layoutDirection"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:resizeable="true"
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />
