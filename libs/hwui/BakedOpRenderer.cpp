@@ -331,9 +331,28 @@ void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& sta
     mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
 }
 
+#define VALIDATE_RECT_ARG(rect, arg) \
+        ((isnanf(rect.arg) || rect.arg < -10000 || rect.arg > 10000) ? (\
+            ALOGW("suspicious " #rect "." #arg "! %f", rect.arg),\
+            false) : true)
+
+#define VALIDATE_RECT(rect) \
+    VALIDATE_RECT_ARG(rect, bottom) & \
+    VALIDATE_RECT_ARG(rect, left) & \
+    VALIDATE_RECT_ARG(rect, top) & \
+    VALIDATE_RECT_ARG(rect, right)
+
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
     if (mRenderTarget.offscreenBuffer) {
-        android::Rect dirty(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
+        bool valid = VALIDATE_RECT(uiDirty);
+        android::Rect dirty;
+        if (valid) {
+            dirty = android::Rect(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
+        } else {
+            dirty = android::Rect(0, 0,
+                    mRenderTarget.offscreenBuffer->viewportWidth,
+                    mRenderTarget.offscreenBuffer->viewportHeight);
+        }
         mRenderTarget.offscreenBuffer->region.orSelf(dirty);
     }
 }
