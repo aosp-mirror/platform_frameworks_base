@@ -1204,8 +1204,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
             builder.append(componentName.flattenToShortString());
         }
-        Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                settingName, builder.toString(), userId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    settingName, builder.toString(), userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private void manageServicesLocked(UserState userState) {
@@ -1250,8 +1255,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (isEnabled && userState.mBoundServices.isEmpty()
                 && userState.mBindingServices.isEmpty()) {
             userState.mIsAccessibilityEnabled = false;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_ENABLED, 0, userState.mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -1342,9 +1352,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                          // Enable touch exploration.
                          UserState userState = getUserStateLocked(service.mUserId);
                          userState.mIsTouchExplorationEnabled = true;
-                         Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                                 Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1,
-                                 service.mUserId);
+                         final long identity = Binder.clearCallingIdentity();
+                         try {
+                             Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                                     Settings.Secure.TOUCH_EXPLORATION_ENABLED, 1,
+                                     service.mUserId);
+                         } finally {
+                             Binder.restoreCallingIdentity(identity);
+                         }
                          onUserStateChangedLocked(userState);
                      }
                  })
@@ -1613,9 +1628,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
         if (enabled != userState.mIsTouchExplorationEnabled) {
             userState.mIsTouchExplorationEnabled = enabled;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
-                    userState.mUserId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.TOUCH_EXPLORATION_ENABLED, enabled ? 1 : 0,
+                        userState.mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
@@ -1666,9 +1686,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
         if (enabled != userState.mIsEnhancedWebAccessibilityEnabled) {
             userState.mIsEnhancedWebAccessibilityEnabled = enabled;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, enabled ? 1 : 0,
-                    userState.mUserId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION, enabled ? 1 : 0,
+                        userState.mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
