@@ -551,6 +551,29 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_DEVICE_ORIENTATION = "android.sensor.device_orientation";
 
+     /**
+     * A constant describing a pose sensor with 6 degrees of freedom.
+     *
+     * Similar to {@link #TYPE_ROTATION_VECTOR}, with additional delta
+     * translation from an arbitrary reference point.
+     *
+     * Can use camera, depth sensor etc to compute output value.
+     *
+     * This is expected to be a high power sensor and expected only to be
+     * used when the screen is on.
+     *
+     * Expected to be more accurate than the rotation vector alone.
+     *
+     */
+    public static final int TYPE_POSE_6DOF = 28;
+
+    /**
+     * A constant string describing a pose sensor with 6 degrees of freedom.
+     *
+     * @see #TYPE_POSE_6DOF
+     */
+    public static final String STRING_TYPE_POSE_6DOF = "android.sensor.pose_6dof";
+
     /**
      * A constant describing all sensor types.
      */
@@ -637,6 +660,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_PICK_UP_GESTURE
             1, // SENSOR_TYPE_WRIST_TILT_GESTURE
             1, // SENSOR_TYPE_DEVICE_ORIENTATION
+            16, // SENSOR_TYPE_POSE_6DOF
     };
 
     /**

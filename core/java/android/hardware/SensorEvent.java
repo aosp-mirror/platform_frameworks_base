@@ -497,6 +497,40 @@ public class SensorEvent {
      * <li> 3: device is rotated 90 degrees clockwise from default orientation (X axis
      *         is vertical and points down)
      * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_POSE_6DOF
+     * Sensor.TYPE_POSE_6DOF}:</h4>
+     *
+     * A TYPE_POSE_6DOF event consists of a rotation expressed as a quaternion and a translation
+     * expressed in SI units. The event also contains a delta rotation and translation that show
+     * how the device?s pose has changed since the previous sequence numbered pose.
+     * The event uses the cannonical Android Sensor axes.
+     *
+     *
+     * <ul>
+     *  <li> values[0]: x*sin(&#952/2) </li>
+     *  <li> values[1]: y*sin(&#952/2) </li>
+     *  <li> values[2]: z*sin(&#952/2) </li>
+     *  <li> values[3]: cos(&#952/2)   </li>
+     *
+     *
+     * <li> values[4]: Translation along x axis from an arbitrary origin. </li>
+     * li> values[5]: Translation along y axis from an arbitrary origin. </li>
+     * <li> values[6]: Translation along z axis from an arbitrary origin. </li>
+     *
+     * <li> values[7]:  Delta quaternion rotation x*sin(&#952/2) </li>
+     * <li> values[8]:  Delta quaternion rotation y*sin(&#952/2) </li>
+     * <li> values[9]:  Delta quaternion rotation z*sin(&#952/2) </li>
+     * <li> values[10]: Delta quaternion rotation cos(&#952/2) </li>
+     *
+     * <li> values[11]: Delta translation along x axis. </li>
+     * <li> values[12]: Delta translation along y axis. </li>
+     * <li> values[13]: Delta translation along z axis. </li>
+     *
+     * <li> values[14]: Sequence number </li>
+     *
+     * </ul>
+     *
      */
     public final float[] values;
 
