@@ -527,14 +527,26 @@ class DragState {
             ClipDescription description, ClipData data,
             IDropPermissions dropPermissions,
             boolean result) {
-        float winX = x - win.mFrame.left;
-        float winY = y - win.mFrame.top;
-        if (win.mEnforceSizeCompat) {
-            winX *= win.mGlobalScale;
-            winY *= win.mGlobalScale;
-        }
+        final float winX = translateToWindowX(win, x);
+        final float winY = translateToWindowY(win, y);
         return DragEvent.obtain(action, winX, winY, localState, description, data,
                 dropPermissions, result);
+    }
+
+    private static float translateToWindowX(WindowState win, float x) {
+        float winX = x - win.mFrame.left;
+        if (win.mEnforceSizeCompat) {
+            winX *= win.mGlobalScale;
+        }
+        return winX;
+    }
+
+    private static float translateToWindowY(WindowState win, float y) {
+        float winY = y - win.mFrame.top;
+        if (win.mEnforceSizeCompat) {
+            winY *= win.mGlobalScale;
+        }
+        return winY;
     }
 
     boolean stepAnimationLocked(long currentTimeMs) {
@@ -595,6 +607,17 @@ class DragState {
 
     private void restorePointerIconLw() {
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            WindowState touchWin = getTouchedWinAtPointLw(mCurrentX, mCurrentY);
+            if (touchWin != null) {
+                try {
+                    touchWin.mClient.updatePointerIcon(
+                            translateToWindowX(touchWin, mCurrentX),
+                            translateToWindowY(touchWin, mCurrentY));
+                    return;
+                } catch (RemoteException e) {
+                    Slog.w(TAG_WM, "unable to restore pointer icon");
+                }
+            }
             InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
         }
     }

@@ -76,6 +76,11 @@ oneway interface IWindow {
     void dispatchDragEvent(in DragEvent event);
 
     /**
+     * Pointer icon events
+     */
+    void updatePointerIcon(float x, float y);
+
+    /**
      * System chrome visibility changes
      */
     void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,

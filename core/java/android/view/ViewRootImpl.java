@@ -3278,6 +3278,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_SYNTHESIZE_INPUT_EVENT = 24;
     private final static int MSG_DISPATCH_WINDOW_SHOWN = 25;
     private final static int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
+    private final static int MSG_UPDATE_POINTER_ICON = 27;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3327,6 +3328,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_SYNTHESIZE_INPUT_EVENT";
                 case MSG_DISPATCH_WINDOW_SHOWN:
                     return "MSG_DISPATCH_WINDOW_SHOWN";
+                case MSG_UPDATE_POINTER_ICON:
+                    return "MSG_UPDATE_POINTER_ICON";
             }
             return super.getMessageName(message);
         }
@@ -3567,6 +3570,10 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_REQUEST_KEYBOARD_SHORTCUTS: {
                 IResultReceiver receiver = (IResultReceiver) msg.obj;
                 handleRequestKeyboardShortcuts(receiver);
+            } break;
+            case MSG_UPDATE_POINTER_ICON: {
+                MotionEvent event = (MotionEvent) msg.obj;
+                resetPointerIcon(event);
             } break;
             }
         }
@@ -4309,31 +4316,11 @@ public final class ViewRootImpl implements ViewParent,
                     mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
                 }
 
-                final float x = event.getX();
-                final float y = event.getY();
-                if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT
-                        && x >= 0 && x < mView.getWidth() && y >= 0 && y < mView.getHeight()) {
-                    PointerIcon pointerIcon = mView.getPointerIcon(event, x, y);
-                    int pointerShape = (pointerIcon != null) ?
-                            pointerIcon.getStyle() : PointerIcon.STYLE_DEFAULT;
-
-                    final InputDevice inputDevice = event.getDevice();
-                    if (inputDevice != null) {
-                        if (mPointerIconShape != pointerShape) {
-                            mPointerIconShape = pointerShape;
-                            if (mPointerIconShape != PointerIcon.STYLE_CUSTOM) {
-                                mCustomPointerIcon = null;
-                                inputDevice.setPointerShape(pointerShape);
-                            }
-                        }
-                        if (mPointerIconShape == PointerIcon.STYLE_CUSTOM &&
-                                !pointerIcon.equals(mCustomPointerIcon)) {
-                            mCustomPointerIcon = pointerIcon;
-                            inputDevice.setCustomPointerIcon(mCustomPointerIcon);
-                        }
+                if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT) {
+                    if (!updatePointerIcon(event) &&
+                            event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
+                        mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
                     }
-                } else if (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
-                    mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
                 }
             }
 
@@ -4369,6 +4356,38 @@ public final class ViewRootImpl implements ViewParent,
             }
             return FORWARD;
         }
+    }
+
+    private void resetPointerIcon(MotionEvent event) {
+        mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+        updatePointerIcon(event);
+    }
+
+    private boolean updatePointerIcon(MotionEvent event) {
+        final float x = event.getX();
+        final float y = event.getY();
+        if (x < 0 || x >= mView.getWidth() || y < 0 || y >= mView.getHeight()) {
+            Slog.e(mTag, "updatePointerIcon called with position out of bounds");
+            return false;
+        }
+        final PointerIcon pointerIcon = mView.getPointerIcon(event, x, y);
+        final int pointerShape = (pointerIcon != null) ?
+                pointerIcon.getStyle() : PointerIcon.STYLE_DEFAULT;
+
+        if (mPointerIconShape != pointerShape) {
+            mPointerIconShape = pointerShape;
+            if (mPointerIconShape != PointerIcon.STYLE_CUSTOM) {
+                mCustomPointerIcon = null;
+                InputManager.getInstance().setPointerIconShape(pointerShape);
+                return true;
+            }
+        }
+        if (mPointerIconShape == PointerIcon.STYLE_CUSTOM &&
+                !pointerIcon.equals(mCustomPointerIcon)) {
+            mCustomPointerIcon = pointerIcon;
+            InputManager.getInstance().setCustomPointerIcon(mCustomPointerIcon);
+        }
+        return true;
     }
 
     /**
@@ -6389,6 +6408,16 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
+    public void updatePointerIcon(float x, float y) {
+        final int what = MSG_UPDATE_POINTER_ICON;
+        mHandler.removeMessages(what);
+        final long now = SystemClock.uptimeMillis();
+        final MotionEvent event = MotionEvent.obtain(
+                0, now, MotionEvent.ACTION_HOVER_MOVE, x, y, 0);
+        Message msg = mHandler.obtainMessage(what, event);
+        mHandler.sendMessage(msg);
+    }
+
     public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility,
             int localValue, int localChanges) {
         SystemUiVisibilityInfo args = new SystemUiVisibilityInfo();
@@ -6963,6 +6992,14 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchDragEvent(event);
+            }
+        }
+
+        @Override
+        public void updatePointerIcon(float x, float y) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.updatePointerIcon(x, y);
             }
         }
 

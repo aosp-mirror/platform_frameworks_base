@@ -86,6 +86,10 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
+    public void updatePointerIcon(float x, float y) {
+    }
+
+    @Override
     public void dispatchSystemUiVisibilityChanged(int seq, int globalUi,
             int localValue, int localChanges) {
         mSeq = seq;
