@@ -111,6 +111,7 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
                        "of AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_16BIT or " +
                        "AudioFormat.ENCODING_PCM_FLOAT");
         }
+        mDispatcher.dispatchOnBeginSynthesis(sampleRateInHz, audioFormat, channelCount);
 
         FileChannel fileChannel = null;
         synchronized (mStateLock) {
@@ -175,6 +176,10 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
             }
             fileChannel = mFileChannel;
         }
+
+        final byte[] bufferCopy = new byte[length];
+        System.arraycopy(buffer, offset, bufferCopy, 0, length);
+        mDispatcher.dispatchOnAudioAvailable(bufferCopy);
 
         try {
             fileChannel.write(ByteBuffer.wrap(buffer,  offset,  length));

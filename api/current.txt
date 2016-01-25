@@ -34412,6 +34412,8 @@ package android.speech.tts {
 
   public abstract class UtteranceProgressListener {
     ctor public UtteranceProgressListener();
+    method public void onAudioAvailable(java.lang.String, byte[]);
+    method public void onBeginSynthesis(java.lang.String, int, int, int);
     method public abstract void onDone(java.lang.String);
     method public abstract deprecated void onError(java.lang.String);
     method public void onError(java.lang.String, int);

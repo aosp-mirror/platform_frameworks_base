@@ -16,6 +16,7 @@
 package android.speech.tts;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -665,7 +666,7 @@ public class TextToSpeech {
     private OnInitListener mInitListener;
     // Written from an unspecified application thread, read from
     // a binder thread.
-    private volatile UtteranceProgressListener mUtteranceProgressListener;
+    @Nullable private volatile UtteranceProgressListener mUtteranceProgressListener;
     private final Object mStartLock = new Object();
 
     private String mRequestedEngine;
@@ -2131,6 +2132,23 @@ public class TextToSpeech {
                 UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
                     listener.onStart(utteranceId);
+                }
+            }
+
+            @Override
+            public void onBeginSynthesis(String utteranceId, int sampleRateInHz, int audioFormat,
+                                     int channelCount) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onBeginSynthesis(utteranceId, sampleRateInHz, audioFormat, channelCount);
+                }
+            }
+
+            @Override
+            public void onAudioAvailable(String utteranceId, byte[] audio) {
+                UtteranceProgressListener listener = mUtteranceProgressListener;
+                if (listener != null) {
+                    listener.onAudioAvailable(utteranceId, audio);
                 }
             }
         };
