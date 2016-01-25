@@ -37,7 +37,6 @@ public class MtpDocumentsService extends Service {
     static final String ACTION_OPEN_DEVICE = "com.android.mtp.OPEN_DEVICE";
     static final String ACTION_CLOSE_DEVICE = "com.android.mtp.CLOSE_DEVICE";
     static final String EXTRA_DEVICE = "device";
-    private static final int FOREGROUND_NOTIFICATION_ID = 1;
 
     NotificationManager mNotificationManager;
 
@@ -67,6 +66,7 @@ public class MtpDocumentsService extends Service {
                         break;
 
                     case ACTION_CLOSE_DEVICE:
+                        mNotificationManager.cancel(device.getDeviceId());
                         provider.closeDevice(device.getDeviceId());
                         break;
 
@@ -90,36 +90,40 @@ public class MtpDocumentsService extends Service {
     private boolean updateForegroundState() {
         final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
         final int[] deviceIds = provider.getOpenedDeviceIds();
-        String message = null;
-        if (deviceIds.length != 0) {
-            // TODO: Localize the message.
-            // TODO: Add buttons "Open in Files" and "Open in Apps" if needed.
-            if (deviceIds.length > 1) {
-                message = deviceIds.length + " devices are being connected.";
-            } else {
+        int notificationId = 0;
+        Notification notification = null;
+        for (final int deviceId : deviceIds) {
+            try {
+                final String title = getResources().getString(
+                        R.string.accessing_notification_title,
+                        provider.getDeviceName(deviceIds[0]));
+                final String description = getResources().getString(
+                        R.string.accessing_notification_description);
+                notificationId = deviceId;
+                notification = new Notification.Builder(this)
+                        .setLocalOnly(true)
+                        .setContentTitle(title)
+                        .setContentText(description)
+                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setPriority(Notification.PRIORITY_LOW)
+                        .build();
+                mNotificationManager.notify(deviceId, notification);
+            } catch (IOException exp) {
+                logErrorMessage(exp);
+                // If we failed to obtain device name, it looks the device is unusable.
+                // Because this is the last device we opened, we should hide the notification
+                // for the case.
                 try {
-                    message = provider.getDeviceName(deviceIds[0]) + " is being connected.";
-                } catch (IOException exp) {
-                    logErrorMessage(exp);
-                    // If we failed to obtain device name, it looks the device is unusable.
-                    // Because this is the last device we opened, we should hide the notification
-                    // for the case.
-                    try {
-                        provider.closeDevice(deviceIds[0]);
-                    } catch (IOException | InterruptedException closeError) {
-                        logErrorMessage(closeError);
-                    }
+                    provider.closeDevice(deviceIds[0]);
+                } catch (IOException | InterruptedException closeError) {
+                    logErrorMessage(closeError);
                 }
             }
         }
-        if (message != null) {
-            final Notification notification = new Notification.Builder(this)
-                    .setContentTitle(message)
-                    .setSmallIcon(android.R.drawable.ic_menu_camera)
-                    .setCategory(Notification.CATEGORY_SYSTEM)
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .build();
-            startForeground(FOREGROUND_NOTIFICATION_ID, notification);
+
+        if (notification != null) {
+            startForeground(notificationId, notification);
             return true;
         } else {
             stopForeground(true /* removeNotification */);
