@@ -33,16 +33,13 @@ import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperations;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Alert dialog for failed operations.
  */
-public class FailureDialogFragment extends DialogFragment
-        implements DialogInterface.OnClickListener {
+public class FailureDialogFragment extends DialogFragment {
     private static final String TAG = "FailureDialogFragment";
-
-    private int mOperationType;
-    private ArrayList<DocumentInfo> mFailedSrcList;
 
     public static void show(FragmentManager fm, int failure,
             ArrayList<DocumentInfo> failedSrcList, DocumentStack dstStack, int operationType) {
@@ -65,36 +62,25 @@ public class FailureDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int whichButton) {
-        if (whichButton == DialogInterface.BUTTON_POSITIVE) {
-            FileOperations.start(
-                    getActivity(),
-                    mFailedSrcList,
-                    (DocumentStack) getActivity().getIntent().getParcelableExtra(
-                            Shared.EXTRA_STACK),
-                    mOperationType);
-        }
-    }
-
-    @Override
     public Dialog onCreateDialog(Bundle inState) {
         super.onCreate(inState);
 
-        mOperationType = getArguments().getInt(FileOperationService.EXTRA_OPERATION);
-        mFailedSrcList = getArguments().getParcelableArrayList(FileOperationService.EXTRA_SRC_LIST);
+        final int operationType = getArguments().getInt(FileOperationService.EXTRA_OPERATION);
+        final List<DocumentInfo> failedSrcList = getArguments().getParcelableArrayList(
+                FileOperationService.EXTRA_SRC_LIST);
 
         final StringBuilder list = new StringBuilder("<p>");
-        for (DocumentInfo documentInfo : mFailedSrcList) {
+        for (DocumentInfo documentInfo : failedSrcList) {
             list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
         }
         list.append("</p>");
 
         // TODO: Add support for other file operations.
         checkArgument(
-                mOperationType == FileOperationService.OPERATION_COPY
-                || mOperationType == FileOperationService.OPERATION_MOVE);
+                operationType == FileOperationService.OPERATION_COPY
+                || operationType == FileOperationService.OPERATION_MOVE);
 
-        int messageId = mOperationType == FileOperationService.OPERATION_COPY
+        int messageId = operationType == FileOperationService.OPERATION_COPY
                 ? R.string.copy_failure_alert_content
                 : R.string.move_failure_alert_content;
 
@@ -105,8 +91,12 @@ public class FailureDialogFragment extends DialogFragment
 
         return new AlertDialog.Builder(getActivity())
                 .setMessage(Html.fromHtml(message))
-                .setPositiveButton(R.string.retry, this)
-                .setNegativeButton(android.R.string.cancel, this)
+                .setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                })
                 .create();
     }
 }
