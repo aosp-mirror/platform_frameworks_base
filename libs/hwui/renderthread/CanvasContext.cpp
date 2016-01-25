@@ -345,7 +345,7 @@ void CanvasContext::draw() {
 
 #if HWUI_NEW_OPS
     FrameBuilder frameBuilder(mLayerUpdateQueue, dirty, frame.width(), frame.height(),
-            mRenderNodes, mLightCenter);
+            mRenderNodes, mLightCenter, mContentDrawBounds);
     mLayerUpdateQueue.clear();
     BakedOpRenderer renderer(Caches::getInstance(), mRenderThread.renderState(),
             mOpaque, mLightInfo);
