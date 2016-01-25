@@ -42,7 +42,7 @@ public class TopicPriorityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packagePriority = mConfig.getTopicPriority(record.sbn.getPackageName(),
+        final int packagePriority = mConfig.getPriority(record.sbn.getPackageName(),
                 record.sbn.getUid(), record.sbn.getNotification().getTopic());
         record.setPackagePriority(packagePriority);
 

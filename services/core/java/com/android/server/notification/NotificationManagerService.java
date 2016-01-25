@@ -1242,58 +1242,55 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setTopicPriority(String pkg, int uid, Notification.Topic topic, int priority) {
+        public void setPriority(String pkg, int uid, Notification.Topic topic, int priority) {
             checkCallerIsSystem();
-            mRankingHelper.setTopicPriority(pkg, uid, topic, priority);
+            mRankingHelper.setPriority(pkg, uid, topic, priority);
             savePolicyFile();
         }
 
         @Override
-        public int getTopicPriority(String pkg, int uid, Notification.Topic topic) {
+        public int getPriority(String pkg, int uid, Notification.Topic topic) {
             checkCallerIsSystem();
-            return mRankingHelper.getTopicPriority(pkg, uid, topic);
+            return mRankingHelper.getPriority(pkg, uid, topic);
         }
 
         @Override
-        public void setTopicVisibilityOverride(String pkg, int uid, Notification.Topic topic,
+        public void setVisibilityOverride(String pkg, int uid, Notification.Topic topic,
                 int visibility) {
             checkCallerIsSystem();
-            mRankingHelper.setTopicVisibilityOverride(pkg, uid, topic, visibility);
+            mRankingHelper.setVisibilityOverride(pkg, uid, topic, visibility);
             savePolicyFile();
         }
 
         @Override
-        public int getTopicVisibilityOverride(String pkg, int uid, Notification.Topic topic) {
+        public int getVisibilityOverride(String pkg, int uid, Notification.Topic topic) {
             checkCallerIsSystem();
-            return mRankingHelper.getTopicVisibilityOverride(pkg, uid, topic);
+            return mRankingHelper.getVisibilityOverride(pkg, uid, topic);
         }
 
         @Override
-        public void setTopicImportance(String pkg, int uid, Notification.Topic topic,
+        public void setImportance(String pkg, int uid, Notification.Topic topic,
                 int importance) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            if (NotificationListenerService.Ranking.IMPORTANCE_NONE == importance) {
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, 0, 0, true,
-                        UserHandle.getUserId(uid),
-                        REASON_TOPIC_BANNED, topic, null);
+            if (topic == null) {
+                // App wide, potentially store block in app ops.
+                setNotificationsEnabledForPackageImpl(pkg, uid,
+                        importance != NotificationListenerService.Ranking.IMPORTANCE_NONE);
+            } else {
+                if (NotificationListenerService.Ranking.IMPORTANCE_NONE == importance) {
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, 0, 0, true,
+                            UserHandle.getUserId(uid),
+                            REASON_TOPIC_BANNED, topic, null);
+                }
             }
-            mRankingHelper.setTopicImportance(pkg, uid, topic, importance);
+            mRankingHelper.setImportance(pkg, uid, topic, importance);
             savePolicyFile();
         }
 
         @Override
-        public int getTopicImportance(String pkg, int uid, Notification.Topic topic) {
+        public int getImportance(String pkg, int uid, Notification.Topic topic) {
             checkCallerIsSystem();
-            return mRankingHelper.getTopicImportance(pkg, uid, topic);
-        }
-
-        @Override
-        public void setAppImportance(String pkg, int uid, int importance) {
-            enforceSystemOrSystemUI("Caller not system or systemui");
-            setNotificationsEnabledForPackageImpl(pkg, uid,
-                    importance != NotificationListenerService.Ranking.IMPORTANCE_NONE);
-            mRankingHelper.setAppImportance(pkg, uid, importance);
-            savePolicyFile();
+            return mRankingHelper.getImportance(pkg, uid, topic);
         }
 
         @Override

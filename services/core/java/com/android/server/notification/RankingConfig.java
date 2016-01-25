@@ -23,20 +23,18 @@ public interface RankingConfig {
 
     List<Notification.Topic> getTopics(String packageName, int uid);
 
-    int getTopicPriority(String packageName, int uid, Notification.Topic topic);
+    int getPriority(String packageName, int uid, Notification.Topic topic);
 
-    void setTopicPriority(String packageName, int uid, Notification.Topic topic, int priority);
+    void setPriority(String packageName, int uid, Notification.Topic topic, int priority);
 
-    int getTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic);
+    int getVisibilityOverride(String packageName, int uid, Notification.Topic topic);
 
-    void setTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic,
+    void setVisibilityOverride(String packageName, int uid, Notification.Topic topic,
             int visibility);
 
-    void setTopicImportance(String packageName, int uid, Notification.Topic topic, int importance);
+    void setImportance(String packageName, int uid, Notification.Topic topic, int importance);
 
-    int getTopicImportance(String packageName, int uid, Notification.Topic topic);
-
-    void setAppImportance(String packageName, int uid, int importance);
+    int getImportance(String packageName, int uid, Notification.Topic topic);
 
     boolean doesAppUseTopics(String packageName, int uid);
 }
