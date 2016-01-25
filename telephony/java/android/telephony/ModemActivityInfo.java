@@ -58,6 +58,7 @@ public class ModemActivityInfo implements Parcelable {
         return "ModemActivityInfo{"
             + " mTimestamp=" + mTimestamp
             + " mSleepTimeMs=" + mSleepTimeMs
+            + " mIdleTimeMs=" + mIdleTimeMs
             + " mTxTimeMs[]=" + Arrays.toString(mTxTimeMs)
             + " mRxTimeMs=" + mRxTimeMs
             + " mEnergyUsed=" + mEnergyUsed
@@ -153,7 +154,7 @@ public class ModemActivityInfo implements Parcelable {
         for (int i = 0; i < TX_POWER_LEVELS; i++) {
             totalTxTimeMs += txTime[i];
         }
-        return ((getIdleTimeMillis() != 0) || (totalTxTimeMs != 0)
-                || (getSleepTimeMillis() != 0) || (getIdleTimeMillis() != 0));
+        return ((getIdleTimeMillis() >= 0) && (totalTxTimeMs >= 0)
+                && (getSleepTimeMillis() >= 0) && (getIdleTimeMillis() >= 0));
     }
 }
