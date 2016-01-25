@@ -525,7 +525,7 @@ final class UserController {
         List<UserInfo> profilesToStart = new ArrayList<>(profiles.size());
         for (UserInfo user : profiles) {
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
-                    && user.id != mCurrentUserId) {
+                    && user.id != mCurrentUserId && !user.isQuietModeEnabled()) {
                 profilesToStart.add(user);
             }
         }
