@@ -275,7 +275,7 @@ public class LocalePicker extends ListFragment {
             config.setLocales(locales);
             config.userSetLocale = true;
 
-            am.updateConfiguration(config);
+            am.updatePersistentConfiguration(config);
             // Trigger the dirty bit for the Settings Provider.
             BackupManager.dataChanged("com.android.providers.settings");
         } catch (RemoteException e) {
