@@ -294,6 +294,7 @@ public final class NfcAdapter {
     static INfcAdapter sService;
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
+    static INfcFCardEmulation sNfcFCardEmulationService;
 
     /**
      * The NfcAdapter object for each application context.
@@ -452,6 +453,13 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
 
+            try {
+                sNfcFCardEmulationService = sService.getNfcFCardEmulationInterface();
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not retrieve NFC-F card emulation service");
+                throw new UnsupportedOperationException();
+            }
+
             sIsInitialized = true;
         }
         if (context == null) {
@@ -571,6 +579,15 @@ public final class NfcAdapter {
     }
 
     /**
+     * Returns the binder interface to the NFC-F card emulation service.
+     * @hide
+     */
+    public INfcFCardEmulation getNfcFCardEmulationService() {
+        isEnabled();
+        return sNfcFCardEmulationService;
+    }
+
+    /**
      * NFC service dead - attempt best effort recovery
      * @hide
      */
@@ -599,6 +616,12 @@ public final class NfcAdapter {
             sCardEmulationService = service.getNfcCardEmulationInterface();
         } catch (RemoteException ee) {
             Log.e(TAG, "could not retrieve NFC card emulation service during service recovery");
+        }
+
+        try {
+            sNfcFCardEmulationService = service.getNfcFCardEmulationInterface();
+        } catch (RemoteException ee) {
+            Log.e(TAG, "could not retrieve NFC-F card emulation service during service recovery");
         }
 
         return;
