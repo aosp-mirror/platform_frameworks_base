@@ -38,48 +38,48 @@ interface IDevicePolicyManager {
     void setPasswordQuality(in ComponentName who, int quality, boolean parent);
     int getPasswordQuality(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumLength(in ComponentName who, int length);
-    int getPasswordMinimumLength(in ComponentName who, int userHandle);
+    void setPasswordMinimumLength(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumLength(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumUpperCase(in ComponentName who, int length);
-    int getPasswordMinimumUpperCase(in ComponentName who, int userHandle);
+    void setPasswordMinimumUpperCase(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumUpperCase(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumLowerCase(in ComponentName who, int length);
-    int getPasswordMinimumLowerCase(in ComponentName who, int userHandle);
+    void setPasswordMinimumLowerCase(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumLowerCase(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumLetters(in ComponentName who, int length);
-    int getPasswordMinimumLetters(in ComponentName who, int userHandle);
+    void setPasswordMinimumLetters(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumLetters(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumNumeric(in ComponentName who, int length);
-    int getPasswordMinimumNumeric(in ComponentName who, int userHandle);
+    void setPasswordMinimumNumeric(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumNumeric(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumSymbols(in ComponentName who, int length);
-    int getPasswordMinimumSymbols(in ComponentName who, int userHandle);
+    void setPasswordMinimumSymbols(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumSymbols(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordMinimumNonLetter(in ComponentName who, int length);
-    int getPasswordMinimumNonLetter(in ComponentName who, int userHandle);
+    void setPasswordMinimumNonLetter(in ComponentName who, int length, boolean parent);
+    int getPasswordMinimumNonLetter(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordHistoryLength(in ComponentName who, int length);
-    int getPasswordHistoryLength(in ComponentName who, int userHandle);
+    void setPasswordHistoryLength(in ComponentName who, int length, boolean parent);
+    int getPasswordHistoryLength(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordExpirationTimeout(in ComponentName who, long expiration);
-    long getPasswordExpirationTimeout(in ComponentName who, int userHandle);
+    void setPasswordExpirationTimeout(in ComponentName who, long expiration, boolean parent);
+    long getPasswordExpirationTimeout(in ComponentName who, int userHandle, boolean parent);
 
-    long getPasswordExpiration(in ComponentName who, int userHandle);
+    long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
-    int getCurrentFailedPasswordAttempts(int userHandle);
-    int getProfileWithMinimumFailedPasswordsForWipe(int userHandle);
+    int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
+    int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
-    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
-    int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle);
+    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, boolean parent);
+    int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle, boolean parent);
 
     boolean resetPassword(String password, int flags);
 
-    void setMaximumTimeToLock(in ComponentName who, long timeMs);
-    long getMaximumTimeToLock(in ComponentName who, int userHandle);
+    void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
+    long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
 
-    void lockNow();
+    void lockNow(boolean parent);
 
     void wipeData(int flags);
 
@@ -99,8 +99,8 @@ interface IDevicePolicyManager {
     void setScreenCaptureDisabled(in ComponentName who, boolean disabled);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle);
 
-    void setKeyguardDisabledFeatures(in ComponentName who, int which);
-    int getKeyguardDisabledFeatures(in ComponentName who, int userHandle);
+    void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
+    int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
     boolean isAdminActive(in ComponentName policyReceiver, int userHandle);
