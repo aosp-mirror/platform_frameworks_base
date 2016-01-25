@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"I-Shell"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Kukhiqizwa umbiko wesiphazamisi"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Umbiko wesiphazamisi uthwetshuliwe"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Ingeza imininingwane kumbiko wesiphazamisi"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Sicela ulinde..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Swayiphela kwesokunxele ukuze wabelane umbiko wesiphazamiso sakho"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Thinta ukuze wabelane ngombiko wakho wesiphazamisi"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Imibiko yeziphazamisi iqukethe idatha yamafayela wokungena ahlukile wesistimu, afaka ulwazi lomuntu siqu noma lobumfihlo. Yabelana kuphela ngemibiko yeziphazamisi nezinhlelo zokusebenza nabantu obathembayo."</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"Isithombe-skrini sithathwe ngempumelelo."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Isithombe-skrini asikwazanga ukuthathwa."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Imininingwane yombiko wesiphazamisi"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"Igama lefayela"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"Isihloko"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Incazelo enemininingwane"</string>
 </resources>

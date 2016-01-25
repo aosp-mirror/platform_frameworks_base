@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"សែល"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"របាយការណ៍កំហុសកំពុងត្រូវបានបង្កើត"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"បាន​ចាប់​យក​របាយការណ៍​កំហុស"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"កំពុងបន្ថែមព័ត៌មានលម្អិតទៅរបាយការណ៍កំហុស"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"សូម​រង់ចាំ…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"អូស​ទៅ​ឆ្វេង​​ ដើម្បី​ចែក​រំលែក​របាយការណ៍​កំហុស​របស់​អ្នក"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ប៉ះ​ ដើម្បី​ចែក​រំលែក​របាយការណ៍​កំហុស​របស់​អ្នក"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"របាយការណ៍​កំហុស​រួមមាន​ឯកសារ​កំណត់​ហេតុ​ផ្សេងៗ​របស់​ប្រព័ន្ធ រួមមាន​ព័ត៌មាន​ផ្ទាល់ខ្លួន និង​ឯកជន។ ចែករំលែក​របាយការណ៍​កំហុស​ជា​មួយ​កម្មវិធី និង​មនុស្ស​ដែល​អ្នក​ទុក​ចិត្ត។"</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"បានថតរូបថតអេក្រង់ដោយជោគជ័យ"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"មិនអាចថតរូបថតអេក្រង់បានទេ"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ព័ត៌មានលម្អិតពីរបាយការណ៍កំហុស"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ឈ្មោះ​ឯកសារ"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"ចំណងជើង"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"ការពិពណ៌នាលម្អិត"</string>
 </resources>

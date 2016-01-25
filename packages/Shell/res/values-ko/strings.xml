@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"셸"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"버그 신고 생성 중"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"버그 신고서 캡처됨"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"세부정보를 버그 보고서에 추가"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"잠시 기다려 주세요..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"왼쪽으로 스와이프하여 버그 신고서를 공유하세요."</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"버그 신고서를 공유하려면 터치하세요."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"버그 신고서는 시스템의 다양한 로그 파일 데이터(예: 개인 및 비공개 정보)를 포함합니다. 신뢰할 수 있는 앱과 사용자에게만 버그 신고서를 공유하세요."</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"스크린샷을 찍었습니다."</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"스크린샷을 찍을 수 없습니다."</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"버그 신고 세부정보"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"파일 이름"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"제목"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"자세한 설명"</string>
 </resources>

@@ -19,6 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"ਸ਼ੈਲ"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"ਬੱਗ ਰਿਪੋਰਟ ਸਿਰਜੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"ਬਗ ਰਿਪੋਰਟ ਕੈਪਚਰ ਕੀਤੀ"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"ਬੱਗ ਰਿਪੋਰਟ ਵਿੱਚ ਵੇਰਵਿਆਂ ਨੂੰ ਸ਼ਾਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"ਤੁਹਾਡੀ ਬਗ ਰਿਪੋਰਟ ਸ਼ੇਅਰ ਕਰਨ ਲਈ ਖੱਬੇ ਪਾਸੇ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"ਆਪਣੀ ਬਗ ਰਿਪੋਰਟ ਸ਼ੇਅਰ ਕਰਨ ਲਈ ਛੋਹਵੋ"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"ਬਗ ਰਿਪੋਰਟਾਂ ਵਿੱਚ ਸਿਸਟਮ ਦੀਆਂ ਭਿੰਨ ਲੌਗ ਫਾਈਲਾਂ ਦਾ ਡਾਟਾ ਹੁੰਦਾ ਹੈ, ਨਿੱਜੀ ਅਤੇ ਪ੍ਰਾਈਵੇਟ ਜਾਣਕਾਰੀ ਸਮੇਤ। ਕੇਵਲ ਉਹਨਾਂ ਐਪਸ ਅਤੇ ਲੋਕਾਂ ਨਾਲ ਬਗ ਰਿਪੋਰਟਾਂ ਸ਼ੇਅਰ ਕਰੋ, ਜਿਹਨਾਂ ਤੇ ਤੁਸੀਂ ਭਰੋਸਾ ਕਰਦੇ ਹੋ।"</string>
@@ -31,9 +33,7 @@
     <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਫਲਤਾਪੂਰਵਕ ਲਿਆ ਗਿਆ।"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਿਆ।"</string>
     <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"ਬੱਗ ਰਿਪੋਰਟ ਵੇਰਵੇ"</string>
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
-    <skip />
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ਫ਼ਾਈਲ ਨਾਮ"</string>
+    <string name="bugreport_info_title" msgid="5599558206004371052">"ਸਿਰਲੇਖ"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"ਵਿਸਥਾਰ ਸਹਿਤ ਵਰਣਨ"</string>
 </resources>
