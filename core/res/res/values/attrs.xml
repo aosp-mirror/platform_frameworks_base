@@ -3412,6 +3412,32 @@ i
         <attr name="name" />
     </declare-styleable>
 
+    <!-- Use <code>host-nfcf-service</code> as the root tag of the XML resource that
+         describes an {@link android.nfc.cardemulation.HostNfcFService} service, which
+         is referenced from its {@link android.nfc.cardemulation.HostNfcFService#SERVICE_META_DATA}
+         entry. -->
+    <declare-styleable name="HostNfcFService">
+        <!-- Short description of the functionality the service implements. This attribute
+             is mandatory.-->
+        <attr name="description" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>system-code-filter</code> elements inside a
+         <code>host-nfcf-service</code> element to specify a System Code
+         your service can handle. -->
+    <declare-styleable name="SystemCodeFilter">
+        <!-- The System Code. This attribute is mandatory. -->
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>nfcid2-filter</code> elements inside a
+         <code>host-nfcf-service</code> element to specify a NFCID2
+         your service can handle. -->
+    <declare-styleable name="Nfcid2Filter">
+        <!-- The NFCID2. This attribute is mandatory. -->
+        <attr name="name" />
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>
