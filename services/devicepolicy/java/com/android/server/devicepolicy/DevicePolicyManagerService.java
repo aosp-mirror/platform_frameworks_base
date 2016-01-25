@@ -49,6 +49,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
+import android.auditing.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -4381,6 +4382,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0);
+        }
     }
 
     @Override
@@ -4406,6 +4411,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mInjector.binderRestoreCallingIdentity(ident);
                 }
             }
+        }
+
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 1);
+        }
+    }
+
+    @Override
+    public void reportKeyguardDismissed() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISSED);
+        }
+    }
+
+    @Override
+    public void reportKeyguardSecured() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_SECURED);
         }
     }
 

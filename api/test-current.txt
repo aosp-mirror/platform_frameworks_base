@@ -6510,8 +6510,9 @@ package android.auditing {
     field public static final int TAG_ADB_SHELL_CMD = 210002; // 0x33452
     field public static final int TAG_ADB_SHELL_INTERACTIVE = 210001; // 0x33451
     field public static final int TAG_APP_PROCESS_START = 210005; // 0x33455
-    field public static final int TAG_DEVICE_LOCKED = 210007; // 0x33457
-    field public static final int TAG_DEVICE_UNLOCK_ATTEMPT = 210006; // 0x33456
+    field public static final int TAG_KEYGUARD_DISMISSED = 210006; // 0x33456
+    field public static final int TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT = 210007; // 0x33457
+    field public static final int TAG_KEYGUARD_SECURED = 210008; // 0x33458
     field public static final int TAG_SYNC_RECV_FILE = 210003; // 0x33453
     field public static final int TAG_SYNC_SEND_FILE = 210004; // 0x33454
   }
