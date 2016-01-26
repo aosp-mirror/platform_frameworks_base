@@ -491,12 +491,13 @@ public class FingerprintManager {
      * credentials (e.g. pin, pattern or password).
      * @param cancel an object that can be used to cancel enrollment
      * @param flags optional flags
+     * @param userId the user to whom this fingerprint will belong to
      * @param callback an object to receive enrollment events
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void enroll(byte [] token, CancellationSignal cancel, int flags,
-            EnrollmentCallback callback, int userId) {
+            int userId, EnrollmentCallback callback) {
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentUserId();
         }
@@ -576,17 +577,18 @@ public class FingerprintManager {
     /**
      * Remove given fingerprint template from fingerprint hardware and/or protected storage.
      * @param fp the fingerprint item to remove
+     * @param userId the user who this fingerprint belongs to
      * @param callback an optional callback to verify that fingerprint templates have been
      * successfully removed. May be null of no callback is required.
      *
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void remove(Fingerprint fp, RemovalCallback callback) {
+    public void remove(Fingerprint fp, int userId, RemovalCallback callback) {
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            mService.remove(mToken, fp.getFingerId(), getCurrentUserId(), mServiceReceiver);
+            mService.remove(mToken, fp.getFingerId(), userId, mServiceReceiver);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
@@ -599,16 +601,17 @@ public class FingerprintManager {
     /**
      * Renames the given fingerprint template
      * @param fpId the fingerprint id
+     * @param userId the user who this fingerprint belongs to
      * @param newName the new name
      *
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public void rename(int fpId, String newName) {
+    public void rename(int fpId, int userId, String newName) {
         // Renames the given fpId
         if (mService != null) {
             try {
-                mService.rename(fpId, getCurrentUserId(), newName);
+                mService.rename(fpId, userId, newName);
             } catch (RemoteException e) {
                 Log.v(TAG, "Remote exception in rename(): ", e);
             }
