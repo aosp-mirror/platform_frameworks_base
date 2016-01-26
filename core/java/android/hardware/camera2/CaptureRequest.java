@@ -1599,13 +1599,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is optional. Applications can assume there is no boost applied
      * after RAW is captured if this key is not available.
      * When this key is available, the sensitivity boost value must be within
-     * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost}.</p>
+     * {@link CameraCharacteristics#CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE android.control.postRawSensitivityBoostRange}.</p>
      * <p>If the camera device cannot apply the exact boost requested, it will reduce the
      * boost to the nearest supported value.
      * The final boost value used will be available in the output capture result.</p>
      * <p>For devices that support post RAW sensitivity boost, the YUV/JPEG output images
      * of such device will have the total sensitivity of
-     * <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} * android.control.ispSensitivity / 100</code>
+     * <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity} * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} / 100</code>
      * The sensitivity of RAW format images will always be <code>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</code></p>
      * <p>This control is only effective if {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} is set to
      * OFF; otherwise the auto-exposure algorithm will override this value.</p>
