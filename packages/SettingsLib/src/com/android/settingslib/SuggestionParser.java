@@ -17,6 +17,7 @@ package com.android.settingslib;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -38,14 +39,39 @@ public class SuggestionParser {
 
     private static final String TAG = "SuggestionParser";
 
+    // If defined, only returns this suggestion if the feature is supported.
+    public static final String META_DATA_REQUIRE_FEATURE = "com.android.settings.require_feature";
+
+    /**
+     * Allows suggestions to appear after a certain number of days, and to re-appear if dismissed.
+     * For instance:
+     * 0,10
+     * Will appear immediately, but if the user removes it, it will come back after 10 days.
+     *
+     * Another example:
+     * 10,30
+     * Will only show up after 10 days, and then again after 30.
+     */
+    public static final String META_DATA_DISMISS_CONTROL = "com.android.settings.dismiss";
+
+    // Shared prefs keys for storing dismissed state.
+    // Index into current dismissed state.
+    private static final String DISMISS_INDEX = "_dismiss_index";
+    private static final String SETUP_TIME = "_setup_time";
+    private static final String IS_DISMISSED = "_is_dismissed";
+
+    private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
+
     private final Context mContext;
     private final List<SuggestionCategory> mSuggestionList;
     private final ArrayMap<Pair<String, String>, Tile> addCache = new ArrayMap<>();
+    private final SharedPreferences mSharedPrefs;
 
-    public SuggestionParser(Context context, int orderXml) {
+    public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
         mContext = context;
         mSuggestionList = (List<SuggestionCategory>) new SuggestionOrderInflater(mContext)
                 .parse(orderXml);
+        mSharedPrefs = sharedPrefs;
     }
 
     public List<Tile> getSuggestions() {
@@ -57,6 +83,23 @@ public class SuggestionParser {
         return suggestions;
     }
 
+    /**
+     * Dismisses a suggestion, returns true if the suggestion has no more dismisses left and should
+     * be disabled.
+     */
+    public boolean dismissSuggestion(Tile suggestion) {
+        String keyBase = suggestion.intent.getComponent().flattenToShortString();
+        int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
+        String dismissControl = suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
+        if (dismissControl == null || parseDismissString(dismissControl).length == index) {
+            return true;
+        }
+        mSharedPrefs.edit()
+                .putBoolean(keyBase + IS_DISMISSED, true)
+                .commit();
+        return false;
+    }
+
     private void readSuggestions(SuggestionCategory category, List<Tile> suggestions) {
         int countBefore = suggestions.size();
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -66,6 +109,11 @@ public class SuggestionParser {
         }
         TileUtils.getTilesForIntent(mContext, new UserHandle(UserHandle.myUserId()), intent,
                 addCache, null, suggestions, true, false);
+        for (int i = countBefore; i < suggestions.size(); i++) {
+            if (!isAvailable(suggestions.get(i)) || isDismissed(suggestions.get(i))) {
+                suggestions.remove(i--);
+            }
+        }
         if (!category.multiple && suggestions.size() > (countBefore + 1)) {
             // If there are too many, remove them all and only re-add the one with the highest
             // priority.
@@ -78,6 +126,58 @@ public class SuggestionParser {
             }
             suggestions.add(item);
         }
+    }
+
+    private boolean isAvailable(Tile suggestion) {
+        String featureRequired = suggestion.metaData.getString(META_DATA_REQUIRE_FEATURE);
+        if (featureRequired != null) {
+            return mContext.getPackageManager().hasSystemFeature(featureRequired);
+        }
+        return true;
+    }
+
+    private boolean isDismissed(Tile suggestion) {
+        String dismissControl = suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
+        if (dismissControl == null) {
+            return false;
+        }
+        String keyBase = suggestion.intent.getComponent().flattenToShortString();
+        if (!mSharedPrefs.contains(keyBase + SETUP_TIME)) {
+            mSharedPrefs.edit()
+                    .putLong(keyBase + SETUP_TIME, System.currentTimeMillis())
+                    .commit();
+        }
+        // Default to dismissed, so that we can have suggestions that only first appear after
+        // some number of days.
+        if (!mSharedPrefs.getBoolean(keyBase + IS_DISMISSED, true)) {
+            return false;
+        }
+        int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
+        int currentDismiss = parseDismissString(dismissControl)[index];
+        long time = getEndTime(mSharedPrefs.getLong(keyBase + SETUP_TIME, 0), currentDismiss);
+        if (System.currentTimeMillis() >= time) {
+            // Dismiss timeout has passed, undismiss it.
+            mSharedPrefs.edit()
+                    .putBoolean(keyBase + IS_DISMISSED, false)
+                    .putInt(keyBase + DISMISS_INDEX, index + 1)
+                    .commit();
+            return false;
+        }
+        return true;
+    }
+
+    private long getEndTime(long startTime, int daysDelay) {
+        long days = daysDelay * MILLIS_IN_DAY;
+        return startTime + days;
+    }
+
+    private int[] parseDismissString(String dismissControl) {
+        String[] dismissStrs = dismissControl.split(",");
+        int[] dismisses = new int[dismissStrs.length];
+        for (int i = 0; i < dismissStrs.length; i++) {
+            dismisses[i] = Integer.parseInt(dismissStrs[i]);
+        }
+        return dismisses;
     }
 
     private static class SuggestionCategory {
