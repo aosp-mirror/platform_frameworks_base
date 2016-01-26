@@ -69,6 +69,9 @@ public class RestrictedLockUtils {
             String userRestriction, int userId) {
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         ComponentName deviceOwner = dpm.getDeviceOwnerComponentOnAnyUser();
         int deviceOwnerUserId = dpm.getDeviceOwnerUserId();
         boolean enforcedByDeviceOwner = false;
@@ -125,6 +128,9 @@ public class RestrictedLockUtils {
             int keyguardNotificationFeatures) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         boolean isDisabledByMultipleAdmins = false;
         ComponentName adminComponent = null;
         List<ComponentName> admins = dpm.getActiveAdmins();
@@ -170,6 +176,9 @@ public class RestrictedLockUtils {
             if (ipm.getBlockUninstallForUser(packageName, userId)) {
                 DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                         Context.DEVICE_POLICY_SERVICE);
+                if (dpm == null) {
+                    return null;
+                }
                 ComponentName admin = dpm.getProfileOwner();
                 if (admin == null) {
                     admin = dpm.getDeviceOwnerComponentOnCallingUser();
@@ -197,6 +206,9 @@ public class RestrictedLockUtils {
         }
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         boolean isAccountTypeDisabled = false;
         String[] disabledTypes = dpm.getAccountTypesWithManagementDisabled();
         for (String type : disabledTypes) {
@@ -221,7 +233,7 @@ public class RestrictedLockUtils {
     public static EnforcedAdmin checkIfAutoTimeRequired(Context context) {
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        if (dpm.getAutoTimeRequired()) {
+        if (dpm == null || !dpm.getAutoTimeRequired()) {
             return null;
         }
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
@@ -240,6 +252,9 @@ public class RestrictedLockUtils {
     public static EnforcedAdmin checkIfPasswordQualityIsSet(Context context) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         boolean isDisabledByMultipleAdmins = false;
         ComponentName adminComponent = null;
         List<ComponentName> admins = dpm.getActiveAdmins();
@@ -271,6 +286,9 @@ public class RestrictedLockUtils {
     public static EnforcedAdmin getProfileOrDeviceOwnerOnCallingUser(Context context) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
         if (adminComponent != null) {
             return new EnforcedAdmin(adminComponent, UserHandle.myUserId());
