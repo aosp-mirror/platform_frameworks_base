@@ -584,9 +584,9 @@ android {
 
 <h2>Updating the Android Plugin for Gradle Version</h2>
 <p>The Android Plugin for Gradle version is specified in the
-<strong>File &gt; Project Structure</strong> menu or the project-level
+<strong>File &gt; Project Structure &gt; Project</strong> menu and the project-level
 <code>build.gradle</code> file. The plugin version applies to all modules built in that
-Android Studio project. This example updates the Android Plugin for Gradle to version 1.1.0:
+Android Studio project. This example sets the Android Plugin for Gradle to version 1.1.0 from the <code>build.gradle</code> file:
 <pre>
 ...
      dependencies {
@@ -600,8 +600,8 @@ Android Studio project. This example updates the Android Plugin for Gradle to ve
 version numbers. Using this feature can cause unexpected version updates and difficulty
 resolving version differences. </p>
 
-<p>If you're building with Gradle but using not Android Studio, the build process downloads the
-latest Android Plugin for Gradle plugin when it runs. </p>
+<p>If you're building with Gradle but not using Android Studio, the build process downloads the
+latest Android Plugin for Gradle when it runs. </p>
 
 
 
@@ -609,8 +609,8 @@ latest Android Plugin for Gradle plugin when it runs. </p>
 
 <p>Android Studio requires Gradle version 2.2.1 or later. To view and
 update the Gradle version, edit the Gradle distribution reference in the
-<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example shows the
-Android Plugin for Gradle version set to 2.2.1.</p>
+<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example sets the
+Gradle version to 2.2.1.</p>
 
 <pre>
 ...
@@ -618,14 +618,6 @@ distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
 ...
 </pre>
 
-
-
-
 <p>For more details about the supported Android Plugin for Gradle properties and syntax, click
 the link to the
 <a href="{@docRoot}tools/building/plugin-for-gradle.html">Plugin Language Reference</a>.</p>
-
-
-
-
-
