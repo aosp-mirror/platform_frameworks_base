@@ -3328,17 +3328,6 @@ public final class ActivityThread {
                 }
                 r.activity.performResume();
 
-                // If there is a pending relaunch that was requested when the activity was paused,
-                // it will put the activity into paused state when it finally happens. Since the
-                // activity resumed before being relaunched, we don't want that to happen, so we
-                // need to clear the request to relaunch paused.
-                for (int i = mRelaunchingActivities.size() - 1; i >= 0; i--) {
-                    final ActivityClientRecord relaunching = mRelaunchingActivities.get(i);
-                    if (relaunching.token == r.token && relaunching.startsNotResumed) {
-                        relaunching.startsNotResumed = false;
-                    }
-                }
-
                 EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED,
                         UserHandle.myUserId(), r.activity.getComponentName().getClassName());
 
@@ -3567,7 +3556,6 @@ public final class ActivityThread {
     private void handlePauseActivity(IBinder token, boolean finished,
             boolean userLeaving, int configChanges, boolean dontReport, int seq) {
         ActivityClientRecord r = mActivities.get(token);
-        if (DEBUG_ORDER) Slog.d(TAG, "handlePauseActivity " + r + ", seq: " + seq);
         if (!checkAndUpdateLifecycleSeq(seq, r, "pauseActivity")) {
             return;
         }
@@ -4207,7 +4195,6 @@ public final class ActivityThread {
         synchronized (mResourcesManager) {
             for (int i=0; i<mRelaunchingActivities.size(); i++) {
                 ActivityClientRecord r = mRelaunchingActivities.get(i);
-                if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: " + this + ", trying: " + r);
                 if (r.token == token) {
                     target = r;
                     if (pendingResults != null) {
@@ -4238,19 +4225,14 @@ public final class ActivityThread {
             }
 
             if (target == null) {
-                if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: target is null, fromServer:"
-                        + fromServer);
                 target = new ActivityClientRecord();
                 target.token = token;
                 target.pendingResults = pendingResults;
                 target.pendingIntents = pendingNewIntents;
                 target.mPreserveWindow = preserveWindow;
                 if (!fromServer) {
-                    final ActivityClientRecord existing = mActivities.get(token);
-                    if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: " + existing);
+                    ActivityClientRecord existing = mActivities.get(token);
                     if (existing != null) {
-                        if (DEBUG_ORDER) Slog.d(TAG, "requestRelaunchActivity: paused= "
-                                + existing.paused);;
                         target.startsNotResumed = existing.paused;
                         target.overrideConfig = existing.overrideConfig;
                     }
@@ -4273,8 +4255,8 @@ public final class ActivityThread {
             target.pendingConfigChanges |= configChanges;
             target.relaunchSeq = getLifecycleSeq();
         }
-        if (DEBUG_ORDER) Slog.d(TAG, "relaunchActivity " + ActivityThread.this + ", target "
-                + target + " operation received seq: " + target.relaunchSeq);
+        if (DEBUG_ORDER) Slog.d(TAG, "relaunchActivity " + ActivityThread.this
+                + " operation received seq: " + target.relaunchSeq);
     }
 
     private void handleRelaunchActivity(ActivityClientRecord tmp) {
