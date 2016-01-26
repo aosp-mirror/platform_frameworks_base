@@ -16,6 +16,7 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
@@ -89,7 +90,7 @@ public class PrinterRegistry {
         return false;
     }
 
-    public void setTrackedPrinter(PrinterId printerId) {
+    public void setTrackedPrinter(@Nullable PrinterId printerId) {
         FusedPrintersProvider provider = getPrinterProvider();
         if (provider != null) {
             provider.setTrackedPrinter(printerId);

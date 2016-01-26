@@ -535,7 +535,10 @@ public final class PrintManager {
         return new PrinterDiscoverySession(mService, mContext, mUserId);
     }
 
-    private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub
+    /**
+     * @hide
+     */
+    public static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub
             implements ActivityLifecycleCallbacks {
         private final Object mLock = new Object();
 
@@ -1061,7 +1064,10 @@ public final class PrintManager {
         }
     }
 
-    private static final class PrintJobStateChangeListenerWrapper extends
+    /**
+     * @hide
+     */
+    public static final class PrintJobStateChangeListenerWrapper extends
             IPrintJobStateChangeListener.Stub {
         private final WeakReference<PrintJobStateChangeListener> mWeakListener;
         private final WeakReference<Handler> mWeakHandler;

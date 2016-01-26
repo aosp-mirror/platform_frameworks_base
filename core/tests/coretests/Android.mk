@@ -32,7 +32,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     littlemock \
     android-support-test \
     mockito-target \
-    espresso-core
+    espresso-core \
+    ub-uiautomator
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
