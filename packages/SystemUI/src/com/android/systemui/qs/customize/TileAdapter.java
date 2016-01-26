@@ -73,7 +73,7 @@ public class TileAdapter extends BaseAdapter {
             mCurrentTiles = tileSpecs;
             final TileGroup group = new TileGroup("com.android.settings", mContext);
             String possible = mContext.getString(R.string.quick_settings_tiles_default)
-                    + ",user,hotspot,inversion,saver";
+                    + ",hotspot,inversion,saver";
             String[] possibleTiles = possible.split(",");
             for (int i = 0; i < possibleTiles.length; i++) {
                 final String spec = possibleTiles[i];

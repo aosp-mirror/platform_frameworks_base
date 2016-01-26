@@ -70,6 +70,18 @@
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
+        <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/ripple_drawable" >
+            <ImageView android:id="@+id/multi_user_avatar"
+                android:layout_width="@dimen/multi_user_avatar_expanded_size"
+                android:layout_height="@dimen/multi_user_avatar_expanded_size"
+                android:layout_gravity="center"
+                android:scaleType="centerInside"/>
+        </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
