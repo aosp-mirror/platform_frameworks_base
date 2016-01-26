@@ -65,6 +65,10 @@ public class RestrictedPreference extends Preference {
         }
     }
 
+    public void useAdminDisabledSummary(boolean useSummary) {
+        mHelper.useAdminDisabledSummary(useSummary);
+    }
+
     @Override
     protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
         mHelper.onAttachedToHierarchy();
