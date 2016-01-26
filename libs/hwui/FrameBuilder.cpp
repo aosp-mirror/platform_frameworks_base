@@ -33,6 +33,15 @@ namespace uirenderer {
 FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         uint32_t viewportWidth, uint32_t viewportHeight,
         const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter)
+        : FrameBuilder(layers, clip, viewportWidth, viewportHeight, nodes, lightCenter,
+                Rect(0, 0, 0, 0)) {
+}
+
+
+FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
+        uint32_t viewportWidth, uint32_t viewportHeight,
+        const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter,
+        const Rect &contentDrawBounds)
         : mCanvasState(*this) {
     ATRACE_NAME("prepare drawing commands");
 
@@ -72,14 +81,56 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         }
     }
 
-    // Defer Fbo0
+    // It there are multiple render nodes, they are laid out as follows:
+    // #0 - backdrop (content + caption)
+    // #1 - content (positioned at (0,0) and clipped to - its bounds mContentDrawBounds)
+    // #2 - additional overlay nodes
+    // Usually the backdrop cannot be seen since it will be entirely covered by the content. While
+    // resizing however it might become partially visible. The following render loop will crop the
+    // backdrop against the content and draw the remaining part of it. It will then draw the content
+    // cropped to the backdrop (since that indicates a shrinking of the window).
+    //
+    // Additional nodes will be drawn on top with no particular clipping semantics.
+
+    // The bounds of the backdrop against which the content should be clipped.
+    Rect backdropBounds = contentDrawBounds;
+    // Usually the contents bounds should be mContentDrawBounds - however - we will
+    // move it towards the fixed edge to give it a more stable appearance (for the moment).
+    // If there is no content bounds we ignore the layering as stated above and start with 2.
+    int layer = (contentDrawBounds.isEmpty() || nodes.size() == 1) ? 2 : 0;
+
     for (const sp<RenderNode>& node : nodes) {
         if (node->nothingToDraw()) continue;
         node->computeOrdering();
-
         int count = mCanvasState.save(SaveFlags::MatrixClip);
+
+        if (layer == 0) {
+            const RenderProperties& properties = node->properties();
+            Rect targetBounds(properties.getLeft(), properties.getTop(),
+                              properties.getRight(), properties.getBottom());
+            // Move the content bounds towards the fixed corner of the backdrop.
+            const int x = targetBounds.left;
+            const int y = targetBounds.top;
+            // Remember the intersection of the target bounds and the intersection bounds against
+            // which we have to crop the content.
+            backdropBounds.set(x, y, x + backdropBounds.getWidth(), y + backdropBounds.getHeight());
+            backdropBounds.doIntersect(targetBounds);
+        } else if (layer == 1) {
+            // We shift and clip the content to match its final location in the window.
+            const float left = contentDrawBounds.left;
+            const float top = contentDrawBounds.top;
+            const float dx = backdropBounds.left - left;
+            const float dy = backdropBounds.top - top;
+            const float width = backdropBounds.getWidth();
+            const float height = backdropBounds.getHeight();
+            mCanvasState.translate(dx, dy);
+            // It gets cropped against the bounds of the backdrop to stay inside.
+            mCanvasState.clipRect(left, top, left + width, top + height, SkRegion::kIntersect_Op);
+        }
+
         deferNodePropsAndOps(*node);
         mCanvasState.restoreToCount(count);
+        layer++;
     }
 }
 

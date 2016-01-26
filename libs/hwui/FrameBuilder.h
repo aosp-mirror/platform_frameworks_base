@@ -59,6 +59,11 @@ public:
             uint32_t viewportWidth, uint32_t viewportHeight,
             const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
 
+    FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
+            uint32_t viewportWidth, uint32_t viewportHeight,
+            const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter,
+            const Rect &contentDrawBounds);
+
     virtual ~FrameBuilder() {}
 
     /**
