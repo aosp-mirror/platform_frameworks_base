@@ -1003,7 +1003,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (currMediaSize == null) {
             attributes.setMediaSize(defaults.getMediaSize());
         } else {
-            boolean foundCurrentMediaSize = false;
+            MediaSize newMediaSize = null;
+            boolean isPortrait = currMediaSize.isPortrait();
+
             // Try to find the current media size in the capabilities as
             // it may be in a different orientation.
             MediaSize currMediaSizePortrait = currMediaSize.asPortrait();
@@ -1011,14 +1013,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             for (int i = 0; i < mediaSizeCount; i++) {
                 MediaSize mediaSize = sortedMediaSizes.get(i);
                 if (currMediaSizePortrait.equals(mediaSize.asPortrait())) {
-                    attributes.setMediaSize(currMediaSize);
-                    foundCurrentMediaSize = true;
+                    newMediaSize = mediaSize;
                     break;
                 }
             }
             // If we did not find the current media size fall back to default.
-            if (!foundCurrentMediaSize) {
-                attributes.setMediaSize(defaults.getMediaSize());
+            if (newMediaSize == null) {
+                newMediaSize = defaults.getMediaSize();
+            }
+
+            if (newMediaSize != null) {
+                if (isPortrait) {
+                    attributes.setMediaSize(newMediaSize.asPortrait());
+                } else {
+                    attributes.setMediaSize(newMediaSize.asLandscape());
+                }
             }
         }
 
