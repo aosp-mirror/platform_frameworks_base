@@ -100,13 +100,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
-
 import static android.os.Build.VERSION_CODES.*;
 import static java.lang.Math.max;
 
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.widget.ScrollBarUtils;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -5128,6 +5128,88 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mVerticalScrollbarPosition;
     }
 
+    boolean isOnScrollbar(float x, float y) {
+        if (mScrollCache == null) {
+            return false;
+        }
+        x += getScrollX();
+        y += getScrollY();
+        if (isVerticalScrollBarEnabled() && !isVerticalScrollBarHidden()) {
+            final Rect bounds = mScrollCache.mScrollBarBounds;
+            getVerticalScrollBarBounds(bounds);
+            if (bounds.contains((int)x, (int)y)) {
+                return true;
+            }
+        }
+        if (isHorizontalScrollBarEnabled()) {
+            final Rect bounds = mScrollCache.mScrollBarBounds;
+            getHorizontalScrollBarBounds(bounds);
+            if (bounds.contains((int)x, (int)y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isOnScrollbarThumb(float x, float y) {
+        return isOnVerticalScrollbarThumb(x, y) || isOnHorizontalScrollbarThumb(x, y);
+    }
+
+    private boolean isOnVerticalScrollbarThumb(float x, float y) {
+        if (mScrollCache == null) {
+            return false;
+        }
+        if (isVerticalScrollBarEnabled() && !isVerticalScrollBarHidden()) {
+            x += getScrollX();
+            y += getScrollY();
+            final Rect bounds = mScrollCache.mScrollBarBounds;
+            getVerticalScrollBarBounds(bounds);
+            final int range = computeVerticalScrollRange();
+            final int offset = computeVerticalScrollOffset();
+            final int extent = computeVerticalScrollExtent();
+            final int thumbLength = ScrollBarUtils.getThumbLength(bounds.height(), bounds.width(),
+                    extent, range);
+            final int thumbOffset = ScrollBarUtils.getThumbOffset(bounds.height(), thumbLength,
+                    extent, range, offset);
+            final int thumbTop = bounds.top + thumbOffset;
+            if (x >= bounds.left && x <= bounds.right && y >= thumbTop
+                    && y <= thumbTop + thumbLength) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isOnHorizontalScrollbarThumb(float x, float y) {
+        if (mScrollCache == null) {
+            return false;
+        }
+        if (isHorizontalScrollBarEnabled()) {
+            x += getScrollX();
+            y += getScrollY();
+            final Rect bounds = mScrollCache.mScrollBarBounds;
+            getHorizontalScrollBarBounds(bounds);
+            final int range = computeHorizontalScrollRange();
+            final int offset = computeHorizontalScrollOffset();
+            final int extent = computeHorizontalScrollExtent();
+            final int thumbLength = ScrollBarUtils.getThumbLength(bounds.width(), bounds.height(),
+                    extent, range);
+            final int thumbOffset = ScrollBarUtils.getThumbOffset(bounds.width(), thumbLength,
+                    extent, range, offset);
+            final int thumbLeft = bounds.left + thumbOffset;
+            if (x >= thumbLeft && x <= thumbLeft + thumbLength && y >= bounds.top
+                    && y <= bounds.bottom) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean isDraggingScrollBar() {
+        return mScrollCache != null
+                && mScrollCache.mScrollBarDraggingState != ScrollabilityCache.NOT_DRAGGING;
+    }
+
     /**
      * Sets the state of all scroll indicators.
      * <p>
@@ -9715,6 +9797,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (onFilterTouchEventForSecurity(event)) {
+            if ((mViewFlags & ENABLED_MASK) == ENABLED && handleScrollBarDragging(event)) {
+                result = true;
+            }
             //noinspection SimplifiableIfStatement
             ListenerInfo li = mListenerInfo;
             if (li != null && li.mOnTouchListener != null
@@ -10579,6 +10664,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
 
+        if ((action == MotionEvent.ACTION_HOVER_ENTER || action == MotionEvent.ACTION_HOVER_MOVE)
+                && event.isFromSource(InputDevice.SOURCE_MOUSE)
+                && isOnScrollbar(event.getX(), event.getY())) {
+            awakenScrollBars();
+        }
         if (isHoverable()) {
             switch (action) {
                 case MotionEvent.ACTION_HOVER_ENTER:
@@ -10682,6 +10772,110 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Handles scroll bar dragging by mouse input.
+     *
+     * @hide
+     * @param event The motion event.
+     *
+     * @return true if the event was handled as a scroll bar dragging, false otherwise.
+     */
+    protected boolean handleScrollBarDragging(MotionEvent event) {
+        if (mScrollCache == null) {
+            return false;
+        }
+        final float x = event.getX();
+        final float y = event.getY();
+        final int action = event.getAction();
+        if ((mScrollCache.mScrollBarDraggingState == ScrollabilityCache.NOT_DRAGGING
+                && action != MotionEvent.ACTION_DOWN)
+                    || !event.isFromSource(InputDevice.SOURCE_MOUSE)
+                    || !event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)) {
+            mScrollCache.mScrollBarDraggingState = ScrollabilityCache.NOT_DRAGGING;
+            return false;
+        }
+
+        switch (action) {
+            case MotionEvent.ACTION_MOVE:
+                if (mScrollCache.mScrollBarDraggingState == ScrollabilityCache.NOT_DRAGGING) {
+                    return false;
+                }
+                if (mScrollCache.mScrollBarDraggingState
+                        == ScrollabilityCache.DRAGGING_VERTICAL_SCROLL_BAR) {
+                    final Rect bounds = mScrollCache.mScrollBarBounds;
+                    getVerticalScrollBarBounds(bounds);
+                    final int range = computeVerticalScrollRange();
+                    final int offset = computeVerticalScrollOffset();
+                    final int extent = computeVerticalScrollExtent();
+
+                    final int thumbLength = ScrollBarUtils.getThumbLength(
+                            bounds.height(), bounds.width(), extent, range);
+                    final int thumbOffset = ScrollBarUtils.getThumbOffset(
+                            bounds.height(), thumbLength, extent, range, offset);
+
+                    final float diff = y - mScrollCache.mScrollBarDraggingPos;
+                    final float maxThumbOffset = bounds.height() - thumbLength;
+                    final float newThumbOffset =
+                            Math.min(Math.max(thumbOffset + diff, 0.0f), maxThumbOffset);
+                    final int height = getHeight();
+                    if (Math.round(newThumbOffset) != thumbOffset && maxThumbOffset > 0
+                            && height > 0 && extent > 0) {
+                        final int newY = Math.round((range - extent)
+                                / ((float)extent / height) * (newThumbOffset / maxThumbOffset));
+                        if (newY != getScrollY()) {
+                            mScrollCache.mScrollBarDraggingPos = y;
+                            setScrollY(newY);
+                        }
+                    }
+                    return true;
+                }
+                if (mScrollCache.mScrollBarDraggingState
+                        == ScrollabilityCache.DRAGGING_HORIZONTAL_SCROLL_BAR) {
+                    final Rect bounds = mScrollCache.mScrollBarBounds;
+                    getHorizontalScrollBarBounds(bounds);
+                    final int range = computeHorizontalScrollRange();
+                    final int offset = computeHorizontalScrollOffset();
+                    final int extent = computeHorizontalScrollExtent();
+
+                    final int thumbLength = ScrollBarUtils.getThumbLength(
+                            bounds.width(), bounds.height(), extent, range);
+                    final int thumbOffset = ScrollBarUtils.getThumbOffset(
+                            bounds.width(), thumbLength, extent, range, offset);
+
+                    final float diff = x - mScrollCache.mScrollBarDraggingPos;
+                    final float maxThumbOffset = bounds.width() - thumbLength;
+                    final float newThumbOffset =
+                            Math.min(Math.max(thumbOffset + diff, 0.0f), maxThumbOffset);
+                    final int width = getWidth();
+                    if (Math.round(newThumbOffset) != thumbOffset && maxThumbOffset > 0
+                            && width > 0 && extent > 0) {
+                        final int newX = Math.round((range - extent)
+                                / ((float)extent / width) * (newThumbOffset / maxThumbOffset));
+                        if (newX != getScrollX()) {
+                            mScrollCache.mScrollBarDraggingPos = x;
+                            setScrollX(newX);
+                        }
+                    }
+                    return true;
+                }
+            case MotionEvent.ACTION_DOWN:
+                if (isOnVerticalScrollbarThumb(x, y)) {
+                    mScrollCache.mScrollBarDraggingState =
+                            ScrollabilityCache.DRAGGING_VERTICAL_SCROLL_BAR;
+                    mScrollCache.mScrollBarDraggingPos = y;
+                    return true;
+                }
+                if (isOnHorizontalScrollbarThumb(x, y)) {
+                    mScrollCache.mScrollBarDraggingState =
+                            ScrollabilityCache.DRAGGING_HORIZONTAL_SCROLL_BAR;
+                    mScrollCache.mScrollBarDraggingPos = x;
+                    return true;
+                }
+        }
+        mScrollCache.mScrollBarDraggingState = ScrollabilityCache.NOT_DRAGGING;
+        return false;
+    }
+
+    /**
      * Implement this method to handle touch screen motion events.
      * <p>
      * If this method is used to detect click actions, it is recommended that
@@ -10714,7 +10908,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE)
                     || (viewFlags & CONTEXT_CLICKABLE) == CONTEXT_CLICKABLE);
         }
-
         if (mTouchDelegate != null) {
             if (mTouchDelegate.onTouchEvent(event)) {
                 return true;
@@ -14275,6 +14468,45 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
+    private void getHorizontalScrollBarBounds(Rect bounds) {
+        final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
+        final boolean drawVerticalScrollBar = isVerticalScrollBarEnabled()
+                && !isVerticalScrollBarHidden();
+        final int size = getHorizontalScrollbarHeight();
+        final int verticalScrollBarGap = drawVerticalScrollBar ?
+                getVerticalScrollbarWidth() : 0;
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+        bounds.top = mScrollY + height - size - (mUserPaddingBottom & inside);
+        bounds.left = mScrollX + (mPaddingLeft & inside);
+        bounds.right = mScrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap;
+        bounds.bottom = bounds.top + size;
+    }
+
+    private void getVerticalScrollBarBounds(Rect bounds) {
+        final int inside = (mViewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
+        final int size = getVerticalScrollbarWidth();
+        int verticalScrollbarPosition = mVerticalScrollbarPosition;
+        if (verticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT) {
+            verticalScrollbarPosition = isLayoutRtl() ?
+                    SCROLLBAR_POSITION_LEFT : SCROLLBAR_POSITION_RIGHT;
+        }
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+        switch (verticalScrollbarPosition) {
+            default:
+            case SCROLLBAR_POSITION_RIGHT:
+                bounds.left = mScrollX + width - size - (mUserPaddingRight & inside);
+                break;
+            case SCROLLBAR_POSITION_LEFT:
+                bounds.left = mScrollX + (mUserPaddingLeft & inside);
+                break;
+        }
+        bounds.top = mScrollY + (mPaddingTop & inside);
+        bounds.right = bounds.left + size;
+        bounds.bottom = mScrollY + height - (mUserPaddingBottom & inside);
+    }
+
     /**
      * <p>Request the drawing of the horizontal and the vertical scrollbar. The
      * scrollbars are painted only if they have been awakened first.</p>
@@ -14322,80 +14554,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 cache.scrollBar.mutate().setAlpha(255);
             }
 
-
-            final int viewFlags = mViewFlags;
-
-            final boolean drawHorizontalScrollBar =
-                (viewFlags & SCROLLBARS_HORIZONTAL) == SCROLLBARS_HORIZONTAL;
-            final boolean drawVerticalScrollBar =
-                (viewFlags & SCROLLBARS_VERTICAL) == SCROLLBARS_VERTICAL
-                && !isVerticalScrollBarHidden();
+            final boolean drawHorizontalScrollBar = isHorizontalScrollBarEnabled();
+            final boolean drawVerticalScrollBar = isVerticalScrollBarEnabled()
+                    && !isVerticalScrollBarHidden();
 
             if (drawVerticalScrollBar || drawHorizontalScrollBar) {
-                final int width = mRight - mLeft;
-                final int height = mBottom - mTop;
-
                 final ScrollBarDrawable scrollBar = cache.scrollBar;
 
-                final int scrollX = mScrollX;
-                final int scrollY = mScrollY;
-                final int inside = (viewFlags & SCROLLBARS_OUTSIDE_MASK) == 0 ? ~0 : 0;
-
-                int left;
-                int top;
-                int right;
-                int bottom;
-
                 if (drawHorizontalScrollBar) {
-                    int size = scrollBar.getSize(false);
-                    if (size <= 0) {
-                        size = cache.scrollBarSize;
-                    }
-
                     scrollBar.setParameters(computeHorizontalScrollRange(),
                                             computeHorizontalScrollOffset(),
                                             computeHorizontalScrollExtent(), false);
-                    final int verticalScrollBarGap = drawVerticalScrollBar ?
-                            getVerticalScrollbarWidth() : 0;
-                    top = scrollY + height - size - (mUserPaddingBottom & inside);
-                    left = scrollX + (mPaddingLeft & inside);
-                    right = scrollX + width - (mUserPaddingRight & inside) - verticalScrollBarGap;
-                    bottom = top + size;
-                    onDrawHorizontalScrollBar(canvas, scrollBar, left, top, right, bottom);
+                    final Rect bounds = cache.mScrollBarBounds;
+                    getHorizontalScrollBarBounds(bounds);
+                    onDrawHorizontalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
+                            bounds.right, bounds.bottom);
                     if (invalidate) {
-                        invalidate(left, top, right, bottom);
+                        invalidate(bounds);
                     }
                 }
 
                 if (drawVerticalScrollBar) {
-                    int size = scrollBar.getSize(true);
-                    if (size <= 0) {
-                        size = cache.scrollBarSize;
-                    }
-
                     scrollBar.setParameters(computeVerticalScrollRange(),
                                             computeVerticalScrollOffset(),
                                             computeVerticalScrollExtent(), true);
-                    int verticalScrollbarPosition = mVerticalScrollbarPosition;
-                    if (verticalScrollbarPosition == SCROLLBAR_POSITION_DEFAULT) {
-                        verticalScrollbarPosition = isLayoutRtl() ?
-                                SCROLLBAR_POSITION_LEFT : SCROLLBAR_POSITION_RIGHT;
-                    }
-                    switch (verticalScrollbarPosition) {
-                        default:
-                        case SCROLLBAR_POSITION_RIGHT:
-                            left = scrollX + width - size - (mUserPaddingRight & inside);
-                            break;
-                        case SCROLLBAR_POSITION_LEFT:
-                            left = scrollX + (mUserPaddingLeft & inside);
-                            break;
-                    }
-                    top = scrollY + (mPaddingTop & inside);
-                    right = left + size;
-                    bottom = scrollY + height - (mUserPaddingBottom & inside);
-                    onDrawVerticalScrollBar(canvas, scrollBar, left, top, right, bottom);
+                    final Rect bounds = cache.mScrollBarBounds;
+                    getVerticalScrollBarBounds(bounds);
+                    onDrawVerticalScrollBar(canvas, scrollBar, bounds.left, bounds.top,
+                            bounds.right, bounds.bottom);
                     if (invalidate) {
-                        invalidate(left, top, right, bottom);
+                        invalidate(bounds);
                     }
                 }
             }
@@ -21335,6 +21523,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see PointerIcon
      */
     public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
+        if (isDraggingScrollBar() || isOnScrollbarThumb(x, y)) {
+            return PointerIcon.getSystemIcon(mContext, PointerIcon.STYLE_ARROW);
+        }
         return mPointerIcon;
     }
 
@@ -22605,6 +22796,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public int state = OFF;
 
         private int mLastColor;
+
+        public final Rect mScrollBarBounds = new Rect();
+
+        public static final int NOT_DRAGGING = 0;
+        public static final int DRAGGING_VERTICAL_SCROLL_BAR = 1;
+        public static final int DRAGGING_HORIZONTAL_SCROLL_BAR = 2;
+        public int mScrollBarDraggingState = NOT_DRAGGING;
+
+        public float mScrollBarDraggingPos = 0;
 
         public ScrollabilityCache(ViewConfiguration configuration, View host) {
             fadingEdgeLength = configuration.getScaledFadingEdgeLength();
