@@ -283,7 +283,7 @@ interface IPackageManager {
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
-    boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId);
+    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended, int userId);
     boolean isPackageSuspendedForUser(String packageName, int userId);
 
     /**

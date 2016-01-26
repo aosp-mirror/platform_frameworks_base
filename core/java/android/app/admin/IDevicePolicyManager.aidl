@@ -138,7 +138,7 @@ interface IDevicePolicyManager {
     boolean setDeviceOwnerLockScreenInfo(in ComponentName who, String deviceOwnerInfo);
     String getDeviceOwnerLockScreenInfo();
 
-    boolean setPackageSuspended(in ComponentName admin, String packageName, boolean suspended);
+    String[] setPackagesSuspended(in ComponentName admin, in String[] packageNames, boolean suspended);
     boolean getPackageSuspended(in ComponentName admin, String packageName);
 
     boolean installCaCert(in ComponentName admin, in byte[] certBuffer);

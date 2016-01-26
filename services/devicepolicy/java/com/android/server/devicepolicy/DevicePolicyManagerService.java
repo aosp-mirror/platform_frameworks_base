@@ -6924,7 +6924,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setPackageSuspended(ComponentName who, String packageName,
+    public String[] setPackagesSuspended(ComponentName who, String[] packageNames,
             boolean suspended) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
@@ -6933,15 +6933,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
-                return mIPackageManager.setPackageSuspendedAsUser(
-                        packageName, suspended, callingUserId);
+                return mIPackageManager.setPackagesSuspendedAsUser(
+                        packageNames, suspended, callingUserId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
-            return false;
+            return packageNames;
         }
     }
 

@@ -3472,27 +3472,31 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owners for setting the package suspended for this user.
-     * A suspended package will not be started by the package manager, its notifications will
-     * be hidden and it will not show up in recents. The package must already be installed.
+     * Called by device or profile owners to suspend packages for this user.
+     *
+     * <p>A suspended package will not be able to start activities. Its notifications will
+     * be hidden, it will not show up in recents, will not be able to show toasts or dialogs
+     * or ring the device.
+     *
+     * <p>The package must already be installed.
      *
      * @param admin The name of the admin component to check.
-     * @param packageName The package name of the app to suspend or unsuspend.
-     * @param suspended If set to {@code true} than the package will be suspended, if set to
-     * {@code false} the package will be unsuspended.
-     * @return boolean {@code true} if the operation was successfully performed, {@code false}
-     * otherwise.
+     * @param packageNames The package names to suspend or unsuspend.
+     * @param suspended If set to {@code true} than the packages will be suspended, if set to
+     * {@code false} the packages will be unsuspended.
+     * @return an array of package names for which the suspended status is not set as requested in
+     * this method.
      */
-    public boolean setPackageSuspended(@NonNull ComponentName admin, String packageName,
+    public String[] setPackagesSuspended(@NonNull ComponentName admin, String[] packageNames,
             boolean suspended) {
         if (mService != null) {
             try {
-                return mService.setPackageSuspended(admin, packageName, suspended);
+                return mService.setPackagesSuspended(admin, packageNames, suspended);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed talking with device policy service", re);
             }
         }
-        return false;
+        return packageNames;
     }
 
     /**
@@ -3501,7 +3505,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to retrieve the suspended status of.
      * @return {@code true} if the package is suspended or {@code false} if the package is not
-     * suspended, could not be found or an error occured.
+     * suspended, could not be found or an error occurred.
      */
     public boolean getPackageSuspended(@NonNull ComponentName admin, String packageName) {
         if (mService != null) {
