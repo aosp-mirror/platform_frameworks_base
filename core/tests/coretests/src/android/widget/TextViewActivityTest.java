@@ -159,6 +159,22 @@ public class TextViewActivityTest extends ActivityInstrumentationTestCase2<TextV
     }
 
     @SmallTest
+    public void testDragAndDrop() throws Exception {
+        final String text = "abc def ghi.";
+        onView(withId(R.id.textview)).perform(click());
+        onView(withId(R.id.textview)).perform(typeTextIntoFocusedView(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf("e")));
+
+        onView(withId(R.id.textview)).perform(
+                longPressAndDragOnText(text.indexOf("e"), text.length()));
+
+        onView(withId(R.id.textview)).check(matches(withText("abc ghi.def")));
+        onView(withId(R.id.textview)).check(hasSelection(""));
+        assertNoSelectionHandles();
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex("abc ghi.def".length()));
+    }
+
+    @SmallTest
     public void testDoubleTapToSelect() throws Exception {
         final String helloWorld = "Hello SuetYi!";
         onView(withId(R.id.textview)).perform(click());
