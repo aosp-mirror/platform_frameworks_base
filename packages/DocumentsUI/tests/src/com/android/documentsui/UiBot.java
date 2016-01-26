@@ -17,7 +17,11 @@
 package com.android.documentsui;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
+import android.content.Context;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
 import android.support.test.uiautomator.UiDevice;
@@ -28,11 +32,13 @@ import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -48,10 +54,12 @@ class UiBot {
             By.desc(Pattern.compile("^Deleting [0-9]+ file.+"));
 
     private UiDevice mDevice;
+    private Context mContext;
     private int mTimeout;
 
-    public UiBot(UiDevice device, int timeout) {
+    public UiBot(UiDevice device, Context context, int timeout) {
         mDevice = device;
+        mContext = context;
         mTimeout = timeout;
     }
 
@@ -109,25 +117,40 @@ class UiBot {
         }
     }
 
-    UiObject findDocument(String label) throws UiObjectNotFoundException {
-        final UiSelector docList = new UiSelector().resourceId(
-                "com.android.documentsui:id/container_directory").childSelector(
-                        new UiSelector().resourceId("com.android.documentsui:id/list"));
-
-        // Wait for the first list item to appear
-        new UiObject(docList.childSelector(new UiSelector())).waitForExists(mTimeout);
-
-        // new UiScrollable(docList).scrollIntoView(new UiSelector().text(label));
-        return mDevice.findObject(docList.childSelector(new UiSelector().text(label)));
+    void assertMenuEnabled(int id, boolean enabled) {
+        UiObject2 menu= findMenuWithName(mContext.getString(id));
+        assertNotNull(menu);
+        assertEquals(enabled, menu.isEnabled());
     }
 
-    boolean hasDocuments(String... labels) throws UiObjectNotFoundException {
-        for (String label : labels) {
-            if (!findDocument(label).exists()) {
-                return false;
-            }
+    void assertDocumentsCount(int count) throws UiObjectNotFoundException {
+        UiObject docsList = findDocumentsList();
+        assertEquals(count, docsList.getChildCount());
+    }
+
+    void assertDocumentsCount(String dir, int count) throws UiObjectNotFoundException {
+        openRoot(dir);
+        UiObject docsList = findDocumentsList();
+        assertEquals(count, docsList.getChildCount());
+    }
+
+    void assertSearchTextField(boolean isFocused, String query)
+            throws UiObjectNotFoundException {
+        UiObject textField = findSearchViewTextField();
+        UiObject searchIcon = findSearchViewIcon();
+
+        assertFalse(searchIcon.exists());
+        assertTrue(textField.exists());
+        assertEquals(isFocused, textField.isFocused());
+        if(query != null) {
+            assertEquals(query, textField.getText());
         }
-        return true;
+    }
+
+    void assertSearchTextFiledAndIcon(boolean searchTextFieldExists, boolean searchIconExists) {
+        assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
+        assertEquals(searchIconExists, findSearchViewIcon().exists());
+
     }
 
     void assertHasDocuments(String... labels) throws UiObjectNotFoundException {
@@ -143,8 +166,75 @@ class UiBot {
         }
     }
 
+    void assertDocument(String name, boolean exists) throws UiObjectNotFoundException {
+        UiObject doc = findDocument(name);
+        assertEquals(exists, doc.exists());
+    }
+
+    void assertDocumentsCountOnList(boolean exists, int count) throws UiObjectNotFoundException {
+        UiObject docsList = findDocumentsList();
+        assertEquals(exists, docsList.exists());
+        if(docsList.exists()) {
+            assertEquals(count, docsList.getChildCount());
+        }
+    }
+
+    void assertMessageTextView(String message) throws UiObjectNotFoundException {
+        UiObject messageTextView = findMessageTextView();
+        assertTrue(messageTextView.exists());
+
+        String msg = String.valueOf(message);
+        assertEquals(String.format(msg, "TEST_ROOT_0"), messageTextView.getText());
+
+    }
+    void assertSnackbar(int id) {
+        assertNotNull(getSnackbar(mContext.getString(id)));
+    }
+
     void clickDocument(String label) throws UiObjectNotFoundException {
         findDocument(label).click();
+    }
+
+    void openSearchView() throws UiObjectNotFoundException {
+        UiObject searchView = findSearchView();
+        searchView.click();
+        assertTrue(searchView.exists());
+    }
+
+    void setSearchQuery(String query) throws UiObjectNotFoundException {
+        UiObject searchView = findSearchView();
+        assertTrue(searchView.exists());
+        UiObject searchTextField = findSearchViewTextField();
+        searchTextField.setText(query);
+        assertSearchTextField(true, query);
+    }
+
+    UiObject openOverflowMenu() throws UiObjectNotFoundException {
+        UiObject obj = findMenuMoreOptions();
+        obj.click();
+        mDevice.waitForIdle(mTimeout);
+        return obj;
+    }
+
+    void openDialog(int id) {
+        UiObject2 menu= findMenuWithName(mContext.getString(id));
+        assertNotNull(menu);
+        assertEquals(true, menu.isEnabled());
+        menu.click();
+    }
+
+    void setDialogText(String text) throws UiObjectNotFoundException {
+        findDialogEditText().setText(text);
+    }
+
+    UiObject selectDocument(String label) throws UiObjectNotFoundException {
+        UiObject doc = findDocument(label);
+        doc.longClick();
+        return doc;
+    }
+
+    UiObject2 getSnackbar(String message) {
+        return mDevice.wait(Until.findObject(By.text(message)), mTimeout);
     }
 
     void waitForDeleteSnackbar() {
@@ -200,6 +290,27 @@ class UiBot {
         return mDevice.findObject(selector);
     }
 
+    UiObject findDocument(String label) throws UiObjectNotFoundException {
+        final UiSelector docList = new UiSelector().resourceId(
+                "com.android.documentsui:id/container_directory").childSelector(
+                        new UiSelector().resourceId("com.android.documentsui:id/list"));
+
+        // Wait for the first list item to appear
+        new UiObject(docList.childSelector(new UiSelector())).waitForExists(mTimeout);
+
+        // new UiScrollable(docList).scrollIntoView(new UiSelector().text(label));
+        return mDevice.findObject(docList.childSelector(new UiSelector().text(label)));
+    }
+
+    boolean hasDocuments(String... labels) throws UiObjectNotFoundException {
+        for (String label : labels) {
+            if (!findDocument(label).exists()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     UiObject findDocumentsList() {
         return findObject(
                 "com.android.documentsui:id/container_directory",
@@ -222,6 +333,62 @@ class UiBot {
         return findObject(
                 "com.android.documentsui:id/container_directory",
                 "com.android.documentsui:id/message");
+    }
+
+    UiObject findActionModeBar() {
+        return findObject("android:id/action_mode_bar");
+    }
+
+    UiObject findDialogEditText() {
+        return findObject("android:id/content", "android:id/text1");
+    }
+
+    UiObject findRenameDialogOkButton() {
+        return findObject("android:id/content", "android:id/button1");
+    }
+
+    UiObject findRenameDialogCancelButton() {
+        return findObject("android:id/content", "android:id/button2");
+    }
+
+    UiObject findMenuLabelWithName(String label) {
+        UiSelector selector = new UiSelector().text(label);
+        return mDevice.findObject(selector);
+    }
+
+    UiObject2 findMenuWithName(String label) {
+        List<UiObject2> menuItems = mDevice.findObjects(By.clazz("android.widget.LinearLayout"));
+        Iterator<UiObject2> it = menuItems.iterator();
+
+        UiObject2 menuItem = null;
+        while(it.hasNext()) {
+            menuItem = it.next();
+            UiObject2 text = menuItem.findObject(By.text(label));
+            if(text != null) {
+                break;
+            }
+        }
+        return menuItem;
+    }
+
+    UiObject findMenuMoreOptions() {
+        UiSelector selector = new UiSelector().className("android.widget.ImageButton")
+                .descriptionContains("More options");
+        //TODO: use the system string ? android.R.string.action_menu_overflow_description
+        return mDevice.findObject(selector);
+    }
+
+    // Indirect way to detect the keyboard.
+    boolean isKeyboardPresent() {
+        InputMethodManager inputManager = (InputMethodManager) mContext
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        return inputManager.isAcceptingText();
+    }
+
+    void dismissKeyboardIfPresent() {
+        if(isKeyboardPresent()) {
+            mDevice.pressBack();
+        }
     }
 
 }

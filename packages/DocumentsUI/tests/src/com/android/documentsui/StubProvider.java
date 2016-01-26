@@ -16,6 +16,10 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.TAG;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ProviderInfo;
@@ -34,6 +38,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -66,10 +71,13 @@ public class StubProvider extends DocumentsProvider {
             = "com.android.documentsui.stubprovider.STREAM_TYPES";
     public static final String EXTRA_CONTENT = "com.android.documentsui.stubprovider.CONTENT";
 
+    public static final String EXTRA_FLAGS = "com.android.documentsui.stubprovider.FLAGS";
+    public static final String EXTRA_PARENT_ID = "com.android.documentsui.stubprovider.PARENT";
+
     private static final String TAG = "StubProvider";
 
     private static final String STORAGE_SIZE_KEY = "documentsui.stubprovider.size";
-    private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100;  // 100 MB.
+    private static int DEFAULT_ROOT_SIZE = 1024 * 1024 * 100; // 100 MB.
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_TITLE, Root.COLUMN_DOCUMENT_ID,
@@ -176,44 +184,8 @@ public class StubProvider extends DocumentsProvider {
     @Override
     public String createDocument(String parentId, String mimeType, String displayName)
             throws FileNotFoundException {
-
-        final StubDocument parent = mStorage.get(parentId);
-        if (parent == null) {
-            throw new IllegalArgumentException(
-                    "Can't create file " + displayName + " in null parent.");
-        }
-        if (!parent.file.isDirectory()) {
-            throw new IllegalArgumentException(
-                    "Can't create file " + displayName + " inside non-directory parent "
-                    + parent.file.getName());
-        }
-
-        final File file = new File(parent.file, displayName);
-        if (file.exists()) {
-            throw new FileNotFoundException(
-                    "Duplicate file names not supported for " + file);
-        }
-
-        if (mimeType.equals(Document.MIME_TYPE_DIR)) {
-            if (!file.mkdirs()) {
-                throw new FileNotFoundException(
-                        "Failed to create directory(s): " + file);
-            }
-            Log.i(TAG, "Created new directory: " + file);
-        } else {
-            boolean created = false;
-            try {
-                created = file.createNewFile();
-            } catch (IOException e) {
-                // We'll throw an FNF exception later :)
-                Log.e(TAG, "createNewFile operation failed for file: " + file, e);
-            }
-            if (!created) {
-                throw new FileNotFoundException(
-                        "createNewFile operation failed for: " + file);
-            }
-            Log.i(TAG, "Created new file: " + file);
-        }
+        StubDocument parent = mStorage.get(parentId);
+        File file = createFile(parent, mimeType, displayName);
 
         final StubDocument document = StubDocument.createRegularDocument(file, mimeType, parent);
         mStorage.put(document.documentId, document);
@@ -300,6 +272,45 @@ public class StubProvider extends DocumentsProvider {
             }
         }
         return result;
+    }
+
+    @Override
+    public String renameDocument(String documentId, String displayName)
+            throws FileNotFoundException {
+
+        StubDocument oldDoc = mStorage.get(documentId);
+
+        File before = oldDoc.file;
+        File after = new File(before.getParentFile(), displayName);
+
+        if (after.exists()) {
+            throw new IllegalStateException("Already exists " + after);
+        }
+
+        boolean result = before.renameTo(after);
+
+        if (!result) {
+            throw new IllegalStateException("Failed to rename to " + after);
+        }
+
+        StubDocument newDoc = StubDocument.createRegularDocument(after, oldDoc.mimeType,
+                mStorage.get(oldDoc.parentId));
+
+        mStorage.remove(documentId);
+        notifyParentChanged(oldDoc.parentId);
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildDocumentUri(mAuthority, oldDoc.documentId), null, false);
+
+        mStorage.put(newDoc.documentId, newDoc);
+        notifyParentChanged(newDoc.parentId);
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildDocumentUri(mAuthority, newDoc.documentId), null, false);
+
+        if (!TextUtils.equals(documentId, newDoc.documentId)) {
+            return newDoc.documentId;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -468,6 +479,9 @@ public class StubProvider extends DocumentsProvider {
             case "simulateReadErrorsForFile":
                 simulateReadErrorsForFile(arg);
                 return null;
+            case "createDocumentWithFlags":
+                Bundle bundle = dispatchCreateDocumentWithFlags(extras);
+                return bundle;
             default:
                 return super.call(method, arg, extras);
         }
@@ -491,6 +505,81 @@ public class StubProvider extends DocumentsProvider {
         }
 
         return null;
+    }
+
+    private Bundle dispatchCreateDocumentWithFlags(Bundle extras) {
+        String rootId = extras.getString(EXTRA_PARENT_ID);
+        String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
+        String name = extras.getString(Document.COLUMN_DISPLAY_NAME);
+        int flags = extras.getInt(EXTRA_FLAGS);
+
+        Bundle out = new Bundle();
+        String documentId = null;
+        try {
+            documentId = createDocument(rootId, mimeType, name, flags);
+            Uri uri = DocumentsContract.buildDocumentUri(mAuthority, documentId);
+            out.putParcelable(DocumentsContract.EXTRA_URI, uri);
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "Cretaing document with flags failed" + name);
+        }
+        return out;
+    }
+
+    public String createDocument(String parentId, String mimeType, String displayName, int flags)
+            throws FileNotFoundException {
+
+        StubDocument parent = mStorage.get(parentId);
+        File file = createFile(parent, mimeType, displayName);
+
+        final StubDocument document = StubDocument.createDocumentWithFlags(file, mimeType, parent,
+                flags);
+        mStorage.put(document.documentId, document);
+        Log.d(TAG, "Created document " + document.documentId);
+        notifyParentChanged(document.parentId);
+        getContext().getContentResolver().notifyChange(
+                DocumentsContract.buildDocumentUri(mAuthority, document.documentId),
+                null, false);
+
+        return document.documentId;
+    }
+
+    private File createFile(StubDocument parent, String mimeType, String displayName)
+            throws FileNotFoundException {
+        if (parent == null) {
+            throw new IllegalArgumentException(
+                    "Can't create file " + displayName + " in null parent.");
+        }
+        if (!parent.file.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Can't create file " + displayName + " inside non-directory parent "
+                            + parent.file.getName());
+        }
+
+        final File file = new File(parent.file, displayName);
+        if (file.exists()) {
+            throw new FileNotFoundException(
+                    "Duplicate file names not supported for " + file);
+        }
+
+        if (mimeType.equals(Document.MIME_TYPE_DIR)) {
+            if (!file.mkdirs()) {
+                throw new FileNotFoundException("Failed to create directory(s): " + file);
+            }
+            Log.i(TAG, "Created new directory: " + file);
+        } else {
+            boolean created = false;
+            try {
+                created = file.createNewFile();
+            } catch (IOException e) {
+                // We'll throw an FNF exception later :)
+                Log.e(TAG, "createNewFile operation failed for file: " + file, e);
+            }
+            if (!created) {
+                throw new FileNotFoundException("createNewFile operation failed for: " + file);
+            }
+            Log.i(TAG, "Created new file: " + file);
+        }
+        return file;
     }
 
     private void configure(String arg, Bundle extras) {
@@ -557,7 +646,7 @@ public class StubProvider extends DocumentsProvider {
         }
         final StubDocument document = StubDocument.createRegularDocument(file, mimeType, parent);
         mStorage.put(document.documentId, document);
-        return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
+        return DocumentsContract.buildDocumentUri(mAuthority, document.documentId);
     }
 
     @VisibleForTesting
@@ -573,7 +662,7 @@ public class StubProvider extends DocumentsProvider {
         final StubDocument document = StubDocument.createVirtualDocument(
                 file, mimeType, streamTypes, parent);
         mStorage.put(document.documentId, document);
-        return DocumentsContract.buildDocumentUri(mAuthority,  document.documentId);
+        return DocumentsContract.buildDocumentUri(mAuthority, document.documentId);
     }
 
     @VisibleForTesting
@@ -643,9 +732,8 @@ public class StubProvider extends DocumentsProvider {
         public final String parentId;
         public final RootInfo rootInfo;
 
-        private StubDocument(
-                 File file, String mimeType, List<String> streamTypes, int flags,
-                 StubDocument parent) {
+        private StubDocument(File file, String mimeType, List<String> streamTypes, int flags,
+                StubDocument parent) {
             this.file = file;
             this.documentId = getDocumentIdForFile(file);
             this.mimeType = mimeType;
@@ -671,12 +759,17 @@ public class StubProvider extends DocumentsProvider {
 
         public static StubDocument createRegularDocument(
                 File file, String mimeType, StubDocument parent) {
-            int flags = Document.FLAG_SUPPORTS_DELETE;
+            int flags = Document.FLAG_SUPPORTS_DELETE | Document.FLAG_SUPPORTS_RENAME;
             if (file.isDirectory()) {
                 flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
             } else {
                 flags |= Document.FLAG_SUPPORTS_WRITE;
             }
+            return new StubDocument(file, mimeType, new ArrayList<String>(), flags, parent);
+        }
+
+        public static StubDocument createDocumentWithFlags(
+                File file, String mimeType, StubDocument parent, int flags) {
             return new StubDocument(file, mimeType, new ArrayList<String>(), flags, parent);
         }
 
