@@ -97,7 +97,8 @@ public class WindowManagerProxy {
         @Override
         public void run() {
             try {
-                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, null, true);
+                ActivityManagerNative.getDefault().resizeStack(DOCKED_STACK_ID, null, true, false,
+                        false);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to resize stack: " + e);
             }

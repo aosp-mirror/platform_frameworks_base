@@ -47,7 +47,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -79,7 +78,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 public class Am extends BaseCommand {
@@ -159,6 +157,7 @@ public class Am extends BaseCommand {
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack resize-animated <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack resize-docked-stack <LEFT,TOP,RIGHT,BOTTOM> [<TASK_LEFT,TASK_TOP,TASK_RIGHT,TASK_BOTTOM>]\n" +
                 "       am stack size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]\n" +
                 "       am stack move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
@@ -1688,6 +1687,9 @@ public class Am extends BaseCommand {
             case "resize":
                 runStackResize();
                 break;
+            case "resize-animated":
+                runStackResizeAnimated();
+                break;
             case "resize-docked-stack":
                 runStackResizeDocked();
                 break;
@@ -1756,7 +1758,18 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
-        resizeStack(stackId, bounds, 0);
+        resizeStack(stackId, bounds, 0, false);
+    }
+
+    private void runStackResizeAnimated() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
+        resizeStack(stackId, bounds, 0, true);
     }
 
     private void runStackResizeDocked() throws Exception {
@@ -1773,14 +1786,15 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void resizeStack(int stackId, Rect bounds, int delayMs) throws Exception {
+    private void resizeStack(int stackId, Rect bounds, int delayMs, boolean animate)
+            throws Exception {
         if (bounds == null) {
             showError("Error: invalid input bounds");
             return;
         }
 
         try {
-            mAm.resizeStack(stackId, bounds, false);
+            mAm.resizeStack(stackId, bounds, false, false, animate);
             Thread.sleep(delayMs);
         } catch (RemoteException e) {
             showError("Error: resizing stack " + e);
@@ -1894,7 +1908,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, currentPoint - minPoint);
             currentPoint -= maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
         }
 
         System.out.println("Growing docked stack side=" + side);
@@ -1902,7 +1916,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, maxPoint - currentPoint);
             currentPoint += maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
         }
 
         System.out.println("Back to Original size side=" + side);
@@ -1910,7 +1924,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, currentPoint - startPoint);
             currentPoint -= maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
         }
     }
 

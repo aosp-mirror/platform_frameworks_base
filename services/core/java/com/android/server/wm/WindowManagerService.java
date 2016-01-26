@@ -157,6 +157,7 @@ import java.util.List;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -642,6 +643,9 @@ public class WindowManagerService extends IWindowManager.Stub
     int mTransactionSequence;
 
     final WindowAnimator mAnimator;
+
+    private final BoundsAnimationController mBoundsAnimationController =
+            new BoundsAnimationController();
 
     SparseArray<Task> mTaskIdToTask = new SparseArray<>();
 
@@ -2848,11 +2852,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             win.prepareWindowToDisplayDuringRelayout(outConfig);
         }
-        if ((attrChanges& LayoutParams.FORMAT_CHANGED) != 0) {
-            // If the format can be changed in place yaay!
-            // If not, fall back to a surface re-build
+        if ((attrChanges & LayoutParams.FORMAT_CHANGED) != 0) {
+            // If the format can't be changed in place, preserve the old surface until the app draws
+            // on the new one. This prevents blinking when we change elevation of freeform and
+            // pinned windows.
             if (!winAnimator.tryChangeFormatInPlaceLocked()) {
-                winAnimator.destroySurfaceLocked();
+                winAnimator.preserveSurfaceLocked();
                 result |= RELAYOUT_RES_SURFACE_CHANGED
                         | WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
             }
@@ -8085,7 +8090,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case RESIZE_STACK: {
                     try {
-                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj, msg.arg2 == 1);
+                        mActivityManager.resizeStack(msg.arg1, (Rect) msg.obj, msg.arg2 == 1, false,
+                                false);
                     } catch (RemoteException e) {
                         // This will not happen since we are in the same process.
                     }
@@ -10270,6 +10276,31 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController().setResizeDimLayer(
                     visible, targetStackId, alpha);
+        }
+    }
+
+    public void animateResizePinnedStack(final Rect bounds) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(PINNED_STACK_ID);
+            if (stack == null) {
+                Slog.w(TAG, "animateResizePinnedStack: stackId " + PINNED_STACK_ID + " not found.");
+                return;
+            }
+            final ArrayList<Task> tasks = stack.getTasks();
+            if (tasks.isEmpty()) {
+                Slog.w(TAG, "animateResizePinnedStack: pinned stack doesn't have any tasks.");
+                return;
+            }
+            final Task task = tasks.get(tasks.size() - 1);
+            task.setDragResizing(true);
+            final Rect originalBounds = new Rect();
+            stack.getBounds(originalBounds);
+            UiThread.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mBoundsAnimationController.animateBounds(stack, originalBounds, bounds);
+                }
+            });
         }
     }
 

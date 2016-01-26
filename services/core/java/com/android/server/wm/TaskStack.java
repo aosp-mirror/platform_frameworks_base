@@ -20,6 +20,7 @@ import android.app.ActivityManager.StackId;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.RemoteException;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -47,7 +48,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT
 import static com.android.server.wm.WindowManagerService.H.RESIZE_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-public class TaskStack implements DimLayer.DimLayerUser {
+public class TaskStack implements DimLayer.DimLayerUser,
+        BoundsAnimationController.AnimateBoundsUser {
 
     // If the stack should be resized to fullscreen.
     private static final boolean FULLSCREEN = true;
@@ -803,5 +805,33 @@ public class TaskStack implements DimLayer.DimLayerUser {
             }
         }
         return false;
+    }
+
+    @Override  // AnimatesBounds
+    public boolean setSize(Rect bounds) {
+        synchronized (mService.mWindowMap) {
+            if (mDisplayContent == null) {
+                return false;
+            }
+        }
+        try {
+            mService.mActivityManager.resizeStack(mStackId, bounds, false, true, false);
+        } catch (RemoteException e) {
+        }
+        return true;
+    }
+
+    @Override  // AnimatesBounds
+    public void finishBoundsAnimation() {
+        synchronized (mService.mWindowMap) {
+            if (mTasks.isEmpty()) {
+                return;
+            }
+            final Task task = mTasks.get(mTasks.size() - 1);
+            if (task != null) {
+                task.setDragResizing(false);
+                mService.requestTraversal();
+            }
+        }
     }
 }

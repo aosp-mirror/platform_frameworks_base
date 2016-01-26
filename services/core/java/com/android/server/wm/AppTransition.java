@@ -134,7 +134,7 @@ public class AppTransition implements Dump {
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.5f;
 
-    private static final int DEFAULT_APP_TRANSITION_DURATION = 336;
+    static final int DEFAULT_APP_TRANSITION_DURATION = 336;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
     private static final int THUMBNAIL_APP_TRANSITION_ALPHA_DURATION = 336;
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
