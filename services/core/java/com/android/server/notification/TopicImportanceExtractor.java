@@ -42,7 +42,7 @@ public class TopicImportanceExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int topicImportance = mConfig.getTopicImportance(record.sbn.getPackageName(),
+        final int topicImportance = mConfig.getImportance(record.sbn.getPackageName(),
                 record.sbn.getUid(), record.sbn.getNotification().getTopic());
         record.setTopicImportance(topicImportance);
 

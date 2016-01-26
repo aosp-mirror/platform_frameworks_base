@@ -164,6 +164,8 @@ public class RankingHelper implements RankingConfig {
                             r = getOrCreateRecord(name, uid);
                         }
                         r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                        r.priority = priority;
+                        r.visibility = vis;
 
                         // Migrate package level settings to the default topic.
                         // Might be overwritten by parseTopics.
@@ -245,7 +247,15 @@ public class RankingHelper implements RankingConfig {
             }
             out.startTag(null, TAG_PACKAGE);
             out.attribute(null, ATT_NAME, r.pkg);
-            out.attribute(null, ATT_IMPORTANCE, Integer.toString(r.importance));
+            if (r.importance != DEFAULT_IMPORTANCE) {
+                out.attribute(null, ATT_IMPORTANCE, Integer.toString(r.importance));
+            }
+            if (r.priority != DEFAULT_PRIORITY) {
+                out.attribute(null, ATT_PRIORITY, Integer.toString(r.priority));
+            }
+            if (r.visibility != DEFAULT_VISIBILITY) {
+                out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
+            }
 
             if (!forBackup) {
                 out.attribute(null, ATT_UID, Integer.toString(r.uid));
@@ -373,66 +383,109 @@ public class RankingHelper implements RankingConfig {
     public List<Notification.Topic> getTopics(String packageName, int uid) {
         final Record r = getOrCreateRecord(packageName, uid);
         List<Notification.Topic> topics = new ArrayList<>();
-        for (Topic t :  r.topics.values()) {
+        for (Topic t : r.topics.values()) {
             topics.add(t.topic);
         }
         return topics;
     }
 
+    /**
+     * Gets priority. If a topic is given, returns the priority of that topic. Otherwise, the
+     * priority of the app.
+     */
     @Override
-    public int getTopicPriority(String packageName, int uid, Notification.Topic topic) {
+    public int getPriority(String packageName, int uid, Notification.Topic topic) {
         final Record r = getOrCreateRecord(packageName, uid);
+        if (topic == null) {
+            return r.priority;
+        }
         return getOrCreateTopic(r, topic).priority;
     }
 
+    /**
+     * Sets priority. If a topic is given, sets the priority of that topic. If not,
+     * sets the default priority for all new topics that appear in the future, and resets
+     * the priority of all current topics.
+     */
     @Override
-    public void setTopicPriority(String packageName, int uid, Notification.Topic topic,
+    public void setPriority(String packageName, int uid, Notification.Topic topic,
             int priority) {
         final Record r = getOrCreateRecord(packageName, uid);
-        getOrCreateTopic(r, topic).priority = priority;
-        updateConfig();
-    }
-
-    @Override
-    public int getTopicVisibilityOverride(String packageName, int uid, Notification.Topic topic) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        return getOrCreateTopic(r, topic).visibility;
-    }
-
-    @Override
-    public void setTopicVisibilityOverride(String pkgName, int uid, Notification.Topic topic,
-        int visibility) {
-        final Record r = getOrCreateRecord(pkgName, uid);
-        getOrCreateTopic(r, topic).visibility = visibility;
-        updateConfig();
-    }
-
-    @Override
-    public int getTopicImportance(String packageName, int uid, Notification.Topic topic) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        return getOrCreateTopic(r, topic).importance;
-    }
-
-    @Override
-    public void setTopicImportance(String pkgName, int uid, Notification.Topic topic,
-            int importance) {
-        final Record r = getOrCreateRecord(pkgName, uid);
-        getOrCreateTopic(r, topic).importance = importance;
+        if (topic == null) {
+            r.priority = priority;
+            for (Topic t : r.topics.values()) {
+                t.priority = priority;
+            }
+        } else {
+            getOrCreateTopic(r, topic).priority = priority;
+        }
         updateConfig();
     }
 
     /**
-     * Sets the default importance for all new topics that appear in the future, and resets
+     * Gets visual override. If a topic is given, returns the override of that topic. Otherwise, the
+     * override of the app.
+     */
+    @Override
+    public int getVisibilityOverride(String packageName, int uid, Notification.Topic topic) {
+        final Record r = getOrCreateRecord(packageName, uid);
+        if (topic == null) {
+            return r.visibility;
+        }
+        return getOrCreateTopic(r, topic).visibility;
+    }
+
+    /**
+     * Sets visibility override. If a topic is given, sets the override of that topic. If not,
+     * sets the default override for all new topics that appear in the future, and resets
+     * the override of all current topics.
+     */
+    @Override
+    public void setVisibilityOverride(String pkgName, int uid, Notification.Topic topic,
+        int visibility) {
+        final Record r = getOrCreateRecord(pkgName, uid);
+        if (topic == null) {
+            r.visibility = visibility;
+            for (Topic t : r.topics.values()) {
+                t.visibility = visibility;
+            }
+        } else {
+            getOrCreateTopic(r, topic).visibility = visibility;
+        }
+        updateConfig();
+    }
+
+    /**
+     * Gets importance. If a topic is given, returns the importance of that topic. Otherwise, the
+     * importance of the app.
+     */
+    @Override
+    public int getImportance(String packageName, int uid, Notification.Topic topic) {
+        final Record r = getOrCreateRecord(packageName, uid);
+        if (topic == null) {
+            return r.importance;
+        }
+        return getOrCreateTopic(r, topic).importance;
+    }
+
+    /**
+     * Sets importance. If a topic is given, sets the importance of that topic. If not, sets the
+     * default importance for all new topics that appear in the future, and resets
      * the importance of all current topics (unless the app is being blocked).
      */
     @Override
-    public void setAppImportance(String pkgName, int uid, int importance) {
+    public void setImportance(String pkgName, int uid, Notification.Topic topic,
+            int importance) {
         final Record r = getOrCreateRecord(pkgName, uid);
-        r.importance = importance;
-        if (Ranking.IMPORTANCE_NONE != importance) {
-            for (Topic t : r.topics.values()) {
-                t.importance = importance;
+        if (topic == null) {
+            r.importance = importance;
+            if (Ranking.IMPORTANCE_NONE != importance) {
+                for (Topic t : r.topics.values()) {
+                    t.importance = importance;
+                }
             }
+        } else {
+            getOrCreateTopic(r, topic).importance = importance;
         }
         updateConfig();
     }
@@ -459,6 +512,8 @@ public class RankingHelper implements RankingConfig {
         } else {
             t = new Topic(topic);
             t.importance = r.importance;
+            t.priority = r.priority;
+            t.visibility = r.visibility;
             r.topics.put(topic.getId(), t);
             return t;
         }
@@ -503,8 +558,18 @@ public class RankingHelper implements RankingConfig {
                 pw.print(" (");
                 pw.print(r.uid == Record.UNKNOWN_UID ? "UNKNOWN_UID" : Integer.toString(r.uid));
                 pw.print(')');
-                pw.print(" importance=");
-                pw.print(Ranking.importanceToString(r.importance));
+                if (r.importance != DEFAULT_IMPORTANCE) {
+                    pw.print(" importance=");
+                    pw.print(Ranking.importanceToString(r.importance));
+                }
+                if (r.priority != DEFAULT_PRIORITY) {
+                    pw.print(" priority=");
+                    pw.print(Ranking.importanceToString(r.priority));
+                }
+                if (r.visibility != DEFAULT_VISIBILITY) {
+                    pw.print(" visibility=");
+                    pw.print(Ranking.importanceToString(r.visibility));
+                }
                 pw.println();
                 for (Topic t : r.topics.values()) {
                     pw.print(prefix);
@@ -561,6 +626,8 @@ public class RankingHelper implements RankingConfig {
         String pkg;
         int uid = UNKNOWN_UID;
         int importance = DEFAULT_IMPORTANCE;
+        int priority = DEFAULT_PRIORITY;
+        int visibility = DEFAULT_VISIBILITY;
         Map<String, Topic> topics = new ArrayMap<>();
    }
 

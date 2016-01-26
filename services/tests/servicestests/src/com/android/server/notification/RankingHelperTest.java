@@ -155,16 +155,12 @@ public class RankingHelperTest extends AndroidTestCase {
 
     @SmallTest
     public void testTopicImportanceExtractor() throws Exception {
-        mHelper.setTopicImportance("package", 0, new Notification.Topic("A", "a"),
-                IMPORTANCE_MAX);
+        mHelper.setImportance("package", 0, new Notification.Topic("A", "a"), IMPORTANCE_MAX);
         // There is no B. There never was a b. Moving on...
-        mHelper.setTopicImportance("package", 0, new Notification.Topic("C", "c"),
-                IMPORTANCE_HIGH);
-        mHelper.setTopicImportance("package", 0, new Notification.Topic("D", "d"),
-                IMPORTANCE_LOW);
+        mHelper.setImportance("package", 0, new Notification.Topic("C", "c"), IMPORTANCE_HIGH);
+        mHelper.setImportance("package", 0, new Notification.Topic("D", "d"), IMPORTANCE_LOW);
         // watch out: different package.
-        mHelper.setTopicImportance("package2", 0, new Notification.Topic("E", "e"),
-                IMPORTANCE_NONE);
+        mHelper.setImportance("package2", 0, new Notification.Topic("E", "e"), IMPORTANCE_NONE);
 
         TopicImportanceExtractor validator = mHelper.findExtractor(TopicImportanceExtractor.class);
         validator.process(mRecordGroupGSortA);

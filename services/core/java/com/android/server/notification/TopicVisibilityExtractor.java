@@ -42,7 +42,7 @@ public class TopicVisibilityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packageVisibility = mConfig.getTopicVisibilityOverride(
+        final int packageVisibility = mConfig.getVisibilityOverride(
                 record.sbn.getPackageName(), record.sbn.getUid(),
                 record.sbn.getNotification().getTopic());
         record.setPackageVisibilityOverride(packageVisibility);

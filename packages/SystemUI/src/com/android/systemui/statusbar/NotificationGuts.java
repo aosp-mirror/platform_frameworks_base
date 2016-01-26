@@ -206,13 +206,8 @@ public class NotificationGuts extends LinearLayout {
     void saveImportance(final StatusBarNotification sbn) {
         int progress = mSeekBar.getProgress();
         try {
-            if (mApplyToTopic.isChecked()) {
-                mINotificationManager.setTopicImportance(sbn.getPackageName(), sbn.getUid(), mTopic,
-                        progress);
-            } else {
-                mINotificationManager.setAppImportance(
-                        sbn.getPackageName(), sbn.getUid(), progress);
-            }
+            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(),
+                    mApplyToTopic.isChecked() ? mTopic : null, progress);
         } catch (RemoteException e) {
             // :(
         }

@@ -48,13 +48,12 @@ interface INotificationManager
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
 
     ParceledListSlice getTopics(String pkg, int uid);
-    void setTopicVisibilityOverride(String pkg, int uid, in Notification.Topic topic, int visibility);
-    int getTopicVisibilityOverride(String pkg, int uid, in Notification.Topic topic);
-    void setTopicPriority(String pkg, int uid, in Notification.Topic topic, int priority);
-    int getTopicPriority(String pkg, int uid, in Notification.Topic topic);
-    void setTopicImportance(String pkg, int uid, in Notification.Topic topic, int importance);
-    int getTopicImportance(String pkg, int uid, in Notification.Topic topic);
-    void setAppImportance(String pkg, int uid, int importance);
+    void setVisibilityOverride(String pkg, int uid, in Notification.Topic topic, int visibility);
+    int getVisibilityOverride(String pkg, int uid, in Notification.Topic topic);
+    void setPriority(String pkg, int uid, in Notification.Topic topic, int priority);
+    int getPriority(String pkg, int uid, in Notification.Topic topic);
+    void setImportance(String pkg, int uid, in Notification.Topic topic, int importance);
+    int getImportance(String pkg, int uid, in Notification.Topic topic);
     boolean doesAppUseTopics(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
