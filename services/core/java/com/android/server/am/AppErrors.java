@@ -745,7 +745,8 @@ class AppErrors {
         if (mService.mController != null) {
             try {
                 // 0 == continue, -1 = kill process immediately
-                int res = mService.mController.appEarlyNotResponding(app.processName, app.pid, annotation);
+                int res = mService.mController.appEarlyNotResponding(
+                        app.processName, app.pid, annotation);
                 if (res < 0 && app.pid != MY_PID) {
                     app.kill("anr", true);
                 }

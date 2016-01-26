@@ -2597,10 +2597,9 @@
     <string name="aerr_process"><xliff:g id="process">%1$s</xliff:g> has
         stopped</string>
     <!-- Text of the alert that is displayed when an application has crashed repeatedly. -->
-    <string name="aerr_application_repeated"><xliff:g id="application">%1$s</xliff:g> is repeatedly stopping</string>
+    <string name="aerr_application_repeated"><xliff:g id="application">%1$s</xliff:g> keeps stopping</string>
     <!-- Text of the alert that is displayed when a process has crashed repeatedly. -->
-    <string name="aerr_process_repeated"><xliff:g id="process">%1$s</xliff:g> is
-        repeatedly stopping</string>
+    <string name="aerr_process_repeated"><xliff:g id="process">%1$s</xliff:g> keeps stopping</string>
     <!-- Button that restarts a crashed application -->
     <string name="aerr_restart">Restart app</string>
     <!-- Button that clears cache and restarts a crashed application -->
@@ -2611,17 +2610,21 @@
     <string name="aerr_close">Close</string>
     <!-- Button that mutes further crashes of the crashed application-->
     <string name="aerr_mute">Mute</string>
+    <!-- Button that waits a bit more for an unresponsive app -->
+    <string name="aerr_wait">Wait</string>
+    <!-- Button that closes an unresponsive application -->
+    <string name="aerr_close_app">Close app</string>
 
     <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_activity_application"><xliff:g id="application">%2$s</xliff:g> isn\'t responding.\n\nDo you want to close it?</string>
+    <string name="anr_activity_application"><xliff:g id="application">%2$s</xliff:g> isn\'t responding</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_activity_process">Activity <xliff:g id="activity">%1$s</xliff:g> isn\'t responding.\n\nDo you want to close it?</string>
+    <string name="anr_activity_process"><xliff:g id="activity">%1$s</xliff:g> isn\'t responding</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_application_process"><xliff:g id="application">%1$s</xliff:g> isn\'t responding. Do you want to close it?</string>
+    <string name="anr_application_process"><xliff:g id="application">%1$s</xliff:g> isn\'t responding</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> isn\'t responding.\n\nDo you want to close it?</string>
+    <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> isn\'t responding</string>
     <!-- Button allowing the user to close an application that is not responding. This will kill the application. -->
     <string name="force_close">OK</string>
     <!-- Button allowing the user to send a bug report for application which has encountered an error. -->

@@ -21,12 +21,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Slog;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
-final class AppNotRespondingDialog extends BaseErrorDialog {
+import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
+
+final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnClickListener {
     private static final String TAG = "AppNotRespondingDialog";
 
     // Event 'what' codes
@@ -36,15 +43,15 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
 
     private final ActivityManagerService mService;
     private final ProcessRecord mProc;
-    
+
     public AppNotRespondingDialog(ActivityManagerService service, Context context,
             ProcessRecord app, ActivityRecord activity, boolean aboveSystem) {
         super(context);
-        
+
         mService = service;
         mProc = app;
         Resources res = context.getResources();
-        
+
         setCancelable(false);
 
         int resid;
@@ -71,24 +78,10 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
             }
         }
 
-        setMessage(name2 != null
+        setTitle(name2 != null
                 ? res.getString(resid, name1.toString(), name2.toString())
                 : res.getString(resid, name1.toString()));
 
-        setButton(DialogInterface.BUTTON_POSITIVE,
-                res.getText(com.android.internal.R.string.force_close),
-                mHandler.obtainMessage(FORCE_CLOSE));
-        setButton(DialogInterface.BUTTON_NEGATIVE,
-                res.getText(com.android.internal.R.string.wait),
-                mHandler.obtainMessage(WAIT));
-
-        if (app.errorReportReceiver != null) {
-            setButton(DialogInterface.BUTTON_NEUTRAL,
-                    res.getText(com.android.internal.R.string.report),
-                    mHandler.obtainMessage(WAIT_AND_REPORT));
-        }
-
-        setTitle(res.getText(com.android.internal.R.string.anr_title));
         if (aboveSystem) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }
@@ -99,7 +92,41 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
         getWindow().setAttributes(attrs);
     }
 
-    public void onStop() {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final FrameLayout frame = (FrameLayout) findViewById(android.R.id.custom);
+        final Context context = getContext();
+        LayoutInflater.from(context).inflate(
+                com.android.internal.R.layout.app_anr_dialog, frame, true);
+
+        final TextView report = (TextView) findViewById(com.android.internal.R.id.aerr_report);
+        report.setOnClickListener(this);
+        final boolean hasReceiver = mProc.errorReportReceiver != null;
+        report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
+        final TextView close = (TextView) findViewById(com.android.internal.R.id.aerr_close);
+        close.setOnClickListener(this);
+        final TextView wait = (TextView) findViewById(com.android.internal.R.id.aerr_wait);
+        wait.setOnClickListener(this);
+
+        findViewById(com.android.internal.R.id.customPanel).setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case com.android.internal.R.id.aerr_report:
+                mHandler.obtainMessage(WAIT_AND_REPORT).sendToTarget();
+                break;
+            case com.android.internal.R.id.aerr_close:
+                mHandler.obtainMessage(FORCE_CLOSE).sendToTarget();
+                break;
+            case com.android.internal.R.id.aerr_wait:
+                mHandler.obtainMessage(WAIT).sendToTarget();
+                break;
+            default:
+                break;
+        }
     }
 
     private final Handler mHandler = new Handler() {
@@ -138,6 +165,8 @@ final class AppNotRespondingDialog extends BaseErrorDialog {
                     Slog.w(TAG, "bug report receiver dissappeared", e);
                 }
             }
+
+            dismiss();
         }
     };
 }
