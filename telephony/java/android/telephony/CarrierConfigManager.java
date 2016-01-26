@@ -409,6 +409,11 @@ public class CarrierConfigManager {
     public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN = "vvm_cellular_data_required";
 
     /**
+     * Whether to prefetch audio data on new voicemail arrival, defaulted to true.
+     */
+    public static final String KEY_VVM_PREFETCH_BOOLEAN = "vvm_prefetch";
+
+    /**
      * The package name of the carrier's visual voicemail app to ensure that dialer visual voicemail
      * and carrier visual voicemail are not active at the same time.
      */
@@ -638,6 +643,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_VVM_PORT_NUMBER_INT, 0);
         sDefaults.putString(KEY_VVM_TYPE_STRING, "");
         sDefaults.putBoolean(KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN,false);
+        sDefaults.putBoolean(KEY_VVM_PREFETCH_BOOLEAN,true);
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
