@@ -1155,7 +1155,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final ArrayList<Pair<String, NetworkIdentity>> connIdents = new ArrayList<>(states.length);
         final ArraySet<String> connIfaces = new ArraySet<String>(states.length);
         for (NetworkState state : states) {
-            if (state.networkInfo.isConnected()) {
+            if (state.networkInfo != null && state.networkInfo.isConnected()) {
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
 
                 final String baseIface = state.linkProperties.getInterfaceName();
@@ -1990,6 +1990,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (policy != null) {
             return policy.metered;
         } else {
+            if (state.networkInfo == null) {
+                return false;
+            }
+
             final int type = state.networkInfo.getType();
             if (isNetworkTypeMobile(type) || type == TYPE_WIMAX) {
                 return true;
