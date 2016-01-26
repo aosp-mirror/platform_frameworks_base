@@ -20,6 +20,7 @@ import static android.provider.DocumentsContract.buildChildDocumentsUri;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.buildRootsUri;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
+import static com.android.internal.util.Preconditions.checkArgument;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
@@ -37,7 +38,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.support.annotation.Nullable;
 import android.test.MoreAsserts;
-import android.util.Log;
+import android.text.TextUtils;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -60,13 +61,13 @@ public class DocumentsProviderHelper {
     private final ContentProviderClient mClient;
 
     public DocumentsProviderHelper(String authority, ContentProviderClient client) {
+        checkArgument(!TextUtils.isEmpty(authority));
         mAuthority = authority;
         mClient = client;
     }
 
     public RootInfo getRoot(String documentId) throws RemoteException {
         final Uri rootsUri = buildRootsUri(mAuthority);
-
         Cursor cursor = null;
         try {
             cursor = mClient.query(rootsUri, null, null, null, null);
@@ -126,7 +127,6 @@ public class DocumentsProviderHelper {
     }
 
     public byte[] readDocument(Uri documentUri) throws RemoteException, IOException {
-        Log.d("DocumentsProviderHelper", "Trying to read file contents: " + documentUri);
         ParcelFileDescriptor file = mClient.openFile(documentUri, "r", null);
         byte[] buf = null;
         try (AutoCloseInputStream in = new AutoCloseInputStream(file)) {
@@ -245,21 +245,18 @@ public class DocumentsProviderHelper {
         Uri uri = buildChildDocumentsUri(mAuthority, documentId);
         List<DocumentInfo> children = new ArrayList<>();
         try (Cursor cursor = mClient.query(uri, null, null, null, null, null)) {
-            while (cursor.moveToNext()) {
-                children.add(DocumentInfo.fromDirectoryCursor(cursor));
+            Cursor wrapper = new RootCursorWrapper(mAuthority, "totally-fake", cursor, 100);
+            while (wrapper.moveToNext()) {
+                children.add(DocumentInfo.fromDirectoryCursor(wrapper));
             }
         }
         return children;
     }
 
     public void assertFileContents(Uri documentUri, byte[] expected) throws Exception {
-        // TODO: Fix this: java.lang.SecurityException:
-        // The authority of the uri content:/document/%2Fdata%2Fuser%2F0%2Fcom.android.documentsui.\
-        // tests%2Fcache%2FTEST_ROOT_1%2Ftest1.txt does not match the one of the contentProvider: \
-        // com.android.documentsui.stubprovider
-//        MoreAsserts.assertEquals(
-//                "Copied file contents differ",
-//                expected, readDocument(documentUri));
+        MoreAsserts.assertEquals(
+                "Copied file contents differ",
+                expected, readDocument(documentUri));
     }
 
     public void assertFileContents(String parentId, String fileName, byte[] expected)
