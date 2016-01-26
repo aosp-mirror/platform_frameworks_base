@@ -87,6 +87,11 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
+    public void updatePointerIcon(float x, float y) {
+        // pass for now
+    }
+
+    @Override
     public void dispatchSystemUiVisibilityChanged(int seq, int globalUi,
             int localValue, int localChanges) {
         // pass for now.
@@ -106,7 +111,4 @@ public final class BridgeWindow implements IWindow {
         return null;
     }
 
-    @Override
-    void updatePointerIcon(float x, float y) {
-    }
 }
