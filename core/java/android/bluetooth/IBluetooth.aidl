@@ -104,8 +104,6 @@ interface IBluetooth
     void getActivityEnergyInfoFromController();
     BluetoothActivityEnergyInfo reportActivityInfo();
 
-    // For dumpsys support
-    void dump(in ParcelFileDescriptor fd);
     void onLeServiceUp();
     void onBrEdrDown();
 }
