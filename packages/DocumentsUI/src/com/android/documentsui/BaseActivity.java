@@ -107,6 +107,8 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                         : buildState();
 
+        Metrics.logActivityLaunch(this, mState, getIntent());
+
         setContentView(mLayoutId);
 
         mRoots = DocumentsApplication.getRootsCache(this);

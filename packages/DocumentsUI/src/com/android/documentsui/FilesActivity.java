@@ -282,6 +282,7 @@ public class FilesActivity extends BaseActivity {
     }
 
     private void createNewWindow() {
+        Metrics.logMultiWindow(this);
         Intent intent = LauncherActivity.createLaunchIntent(this);
         intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
         startActivity(intent);
