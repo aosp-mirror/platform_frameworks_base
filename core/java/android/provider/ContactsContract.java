@@ -8401,10 +8401,15 @@ public final class ContactsContract {
          * @hide
          */
         public static Intent rebuildManagedQuickContactsIntent(String lookupKey, long contactId,
-                long directoryId, Intent originalIntent) {
+                boolean isContactIdIgnored, long directoryId, Intent originalIntent) {
             final Intent intent = new Intent(ACTION_QUICK_CONTACT);
             // Rebuild the URI from a lookup key and a contact ID.
-            Uri uri = Contacts.getLookupUri(contactId, lookupKey);
+            Uri uri = null;
+            if (!TextUtils.isEmpty(lookupKey)) {
+                uri = isContactIdIgnored
+                        ? Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, lookupKey)
+                        : Contacts.getLookupUri(contactId, lookupKey);
+            }
             if (uri != null && directoryId != Directory.DEFAULT) {
                 uri = uri.buildUpon().appendQueryParameter(
                         ContactsContract.DIRECTORY_PARAM_KEY, String.valueOf(directoryId)).build();
