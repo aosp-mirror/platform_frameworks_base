@@ -907,6 +907,8 @@ int link(const std::vector<StringPiece>& args) {
     Maybe<std::string> versionCode, versionName;
     Maybe<std::string> customJavaPackage;
     std::vector<std::string> extraJavaPackages;
+    bool legacyXFlag = false;
+    bool requireLocalization = false;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .requiredFlag("--manifest", "Path to the Android manifest to build",
@@ -922,6 +924,10 @@ int link(const std::vector<StringPiece>& args) {
             .optionalSwitch("--no-auto-version",
                             "Disables automatic style and layout SDK versioning",
                             &options.noAutoVersion)
+            .optionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01",
+                            &legacyXFlag)
+            .optionalSwitch("-z", "Require localization of strings marked 'suggested'",
+                            &requireLocalization)
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
                             "by -o",
                             &options.outputToDirectory)
