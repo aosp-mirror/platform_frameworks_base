@@ -26,8 +26,8 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
  *
  * @hide
  */
-public class MetricsLogger implements com.android.internal.logging.MetricsConstants {
-    // define metric categories in frameworks/base/core/proto/src/metrics_constants.proto.
+public class MetricsLogger {
+    // define metric categories in frameworks/base/proto/src/metrics_constants.proto.
 
     public static final int VIEW_UNKNOWN = MetricsEvent.VIEW_UNKNOWN;
 

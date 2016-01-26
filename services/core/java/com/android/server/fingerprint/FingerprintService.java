@@ -48,6 +48,7 @@ import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.server.SystemService;
 
 import org.json.JSONArray;
@@ -686,7 +687,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
             if (receiver == null) return true; // client not listening
             FingerprintUtils.vibrateFingerprintSuccess(getContext());
-            MetricsLogger.action(mContext, MetricsLogger.ACTION_FINGERPRINT_ENROLL);
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_FINGERPRINT_ENROLL);
             try {
                 receiver.onEnrollResult(mHalDeviceId, fpId, groupId, remaining);
                 return remaining == 0;
@@ -704,7 +705,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             boolean authenticated = fpId != 0;
             if (receiver != null) {
                 try {
-                    MetricsLogger.action(mContext, MetricsLogger.ACTION_FINGERPRINT_AUTH,
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_FINGERPRINT_AUTH,
                             authenticated);
                     if (!authenticated) {
                         receiver.onAuthenticationFailed(mHalDeviceId);

@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
 /** A dialog that provides controls for adjusting the screen brightness. */
@@ -53,13 +54,13 @@ public class BrightnessDialog extends Activity {
     protected void onStart() {
         super.onStart();
         mBrightnessController.registerCallbacks();
-        MetricsLogger.visible(this, MetricsLogger.BRIGHTNESS_DIALOG);
+        MetricsLogger.visible(this, MetricsEvent.BRIGHTNESS_DIALOG);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        MetricsLogger.hidden(this, MetricsLogger.BRIGHTNESS_DIALOG);
+        MetricsLogger.hidden(this, MetricsEvent.BRIGHTNESS_DIALOG);
         mBrightnessController.unregisterCallbacks();
     }
 

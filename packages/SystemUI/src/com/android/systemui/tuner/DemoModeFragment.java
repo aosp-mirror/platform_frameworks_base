@@ -31,6 +31,7 @@ import android.support.v7.preference.PreferenceScreen;
 import android.view.MenuItem;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
@@ -94,13 +95,13 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
     @Override
     public void onResume() {
         super.onResume();
-        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, true);
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_DEMO_MODE, true);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_DEMO_MODE, false);
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_DEMO_MODE, false);
     }
 
     @Override
@@ -131,10 +132,10 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
                 mOnSwitch.setChecked(false);
                 stopDemoMode();
             }
-            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ENABLED, enabled);
+            MetricsLogger.action(getContext(), MetricsEvent.TUNER_DEMO_MODE_ENABLED, enabled);
             setGlobal(DemoMode.DEMO_MODE_ALLOWED, enabled ? 1 : 0);
         } else if (preference == mOnSwitch) {
-            MetricsLogger.action(getContext(), MetricsLogger.TUNER_DEMO_MODE_ON, enabled);
+            MetricsLogger.action(getContext(), MetricsEvent.TUNER_DEMO_MODE_ON, enabled);
             if (enabled) {
                 startDemoMode();
             } else {

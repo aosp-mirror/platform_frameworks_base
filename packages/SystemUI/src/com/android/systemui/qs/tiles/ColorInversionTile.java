@@ -17,7 +17,9 @@
 package com.android.systemui.qs.tiles;
 
 import android.provider.Settings.Secure;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
@@ -84,7 +86,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_COLORINVERSION;
+        return MetricsEvent.QS_COLORINVERSION;
     }
 
     @Override

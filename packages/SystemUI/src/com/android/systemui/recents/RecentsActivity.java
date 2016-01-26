@@ -37,7 +37,9 @@ import android.view.View;
 import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEvent;
@@ -402,7 +404,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
 
-        MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
+        MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
@@ -460,7 +462,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         launchState.launchedHasConfigurationChanged = false;
         launchState.launchedViaDragGesture = false;
 
-        MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
+        MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
     }
 
     @Override
@@ -633,7 +635,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // Focus the next task
             EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
-            MetricsLogger.action(this, MetricsLogger.ACTION_OVERVIEW_PAGE);
+            MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
         }
     }
 

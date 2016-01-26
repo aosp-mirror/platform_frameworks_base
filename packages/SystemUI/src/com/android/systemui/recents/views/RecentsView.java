@@ -34,7 +34,9 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -537,8 +539,7 @@ public class RecentsView extends FrameLayout {
                                 }
                             }));
 
-            MetricsLogger.action(mContext,
-                    MetricsLogger.ACTION_WINDOW_DOCK_DRAG_DROP);
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP);
         } else {
             // Animate the overlay alpha back to 0
             updateVisibleDockRegions(null, true /* isDefaultDockState */, -1,

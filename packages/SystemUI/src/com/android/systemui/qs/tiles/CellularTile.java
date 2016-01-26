@@ -23,7 +23,9 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSIconView;
@@ -89,7 +91,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     protected void handleSecondaryClick() {
         boolean dataEnabled = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
-        MetricsLogger.action(mContext, MetricsLogger.QS_CELLULAR_TOGGLE, !dataEnabled);
+        MetricsLogger.action(mContext, MetricsEvent.QS_CELLULAR_TOGGLE, !dataEnabled);
         mDataController.setMobileDataEnabled(!dataEnabled);
     }
 
@@ -131,7 +133,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_CELLULAR;
+        return MetricsEvent.QS_CELLULAR;
     }
 
     // Remove the period from the network name
@@ -241,13 +243,13 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public void setToggleState(boolean state) {
-            MetricsLogger.action(mContext, MetricsLogger.QS_CELLULAR_TOGGLE, state);
+            MetricsLogger.action(mContext, MetricsEvent.QS_CELLULAR_TOGGLE, state);
             mDataController.setMobileDataEnabled(state);
         }
 
         @Override
         public int getMetricsCategory() {
-            return MetricsLogger.QS_DATAUSAGEDETAIL;
+            return MetricsEvent.QS_DATAUSAGEDETAIL;
         }
 
         @Override

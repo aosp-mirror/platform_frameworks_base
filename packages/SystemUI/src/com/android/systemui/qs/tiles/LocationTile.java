@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -99,7 +100,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_LOCATION;
+        return MetricsEvent.QS_LOCATION;
     }
 
     @Override

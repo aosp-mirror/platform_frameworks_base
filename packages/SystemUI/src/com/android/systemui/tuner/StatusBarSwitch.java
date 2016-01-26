@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -63,14 +64,14 @@ public class StatusBarSwitch extends SwitchPreference implements Tunable {
         if (!value) {
             // If not enabled add to blacklist.
             if (!mBlacklist.contains(getKey())) {
-                MetricsLogger.action(getContext(), MetricsLogger.TUNER_STATUS_BAR_DISABLE,
+                MetricsLogger.action(getContext(), MetricsEvent.TUNER_STATUS_BAR_DISABLE,
                         getKey());
                 mBlacklist.add(getKey());
                 setList(mBlacklist);
             }
         } else {
             if (mBlacklist.remove(getKey())) {
-                MetricsLogger.action(getContext(), MetricsLogger.TUNER_STATUS_BAR_ENABLE, getKey());
+                MetricsLogger.action(getContext(), MetricsEvent.TUNER_STATUS_BAR_ENABLE, getKey());
                 setList(mBlacklist);
             }
         }

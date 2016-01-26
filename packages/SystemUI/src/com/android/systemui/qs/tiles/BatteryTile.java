@@ -25,7 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.BatteryInfo;
 import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.R;
@@ -64,7 +64,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_BATTERY_TILE;
+        return MetricsEvent.QS_BATTERY_TILE;
     }
 
     @Override
@@ -199,7 +199,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
 
         @Override
         public int getMetricsCategory() {
-            return MetricsLogger.QS_BATTERY_DETAIL;
+            return MetricsEvent.QS_BATTERY_DETAIL;
         }
     }
 }

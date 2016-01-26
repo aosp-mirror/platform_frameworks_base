@@ -81,7 +81,9 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
@@ -947,7 +949,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_INFO);
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_INFO);
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
@@ -994,7 +996,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return false;
                 }
 
-                MetricsLogger.action(mContext, MetricsLogger.ACTION_NOTE_CONTROLS);
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_CONTROLS);
 
                 // ensure that it's layouted but not visible until actually laid out
                 guts.setVisibility(View.INVISIBLE);

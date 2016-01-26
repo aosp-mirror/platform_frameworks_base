@@ -17,7 +17,7 @@ package com.android.systemui.tuner;
 
 import android.app.ActivityManager;
 import android.provider.Settings;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import libcore.util.Objects;
@@ -102,6 +102,6 @@ public class ColorMatrixTile extends QSTile<QSTile.State> implements TunerServic
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_COLOR_MATRIX;
+        return MetricsEvent.QS_COLOR_MATRIX;
     }
 }
