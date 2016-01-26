@@ -33,6 +33,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -106,6 +107,7 @@ public final class NotificationRecord {
         mCreationTimeMs = sbn.getPostTime();
         mUpdateTimeMs = mCreationTimeMs;
         mContext = context;
+        stats = new NotificationUsageStats.SingleNotificationStats();
         mImportance = defaultImportance();
     }
 
@@ -133,27 +135,22 @@ public final class NotificationRecord {
                 importance = IMPORTANCE_MAX;
                 break;
         }
+        stats.requestedImportance = importance;
 
         boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
                 || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
                 || n.sound != null
                 || n.vibrate != null;
+        stats.isNoisy = isNoisy;
         if (!isNoisy && importance > IMPORTANCE_DEFAULT) {
             importance = IMPORTANCE_DEFAULT;
-        }
-        // maybe only do this for target API < N?
-        if (isNoisy) {
-            if (importance >= IMPORTANCE_HIGH) {
-                importance = IMPORTANCE_MAX;
-            } else {
-                importance = IMPORTANCE_HIGH;
-            }
         }
 
         if (n.fullScreenIntent != null) {
             importance = IMPORTANCE_MAX;
         }
 
+        stats.naturalImportance = importance;
         return importance;
     }
 
