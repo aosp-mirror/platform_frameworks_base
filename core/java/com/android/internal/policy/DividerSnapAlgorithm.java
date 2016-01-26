@@ -139,7 +139,12 @@ public class DividerSnapAlgorithm {
     }
 
     public SnapTarget getClosestDismissTarget(int position) {
-        if (position - mDismissStartTarget.position < mDismissEndTarget.position - position) {
+        if (position < mFirstSplitTarget.position) {
+            return mDismissStartTarget;
+        } else if (position > mLastSplitTarget.position) {
+            return mDismissEndTarget;
+        } else if (position - mDismissStartTarget.position
+                < mDismissEndTarget.position - position) {
             return mDismissStartTarget;
         } else {
             return mDismissEndTarget;

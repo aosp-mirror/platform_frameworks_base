@@ -73,8 +73,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private static final String TAG = "DividerView";
 
     private static final int TASK_POSITION_SAME = Integer.MAX_VALUE;
-    private static final float DIM_START_FRACTION = 0.5f;
-    private static final float DIM_DAMP_FACTOR = 1.7f;
 
     /**
      * Fraction of the divider position between two snap targets to switch to the full-screen
@@ -90,6 +88,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
+    private static final PathInterpolator DIM_INTERPOLATOR =
+            new PathInterpolator(.23f, .87f, .52f, -0.11f);
 
     private DividerHandleView mHandle;
     private View mBackground;
@@ -497,8 +497,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mWindowManagerProxy.resizeDockedStack(mDockedRect, null, null, null, null);
         }
         float fraction = mSnapAlgorithm.calculateDismissingFraction(position);
-        fraction = Math.max(0,
-                Math.min((fraction / DIM_START_FRACTION - 1f) / DIM_DAMP_FACTOR, 1f));
+        fraction = Math.max(0, Math.min(fraction, 1f));
+        fraction = DIM_INTERPOLATOR.getInterpolation(fraction);
         mWindowManagerProxy.setResizeDimLayer(fraction != 0f,
                 getStackIdForDismissTarget(mSnapAlgorithm.getClosestDismissTarget(position)),
                 fraction);
