@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include <utils/RefBase.h>
-#include <utils/Log.h>
+#include "utils/RefBase.h"
+#include "utils/Log.h"
+#include "utils/Macros.h"
 
 #include <atomic>
 #include <stdint.h>
@@ -37,6 +38,7 @@ namespace uirenderer {
 class BufferPool : public VirtualLightRefBase {
 public:
     class Buffer {
+        PREVENT_COPY_AND_ASSIGN(Buffer);
     public:
         int64_t* getBuffer() { return mBuffer.get(); }
         size_t getSize() { return mSize; }
@@ -57,14 +59,17 @@ public:
             return refs - 1;
         }
 
+        bool isUniqueRef() {
+            return mRefs.load() == 1;
+        }
+
     private:
         friend class BufferPool;
 
-        Buffer(BufferPool* pool, size_t size) {
+        Buffer(BufferPool* pool, size_t size) : mRefs(1) {
             mSize = size;
             mBuffer.reset(new int64_t[size]);
             mPool = pool;
-            mRefs++;
         }
 
         void setPool(BufferPool* pool) {
