@@ -27,6 +27,7 @@ import android.app.IWallpaperManagerCallback;
 import android.app.PendingIntent;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.BroadcastReceiver;
@@ -84,6 +85,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -611,7 +613,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             return changed;
         }
     }
-    
+
     public WallpaperManagerService(Context context) {
         if (DEBUG) Slog.v(TAG, "WallpaperService startup");
         mContext = context;
@@ -626,7 +628,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
         loadSettingsLocked(UserHandle.USER_SYSTEM);
     }
-    
+
     private static File getWallpaperDir(int userId) {
         return Environment.getUserSystemDirectory(userId);
     }
@@ -764,7 +766,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public void clearWallpaper(String callingPackage) {
         if (DEBUG) Slog.v(TAG, "clearWallpaper");
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
-        if (!isWallpaperSupported(callingPackage)) {
+        if (!isWallpaperSupported(callingPackage) || !isWallpaperSettingAllowed(callingPackage)) {
             return;
         }
         synchronized (mLock) {
@@ -1000,7 +1002,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             return null;
         }
 
-        if (!isWallpaperSupported(callingPackage)) {
+        if (!isWallpaperSupported(callingPackage) || !isWallpaperSettingAllowed(callingPackage)) {
             return null;
         }
 
@@ -1069,7 +1071,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     public void setWallpaperComponentChecked(ComponentName name, String callingPackage) {
-        if (isWallpaperSupported(callingPackage)) {
+        if (isWallpaperSupported(callingPackage) && isWallpaperSettingAllowed(callingPackage)) {
             setWallpaperComponent(name);
         }
     }
@@ -1093,7 +1095,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             }
         }
     }
-    
+
     boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
             boolean fromUser, WallpaperData wallpaper, IRemoteCallback reply) {
         if (DEBUG) Slog.v(TAG, "bindWallpaperComponentLocked: componentName=" + componentName);
@@ -1113,7 +1115,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
             }
         }
-        
+
         try {
             if (componentName == null) {
                 componentName = WallpaperManager.getDefaultWallpaperComponent(mContext);
@@ -1143,9 +1145,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 Slog.w(TAG, msg);
                 return false;
             }
-            
+
             WallpaperInfo wi = null;
-            
+
             Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
             if (componentName != null && !componentName.equals(mImageWallpaper)) {
                 // Make sure the selected service is actually a wallpaper service.
@@ -1185,7 +1187,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     return false;
                 }
             }
-            
+
             // Bind the service!
             if (DEBUG) Slog.v(TAG, "Binding to:" + componentName);
             WallpaperConnection newConn = new WallpaperConnection(wi, wallpaper);
@@ -1312,6 +1314,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public boolean isWallpaperSupported(String callingPackage) {
         return mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_WRITE_WALLPAPER, Binder.getCallingUid(),
                 callingPackage) == AppOpsManager.MODE_ALLOWED;
+    }
+
+    @Override
+    public boolean isWallpaperSettingAllowed(String callingPackage) {
+        final PackageManager pm = mContext.getPackageManager();
+        String[] uidPackages = pm.getPackagesForUid(Binder.getCallingUid());
+        boolean uidMatchPackage = Arrays.asList(uidPackages).contains(callingPackage);
+        if (!uidMatchPackage) {
+            return false;   // callingPackage was faked.
+        }
+
+        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        if (dpm.isDeviceOwnerApp(callingPackage) || dpm.isProfileOwnerApp(callingPackage)) {
+            return true;
+        }
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        return !um.hasUserRestriction(UserManager.DISALLOW_SET_WALLPAPER);
     }
 
     private static JournaledFile makeJournaledFile(int userId) {
@@ -1465,7 +1484,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                                         .getPackageName())) {
                             wallpaper.nextWallpaperComponent = mImageWallpaper;
                         }
-                          
+
                         if (DEBUG) {
                             Slog.v(TAG, "mWidth:" + wallpaper.width);
                             Slog.v(TAG, "mHeight:" + wallpaper.height);
@@ -1666,7 +1685,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
-            
+
             pw.println("Permission Denial: can't dump wallpaper service from from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid());
