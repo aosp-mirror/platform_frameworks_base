@@ -25,12 +25,12 @@ public class AnimationFilter {
     boolean animateAlpha;
     boolean animateY;
     boolean animateZ;
-    boolean animateScale;
     boolean animateHeight;
     boolean animateTopInset;
     boolean animateDimmed;
     boolean animateDark;
     boolean animateHideSensitive;
+    public boolean animateShadowAlpha;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
     boolean hasDarkEvent;
@@ -57,11 +57,6 @@ public class AnimationFilter {
         return this;
     }
 
-    public AnimationFilter animateScale() {
-        animateScale = true;
-        return this;
-    }
-
     public AnimationFilter animateHeight() {
         animateHeight = true;
         return this;
@@ -84,6 +79,11 @@ public class AnimationFilter {
 
     public AnimationFilter animateHideSensitive() {
         animateHideSensitive = true;
+        return this;
+    }
+
+    public AnimationFilter animateShadowAlpha() {
+        animateShadowAlpha = true;
         return this;
     }
 
@@ -118,12 +118,12 @@ public class AnimationFilter {
         animateAlpha |= filter.animateAlpha;
         animateY |= filter.animateY;
         animateZ |= filter.animateZ;
-        animateScale |= filter.animateScale;
         animateHeight |= filter.animateHeight;
         animateTopInset |= filter.animateTopInset;
         animateDimmed |= filter.animateDimmed;
         animateDark |= filter.animateDark;
         animateHideSensitive |= filter.animateHideSensitive;
+        animateShadowAlpha |= filter.animateShadowAlpha;
         hasDelays |= filter.hasDelays;
     }
 
@@ -131,8 +131,8 @@ public class AnimationFilter {
         animateAlpha = false;
         animateY = false;
         animateZ = false;
-        animateScale = false;
         animateHeight = false;
+        animateShadowAlpha = false;
         animateTopInset = false;
         animateDimmed = false;
         animateDark = false;

@@ -87,9 +87,6 @@
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
-    <!-- half the distance between notifications in the panel -->
-    <dimen name="notification_divider_height">2dp</dimen>
-
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 
@@ -137,7 +134,7 @@
 
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
-    <dimen name="standard_notification_panel_width">416dp</dimen><!-- includes notification_side_padding on each side -->
+    <dimen name="standard_notification_panel_width">416dp</dimen>
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
     <!-- Gravity for the notification panel -->
@@ -298,17 +295,14 @@
     <!-- The height of the area before the top stack in which the notifications slow down -->
     <dimen name="top_stack_slow_down_length">12dp</dimen>
 
-    <!-- The side padding of the notifications-->
-    <dimen name="notification_side_padding">8dp</dimen>
-
     <!-- Z distance between notifications if they are in the stack -->
-    <dimen name="z_distance_between_notifications">1dp</dimen>
+    <dimen name="z_distance_between_notifications">0.5dp</dimen>
 
-    <!-- The padding between the individual notification cards when dimmed. -->
-    <dimen name="notification_padding_dimmed">0dp</dimen>
+    <!-- The height of the divider between the individual notifications. -->
+    <dimen name="notification_divider_height">0.5dp</dimen>
 
-    <!-- The padding between the individual notification cards. -->
-    <dimen name="notification_padding">2dp</dimen>
+    <!-- The height of the divider between the individual notifications when the notification wants it to be increased. This is currently the case for notification groups -->
+    <dimen name="notification_divider_height_increased">6dp</dimen>
 
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
@@ -327,8 +321,6 @@
 
     <!-- Falsing threshold used when dismissing notifications from the lockscreen. -->
     <dimen name="swipe_helper_falsing_threshold">70dp</dimen>
-
-    <dimen name="notifications_top_padding">4dp</dimen>
 
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
@@ -374,20 +366,11 @@
          phone hints. -->
     <dimen name="edge_tap_area_width">48dp</dimen>
 
-    <!-- radius of the corners of the material rounded rect background -->
-    <dimen name="notification_material_rounded_rect_radius">2dp</dimen>
-
-    <!-- radius of the corners of the material rounded rect background but negative-->
-    <dimen name="notification_material_rounded_rect_radius_negative">-2dp</dimen>
-
     <!-- The padding between notification children when collapsed -->
     <dimen name="notification_children_padding">4dp</dimen>
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
-
-    <!-- The height of the divider between the notfication children -->
-    <dimen name="notification_children_divider_height">1dp</dimen>
 
     <!-- The vertical distance from which the notification appear when children are expanded -->
     <dimen name="notification_appear_distance">140dp</dimen>

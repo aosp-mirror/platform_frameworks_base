@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowView;
-
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
+
+import com.android.systemui.R;
+import com.android.systemui.statusbar.Interpolators;
+import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.phone.StatusBarWindowView;
 
 /**
  * Controls showing and hiding of the brightness mirror.
@@ -46,13 +46,13 @@ public class BrightnessMirrorController {
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
-        mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, PhoneStatusBar.ALPHA_OUT);
+        mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, Interpolators.ALPHA_OUT);
         outAnimation(mNotificationPanel.animate())
                 .withLayer();
     }
 
     public void hideMirror() {
-        mScrimBehind.animateViewAlpha(1.0f, TRANSITION_DURATION_IN, PhoneStatusBar.ALPHA_IN);
+        mScrimBehind.animateViewAlpha(1.0f, TRANSITION_DURATION_IN, Interpolators.ALPHA_IN);
         inAnimation(mNotificationPanel.animate())
                 .withLayer()
                 .withEndAction(new Runnable() {
@@ -66,12 +66,12 @@ public class BrightnessMirrorController {
     private ViewPropertyAnimator outAnimation(ViewPropertyAnimator a) {
         return a.alpha(0.0f)
                 .setDuration(TRANSITION_DURATION_OUT)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT);
+                .setInterpolator(Interpolators.ALPHA_OUT);
     }
     private ViewPropertyAnimator inAnimation(ViewPropertyAnimator a) {
         return a.alpha(1.0f)
                 .setDuration(TRANSITION_DURATION_IN)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN);
+                .setInterpolator(Interpolators.ALPHA_IN);
     }
 
 
@@ -103,10 +103,5 @@ public class BrightnessMirrorController {
         lp.gravity = mBrightnessMirror.getResources().getInteger(
                 R.integer.notification_panel_layout_gravity);
         mBrightnessMirror.setLayoutParams(lp);
-
-        int padding = mBrightnessMirror.getResources().getDimensionPixelSize(
-                R.dimen.notification_side_padding);
-        mBrightnessMirror.setPadding(padding, mBrightnessMirror.getPaddingTop(),
-                padding, mBrightnessMirror.getPaddingBottom());
     }
 }

@@ -24,22 +24,17 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
-import com.android.systemui.R;
-
 /**
  * Like {@link ExpandableView}, but setting an outline for the height and clipping.
  */
 public abstract class ExpandableOutlineView extends ExpandableView {
 
     private final Rect mOutlineRect = new Rect();
-    protected final int mRoundedRectCornerRadius;
     private boolean mCustomOutline;
-    private float mOutlineAlpha = 1f;
+    private float mOutlineAlpha = -1f;
 
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mRoundedRectCornerRadius = getResources().getDimensionPixelSize(
-                R.dimen.notification_material_rounded_rect_radius);
         setOutlineProvider(new ViewOutlineProvider() {
             @Override
             public void getOutline(View view, Outline outline) {
@@ -49,7 +44,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                             getWidth(),
                             Math.max(getActualHeight(), mClipTopAmount));
                 } else {
-                    outline.setRoundRect(mOutlineRect, mRoundedRectCornerRadius);
+                    outline.setRect(mOutlineRect);
                 }
                 outline.setAlpha(mOutlineAlpha);
             }
@@ -69,8 +64,10 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     protected void setOutlineAlpha(float alpha) {
-        mOutlineAlpha = alpha;
-        invalidateOutline();
+        if (alpha != mOutlineAlpha) {
+            mOutlineAlpha = alpha;
+            invalidateOutline();
+        }
     }
 
     protected void setOutlineRect(RectF rect) {

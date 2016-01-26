@@ -43,7 +43,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private boolean mCollapseSnoozes;
     private NotificationPanelView mPanel;
     private ExpandableNotificationRow mPickedChild;
-    private final int mNotificationsTopPadding;
 
     public HeadsUpTouchHelper(HeadsUpManager headsUpManager,
             NotificationStackScrollLayout stackScroller,
@@ -54,8 +53,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
         Context context = stackScroller.getContext();
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
-        mNotificationsTopPadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.notifications_top_padding);
     }
 
     public boolean isTrackingHeadsUp() {
@@ -80,10 +77,6 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 mInitialTouchX = x;
                 setTrackingHeadsUp(false);
                 ExpandableView child = mStackScroller.getChildAtRawPosition(x, y);
-                if (child == null && y < mNotificationsTopPadding) {
-                    // We should also allow drags from the margin above the heads up
-                    child = mStackScroller.getChildAtRawPosition(x, y + mNotificationsTopPadding);
-                }
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
                     mPickedChild = (ExpandableNotificationRow) child;
@@ -113,8 +106,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mHeadsUpManager.unpinAll();
                     mPanel.setPanelScrimMinFraction((float) expandedHeight
                             / mPanel.getMaxPanelHeight());
-                    mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight
-                            + mNotificationsTopPadding);
+                    mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight);
                     mPanel.clearNotificattonEffects();
                     return true;
                 }

@@ -17,7 +17,5 @@
     <solid android:color="@color/system_secondary_color" />
     <corners
         android:topLeftRadius="0dp"
-        android:topRightRadius="0dp"
-        android:bottomLeftRadius="@dimen/notification_material_rounded_rect_radius"
-        android:bottomRightRadius="@dimen/notification_material_rounded_rect_radius"/>
+        android:topRightRadius="0dp" />
 </shape>

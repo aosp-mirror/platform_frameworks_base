@@ -33,13 +33,11 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardAffordanceHelper;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
  * An ImageView which does not have overlapping renderings commands and therefore does not need a
@@ -55,8 +53,6 @@ public class KeyguardAffordanceView extends ImageView {
 
     private final int mMinBackgroundRadius;
     private final Paint mCirclePaint;
-    private final Interpolator mAppearInterpolator;
-    private final Interpolator mDisappearInterpolator;
     private final int mInverseColor;
     private final int mNormalColor;
     private final ArgbEvaluator mColorInterpolator;
@@ -136,10 +132,6 @@ public class KeyguardAffordanceView extends ImageView {
         mInverseColor = 0xff000000;
         mMinBackgroundRadius = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_affordance_min_background_radius);
-        mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear_out_slow_in);
-        mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_linear_in);
         mColorInterpolator = new ArgbEvaluator();
         mFlingAnimationUtils = new FlingAnimationUtils(mContext, 0.3f);
     }
@@ -261,7 +253,7 @@ public class KeyguardAffordanceView extends ImageView {
             RenderNodeAnimator animator = new RenderNodeAnimator(mHwCirclePaint,
                     RenderNodeAnimator.PAINT_ALPHA, 255);
             animator.setTarget(this);
-            animator.setInterpolator(PhoneStatusBar.ALPHA_IN);
+            animator.setInterpolator(Interpolators.ALPHA_IN);
             animator.setDuration(250);
             animator.start();
         }
@@ -282,7 +274,7 @@ public class KeyguardAffordanceView extends ImageView {
         RenderNodeAnimator animator = new RenderNodeAnimator(mHwCirclePaint,
                 RenderNodeAnimator.PAINT_ALPHA, 0);
         animator.setDuration(duration);
-        animator.setInterpolator(PhoneStatusBar.ALPHA_OUT);
+        animator.setInterpolator(Interpolators.ALPHA_OUT);
         animator.setTarget(this);
         animator.start();
     }
@@ -352,8 +344,8 @@ public class KeyguardAffordanceView extends ImageView {
             cancelAnimator(mPreviewClipper);
             ValueAnimator animator = getAnimatorToRadius(circleRadius);
             Interpolator interpolator = circleRadius == 0.0f
-                    ? mDisappearInterpolator
-                    : mAppearInterpolator;
+                    ? Interpolators.FAST_OUT_LINEAR_IN
+                    : Interpolators.LINEAR_OUT_SLOW_IN;
             animator.setInterpolator(interpolator);
             long duration = 250;
             if (!slowAnimation) {
@@ -438,8 +430,8 @@ public class KeyguardAffordanceView extends ImageView {
             animator.addListener(mScaleEndListener);
             if (interpolator == null) {
                 interpolator = imageScale == 0.0f
-                        ? mDisappearInterpolator
-                        : mAppearInterpolator;
+                        ? Interpolators.FAST_OUT_LINEAR_IN
+                        : Interpolators.LINEAR_OUT_SLOW_IN;
             }
             animator.setInterpolator(interpolator);
             if (duration == -1) {
@@ -501,8 +493,8 @@ public class KeyguardAffordanceView extends ImageView {
             animator.addListener(mAlphaEndListener);
             if (interpolator == null) {
                 interpolator = alpha == 0.0f
-                        ? mDisappearInterpolator
-                        : mAppearInterpolator;
+                        ? Interpolators.FAST_OUT_LINEAR_IN
+                        : Interpolators.LINEAR_OUT_SLOW_IN;
             }
             animator.setInterpolator(interpolator);
             if (duration == -1) {

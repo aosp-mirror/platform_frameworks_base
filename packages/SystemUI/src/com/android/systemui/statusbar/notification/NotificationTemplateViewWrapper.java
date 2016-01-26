@@ -26,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -64,7 +65,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                                             - ownPosition[1]) * 0.33f)
                                     .setDuration(
                                             StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                                    .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                                     .withEndAction(new Runnable() {
                                         @Override
                                         public void run() {
@@ -103,7 +104,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                                     .translationY(0)
                                     .setDuration(
                                             StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                                    .setInterpolator(TransformState.FAST_OUT_SLOW_IN)
+                                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                                     .withEndAction(new Runnable() {
                                         @Override
                                         public void run() {

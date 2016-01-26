@@ -26,7 +26,9 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+
 import com.android.keyguard.AlphaOptimizedImageButton;
+import com.android.systemui.statusbar.Interpolators;
 
 public class SettingsButton extends AlphaOptimizedImageButton {
 
@@ -157,8 +159,7 @@ public class SettingsButton extends AlphaOptimizedImageButton {
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         mUpToSpeed = true;
         mAnimator = ObjectAnimator.ofFloat(this, View.ROTATION, 0, 360);
-        mAnimator.setInterpolator(AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear));
+        mAnimator.setInterpolator(Interpolators.LINEAR);
         mAnimator.setDuration(FULL_SPEED_LENGTH);
         mAnimator.setRepeatCount(Animation.INFINITE);
         mAnimator.start();

@@ -58,6 +58,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -111,7 +112,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private AccessibilityController mAccessibilityController;
     private PhoneStatusBar mPhoneStatusBar;
 
-    private final Interpolator mLinearOutSlowInInterpolator;
     private boolean mUserSetupComplete;
     private boolean mPrewarmBound;
     private Messenger mPrewarmMessenger;
@@ -146,8 +146,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -600,7 +598,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText.setAlpha(0f);
         mIndicationText.animate()
                 .alpha(1f)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
     }
 
@@ -610,7 +608,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         element.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setStartDelay(delay)
                 .setDuration(DOZE_ANIMATION_ELEMENT_DURATION);
     }

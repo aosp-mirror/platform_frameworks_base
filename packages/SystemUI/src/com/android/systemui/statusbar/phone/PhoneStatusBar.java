@@ -87,13 +87,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -124,6 +122,7 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -131,7 +130,6 @@ import com.android.systemui.statusbar.NotificationOverflowContainer;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.SignalClusterView;
-import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -438,10 +436,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDozingRequested;
     protected boolean mScrimSrcModeEnabled;
 
-    private Interpolator mLinearInterpolator = new LinearInterpolator();
-    private Interpolator mBackdropInterpolator = new AccelerateDecelerateInterpolator();
-    public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
-    public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
+    public static final Interpolator ALPHA_IN = Interpolators.ALPHA_IN;
+    public static final Interpolator ALPHA_OUT = Interpolators.ALPHA_OUT;
 
     private BackDropView mBackdrop;
     private ImageView mBackdropFront, mBackdropBack;
@@ -744,9 +740,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIconOverflowContainer.setOnClickListener(mOverflowClickListener);
         mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
 
-        SpeedBumpView speedBump = (SpeedBumpView) LayoutInflater.from(mContext).inflate(
-                        R.layout.status_bar_notification_speed_bump, mStackScroller, false);
-        mStackScroller.setSpeedBumpView(speedBump);
+
         mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, mStackScroller, false);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
@@ -1849,7 +1843,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             // if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in
                             // libhwui.
                             .alpha(0.002f)
-                            .setInterpolator(mBackdropInterpolator)
+                            .setInterpolator(Interpolators.ACCELERATE_DECELERATE)
                             .setDuration(300)
                             .setStartDelay(0)
                             .withEndAction(new Runnable() {
@@ -1868,7 +1862,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 // behind.
                                 .setDuration(mKeyguardFadingAwayDuration / 2)
                                 .setStartDelay(mKeyguardFadingAwayDelay)
-                                .setInterpolator(mLinearInterpolator)
+                                .setInterpolator(Interpolators.LINEAR)
                                 .start();
                     }
                 }
@@ -3748,7 +3742,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
         updatePublicMode();
-        updateStackScrollerState(goingToFullShade);
+        updateStackScrollerState(goingToFullShade, fromShadeLocked);
         updateNotifications();
         checkBarModes();
         updateMediaMetaData(false);
@@ -3769,11 +3763,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING, animate);
     }
 
-    public void updateStackScrollerState(boolean goingToFullShade) {
+    public void updateStackScrollerState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
         mStackScroller.setHideSensitive(isLockscreenPublicMode(), goingToFullShade);
-        mStackScroller.setDimmed(onKeyguard, false /* animate */);
+        mStackScroller.setDimmed(onKeyguard, fromShadeLocked /* animate */);
         mStackScroller.setExpandingEnabled(!onKeyguard);
         ActivatableNotificationView activatedChild = mStackScroller.getActivatedChild();
         mStackScroller.setActivatedChild(null);

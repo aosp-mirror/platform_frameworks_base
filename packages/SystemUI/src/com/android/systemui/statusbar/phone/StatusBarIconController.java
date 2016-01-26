@@ -32,15 +32,15 @@ import android.util.ArraySet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -63,8 +63,6 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
 
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
-    private Interpolator mLinearOutSlowIn;
-    private Interpolator mFastOutSlowIn;
     private DemoStatusIcons mDemoStatusIcons;
 
     private LinearLayout mSystemIconArea;
@@ -129,10 +127,6 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         maybeScaleBatteryMeterView(context);
 
         mClock = (TextView) statusBar.findViewById(R.id.clock);
-        mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.linear_out_slow_in);
-        mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_slow_in);
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mHandler = new Handler();
@@ -348,7 +342,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
                 .alpha(0f)
                 .setDuration(160)
                 .setStartDelay(0)
-                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setInterpolator(Interpolators.ALPHA_OUT)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -370,7 +364,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         v.animate()
                 .alpha(1f)
                 .setDuration(320)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .setInterpolator(Interpolators.ALPHA_IN)
                 .setStartDelay(50)
 
                 // We need to clean up any pending end action from animateHide if we call
@@ -382,7 +376,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         if (mPhoneStatusBar.isKeyguardFadingAway()) {
             v.animate()
                     .setDuration(mPhoneStatusBar.getKeyguardFadingAwayDuration())
-                    .setInterpolator(mLinearOutSlowIn)
+                    .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                     .setStartDelay(mPhoneStatusBar.getKeyguardFadingAwayDelay())
                     .start();
         }
@@ -419,7 +413,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         });
         mTintAnimator.setDuration(duration);
         mTintAnimator.setStartDelay(delay);
-        mTintAnimator.setInterpolator(mFastOutSlowIn);
+        mTintAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mTintAnimator.start();
     }
 

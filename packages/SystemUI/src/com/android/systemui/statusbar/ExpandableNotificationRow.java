@@ -1126,6 +1126,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
+    public boolean needsIncreasedPadding() {
+        return mIsSummaryWithChildren && isGroupExpanded();
+    }
+
+    @Override
     protected boolean disallowSingleClick(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();

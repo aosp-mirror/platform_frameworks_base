@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -28,13 +29,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewConfiguration;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -107,11 +107,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private OnActivatedListener mOnActivatedListener;
 
-    private final Interpolator mLinearOutSlowInInterpolator;
-    protected final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mSlowOutFastInInterpolator;
     private final Interpolator mSlowOutLinearInInterpolator;
-    private final Interpolator mLinearInterpolator;
     private Interpolator mCurrentAppearInterpolator;
     private Interpolator mCurrentAlphaInterpolator;
 
@@ -132,16 +129,37 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private FalsingManager mFalsingManager;
     private boolean mTrackTouch;
 
+    private float mNormalBackgroundVisibilityAmount;
+    private ValueAnimator mFadeInFromDarkAnimator;
+    private ValueAnimator.AnimatorUpdateListener mBackgroundVisibilityUpdater
+            = new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            setNormalBackgroundVisibilityAmount(mBackgroundNormal.getAlpha());
+        }
+    };
+    private AnimatorListenerAdapter mFadeInEndListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            mFadeInFromDarkAnimator = null;
+            updateOutlineAlpha();
+        }
+    };
+    private ValueAnimator.AnimatorUpdateListener mUpdateOutlineListener
+            = new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            updateOutlineAlpha();
+        }
+    };
+    private float mShadowAlpha = 1.0f;
+
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mFastOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mSlowOutFastInInterpolator = new PathInterpolator(0.8f, 0.0f, 0.6f, 1.0f);
-        mLinearOutSlowInInterpolator =
-                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
-        mLinearInterpolator = new LinearInterpolator();
         setClipChildren(false);
         setClipToPadding(false);
         mLegacyColor = context.getColor(R.color.notification_legacy_background_color);
@@ -166,6 +184,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
         updateBackground();
         updateBackgroundTint();
+        updateOutlineAlpha();
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -272,7 +291,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    private void startActivateAnimation(boolean reverse) {
+    private void startActivateAnimation(final boolean reverse) {
         if (!isAttachedToWindow()) {
             return;
         }
@@ -291,8 +310,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         Interpolator interpolator;
         Interpolator alphaInterpolator;
         if (!reverse) {
-            interpolator = mLinearOutSlowInInterpolator;
-            alphaInterpolator = mLinearOutSlowInInterpolator;
+            interpolator = Interpolators.LINEAR_OUT_SLOW_IN;
+            alphaInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
         } else {
             interpolator = ACTIVATE_INVERSE_INTERPOLATOR;
             alphaInterpolator = ACTIVATE_INVERSE_ALPHA_INTERPOLATOR;
@@ -317,6 +336,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.animate()
                 .alpha(reverse ? 0f : 1f)
                 .setInterpolator(alphaInterpolator)
+                .setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        float animatedFraction = animation.getAnimatedFraction();
+                        if (reverse) {
+                            animatedFraction = 1.0f - animatedFraction;
+                        }
+                        setNormalBackgroundVisibilityAmount(animatedFraction);
+                    }
+                })
                 .setDuration(ACTIVATE_ANIMATION_LENGTH);
     }
 
@@ -377,8 +406,27 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         } else {
             updateBackground();
         }
-        setOutlineAlpha(dark ? 0f : 1f);
-     }
+        updateOutlineAlpha();
+    }
+
+    private void updateOutlineAlpha() {
+        if (mDark) {
+            setOutlineAlpha(0f);
+            return;
+        }
+        float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
+        alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
+        alpha *= mShadowAlpha;
+        if (mFadeInFromDarkAnimator != null) {
+            alpha *= mFadeInFromDarkAnimator.getAnimatedFraction();
+        }
+        setOutlineAlpha(alpha);
+    }
+
+    public void setNormalBackgroundVisibilityAmount(float normalBackgroundVisibilityAmount) {
+        mNormalBackgroundVisibilityAmount = normalBackgroundVisibilityAmount;
+        updateOutlineAlpha();
+    }
 
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
@@ -431,7 +479,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 .scaleY(1f)
                 .setDuration(DARK_ANIMATION_LENGTH)
                 .setStartDelay(delay)
-                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationCancel(Animator animation) {
@@ -441,7 +489,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                         background.setAlpha(1f);
                     }
                 })
+                .setUpdateListener(mBackgroundVisibilityUpdater)
                 .start();
+        mFadeInFromDarkAnimator = TimeAnimator.ofFloat(0.0f, 1.0f);
+        mFadeInFromDarkAnimator.setDuration(DARK_ANIMATION_LENGTH);
+        mFadeInFromDarkAnimator.setStartDelay(delay);
+        mFadeInFromDarkAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        mFadeInFromDarkAnimator.addListener(mFadeInEndListener);
+        mFadeInFromDarkAnimator.addUpdateListener(mUpdateOutlineListener);
+        mFadeInFromDarkAnimator.start();
     }
 
     /**
@@ -474,7 +530,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setAlpha(startAlpha);
         mBackgroundAnimator =
                 ObjectAnimator.ofFloat(mBackgroundNormal, View.ALPHA, startAlpha, endAlpha);
-        mBackgroundAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        mBackgroundAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         mBackgroundAnimator.setDuration(duration);
         mBackgroundAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -487,6 +543,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mBackgroundAnimator = null;
             }
         });
+        mBackgroundAnimator.addUpdateListener(mBackgroundVisibilityUpdater);
         mBackgroundAnimator.start();
     }
 
@@ -504,6 +561,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mBackgroundNormal.setAlpha(1f);
             removeCallbacks(mTapTimeoutRunnable);
         }
+        setNormalBackgroundVisibilityAmount(
+                mBackgroundNormal.getVisibility() == View.VISIBLE ? 1.0f : 0.0f);
     }
 
     protected boolean shouldHideBackground() {
@@ -577,16 +636,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         float targetValue;
         if (isAppearing) {
             mCurrentAppearInterpolator = mSlowOutFastInInterpolator;
-            mCurrentAlphaInterpolator = mLinearOutSlowInInterpolator;
+            mCurrentAlphaInterpolator = Interpolators.LINEAR_OUT_SLOW_IN;
             targetValue = 1.0f;
         } else {
-            mCurrentAppearInterpolator = mFastOutSlowInInterpolator;
+            mCurrentAppearInterpolator = Interpolators.FAST_OUT_SLOW_IN;
             mCurrentAlphaInterpolator = mSlowOutLinearInInterpolator;
             targetValue = 0.0f;
         }
         mAppearAnimator = ValueAnimator.ofFloat(mAppearAnimationFraction,
                 targetValue);
-        mAppearAnimator.setInterpolator(mLinearInterpolator);
+        mAppearAnimator.setInterpolator(Interpolators.LINEAR);
         mAppearAnimator.setDuration(
                 (long) (duration * Math.abs(mAppearAnimationFraction - targetValue)));
         mAppearAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -770,6 +829,19 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public boolean hasSameBgColor(ActivatableNotificationView otherView) {
         return getBgColor() == otherView.getBgColor();
+    }
+
+    @Override
+    public float getShadowAlpha() {
+        return mShadowAlpha;
+    }
+
+    @Override
+    public void setShadowAlpha(float shadowAlpha) {
+        if (shadowAlpha != mShadowAlpha) {
+            mShadowAlpha = shadowAlpha;
+            updateOutlineAlpha();
+        }
     }
 
     public interface OnActivatedListener {

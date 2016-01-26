@@ -388,6 +388,17 @@ public abstract class ExpandableView extends FrameLayout {
         return super.hasOverlappingRendering() && getActualHeight() <= getHeight();
     }
 
+    public float getShadowAlpha() {
+        return 0.0f;
+    }
+
+    public void setShadowAlpha(float shadowAlpha) {
+    }
+
+    public boolean needsIncreasedPadding() {
+        return false;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

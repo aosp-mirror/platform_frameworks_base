@@ -22,6 +22,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
@@ -496,5 +497,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void dontAnimateBouncerChangesUntilNextFrame() {
         mDontAnimateBouncerChanges = true;
+    }
+
+    public void setExcludedBackgroundArea(Rect area) {
+        mScrimBehind.setExcludedArea(area);
+    }
+
+    public int getScrimBehindColor() {
+        return mScrimBehind.getScrimColorWithAlpha();
+    }
+
+    public void setScrimBehindChangeRunnable(Runnable changeRunnable) {
+        mScrimBehind.setChangeRunnable(changeRunnable);
     }
 }
