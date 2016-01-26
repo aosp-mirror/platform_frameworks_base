@@ -19,6 +19,7 @@ package com.android.server.fingerprint;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.trust.TrustManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -103,6 +104,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int FINGERPRINT_ACQUIRED_GOOD = 0;
     private final String mKeyguardPackage;
+    private int mCurrentUserId = UserHandle.USER_CURRENT;
 
     Handler mHandler = new Handler() {
         @Override
@@ -125,6 +127,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     private IFingerprintDaemon mDaemon;
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
+    private final UserManager mUserManager;
 
     private final BroadcastReceiver mLockoutReceiver = new BroadcastReceiver() {
         @Override
@@ -152,6 +155,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mContext.registerReceiver(mLockoutReceiver, new IntentFilter(ACTION_LOCKOUT_RESET),
                 RESET_FINGERPRINT_LOCKOUT, null /* handler */);
+        mUserManager = UserManager.get(mContext);
     }
 
     @Override
@@ -170,7 +174,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     mDaemon.init(mDaemonCallback);
                     mHalDeviceId = mDaemon.openHal();
                     if (mHalDeviceId != 0) {
-                        updateActiveGroup(ActivityManager.getCurrentUser());
+                        updateActiveGroup(ActivityManager.getCurrentUser(), null);
                     } else {
                         Slog.w(TAG, "Failed to open Fingerprint HAL!");
                         mDaemon = null;
@@ -261,7 +265,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     }
 
     void handleUserSwitching(int userId) {
-        updateActiveGroup(userId);
+        updateActiveGroup(userId, null);
     }
 
     private void removeClient(ClientMonitor client) {
@@ -414,7 +418,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         removeClient(mEnrollClient);
     }
 
-    void startAuthentication(IBinder token, long opId, int groupId,
+    void startAuthentication(IBinder token, long opId, int realUserId, int groupId,
             IFingerprintServiceReceiver receiver, int flags, boolean restricted,
             String opPackageName) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
@@ -423,6 +427,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return;
         }
         stopPendingOperations(true);
+        updateActiveGroup(groupId, opPackageName);
         mAuthClient = new ClientMonitor(token, receiver, groupId, restricted, opPackageName);
         if (inLockoutMode()) {
             Slog.v(TAG, "In lockout mode; disallowing authentication");
@@ -564,7 +569,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         checkPermission(USE_FINGERPRINT);
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
-        if (opPackageName.equals(mKeyguardPackage)) {
+        if (isKeyguard(opPackageName)) {
             return true; // Keyguard is always allowed
         }
         if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
@@ -581,6 +586,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param clientPackage
+     * @return true if this is keyguard package
+     */
+    private boolean isKeyguard(String clientPackage) {
+        return mKeyguardPackage.equals(clientPackage);
     }
 
     private void addLockoutResetMonitor(FingerprintServiceLockoutResetMonitor monitor) {
@@ -927,14 +940,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             // Group ID is arbitrarily set to parent profile user ID. It just represents
             // the default fingerprints for the user.
             final int effectiveGroupId = getEffectiveUserId(groupId);
+            final int realUserId = Binder.getCallingUid();
 
             final boolean restricted = isRestricted();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     MetricsLogger.histogram(mContext, "fingerprint_token", opId != 0L ? 1 : 0);
-                    startAuthentication(token, opId, effectiveGroupId, receiver, flags, restricted,
-                            opPackageName);
+                    startAuthentication(token, opId, realUserId, effectiveGroupId, receiver,
+                            flags, restricted, opPackageName);
                 }
             });
         }
@@ -948,6 +962,17 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 @Override
                 public void run() {
                     stopAuthentication(token, true);
+                }
+            });
+        }
+
+        @Override // Binder call
+        public void setActiveUser(final int userId) {
+            checkPermission(MANAGE_FINGERPRINT);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    updateActiveGroup(userId, null);
                 }
             });
         }
@@ -1102,31 +1127,54 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         listenForUserSwitches();
     }
 
-    private void updateActiveGroup(int userId) {
+    private void updateActiveGroup(int userId, String clientPackage) {
         IFingerprintDaemon daemon = getFingerprintDaemon();
         if (daemon != null) {
             try {
-                userId = getEffectiveUserId(userId);
-                final File systemDir = Environment.getUserSystemDirectory(userId);
-                final File fpDir = new File(systemDir, FP_DATA_DIR);
-                if (!fpDir.exists()) {
-                    if (!fpDir.mkdir()) {
-                        Slog.v(TAG, "Cannot make directory: " + fpDir.getAbsolutePath());
-                        return;
+                userId = getUserOrWorkProfileId(clientPackage, userId);
+                if (userId != mCurrentUserId) {
+                    final File systemDir = Environment.getUserSystemDirectory(userId);
+                    final File fpDir = new File(systemDir, FP_DATA_DIR);
+                    if (!fpDir.exists()) {
+                        if (!fpDir.mkdir()) {
+                            Slog.v(TAG, "Cannot make directory: " + fpDir.getAbsolutePath());
+                            return;
+                        }
+                        // Calling mkdir() from this process will create a directory with our
+                        // permissions (inherited from the containing dir). This command fixes
+                        // the label.
+                        if (!SELinux.restorecon(fpDir)) {
+                            Slog.w(TAG, "Restorecons failed. Directory will have wrong label.");
+                            return;
+                        }
                     }
-                    // Calling mkdir() from this process will create a directory with our
-                    // permissions (inherited from the containing dir). This command fixes
-                    // the label.
-                    if (!SELinux.restorecon(fpDir)) {
-                        Slog.w(TAG, "Restorecons failed. Directory will have wrong label.");
-                        return;
-                    }
+                    daemon.setActiveGroup(userId, fpDir.getAbsolutePath().getBytes());
+                    mCurrentUserId = userId;
                 }
-                daemon.setActiveGroup(userId, fpDir.getAbsolutePath().getBytes());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveGroup():", e);
             }
         }
+    }
+
+    /**
+     * @param clientPackage the package of the caller
+     * @return the profile id
+     */
+    private int getUserOrWorkProfileId(String clientPackage, int userId) {
+        if (!isKeyguard(clientPackage) && isWorkProfile(userId)) {
+            return userId;
+        }
+        return getEffectiveUserId(userId);
+    }
+
+    /**
+     * @param userId
+     * @return true if this is a work profile
+     */
+    private boolean isWorkProfile(int userId) {
+        UserInfo info = mUserManager.getUserInfo(userId);
+        return info != null && info.isManagedProfile();
     }
 
     private void listenForUserSwitches() {

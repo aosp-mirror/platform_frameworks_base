@@ -75,4 +75,7 @@ interface IFingerprintService {
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
     void addLockoutResetCallback(IFingerprintServiceLockoutResetCallback callback);
+
+    // Explicitly set the active user (for enrolling work profile)
+    void setActiveUser(int uid);
 }
