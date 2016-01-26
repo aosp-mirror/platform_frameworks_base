@@ -450,6 +450,10 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
     if (!bakedState) return; // quick rejected
 
+    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
+
+    // TODO: Fix this ( b/26569206 )
+/*
     // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
     // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
     // MergingDrawBatch::canMergeWith()
@@ -464,6 +468,7 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     } else {
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
     }
+*/
 }
 
 void FrameBuilder::deferBitmapMeshOp(const BitmapMeshOp& op) {
