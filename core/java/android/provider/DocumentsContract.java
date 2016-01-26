@@ -342,8 +342,8 @@ public final class DocumentsContract {
          * within the same document provider.
          *
          * @see #COLUMN_FLAGS
-         * @see DocumentsContract#moveDocument(ContentProviderClient, Uri, Uri)
-         * @see DocumentsProvider#moveDocument(String, String)
+         * @see DocumentsContract#moveDocument(ContentProviderClient, Uri, Uri, Uri)
+         * @see DocumentsProvider#moveDocument(String, String, String)
          */
         public static final int FLAG_SUPPORTS_MOVE = 1 << 8;
 
@@ -613,6 +613,8 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String METHOD_IS_CHILD_DOCUMENT = "android:isChildDocument";
 
+    /** {@hide} */
+    public static final String EXTRA_PARENT_URI = "parentUri";
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
 
@@ -1170,17 +1172,19 @@ public final class DocumentsContract {
      * Moves the given document under a new parent.
      *
      * @param sourceDocumentUri document with {@link Document#FLAG_SUPPORTS_MOVE}
+     * @param sourceParentDocumentUri parent document of the document to move.
      * @param targetParentDocumentUri document which will become a new parent of the source
      *         document.
      * @return the moved document, or {@code null} if failed.
      * @hide
      */
     public static Uri moveDocument(ContentResolver resolver, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) {
+            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
-            return moveDocument(client, sourceDocumentUri, targetParentDocumentUri);
+            return moveDocument(client, sourceParentDocumentUri, sourceDocumentUri,
+                    targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to move document", e);
             return null;
@@ -1191,9 +1195,10 @@ public final class DocumentsContract {
 
     /** {@hide} */
     public static Uri moveDocument(ContentProviderClient client, Uri sourceDocumentUri,
-            Uri targetParentDocumentUri) throws RemoteException {
+            Uri sourceParentDocumentUri, Uri targetParentDocumentUri) throws RemoteException {
         final Bundle in = new Bundle();
         in.putParcelable(DocumentsContract.EXTRA_URI, sourceDocumentUri);
+        in.putParcelable(DocumentsContract.EXTRA_PARENT_URI, sourceParentDocumentUri);
         in.putParcelable(DocumentsContract.EXTRA_TARGET_URI, targetParentDocumentUri);
 
         final Bundle out = client.call(METHOD_MOVE_DOCUMENT, null, in);

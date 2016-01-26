@@ -289,12 +289,14 @@ public abstract class DocumentsProvider extends ContentProvider {
      * be returned.
      *
      * @param sourceDocumentId the document to move.
+     * @param sourceParentDocumentId the parent of the document to move.
      * @param targetParentDocumentId the target document to be a new parent of the
      *     source document.
      * @hide
      */
     @SuppressWarnings("unused")
-    public String moveDocument(String sourceDocumentId, String targetParentDocumentId)
+    public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
+            String targetParentDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Move not supported");
     }
@@ -759,7 +761,7 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
 
-                // Original document no longer exists, clean up any grants
+                // Original document no longer exists, clean up any grants.
                 revokeDocumentPermission(documentId);
             }
 
@@ -767,7 +769,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             enforceWritePermissionInner(documentUri, getCallingPackage(), null);
             deleteDocument(documentId);
 
-            // Document no longer exists, clean up any grants
+            // Document no longer exists, clean up any grants.
             revokeDocumentPermission(documentId);
 
         } else if (METHOD_COPY_DOCUMENT.equals(method)) {
@@ -793,13 +795,16 @@ public abstract class DocumentsProvider extends ContentProvider {
             }
 
         } else if (METHOD_MOVE_DOCUMENT.equals(method)) {
+            final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
+            final String parentSourceId = DocumentsContract.getDocumentId(parentSourceUri);
             final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
             final String targetId = DocumentsContract.getDocumentId(targetUri);
 
-            enforceReadPermissionInner(documentUri, getCallingPackage(), null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(), null);
+            enforceReadPermissionInner(parentSourceUri, getCallingPackage(), null);
             enforceWritePermissionInner(targetUri, getCallingPackage(), null);
 
-            final String newDocumentId = moveDocument(documentId, targetId);
+            final String newDocumentId = moveDocument(documentId, parentSourceId, targetId);
 
             if (newDocumentId != null) {
                 final Uri newDocumentUri = buildDocumentUriMaybeUsingTree(documentUri,
@@ -814,7 +819,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
             }
 
-            // Original document no longer exists, clean up any grants
+            // Original document no longer exists, clean up any grants.
             revokeDocumentPermission(documentId);
 
         } else {
