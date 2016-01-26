@@ -1141,7 +1141,6 @@ public final class DocumentsContract {
      * @param targetParentDocumentUri document which will become a parent of the source
      *         document's copy.
      * @return the copied document, or {@code null} if failed.
-     * @hide
      */
     public static Uri copyDocument(ContentResolver resolver, Uri sourceDocumentUri,
             Uri targetParentDocumentUri) {
@@ -1176,7 +1175,6 @@ public final class DocumentsContract {
      * @param targetParentDocumentUri document which will become a new parent of the source
      *         document.
      * @return the moved document, or {@code null} if failed.
-     * @hide
      */
     public static Uri moveDocument(ContentResolver resolver, Uri sourceDocumentUri,
             Uri sourceParentDocumentUri, Uri targetParentDocumentUri) {

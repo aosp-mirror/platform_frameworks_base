@@ -31098,6 +31098,7 @@ package android.provider {
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchDocumentsUri(java.lang.String, java.lang.String, java.lang.String);
     method public static android.net.Uri buildTreeDocumentUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri copyDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri);
     method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);
     method public static boolean deleteDocument(android.content.ContentResolver, android.net.Uri);
     method public static java.lang.String getDocumentId(android.net.Uri);
@@ -31106,6 +31107,7 @@ package android.provider {
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
     method public static java.lang.String getTreeDocumentId(android.net.Uri);
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
+    method public static android.net.Uri moveDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri, android.net.Uri);
     method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
     field public static final java.lang.String EXTRA_ERROR = "error";
     field public static final java.lang.String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
