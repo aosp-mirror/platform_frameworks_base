@@ -180,10 +180,14 @@ public class RootsFragment extends Fragment {
             Item item = mAdapter.getItem(position);
             if (item instanceof RootItem) {
                 BaseActivity activity = BaseActivity.get(RootsFragment.this);
-                activity.onRootPicked(((RootItem) item).root);
+                RootInfo info = ((RootItem) item).root;
+                Metrics.logRootVisited(getActivity(), info);
+                activity.onRootPicked(info);
             } else if (item instanceof AppItem) {
                 DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
-                activity.onAppPicked(((AppItem) item).info);
+                ResolveInfo info = ((AppItem) item).info;
+                Metrics.logAppVisited(getActivity(), info);
+                activity.onAppPicked(info);
             } else if (item instanceof SpacerItem) {
                 if (DEBUG) Log.d(TAG, "Ignoring click on spacer item.");
             } else {
