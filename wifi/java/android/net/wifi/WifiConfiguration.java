@@ -26,7 +26,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.BackupUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -37,6 +42,10 @@ import java.util.HashMap;
  */
 public class WifiConfiguration implements Parcelable {
     private static final String TAG = "WifiConfiguration";
+    /**
+     * Current Version of the Backup Serializer.
+    */
+    private static final int BACKUP_VERSION = 2;
     /** {@hide} */
     public static final String ssidVarName = "ssid";
     /** {@hide} */
@@ -1449,10 +1458,10 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append(" blackListed since <incorrect>");
             } else {
-                sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec ");
+                sbuf.append(" blackListed: ").append(Long.toString(diff / 1000)).append("sec ");
             }
         }
-        if (creatorUid != 0)  sbuf.append(" cuid=" + Integer.toString(creatorUid));
+        if (creatorUid != 0) sbuf.append(" cuid=" + creatorUid);
         if (creatorName != null) sbuf.append(" cname=" + creatorName);
         if (lastUpdateUid != 0) sbuf.append(" luid=" + lastUpdateUid);
         if (lastUpdateName != null) sbuf.append(" lname=" + lastUpdateName);
@@ -1467,7 +1476,7 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append("lastConnected since <incorrect>");
             } else {
-                sbuf.append("lastConnected: ").append(Long.toString(diff/1000)).append( "sec ");
+                sbuf.append("lastConnected: ").append(Long.toString(diff / 1000)).append("sec ");
             }
         }
         if (this.lastConnectionFailure != 0) {
@@ -1476,8 +1485,8 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append("lastConnectionFailure since <incorrect> ");
             } else {
-                sbuf.append("lastConnectionFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec ");
+                sbuf.append("lastConnectionFailure: ").append(Long.toString(diff / 1000));
+                sbuf.append("sec ");
             }
         }
         if (this.lastRoamingFailure != 0) {
@@ -1486,20 +1495,19 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append("lastRoamingFailure since <incorrect> ");
             } else {
-                sbuf.append("lastRoamingFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec ");
+                sbuf.append("lastRoamingFailure: ").append(Long.toString(diff / 1000));
+                sbuf.append("sec ");
             }
         }
         sbuf.append("roamingFailureBlackListTimeMilli: ").
                 append(Long.toString(this.roamingFailureBlackListTimeMilli));
         sbuf.append('\n');
         if (this.linkedConfigurations != null) {
-            for(String key : this.linkedConfigurations.keySet()) {
+            for (String key : this.linkedConfigurations.keySet()) {
                 sbuf.append(" linked: ").append(key);
                 sbuf.append('\n');
             }
         }
-
         sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
         sbuf.append(" triggeredBad: ").append(this.numUserTriggeredWifiDisableBadRSSI);
         sbuf.append(" triggeredNotHigh: ").append(this.numUserTriggeredWifiDisableNotHighRSSI);
@@ -1989,4 +1997,43 @@ public class WifiConfiguration implements Parcelable {
                 return new WifiConfiguration[size];
             }
         };
+
+    /**
+     * Serializes the object for backup
+     * @hide
+     */
+    public byte[] getBytesForBackup() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+
+        out.writeInt(BACKUP_VERSION);
+        BackupUtils.writeString(out, SSID);
+        out.writeInt(apBand);
+        out.writeInt(apChannel);
+        BackupUtils.writeString(out, preSharedKey);
+        out.writeInt(getAuthType());
+        return baos.toByteArray();
+    }
+
+    /**
+     * Deserializes a byte array into the WiFiConfiguration Object
+     * @hide
+     */
+    public static WifiConfiguration getWifiConfigFromBackup(DataInputStream in) throws IOException,
+            BackupUtils.BadVersionException {
+        WifiConfiguration config = new WifiConfiguration();
+        int version = in.readInt();
+        if (version < 1 || version > BACKUP_VERSION) {
+            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
+        }
+
+        if (version == 1) return null; // Version 1 is a bad dataset.
+
+        config.SSID = BackupUtils.readString(in);
+        config.apBand = in.readInt();
+        config.apChannel = in.readInt();
+        config.preSharedKey = BackupUtils.readString(in);
+        config.allowedKeyManagement.set(in.readInt());
+        return config;
+    }
 }
