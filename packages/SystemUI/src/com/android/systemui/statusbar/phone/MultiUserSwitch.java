@@ -65,6 +65,10 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         setUserSwitcherController(qsPanel.getHost().getUserSwitcherController());
     }
 
+    public boolean hasMultipleUsers() {
+        return mUserListener.getCount() != 0;
+    }
+
     public void setUserSwitcherController(UserSwitcherController userSwitcherController) {
         mUserSwitcherController = userSwitcherController;
         registerListener();

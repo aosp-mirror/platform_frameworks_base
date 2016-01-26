@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -70,6 +71,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private QuickQSPanel mHeaderQsPanel;
     private boolean mShowEmergencyCallsOnly;
     private float mDateTimeTranslation;
+    private MultiUserSwitch mMultiUserSwitch;
+    private ImageView mMultiUserAvatar;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,6 +102,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
+
+        mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
+        mMultiUserAvatar = (ImageView) mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -173,6 +179,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+        mMultiUserSwitch.setVisibility(mMultiUserSwitch.hasMultipleUsers() ? View.VISIBLE
+                : View.GONE);
+    }
+
+    private boolean hasMultiUsers() {
+        return false;
     }
 
     private void updateListeners() {
@@ -194,6 +206,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         setupHost(qsPanel.getHost());
         if (mQsPanel != null) {
             mQsPanel.setCallback(mQsPanelCallback);
+            mMultiUserSwitch.setQsPanel(qsPanel);
         }
     }
 
@@ -254,7 +267,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setUserInfoController(UserInfoController userInfoController) {
-        // Don't care.
+        userInfoController.addListener(new UserInfoController.OnUserInfoChangedListener() {
+            @Override
+            public void onUserInfoChanged(String name, Drawable picture) {
+                mMultiUserAvatar.setImageDrawable(picture);
+            }
+        });
     }
 
     @Override
