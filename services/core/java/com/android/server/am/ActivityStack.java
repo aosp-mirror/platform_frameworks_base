@@ -3041,42 +3041,44 @@ final class ActivityStack {
         mService.updateOomAdjLocked();
     }
 
-    final void finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+    final TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
         ActivityRecord r = topRunningActivityLocked();
-        if (r != null && r.app == app) {
-            // If the top running activity is from this crashing
-            // process, then terminate it to avoid getting in a loop.
-            Slog.w(TAG, "  Force finishing activity "
-                    + r.intent.getComponent().flattenToShortString());
-            int taskNdx = mTaskHistory.indexOf(r.task);
-            int activityNdx = r.task.mActivities.indexOf(r);
-            finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
-            // Also terminate any activities below it that aren't yet
-            // stopped, to avoid a situation where one will get
-            // re-start our crashing activity once it gets resumed again.
-            --activityNdx;
-            if (activityNdx < 0) {
-                do {
-                    --taskNdx;
-                    if (taskNdx < 0) {
-                        break;
-                    }
-                    activityNdx = mTaskHistory.get(taskNdx).mActivities.size() - 1;
-                } while (activityNdx < 0);
-            }
-            if (activityNdx >= 0) {
-                r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
-                if (r.state == ActivityState.RESUMED
-                        || r.state == ActivityState.PAUSING
-                        || r.state == ActivityState.PAUSED) {
-                    if (!r.isHomeActivity() || mService.mHomeProcess != r.app) {
-                        Slog.w(TAG, "  Force finishing activity "
-                                + r.intent.getComponent().flattenToShortString());
-                        finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
-                    }
+        TaskRecord finishedTask = null;
+        if (r == null || r.app != app) {
+            return null;
+        }
+        Slog.w(TAG, "  Force finishing activity "
+                + r.intent.getComponent().flattenToShortString());
+        int taskNdx = mTaskHistory.indexOf(r.task);
+        int activityNdx = r.task.mActivities.indexOf(r);
+        finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
+        finishedTask = r.task;
+        // Also terminate any activities below it that aren't yet
+        // stopped, to avoid a situation where one will get
+        // re-start our crashing activity once it gets resumed again.
+        --activityNdx;
+        if (activityNdx < 0) {
+            do {
+                --taskNdx;
+                if (taskNdx < 0) {
+                    break;
+                }
+                activityNdx = mTaskHistory.get(taskNdx).mActivities.size() - 1;
+            } while (activityNdx < 0);
+        }
+        if (activityNdx >= 0) {
+            r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
+            if (r.state == ActivityState.RESUMED
+                    || r.state == ActivityState.PAUSING
+                    || r.state == ActivityState.PAUSED) {
+                if (!r.isHomeActivity() || mService.mHomeProcess != r.app) {
+                    Slog.w(TAG, "  Force finishing activity "
+                            + r.intent.getComponent().flattenToShortString());
+                    finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
                 }
             }
         }
+        return finishedTask;
     }
 
     final void finishVoiceTask(IVoiceInteractionSession session) {

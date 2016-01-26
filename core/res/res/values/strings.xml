@@ -2588,16 +2588,27 @@
     <!-- Text to display when there are no activities found to display in the
          activity chooser. See the "Select an action" title. -->
     <string name="noApplications">No apps can perform this action.</string>
-    <!-- Title of the alert when an application has crashed. -->
-    <string name="aerr_title"></string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_application">Unfortunately, <xliff:g id="application">%1$s</xliff:g> has stopped.</string>
-    <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
-        stopped.</string>
-    <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_process_silence">Silence crashes from <xliff:g id="process">%1$s</xliff:g>
-        until reboot.</string>
+    <string name="aerr_application"><xliff:g id="application">%1$s</xliff:g> has stopped</string>
+    <!-- Text of the alert that is displayed when a process has crashed. -->
+    <string name="aerr_process"><xliff:g id="process">%1$s</xliff:g> has
+        stopped</string>
+    <!-- Text of the alert that is displayed when an application has crashed repeatedly. -->
+    <string name="aerr_application_repeated"><xliff:g id="application">%1$s</xliff:g> is repeatedly stopping</string>
+    <!-- Text of the alert that is displayed when a process has crashed repeatedly. -->
+    <string name="aerr_process_repeated"><xliff:g id="process">%1$s</xliff:g> is
+        repeatedly stopping</string>
+    <!-- Button that restarts a crashed application -->
+    <string name="aerr_restart">Restart app</string>
+    <!-- Button that clears cache and restarts a crashed application -->
+    <string name="aerr_reset">Reset and restart app</string>
+    <!-- Button that sends feedback about a crashed application -->
+    <string name="aerr_report">Send feedback</string>
+    <!-- Button that closes a crashed application -->
+    <string name="aerr_close">Close</string>
+    <!-- Button that mutes further crashes of the crashed application-->
+    <string name="aerr_mute">Mute</string>
+
     <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
