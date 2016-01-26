@@ -195,7 +195,9 @@ public abstract class TvInputService extends Service {
      * @param inputId The ID of the TV input associated with the recording session.
      */
     @Nullable
-    public abstract RecordingSession onCreateRecordingSession(String inputId);
+    public RecordingSession onCreateRecordingSession(String inputId) {
+        return null;
+    }
 
     /**
      * Returns a new {@link TvInputInfo} object if this service is responsible for

@@ -22457,7 +22457,7 @@ package android.media.tv {
   public abstract class TvInputService extends android.app.Service {
     ctor public TvInputService();
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(java.lang.String);
+    method public android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(java.lang.String);
     method public abstract android.media.tv.TvInputService.Session onCreateSession(java.lang.String);
     method public final void setTvInputInfo(java.lang.String, android.media.tv.TvInputInfo);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
