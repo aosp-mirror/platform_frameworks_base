@@ -62,6 +62,7 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -2233,10 +2234,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
             ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
             if (icon != null) {
-                iconView.setImageDrawable(icon);
                 iconView.setVisibility(View.VISIBLE);
+                if (!isEnabled(position)) {
+                    icon.mutate();
+
+                    TypedValue value = new TypedValue();
+                    getTheme().resolveAttribute(android.R.attr.disabledAlpha, value, true);
+                    icon.setAlpha((int)(value.getFloat() * 255));
+                }
+                iconView.setImageDrawable(icon);
             } else {
-                iconView.setVisibility(View.INVISIBLE);
+                iconView.setVisibility(View.GONE);
             }
 
             return convertView;

@@ -37,6 +37,7 @@ import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +48,7 @@ import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -663,18 +665,28 @@ public final class SelectPrinterActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         try {
-                            startIntentSender(printer.getInfoIntent().getIntentSender(), null, 0, 0, 0);
+                            startIntentSender(printer.getInfoIntent().getIntentSender(), null, 0, 0,
+                                    0);
                         } catch (SendIntentException e) {
                             Log.e(LOG_TAG, "Could not execute pending info intent: %s", e);
                         }
                     }
                 });
+            } else {
+                moreInfoView.setVisibility(View.GONE);
             }
 
             ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
             if (icon != null) {
-                iconView.setImageDrawable(icon);
                 iconView.setVisibility(View.VISIBLE);
+                if (!isActionable(position)) {
+                    icon.mutate();
+
+                    TypedValue value = new TypedValue();
+                    getTheme().resolveAttribute(android.R.attr.disabledAlpha, value, true);
+                    icon.setAlpha((int)(value.getFloat() * 255));
+                }
+                iconView.setImageDrawable(icon);
             } else {
                 iconView.setVisibility(View.GONE);
             }
