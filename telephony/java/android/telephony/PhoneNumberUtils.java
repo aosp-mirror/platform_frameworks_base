@@ -2082,7 +2082,7 @@ public class PhoneNumberUtils
      * to read the VM number.
      */
     public static boolean isVoiceMailNumber(String number) {
-        return isVoiceMailNumber(SubscriptionManager.getDefaultSubId(), number);
+        return isVoiceMailNumber(SubscriptionManager.getDefaultSubscriptionId(), number);
     }
 
     /**
@@ -2977,7 +2977,7 @@ public class PhoneNumberUtils
      * Returns Default voice subscription Id.
      */
     private static int getDefaultVoiceSubId() {
-        return SubscriptionManager.getDefaultVoiceSubId();
+        return SubscriptionManager.getDefaultVoiceSubscriptionId();
     }
     //==== End of utility methods used only in compareStrictly() =====
 }

@@ -309,7 +309,7 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getCallerInfo() based on number...");
 
-        int subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubscriptionId();
         return getCallerInfo(context, number, subId);
     }
 
@@ -426,7 +426,7 @@ public class CallerInfo {
     // string in the phone number field.
     /* package */ CallerInfo markAsVoiceMail() {
 
-        int subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubscriptionId();
         return markAsVoiceMail(subId);
 
     }

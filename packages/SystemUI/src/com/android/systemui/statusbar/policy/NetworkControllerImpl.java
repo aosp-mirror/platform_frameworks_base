@@ -811,11 +811,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     public static class SubscriptionDefaults {
         public int getDefaultVoiceSubId() {
-            return SubscriptionManager.getDefaultVoiceSubId();
+            return SubscriptionManager.getDefaultVoiceSubscriptionId();
         }
 
         public int getDefaultDataSubId() {
-            return SubscriptionManager.getDefaultDataSubId();
+            return SubscriptionManager.getDefaultDataSubscriptionId();
         }
     }
 

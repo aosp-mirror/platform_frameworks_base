@@ -1230,7 +1230,6 @@ public class TelephonyManager {
      * on a CDMA network).
      * @param subId
      */
-    /** {@hide} */
     public String getNetworkOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, "");
@@ -1257,8 +1256,7 @@ public class TelephonyManager {
      *
      * @param subId
      */
-    /** {@hide} */
-   public String getNetworkOperatorForSubscription(int subId) {
+    public String getNetworkOperator(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getNetworkOperatorForPhone(phoneId);
      }
@@ -1274,7 +1272,7 @@ public class TelephonyManager {
      * @param phoneId
      * @hide
      **/
-   public String getNetworkOperatorForPhone(int phoneId) {
+    public String getNetworkOperatorForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
      }
 
@@ -1296,7 +1294,6 @@ public class TelephonyManager {
      *
      * @param subId
      */
-    /** {@hide} */
     public boolean isNetworkRoaming(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return Boolean.parseBoolean(getTelephonyProperty(phoneId,
@@ -1325,8 +1322,7 @@ public class TelephonyManager {
      *
      * @param subId for which Network CountryIso is returned
      */
-    /** {@hide} */
-    public String getNetworkCountryIsoForSubscription(int subId) {
+    public String getNetworkCountryIso(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getNetworkCountryIsoForPhone(phoneId);
     }
@@ -1434,7 +1430,6 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    /** {@hide} */
    public int getNetworkType(int subId) {
        try {
            ITelephony telephony = getITelephony();
@@ -1495,7 +1490,6 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    /** {@hide} */
     public int getDataNetworkType(int subId) {
         try{
             ITelephony telephony = getITelephony();
@@ -1533,7 +1527,6 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    /** {@hide} */
     public int getVoiceNetworkType(int subId) {
         try{
             ITelephony telephony = getITelephony();
@@ -1802,10 +1795,9 @@ public class TelephonyManager {
      * @see #getSimState
      *
      * @param subId for which SimOperator is returned
-     * @hide
      */
     public String getSimOperator(int subId) {
-        return getSimOperatorNumericForSubscription(subId);
+        return getSimOperatorNumeric(subId);
     }
 
     /**
@@ -1818,17 +1810,17 @@ public class TelephonyManager {
      * @hide
      */
     public String getSimOperatorNumeric() {
-        int subId = SubscriptionManager.getDefaultDataSubId();
+        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
         if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-            subId = SubscriptionManager.getDefaultSmsSubId();
+            subId = SubscriptionManager.getDefaultSmsSubscriptionId();
             if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-                subId = SubscriptionManager.getDefaultVoiceSubId();
+                subId = SubscriptionManager.getDefaultVoiceSubscriptionId();
                 if (!SubscriptionManager.isUsableSubIdValue(subId)) {
-                    subId = SubscriptionManager.getDefaultSubId();
+                    subId = SubscriptionManager.getDefaultSubscriptionId();
                 }
             }
         }
-        return getSimOperatorNumericForSubscription(subId);
+        return getSimOperatorNumeric(subId);
     }
 
     /**
@@ -1842,7 +1834,7 @@ public class TelephonyManager {
      * @param subId for which SimOperator is returned
      * @hide
      */
-    public String getSimOperatorNumericForSubscription(int subId) {
+    public String getSimOperatorNumeric(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimOperatorNumericForPhone(phoneId);
     }
@@ -1879,9 +1871,8 @@ public class TelephonyManager {
      * @see #getSimState
      *
      * @param subId for which SimOperatorName is returned
-     * @hide
      */
-    public String getSimOperatorNameForSubscription(int subId) {
+    public String getSimOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimOperatorNameForPhone(phoneId);
     }
@@ -1907,21 +1898,8 @@ public class TelephonyManager {
      * Returns the ISO country code equivalent for the SIM provider's country code.
      *
      * @param subId for which SimCountryIso is returned
-     *
-     * @hide
      */
     public String getSimCountryIso(int subId) {
-        return getSimCountryIsoForSubscription(subId);
-    }
-
-    /**
-     * Returns the ISO country code equivalent for the SIM provider's country code.
-     *
-     * @param subId for which SimCountryIso is returned
-     *
-     * @hide
-     */
-    public String getSimCountryIsoForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimCountryIsoForPhone(phoneId);
     }
@@ -1955,7 +1933,6 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
-    /** {@hide} */
     public String getSimSerialNumber(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -2044,7 +2021,6 @@ public class TelephonyManager {
      *
      * @param subId whose subscriber id is returned
      */
-    /** {@hide} */
     public String getSubscriberId(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -2087,9 +2063,8 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @param subscription whose subscriber id is returned
+     * @param subId whose subscriber id is returned
      */
-    /** {@hide} */
     public String getGroupIdLevel1(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -2116,7 +2091,7 @@ public class TelephonyManager {
      * The default SMS app can also use this.
      */
     public String getLine1Number() {
-        return getLine1NumberForSubscriber(getDefaultSubscription());
+        return getLine1Number(getDefaultSubscription());
     }
 
     /**
@@ -2132,8 +2107,7 @@ public class TelephonyManager {
      *
      * @param subId whose phone number for line 1 is returned
      */
-    /** {@hide} */
-    public String getLine1NumberForSubscriber(int subId) {
+    public String getLine1Number(int subId) {
         String number = null;
         try {
             ITelephony telephony = getITelephony();
@@ -2172,7 +2146,7 @@ public class TelephonyManager {
      * @return true if the operation was executed correctly.
      */
     public boolean setLine1NumberForDisplay(String alphaTag, String number) {
-        return setLine1NumberForDisplayForSubscriber(getDefaultSubscription(), alphaTag, number);
+        return setLine1NumberForDisplay(getDefaultSubscription(), alphaTag, number);
     }
 
     /**
@@ -2188,9 +2162,8 @@ public class TelephonyManager {
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
      * @return true if the operation was executed correctly.
-     * @hide
      */
-    public boolean setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number) {
+    public boolean setLine1NumberForDisplay(int subId, String alphaTag, String number) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -2211,7 +2184,7 @@ public class TelephonyManager {
      * nobody seems to call this.
      */
     public String getLine1AlphaTag() {
-        return getLine1AlphaTagForSubscriber(getDefaultSubscription());
+        return getLine1AlphaTag(getDefaultSubscription());
     }
 
     /**
@@ -2224,8 +2197,7 @@ public class TelephonyManager {
      * @param subId whose alphabetic identifier associated with line 1 is returned
      * nobody seems to call this.
      */
-    /** {@hide} */
-    public String getLine1AlphaTagForSubscriber(int subId) {
+    public String getLine1AlphaTag(int subId) {
         String alphaTag = null;
         try {
             ITelephony telephony = getITelephony();
@@ -2325,7 +2297,6 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * @param subId whose voice mail number is returned
      */
-    /** {@hide} */
     public String getVoiceMailNumber(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -2398,7 +2369,6 @@ public class TelephonyManager {
      * @param alphaTag The alpha tag to display.
      * @param number The voicemail number.
      */
-    /** {@hide} */
     public boolean setVoiceMailNumber(int subId, String alphaTag, String number) {
         try {
             ITelephony telephony = getITelephony();
@@ -2464,7 +2434,6 @@ public class TelephonyManager {
      * @param subId whose alphabetic identifier associated with the
      * voice mail number is returned
      */
-    /** {@hide} */
     public String getVoiceMailAlphaTag(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -2582,7 +2551,6 @@ public class TelephonyManager {
      *
      * @param subId whose call state is returned
      */
-    /** {@hide} */
     public int getCallState(int subId) {
         try {
             ITelephony telephony = getITelephony();
@@ -3223,19 +3191,19 @@ public class TelephonyManager {
      * Returns Default subscription.
      */
     private static int getDefaultSubscription() {
-        return SubscriptionManager.getDefaultSubId();
+        return SubscriptionManager.getDefaultSubscriptionId();
     }
 
     /**
      * Returns Default phone.
      */
     private static int getDefaultPhone() {
-        return SubscriptionManager.getPhoneId(SubscriptionManager.getDefaultSubId());
+        return SubscriptionManager.getPhoneId(SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /** {@hide} */
     public int getDefaultSim() {
-        return SubscriptionManager.getSlotId(SubscriptionManager.getDefaultSubId());
+        return SubscriptionManager.getSlotId(SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
@@ -4190,7 +4158,7 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public void setDataEnabled(boolean enable) {
-        setDataEnabled(SubscriptionManager.getDefaultDataSubId(), enable);
+        setDataEnabled(SubscriptionManager.getDefaultDataSubscriptionId(), enable);
     }
 
     /** @hide */
@@ -4209,7 +4177,7 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public boolean getDataEnabled() {
-        return getDataEnabled(SubscriptionManager.getDefaultDataSubId());
+        return getDataEnabled(SubscriptionManager.getDefaultDataSubscriptionId());
     }
 
     /** @hide */

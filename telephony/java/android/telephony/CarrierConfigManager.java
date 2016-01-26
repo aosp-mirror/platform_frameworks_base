@@ -710,7 +710,7 @@ public class CarrierConfigManager {
      */
     @Nullable
     public PersistableBundle getConfig() {
-        return getConfigForSubId(SubscriptionManager.getDefaultSubId());
+        return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
     }
 
     /**
