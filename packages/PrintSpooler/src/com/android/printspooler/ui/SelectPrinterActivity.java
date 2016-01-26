@@ -544,7 +544,10 @@ public final class SelectPrinterActivity extends Activity {
                         final int printerCount = mPrinters.size();
                         for (int i = 0; i < printerCount; i++) {
                             PrinterInfo printer = mPrinters.get(i);
-                            if (printer.getName().toLowerCase().contains(constraintLowerCase)) {
+                            String description = printer.getDescription();
+                            if (printer.getName().toLowerCase().contains(constraintLowerCase)
+                                    || description != null && description.toLowerCase()
+                                            .contains(constraintLowerCase)) {
                                 filteredPrinters.add(printer);
                             }
                         }
