@@ -82,8 +82,6 @@ import android.net.wifi.nan.IWifiNanManager;
 import android.net.wifi.nan.WifiNanManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.passpoint.IWifiPasspointManager;
-import android.net.wifi.passpoint.WifiPasspointManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.DropBoxManager;
@@ -481,15 +479,6 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.WIFI_SERVICE);
                 IWifiManager service = IWifiManager.Stub.asInterface(b);
                 return new WifiManager(ctx.getOuterContext(), service);
-            }});
-
-        registerService(Context.WIFI_PASSPOINT_SERVICE, WifiPasspointManager.class,
-                new CachedServiceFetcher<WifiPasspointManager>() {
-            @Override
-            public WifiPasspointManager createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(Context.WIFI_PASSPOINT_SERVICE);
-                IWifiPasspointManager service = IWifiPasspointManager.Stub.asInterface(b);
-                return new WifiPasspointManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.WIFI_P2P_SERVICE, WifiP2pManager.class,
