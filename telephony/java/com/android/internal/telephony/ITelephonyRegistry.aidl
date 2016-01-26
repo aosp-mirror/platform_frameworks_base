@@ -21,7 +21,6 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.telephony.CellInfo;
-import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.CellInfo;
@@ -65,7 +64,6 @@ interface ITelephonyRegistry {
     void notifyPreciseDataConnectionFailed(String reason, String apnType, String apn,
             String failCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);
-    void notifyDataConnectionRealTimeInfo(in DataConnectionRealTimeInfo dcRtInfo);
     void notifyVoLteServiceStateChanged(in VoLteServiceState lteState);
     void notifyOemHookRawEventForSubscriber(in int subId, in byte[] rawData);
     void notifySubscriptionInfoChanged();
