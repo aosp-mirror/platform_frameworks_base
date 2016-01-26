@@ -16,6 +16,8 @@
 
 package android.os;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Schedule a countdown until a time in the future, with
  * regular notifications on intervals along the way.
@@ -54,10 +56,10 @@ public abstract class CountDownTimer {
     private final long mCountdownInterval;
 
     private long mStopTimeInFuture;
-    
+
     /**
-    * boolean representing if the timer was cancelled
-    */
+     * boolean representing if the timer was cancelled
+     */
     private boolean mCancelled = false;
 
     /**
@@ -70,6 +72,7 @@ public abstract class CountDownTimer {
     public CountDownTimer(long millisInFuture, long countDownInterval) {
         mMillisInFuture = millisInFuture;
         mCountdownInterval = countDownInterval;
+        mHandler = new CountDownTimerHandler(this);
     }
 
     /**
@@ -109,39 +112,58 @@ public abstract class CountDownTimer {
 
     private static final int MSG = 1;
 
+    /**
+     * Handler object.
+     */
+    private final Handler mHandler;
 
-    // handles counting down
-    private Handler mHandler = new Handler() {
+    /**
+     * Instances of static inner classes do not hold an implicit reference to their outer class.
+     * Creating this static class helps to avoid memory leaks.
+     */
+    private static class CountDownTimerHandler extends Handler {
+        /**
+         * WeakReference of the outer class CountDownTimer.
+         */
+        private final WeakReference<CountDownTimer> countDownTimerWeakReference;
+
+        /**
+         * Handler constructor.
+         * @param countDownTimeInstance
+         */
+        public CountDownTimerHandler(CountDownTimer countDownTimeInstance) {
+            countDownTimerWeakReference = new WeakReference<CountDownTimer>(countDownTimeInstance);
+        }
 
         @Override
         public void handleMessage(Message msg) {
-
-            synchronized (CountDownTimer.this) {
-                if (mCancelled) {
+            CountDownTimer countDownTimer = countDownTimerWeakReference.get();
+            if (countDownTimer == null) {
+                return;
+            }
+            synchronized (countDownTimer) {
+                if (countDownTimer.mCancelled) {
                     return;
                 }
-
-                final long millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();
-
+                final long millisLeft = countDownTimer.mStopTimeInFuture 
+                        - SystemClock.elapsedRealtime();
                 if (millisLeft <= 0) {
-                    onFinish();
-                } else if (millisLeft < mCountdownInterval) {
+                    countDownTimer.onFinish();
+                } else if (millisLeft < countDownTimer.mCountdownInterval) {
                     // no tick, just delay until done
                     sendMessageDelayed(obtainMessage(MSG), millisLeft);
                 } else {
                     long lastTickStart = SystemClock.elapsedRealtime();
-                    onTick(millisLeft);
-
+                    countDownTimer.onTick(millisLeft);
                     // take into account user's onTick taking time to execute
-                    long delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();
-
+                    long delay = lastTickStart + countDownTimer.mCountdownInterval 
+                            - SystemClock.elapsedRealtime();
                     // special case: user's onTick took more than interval to
                     // complete, skip to next interval
-                    while (delay < 0) delay += mCountdownInterval;
-
+                    while (delay < 0) delay += countDownTimer.mCountdownInterval;
                     sendMessageDelayed(obtainMessage(MSG), delay);
                 }
             }
         }
-    };
+    }
 }
