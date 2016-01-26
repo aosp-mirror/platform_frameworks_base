@@ -42,6 +42,8 @@ import com.android.documentsui.MimePredicate;
 import com.android.documentsui.ProviderExecutor;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.R;
+import com.android.documentsui.State;
+import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.ThumbnailCache;
 
 /**
@@ -64,7 +66,7 @@ public class IconHelper {
      */
     public IconHelper(Context context, int mode) {
         mContext = context;
-        setMode(mode);
+        setViewMode(mode);
         mCache = DocumentsApplication.getThumbnailsCache(context, mThumbSize);
     }
 
@@ -82,7 +84,7 @@ public class IconHelper {
      * Sets the current display mode.  This affects the thumbnail sizes that are loaded.
      * @param mode See {@link State.MODE_LIST} and {@link State.MODE_GRID}.
      */
-    public void setMode(int mode) {
+    public void setViewMode(@ViewMode int mode) {
         // TODO: Instead of exposing setMode, make the mode final, and make separate instances for
         // grid/list.
         int thumbSize;
@@ -94,7 +96,6 @@ public class IconHelper {
                 thumbSize = mContext.getResources().getDimensionPixelSize(
                         R.dimen.list_item_thumbnail_size);
                 break;
-            case MODE_UNKNOWN:
             default:
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }

@@ -20,7 +20,6 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
-import static com.android.documentsui.State.MODE_UNKNOWN;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -37,7 +36,6 @@ import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ClipData;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -91,9 +89,6 @@ import com.android.documentsui.MessageBar;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentLoader;
-import com.android.documentsui.RecentsProvider;
-import com.android.documentsui.RecentsProvider.StateColumns;
-import com.android.documentsui.dirlist.RenameDocumentFragment;
 import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
@@ -155,7 +150,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private int mType = TYPE_NORMAL;
     private String mStateKey;
 
-    private int mLastMode = MODE_UNKNOWN;
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
     private boolean mLastShowSize;
     private DocumentsAdapter mAdapter;
@@ -240,7 +234,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
 
-        mIconHelper = new IconHelper(context, state.derivedMode);
+        mIconHelper = new IconHelper(context, MODE_GRID);
 
         mAdapter = new SectionBreakDocumentsAdapterWrapper(
                 this, new ModelBackedDocumentsAdapter(this, mIconHelper));
@@ -323,12 +317,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 if (!isAdded()) return;
 
                 mModel.update(result);
-
-                // Push latest state up to UI
-                // TODO: if mode change was racing with us, don't overwrite it
-                if (result.mode != MODE_UNKNOWN) {
-                    state.derivedMode = result.mode;
-                }
                 state.derivedSortOrder = result.sortOrder;
 
                 updateDisplayState();
@@ -361,8 +349,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         // Kick off loader at least once
         getLoaderManager().restartLoader(LOADER_ID, null, mCallbacks);
-
-        updateDisplayState();
     }
 
     @Override
@@ -425,61 +411,25 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         state.dirState.put(mStateKey, container);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateDisplayState();
-    }
-
     public void onDisplayStateChanged() {
         updateDisplayState();
     }
 
-    public void onUserSortOrderChanged() {
-        // Sort order change always triggers reload; we'll trigger state change
-        // on the flip side.
+    public void onSortOrderChanged() {
+        // Sort order is implemented as a sorting wrapper around directory
+        // results. So when sort order changes, we force a reload of the directory.
         getLoaderManager().restartLoader(LOADER_ID, null, mCallbacks);
     }
 
-    public void onUserModeChanged() {
-        final ContentResolver resolver = getActivity().getContentResolver();
-        final State state = getDisplayState();
-
-        final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
-        final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
-
-        if (root != null && doc != null) {
-            final Uri stateUri = RecentsProvider.buildState(
-                    root.authority, root.rootId, doc.documentId);
-            final ContentValues values = new ContentValues();
-            values.put(StateColumns.MODE, state.userMode);
-
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    resolver.insert(stateUri, values);
-                    return null;
-                }
-            }.execute();
-        }
-
-        // Mode change is just visual change; no need to kick loader, and
-        // deliver change event immediately.
-        state.derivedMode = state.userMode;
-        ((BaseActivity) getActivity()).onStateChanged();
-
+    public void onViewModeChanged() {
+        // Mode change is just visual change; no need to kick loader.
         updateDisplayState();
     }
 
     private void updateDisplayState() {
-        final State state = getDisplayState();
-
-        if (mLastMode == state.derivedMode && mLastShowSize == state.showSize) return;
-        mLastMode = state.derivedMode;
+        State state = getDisplayState();
         mLastShowSize = state.showSize;
-
         updateLayout(state.derivedMode);
-
         mRecView.setAdapter(mAdapter);
     }
 
@@ -506,7 +456,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 }
                 layout = mListLayout;
                 break;
-            case MODE_UNKNOWN:
             default:
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }
@@ -516,7 +465,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         // setting layout manager automatically invalidates existing ViewHolders.
         mRecView.setLayoutManager(layout);
         mSelectionManager.handleLayoutChanged();  // RecyclerView doesn't do this for us
-        mIconHelper.setMode(mode);
+        mIconHelper.setViewMode(mode);
     }
 
     private int calculateColumnCount() {
@@ -539,7 +488,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             case MODE_LIST:
                 return getResources().getDimensionPixelSize(
                         R.dimen.list_container_padding);
-            case MODE_UNKNOWN:
             default:
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }

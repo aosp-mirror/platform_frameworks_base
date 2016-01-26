@@ -29,7 +29,6 @@ public class DirectoryResult implements AutoCloseable {
     public Cursor cursor;
     public Exception exception;
 
-    public int mode = MODE_UNKNOWN;
     public int sortOrder = SORT_ORDER_UNKNOWN;
 
     @Override

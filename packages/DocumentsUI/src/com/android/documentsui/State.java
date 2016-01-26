@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import android.annotation.IntDef;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -26,18 +27,43 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class State implements android.os.Parcelable {
+
+    public static final int ACTION_OPEN = 1;
+    public static final int ACTION_CREATE = 2;
+    public static final int ACTION_GET_CONTENT = 3;
+    public static final int ACTION_OPEN_TREE = 4;
+    public static final int ACTION_MANAGE = 5;
+    public static final int ACTION_BROWSE = 6;
+    public static final int ACTION_PICK_COPY_DESTINATION = 8;
+
+    @IntDef(flag = true, value = {
+            MODE_UNKNOWN,
+            MODE_LIST,
+            MODE_GRID
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ViewMode {}
+    public static final int MODE_UNKNOWN = 0;
+    public static final int MODE_LIST = 1;
+    public static final int MODE_GRID = 2;
+
+    public static final int SORT_ORDER_UNKNOWN = 0;
+    public static final int SORT_ORDER_DISPLAY_NAME = 1;
+    public static final int SORT_ORDER_LAST_MODIFIED = 2;
+    public static final int SORT_ORDER_SIZE = 3;
+
     public int action;
     public String[] acceptMimes;
 
-    /** Explicit user choice */
-    public int userMode = MODE_UNKNOWN;
-    /** Derived after loader */
-    public int derivedMode = MODE_GRID;
+    /** Derived from local preferences */
+    public @ViewMode int derivedMode = MODE_GRID;
 
     /** Explicit user choice */
     public int userSortOrder = SORT_ORDER_UNKNOWN;
@@ -58,6 +84,8 @@ public class State implements android.os.Parcelable {
 
     /** Current user navigation stack; empty implies recents. */
     public DocumentStack stack = new DocumentStack();
+    private boolean mStackTouched;
+
     /** Currently active search, overriding any stack. */
     public String currentSearch;
 
@@ -69,25 +97,6 @@ public class State implements android.os.Parcelable {
 
     /** Name of the package that started DocsUI */
     public List<String> excludedAuthorities = new ArrayList<>();
-
-    public static final int ACTION_OPEN = 1;
-    public static final int ACTION_CREATE = 2;
-    public static final int ACTION_GET_CONTENT = 3;
-    public static final int ACTION_OPEN_TREE = 4;
-    public static final int ACTION_MANAGE = 5;
-    public static final int ACTION_BROWSE = 6;
-    public static final int ACTION_PICK_COPY_DESTINATION = 8;
-
-    public static final int MODE_UNKNOWN = 0;
-    public static final int MODE_LIST = 1;
-    public static final int MODE_GRID = 2;
-
-    public static final int SORT_ORDER_UNKNOWN = 0;
-    public static final int SORT_ORDER_DISPLAY_NAME = 1;
-    public static final int SORT_ORDER_LAST_MODIFIED = 2;
-    public static final int SORT_ORDER_SIZE = 3;
-
-    private boolean mStackTouched;
 
     public void initAcceptMimes(Intent intent) {
         if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
@@ -131,7 +140,6 @@ public class State implements android.os.Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(action);
-        out.writeInt(userMode);
         out.writeStringArray(acceptMimes);
         out.writeInt(userSortOrder);
         out.writeInt(allowMultiple ? 1 : 0);
@@ -155,7 +163,6 @@ public class State implements android.os.Parcelable {
         public State createFromParcel(Parcel in) {
             final State state = new State();
             state.action = in.readInt();
-            state.userMode = in.readInt();
             state.acceptMimes = in.readStringArray();
             state.userSortOrder = in.readInt();
             state.allowMultiple = in.readInt() != 0;

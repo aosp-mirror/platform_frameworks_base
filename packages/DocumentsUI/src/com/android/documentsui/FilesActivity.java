@@ -296,12 +296,6 @@ public class FilesActivity extends BaseActivity {
 
         if (cwd == null) {
             DirectoryFragment.showRecentsOpen(fm, anim);
-
-            // Start recents in grid when requesting visual things
-            final boolean visualMimes = MimePredicate.mimeMatches(
-                    MimePredicate.VISUAL_MIMES, mState.acceptMimes);
-            mState.userMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
-            mState.derivedMode = mState.userMode;
         } else {
             if (mState.currentSearch != null) {
                 // Ongoing search
