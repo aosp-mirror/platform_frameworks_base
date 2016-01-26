@@ -61,6 +61,8 @@ public class ProfileSelectDialog extends DialogFragment implements OnClickListen
     @Override
     public void onClick(DialogInterface dialog, int which) {
         UserHandle user = mSelectedTile.userHandle.get(which);
+        // Show menu on top level items.
+        mSelectedTile.intent.putExtra(SettingsDrawerActivity.EXTRA_SHOW_MENU, true);
         getActivity().startActivityAsUser(mSelectedTile.intent, user);
         ((SettingsDrawerActivity) getActivity()).onProfileTileOpen();
     }

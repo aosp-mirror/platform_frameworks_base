@@ -48,6 +48,8 @@ public class SettingsDrawerActivity extends Activity {
     protected static final boolean DEBUG_TIMING = false;
     private static final String TAG = "SettingsDrawerActivity";
 
+    static final String EXTRA_SHOW_MENU = "show_drawer_menu";
+
     private static List<DashboardCategory> sDashboardCategories;
     private static HashMap<Pair<String, String>, Tile> sTileCache;
 
@@ -56,6 +58,7 @@ public class SettingsDrawerActivity extends Activity {
 
     private SettingsDrawerAdapter mDrawerAdapter;
     private DrawerLayout mDrawerLayout;
+    private boolean mShowingMenu;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,7 +97,7 @@ public class SettingsDrawerActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerLayout != null && item.getItemId() == android.R.id.home
+        if (mShowingMenu && mDrawerLayout != null && item.getItemId() == android.R.id.home
                 && mDrawerAdapter.getCount() != 0) {
             openDrawer();
             return true;
@@ -115,6 +118,9 @@ public class SettingsDrawerActivity extends Activity {
             registerReceiver(mPackageReceiver, filter);
 
             new CategoriesUpdater().execute();
+        }
+        if (getIntent() != null && getIntent().getBooleanExtra(EXTRA_SHOW_MENU, false)) {
+            showMenuIcon();
         }
     }
 
@@ -171,11 +177,15 @@ public class SettingsDrawerActivity extends Activity {
         mDrawerAdapter.updateCategories();
         if (mDrawerAdapter.getCount() != 0) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
         } else {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         }
+    }
+
+    public void showMenuIcon() {
+        mShowingMenu = true;
+        getActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public List<DashboardCategory> getDashboardCategories() {
@@ -204,8 +214,12 @@ public class SettingsDrawerActivity extends Activity {
             ProfileSelectDialog.show(getFragmentManager(), tile);
             return false;
         } else if (numUserHandles == 1) {
+            // Show menu on top level items.
+            tile.intent.putExtra(EXTRA_SHOW_MENU, true);
             startActivityAsUser(tile.intent, tile.userHandle.get(0));
         } else {
+            // Show menu on top level items.
+            tile.intent.putExtra(EXTRA_SHOW_MENU, true);
             startActivity(tile.intent);
         }
         return true;
