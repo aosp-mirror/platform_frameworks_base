@@ -37,10 +37,10 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,18 +103,28 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     @VisibleForTesting
-    void onCreateForTesting(
+    boolean onCreateForTesting(
             Resources resources,
             MtpManager mtpManager,
             ContentResolver resolver,
-            MtpDatabase database) {
+            MtpDatabase database,
+            StorageManager storageManager) {
         mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = database;
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        mAppFuse = new AppFuse(TAG, new AppFuseCallback());
+        // TODO: Mount AppFuse on demands.
+        try {
+            mAppFuse.mount(storageManager);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to start app fuse.", e);
+            return false;
+        }
         resume();
+        return true;
     }
 
     @Override
@@ -165,7 +175,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     // Fallback to non-seekable file descriptor.
                     // TODO: Use getPartialObject64 for MTP devices that support Android vendor
                     // extension.
-                    if (fileSize <= 0xffffffff) {
+                    if (fileSize <= 0xffffffffl) {
                         return mAppFuse.openFile(Integer.parseInt(documentId));
                     } else {
                         return getPipeManager(identifier).readDocument(mMtpManager, identifier);
@@ -305,6 +315,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 throw new RuntimeException(e);
             } finally {
                 mDatabase.close();
+                mAppFuse.close();
                 super.shutdown();
             }
         }
@@ -385,9 +396,11 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         @Override
         public byte[] getObjectBytes(int inode, long offset, int size) throws IOException {
             final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
-            mMtpManager.getPartialObject(
-                    identifier.mDeviceId, identifier.mObjectHandle, (int) offset, size, mBytes);
-            return mBytes;
+            final long readSize = mMtpManager.getPartialObject(
+                    identifier.mDeviceId, identifier.mObjectHandle, offset, size, mBytes);
+            // TODO: Change signature so that getObjectBytes can return read size without copying
+            // bytes.
+            return Arrays.copyOf(mBytes, (int) readSize);
         }
 
         @Override

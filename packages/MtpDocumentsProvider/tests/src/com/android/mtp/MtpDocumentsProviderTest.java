@@ -20,18 +20,25 @@ import android.database.Cursor;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Root;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
 import static com.android.mtp.MtpDatabase.strings;
 
-@SmallTest
+@MediumTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
     private final static Uri ROOTS_URI =
             DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
@@ -421,10 +428,71 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                         MtpDocumentsProvider.AUTHORITY, "1")));
     }
 
+    public void testOpenDocument() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+        });
+        final byte[] bytes = "Hello world".getBytes();
+        setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {
+                new MtpObjectInfo.Builder()
+                        .setName("test.txt")
+                        .setObjectHandle(1)
+                        .setCompressedSize(bytes.length)
+                        .setParent(-1)
+                        .build()
+        });
+        mMtpManager.setImportFileBytes(0, 1, bytes);
+        try (final ParcelFileDescriptor fd = mProvider.openDocument("3", "r", null)) {
+            final byte[] readBytes = new byte[5];
+            assertEquals(6, Os.lseek(fd.getFileDescriptor(), 6, OsConstants.SEEK_SET));
+            assertEquals(5, Os.read(fd.getFileDescriptor(), readBytes, 0, 5));
+            assertTrue(Arrays.equals("world".getBytes(), readBytes));
+
+            assertEquals(0, Os.lseek(fd.getFileDescriptor(), 0, OsConstants.SEEK_SET));
+            assertEquals(5, Os.read(fd.getFileDescriptor(), readBytes, 0, 5));
+            assertTrue(Arrays.equals("Hello".getBytes(), readBytes));
+        }
+    }
+
+    public void testOpenDocument_shortBytes() throws Exception {
+        mMtpManager = new TestMtpManager(getContext()) {
+            @Override
+            MtpObjectInfo getObjectInfo(int deviceId, int objectHandle) throws IOException {
+                if (objectHandle == 1) {
+                    return new MtpObjectInfo.Builder(super.getObjectInfo(deviceId, objectHandle))
+                            .setObjectHandle(1).setCompressedSize(1024 * 1024).build();
+                }
+
+                return super.getObjectInfo(deviceId, objectHandle);
+            }
+        };
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        setupRoots(0, new MtpRoot[] {
+                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+        });
+        final byte[] bytes = "Hello world".getBytes();
+        setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {
+                new MtpObjectInfo.Builder()
+                        .setName("test.txt")
+                        .setObjectHandle(1)
+                        .setCompressedSize(bytes.length)
+                        .setParent(-1)
+                        .build()
+        });
+        mMtpManager.setImportFileBytes(0, 1, bytes);
+        try (final ParcelFileDescriptor fd = mProvider.openDocument("3", "r", null)) {
+            final byte[] readBytes = new byte[1024 * 1024];
+            assertEquals(11, Os.read(fd.getFileDescriptor(), readBytes, 0, readBytes.length));
+        }
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();
-        mProvider.onCreateForTesting(mResources, mMtpManager, mResolver, mDatabase);
+        final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
+        assertTrue(mProvider.onCreateForTesting(
+                mResources, mMtpManager, mResolver, mDatabase, storageManager));
     }
 
     private String[] getStrings(Cursor cursor) {
