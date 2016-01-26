@@ -23,13 +23,13 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * This is an optimized ImageView that does not trigger a requestLayout() or invalidate() when
- * setting the image to Null.
+ * This is an optimized ImageView that does not trigger a <code>requestLayout()</code> or
+ * <code>invalidate()</code> when setting the image to <code>null</code>.
  */
 public class FixedSizeImageView extends ImageView {
 
-    boolean mAllowRelayout = true;
-    boolean mAllowInvalidate = true;
+    private boolean mAllowRelayout = true;
+    private boolean mAllowInvalidate = true;
 
     public FixedSizeImageView(Context context) {
         this(context, null);

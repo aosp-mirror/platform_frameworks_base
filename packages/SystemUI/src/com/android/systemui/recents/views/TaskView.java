@@ -17,7 +17,6 @@
 package com.android.systemui.recents.views;
 
 import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -40,7 +39,6 @@ import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -62,8 +60,13 @@ import java.util.ArrayList;
 
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
-/* A task view */
-public class TaskView extends FrameLayout implements Task.TaskCallbacks,
+/**
+ * A {@link TaskView} represents a fixed view of a task. Because the TaskView's layout is directed
+ * solely by the {@link TaskStackView}, we make it a fixed size layout which allows relayouts down
+ * the view hierarchy, but not upwards from any of its children (the TaskView will relayout itself
+ * with the previous bounds if any child requests layout).
+ */
+public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks,
         TaskStackAnimationHelper.Callbacks, View.OnClickListener, View.OnLongClickListener {
 
     /** The TaskView callbacks */
@@ -219,33 +222,20 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         return super.onInterceptTouchEvent(ev);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
 
+    @Override
+    protected void measureContents(int width, int height) {
         int widthWithoutPadding = width - mPaddingLeft - mPaddingRight;
         int heightWithoutPadding = height - mPaddingTop - mPaddingBottom;
-        int taskBarHeight = getResources().getDimensionPixelSize(R.dimen.recents_task_bar_height);
 
         // Measure the content
         mContent.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
 
-        // Measure the bar view, and action button
-        mHeaderView.measure(MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(taskBarHeight, MeasureSpec.EXACTLY));
-        mActionButtonView.measure(
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.AT_MOST));
-        // Measure the thumbnail to be square
-        mThumbnailView.measure(
-                MeasureSpec.makeMeasureSpec(widthWithoutPadding, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(heightWithoutPadding, MeasureSpec.EXACTLY));
+        // Optimization: Prevent overdraw of the thumbnail under the header view
         mThumbnailView.updateClipToTaskBar(mHeaderView);
 
         setMeasuredDimension(width, height);
-        invalidateOutline();
     }
 
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform,

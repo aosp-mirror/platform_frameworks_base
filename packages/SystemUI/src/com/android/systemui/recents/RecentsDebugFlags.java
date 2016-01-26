@@ -26,10 +26,6 @@ import com.android.systemui.tuner.TunerService;
  */
 public class RecentsDebugFlags implements TunerService.Tunable {
 
-    private static final String KEY_FAST_TOGGLE = "overview_fast_toggle_via_button";
-    private static final String KEY_FAST_TOGGLE_INDICATOR = "overview_fast_toggle_indicator";
-    private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
-
     public static class Static {
         // Enables debug drawing for the transition thumbnail
         public static final boolean EnableTransitionThumbnailDebugMode = false;
@@ -39,17 +35,22 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean DisableBackgroundCache = false;
         // Enables the task affiliations
         public static final boolean EnableAffiliatedTaskGroups = true;
-        // Enables the simulated task affiliations
-        public static final boolean EnableSimulatedTaskGroups = false;
-        // Defines the number of mock task affiliations per group
-        public static final int TaskAffiliationsGroupCount = 12;
+
         // Enables us to create mock recents tasks
-        public static final boolean EnableSystemServicesProxy = false;
+        public static final boolean EnableMockTasks = false;
         // Defines the number of mock recents packages to create
-        public static final int SystemServicesProxyMockPackageCount = 3;
+        public static final int MockTasksPackageCount = 3;
         // Defines the number of mock recents tasks to create
-        public static final int SystemServicesProxyMockTaskCount = 100;
+        public static final int MockTaskCount = 100;
+        // Enables the simulated task affiliations
+        public static final boolean EnableMockTaskGroups = false;
+        // Defines the number of mock task affiliations per group
+        public static final int MockTaskGroupsTaskCount = 12;
     }
+
+    private static final String KEY_FAST_TOGGLE = "overview_fast_toggle_via_button";
+    private static final String KEY_FAST_TOGGLE_INDICATOR = "overview_fast_toggle_indicator";
+    private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
 
     private boolean mFastToggleRecents;
     private boolean mFastToggleIndicator;

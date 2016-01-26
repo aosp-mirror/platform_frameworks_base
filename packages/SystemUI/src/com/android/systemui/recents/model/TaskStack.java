@@ -776,7 +776,7 @@ public class TaskStack {
      * Temporary: This method will simulate affiliation groups by
      */
     public void createAffiliatedGroupings(Context context) {
-        if (RecentsDebugFlags.Static.EnableSimulatedTaskGroups) {
+        if (RecentsDebugFlags.Static.EnableMockTaskGroups) {
             ArrayMap<Task.TaskKey, Task> taskMap = new ArrayMap<>();
             // Sort all tasks by increasing firstActiveTime of the task
             ArrayList<Task> tasks = mStackTaskList.getTasks();
@@ -792,7 +792,7 @@ public class TaskStack {
             String prevPackage = "";
             int prevAffiliation = -1;
             Random r = new Random();
-            int groupCountDown = RecentsDebugFlags.Static.TaskAffiliationsGroupCount;
+            int groupCountDown = RecentsDebugFlags.Static.MockTaskGroupsTaskCount;
             for (int i = 0; i < taskCount; i++) {
                 Task t = tasks.get(i);
                 String packageName = t.key.getComponent().getPackageName();
@@ -807,7 +807,7 @@ public class TaskStack {
                     addGroup(group);
                     prevAffiliation = affiliation;
                     prevPackage = packageName;
-                    groupCountDown = RecentsDebugFlags.Static.TaskAffiliationsGroupCount;
+                    groupCountDown = RecentsDebugFlags.Static.MockTaskGroupsTaskCount;
                 }
                 group.addTask(t);
                 taskMap.put(t.key, t);

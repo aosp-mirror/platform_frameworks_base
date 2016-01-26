@@ -151,7 +151,7 @@ public class SystemServicesProxy {
         // Resolve the assist intent
         mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             // Create a dummy icon
             mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             mDummyIcon.eraseColor(0xFF999999);
@@ -164,20 +164,20 @@ public class SystemServicesProxy {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             ArrayList<ActivityManager.RecentTaskInfo> tasks =
                     new ArrayList<ActivityManager.RecentTaskInfo>();
-            int count = Math.min(numLatestTasks, RecentsDebugFlags.Static.SystemServicesProxyMockTaskCount);
+            int count = Math.min(numLatestTasks, RecentsDebugFlags.Static.MockTaskCount);
             for (int i = 0; i < count; i++) {
                 // Create a dummy component name
-                int packageIndex = i % RecentsDebugFlags.Static.SystemServicesProxyMockPackageCount;
+                int packageIndex = i % RecentsDebugFlags.Static.MockTasksPackageCount;
                 ComponentName cn = new ComponentName("com.android.test" + packageIndex,
                         "com.android.test" + i + ".Activity");
                 String description = "" + i + " - " +
                         Long.toString(Math.abs(new Random().nextLong()), 36);
                 // Create the recent task info
                 ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-                rti.id = rti.persistentId = i;
+                rti.id = rti.persistentId = rti.affiliatedTaskId = i;
                 rti.baseIntent = new Intent();
                 rti.baseIntent.setComponent(cn);
                 rti.description = description;
@@ -418,7 +418,7 @@ public class SystemServicesProxy {
         if (mAm == null) return null;
 
         // If we are mocking, then just return a dummy thumbnail
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             Bitmap thumbnail = Bitmap.createBitmap(mDummyThumbnailWidth, mDummyThumbnailHeight,
                     Bitmap.Config.ARGB_8888);
             thumbnail.eraseColor(0xff333333);
@@ -484,7 +484,7 @@ public class SystemServicesProxy {
     /** Moves a task to the front with the specified activity options. */
     public void moveTaskToFront(int taskId, ActivityOptions opts) {
         if (mAm == null) return;
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return;
+        if (RecentsDebugFlags.Static.EnableMockTasks) return;
 
         if (opts != null) {
             mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME,
@@ -497,7 +497,7 @@ public class SystemServicesProxy {
     /** Removes the task */
     public void removeTask(final int taskId) {
         if (mAm == null) return;
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return;
+        if (RecentsDebugFlags.Static.EnableMockTasks) return;
 
         // Remove the task.
         BackgroundThread.getHandler().post(new Runnable() {
@@ -528,7 +528,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn, int userId) {
         if (mIpm == null) return null;
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return new ActivityInfo();
+        if (RecentsDebugFlags.Static.EnableMockTasks) return new ActivityInfo();
 
         try {
             return mIpm.getActivityInfo(cn, PackageManager.GET_META_DATA, userId);
@@ -545,7 +545,7 @@ public class SystemServicesProxy {
      */
     public ActivityInfo getActivityInfo(ComponentName cn) {
         if (mPm == null) return null;
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return new ActivityInfo();
+        if (RecentsDebugFlags.Static.EnableMockTasks) return new ActivityInfo();
 
         try {
             return mPm.getActivityInfo(cn, PackageManager.GET_META_DATA);
@@ -562,7 +562,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             return "Recent Task: " + userId;
         }
 
@@ -576,7 +576,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             return "Recent Task App: " + userId;
         }
 
@@ -588,6 +588,11 @@ public class SystemServicesProxy {
      * description joins the app and activity labels.
      */
     public String getBadgedContentDescription(ActivityInfo info, int userId, Resources res) {
+        // If we are mocking, then return a mock label
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            return "Recent Task Content Description: " + userId;
+        }
+
         String activityLabel = info.loadLabel(mPm).toString();
         String applicationLabel = info.applicationInfo.loadLabel(mPm).toString();
         String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
@@ -604,7 +609,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             return new ColorDrawable(0xFF666666);
         }
 
@@ -620,7 +625,7 @@ public class SystemServicesProxy {
         if (mPm == null) return null;
 
         // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             return new ColorDrawable(0xFF666666);
         }
 
@@ -635,7 +640,7 @@ public class SystemServicesProxy {
             int userId, Resources res) {
 
         // If we are mocking, then return a mock label
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) {
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
             return new ColorDrawable(0xFF666666);
         }
 
@@ -673,7 +678,7 @@ public class SystemServicesProxy {
     /** Returns the package name of the home activity. */
     public String getHomeActivityPackageName() {
         if (mPm == null) return null;
-        if (RecentsDebugFlags.Static.EnableSystemServicesProxy) return null;
+        if (RecentsDebugFlags.Static.EnableMockTasks) return null;
 
         ArrayList<ResolveInfo> homeActivities = new ArrayList<>();
         ComponentName defaultHomeActivity = mPm.getHomeActivities(homeActivities);

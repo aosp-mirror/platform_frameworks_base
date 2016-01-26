@@ -22,6 +22,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Debug;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
@@ -31,6 +32,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
@@ -130,6 +132,9 @@ public class RecentsTaskLoadPlan {
                 R.string.accessibility_recents_item_will_be_dismissed);
         long lastStackActiveTime = Prefs.getLong(mContext,
                 Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
+        if (RecentsDebugFlags.Static.EnableMockTasks) {
+            lastStackActiveTime = 0;
+        }
         long newLastStackActiveTime = -1;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {

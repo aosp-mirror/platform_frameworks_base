@@ -1375,11 +1375,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Report that this tasks's data is no longer being used
         Recents.getTaskLoader().unloadTaskData(task);
 
-        // Detach the view from the hierarchy
-        detachViewFromParent(tv);
-        // Update the task views list after removing the task view
-        updateTaskViewsList();
-
         // Reset the view properties and view state
         tv.resetViewProperties();
         tv.setFocusedState(false, false /* requestViewFocus */);
@@ -1387,19 +1382,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mScreenPinningEnabled) {
             tv.hideActionButton(false /* fadeOut */, 0 /* duration */, false /* scaleDown */, null);
         }
+
+        // Detach the view from the hierarchy
+        detachViewFromParent(tv);
+        // Update the task views list after removing the task view
+        updateTaskViewsList();
     }
 
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
-        // Rebind the task and request that this task's data be filled into the TaskView
-        tv.onTaskBound(task);
-
-        // Load the task data
-        Recents.getTaskLoader().loadTaskData(task);
-
-        // If the doze trigger has already fired, then update the state for this task view
-        tv.setNoUserInteractionState();
-
         // Find the index where this task should be placed in the stack
         int taskIndex = mStack.indexOfStackTask(task);
         int insertIndex = findTaskViewInsertIndex(task, taskIndex);
@@ -1412,6 +1403,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         // Update the task views list after adding the new task view
         updateTaskViewsList();
+
+        // Rebind the task and request that this task's data be filled into the TaskView
+        tv.onTaskBound(task);
+
+        // Load the task data
+        Recents.getTaskLoader().loadTaskData(task);
+
+        // If the doze trigger has already fired, then update the state for this task view
+        tv.setNoUserInteractionState();
 
         // Set the new state for this view, including the callbacks and view clipping
         tv.setCallbacks(this);
