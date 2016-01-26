@@ -137,10 +137,11 @@ public class SuggestionParser {
     }
 
     private boolean isDismissed(Tile suggestion) {
-        String dismissControl = suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
-        if (dismissControl == null) {
+        Object dismissObj = suggestion.metaData.get(META_DATA_DISMISS_CONTROL);
+        if (dismissObj == null) {
             return false;
         }
+        String dismissControl = String.valueOf(dismissObj);
         String keyBase = suggestion.intent.getComponent().flattenToShortString();
         if (!mSharedPrefs.contains(keyBase + SETUP_TIME)) {
             mSharedPrefs.edit()
