@@ -2461,7 +2461,6 @@ public abstract class Context {
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
             WIFI_NAN_SERVICE,
-            WIFI_PASSPOINT_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
@@ -2900,17 +2899,6 @@ public abstract class Context {
      * @see android.net.wifi.WifiManager
      */
     public static final String WIFI_SERVICE = "wifi";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a {@link
-     * android.net.wifi.passpoint.WifiPasspointManager} for handling management of
-     * Wi-Fi passpoint access.
-     *
-     * @see #getSystemService
-     * @see android.net.wifi.passpoint.WifiPasspointManager
-     * @hide
-     */
-    public static final String WIFI_PASSPOINT_SERVICE = "wifipasspoint";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
