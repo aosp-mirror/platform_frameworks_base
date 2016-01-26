@@ -34,6 +34,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.MoreAsserts;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Pair;
 
@@ -70,6 +71,7 @@ import static org.mockito.Mockito.when;
 
  (mmma frameworks/base/services/tests/servicestests/ for non-ninja build)
  */
+@SmallTest
 public class DevicePolicyManagerTest extends DpmTestBase {
     private DpmMockContext mContext;
     public DevicePolicyManager dpm;
