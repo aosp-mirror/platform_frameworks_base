@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
+import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import java.util.List;
 
@@ -60,9 +63,9 @@ public class RestrictedLockUtils {
      *
      * @param userRestriction Restriction to check
      * @param userId User which we need to check if restriction is enforced on.
-     * @return EnforcedAdmin Object containing the enforce admin and admin user details, or
-     * {@code null} If the restriction is not set. If the restriction is set by both device owner
-     * and profile owner, then the admin will be set to {@code null} and userId to
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} If the restriction is not set. If the restriction is set by both device owner
+     * and profile owner, then the admin component will be set to {@code null} and userId to
      * {@link UserHandle#USER_NULL}.
      */
     public static EnforcedAdmin checkIfRestrictionEnforced(Context context,
@@ -119,9 +122,9 @@ public class RestrictedLockUtils {
      *
      * @param keyguardNotificationFeatures Could be any of notification features that can be
      * disabled by {@link android.app.admin.DevicePolicyManager#setKeyguardDisabledFeatures}.
-     * @return EnforcedAdmin Object containing the enforce admin and admin user details, or
-     * {@code null} If the notification features are not disabled. If the restriction is set by
-     * multiple admins, then the admin will be set to {@code null} and userId to
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} If the notification features are not disabled. If the restriction is set by
+     * multiple admins, then the admin component will be set to {@code null} and userId to
      * {@link UserHandle#USER_NULL}.
      */
     public static EnforcedAdmin checkIfKeyguardNotificationFeaturesDisabled(Context context,
@@ -283,6 +286,76 @@ public class RestrictedLockUtils {
         return enforcedAdmin;
     }
 
+    /**
+     * Checks if any admin has set maximum time to lock.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if no admin has set this restriction. If multiple admins has set this, then
+     * the admin component will be set to {@code null} and userId to {@link UserHandle#USER_NULL}
+     */
+    public static EnforcedAdmin checkIfMaximumTimeToLockIsSet(Context context) {
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
+        EnforcedAdmin enforcedAdmin = null;
+        final int userId = UserHandle.myUserId();
+        if (lockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+            // If the user has a separate challenge, only consider the admins in that user.
+            final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userId);
+            if (admins == null) {
+                return null;
+            }
+            for (ComponentName admin : admins) {
+                if (dpm.getMaximumTimeToLock(admin, userId) > 0) {
+                    if (enforcedAdmin == null) {
+                        enforcedAdmin = new EnforcedAdmin(admin, userId);
+                    } else {
+                        return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                    }
+                }
+            }
+        } else {
+            // Return all admins for this user and the profiles that are visible from this
+            // user that do not use a separate work challenge.
+            final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+            for (UserInfo userInfo : um.getProfiles(userId)) {
+                final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userInfo.id);
+                if (admins == null) {
+                    return null;
+                }
+                for (ComponentName admin : admins) {
+                    if (!lockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id)) {
+                        if (dpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
+                            if (enforcedAdmin == null) {
+                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            } else {
+                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                            }
+                            // This same admins could have set policies both on the managed profile
+                            // and on the parent. So, if the admin has set the policy on the
+                            // managed profile here, we don't need to further check if that admin
+                            // has set policy on the parent admin.
+                            continue;
+                        }
+                    }
+                    if (userInfo.isManagedProfile()) {
+                        // If userInfo.id is a managed profile, we also need to look at
+                        // the policies set on the parent.
+                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(admin);
+                        if (parentDpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
+                            if (enforcedAdmin == null) {
+                                enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            } else {
+                                return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return enforcedAdmin;
+    }
+
     public static EnforcedAdmin getProfileOrDeviceOwnerOnCallingUser(Context context) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
@@ -408,6 +481,9 @@ public class RestrictedLockUtils {
     public static class EnforcedAdmin {
         public ComponentName component = null;
         public int userId = UserHandle.USER_NULL;
+
+        // We use this to represent the case where a policy is enforced by multiple admins.
+        public final static EnforcedAdmin MULTIPLE_ENFORCED_ADMIN = new EnforcedAdmin();
 
         public EnforcedAdmin(ComponentName component, int userId) {
             this.component = component;
