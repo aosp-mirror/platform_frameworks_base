@@ -179,8 +179,8 @@
     </plurals>
     <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
     <string name="notification_touch_for_details">Tap to view details</string>
-    <!-- Label of a dialog button for retrying a failed operation [CHAR LIMIT=24] -->
-    <string name="retry">Retry</string>
+    <!-- Label of the close dialog button.[CHAR LIMIT=24] -->
+    <string name="close">Close</string>
     <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
     <string name="copy_failure_alert_content">These files weren\'t copied: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the moving failure alert dialog. [CHAR LIMIT=48] -->
