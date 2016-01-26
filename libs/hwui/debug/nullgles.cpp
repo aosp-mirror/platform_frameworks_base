@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "unwrap_gles.h"
+
 #include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
 

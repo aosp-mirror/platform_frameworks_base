@@ -195,7 +195,7 @@ bool OpenGLRenderer::finish() {
     }
 
     if (!suppressErrorChecks()) {
-        GL_CHECKPOINT();
+        GL_CHECKPOINT(MODERATE);
 
 #if DEBUG_MEMORY_USAGE
         mCaches.dumpMemoryUsage();

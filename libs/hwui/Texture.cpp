@@ -97,7 +97,7 @@ void Texture::resetCachedParams() {
 
 void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
         GLenum format, GLenum type, const void* pixels) {
-    GL_CHECKPOINT();
+    GL_CHECKPOINT(MODERATE);
     bool needsAlloc = updateSize(width, height, internalformat);
     if (!mId) {
         glGenTextures(1, &mId);
@@ -112,7 +112,7 @@ void Texture::upload(GLint internalformat, uint32_t width, uint32_t height,
         glTexSubImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
                 format, type, pixels);
     }
-    GL_CHECKPOINT();
+    GL_CHECKPOINT(MODERATE);
 }
 
 static void uploadToTexture(bool resize, GLenum format, GLenum type, GLsizei stride, GLsizei bpp,

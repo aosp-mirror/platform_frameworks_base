@@ -407,7 +407,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         renderState.bindFramebuffer(fbo);
 
         glGenTextures(1, &texture);
-        GL_CHECKPOINT();
 
         caches.textureState().activateTexture(0);
         caches.textureState().bindTexture(texture);
@@ -422,11 +421,9 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
                 0, format, type, nullptr);
-        GL_CHECKPOINT();
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, texture, 0);
-        GL_CHECKPOINT();
 
         {
             LayerRenderer renderer(renderState, layer);
@@ -437,8 +434,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
 
-            GL_CHECKPOINT();
-
             {
                 Rect bounds;
                 bounds.set(0.0f, 0.0f, bitmap->width(), bitmap->height());
@@ -447,7 +442,6 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
                 glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
                         type, bitmap->getPixels());
 
-                GL_CHECKPOINT();
             }
 
             status = true;
@@ -459,6 +453,8 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         caches.textureState().deleteTexture(texture);
         renderState.deleteFramebuffer(fbo);
         renderState.setViewport(previousViewportWidth, previousViewportHeight);
+
+        GL_CHECKPOINT(MODERATE);
 
         return status;
     }

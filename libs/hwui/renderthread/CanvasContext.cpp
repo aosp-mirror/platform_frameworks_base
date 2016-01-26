@@ -214,13 +214,13 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         // node(s) are non client / filler nodes.
         info.mode = (node.get() == target ? TreeInfo::MODE_FULL : TreeInfo::MODE_RT_ONLY);
         node->prepareTree(info);
-        GL_CHECKPOINT();
+        GL_CHECKPOINT(MODERATE);
     }
     mAnimationContext->runRemainingAnimations(info);
-    GL_CHECKPOINT();
+    GL_CHECKPOINT(MODERATE);
 
     freePrefetechedLayers();
-    GL_CHECKPOINT();
+    GL_CHECKPOINT(MODERATE);
 
     if (CC_UNLIKELY(!mNativeWindow.get())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
@@ -468,7 +468,7 @@ void CanvasContext::draw() {
     bool drew = mCanvas->finish();
 #endif
 
-    GL_CHECKPOINT();
+    GL_CHECKPOINT(LOW);
 
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
