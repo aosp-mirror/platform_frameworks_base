@@ -105,4 +105,8 @@ public final class BridgeWindow implements IWindow {
         // pass for now.
         return null;
     }
+
+    @Override
+    void updatePointerIcon(float x, float y) {
+    }
 }
