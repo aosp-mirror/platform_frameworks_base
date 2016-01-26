@@ -52,6 +52,7 @@ public class SystemSensorManager extends SensorManager {
     private final Object mLock = new Object();
 
     private final ArrayList<Sensor> mFullSensorsList = new ArrayList<>();
+    private List<Sensor> mSensorsListCached = null;
     private final SparseArray<Sensor> mHandleToSensor = new SparseArray<>();
 
     // Listener list
@@ -59,6 +60,8 @@ public class SystemSensorManager extends SensorManager {
             new HashMap<SensorEventListener, SensorEventQueue>();
     private final HashMap<TriggerEventListener, TriggerEventQueue> mTriggerListeners =
             new HashMap<TriggerEventListener, TriggerEventQueue>();
+
+    private boolean mBodySensorPermission;
 
     // Looper associated with the context in which this instance was created.
     private final Looper mMainLooper;
@@ -74,6 +77,7 @@ public class SystemSensorManager extends SensorManager {
         mNativeInstance = nativeCreate(context.getOpPackageName());
 
         synchronized(mLock) {
+            updatePermission();
             if (!sSensorModuleInitialized) {
                 sSensorModuleInitialized = true;
                 nativeClassInit();
@@ -89,11 +93,27 @@ public class SystemSensorManager extends SensorManager {
         }
     }
 
-
     /** @hide */
     @Override
     protected List<Sensor> getFullSensorList() {
-        return mFullSensorsList;
+        synchronized (mLock) {
+            if ( updatePermission() || mSensorsListCached == null) {
+                List<Sensor> list = new ArrayList();
+                for (Sensor s: mFullSensorsList) {
+                    switch (s.getRequiredPermission()) {
+                    case Manifest.permission.BODY_SENSORS:
+                        if (mBodySensorPermission) {
+                            list.add(s);
+                        }
+                        break;
+                    default:
+                        list.add(s);
+                    }
+                }
+                mSensorsListCached = list;
+            }
+        }
+        return mSensorsListCached;
     }
 
 
@@ -272,6 +292,17 @@ public class SystemSensorManager extends SensorManager {
             }
             return ret == 0;
         }
+    }
+
+    /** Returns true if permission is changed */
+    private boolean updatePermission() {
+        boolean bodySensorPermission =
+                (mContext.checkSelfPermission(Manifest.permission.BODY_SENSORS) ==
+                        PackageManager.PERMISSION_GRANTED);
+
+        boolean ret = bodySensorPermission != mBodySensorPermission;
+        mBodySensorPermission = bodySensorPermission;
+        return ret;
     }
 
     /*

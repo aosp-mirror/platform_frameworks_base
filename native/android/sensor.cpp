@@ -52,13 +52,12 @@ ASensorManager* ASensorManager_getInstanceForPackage(const char* packageName)
     }
 }
 
-int ASensorManager_getSensorList(ASensorManager* manager,
-        ASensorList* list)
+int ASensorManager_getSensorList(ASensorManager* manager, ASensorList* list)
 {
-    Sensor const* const* l;
-    int c = static_cast<SensorManager*>(manager)->getSensorList(&l);
+    Sensor const* const* sensorPointerList;
+    int c = static_cast<SensorManager*>(manager)->getAvailableSensorList(&sensorPointerList);
     if (list) {
-        *list = reinterpret_cast<ASensorList>(l);
+        *list = reinterpret_cast<ASensorList>(sensorPointerList);
     }
     return c;
 }
@@ -71,7 +70,7 @@ ASensor const* ASensorManager_getDefaultSensor(ASensorManager* manager, int type
 ASensor const* ASensorManager_getDefaultSensorEx(ASensorManager* manager,
         int type, bool wakeUp) {
     Sensor const* const* sensorList;
-    size_t size = static_cast<SensorManager*>(manager)->getSensorList(&sensorList);
+    size_t size = static_cast<SensorManager*>(manager)->getAvailableSensorList(&sensorList);
     for (size_t i = 0; i < size; ++i) {
         if (ASensor_getType(sensorList[i]) == type &&
             ASensor_isWakeUpSensor(sensorList[i]) == wakeUp) {
