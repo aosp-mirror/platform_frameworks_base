@@ -1410,14 +1410,11 @@ final class ActivityStack {
         }
 
         if (mStackId == DOCKED_STACK_ID) {
-            // Docked stack is always visible, except in the case where the home activity
-            // is the top running activity in the focused home stack.
-            if (focusedStackId != HOME_STACK_ID) {
-                return STACK_VISIBLE;
-            }
-            ActivityRecord topHomeActivity = focusedStack.topRunningActivityLocked();
-            return topHomeActivity == null || !topHomeActivity.isHomeActivity() ?
-                    STACK_VISIBLE : STACK_INVISIBLE;
+            // Docked stack is always visible, except in the case where the top running activity in
+            // the focus stack doesn't support any form of resizing.
+            final ActivityRecord r = focusedStack.topRunningActivityLocked();
+            return r == null || r.isResizeable() || r.cropAppWindows()
+                    ? STACK_VISIBLE : STACK_INVISIBLE;
         }
 
         // Find the first stack below focused stack that actually got something visible.
@@ -4819,7 +4816,7 @@ final class ActivityStack {
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
                 task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
-                !r.isHomeActivity(), r.isAlwaysFocusable());
+                r.cropAppWindows() | r.isResizeable(), r.isAlwaysFocusable());
         mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
         r.taskConfigOverride = task.mOverrideConfig;
     }

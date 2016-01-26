@@ -156,6 +156,35 @@ public class ActivityInfo extends ComponentInfo
     public String targetActivity;
 
     /**
+     * Activity can not be resized and always occupies the fullscreen area with all windows fully
+     * visible.
+     * @hide
+     */
+    public static final int RESIZE_MODE_UNRESIZEABLE = 0;
+    /**
+     * Activity can not be resized and always occupies the fullscreen area with all windows cropped
+     * to either the task or stack bounds.
+     * @hide
+     */
+    public static final int RESIZE_MODE_CROP_WINDOWS = 1;
+    /**
+     * Activity is resizeable.
+     * @hide
+     */
+    public static final int RESIZE_MODE_RESIZEABLE = 2;
+    /**
+     * Activity is resizeable and supported picture-in-picture mode.
+     * @hide
+     */
+    public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
+    /**
+     * Value indicating if the resizing mode the activity supports.
+     * See {@link android.R.attr#resizeableActivity}.
+     * @hide
+     */
+    public int resizeMode;
+
+    /**
      * Bit in {@link #flags} indicating whether this activity is able to
      * run in multiple processes.  If
      * true, the system may instantiate it in the some process as the
@@ -281,20 +310,6 @@ public class ActivityInfo extends ComponentInfo
      * {@see android.app.Activity#setVrMode(boolean)}.
      */
     public static final int FLAG_ENABLE_VR_MODE = 0x8000;
-
-    /**
-     * Bit in {@link #flags} indicating if the activity is resizeable to any dimension.
-     * See {@link android.R.attr#resizeableActivity}.
-     * @hide
-     */
-    public static final int FLAG_RESIZEABLE = 0x10000;
-
-    /**
-     * Bit in {@link #flags} indicating if the activity is supports picture-in-picture form of
-     * multi-window mode. See {@link android.R.attr#supportsPictureInPicture}.
-     * @hide
-     */
-    public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x20000;
 
     /**
      * Bit in {@link #flags} indicating if the activity is always focusable regardless of if it is
@@ -746,6 +761,7 @@ public class ActivityInfo extends ComponentInfo
         maxRecents = orig.maxRecents;
         lockTaskLaunchMode = orig.lockTaskLaunchMode;
         layout = orig.layout;
+        resizeMode = orig.resizeMode;
     }
 
     /**
@@ -765,6 +781,22 @@ public class ActivityInfo extends ComponentInfo
             case PERSIST_NEVER: return "PERSIST_NEVER";
             case PERSIST_ACROSS_REBOOTS: return "PERSIST_ACROSS_REBOOTS";
             default: return "UNKNOWN=" + persistableMode;
+        }
+    }
+
+    /** @hide */
+    public static final String resizeModeToString(int mode) {
+        switch (mode) {
+            case RESIZE_MODE_UNRESIZEABLE:
+                return "RESIZE_MODE_UNRESIZEABLE";
+            case RESIZE_MODE_CROP_WINDOWS:
+                return "RESIZE_MODE_CROP_WINDOWS";
+            case RESIZE_MODE_RESIZEABLE:
+                return "RESIZE_MODE_RESIZEABLE";
+            case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
+                return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
+            default:
+                return "unknown=" + mode;
         }
     }
 
@@ -806,6 +838,7 @@ public class ActivityInfo extends ComponentInfo
                     + layout.widthFraction + ", " + layout.height + "|"
                     + layout.heightFraction + ", " + layout.gravity);
         }
+        pw.println(prefix + "resizeMode=" + resizeModeToString(resizeMode));
         super.dumpBack(pw, prefix, flags);
     }
 
@@ -847,6 +880,7 @@ public class ActivityInfo extends ComponentInfo
         } else {
             dest.writeInt(0);
         }
+        dest.writeInt(resizeMode);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -879,6 +913,7 @@ public class ActivityInfo extends ComponentInfo
         if (source.readInt() == 1) {
             layout = new Layout(source);
         }
+        resizeMode = source.readInt();
     }
 
     public static final class Layout {
