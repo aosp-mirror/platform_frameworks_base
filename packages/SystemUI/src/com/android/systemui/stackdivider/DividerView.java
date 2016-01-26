@@ -44,7 +44,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
@@ -52,8 +51,10 @@ import com.android.systemui.R;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 
 import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
@@ -111,6 +112,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mStableInsets = new Rect();
 
     private boolean mAnimateAfterRecentsDrawn;
+    private boolean mGrowAfterRecentsDrawn;
+    private boolean mGrowRecents;
 
     public DividerView(Context context) {
         super(context);
@@ -142,6 +145,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mDividerSize = mDividerWindowWidth - 2 * mDividerInsets;
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
+        mGrowRecents = getResources().getBoolean(R.bool.recents_grow_in_multiwindow);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
@@ -186,8 +190,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mHandle.setTouching(true, animate);
         }
         mDockSide = mWindowManagerProxy.getDockSide();
-        mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(), mDisplayWidth,
-                mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
+        getSnapAlgorithm();
         if (mDockSide != WindowManager.DOCKED_INVALID) {
             mWindowManagerProxy.setResizing(true);
             mWindowManager.setSlippery(false);
@@ -216,6 +219,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public DividerSnapAlgorithm getSnapAlgorithm() {
+        if (mSnapAlgorithm == null) {
+            mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(), mDisplayWidth,
+                    mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
+        }
         return mSnapAlgorithm;
     }
 
@@ -392,6 +399,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         display.getDisplayInfo(info);
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
+        mSnapAlgorithm = null;
     }
 
     private int calculatePosition(int touchX, int touchY) {
@@ -590,14 +598,30 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mBackground.getRight(), mBackground.getBottom(), Op.UNION);
     }
 
+    public final void onBusEvent(RecentsActivityStartingEvent recentsActivityStartingEvent) {
+        if (mGrowRecents && getWindowManagerProxy().getDockSide() == WindowManager.DOCKED_TOP
+                && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position) {
+            mGrowAfterRecentsDrawn = true;
+            startDragging(false /* animate */, false /* touching */);
+        }
+    }
+
     public final void onBusEvent(DockingTopTaskEvent dockingEvent) {
-        mAnimateAfterRecentsDrawn = true;
-        startDragging(false /* animate */, false /* touching*/);
+        if (dockingEvent.dragMode == NavigationBarGestureHelper.DRAG_MODE_NONE) {
+            mGrowAfterRecentsDrawn = false;
+            mAnimateAfterRecentsDrawn = true;
+            startDragging(false /* animate */, false /* touching */);
+        }
     }
 
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
         if (mAnimateAfterRecentsDrawn) {
             mAnimateAfterRecentsDrawn = false;
+            stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
+                    TOUCH_RESPONSE_INTERPOLATOR);
+        }
+        if (mGrowAfterRecentsDrawn) {
+            mGrowAfterRecentsDrawn = false;
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
                     TOUCH_RESPONSE_INTERPOLATOR);
         }

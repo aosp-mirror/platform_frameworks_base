@@ -1124,13 +1124,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 } else {
                     initialBounds = new Rect(0, 0, realSize.x, realSize.y - 1);
                 }
-                boolean docked = mRecents.dockTopTask(false /* draggingInRecents */,
+                boolean docked = mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
                         ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                         initialBounds);
                 if (docked) {
                     MetricsLogger.action(mContext,
                             MetricsLogger.ACTION_WINDOW_DOCK_LONGPRESS);
-                    EventBus.getDefault().send(new DockingTopTaskEvent());
                     return true;
                 }
             }

@@ -42,16 +42,20 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         implements TunerService.Tunable {
 
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
+    /**
+     * When dragging from the navigation bar, we drag in recents.
+     */
+    public static final int DRAG_MODE_NONE = -1;
 
     /**
      * When dragging from the navigation bar, we drag in recents.
      */
-    private static final int DRAG_MODE_RECENTS = 0;
+    public static final int DRAG_MODE_RECENTS = 0;
 
     /**
      * When dragging from the navigation bar, we drag the divider.
      */
-    private static final int DRAG_MODE_DIVIDER = 1;
+    public static final int DRAG_MODE_DIVIDER = 1;
 
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
@@ -207,8 +211,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
                     createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                boolean docked = mRecentsComponent.dockTopTask(dragMode == DRAG_MODE_RECENTS,
-                        createMode, initialBounds);
+                boolean docked = mRecentsComponent.dockTopTask(dragMode, createMode, initialBounds);
                 if (docked) {
                     mDragMode = dragMode;
                     if (mDragMode == DRAG_MODE_DIVIDER) {

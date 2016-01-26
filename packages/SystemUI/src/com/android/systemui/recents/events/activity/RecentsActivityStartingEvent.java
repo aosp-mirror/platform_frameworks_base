@@ -19,13 +19,8 @@ package com.android.systemui.recents.events.activity;
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * Fires when the user invoked the gesture to dock the top/left task.
+ * Called after recents activity is being started, i.e. startActivity has just been called.
  */
-public class DockingTopTaskEvent extends EventBus.Event {
+public class RecentsActivityStartingEvent extends EventBus.Event{
 
-    public int dragMode;
-
-    public DockingTopTaskEvent(int dragMode) {
-        this.dragMode = dragMode;
-    }
 }

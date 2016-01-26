@@ -23,6 +23,8 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 
 /**
@@ -77,5 +79,15 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     @Override
     public void sendRecentsDrawnEvent() {
         EventBus.getDefault().post(new RecentsDrawnEvent());
+    }
+
+    @Override
+    public void sendDockingTopTaskEvent(int dragMode) throws RemoteException {
+        EventBus.getDefault().post(new DockingTopTaskEvent(dragMode));
+    }
+
+    @Override
+    public void sendLaunchRecentsEvent() throws RemoteException {
+        EventBus.getDefault().post(new RecentsActivityStartingEvent());
     }
 }
