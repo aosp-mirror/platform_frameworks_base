@@ -22224,6 +22224,7 @@ package android.media.tv {
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri);
     method public static final android.net.Uri buildProgramsUriForChannel(long, long, long);
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri, long, long);
+    method public static final android.net.Uri buildRecordedProgramUri(long);
     field public static final java.lang.String AUTHORITY = "android.media.tv";
   }
 
@@ -22360,13 +22361,49 @@ package android.media.tv {
     field public static final java.lang.String TRAVEL = "TRAVEL";
   }
 
+  public static final class TvContract.RecordedPrograms implements android.media.tv.TvContract.BaseTvColumns {
+    field public static final java.lang.String COLUMN_AUDIO_LANGUAGE = "audio_language";
+    field public static final java.lang.String COLUMN_BROADCAST_GENRE = "broadcast_genre";
+    field public static final java.lang.String COLUMN_CANONICAL_GENRE = "canonical_genre";
+    field public static final java.lang.String COLUMN_CHANNEL_ID = "channel_id";
+    field public static final java.lang.String COLUMN_CONTENT_RATING = "content_rating";
+    field public static final java.lang.String COLUMN_END_TIME_UTC_MILLIS = "end_time_utc_millis";
+    field public static final java.lang.String COLUMN_EPISODE_NUMBER = "episode_number";
+    field public static final java.lang.String COLUMN_EPISODE_TITLE = "episode_title";
+    field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_DATA = "internal_provider_data";
+    field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_FLAG1 = "internal_provider_flag1";
+    field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_FLAG2 = "internal_provider_flag2";
+    field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_FLAG3 = "internal_provider_flag3";
+    field public static final java.lang.String COLUMN_INTERNAL_PROVIDER_FLAG4 = "internal_provider_flag4";
+    field public static final java.lang.String COLUMN_LONG_DESCRIPTION = "long_description";
+    field public static final java.lang.String COLUMN_POSTER_ART_URI = "poster_art_uri";
+    field public static final java.lang.String COLUMN_RECORDING_DATA_BYTES = "recording_data_bytes";
+    field public static final java.lang.String COLUMN_RECORDING_DATA_URI = "recording_data_uri";
+    field public static final java.lang.String COLUMN_RECORDING_DURATION_MILLIS = "recording_duration_millis";
+    field public static final java.lang.String COLUMN_RECORDING_EXPIRE_TIME_UTC_MILLIS = "recording_expire_time_utc_millis";
+    field public static final java.lang.String COLUMN_SEARCHABLE = "searchable";
+    field public static final java.lang.String COLUMN_SEASON_NUMBER = "season_number";
+    field public static final java.lang.String COLUMN_SHORT_DESCRIPTION = "short_description";
+    field public static final java.lang.String COLUMN_START_TIME_UTC_MILLIS = "start_time_utc_millis";
+    field public static final java.lang.String COLUMN_THUMBNAIL_URI = "thumbnail_uri";
+    field public static final java.lang.String COLUMN_TITLE = "title";
+    field public static final java.lang.String COLUMN_VERSION_NUMBER = "version_number";
+    field public static final java.lang.String COLUMN_VIDEO_HEIGHT = "video_height";
+    field public static final java.lang.String COLUMN_VIDEO_WIDTH = "video_width";
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/recorded_program";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/recorded_program";
+    field public static final android.net.Uri CONTENT_URI;
+  }
+
   public final class TvInputInfo implements android.os.Parcelable {
+    method public boolean canRecord();
     method public android.content.Intent createSettingsIntent();
     method public android.content.Intent createSetupIntent();
     method public int describeContents();
     method public java.lang.String getId();
     method public java.lang.String getParentId();
     method public android.content.pm.ServiceInfo getServiceInfo();
+    method public int getTunerCount();
     method public int getType();
     method public boolean isPassthroughInput();
     method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
@@ -22401,6 +22438,10 @@ package android.media.tv {
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
+    field public static final int RECORDING_ERROR_CONNECTION_FAILED = 1; // 0x1
+    field public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 2; // 0x2
+    field public static final int RECORDING_ERROR_RESOURCE_BUSY = 3; // 0x3
+    field public static final int RECORDING_ERROR_UNKNOWN = 0; // 0x0
     field public static final long TIME_SHIFT_INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
     field public static final int TIME_SHIFT_STATUS_AVAILABLE = 3; // 0x3
     field public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2; // 0x2
@@ -22418,12 +22459,15 @@ package android.media.tv {
     method public void onInputAdded(java.lang.String);
     method public void onInputRemoved(java.lang.String);
     method public void onInputStateChanged(java.lang.String, int);
+    method public void onTvInputInfoChanged(java.lang.String, android.media.tv.TvInputInfo);
   }
 
   public abstract class TvInputService extends android.app.Service {
     ctor public TvInputService();
     method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(java.lang.String);
     method public abstract android.media.tv.TvInputService.Session onCreateSession(java.lang.String);
+    method public final void setTvInputInfo(java.lang.String, android.media.tv.TvInputInfo);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
     field public static final java.lang.String SERVICE_META_DATA = "android.media.tv.input";
   }
@@ -22434,6 +22478,18 @@ package android.media.tv {
     method public void onHardwareVideoAvailable();
     method public void onHardwareVideoUnavailable(int);
     method public final boolean onSetSurface(android.view.Surface);
+  }
+
+  public static abstract class TvInputService.RecordingSession {
+    ctor public TvInputService.RecordingSession(android.content.Context);
+    method public void notifyConnected();
+    method public void notifyError(int);
+    method public void notifyRecordingStarted();
+    method public void notifyRecordingStopped(android.net.Uri);
+    method public abstract void onConnect(android.net.Uri);
+    method public abstract void onDisconnect();
+    method public abstract void onStartRecording();
+    method public abstract void onStopRecording();
   }
 
   public static abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
@@ -22463,6 +22519,7 @@ package android.media.tv {
     method public long onTimeShiftGetCurrentPosition();
     method public long onTimeShiftGetStartPosition();
     method public void onTimeShiftPause();
+    method public void onTimeShiftPlay(android.net.Uri);
     method public void onTimeShiftResume();
     method public void onTimeShiftSeekTo(long);
     method public void onTimeShiftSetPlaybackParams(android.media.PlaybackParams);
@@ -22471,6 +22528,23 @@ package android.media.tv {
     method public abstract boolean onTune(android.net.Uri);
     method public void onUnblockContent(android.media.tv.TvContentRating);
     method public void setOverlayViewEnabled(boolean);
+  }
+
+  public class TvRecordingClient {
+    ctor public TvRecordingClient(android.content.Context, java.lang.String, android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
+    method public void connect(java.lang.String, android.net.Uri);
+    method public void disconnect();
+    method public void startRecording();
+    method public void stopRecording();
+  }
+
+  public class TvRecordingClient.RecordingCallback {
+    ctor public TvRecordingClient.RecordingCallback();
+    method public void onConnected();
+    method public void onDisconnected();
+    method public void onError(int);
+    method public void onRecordingStarted();
+    method public void onRecordingStopped(android.net.Uri);
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
@@ -22524,6 +22598,7 @@ package android.media.tv {
     method public void setStreamVolume(float);
     method public void setTimeShiftPositionCallback(android.media.tv.TvView.TimeShiftPositionCallback);
     method public void timeShiftPause();
+    method public void timeShiftPlay(java.lang.String, android.net.Uri);
     method public void timeShiftResume();
     method public void timeShiftSeekTo(long);
     method public void timeShiftSetPlaybackParams(android.media.PlaybackParams);

@@ -43,4 +43,10 @@ oneway interface ITvInputClient {
     void onTimeShiftStatusChanged(int status, int seq);
     void onTimeShiftStartPositionChanged(long timeMs, int seq);
     void onTimeShiftCurrentPositionChanged(long timeMs, int seq);
+
+    // For the recording session
+    void onConnected(int seq);
+    void onRecordingStarted(int seq);
+    void onRecordingStopped(in Uri recordedProgramUri, int seq);
+    void onError(int error, int seq);
 }

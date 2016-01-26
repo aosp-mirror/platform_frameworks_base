@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -44,6 +45,8 @@ import android.view.View;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -124,6 +127,35 @@ public final class TvInputManager {
     public static final int TIME_SHIFT_STATUS_AVAILABLE = 3;
 
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
+
+    /**
+     * RecordingError when a requested operation cannot be completed due to a problem that does not
+     * fit under any other error code.
+     */
+    public static final int RECORDING_ERROR_UNKNOWN = 0;
+
+    /**
+     * RecordingError when an attempt to connect to a recording session has failed or the
+     * established connection has been disconnected without a known reason.
+     */
+    public static final int RECORDING_ERROR_CONNECTION_FAILED = 1;
+
+    /**
+     * RecordingError when recording cannot proceed due to insufficient storage space.
+     */
+    public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 2;
+
+    /**
+     * RecordingError when recording cannot proceed because the required recording resource is not
+     * able to be allocated.
+     */
+    public static final int RECORDING_ERROR_RESOURCE_BUSY = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_CONNECTION_FAILED,
+            RECORDING_ERROR_INSUFFICIENT_SPACE, RECORDING_ERROR_RESOURCE_BUSY})
+    public @interface RecordingError {}
 
     /**
      * The TV input is connected.
@@ -416,6 +448,39 @@ public final class TvInputManager {
          */
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
+
+        /**
+         * This is called when a recording session initiated by a call to {@link
+         * TvRecordingClient#connect(String, Uri)} has been established.
+         */
+        void onConnected(Session session) {
+        }
+
+        /**
+         * This is called when TV program recording on the current channel has started.
+         *
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         */
+        void onRecordingStarted(Session session) {
+        }
+
+        /**
+         * This is called when TV program recording on the current channel has stopped. The passed
+         * URI contains information about the new recorded program.
+         *
+         * @param recordedProgramUri The URI for the new recorded program.
+         * @see android.media.tv.TvContract.RecordedPrograms
+         **/
+        void onRecordingStopped(Session session, Uri recordedProgramUri) {
+        }
+
+        /**
+         * This is called when an issue has occurred before or during recording.
+         *
+         * @param error The error code.
+         */
+        void onError(Session session, @TvInputManager.RecordingError int error) {
+        }
     }
 
     private static final class SessionCallbackRecord {
@@ -565,6 +630,46 @@ public final class TvInputManager {
                 }
             });
         }
+
+        // For the recording session only
+        void postConnected() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onConnected(mSession);
+                }
+            });
+        }
+
+        // For the recording session only
+        void postRecordingStarted() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRecordingStarted(mSession);
+                }
+            });
+        }
+
+        // For the recording session only
+        void postRecordingStopped(final Uri recordedProgramUri) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onRecordingStopped(mSession, recordedProgramUri);
+                }
+            });
+        }
+
+        // For the recording session only
+        void postError(final int error) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onError(mSession, error);
+                }
+            });
+        }
     }
 
     /**
@@ -574,7 +679,7 @@ public final class TvInputManager {
         /**
          * This is called when the state of a given TV input is changed.
          *
-         * @param inputId The id of the TV input.
+         * @param inputId The ID of the TV input.
          * @param state State of the TV input. The value is one of the following:
          * <ul>
          * <li>{@link TvInputManager#INPUT_STATE_CONNECTED}
@@ -591,7 +696,7 @@ public final class TvInputManager {
          * <p>Normally it happens when the user installs a new TV input package that implements
          * {@link TvInputService} interface.
          *
-         * @param inputId The id of the TV input.
+         * @param inputId The ID of the TV input.
          */
         public void onInputAdded(String inputId) {
         }
@@ -602,7 +707,7 @@ public final class TvInputManager {
          * <p>Normally it happens when the user uninstalls the previously installed TV input
          * package.
          *
-         * @param inputId The id of the TV input.
+         * @param inputId The ID of the TV input.
          */
         public void onInputRemoved(String inputId) {
         }
@@ -613,11 +718,20 @@ public final class TvInputManager {
          * <p>Normally it happens when a previously installed TV input package is re-installed or
          * the media on which a newer version of the package exists becomes available/unavailable.
          *
-         * @param inputId The id of the TV input.
+         * @param inputId The ID of the TV input.
          * @hide
          */
         @SystemApi
         public void onInputUpdated(String inputId) {
+        }
+
+        /**
+         * This is called when the information about a given TV input is changed.
+         *
+         * @param inputId The ID of the TV input.
+         * @param inputInfo TvInputInfo object that contains the information about the TV input.
+         */
+        public void onTvInputInfoChanged(String inputId, TvInputInfo inputInfo) {
         }
     }
 
@@ -632,15 +746,6 @@ public final class TvInputManager {
 
         public TvInputCallback getCallback() {
             return mCallback;
-        }
-
-        public void postInputStateChanged(final String inputId, final int state) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mCallback.onInputStateChanged(inputId, state);
-                }
-            });
         }
 
         public void postInputAdded(final String inputId) {
@@ -666,6 +771,24 @@ public final class TvInputManager {
                 @Override
                 public void run() {
                     mCallback.onInputUpdated(inputId);
+                }
+            });
+        }
+
+        public void postInputStateChanged(final String inputId, final int state) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onInputStateChanged(inputId, state);
+                }
+            });
+        }
+
+        public void postTvInputInfoChanged(final String inputId, final TvInputInfo inputInfo) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onTvInputInfoChanged(inputId, inputInfo);
                 }
             });
         }
@@ -876,18 +999,56 @@ public final class TvInputManager {
                     record.postTimeShiftCurrentPositionChanged(timeMs);
                 }
             }
-        };
-        ITvInputManagerCallback managerCallback = new ITvInputManagerCallback.Stub() {
+
             @Override
-            public void onInputStateChanged(String inputId, int state) {
-                synchronized (mLock) {
-                    mStateMap.put(inputId, state);
-                    for (TvInputCallbackRecord record : mCallbackRecords) {
-                        record.postInputStateChanged(inputId, state);
+            public void onConnected(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
                     }
+                    record.postConnected();
                 }
             }
 
+            @Override
+            public void onRecordingStarted(int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRecordingStarted();
+                }
+            }
+
+            @Override
+            public void onRecordingStopped(Uri recordedProgramUri, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRecordingStopped(recordedProgramUri);
+                }
+            }
+
+            @Override
+            public void onError(int error, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postError(error);
+                }
+            }
+        };
+        ITvInputManagerCallback managerCallback = new ITvInputManagerCallback.Stub() {
             @Override
             public void onInputAdded(String inputId) {
                 synchronized (mLock) {
@@ -913,6 +1074,25 @@ public final class TvInputManager {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
                         record.postInputUpdated(inputId);
+                    }
+                }
+            }
+
+            @Override
+            public void onInputStateChanged(String inputId, int state) {
+                synchronized (mLock) {
+                    mStateMap.put(inputId, state);
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
+                        record.postInputStateChanged(inputId, state);
+                    }
+                }
+            }
+
+            @Override
+            public void onTvInputInfoChanged(String inputId, TvInputInfo inputInfo) {
+                synchronized (mLock) {
+                    for (TvInputCallbackRecord record : mCallbackRecords) {
+                        record.postTvInputInfoChanged(inputId, inputInfo);
                     }
                 }
             }
@@ -972,7 +1152,7 @@ public final class TvInputManager {
      * <li>{@link #INPUT_STATE_DISCONNECTED}
      * </ul>
      *
-     * @param inputId The id of the TV input.
+     * @param inputId The ID of the TV input.
      * @throws IllegalArgumentException if the argument is {@code null}.
      */
     public int getInputState(@NonNull String inputId) {
@@ -1139,7 +1319,7 @@ public final class TvInputManager {
      * <p>The number of sessions that can be created at the same time is limited by the capability
      * of the given TV input.
      *
-     * @param inputId The id of the TV input.
+     * @param inputId The ID of the TV input.
      * @param callback A callback used to receive the created session.
      * @param handler A {@link Handler} that the session creation will be delivered to.
      * @hide
@@ -1147,6 +1327,28 @@ public final class TvInputManager {
     @SystemApi
     public void createSession(@NonNull String inputId, @NonNull final SessionCallback callback,
             @NonNull Handler handler) {
+        createSessionInternal(inputId, false, callback, handler);
+    }
+
+    /**
+     * Creates a recording {@link Session} for a given TV input.
+     *
+     * <p>The number of sessions that can be created at the same time is limited by the capability
+     * of the given TV input.
+     *
+     * @param inputId The ID of the TV input.
+     * @param callback A callback used to receive the created session.
+     * @param handler A {@link Handler} that the session creation will be delivered to.
+     * @hide
+     */
+    @SystemApi
+    public void createRecordingSession(@NonNull String inputId,
+            @NonNull final SessionCallback callback, @NonNull Handler handler) {
+        createSessionInternal(inputId, true, callback, handler);
+    }
+
+    private void createSessionInternal(String inputId, boolean isRecordingSession,
+            SessionCallback callback, Handler handler) {
         Preconditions.checkNotNull(inputId);
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(handler);
@@ -1155,7 +1357,7 @@ public final class TvInputManager {
             int seq = mNextSeq++;
             mSessionCallbackRecordMap.put(seq, record);
             try {
-                mService.createSession(mClient, inputId, seq, mUserId);
+                mService.createSession(mClient, inputId, isRecordingSession, seq, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -1171,7 +1373,7 @@ public final class TvInputManager {
      * here. This method is designed to be used with {@link #captureFrame} in
      * capture scenarios specifically and not suitable for any other use.
      *
-     * @param inputId the id of the TV input.
+     * @param inputId The ID of the TV input.
      * @return List of {@link TvStreamConfig} which is available for capturing
      *   of the given TV input.
      * @hide
@@ -1188,7 +1390,7 @@ public final class TvInputManager {
     /**
      * Take a snapshot of the given TV input into the provided Surface.
      *
-     * @param inputId the id of the TV input.
+     * @param inputId The ID of the TV input.
      * @param surface the {@link Surface} to which the snapshot is captured.
      * @param config the {@link TvStreamConfig} which is used for capturing.
      * @return true when the {@link Surface} is ready to be captured.
@@ -1607,7 +1809,7 @@ public final class TvInputManager {
          * Returns the selected track for a given type. Returns {@code null} if the information is
          * not available or any of the tracks for the given type is not selected.
          *
-         * @return the ID of the selected track.
+         * @return The ID of the selected track.
          * @see #selectTrack
          */
         @Nullable
@@ -1697,6 +1899,21 @@ public final class TvInputManager {
         }
 
         /**
+         * Plays a given recorded TV program.
+         */
+        void timeShiftPlay(Uri recordedProgramUri) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftPlay(mToken, recordedProgramUri, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
          * Pauses the playback. Call {@link #timeShiftResume()} to restart the playback.
          */
         void timeShiftPause() {
@@ -1776,6 +1993,62 @@ public final class TvInputManager {
             }
             try {
                 mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Connects to a given channel for TV program recording.
+         */
+        void connect(Uri channelUri) {
+            connect(channelUri, null);
+        }
+
+        /**
+         * Tunes to a given channel.
+         *
+         * @param channelUri The URI of a channel.
+         * @param params Extra parameters.
+         */
+        void connect(@NonNull Uri channelUri, Bundle params) {
+            Preconditions.checkNotNull(channelUri);
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.connect(mToken, channelUri, params, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Starts TV program recording for the current recording session.
+         */
+        void startRecording() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.startRecording(mToken, mUserId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Stops TV program recording for the current recording session.
+         */
+        void stopRecording() {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.stopRecording(mToken, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

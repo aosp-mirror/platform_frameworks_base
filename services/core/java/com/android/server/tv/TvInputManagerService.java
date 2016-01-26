@@ -435,7 +435,11 @@ public final class TvInputManagerService extends SystemService {
         for (SessionState state : userState.sessionStateMap.values()) {
             if (state.session != null) {
                 try {
-                    state.session.release();
+                    if (state.isRecordingSession) {
+                        state.session.disconnect();
+                    } else {
+                        state.session.release();
+                    }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in release", e);
                 }
@@ -604,7 +608,11 @@ public final class TvInputManagerService extends SystemService {
 
         // Create a session. When failed, send a null token immediately.
         try {
-            service.createSession(channels[1], callback, sessionState.info.getId());
+            if (sessionState.isRecordingSession) {
+                service.createRecordingSession(callback, sessionState.info.getId());
+            } else {
+                service.createSession(channels[1], callback, sessionState.info.getId());
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
             removeSessionStateLocked(sessionToken, userId);
@@ -632,7 +640,11 @@ public final class TvInputManagerService extends SystemService {
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
-                sessionState.session.release();
+                if (sessionState.isRecordingSession) {
+                    sessionState.session.disconnect();
+                } else {
+                    sessionState.session.release();
+                }
             }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
@@ -762,6 +774,21 @@ public final class TvInputManagerService extends SystemService {
                 targetCallback.onInputStateChanged(inputId, state);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report state change to callback", e);
+            }
+        }
+    }
+
+    private void notifyTvInputInfoChanged(UserState userState, String inputId,
+            TvInputInfo inputInfo) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyTvInputInfoChanged(inputId=" + inputId + ", inputInfo=" + inputInfo
+                    + ")");
+        }
+        for (ITvInputManagerCallback callback : userState.callbackSet) {
+            try {
+                callback.onTvInputInfoChanged(inputId, inputInfo);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "failed to report changed input info to callback", e);
             }
         }
     }
@@ -1005,7 +1032,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void createSession(final ITvInputClient client, final String inputId,
-                int seq, int userId) {
+                boolean isRecordingSession, int seq, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "createSession");
@@ -1033,8 +1060,8 @@ public final class TvInputManagerService extends SystemService {
 
                     // Create a new session token and a session state.
                     IBinder sessionToken = new Binder();
-                    SessionState sessionState = new SessionState(sessionToken, info, client,
-                            seq, callingUid, resolvedUserId);
+                    SessionState sessionState = new SessionState(sessionToken, info,
+                            isRecordingSession, client, seq, callingUid, resolvedUserId);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
@@ -1375,6 +1402,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void timeShiftPlay(IBinder sessionToken, final Uri recordedProgramUri, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "timeShiftPlay");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).timeShiftPlay(
+                                recordedProgramUri);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in timeShiftPlay", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void timeShiftPause(IBinder sessionToken, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -1383,8 +1430,7 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
-                                .timeShiftPause();
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).timeShiftPause();
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in timeShiftPause", e);
                     }
@@ -1469,6 +1515,64 @@ public final class TvInputManagerService extends SystemService {
                                 .timeShiftEnablePositionTracking(enable);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void connect(IBinder sessionToken, final Uri channelUri, Bundle params, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "connect");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).connect(
+                                channelUri, params);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in connect", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void startRecording(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "startRecording");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startRecording();
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in startRecording", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void stopRecording(IBinder sessionToken, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "stopRecording");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).stopRecording();
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in stopRecording", e);
                     }
                 }
             } finally {
@@ -1912,6 +2016,7 @@ public final class TvInputManagerService extends SystemService {
 
     private final class SessionState implements IBinder.DeathRecipient {
         private final TvInputInfo info;
+        private final boolean isRecordingSession;
         private final ITvInputClient client;
         private final int seq;
         private final int callingUid;
@@ -1922,10 +2027,11 @@ public final class TvInputManagerService extends SystemService {
         // Not null if this session represents an external device connected to a hardware TV input.
         private IBinder hardwareSessionToken;
 
-        private SessionState(IBinder sessionToken, TvInputInfo info, ITvInputClient client,
-                int seq, int callingUid, int userId) {
+        private SessionState(IBinder sessionToken, TvInputInfo info, boolean isRecordingSession,
+                ITvInputClient client, int seq, int callingUid, int userId) {
             this.sessionToken = sessionToken;
             this.info = info;
+            this.isRecordingSession = isRecordingSession;
             this.client = client;
             this.seq = seq;
             this.callingUid = callingUid;
@@ -2124,6 +2230,18 @@ public final class TvInputManagerService extends SystemService {
                 } else {
                     Slog.e(TAG, "failed to remove input " + inputId);
                 }
+            }
+        }
+
+        @Override
+        public void setTvInputInfo(String inputId, TvInputInfo inputInfo) {
+            ensureValidInput(inputInfo);
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "setTvInputInfo(" + inputInfo + ")");
+                }
+                UserState userState = getOrCreateUserStateLocked(mUserId);
+                notifyTvInputInfoChanged(userState, inputId, inputInfo);
             }
         }
     }
@@ -2390,6 +2508,78 @@ public final class TvInputManagerService extends SystemService {
                             mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onTimeShiftCurrentPositionChanged", e);
+                }
+            }
+        }
+
+        // For the recording session only
+        @Override
+        public void onConnected() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onConnected()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onConnected(mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onConnected", e);
+                }
+            }
+        }
+
+        // For the recording session only
+        @Override
+        public void onRecordingStarted() {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onRecordingStarted()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onRecordingStarted(mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onRecordingStarted", e);
+                }
+            }
+        }
+
+        // For the recording session only
+        @Override
+        public void onRecordingStopped(Uri recordedProgramUri) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onRecordingStopped()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onRecordingStopped(recordedProgramUri, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onRecordingStopped", e);
+                }
+            }
+        }
+
+        // For the recording session only
+        @Override
+        public void onError(int error) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onError()");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onError(error, mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onError", e);
                 }
             }
         }
