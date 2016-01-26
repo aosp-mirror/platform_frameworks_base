@@ -263,11 +263,6 @@ public class NavigationBarView extends LinearLayout {
         return mButtonDisatchers.get(R.id.ime_switcher);
     }
 
-    @Nullable
-    public View getAppShelf() {
-        return getCurrentView().findViewById(R.id.app_shelf);
-    }
-
     private void getCarModeIcons(Context ctx) {
         mBackCarModeIcon = ctx.getDrawable(R.drawable.ic_sysbar_back_carmode);
         mBackLandCarModeIcon = mBackCarModeIcon;
@@ -395,12 +390,6 @@ public class NavigationBarView extends LinearLayout {
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
         getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
-
-        // The app shelf, if it exists, follows the visibility of the home button.
-        View appShelf = getAppShelf();
-        if (appShelf != null) {
-            appShelf.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
-        }
     }
 
     private boolean inLockTask() {

@@ -43,8 +43,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     private static final String RECENT = "recent";
     private static final String NAVSPACE = "space";
 
-    private static final String APP_SHELF = "app_shelf";
-
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
 
@@ -141,32 +139,18 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group),
                 (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
 
-        if (center.length == 1 && APP_SHELF.equals(center[0])) {
-            inflateShelf((LinearLayout) mRot0.findViewById(R.id.ends_group),
-                    (LinearLayout) mRot0.findViewById(R.id.ends_group_lightsout), false);
-            inflateShelf((LinearLayout) mRot90.findViewById(R.id.ends_group),
-                    (LinearLayout) mRot90.findViewById(R.id.ends_group_lightsout), true);
-        } else {
-            inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group),
-                    (ViewGroup) mRot0.findViewById(R.id.center_group_lightsout), false);
-            inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group),
-                    (ViewGroup) mRot90.findViewById(R.id.center_group_lightsout), true);
-            addGravitySpacer((LinearLayout) mRot0.findViewById(R.id.ends_group));
-            addGravitySpacer((LinearLayout) mRot90.findViewById(R.id.ends_group));
-        }
+        inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group),
+                (ViewGroup) mRot0.findViewById(R.id.center_group_lightsout), false);
+        inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group),
+                (ViewGroup) mRot90.findViewById(R.id.center_group_lightsout), true);
+
+        addGravitySpacer((LinearLayout) mRot0.findViewById(R.id.ends_group));
+        addGravitySpacer((LinearLayout) mRot90.findViewById(R.id.ends_group));
 
         inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.ends_group),
                 (ViewGroup) mRot0.findViewById(R.id.ends_group_lightsout), false);
         inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.ends_group),
                 (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
-    }
-
-    private void inflateShelf(LinearLayout layout, LinearLayout lightsOut, boolean landscape) {
-        View v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                .inflate(R.layout.apps_bar, layout, false);
-        layout.addView(v);
-        addToDispatchers(v);
-        copyToLightsout(v, lightsOut);
     }
 
     private void addGravitySpacer(LinearLayout layout) {
