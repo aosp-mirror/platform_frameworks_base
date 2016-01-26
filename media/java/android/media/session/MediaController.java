@@ -605,6 +605,7 @@ public final class MediaController {
         /**
          * Request that the player start playback for a specific media id.
          *
+         * @see PlaybackState#EXTRA_PREPARE_ONLY
          * @param mediaId The id of the requested media.
          * @param extras Optional extras that can include extra information about the media item
          *               to be played.
@@ -626,6 +627,7 @@ public final class MediaController {
          * An empty or null query should be treated as a request to play any
          * music.
          *
+         * @see PlaybackState#EXTRA_PREPARE_ONLY
          * @param query The search query.
          * @param extras Optional extras that can include extra information
          *            about the query.
@@ -646,6 +648,7 @@ public final class MediaController {
         /**
          * Request that the player start playback for a specific {@link Uri}.
          *
+         * @see PlaybackState#EXTRA_PREPARE_ONLY
          * @param uri  The URI of the requested media.
          * @param extras Optional extras that can include extra information about the media item
          *               to be played.

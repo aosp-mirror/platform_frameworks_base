@@ -133,6 +133,21 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_PLAY_FROM_URI = 1 << 13;
 
     /**
+     * Used as an optional boolean extra field in
+     * {@link MediaController.TransportControls#playFromMediaId},
+     * {@link MediaController.TransportControls#playFromSearch}, and
+     * {@link MediaController.TransportControls#playFromUri}. Value of {@code true} overrides
+     * the default behavior of starting the playback after preparing. Check
+     * {@link MediaSession#FLAG_HANDLES_PREPARE_ONLY} to see if the media session supports this.
+     *
+     * @see MediaSession#FLAG_HANDLES_PREPARE_ONLY
+     * @see MediaController.TransportControls#playFromMediaId
+     * @see MediaController.TransportControls#playFromSearch
+     * @see MediaController.TransportControls#playFromUri
+     */
+    public static final String EXTRA_PREPARE_ONLY = "android.media.session.extra.PREPARE_ONLY";
+
+    /**
      * This is the default playback state and indicates that no media has been
      * added yet, or the performer has been reset and has no content to play.
      *
