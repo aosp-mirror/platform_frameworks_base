@@ -2787,22 +2787,39 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Generally classifies the overall set of the camera device functionality.</p>
-     * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
-     * <p>A FULL device will support below capabilities:</p>
+     * <p>The supported hardware level is a high-level description of the camera device's
+     * capabilities, summarizing several capabilities into one field.  Each level adds additional
+     * features to the previous one, and is always a strict superset of the previous level.
+     * The ordering is <code>LEGACY &lt; LIMITED &lt; FULL &lt; LEVEL_3</code>.</p>
+     * <p>Starting from <code>LEVEL_3</code>, the level enumerations are guaranteed to be in increasing
+     * numerical value as well. To check if a given device is at least at a given hardware level,
+     * the following code snippet can be used:</p>
+     * <pre><code>// Returns true if the device supports the required hardware level, or better.
+     * boolean isHardwareLevelSupported(CameraCharacteristics c, int requiredLevel) {
+     *     int deviceLevel = c.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+     *     if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+     *         return requiredLevel == deviceLevel;
+     *     }
+     *     // deviceLevel is not LEGACY, can use numerical sort
+     *     return requiredLevel &lt;= deviceLevel;
+     * }
+     * </code></pre>
+     * <p>At a high level, the levels are:</p>
      * <ul>
-     * <li>BURST_CAPTURE capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
-     * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
-     * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
-     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     *   MANUAL_POST_PROCESSING)</li>
-     * <li>At least 3 processed (but not stalling) format output streams
-     *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
-     * <li>The required stream configurations defined in android.scaler.availableStreamConfigurations</li>
-     * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
-     * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
+     * <li><code>LEGACY</code> devices operate in a backwards-compatibility mode for older
+     *   Android devices, and have very limited capabilities.</li>
+     * <li><code>LIMITED</code> devices represent the
+     *   baseline feature set, and may also include additional capabilities that are
+     *   subsets of <code>FULL</code>.</li>
+     * <li><code>FULL</code> devices additionally support per-frame manual control of sensor, flash, lens and
+     *   post-processing settings, and image capture at a high rate.</li>
+     * <li><code>LEVEL_3</code> devices additionally support YUV reprocessing and RAW image capture, along
+     *   with additional output stream configurations.</li>
      * </ul>
-     * <p>A LIMITED device may have some or none of the above characteristics.
-     * To find out more refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}.</p>
+     * <p>See the individual level enums for full descriptions of the supported capabilities.  The
+     * {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} entry describes the device's capabilities at a
+     * finer-grain level, if needed. In addition, many controls have their available settings or
+     * ranges defined in individual {@link android.hardware.camera2.CameraCharacteristics } entries.</p>
      * <p>Some features are not part of any particular hardware level or capability and must be
      * queried separately. These include:</p>
      * <ul>
@@ -2813,19 +2830,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   ({@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization},
      *    {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes})</li>
      * </ul>
-     * <p>A LEGACY device does not support per-frame control, manual sensor control, manual
-     * post-processing, arbitrary cropping regions, and has relaxed performance constraints.</p>
-     * <p>Each higher level supports everything the lower level supports
-     * in this order: FULL <code>&gt;</code> LIMITED <code>&gt;</code> LEGACY.</p>
-     * <p>Note:
-     * Pre-API level 23, FULL devices also supported arbitrary cropping region
-     * ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM); this requirement was relaxed in API level 23,
-     * and FULL devices may only support CENTERED cropping.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED LIMITED}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_FULL FULL}</li>
      *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY LEGACY}</li>
+     *   <li>{@link #INFO_SUPPORTED_HARDWARE_LEVEL_3 3}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -2833,16 +2843,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC
-     * @see CameraCharacteristics#SCALER_CROPPING_TYPE
-     * @see CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE
-     * @see CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION
      * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
      * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES
-     * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_3
      */
     @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
