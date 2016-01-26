@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -53,6 +54,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.KeyFactory;
@@ -278,6 +281,21 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE
         = "android.app.action.PROVISION_MANAGED_SHAREABLE_DEVICE";
+
+    /**
+     * Activity action: Finalizes management provisioning, should be used after user-setup
+     * has been completed and {@link #getUserProvisioningState()} returns one of:
+     * <ul>
+     * <li>{@link #STATE_USER_SETUP_INCOMPLETE}</li>
+     * <li>{@link #STATE_USER_SETUP_COMPLETE}</li>
+     * <li>{@link #STATE_USER_PROFILE_COMPLETE}</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_PROVISION_FINALIZATION
+            = "android.app.action.PROVISION_FINALIZATION";
 
     /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
@@ -859,6 +877,44 @@ public class DevicePolicyManager {
      * and the user cannot manage the permission through the UI.
      */
     public static final int PERMISSION_GRANT_STATE_DENIED = 2;
+
+    /**
+     * No management for current user in-effect. This is the default.
+     * @hide
+     */
+    public static final int STATE_USER_UNMANAGED = 0;
+
+    /**
+     * Management partially setup, user setup needs to be completed.
+     * @hide
+     */
+    public static final int STATE_USER_SETUP_INCOMPLETE = 1;
+
+    /**
+     * Management partially setup, user setup completed.
+     * @hide
+     */
+    public static final int STATE_USER_SETUP_COMPLETE = 2;
+
+    /**
+     * Management setup and active on current user.
+     * @hide
+     */
+    public static final int STATE_USER_SETUP_FINALIZED = 3;
+
+    /**
+     * Management partially setup on a managed profile.
+     * @hide
+     */
+    public static final int STATE_USER_PROFILE_COMPLETE = 4;
+
+    /**
+     * @hide
+     */
+    @IntDef({STATE_USER_UNMANAGED, STATE_USER_SETUP_INCOMPLETE, STATE_USER_SETUP_COMPLETE,
+            STATE_USER_SETUP_FINALIZED, STATE_USER_PROFILE_COMPLETE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserProvisioningState {}
 
     /**
      * Return true if the given administrator component is currently
@@ -5243,6 +5299,40 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return 0;
+        }
+    }
+
+    /**
+     * @return the {@link UserProvisioningState} for the current user - for unmanaged users will
+     *         return {@link #STATE_USER_UNMANAGED}
+     * @hide
+     */
+    @UserProvisioningState
+    public int getUserProvisioningState() {
+        if (mService != null) {
+            try {
+                return mService.getUserProvisioningState();
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return STATE_USER_UNMANAGED;
+    }
+
+    /**
+     * Set the {@link UserProvisioningState} for the supplied user, if they are managed.
+     *
+     * @param state to store
+     * @param userHandle for user
+     * @hide
+     */
+    public void setUserProvisioningState(@UserProvisioningState int state, int userHandle) {
+        if (mService != null) {
+            try {
+                mService.setUserProvisioningState(state, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
         }
     }
 

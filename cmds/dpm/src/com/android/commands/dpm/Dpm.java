@@ -18,6 +18,7 @@ package com.android.commands.dpm;
 
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -143,6 +144,10 @@ public final class Dpm extends BaseCommand {
             mDevicePolicyManager.removeActiveAdmin(mComponent, UserHandle.USER_SYSTEM);
             throw e;
         }
+
+        mDevicePolicyManager.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
         System.out.println("Success: Device owner set to package " + mComponent);
         System.out.println("Active admin set to component " + mComponent.toShortString());
     }
@@ -161,6 +166,10 @@ public final class Dpm extends BaseCommand {
             mDevicePolicyManager.removeActiveAdmin(mComponent, mUserId);
             throw e;
         }
+
+        mDevicePolicyManager.setUserProvisioningState(
+                DevicePolicyManager.STATE_USER_SETUP_FINALIZED, mUserId);
+
         System.out.println("Success: Active admin and profile owner set to "
                 + mComponent.toShortString() + " for user " + mUserId);
     }
