@@ -57,6 +57,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
+import com.android.systemui.recents.events.activity.ToggleHistoryEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -105,8 +106,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     // Top level views
     private RecentsView mRecentsView;
     private SystemBarScrimViews mScrimViews;
-    private ViewStub mHistoryViewStub;
-    private RecentsHistoryView mHistoryView;
 
     // Search AppWidget
     private AppWidgetProviderInfo mSearchWidgetInfo;
@@ -127,12 +126,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * just finishing the activity since we don't know what is behind Recents in the task stack.
      */
     class FinishRecentsRunnable implements Runnable {
+
         Intent mLaunchIntent;
+        ActivityOptions mOpts;
 
         /**
          * Creates a finish runnable that starts the specified intent.
          */
-        public FinishRecentsRunnable(Intent launchIntent) {
+        public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
             mLaunchIntent = launchIntent;
         }
 
@@ -141,13 +142,16 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             try {
                 RecentsActivityLaunchState launchState =
                         Recents.getConfiguration().getLaunchState();
-                ActivityOptions opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
-                        launchState.launchedFromSearchHome ?
-                                R.anim.recents_to_search_launcher_enter :
-                                R.anim.recents_to_launcher_enter,
-                        launchState.launchedFromSearchHome ?
-                                R.anim.recents_to_search_launcher_exit :
-                                R.anim.recents_to_launcher_exit);
+                ActivityOptions opts = mOpts;
+                if (opts == null) {
+                    opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
+                            launchState.launchedFromSearchHome ?
+                                    R.anim.recents_to_search_launcher_enter :
+                                    R.anim.recents_to_launcher_enter,
+                            launchState.launchedFromSearchHome ?
+                                    R.anim.recents_to_search_launcher_exit :
+                                    R.anim.recents_to_launcher_exit);
+                }
                 startActivityAsUser(mLaunchIntent, opts.toBundle(), UserHandle.CURRENT);
             } catch (Exception e) {
                 Log.e(TAG, getString(R.string.recents_launch_error_message, "Home"), e);
@@ -205,12 +209,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         int launchTaskIndexInStack = launchTarget != null
                 ? stack.indexOfStackTask(launchTarget)
                 : 0;
-        boolean hasStatusBarScrim = taskCount > 0;
-        boolean animateStatusBarScrim = launchState.launchedFromHome;
         boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
         boolean animateNavBarScrim = true;
-        mScrimViews.prepareEnterRecentsAnimation(hasStatusBarScrim, animateStatusBarScrim,
-                hasNavBarScrim, animateNavBarScrim);
+        mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
         if (launchState.launchedWithAltTab) {
@@ -234,8 +235,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Dismisses the history view back into the stack view.
      */
     boolean dismissHistory() {
-        // Try and hide the history view first
-        if (mHistoryView != null && mHistoryView.isVisible()) {
+        if (mRecentsView.isHistoryVisible()) {
             EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
             return true;
         }
@@ -287,9 +287,24 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Dismisses Recents directly to Home without checking whether it is currently visible.
      */
     void dismissRecentsToHome(boolean animateTaskViews) {
+        dismissRecentsToHome(animateTaskViews, null);
+    }
+
+    /**
+     * Dismisses Recents directly to Home without checking whether it is currently visible.
+     *
+     * @param overrideAnimation If not null, will override the default animation that is based on
+     *                          how Recents was launched.
+     */
+    void dismissRecentsToHome(boolean animateTaskViews, ActivityOptions overrideAnimation) {
         DismissRecentsToHomeAnimationStarted dismissEvent =
                 new DismissRecentsToHomeAnimationStarted(animateTaskViews);
-        dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
+        if (overrideAnimation != null) {
+            dismissEvent.addPostAnimationCallback(new FinishRecentsRunnable(
+                    mFinishLaunchHomeRunnable.mLaunchIntent, overrideAnimation));
+        } else {
+            dismissEvent.addPostAnimationCallback(mFinishLaunchHomeRunnable);
+        }
         dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
@@ -342,7 +357,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mRecentsView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mHistoryViewStub = (ViewStub) findViewById(R.id.history_view_stub);
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
@@ -360,7 +374,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
+        mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent, null);
 
         // Bind the search app widget when we first start up
         if (RecentsDebugFlags.Static.EnableSearchBar) {
@@ -441,7 +455,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Reset some states
         mIgnoreAltTabRelease = false;
-        if (mHistoryView != null) {
+        if (mRecentsView.isHistoryVisible()) {
             EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
         }
 
@@ -503,8 +517,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE,
-                (mHistoryView != null) && mHistoryView.isVisible());
+        outState.putBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, mRecentsView.isHistoryVisible());
     }
 
     @Override
@@ -651,15 +664,12 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
-            if (mHistoryView != null && mHistoryView.isVisible()) {
-                HideHistoryEvent hideEvent = new HideHistoryEvent(true /* animate */);
-                hideEvent.addPostAnimationCallback(new Runnable() {
-                    @Override
-                    public void run() {
-                        dismissRecentsToHome(true /* animateTaskViews */);
-                    }
-                });
-                EventBus.getDefault().send(hideEvent);
+            if (mRecentsView.isHistoryVisible()) {
+                // If the history view is visible, then just cross-fade home
+                ActivityOptions opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
+                                R.anim.recents_to_launcher_enter,
+                                R.anim.recents_to_launcher_exit);
+                dismissRecentsToHome(false /* animate */, opts);
 
             } else {
                 dismissRecentsToHome(true /* animateTaskViews */);
@@ -793,21 +803,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Once the user has scrolled while holding alt-tab, then we should ignore the release of
         // the key
         mIgnoreAltTabRelease = true;
-    }
-
-    public final void onBusEvent(ShowHistoryEvent event) {
-        if (mHistoryView == null) {
-            mHistoryView = (RecentsHistoryView) mHistoryViewStub.inflate();
-            // Since this history view is inflated by a view stub after the insets have already
-            // been applied, we have to set them ourselves initial from the insets that were last
-            // provided.
-            mHistoryView.setSystemInsets(mRecentsView.getSystemInsets());
-        }
-        mHistoryView.show(mRecentsView.getTaskStack(), event.getAnimationTrigger());
-    }
-
-    public final void onBusEvent(HideHistoryEvent event) {
-        mHistoryView.hide(event.animate, event.getAnimationTrigger());
     }
 
     private void refreshSearchWidgetView() {

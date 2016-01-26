@@ -354,6 +354,7 @@ public class TaskStackLayoutAlgorithm {
         mStackBottomOffset = mSystemInsets.bottom + heightPadding;
         state.computeRects(mFreeformRect, mStackRect, taskStackBounds, widthPadding, heightPadding,
                 mStackBottomOffset);
+        // The history button will take the full un-padded header space above the stack
         mHistoryButtonRect.set(mStackRect.left, mStackRect.top - heightPadding,
                 mStackRect.right, mStackRect.top + mFocusedPeekHeight);
 

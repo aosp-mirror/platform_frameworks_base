@@ -138,7 +138,7 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedFromHome) {
                 // Move the task view off screen (below) so we can animate it in
                 RectF bounds = new RectF(mTmpTransform.rect);
-                bounds.offset(0, offscreenY);
+                bounds.offsetTo(bounds.left, offscreenY);
                 tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
                         (int) bounds.bottom);
             }
@@ -259,7 +259,7 @@ public class TaskStackAnimationHelper {
 
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
-            mTmpTransform.rect.offset(0, offscreenY);
+            mTmpTransform.rect.offsetTo(mTmpTransform.rect.left, offscreenY);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
     }
@@ -346,61 +346,58 @@ public class TaskStackAnimationHelper {
     }
 
     /**
-     * Starts the animation to hide the {@link TaskView}s when the history is shown.  The history
-     * view's animation will be deferred until all the {@link TaskView}s are finished animating.
+     * Starts the animation to hide the {@link TaskView}s when the history is shown.
      */
     public void startShowHistoryAnimation(ReferenceCountedTrigger postAnimationTrigger) {
         Resources res = mStackView.getResources();
         TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
         TaskStackViewScroller stackScroller = mStackView.getScroller();
 
+        int offscreenY = stackLayout.mStackRect.bottom;
         int historyTransitionDuration = res.getInteger(
                 R.integer.recents_history_transition_duration);
+        int startDelayIncr = 16;
 
         List<TaskView> taskViews = mStackView.getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                    historyTransitionDuration, PhoneStatusBar.ALPHA_OUT,
+            TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
+                    historyTransitionDuration, mFastOutSlowInInterpolator,
                     postAnimationTrigger.decrementOnAnimationEnd());
             postAnimationTrigger.increment();
 
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
             mTmpTransform.alpha = 0f;
+            mTmpTransform.rect.offsetTo(mTmpTransform.rect.left, offscreenY);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
     }
 
     /**
-     * Starts the animation to show the {@link TaskView}s when the history is hidden.  The
-     * {@link TaskView} animations will be deferred until the history view has been animated away.
+     * Starts the animation to show the {@link TaskView}s when the history is hidden.
      */
-    public void startHideHistoryAnimation(final ReferenceCountedTrigger postAnimationTrigger) {
-        final Resources res = mStackView.getResources();
-        final TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
-        final TaskStackViewScroller stackScroller = mStackView.getScroller();
+    public void startHideHistoryAnimation() {
+        Resources res = mStackView.getResources();
+        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
+        TaskStackViewScroller stackScroller = mStackView.getScroller();
 
-        final int historyTransitionDuration = res.getInteger(
+        int historyTransitionDuration = res.getInteger(
                 R.integer.recents_history_transition_duration);
+        int startDelayIncr = 16;
 
         List<TaskView> taskViews = mStackView.getTaskViews();
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
-            final TaskView tv = taskViews.get(i);
-            postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-                @Override
-                public void run() {
-                    TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                            historyTransitionDuration, PhoneStatusBar.ALPHA_IN);
-                    stackLayout.getStackTransform(tv.getTask(), stackScroller.getStackScroll(),
-                            mTmpTransform, null);
-                    mTmpTransform.alpha = 1f;
-                    mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
-                }
-            });
+            TaskView tv = taskViews.get(i);
+            TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
+                    historyTransitionDuration, mFastOutSlowInInterpolator);
+            stackLayout.getStackTransform(tv.getTask(), stackScroller.getStackScroll(),
+                    mTmpTransform, null);
+            mTmpTransform.alpha = 1f;
+            mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
     }
 }

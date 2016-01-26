@@ -22,5 +22,11 @@ import com.android.systemui.recents.events.EventBus;
  * This is sent when the history view button should be shown.
  */
 public class ShowHistoryButtonEvent extends EventBus.Event {
-    // Simple event
+
+    // Whether or not to translate the history button when showing it
+    public final boolean translate;
+
+    public ShowHistoryButtonEvent(boolean translate) {
+        this.translate = translate;
+    }
 }

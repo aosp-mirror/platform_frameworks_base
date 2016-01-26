@@ -24,5 +24,4 @@
     android:textColor="#ffffffff"
     android:text="@string/recents_empty_message"
     android:fontFamily="sans-serif"
-    android:background="#80000000"
     android:visibility="gone" />

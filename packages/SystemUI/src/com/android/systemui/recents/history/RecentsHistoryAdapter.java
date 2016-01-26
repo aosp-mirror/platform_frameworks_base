@@ -166,14 +166,16 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         final List<Task> tasksMostRecent = new ArrayList<>(stack.getHistoricalTasks());
         Collections.reverse(tasksMostRecent);
         int prevDateKey = -1;
+        int taskCount = tasksMostRecent.size();
         mRows.clear();
         mTaskRowCount.clear();
-        for (Task task : tasksMostRecent) {
+        Calendar cal = Calendar.getInstance(l);
+        for (int i = 0; i < taskCount; i++) {
+            Task task = tasksMostRecent.get(i);
             if (task.isFreeformTask()) {
                 continue;
             }
 
-            Calendar cal = Calendar.getInstance(l);
             cal.setTimeInMillis(task.key.lastActiveTime);
             int dateKey = Objects.hash(cal.get(Calendar.YEAR), cal.get(Calendar.DAY_OF_YEAR));
             if (dateKey != prevDateKey) {

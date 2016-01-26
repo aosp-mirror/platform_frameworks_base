@@ -45,6 +45,10 @@ public class TaskViewAnimation {
         this(0 /* startDelay */, duration, interpolator, listener);
     }
 
+    public TaskViewAnimation(int startDelay, int duration, Interpolator interpolator) {
+        this(startDelay, duration, interpolator, null);
+    }
+
     public TaskViewAnimation(int startDelay, int duration, Interpolator interpolator,
             Animator.AnimatorListener listener) {
         this.startDelay = startDelay;

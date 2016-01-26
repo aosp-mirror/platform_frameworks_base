@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents.history;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -37,22 +38,29 @@ import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
+import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
+import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.views.AnimateableViewBounds;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
  * A list of the recent tasks that are not in the stack.
  */
-public class RecentsHistoryView extends LinearLayout {
+public class RecentsHistoryView extends LinearLayout
+        implements ValueAnimator.AnimatorUpdateListener {
 
-    private static final String TAG = "RecentsHistoryView";
-    private static final boolean DEBUG = false;
+    private static final float TRANSLATION_Y_PCT = 0.25f;
+    private static final float BG_SCRIM_ALPHA = 0.625f;
 
     private RecyclerView mRecyclerView;
     private RecentsHistoryAdapter mAdapter;
     private RecentsHistoryItemTouchCallbacks mItemTouchHandler;
+    private AnimateableViewBounds mViewBounds;
     private boolean mIsVisible;
     private Rect mSystemInsets = new Rect();
+    private int mHeaderHeight;
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInInterpolator;
@@ -81,27 +89,28 @@ public class RecentsHistoryView extends LinearLayout {
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_linear_in);
+        mViewBounds = new AnimateableViewBounds(this, 0);
+        setOutlineProvider(mViewBounds);
     }
 
     /**
      * Updates this history view with the recent tasks, and then shows it.
      */
-    public void show(TaskStack stack, ReferenceCountedTrigger postHideAnimationTrigger) {
+    public void show(TaskStack stack, int stackHeight) {
         setVisibility(View.VISIBLE);
         setAlpha(0f);
-        postHideAnimationTrigger.addLastDecrementRunnable(new Runnable() {
-            @Override
-            public void run() {
-                animate()
-                        .alpha(1f)
-                        .setDuration(mHistoryTransitionDuration)
-                        .setInterpolator(mFastOutSlowInInterpolator)
-                        .withLayer()
-                        .start();
-            }
-        });
+        setTranslationY(-stackHeight * TRANSLATION_Y_PCT);
+        animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(mHistoryTransitionDuration)
+                .setInterpolator(mFastOutSlowInInterpolator)
+                .setUpdateListener(this)
+                .withLayer()
+                .start();
         mAdapter.updateTasks(getContext(), stack);
         mIsVisible = true;
+        EventBus.getDefault().send(new UpdateBackgroundScrimEvent(BG_SCRIM_ALPHA));
 
         MetricsLogger.visible(mRecyclerView.getContext(), MetricsEvent.OVERVIEW_HISTORY);
     }
@@ -109,31 +118,28 @@ public class RecentsHistoryView extends LinearLayout {
     /**
      * Hides this history view.
      */
-    public void hide(boolean animate, final ReferenceCountedTrigger postAnimationTrigger) {
+    public void hide(boolean animate, int stackHeight) {
         if (animate) {
             animate()
                     .alpha(0f)
+                    .translationY(-stackHeight * TRANSLATION_Y_PCT)
                     .setDuration(mHistoryTransitionDuration)
                     .setInterpolator(mFastOutLinearInInterpolator)
+                    .setUpdateListener(this)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
                             setVisibility(View.INVISIBLE);
-                            if (postAnimationTrigger != null) {
-                                postAnimationTrigger.decrement();
-                            }
                         }
                     })
                     .withLayer()
                     .start();
-            if (postAnimationTrigger != null) {
-                postAnimationTrigger.increment();
-            }
         } else {
             setAlpha(0f);
             setVisibility(View.INVISIBLE);
         }
         mIsVisible = false;
+        EventBus.getDefault().send(new ResetBackgroundScrimEvent());
 
         MetricsLogger.hidden(mRecyclerView.getContext(), MetricsEvent.OVERVIEW_HISTORY);
     }
@@ -142,7 +148,15 @@ public class RecentsHistoryView extends LinearLayout {
      * Updates the system insets of this history view to the provided values.
      */
     public void setSystemInsets(Rect systemInsets) {
-        mSystemInsets.set(systemInsets.left, systemInsets.top, systemInsets.right, systemInsets.bottom);
+        mSystemInsets.set(systemInsets);
+        requestLayout();
+    }
+
+    /**
+     * Updates the header height to account for the history button bar.
+     */
+    public void setHeaderHeight(int height) {
+        mHeaderHeight = height;
         requestLayout();
     }
 
@@ -177,7 +191,7 @@ public class RecentsHistoryView extends LinearLayout {
         int stackHeightPadding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.recents_stack_top_padding);
         mRecyclerView.setPadding(stackWidthPadding + mSystemInsets.left,
-                stackHeightPadding + mSystemInsets.top,
+                stackHeightPadding + mSystemInsets.top + mHeaderHeight,
                 stackWidthPadding + mSystemInsets.right, mSystemInsets.bottom);
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -199,6 +213,13 @@ public class RecentsHistoryView extends LinearLayout {
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         setSystemInsets(insets.getSystemWindowInsets());
         return insets;
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
+        // Clip the top of the view by the header bar height
+        int top = Math.max(0, (int) -getTranslationY()) + mSystemInsets.top + mHeaderHeight;
+        mViewBounds.setClipTop(top);
     }
 
     /**** EventBus Events ****/
