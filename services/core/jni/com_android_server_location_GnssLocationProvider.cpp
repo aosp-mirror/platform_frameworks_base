@@ -968,9 +968,11 @@ static jboolean android_location_GnssLocationProvider_resume_geofence(JNIEnv* /*
     return JNI_FALSE;
 }
 
-static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
+static jobject translate_gps_clock(JNIEnv* env, void* data, size_t size) {
     const char* doubleSignature = "(D)V";
     const char* longSignature = "(J)V";
+
+    GpsClock* clock = reinterpret_cast<GpsClock*>(data);
 
     jclass gpsClockClass = env->FindClass("android/location/GpsClock");
     jmethodID gpsClockCtor = env->GetMethodID(gpsClockClass, "<init>", "()V");
@@ -1023,11 +1025,23 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
         env->CallVoidMethod(gpsClockObject, setterMethod, clock->drift_uncertainty_nsps);
     }
 
+    if (flags & GPS_CLOCK_TYPE_LOCAL_HW_TIME) {
+        if (size == sizeof(GpsClock)) {
+            jmethodID setterMethod =
+                    env->GetMethodID(gpsClockClass,
+                                     "setTimeOfLastHwClockDiscontinuityInNs",
+                                     longSignature);
+            env->CallVoidMethod(gpsClockObject,
+                                setterMethod,
+                                clock->time_of_last_hw_clock_discontinuity_ns);
+        }
+    }
+
     env->DeleteLocalRef(gpsClockClass);
     return gpsClockObject;
 }
 
-static jobject translate_gps_measurement(JNIEnv* env, GpsMeasurement* measurement) {
+static jobject translate_gps_measurement(JNIEnv* env, void* data, size_t size) {
     const char* byteSignature = "(B)V";
     const char* shortSignature = "(S)V";
     const char* intSignature = "(I)V";
@@ -1037,6 +1051,7 @@ static jobject translate_gps_measurement(JNIEnv* env, GpsMeasurement* measuremen
 
     jclass gpsMeasurementClass = env->FindClass("android/location/GpsMeasurement");
     jmethodID gpsMeasurementCtor = env->GetMethodID(gpsMeasurementClass, "<init>", "()V");
+    GpsMeasurement* measurement = reinterpret_cast<GpsMeasurement*>(data);
 
     jobject gpsMeasurementObject = env->NewObject(gpsMeasurementClass, gpsMeasurementCtor);
     GpsMeasurementFlags flags = measurement->flags;
@@ -1270,12 +1285,38 @@ static jobject translate_gps_measurement(JNIEnv* env, GpsMeasurement* measuremen
             usedInFixSetterMethod,
             (flags & GPS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
 
+    if (size == sizeof(GpsMeasurement)) {
+      jmethodID setterMethod =
+          env->GetMethodID(gpsMeasurementClass,
+                           "setPseudorangeRateCarrierInMetersPerSec",
+                           doubleSignature);
+      env->CallVoidMethod(
+          gpsMeasurementObject,
+          setterMethod,
+          measurement->pseudorange_rate_carrier_mps);
+
+      setterMethod =
+          env->GetMethodID(gpsMeasurementClass,
+                           "setPseudorangeRateCarrierUncertaintyInMetersPerSec",
+                           doubleSignature);
+      env->CallVoidMethod(
+          gpsMeasurementObject,
+          setterMethod,
+          measurement->pseudorange_rate_carrier_uncertainty_mps);
+    }
+
     env->DeleteLocalRef(gpsMeasurementClass);
     return gpsMeasurementObject;
 }
 
-static jobjectArray translate_gps_measurements(JNIEnv* env, GpsData* data) {
-    size_t measurementCount = data->measurement_count;
+/**
+ * <T> can only be GpsData or GpsData_v1. Must rewrite this function if more
+ * types are introduced in the future releases.
+ */
+template<class T>
+static jobjectArray translate_gps_measurements(JNIEnv* env, void* data) {
+    T* gps_data = reinterpret_cast<T*>(data);
+    size_t measurementCount = gps_data->measurement_count;
     if (measurementCount == 0) {
         return NULL;
     }
@@ -1286,9 +1327,11 @@ static jobjectArray translate_gps_measurements(JNIEnv* env, GpsData* data) {
             gpsMeasurementClass,
             NULL /* initialElement */);
 
-    GpsMeasurement* gpsMeasurements = data->measurements;
     for (uint16_t i = 0; i < measurementCount; ++i) {
-        jobject gpsMeasurement = translate_gps_measurement(env, &gpsMeasurements[i]);
+        jobject gpsMeasurement = translate_gps_measurement(
+            env,
+            &(gps_data->measurements[i]),
+            sizeof(gps_data->measurements[0]));
         env->SetObjectArrayElement(gpsMeasurementArray, i, gpsMeasurement);
         env->DeleteLocalRef(gpsMeasurement);
     }
@@ -1303,33 +1346,39 @@ static void measurement_callback(GpsData* data) {
         ALOGE("Invalid data provided to gps_measurement_callback");
         return;
     }
-
-    if (data->size == sizeof(GpsData)) {
-        jobject gpsClock = translate_gps_clock(env, &data->clock);
-        jobjectArray measurementArray = translate_gps_measurements(env, data);
-
-        jclass gpsMeasurementsEventClass = env->FindClass("android/location/GpsMeasurementsEvent");
-        jmethodID gpsMeasurementsEventCtor = env->GetMethodID(
-                gpsMeasurementsEventClass,
-                "<init>",
-                "(Landroid/location/GpsClock;[Landroid/location/GpsMeasurement;)V");
-
-        jobject gpsMeasurementsEvent = env->NewObject(
-                gpsMeasurementsEventClass,
-                gpsMeasurementsEventCtor,
-                gpsClock,
-                measurementArray);
-
-        env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData, gpsMeasurementsEvent);
-        checkAndClearExceptionFromCallback(env, __FUNCTION__);
-
-        env->DeleteLocalRef(gpsClock);
-        env->DeleteLocalRef(measurementArray);
-        env->DeleteLocalRef(gpsMeasurementsEventClass);
-        env->DeleteLocalRef(gpsMeasurementsEvent);
-    } else {
+    if (data->size != sizeof(GpsData) && data->size != sizeof(GpsData_v1)) {
         ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%zd", data->size);
+        return;
     }
+
+    jobject gpsClock;
+    jobjectArray measurementArray;
+    if (data->size == sizeof(GpsData)) {
+        gpsClock = translate_gps_clock(env, &data->clock, sizeof(GpsClock));
+        measurementArray = translate_gps_measurements<GpsData>(env, data);
+    } else {
+        gpsClock = translate_gps_clock(env, &data->clock, sizeof(GpsClock_v1));
+        measurementArray = translate_gps_measurements<GpsData_v1>(env, data);
+    }
+    jclass gpsMeasurementsEventClass = env->FindClass("android/location/GpsMeasurementsEvent");
+    jmethodID gpsMeasurementsEventCtor = env->GetMethodID(
+        gpsMeasurementsEventClass,
+        "<init>",
+        "(Landroid/location/GpsClock;[Landroid/location/GpsMeasurement;)V");
+
+    jobject gpsMeasurementsEvent = env->NewObject(
+        gpsMeasurementsEventClass,
+        gpsMeasurementsEventCtor,
+        gpsClock,
+        measurementArray);
+
+    env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData, gpsMeasurementsEvent);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+
+    env->DeleteLocalRef(gpsClock);
+    env->DeleteLocalRef(measurementArray);
+    env->DeleteLocalRef(gpsMeasurementsEventClass);
+    env->DeleteLocalRef(gpsMeasurementsEvent);
 }
 
 GpsMeasurementCallbacks sGpsMeasurementCallbacks = {

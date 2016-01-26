@@ -73,6 +73,7 @@ public final class GpsClock implements Parcelable {
     private double mBiasUncertaintyInNs;
     private double mDriftInNsPerSec;
     private double mDriftUncertaintyInNsPerSec;
+    private long mTimeOfLastHwClockDiscontinuityInNs;
 
     GpsClock() {
         initialize();
@@ -92,6 +93,7 @@ public final class GpsClock implements Parcelable {
         mBiasUncertaintyInNs = clock.mBiasUncertaintyInNs;
         mDriftInNsPerSec = clock.mDriftInNsPerSec;
         mDriftUncertaintyInNsPerSec = clock.mDriftUncertaintyInNsPerSec;
+        mTimeOfLastHwClockDiscontinuityInNs = clock.mTimeOfLastHwClockDiscontinuityInNs;
     }
 
     /**
@@ -393,6 +395,20 @@ public final class GpsClock implements Parcelable {
     }
 
     /**
+     * Gets time of last hardware clock discontinuity.
+     */
+    public long getTimeOfLastHwClockDiscontinuityInNs() {
+        return mTimeOfLastHwClockDiscontinuityInNs;
+    }
+
+    /**
+     * Sets time of last hardware clock discontinuity.
+     */
+    public void setTimeOfLastHwClockDiscontinuityInNs(long timeOfLastHwClockDiscontinuityInNs) {
+        mTimeOfLastHwClockDiscontinuityInNs = timeOfLastHwClockDiscontinuityInNs;
+    }
+
+    /**
      * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
     public void resetDriftUncertaintyInNsPerSec() {
@@ -415,6 +431,7 @@ public final class GpsClock implements Parcelable {
             gpsClock.mBiasUncertaintyInNs = parcel.readDouble();
             gpsClock.mDriftInNsPerSec = parcel.readDouble();
             gpsClock.mDriftUncertaintyInNsPerSec = parcel.readDouble();
+            gpsClock.mTimeOfLastHwClockDiscontinuityInNs = parcel.readLong();
 
             return gpsClock;
         }
@@ -436,6 +453,7 @@ public final class GpsClock implements Parcelable {
         parcel.writeDouble(mBiasUncertaintyInNs);
         parcel.writeDouble(mDriftInNsPerSec);
         parcel.writeDouble(mDriftUncertaintyInNsPerSec);
+        parcel.writeLong(mTimeOfLastHwClockDiscontinuityInNs);
     }
 
     @Override
@@ -479,6 +497,10 @@ public final class GpsClock implements Parcelable {
                 "DriftUncertaintyInNsPerSec",
                 hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
 
+        builder.append(String.format(format, "TimeOfLastHwClockDiscontinuityInNs",
+                getType() == CLOCK_TYPE_LOCAL_HW_TIME
+                        ? mTimeOfLastHwClockDiscontinuityInNs : null));
+
         return builder.toString();
     }
 
@@ -493,6 +515,7 @@ public final class GpsClock implements Parcelable {
         resetBiasUncertaintyInNs();
         resetDriftInNsPerSec();
         resetDriftUncertaintyInNsPerSec();
+        setTimeOfLastHwClockDiscontinuityInNs(Long.MIN_VALUE);
     }
 
     private void setFlag(short flag) {

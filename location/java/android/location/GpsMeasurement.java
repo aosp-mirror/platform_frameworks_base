@@ -59,6 +59,8 @@ public final class GpsMeasurement implements Parcelable {
     private double mAzimuthInDeg;
     private double mAzimuthUncertaintyInDeg;
     private boolean mUsedInFix;
+    private double mPseudorangeRateCarrierInMetersPerSec;
+    private double mPseudorangeRateCarrierUncertaintyInMetersPerSec;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -229,6 +231,10 @@ public final class GpsMeasurement implements Parcelable {
         mAzimuthInDeg = measurement.mAzimuthInDeg;
         mAzimuthUncertaintyInDeg = measurement.mAzimuthUncertaintyInDeg;
         mUsedInFix = measurement.mUsedInFix;
+        mPseudorangeRateCarrierInMetersPerSec =
+                measurement.mPseudorangeRateCarrierInMetersPerSec;
+        mPseudorangeRateCarrierUncertaintyInMetersPerSec =
+                measurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec;
     }
 
     /**
@@ -1170,6 +1176,34 @@ public final class GpsMeasurement implements Parcelable {
         mUsedInFix = value;
     }
 
+    /**
+     * Gets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
+     */
+    public double getPseudorangeRateCarrierInMetersPerSec() {
+        return mPseudorangeRateCarrierInMetersPerSec;
+    }
+
+    /**
+     * Sets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
+     */
+    public void setPseudorangeRateCarrierInMetersPerSec(double value) {
+        mPseudorangeRateCarrierInMetersPerSec = value;
+    }
+
+    /**
+     * Gets 1-Sigma uncertainty of the pseudorange rate carrier.
+     */
+    public double getPseudorangeRateCarrierUncertaintyInMetersPerSec() {
+        return mPseudorangeRateCarrierUncertaintyInMetersPerSec;
+    }
+
+    /**
+     * Sets 1-Sigma uncertainty of the pseudorange rate carrier.
+     */
+    public void setPseudorangeRateCarrierUncertaintyInMetersPerSec(double value) {
+        mPseudorangeRateCarrierUncertaintyInMetersPerSec = value;
+    }
+
     public static final Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
         @Override
         public GpsMeasurement createFromParcel(Parcel parcel) {
@@ -1207,6 +1241,8 @@ public final class GpsMeasurement implements Parcelable {
             gpsMeasurement.mAzimuthInDeg = parcel.readDouble();
             gpsMeasurement.mAzimuthUncertaintyInDeg = parcel.readDouble();
             gpsMeasurement.mUsedInFix = parcel.readInt() != 0;
+            gpsMeasurement.mPseudorangeRateCarrierInMetersPerSec = parcel.readDouble();
+            gpsMeasurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec = parcel.readDouble();
 
             return gpsMeasurement;
         }
@@ -1250,6 +1286,8 @@ public final class GpsMeasurement implements Parcelable {
         parcel.writeDouble(mAzimuthInDeg);
         parcel.writeDouble(mAzimuthUncertaintyInDeg);
         parcel.writeInt(mUsedInFix ? 1 : 0);
+        parcel.writeDouble(mPseudorangeRateCarrierInMetersPerSec);
+        parcel.writeDouble(mPseudorangeRateCarrierUncertaintyInMetersPerSec);
     }
 
     @Override
@@ -1374,6 +1412,11 @@ public final class GpsMeasurement implements Parcelable {
 
         builder.append(String.format(format, "UsedInFix", mUsedInFix));
 
+        builder.append(String.format(format, "PseudorangeRateCarrierInMetersPerSec",
+                    mPseudorangeRateCarrierInMetersPerSec));
+        builder.append(String.format(format, "PseudorangeRateCarrierUncertaintyInMetersPerSec",
+                    mPseudorangeRateCarrierUncertaintyInMetersPerSec));
+
         return builder.toString();
     }
 
@@ -1410,6 +1453,8 @@ public final class GpsMeasurement implements Parcelable {
         resetAzimuthInDeg();
         resetAzimuthUncertaintyInDeg();
         setUsedInFix(false);
+        setPseudorangeRateCarrierInMetersPerSec(Double.MIN_VALUE);
+        setPseudorangeRateCarrierUncertaintyInMetersPerSec(Double.MIN_VALUE);
     }
 
     private void setFlag(int flag) {
