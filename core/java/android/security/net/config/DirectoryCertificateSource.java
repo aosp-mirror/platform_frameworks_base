@@ -29,6 +29,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Set;
 import libcore.io.IoUtils;
 
@@ -110,8 +111,48 @@ abstract class DirectoryCertificateSource implements CertificateSource {
         });
     }
 
+    @Override
+    public Set<X509Certificate> findAllByIssuerAndSignature(final X509Certificate cert) {
+        return findCerts(cert.getIssuerX500Principal(), new CertSelector() {
+            @Override
+            public boolean match(X509Certificate ca) {
+                try {
+                    cert.verify(ca.getPublicKey());
+                    return true;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        });
+    }
+
     private static interface CertSelector {
         boolean match(X509Certificate cert);
+    }
+
+    private Set<X509Certificate> findCerts(X500Principal subj, CertSelector selector) {
+        String hash = getHash(subj);
+        Set<X509Certificate> certs = null;
+        for (int index = 0; index >= 0; index++) {
+            String fileName = hash + "." + index;
+            if (!new File(mDir, fileName).exists()) {
+                break;
+            }
+            if (isCertMarkedAsRemoved(fileName)) {
+                continue;
+            }
+            X509Certificate cert = readCertificate(fileName);
+            if (!subj.equals(cert.getSubjectX500Principal())) {
+                continue;
+            }
+            if (selector.match(cert)) {
+                if (certs == null) {
+                    certs = new ArraySet<X509Certificate>();
+                }
+                certs.add(cert);
+            }
+        }
+        return certs != null ? certs : Collections.<X509Certificate>emptySet();
     }
 
     private X509Certificate findCert(X500Principal subj, CertSelector selector) {

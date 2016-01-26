@@ -21,6 +21,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Set;
 
@@ -89,5 +90,19 @@ class KeyStoreCertificateSource implements CertificateSource {
             return null;
         }
         return anchor.getTrustedCert();
+    }
+
+    @Override
+    public Set<X509Certificate> findAllByIssuerAndSignature(X509Certificate cert) {
+        ensureInitialized();
+        Set<java.security.cert.TrustAnchor> anchors = mIndex.findAllByIssuerAndSignature(cert);
+        if (anchors.isEmpty()) {
+            return Collections.<X509Certificate>emptySet();
+        }
+        Set<X509Certificate> certs = new ArraySet<X509Certificate>(anchors.size());
+        for (java.security.cert.TrustAnchor anchor : anchors) {
+            certs.add(anchor.getTrustedCert());
+        }
+        return certs;
     }
 }

@@ -145,6 +145,15 @@ public final class NetworkSecurityConfig {
         return null;
     }
 
+    /** @hide */
+    public Set<X509Certificate> findAllCertificatesByIssuerAndSignature(X509Certificate cert) {
+        Set<X509Certificate> certs = new ArraySet<X509Certificate>();
+        for (CertificatesEntryRef ref : mCertificatesEntryRefs) {
+            certs.addAll(ref.findAllCertificatesByIssuerAndSignature(cert));
+        }
+        return certs;
+    }
+
     /**
      * Return a {@link Builder} for the default {@code NetworkSecurityConfig}.
      *
