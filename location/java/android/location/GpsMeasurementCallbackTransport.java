@@ -20,17 +20,17 @@ import android.content.Context;
 import android.os.RemoteException;
 
 /**
- * A handler class to manage transport listeners for {@link GpsMeasurementsEvent.Listener}.
+ * A handler class to manage transport callbacks for {@link GpsMeasurementsEvent.Callback}.
  *
  * @hide
  */
-class GpsMeasurementListenerTransport
-        extends LocalListenerHelper<GpsMeasurementsEvent.Listener> {
+class GpsMeasurementCallbackTransport
+        extends LocalListenerHelper<GpsMeasurementsEvent.Callback> {
     private final ILocationManager mLocationManager;
 
     private final IGpsMeasurementsListener mListenerTransport = new ListenerTransport();
 
-    public GpsMeasurementListenerTransport(Context context, ILocationManager locationManager) {
+    public GpsMeasurementCallbackTransport(Context context, ILocationManager locationManager) {
         super(context, "GpsMeasurementListenerTransport");
         mLocationManager = locationManager;
     }
@@ -50,11 +50,11 @@ class GpsMeasurementListenerTransport
     private class ListenerTransport extends IGpsMeasurementsListener.Stub {
         @Override
         public void onGpsMeasurementsReceived(final GpsMeasurementsEvent event) {
-            ListenerOperation<GpsMeasurementsEvent.Listener> operation =
-                    new ListenerOperation<GpsMeasurementsEvent.Listener>() {
+            ListenerOperation<GpsMeasurementsEvent.Callback> operation =
+                    new ListenerOperation<GpsMeasurementsEvent.Callback>() {
                 @Override
-                public void execute(GpsMeasurementsEvent.Listener listener) throws RemoteException {
-                    listener.onGpsMeasurementsReceived(event);
+                public void execute(GpsMeasurementsEvent.Callback callback) throws RemoteException {
+                    callback.onGpsMeasurementsReceived(event);
                 }
             };
             foreach(operation);
@@ -62,11 +62,11 @@ class GpsMeasurementListenerTransport
 
         @Override
         public void onStatusChanged(final int status) {
-            ListenerOperation<GpsMeasurementsEvent.Listener> operation =
-                    new ListenerOperation<GpsMeasurementsEvent.Listener>() {
+            ListenerOperation<GpsMeasurementsEvent.Callback> operation =
+                    new ListenerOperation<GpsMeasurementsEvent.Callback>() {
                 @Override
-                public void execute(GpsMeasurementsEvent.Listener listener) throws RemoteException {
-                    listener.onStatusChanged(status);
+                public void execute(GpsMeasurementsEvent.Callback callback) throws RemoteException {
+                    callback.onStatusChanged(status);
                 }
             };
             foreach(operation);

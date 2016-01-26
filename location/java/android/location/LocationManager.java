@@ -63,8 +63,8 @@ public class LocationManager {
 
     private final Context mContext;
     private final ILocationManager mService;
-    private final GpsMeasurementListenerTransport mGpsMeasurementListenerTransport;
-    private final GpsNavigationMessageListenerTransport mGpsNavigationMessageListenerTransport;
+    private final GpsMeasurementCallbackTransport mGpsMeasurementCallbackTransport;
+    private final GpsNavigationMessageCallbackTransport mGpsNavigationMessageCallbackTransport;
     private final HashMap<GpsStatus.Listener, GnssStatusListenerTransport> mGpsStatusListeners =
             new HashMap<>();
     private final HashMap<GpsStatus.NmeaListener, GnssStatusListenerTransport> mGpsNmeaListeners =
@@ -320,9 +320,9 @@ public class LocationManager {
     public LocationManager(Context context, ILocationManager service) {
         mService = service;
         mContext = context;
-        mGpsMeasurementListenerTransport = new GpsMeasurementListenerTransport(mContext, mService);
-        mGpsNavigationMessageListenerTransport =
-                new GpsNavigationMessageListenerTransport(mContext, mService);
+        mGpsMeasurementCallbackTransport = new GpsMeasurementCallbackTransport(mContext, mService);
+        mGpsNavigationMessageCallbackTransport =
+                new GpsNavigationMessageCallbackTransport(mContext, mService);
     }
 
     private LocationProvider createProvider(String name, ProviderProperties properties) {
@@ -1816,54 +1816,70 @@ public class LocationManager {
     }
 
     /**
-     * Adds a GPS Measurement listener.
+     * Registers a GPS Measurement callback.
      *
-     * @param listener a {@link GpsMeasurementsEvent.Listener} object to register.
-     * @return {@code true} if the listener was added successfully, {@code false} otherwise.
-     *
-     * @hide
+     * @param callback a {@link GpsMeasurementsEvent.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
-    @SystemApi
-    public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
-        return mGpsMeasurementListenerTransport.add(listener);
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback) {
+        return registerGpsMeasurementCallback(callback, null);
     }
 
     /**
-     * Removes a GPS Measurement listener.
+     * Registers a GPS Measurement callback.
      *
-     * @param listener a {@link GpsMeasurementsEvent.Listener} object to remove.
-     *
-     * @hide
+     * @param callback a {@link GpsMeasurementsEvent.Callback} object to register.
+     * @param handler the handler that the callback runs on.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
-    @SystemApi
-    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
-        mGpsMeasurementListenerTransport.remove(listener);
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback,
+            Handler handler) {
+        return mGpsMeasurementCallbackTransport.add(callback, handler);
     }
 
     /**
-     * Adds a GPS Navigation Message listener.
+     * Unregisters a GPS Measurement callback.
      *
-     * @param listener a {@link GpsNavigationMessageEvent.Listener} object to register.
-     * @return {@code true} if the listener was added successfully, {@code false} otherwise.
-     *
-     * @hide
+     * @param callback a {@link GpsMeasurementsEvent.Callback} object to remove.
      */
-    @SystemApi
-    public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
-        return mGpsNavigationMessageListenerTransport.add(listener);
+    public void unregisterGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback) {
+        mGpsMeasurementCallbackTransport.remove(callback);
     }
 
     /**
-     * Removes a GPS Navigation Message listener.
+     * Registers a GPS Navigation Message callback.
      *
-     * @param listener a {@link GpsNavigationMessageEvent.Listener} object to remove.
-     *
-     * @hide
+     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
-    @SystemApi
-    public void removeGpsNavigationMessageListener(
-            GpsNavigationMessageEvent.Listener listener) {
-        mGpsNavigationMessageListenerTransport.remove(listener);
+    public boolean registerGpsNavigationMessageCallback(
+            GpsNavigationMessageEvent.Callback callback) {
+        return registerGpsNavigationMessageCallback(callback, null);
+    }
+
+    /**
+     * Registers a GPS Navigation Message callback.
+     *
+     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to register.
+     * @param handler the handler that the callback runs on.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGpsNavigationMessageCallback(
+            GpsNavigationMessageEvent.Callback callback, Handler handler) {
+        return mGpsNavigationMessageCallbackTransport.add(callback, handler);
+    }
+
+    /**
+     * Unregisters a GPS Navigation Message callback.
+     *
+     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to remove.
+     */
+    public void unregisterGpsNavigationMessageCallback(
+            GpsNavigationMessageEvent.Callback callback) {
+        mGpsNavigationMessageCallbackTransport.remove(callback);
     }
 
      /**
@@ -1878,6 +1894,7 @@ public class LocationManager {
      * @return status object containing updated GPS status.
      */
     @Deprecated
+    @RequiresPermission(ACCESS_FINE_LOCATION)
     public GpsStatus getGpsStatus(GpsStatus status) {
         if (status == null) {
             status = new GpsStatus();

@@ -21,7 +21,7 @@
 #include "JNIHelp.h"
 #include "jni.h"
 #include "hardware/hardware.h"
-#include "hardware/gps.h"
+#include "hardware/gps_internal.h"
 #include "hardware_legacy/power.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
@@ -68,6 +68,7 @@ static const GpsNavigationMessageInterface* sGpsNavigationMessageInterface = NUL
 static const GnssConfigurationInterface* sGnssConfigurationInterface = NULL;
 
 #define MAX_SATELLITE_COUNT 512
+#define MAX_GPS_SATELLITE_COUNT 512
 
 #define PRN_SHIFT_WIDTH 3
 
@@ -116,7 +117,7 @@ static void sv_status_callback(GpsSvStatus* sv_status)
     if (status_size == 0) {
         status_size = sizeof(GpsSvStatus_v1);
     }
-    if (sv_status->size == sizeof(GpsSvStatus_v2)) {
+    if (status_size == sizeof(GpsSvStatus)) {
         sGnssSvListSize = sv_status->gnss_sv_list_size;
         // Cramp the list size
         if (sGnssSvListSize > MAX_SATELLITE_COUNT) {
@@ -128,6 +129,10 @@ static void sv_status_callback(GpsSvStatus* sv_status)
         }
     } else if (status_size == sizeof(GpsSvStatus_v1)) {
         sGnssSvListSize = sv_status->num_svs;
+        // Cramp the list size
+        if (sGnssSvListSize > MAX_GPS_SATELLITE_COUNT) {
+            sGnssSvListSize = MAX_GPS_SATELLITE_COUNT;
+        }
         uint32_t ephemeris_mask = sv_status->ephemeris_mask;
         uint32_t almanac_mask = sv_status->almanac_mask;
         uint32_t used_in_fix_mask = sv_status->used_in_fix_mask;
@@ -139,14 +144,17 @@ static void sv_status_callback(GpsSvStatus* sv_status)
             info.elevation = sv_status->sv_list[i].elevation;
             info.azimuth = sv_status->sv_list[i].azimuth;
             info.flags = GNSS_SV_FLAGS_NONE;
-            if ((ephemeris_mask & (1 << (info.prn - 1))) != 0) {
+            if (info.prn > 0 && info.prn <= 32) {
+              int32_t this_prn_mask = (1 << (info.prn - 1));
+              if ((ephemeris_mask & this_prn_mask) != 0) {
                 info.flags |= GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA;
-            }
-            if ((almanac_mask & (1 << (info.prn - 1))) != 0) {
+              }
+              if ((almanac_mask & this_prn_mask) != 0) {
                 info.flags |= GNSS_SV_FLAGS_HAS_ALMANAC_DATA;
-            }
-            if ((used_in_fix_mask & (1 << (info.prn - 1))) != 0) {
+              }
+              if ((used_in_fix_mask & this_prn_mask) != 0) {
                 info.flags |= GNSS_SV_FLAGS_USED_IN_FIX;
+              }
             }
         }
     } else {
@@ -262,7 +270,7 @@ static void agps_status_callback(AGpsStatus* agps_status)
     bool isSupported = false;
 
     size_t status_size = agps_status->size;
-    if (status_size == sizeof(AGpsStatus_v3)) {
+    if (status_size == sizeof(AGpsStatus)) {
       ALOGV("AGpsStatus is V3: %zd", status_size);
       switch (agps_status->addr.ss_family)
       {
@@ -805,7 +813,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_open(
     const char *apnStr = env->GetStringUTFChars(apn, NULL);
 
     size_t interface_size = sAGpsInterface->size;
-    if (interface_size == sizeof(AGpsInterface_v2)) {
+    if (interface_size == sizeof(AGpsInterface)) {
         sAGpsInterface->data_conn_open_with_apn_ip_type(apnStr, apnIpType);
     } else if (interface_size == sizeof(AGpsInterface_v1)) {
         sAGpsInterface->data_conn_open(apnStr);

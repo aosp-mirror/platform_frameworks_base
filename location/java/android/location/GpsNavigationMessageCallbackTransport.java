@@ -20,20 +20,20 @@ import android.content.Context;
 import android.os.RemoteException;
 
 /**
- * A handler class to manage transport listeners for {@link GpsNavigationMessageEvent.Listener}.
+ * A handler class to manage transport callback for {@link GpsNavigationMessageEvent.Callback}.
  *
  * @hide
  */
-class GpsNavigationMessageListenerTransport
-        extends LocalListenerHelper<GpsNavigationMessageEvent.Listener> {
+class GpsNavigationMessageCallbackTransport
+        extends LocalListenerHelper<GpsNavigationMessageEvent.Callback> {
     private final ILocationManager mLocationManager;
 
     private final IGpsNavigationMessageListener mListenerTransport = new ListenerTransport();
 
-    public GpsNavigationMessageListenerTransport(
+    public GpsNavigationMessageCallbackTransport(
             Context context,
             ILocationManager locationManager) {
-        super(context, "GpsNavigationMessageListenerTransport");
+        super(context, "GpsNavigationMessageCallbackTransport");
         mLocationManager = locationManager;
     }
 
@@ -52,12 +52,12 @@ class GpsNavigationMessageListenerTransport
     private class ListenerTransport extends IGpsNavigationMessageListener.Stub {
         @Override
         public void onGpsNavigationMessageReceived(final GpsNavigationMessageEvent event) {
-            ListenerOperation<GpsNavigationMessageEvent.Listener> operation =
-                    new ListenerOperation<GpsNavigationMessageEvent.Listener>() {
+            ListenerOperation<GpsNavigationMessageEvent.Callback> operation =
+                    new ListenerOperation<GpsNavigationMessageEvent.Callback>() {
                 @Override
-                public void execute(GpsNavigationMessageEvent.Listener listener)
+                public void execute(GpsNavigationMessageEvent.Callback callback)
                         throws RemoteException {
-                    listener.onGpsNavigationMessageReceived(event);
+                    callback.onGpsNavigationMessageReceived(event);
                 }
             };
             foreach(operation);
@@ -65,12 +65,12 @@ class GpsNavigationMessageListenerTransport
 
         @Override
         public void onStatusChanged(final int status) {
-            ListenerOperation<GpsNavigationMessageEvent.Listener> operation =
-                    new ListenerOperation<GpsNavigationMessageEvent.Listener>() {
+            ListenerOperation<GpsNavigationMessageEvent.Callback> operation =
+                    new ListenerOperation<GpsNavigationMessageEvent.Callback>() {
                 @Override
-                public void execute(GpsNavigationMessageEvent.Listener listener)
+                public void execute(GpsNavigationMessageEvent.Callback callback)
                         throws RemoteException {
-                    listener.onStatusChanged(status);
+                    callback.onStatusChanged(status);
                 }
             };
             foreach(operation);

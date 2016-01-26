@@ -16,17 +16,17 @@
 
 package android.location;
 
-import android.annotation.SystemApi;
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * A class representing a GPS satellite measurement, containing raw and computed information.
- *
- * @hide
  */
-@SystemApi
-public class GpsMeasurement implements Parcelable {
+public final class GpsMeasurement implements Parcelable {
     private int mFlags;
     private byte mPrn;
     private double mTimeOffsetInNs;
@@ -83,6 +83,11 @@ public class GpsMeasurement implements Parcelable {
     private static final int HAS_USED_IN_FIX = (1<<17);
     private static final int GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
+    /** The status of 'loss of lock'. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LOSS_OF_LOCK_UNKNOWN, LOSS_OF_LOCK_OK, LOSS_OF_LOCK_CYCLE_SLIP})
+    public @interface LossOfLockStatus {}
+
     /**
      * The indicator is not available or it is unknown.
      */
@@ -97,6 +102,12 @@ public class GpsMeasurement implements Parcelable {
      * 'Loss of lock' detected between the previous and current observation: cycle slip possible.
      */
     public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2;
+
+    /** The status of multipath. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({MULTIPATH_INDICATOR_UNKNOWN, MULTIPATH_INDICATOR_DETECTED,
+        MULTIPATH_INDICATOR_NOT_USED})
+    public @interface MultipathIndicator {}
 
     /**
      * The indicator is not available or it is unknown.
@@ -776,6 +787,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets a value indicating the 'loss of lock' state of the event.
      */
+    @LossOfLockStatus
     public byte getLossOfLock() {
         return mLossOfLock;
     }
@@ -783,7 +795,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Sets the 'loss of lock' status.
      */
-    public void setLossOfLock(byte value) {
+    public void setLossOfLock(@LossOfLockStatus byte value) {
         mLossOfLock = value;
     }
 
@@ -941,6 +953,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets a value indicating the 'multipath' state of the event.
      */
+    @MultipathIndicator
     public byte getMultipathIndicator() {
         return mMultipathIndicator;
     }
@@ -948,7 +961,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Sets the 'multi-path' indicator.
      */
-    public void setMultipathIndicator(byte value) {
+    public void setMultipathIndicator(@MultipathIndicator byte value) {
         mMultipathIndicator = value;
     }
 

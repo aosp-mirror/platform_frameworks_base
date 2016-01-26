@@ -16,60 +16,60 @@
 
 package android.location;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidParameterException;
 
 /**
  * A class implementing a container for data associated with a navigation message event.
- * Events are delivered to registered instances of {@link Listener}.
- *
- * @hide
+ * Events are delivered to registered instances of {@link Callback}.
  */
-@SystemApi
-public class GpsNavigationMessageEvent implements Parcelable {
+public final class GpsNavigationMessageEvent implements Parcelable {
+    /** The status of GPS measurements event. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GPS_LOCATION_DISABLED})
+    public @interface GpsNavigationMessageStatus {}
 
     /**
      * The system does not support tracking of GPS Navigation Messages. This status will not change
      * in the future.
      */
-    public static int STATUS_NOT_SUPPORTED = 0;
+    public static final int STATUS_NOT_SUPPORTED = 0;
 
     /**
      * GPS Navigation Messages are successfully being tracked, it will receive updates once they are
      * available.
      */
-    public static int STATUS_READY = 1;
+    public static final int STATUS_READY = 1;
 
     /**
      * GPS provider or Location is disabled, updated will not be received until they are enabled.
      */
-    public static int STATUS_GPS_LOCATION_DISABLED = 2;
+    public static final int STATUS_GPS_LOCATION_DISABLED = 2;
 
     private final GpsNavigationMessage mNavigationMessage;
 
     /**
      * Used for receiving GPS satellite Navigation Messages from the GPS engine.
      * You can implement this interface and call
-     * {@link LocationManager#addGpsNavigationMessageListener}.
-     *
-     * @hide
+     * {@link LocationManager#registerGpsNavigationMessageCallback}.
      */
-    @SystemApi
-    public interface Listener {
+    public static abstract class Callback {
 
         /**
          * Returns the latest collected GPS Navigation Message.
          */
-        void onGpsNavigationMessageReceived(GpsNavigationMessageEvent event);
+        public void onGpsNavigationMessageReceived(GpsNavigationMessageEvent event) {}
 
         /**
          * Returns the latest status of the GPS Navigation Messages sub-system.
          */
-        void onStatusChanged(int status);
+        public void onStatusChanged(@GpsNavigationMessageStatus int status) {}
     }
 
     public GpsNavigationMessageEvent(GpsNavigationMessage message) {
