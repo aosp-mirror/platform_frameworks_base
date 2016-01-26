@@ -210,10 +210,10 @@ public class WifiNanSessionListener {
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2), msg.arg2);
                         break;
                     case LISTEN_MESSAGE_SEND_SUCCESS:
-                        WifiNanSessionListener.this.onMessageSendSuccess();
+                        WifiNanSessionListener.this.onMessageSendSuccess(msg.arg1);
                         break;
                     case LISTEN_MESSAGE_SEND_FAIL:
-                        WifiNanSessionListener.this.onMessageSendFail(msg.arg1);
+                        WifiNanSessionListener.this.onMessageSendFail(msg.arg1, msg.arg2);
                         break;
                     case LISTEN_MESSAGE_RECEIVED:
                         WifiNanSessionListener.this.onMessageReceived(msg.arg2,
@@ -306,7 +306,7 @@ public class WifiNanSessionListener {
      * {@link WifiNanSessionListener#onMessageSendFail(int)} will be received -
      * never both.
      */
-    public void onMessageSendSuccess() {
+    public void onMessageSendSuccess(int messageId) {
         if (VDBG) Log.v(TAG, "onMessageSendSuccess: called in stub - override if interested");
     }
 
@@ -325,7 +325,7 @@ public class WifiNanSessionListener {
      * @param reason The failure reason using {@code NanSessionListener.FAIL_*}
      *            codes.
      */
-    public void onMessageSendFail(int reason) {
+    public void onMessageSendFail(int messageId, int reason) {
         if (VDBG) Log.v(TAG, "onMessageSendFail: called in stub - override if interested");
     }
 
@@ -401,19 +401,21 @@ public class WifiNanSessionListener {
         }
 
         @Override
-        public void onMessageSendSuccess() {
+        public void onMessageSendSuccess(int messageId) {
             if (VDBG) Log.v(TAG, "onMessageSendSuccess");
 
             Message msg = mHandler.obtainMessage(LISTEN_MESSAGE_SEND_SUCCESS);
+            msg.arg1 = messageId;
             mHandler.sendMessage(msg);
         }
 
         @Override
-        public void onMessageSendFail(int reason) {
+        public void onMessageSendFail(int messageId, int reason) {
             if (VDBG) Log.v(TAG, "onMessageSendFail: reason=" + reason);
 
             Message msg = mHandler.obtainMessage(LISTEN_MESSAGE_SEND_FAIL);
-            msg.arg1 = reason;
+            msg.arg1 = messageId;
+            msg.arg2 = reason;
             mHandler.sendMessage(msg);
         }
 
