@@ -69,7 +69,7 @@ public:
             float cellSize = floorf(width / 7 - cellSpace);
 
             // each combination of strokeWidth + style gets a column
-            int outerCount = canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+            int outerCount = canvas.save(SaveFlags::MatrixClip);
             SkPaint paint;
             paint.setAntiAlias(true);
             SkPaint::Style styles[] = {
@@ -79,9 +79,9 @@ public:
                 for (auto strokeWidth : { 0.0f, 0.5f, 8.0f }) {
                     paint.setStrokeWidth(strokeWidth);
                     // fill column with each op
-                    int middleCount = canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+                    int middleCount = canvas.save(SaveFlags::MatrixClip);
                     for (auto op : ops) {
-                        int innerCount = canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+                        int innerCount = canvas.save(SaveFlags::MatrixClip);
                         canvas.clipRect(0, 0, cellSize, cellSize, SkRegion::kIntersect_Op);
                         canvas.drawColor(Color::White, SkXfermode::Mode::kSrcOver_Mode);
                         op(canvas, cellSize, paint);

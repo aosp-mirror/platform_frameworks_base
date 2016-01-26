@@ -18,12 +18,12 @@
 
 #include <utils/Trace.h>
 
-#include <SkCanvas.h>
 #include <SkColorFilter.h>
 #include <SkMatrix.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
 
+#include "Canvas.h"
 #include "Matrix.h"
 #include "OpenGLRenderer.h"
 #include "utils/MathUtils.h"
@@ -144,7 +144,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
                     (int)layerBounds.left, (int)layerBounds.top,
                     (int)layerBounds.right, (int)layerBounds.bottom,
                     (int)(mPrimitiveFields.mAlpha * 255),
-                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
+                    SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
         }
 
 

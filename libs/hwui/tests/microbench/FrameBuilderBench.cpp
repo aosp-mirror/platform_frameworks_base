@@ -47,7 +47,7 @@ static std::vector<sp<RenderNode>> createTestNodeList() {
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         for (int i = 0; i < 30; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, paint);

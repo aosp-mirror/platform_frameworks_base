@@ -17,6 +17,7 @@
 #include <GpuMemoryTracker.h>
 #include "OpenGLRenderer.h"
 
+#include "Canvas.h"
 #include "DeferredDisplayList.h"
 #include "GammaFontRenderer.h"
 #include "Glop.h"
@@ -39,7 +40,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkPaintDefaults.h>
 #include <SkPathOps.h>
@@ -472,7 +472,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 int OpenGLRenderer::saveLayer(float left, float top, float right, float bottom,
         const SkPaint* paint, int flags, const SkPath* convexMask) {
     // force matrix/clip isolation for layer
-    flags |= SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag;
+    flags |= SaveFlags::MatrixClip;
 
     const int count = mState.saveSnapshot(flags);
 
@@ -531,7 +531,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         const SkPaint* paint, int flags) {
     const int count = mState.saveSnapshot(flags);
 
-    if (!mState.currentlyIgnored() && (flags & SkCanvas::kClipToLayer_SaveFlag)) {
+    if (!mState.currentlyIgnored() && (flags & SaveFlags::ClipToLayer)) {
         // initialize the snapshot as though it almost represents an FBO layer so deferred draw
         // operations will be able to store and restore the current clip and transform info, and
         // quick rejection will be correct (for display lists)
@@ -558,7 +558,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  * and the frame buffer still receive every drawing command. For instance, if a
  * layer is created and a shape intersecting the bounds of the layers and the
  * framebuffer is draw, the shape will be drawn on both (unless the layer was
- * created with the SkCanvas::kClipToLayer_SaveFlag flag.)
+ * created with the SaveFlags::ClipToLayer flag.)
  *
  * A way to implement layers is to create an FBO for each layer, backed by an RGBA
  * texture. Unfortunately, this is inefficient as it requires every primitive to
@@ -608,7 +608,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
     LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
-    const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
+    const bool fboLayer = flags & SaveFlags::ClipToLayer;
 
     // Window coordinates of the layer
     Rect clip;
@@ -890,7 +890,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     if (CC_UNLIKELY(layer->region.isEmpty())) return; // nothing to draw
 
     if (layer->getConvexMask()) {
-        save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+        save(SaveFlags::MatrixClip);
 
         // clip to the area of the layer the mask can be larger
         clipRect(rect.left, rect.top, rect.right, rect.bottom, SkRegion::kIntersect_Op);
@@ -2233,7 +2233,7 @@ void OpenGLRenderer::drawLayer(Layer* layer) {
     if (layer->isTextureLayer()) {
         transform = &layer->getTransform();
         if (!transform->isIdentity()) {
-            save(SkCanvas::kMatrix_SaveFlag);
+            save(SaveFlags::Matrix);
             concatMatrix(*transform);
         }
     }

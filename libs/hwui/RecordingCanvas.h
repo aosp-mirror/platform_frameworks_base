@@ -108,14 +108,14 @@ public:
 // ----------------------------------------------------------------------------
     // Save (layer)
     virtual int getSaveCount() const override { return mState.getSaveCount(); }
-    virtual int save(SkCanvas::SaveFlags flags) override;
+    virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-        SkCanvas::SaveFlags flags) override;
+        SaveFlags::Flags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SkCanvas::SaveFlags flags) override {
+            int alpha, SaveFlags::Flags flags) override {
         SkPaint paint;
         paint.setAlpha(alpha);
         return saveLayer(left, top, right, bottom, &paint, flags);

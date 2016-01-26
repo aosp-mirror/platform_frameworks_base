@@ -167,7 +167,7 @@ TEST(FrameBuilder, simpleStroke) {
 TEST(FrameBuilder, simpleRejection) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op); // intersection should be empty
         canvas.drawRect(0, 0, 400, 400, SkPaint());
         canvas.restore();
@@ -198,7 +198,7 @@ TEST(FrameBuilder, simpleBatching) {
 
         // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
         // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         for (int i = 0; i < LOOPS; i++) {
             canvas.translate(0, 10);
             canvas.drawRect(0, 0, 10, 10, SkPaint());
@@ -336,7 +336,7 @@ RENDERTHREAD_TEST(FrameBuilder, textureLayer) {
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [&layerUpdater](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(50, 50, 150, 150, SkRegion::kIntersect_Op);
         canvas.drawLayer(layerUpdater.get());
         canvas.restore();
@@ -380,7 +380,7 @@ TEST(FrameBuilder, renderNode) {
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
 
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.translate(40, 40);
         canvas.drawRenderNode(child.get());
         canvas.restore();
@@ -448,7 +448,7 @@ TEST(FrameBuilder, saveLayer_simple) {
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 10, 190, 190, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, SaveFlags::ClipToLayer);
         canvas.drawRect(10, 10, 190, 190, SkPaint());
         canvas.restore();
     });
@@ -512,10 +512,10 @@ TEST(FrameBuilder, saveLayer_nested) {
 
     auto node = TestUtils::createNode(0, 0, 800, 800,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(0, 0, 800, 800, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 800, 800, 128, SaveFlags::ClipToLayer);
         {
             canvas.drawRect(0, 0, 800, 800, SkPaint());
-            canvas.saveLayerAlpha(0, 0, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
+            canvas.saveLayerAlpha(0, 0, 400, 400, 128, SaveFlags::ClipToLayer);
             {
                 canvas.drawRect(0, 0, 400, 400, SkPaint());
             }
@@ -534,9 +534,9 @@ TEST(FrameBuilder, saveLayer_nested) {
 TEST(FrameBuilder, saveLayer_contentRejection) {
         auto node = TestUtils::createNode(0, 0, 200, 200,
                 [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.clipRect(200, 200, 400, 400, SkRegion::kIntersect_Op);
-        canvas.saveLayerAlpha(200, 200, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(200, 200, 400, 400, 128, SaveFlags::ClipToLayer);
 
         // draw within save layer may still be recorded, but shouldn't be drawn
         canvas.drawRect(200, 200, 400, 400, SkPaint());
@@ -583,7 +583,7 @@ TEST(FrameBuilder, saveLayerUnclipped_simple) {
 
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SkCanvas::SaveFlags)(0));
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SaveFlags::Flags)(0));
         canvas.drawRect(0, 0, 200, 200, SkPaint());
         canvas.restore();
     });
@@ -632,12 +632,12 @@ TEST(FrameBuilder, saveLayerUnclipped_mergedClears) {
     auto node = TestUtils::createNode(0, 0, 200, 200,
             [](RenderProperties& props, RecordingCanvas& canvas) {
 
-        int restoreTo = canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        int restoreTo = canvas.save(SaveFlags::MatrixClip);
         canvas.scale(2, 2);
-        canvas.saveLayerAlpha(0, 0, 5, 5, 128, SkCanvas::kMatrixClip_SaveFlag);
-        canvas.saveLayerAlpha(95, 0, 100, 5, 128, SkCanvas::kMatrixClip_SaveFlag);
-        canvas.saveLayerAlpha(0, 95, 5, 100, 128, SkCanvas::kMatrixClip_SaveFlag);
-        canvas.saveLayerAlpha(95, 95, 100, 100, 128, SkCanvas::kMatrixClip_SaveFlag);
+        canvas.saveLayerAlpha(0, 0, 5, 5, 128, SaveFlags::MatrixClip);
+        canvas.saveLayerAlpha(95, 0, 100, 5, 128, SaveFlags::MatrixClip);
+        canvas.saveLayerAlpha(0, 95, 5, 100, 128, SaveFlags::MatrixClip);
+        canvas.saveLayerAlpha(95, 95, 100, 100, 128, SaveFlags::MatrixClip);
         canvas.drawRect(0, 0, 100, 100, SkPaint());
         canvas.restoreToCount(restoreTo);
     });
@@ -695,9 +695,9 @@ TEST(FrameBuilder, saveLayerUnclipped_complex) {
 
     auto node = TestUtils::createNode(0, 0, 600, 600, // 500x500 triggers clipping
             [](RenderProperties& props, RecordingCanvas& canvas) {
-        canvas.saveLayerAlpha(0, 0, 500, 500, 128, (SkCanvas::SaveFlags)0); // unclipped
-        canvas.saveLayerAlpha(100, 100, 400, 400, 128, SkCanvas::kClipToLayer_SaveFlag); // clipped
-        canvas.saveLayerAlpha(200, 200, 300, 300, 128, (SkCanvas::SaveFlags)0); // unclipped
+        canvas.saveLayerAlpha(0, 0, 500, 500, 128, (SaveFlags::Flags)0); // unclipped
+        canvas.saveLayerAlpha(100, 100, 400, 400, 128, SaveFlags::ClipToLayer); // clipped
+        canvas.saveLayerAlpha(200, 200, 300, 300, 128, (SaveFlags::Flags)0); // unclipped
         canvas.drawRect(200, 200, 300, 300, SkPaint());
         canvas.restore();
         canvas.restore();
@@ -849,7 +849,7 @@ RENDERTHREAD_TEST(FrameBuilder, hwLayer_complex) {
         paint.setColor(SK_ColorDKGRAY);
         canvas.drawRect(0, 0, 200, 200, paint);
 
-        canvas.saveLayerAlpha(50, 50, 150, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
+        canvas.saveLayerAlpha(50, 50, 150, 150, 128, SaveFlags::ClipToLayer);
         canvas.drawRenderNode(childPtr);
         canvas.restore();
     });
@@ -987,7 +987,7 @@ TEST(FrameBuilder, projectionReorder) {
     });
     auto parent = TestUtils::createNode(0, 0, 100, 100,
             [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
         canvas.drawRenderNode(receiverBackground.get());
         canvas.drawRenderNode(child.get());
@@ -1071,7 +1071,7 @@ TEST(FrameBuilder, shadowSaveLayer) {
             [](RenderProperties& props, RecordingCanvas& canvas) {
         // save/restore outside of reorderBarrier, so they don't get moved out of place
         canvas.translate(20, 10);
-        int count = canvas.saveLayerAlpha(30, 50, 130, 150, 128, SkCanvas::kClipToLayer_SaveFlag);
+        int count = canvas.saveLayerAlpha(30, 50, 130, 150, 128, SaveFlags::ClipToLayer);
         canvas.insertReorderBarrier(true);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
         canvas.insertReorderBarrier(false);
@@ -1111,7 +1111,7 @@ RENDERTHREAD_TEST(FrameBuilder, shadowHwLayer) {
             [](RenderProperties& props, RecordingCanvas& canvas) {
         props.mutateLayerProperties().setType(LayerType::RenderLayer);
         canvas.insertReorderBarrier(true);
-        canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
         canvas.translate(20, 10);
         canvas.drawRenderNode(createWhiteRectShadowCaster(5.0f).get());
         canvas.restore();

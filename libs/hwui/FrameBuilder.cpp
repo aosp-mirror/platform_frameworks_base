@@ -16,6 +16,7 @@
 
 #include "FrameBuilder.h"
 
+#include "Canvas.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "renderstate/OffscreenBufferPool.h"
@@ -23,7 +24,6 @@
 #include "utils/PaintUtils.h"
 #include "utils/TraceUtils.h"
 
-#include <SkCanvas.h>
 #include <SkPathOps.h>
 #include <utils/TypeHelpers.h>
 
@@ -77,7 +77,7 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
         if (node->nothingToDraw()) continue;
         node->computeOrdering();
 
-        int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+        int count = mCanvasState.save(SaveFlags::MatrixClip);
         deferNodePropsAndOps(*node);
         mCanvasState.restoreToCount(count);
     }
@@ -327,7 +327,7 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
 
 void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
     const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
-    int count = mCanvasState.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+    int count = mCanvasState.save(SaveFlags::MatrixClip);
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
     const DisplayList& displayList = *(renderNode.getDisplayList());
@@ -348,7 +348,7 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
     for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {
         RenderNodeOp* childOp = renderNode.mProjectedNodes[i];
 
-        int restoreTo = mCanvasState.save(SkCanvas::kMatrix_SaveFlag);
+        int restoreTo = mCanvasState.save(SaveFlags::Matrix);
         mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
         deferRenderNodeOpImpl(*childOp);
         mCanvasState.restoreToCount(restoreTo);
@@ -392,7 +392,7 @@ void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
 
 void FrameBuilder::deferRenderNodeOpImpl(const RenderNodeOp& op) {
     if (op.renderNode->nothingToDraw()) return;
-    int count = mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    int count = mCanvasState.save(SaveFlags::MatrixClip);
 
     // apply state from RecordedOp (clip first, since op's clip is transformed by current matrix)
     mCanvasState.writableSnapshot()->mutateClipArea().applyClip(op.localClip,
@@ -597,7 +597,7 @@ void FrameBuilder::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
         const Rect& repaintRect,
         const Vector3& lightCenter,
         const BeginLayerOp* beginLayerOp, RenderNode* renderNode) {
-    mCanvasState.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    mCanvasState.save(SaveFlags::MatrixClip);
     mCanvasState.writableSnapshot()->initializeViewport(layerWidth, layerHeight);
     mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
     mCanvasState.writableSnapshot()->setRelativeLightCenter(lightCenter);

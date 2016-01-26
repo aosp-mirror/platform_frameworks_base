@@ -16,6 +16,7 @@
 
 #include "CanvasState.h"
 
+#include "Canvas.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "utils/LinearAllocator.h"
@@ -23,7 +24,6 @@
 #include <gtest/gtest.h>
 #include <SkPath.h>
 #include <SkRegion.h>
-#include <SkCanvas.h>
 
 namespace android {
 namespace uirenderer {
@@ -83,7 +83,7 @@ TEST(CanvasState, complexClipping) {
     state.initializeSaveStack(200, 200,
             0, 0, 200, 200, Vector3());
 
-    state.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    state.save(SaveFlags::MatrixClip);
     {
         // rotated clip causes complex clip
         state.rotate(10);
@@ -93,7 +93,7 @@ TEST(CanvasState, complexClipping) {
     }
     state.restore();
 
-    state.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    state.save(SaveFlags::MatrixClip);
     {
         // subtracted clip causes complex clip
         EXPECT_TRUE(state.clipIsSimple());
@@ -102,7 +102,7 @@ TEST(CanvasState, complexClipping) {
     }
     state.restore();
 
-    state.save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+    state.save(SaveFlags::MatrixClip);
     {
         // complex path causes complex clip
         SkPath path;
@@ -119,7 +119,7 @@ TEST(CanvasState, saveAndRestore) {
     state.initializeSaveStack(200, 200,
             0, 0, 200, 200, Vector3());
 
-    state.save(SkCanvas::kClip_SaveFlag);
+    state.save(SaveFlags::Clip);
     {
         state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
@@ -129,7 +129,7 @@ TEST(CanvasState, saveAndRestore) {
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
-    state.save(SkCanvas::kMatrix_SaveFlag);
+    state.save(SaveFlags::Matrix);
     {
         state.translate(10, 10, 0);
         EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate));
@@ -143,7 +143,7 @@ TEST(CanvasState, saveAndRestoreButNotTooMuch) {
     state.initializeSaveStack(200, 200,
             0, 0, 200, 200, Vector3());
 
-    state.save(SkCanvas::kMatrix_SaveFlag); // NOTE: clip not saved
+    state.save(SaveFlags::Matrix); // NOTE: clip not saved
     {
         state.clipRect(0, 0, 10, 10, SkRegion::kIntersect_Op);
         ASSERT_EQ(state.getRenderTargetClipBounds(), Rect(10, 10));
@@ -153,7 +153,7 @@ TEST(CanvasState, saveAndRestoreButNotTooMuch) {
 
     Matrix4 simpleTranslate;
     simpleTranslate.loadTranslate(10, 10, 0);
-    state.save(SkCanvas::kClip_SaveFlag); // NOTE: matrix not saved
+    state.save(SaveFlags::Clip); // NOTE: matrix not saved
     {
         state.translate(10, 10, 0);
         EXPECT_TRUE(approxEqual(*state.currentTransform(), simpleTranslate));

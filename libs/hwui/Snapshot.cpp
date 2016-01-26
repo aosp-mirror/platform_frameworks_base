@@ -16,7 +16,7 @@
 
 #include "Snapshot.h"
 
-#include <SkCanvas.h>
+#include "Canvas.h"
 
 namespace android {
 namespace uirenderer {
@@ -57,14 +57,14 @@ Snapshot::Snapshot(Snapshot* s, int saveFlags)
         , mClipArea(nullptr)
         , mViewportData(s->mViewportData)
         , mRelativeLightCenter(s->mRelativeLightCenter) {
-    if (saveFlags & SkCanvas::kMatrix_SaveFlag) {
+    if (saveFlags & SaveFlags::Matrix) {
         mTransformRoot = *s->transform;
         transform = &mTransformRoot;
     } else {
         transform = s->transform;
     }
 
-    if (saveFlags & SkCanvas::kClip_SaveFlag) {
+    if (saveFlags & SaveFlags::Clip) {
         mClipAreaRoot = s->getClipArea();
         mClipArea = &mClipAreaRoot;
     } else {

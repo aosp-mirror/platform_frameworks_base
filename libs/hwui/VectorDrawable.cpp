@@ -420,7 +420,7 @@ void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
         return;
     }
 
-    int saveCount = outCanvas->save(SkCanvas::SaveFlags::kMatrixClip_SaveFlag);
+    int saveCount = outCanvas->save(SaveFlags::MatrixClip);
     outCanvas->translate(mBounds.fLeft, mBounds.fTop);
 
     // Handle RTL mirroring.

@@ -32,7 +32,7 @@ public:
         canvas.drawColor(Color::White, SkXfermode::kSrcOver_Mode);
         card = TestUtils::createNode(0, 0, 200, 400,
                 [](RenderProperties& props, TestCanvas& canvas) {
-            canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             {
                 canvas.clipRect(0, 0, 200, 200, SkRegion::kIntersect_Op);
                 canvas.translate(100, 100);
@@ -43,7 +43,7 @@ public:
             }
             canvas.restore();
 
-            canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             {
                 SkPath clipCircle;
                 clipCircle.addCircle(100, 300, 100);

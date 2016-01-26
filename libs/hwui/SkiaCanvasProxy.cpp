@@ -159,7 +159,21 @@ SkSurface* SkiaCanvasProxy::onNewSurface(const SkImageInfo&, const SkSurfaceProp
 }
 
 void SkiaCanvasProxy::willSave() {
-    mCanvas->save(SkCanvas::kMatrixClip_SaveFlag);
+    mCanvas->save(android::SaveFlags::MatrixClip);
+}
+
+static inline SaveFlags::Flags saveFlags(SkCanvas::SaveLayerFlags layerFlags) {
+    SaveFlags::Flags saveFlags = 0;
+
+    if (!(layerFlags & SkCanvas::kDontClipToLayer_Legacy_SaveLayerFlag)) {
+        saveFlags |= SaveFlags::ClipToLayer;
+    }
+
+    if (!(layerFlags & SkCanvas::kIsOpaque_SaveLayerFlag)) {
+        saveFlags |= SaveFlags::HasAlphaLayer;
+    }
+
+    return saveFlags;
 }
 
 SkCanvas::SaveLayerStrategy SkiaCanvasProxy::getSaveLayerStrategy(const SaveLayerRec& saveLayerRec) {
@@ -170,7 +184,7 @@ SkCanvas::SaveLayerStrategy SkiaCanvasProxy::getSaveLayerStrategy(const SaveLaye
         rect = SkRect::MakeEmpty();
     }
     mCanvas->saveLayer(rect.fLeft, rect.fTop, rect.fRight, rect.fBottom, saveLayerRec.fPaint,
-                       (SkCanvas::SaveFlags) SaveLayerFlagsToSaveFlags(saveLayerRec.fSaveLayerFlags));
+                       saveFlags(saveLayerRec.fSaveLayerFlags));
     return SkCanvas::kNoLayer_SaveLayerStrategy;
 }
 

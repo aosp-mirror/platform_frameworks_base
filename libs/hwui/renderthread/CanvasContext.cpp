@@ -19,6 +19,7 @@
 
 #include "AnimationContext.h"
 #include "Caches.h"
+#include "Canvas.h"
 #include "DeferredLayerUpdater.h"
 #include "EglManager.h"
 #include "LayerUpdateQueue.h"
@@ -394,7 +395,7 @@ void CanvasContext::draw() {
             backdropBounds.doIntersect(targetBounds);
             // Check if we have to draw something on the left side ...
             if (targetBounds.left < contentBounds.left) {
-                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                mCanvas->save(SaveFlags::Clip);
                 if (mCanvas->clipRect(targetBounds.left, targetBounds.top,
                                       contentBounds.left, targetBounds.bottom,
                                       SkRegion::kIntersect_Op)) {
@@ -407,7 +408,7 @@ void CanvasContext::draw() {
             // ... or on the right side ...
             if (targetBounds.right > contentBounds.right &&
                 !targetBounds.isEmpty()) {
-                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                mCanvas->save(SaveFlags::Clip);
                 if (mCanvas->clipRect(contentBounds.right, targetBounds.top,
                                       targetBounds.right, targetBounds.bottom,
                                       SkRegion::kIntersect_Op)) {
@@ -420,7 +421,7 @@ void CanvasContext::draw() {
             // ... or at the top ...
             if (targetBounds.top < contentBounds.top &&
                 !targetBounds.isEmpty()) {
-                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                mCanvas->save(SaveFlags::Clip);
                 if (mCanvas->clipRect(targetBounds.left, targetBounds.top, targetBounds.right,
                                       contentBounds.top,
                                       SkRegion::kIntersect_Op)) {
@@ -433,7 +434,7 @@ void CanvasContext::draw() {
             // ... or at the bottom.
             if (targetBounds.bottom > contentBounds.bottom &&
                 !targetBounds.isEmpty()) {
-                mCanvas->save(SkCanvas::kClip_SaveFlag);
+                mCanvas->save(SaveFlags::Clip);
                 if (mCanvas->clipRect(targetBounds.left, contentBounds.bottom, targetBounds.right,
                                       targetBounds.bottom, SkRegion::kIntersect_Op)) {
                     mCanvas->drawRenderNode(node.get(), outBounds);
@@ -442,7 +443,7 @@ void CanvasContext::draw() {
             }
         } else if (layer == 1) { // Content
             // It gets cropped against the bounds of the backdrop to stay inside.
-            mCanvas->save(SkCanvas::kClip_SaveFlag | SkCanvas::kMatrix_SaveFlag);
+            mCanvas->save(SaveFlags::MatrixClip);
 
             // We shift and clip the content to match its final location in the window.
             const float left = mContentDrawBounds.left;

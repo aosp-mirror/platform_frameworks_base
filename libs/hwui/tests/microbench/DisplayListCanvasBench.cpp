@@ -78,8 +78,8 @@ void BM_DisplayListCanvas_record_saverestore::Run(int iters) {
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
         canvas.reset(100, 100);
-        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
-        canvas.save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.save(SaveFlags::MatrixClip);
         MicroBench::DoNotOptimize(&canvas);
         canvas.restore();
         canvas.restore();
@@ -121,12 +121,12 @@ void BM_DisplayListCanvas_record_simpleBitmapView::Run(int iters) {
     for (int i = 0; i < iters; ++i) {
         canvas.reset(100, 100);
         {
-            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             canvas.drawRect(0, 0, 100, 100, rectPaint);
             canvas.restore();
         }
         {
-            canvas.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
+            canvas.save(SaveFlags::MatrixClip);
             canvas.translate(10, 10);
             canvas.drawBitmap(iconBitmap, 0, 0, nullptr);
             canvas.restore();
@@ -151,8 +151,8 @@ void BM_CanvasState_saverestore::Run(int iters) {
 
     StartBenchmarkTiming();
     for (int i = 0; i < iters; ++i) {
-        state.save(SkCanvas::kMatrixClip_SaveFlag);
-        state.save(SkCanvas::kMatrixClip_SaveFlag);
+        state.save(SaveFlags::MatrixClip);
+        state.save(SaveFlags::MatrixClip);
         MicroBench::DoNotOptimize(&state);
         state.restore();
         state.restore();

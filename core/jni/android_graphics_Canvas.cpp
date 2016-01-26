@@ -86,20 +86,20 @@ static jint getSaveCount(JNIEnv*, jobject, jlong canvasHandle) {
 }
 
 static jint save(JNIEnv*, jobject, jlong canvasHandle, jint flagsHandle) {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->save(flags));
 }
 
 static jint saveLayer(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
                       jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
 }
 
 static jint saveLayerAlpha(JNIEnv* env, jobject, jlong canvasHandle, jfloat l, jfloat t,
                            jfloat r, jfloat b, jint alpha, jint flagsHandle) {
-    SkCanvas::SaveFlags flags = static_cast<SkCanvas::SaveFlags>(flagsHandle);
+    SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
@@ -351,7 +351,7 @@ static void drawNinePatch(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmap
     if (CC_LIKELY(dstDensity == srcDensity || dstDensity == 0 || srcDensity == 0)) {
         canvas->drawNinePatch(skiaBitmap, *chunk, left, top, right, bottom, paint);
     } else {
-        canvas->save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas->save(SaveFlags::MatrixClip);
 
         SkScalar scale = dstDensity / (float)srcDensity;
         canvas->translate(left, top);
@@ -390,7 +390,7 @@ static void drawBitmap(JNIEnv* env, jobject jcanvas, jlong canvasHandle, jobject
             canvas->drawBitmap(bitmap, left, top, paint);
         }
     } else {
-        canvas->save(SkCanvas::kMatrixClip_SaveFlag);
+        canvas->save(SaveFlags::MatrixClip);
         SkScalar scale = canvasDensity / (float)bitmapDensity;
         canvas->translate(left, top);
         canvas->scale(scale, scale);
