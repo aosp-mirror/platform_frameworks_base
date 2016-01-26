@@ -137,6 +137,8 @@
     <dimen name="standard_notification_panel_width">416dp</dimen>
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
+    <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
+
     <!-- Gravity for the notification panel -->
     <integer name="standard_notification_panel_layout_gravity">0x31</integer><!-- top|center_horizontal -->
     <integer name="notification_panel_layout_gravity">0x37</integer><!-- fill_horizontal|top -->

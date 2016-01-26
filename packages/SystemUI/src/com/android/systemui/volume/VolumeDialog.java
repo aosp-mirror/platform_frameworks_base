@@ -254,7 +254,7 @@ public class VolumeDialog implements TunerService.Tunable {
         if (D.BUG) Log.d(TAG, "updateWindowWidth dm.w=" + dm.widthPixels);
         int w = dm.widthPixels;
         final int max = mContext.getResources()
-                .getDimensionPixelSize(R.dimen.standard_notification_panel_width);
+                .getDimensionPixelSize(R.dimen.volume_dialog_panel_width);
         if (w > max) {
             w = max;
         }
