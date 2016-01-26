@@ -1256,7 +1256,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (mNotificationData.shouldSuppressScreenOn(notification.getKey())) {
+            if (shouldSupressFullScreenIntent(notification.getKey())) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
                 }
@@ -1281,6 +1281,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         addNotificationViews(shadeEntry, ranking);
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
+    }
+
+    private boolean shouldSupressFullScreenIntent(String key) {
+        if (mPowerManager.isInteractive()) {
+            return mNotificationData.shouldSuppressPeek(key);
+        } else {
+            return mNotificationData.shouldSuppressScreenOn(key);
+        }
     }
 
     @Override

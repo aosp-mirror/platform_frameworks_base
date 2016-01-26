@@ -186,7 +186,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected DevicePolicyManager mDevicePolicyManager;
     protected IDreamManager mDreamManager;
-    PowerManager mPowerManager;
+    protected PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     // public mode, private notifications, etc
