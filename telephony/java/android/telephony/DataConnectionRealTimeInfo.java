@@ -28,10 +28,10 @@ import android.os.Parcelable;
 public class DataConnectionRealTimeInfo implements Parcelable {
     private long mTime;             // Time the info was collected since boot in nanos;
 
-    public static int DC_POWER_STATE_LOW       = 1;
-    public static int DC_POWER_STATE_MEDIUM    = 2;
-    public static int DC_POWER_STATE_HIGH      = 3;
-    public static int DC_POWER_STATE_UNKNOWN   = Integer.MAX_VALUE;
+    public static final int DC_POWER_STATE_LOW       = 1;
+    public static final int DC_POWER_STATE_MEDIUM    = 2;
+    public static final int DC_POWER_STATE_HIGH      = 3;
+    public static final int DC_POWER_STATE_UNKNOWN   = Integer.MAX_VALUE;
 
     private int mDcPowerState;      // DC_POWER_STATE_[LOW | MEDIUM | HIGH | UNKNOWN]
 
