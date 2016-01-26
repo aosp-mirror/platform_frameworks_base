@@ -36,6 +36,7 @@ TEST(BufferPool, acquireThenRelease) {
             ASSERT_EQ(bufferCount - i, pool->getAvailableBufferCount());
             acquiredBuffers[i] = pool->acquire();
             ASSERT_NE(nullptr, acquiredBuffers[i]);
+            ASSERT_TRUE(acquiredBuffers[i]->isUniqueRef());
         }
 
         for (size_t i = 0; i < bufferCount; i++) {
