@@ -32423,6 +32423,7 @@ package android.renderscript {
     method public void copyTo(short[]);
     method public void copyTo(int[]);
     method public void copyTo(float[]);
+    method public static android.renderscript.Allocation[] createAllocations(android.renderscript.RenderScript, android.renderscript.Type, int, int);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
     method public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
@@ -32438,9 +32439,12 @@ package android.renderscript {
     method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type, int);
     method public static android.renderscript.Allocation createTyped(android.renderscript.RenderScript, android.renderscript.Type);
     method public void generateMipmaps();
+    method public java.nio.ByteBuffer getByteBuffer();
     method public int getBytesSize();
     method public android.renderscript.Element getElement();
+    method public long getStride();
     method public android.view.Surface getSurface();
+    method public long getTimeStamp();
     method public android.renderscript.Type getType();
     method public int getUsage();
     method public void ioReceive();
