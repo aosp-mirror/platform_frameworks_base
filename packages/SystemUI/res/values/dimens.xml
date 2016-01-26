@@ -606,5 +606,4 @@
 
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
-
 </resources>

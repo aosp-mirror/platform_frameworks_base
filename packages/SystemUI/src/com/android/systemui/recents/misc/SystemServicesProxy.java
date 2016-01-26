@@ -81,6 +81,7 @@ import java.util.Random;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
 /**
@@ -266,8 +267,9 @@ public class SystemServicesProxy {
             ComponentName topActivity = topTask.topActivity;
 
             // Check if the front most activity is recents
-            if (topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE) &&
-                    topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY)) {
+            if ((topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE) &&
+                    (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY) ||
+                    topActivity.getClassName().equals(RecentsImpl.RECENTS_TV_ACTIVITY)))) {
                 if (isHomeTopMost != null) {
                     isHomeTopMost.value = false;
                 }
@@ -353,6 +355,13 @@ public class SystemServicesProxy {
      */
     public static boolean isHomeStack(int stackId) {
         return stackId == HOME_STACK_ID;
+    }
+
+    /**
+     * Returns whether the given stack id is the pinned stack id.
+     */
+    public static boolean isPinnedStack(int stackId){
+        return stackId == PINNED_STACK_ID;
     }
 
     /**
@@ -967,5 +976,21 @@ public class SystemServicesProxy {
 
     public void requestKeyboardShortcuts(Context context, KeyboardShortcutsReceiver receiver) {
         mWm.requestAppKeyboardShortcuts(receiver);
+    }
+
+    public void focusPinnedStack() {
+        try {
+            mIam.setFocusedStack(PINNED_STACK_ID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void focusHomeStack() {
+        try {
+            mIam.setFocusedStack(HOME_STACK_ID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -19,10 +19,12 @@ package com.android.systemui.recents;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
+import android.app.UiModeManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -87,7 +89,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
+    public final static String RECENTS_TV_ACTIVITY = "com.android.systemui.recents.tv.RecentsTvActivity";
 
+    //Used to store tv or non-tv activty for use in creating intents.
+    private final String mRecentsIntentActivityName;
     /**
      * An implementation of ITaskStackListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
@@ -210,6 +215,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
         launchOpts.onlyLoadForCache = true;
         loader.loadTasks(mContext, plan, launchOpts);
+
+        //Manager used to determine if we are running on tv or not
+        UiModeManager uiModeManager = (UiModeManager) mContext.getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            mRecentsIntentActivityName = RECENTS_TV_ACTIVITY;
+        } else {
+            mRecentsIntentActivityName = RECENTS_ACTIVITY;
+        }
     }
 
     public void onBootCompleted() {
@@ -906,10 +919,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedViaDragGesture = mDraggingInRecents;
 
         Intent intent = new Intent();
-        intent.setClassName(RECENTS_PACKAGE, RECENTS_ACTIVITY);
+        intent.setClassName(RECENTS_PACKAGE, mRecentsIntentActivityName);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
