@@ -19,6 +19,10 @@ package com.android.server.connectivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,20 +42,24 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.ResultReceiver;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.IoThread;
@@ -59,8 +67,8 @@ import com.android.server.net.BaseNetworkObserver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,6 +116,10 @@ public class Tethering extends BaseNetworkObserver {
     private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
 
     private BroadcastReceiver mStateReceiver;
+
+    // {@link ComponentName} of the Service used to run tether provisioning.
+    private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(Resources
+            .getSystem().getString(com.android.internal.R.string.config_wifi_tether_enable));
 
     private static final String USB_NEAR_IFACE_ADDR      = "192.168.42.129";
     private static final int USB_PREFIX_LENGTH        = 24;
@@ -332,6 +344,206 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    public void startTethering(int type, ResultReceiver receiver,
+            boolean showProvisioningUi) {
+        if (!isTetherProvisioningRequired()) {
+            enableTetheringInternal(type, true, receiver);
+            return;
+        }
+
+        if (showProvisioningUi) {
+            runUiTetherProvisioningAndEnable(type, receiver);
+        } else {
+            runSilentTetherProvisioningAndEnable(type, receiver);
+        }
+    }
+
+    public void stopTethering(int type) {
+        enableTetheringInternal(type, false, null);
+        if (isTetherProvisioningRequired()) {
+            cancelTetherProvisioningRechecks(type);
+        }
+    }
+
+    /**
+     * Check if the device requires a provisioning check in order to enable tethering.
+     *
+     * @return a boolean - {@code true} indicating tether provisioning is required by the carrier.
+     */
+    private boolean isTetherProvisioningRequired() {
+        String[] provisionApp = mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_mobile_hotspot_provision_app);
+        if (SystemProperties.getBoolean("net.tethering.noprovisioning", false)
+                || provisionApp == null) {
+            return false;
+        }
+
+        // Check carrier config for entitlement checks
+        final CarrierConfigManager configManager = (CarrierConfigManager) mContext
+             .getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        boolean isEntitlementCheckRequired = configManager.getConfig().getBoolean(
+             CarrierConfigManager.KEY_REQUIRE_ENTITLEMENT_CHECKS_BOOL);
+
+        if (!isEntitlementCheckRequired) {
+            return false;
+        }
+        return (provisionApp.length == 2);
+    }
+
+    /**
+     * Enables or disables tethering for the given type. This should only be called once
+     * provisioning has succeeded or is not necessary. It will also schedule provisioning rechecks
+     * for the specified interface.
+     */
+    private void enableTetheringInternal(int type, boolean enable, ResultReceiver receiver) {
+        boolean isProvisioningRequired = isTetherProvisioningRequired();
+        switch (type) {
+            case ConnectivityManager.TETHERING_WIFI:
+                final WifiManager wifiManager =
+                        (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+                if (wifiManager.setWifiApEnabled(null, enable)) {
+                    sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_NO_ERROR);
+                    if (enable && isProvisioningRequired) {
+                        scheduleProvisioningRechecks(type);
+                    }
+                } else{
+                    sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
+                }
+                break;
+            case ConnectivityManager.TETHERING_USB:
+                int result = setUsbTethering(enable);
+                if (enable && isProvisioningRequired &&
+                        result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    scheduleProvisioningRechecks(type);
+                }
+                sendTetherResult(receiver, result);
+                break;
+            case ConnectivityManager.TETHERING_BLUETOOTH:
+                setBluetoothTethering(enable, receiver);
+                break;
+            default:
+                Log.w(TAG, "Invalid tether type.");
+                sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE);
+        }
+    }
+
+    private void sendTetherResult(ResultReceiver receiver, int result) {
+        if (receiver != null) {
+            receiver.send(result, null);
+        }
+    }
+
+    private void setBluetoothTethering(final boolean enable, final ResultReceiver receiver) {
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null || !adapter.isEnabled()) {
+            Log.w(TAG, "Tried to enable bluetooth tethering with null or disabled adapter. null: " +
+                    (adapter == null));
+            sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_SERVICE_UNAVAIL);
+            return;
+        }
+
+        adapter.getProfileProxy(mContext, new ServiceListener() {
+            @Override
+            public void onServiceDisconnected(int profile) { }
+
+            @Override
+            public void onServiceConnected(int profile, BluetoothProfile proxy) {
+                ((BluetoothPan) proxy).setBluetoothTethering(enable);
+                // TODO: Enabling bluetooth tethering can fail asynchronously here.
+                // We should figure out a way to bubble up that failure instead of sending success.
+                int result = ((BluetoothPan) proxy).isTetheringOn() ?
+                        ConnectivityManager.TETHER_ERROR_NO_ERROR :
+                        ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
+                sendTetherResult(receiver, result);
+                if (enable && isTetherProvisioningRequired()) {
+                    scheduleProvisioningRechecks(ConnectivityManager.TETHERING_BLUETOOTH);
+                }
+                adapter.closeProfileProxy(BluetoothProfile.PAN, proxy);
+            }
+        }, BluetoothProfile.PAN);
+    }
+
+    private void runUiTetherProvisioningAndEnable(int type, ResultReceiver receiver) {
+        // TODO: Fill in for real.
+        enableTetheringInternal(type, true, receiver);
+    }
+
+    /**
+     * Creates a proxy {@link ResultReceiver} which enables tethering if the provsioning result is
+     * successful before firing back up to the wrapped receiver.
+     *
+     * @param type The type of tethering being enabled.
+     * @param receiver A ResultReceiver which will be called back with an int resultCode.
+     * @return The proxy receiver.
+     */
+    private ResultReceiver getProxyReceiver(final int type, final ResultReceiver receiver) {
+        ResultReceiver rr = new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                // If provisioning is successful, enable tethering, otherwise just send the error.
+                if (resultCode == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    enableTetheringInternal(type, true, receiver);
+                } else {
+                    sendTetherResult(receiver, resultCode);
+                }
+            }
+        };
+
+        // The following is necessary to avoid unmarshalling issues when sending the receiver
+        // across proccesses.
+        Parcel parcel = Parcel.obtain();
+        rr.writeToParcel(parcel,0);
+        parcel.setDataPosition(0);
+        ResultReceiver receiverForSending = ResultReceiver.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return receiverForSending;
+    }
+
+    private void scheduleProvisioningRechecks(int type) {
+        Intent intent = new Intent();
+        intent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, type);
+        intent.putExtra(ConnectivityManager.EXTRA_SET_ALARM, true);
+        intent.setComponent(TETHER_SERVICE);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.startServiceAsUser(intent, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void runSilentTetherProvisioningAndEnable(int type, ResultReceiver receiver) {
+        ResultReceiver proxyReceiver = getProxyReceiver(type, receiver);
+        sendSilentTetherProvisionIntent(type, proxyReceiver);
+    }
+
+    private void sendSilentTetherProvisionIntent(int type, ResultReceiver receiver) {
+        Intent intent = new Intent();
+        intent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, type);
+        intent.putExtra(ConnectivityManager.EXTRA_RUN_PROVISION, true);
+        intent.putExtra(ConnectivityManager.EXTRA_PROVISION_CALLBACK, receiver);
+        intent.setComponent(TETHER_SERVICE);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.startServiceAsUser(intent, UserHandle.CURRENT);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void cancelTetherProvisioningRechecks(int type) {
+        if (getConnectivityManager().isTetheringSupported()) {
+            Intent intent = new Intent();
+            intent.putExtra(ConnectivityManager.EXTRA_REM_TETHER_TYPE, type);
+            intent.setComponent(TETHER_SERVICE);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.startServiceAsUser(intent, UserHandle.CURRENT);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
     public int tether(String iface) {
         if (DBG) Log.d(TAG, "Tethering " + iface);
         TetherInterfaceSM sm = null;
@@ -615,13 +827,23 @@ public class Tethering extends BaseNetworkObserver {
         synchronized (mPublicSync) {
             if (enable) {
                 if (mRndisEnabled) {
-                    tetherUsb(true);
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        tetherUsb(true);
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
                 } else {
                     mUsbTetherRequested = true;
                     usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS);
                 }
             } else {
-                tetherUsb(false);
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    tetherUsb(false);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
                 if (mRndisEnabled) {
                     usbManager.setCurrentFunction(null);
                 }
@@ -1407,15 +1629,6 @@ public class Tethering extends BaseNetworkObserver {
         private final AtomicInteger mSimBcastGenerationNumber = new AtomicInteger(0);
         private SimChangeBroadcastReceiver mBroadcastReceiver = null;
 
-        // keep consts in sync with packages/apps/Settings TetherSettings.java
-        private static final int WIFI_TETHERING      = 0;
-        private static final int USB_TETHERING       = 1;
-        private static final int BLUETOOTH_TETHERING = 2;
-
-        // keep consts in sync with packages/apps/Settings TetherService.java
-        private static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
-        private static final String EXTRA_RUN_PROVISION = "extraRunProvision";
-
         private void startListeningForSimChanges() {
             if (DBG) Log.d(TAG, "startListeningForSimChanges");
             if (mBroadcastReceiver == null) {
@@ -1472,8 +1685,6 @@ public class Tethering extends BaseNetworkObserver {
                     try {
                         if (mContext.getResources().getString(com.android.internal.R.string.
                                 config_mobile_hotspot_provision_app_no_ui).isEmpty() == false) {
-                            final String tetherService = mContext.getResources().getString(
-                                    com.android.internal.R.string.config_wifi_tether_enable);
                             ArrayList<Integer> tethered = new ArrayList<Integer>();
                             synchronized (mPublicSync) {
                                 Set ifaces = mIfaces.keySet();
@@ -1481,21 +1692,25 @@ public class Tethering extends BaseNetworkObserver {
                                     TetherInterfaceSM sm = mIfaces.get(iface);
                                     if (sm != null && sm.isTethered()) {
                                         if (isUsb((String)iface)) {
-                                            tethered.add(new Integer(USB_TETHERING));
+                                            tethered.add(new Integer(
+                                                    ConnectivityManager.TETHERING_USB));
                                         } else if (isWifi((String)iface)) {
-                                            tethered.add(new Integer(WIFI_TETHERING));
+                                            tethered.add(new Integer(
+                                                    ConnectivityManager.TETHERING_WIFI));
                                         } else if (isBluetooth((String)iface)) {
-                                            tethered.add(new Integer(BLUETOOTH_TETHERING));
+                                            tethered.add(new Integer(
+                                                    ConnectivityManager.TETHERING_BLUETOOTH));
                                         }
                                     }
                                 }
                             }
                             for (int tetherType : tethered) {
                                 Intent startProvIntent = new Intent();
-                                startProvIntent.putExtra(EXTRA_ADD_TETHER_TYPE, tetherType);
-                                startProvIntent.putExtra(EXTRA_RUN_PROVISION, true);
-                                startProvIntent.setComponent(
-                                        ComponentName.unflattenFromString(tetherService));
+                                startProvIntent.putExtra(
+                                        ConnectivityManager.EXTRA_ADD_TETHER_TYPE, tetherType);
+                                startProvIntent.putExtra(
+                                        ConnectivityManager.EXTRA_RUN_PROVISION, true);
+                                startProvIntent.setComponent(TETHER_SERVICE);
                                 mContext.startServiceAsUser(startProvIntent, UserHandle.CURRENT);
                             }
                             Log.d(TAG, "re-evaluate provisioning");

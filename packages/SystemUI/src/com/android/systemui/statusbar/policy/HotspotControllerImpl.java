@@ -20,8 +20,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.settingslib.TetherUtil;
@@ -34,21 +34,18 @@ public class HotspotControllerImpl implements HotspotController {
 
     private static final String TAG = "HotspotController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final Intent TETHER_SERVICE_INTENT = new Intent()
-            .putExtra(TetherUtil.EXTRA_ADD_TETHER_TYPE, TetherUtil.TETHERING_WIFI)
-            .putExtra(TetherUtil.EXTRA_SET_ALARM, true)
-            .putExtra(TetherUtil.EXTRA_RUN_PROVISION, true)
-            .putExtra(TetherUtil.EXTRA_ENABLE_WIFI_TETHER, true)
-            .setComponent(TetherUtil.TETHER_SERVICE);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
+    private final ConnectivityManager mConnectivityManager;
     private final Context mContext;
 
     private int mHotspotState;
 
     public HotspotControllerImpl(Context context) {
         mContext = context;
+        mConnectivityManager = (ConnectivityManager)context.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -72,6 +69,7 @@ public class HotspotControllerImpl implements HotspotController {
         return null;
     }
 
+    @Override
     public void addCallback(Callback callback) {
         if (callback == null || mCallbacks.contains(callback)) return;
         if (DEBUG) Log.d(TAG, "addCallback " + callback);
@@ -79,6 +77,7 @@ public class HotspotControllerImpl implements HotspotController {
         mReceiver.setListening(!mCallbacks.isEmpty());
     }
 
+    @Override
     public void removeCallback(Callback callback) {
         if (callback == null) return;
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
@@ -96,13 +95,24 @@ public class HotspotControllerImpl implements HotspotController {
         return TetherUtil.isTetheringSupported(mContext);
     }
 
+    static final class OnStartTetheringCallback extends
+            ConnectivityManager.OnStartTetheringCallback {
+        @Override
+        public void onTetheringStarted() {}
+        @Override
+        public void onTetheringFailed() {
+          // TODO: Show error.
+        }
+    }
+
     @Override
     public void setHotspotEnabled(boolean enabled) {
-        // Call provisioning app which is called when enabling Tethering from Settings
-        if (enabled && TetherUtil.isProvisioningNeeded(mContext)) {
-            mContext.startServiceAsUser(TETHER_SERVICE_INTENT, UserHandle.CURRENT);
+        if (enabled) {
+            OnStartTetheringCallback callback = new OnStartTetheringCallback();
+            mConnectivityManager.startTethering(
+                    ConnectivityManager.TETHERING_WIFI, false, callback);
         } else {
-            TetherUtil.setWifiTethering(enabled, mContext);
+            mConnectivityManager.stopTethering(ConnectivityManager.TETHERING_WIFI);
         }
     }
 
