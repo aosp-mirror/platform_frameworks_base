@@ -34,6 +34,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
+import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
@@ -207,6 +208,23 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
         if (mRows.isEmpty()) {
             dismissHistory();
         }
+    }
+
+    /**
+     * Removes all historical tasks.
+     */
+    public void removeAllTasks() {
+        for (int i = mRows.size() - 1; i >= 0; i--) {
+            Row row = mRows.get(i);
+            if (row.getViewType() == TASK_ROW_VIEW_TYPE) {
+                TaskRow taskRow = (TaskRow) row;
+                Task task = taskRow.task;
+                mStack.removeTask(task, TaskViewAnimation.IMMEDIATE);
+                EventBus.getDefault().send(new DeleteTaskDataEvent(task));
+                i = removeTaskRow(i);
+            }
+        }
+        dismissHistory();
     }
 
     /**
