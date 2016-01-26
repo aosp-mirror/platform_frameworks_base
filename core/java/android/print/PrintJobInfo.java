@@ -244,7 +244,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The id.
      */
-    public @NonNull PrintJobId getId() {
+    public @Nullable PrintJobId getId() {
         return mId;
     }
 
