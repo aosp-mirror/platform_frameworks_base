@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -32,6 +33,7 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
 import android.app.ActivityManager.StackId;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.EventLog;
@@ -84,8 +86,8 @@ class Task implements DimLayer.DimLayerUser {
     // For handling display rotations.
     private Rect mTmpRect2 = new Rect();
 
-    // Whether the task is resizeable
-    private boolean mResizeable;
+    // Resize mode of the task. See {@link ActivityInfo#resizeMode}
+    private int mResizeMode;
 
     // Whether we need to show toast about the app being non-resizeable when it becomes visible.
     // This flag is set when a non-resizeable task is docked (or side-by-side). It's cleared
@@ -94,6 +96,8 @@ class Task implements DimLayer.DimLayerUser {
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
+
+    private boolean mHomeTask;
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
             Configuration config) {
@@ -156,7 +160,7 @@ class Task implements DimLayer.DimLayerUser {
         }
     }
 
-    void addAppToken(int addPos, AppWindowToken wtoken) {
+    void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {
         final int lastPos = mAppTokens.size();
         if (addPos >= lastPos) {
             addPos = lastPos;
@@ -171,6 +175,8 @@ class Task implements DimLayer.DimLayerUser {
         mAppTokens.add(addPos, wtoken);
         wtoken.mTask = this;
         mDeferRemoval = false;
+        mResizeMode = resizeMode;
+        mHomeTask = homeTask;
     }
 
     private boolean hasAppTokensAlive() {
@@ -319,12 +325,21 @@ class Task implements DimLayer.DimLayerUser {
         out.set(mTempInsetBounds);
     }
 
-    void setResizeable(boolean resizeable) {
-        mResizeable = resizeable;
+    void setResizeable(int resizeMode) {
+        mResizeMode = resizeMode;
     }
 
     boolean isResizeable() {
-        return mResizeable;
+        return !mHomeTask
+                && (ActivityInfo.isResizeableMode(mResizeMode) || mService.mForceResizableTasks);
+    }
+
+    boolean cropWindowsToStackBounds() {
+        return !mHomeTask && (isResizeable() || mResizeMode == RESIZE_MODE_CROP_WINDOWS);
+    }
+
+    private boolean inCropWindowsResizeMode() {
+        return !mHomeTask && !isResizeable() && mResizeMode == RESIZE_MODE_CROP_WINDOWS;
     }
 
     boolean resizeLocked(Rect bounds, Configuration configuration, boolean forced) {
@@ -619,7 +634,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     boolean isTwoFingerScrollMode() {
-        return isDockedInEffect() && !isResizeable();
+        return inCropWindowsResizeMode() && isDockedInEffect();
     }
 
     WindowState getTopVisibleAppMainWindow() {

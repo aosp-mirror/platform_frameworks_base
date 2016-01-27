@@ -1171,9 +1171,8 @@ class WindowStateAnimator {
     }
 
     private void adjustCropToStackBounds(WindowState w, Rect clipRect, boolean isFreeformResizing) {
-        final AppWindowToken appToken = w.mAppToken;
         final Task task = w.getTask();
-        if (task == null || !appToken.mCropWindowsToStack) {
+        if (task == null || !task.cropWindowsToStackBounds()) {
             return;
         }
 

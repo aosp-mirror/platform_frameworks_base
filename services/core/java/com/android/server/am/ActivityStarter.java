@@ -1004,7 +1004,7 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        if (!mStartActivity.task.mResizeable
+        if (!mStartActivity.task.isResizeable()
                 && mSupervisor.isStackDockedInEffect(mTargetStack.mStackId)) {
             mSupervisor.showNonResizeableDockToast(mStartActivity.task.taskId);
         }
@@ -1721,7 +1721,7 @@ class ActivityStarter {
 
     Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
         Rect newBounds = null;
-        if (options != null && (r.isResizeable() || (inTask != null && inTask.mResizeable))) {
+        if (options != null && (r.isResizeable() || (inTask != null && inTask.isResizeable()))) {
             if (mSupervisor.canUseActivityOptionsLaunchBounds(
                     options, options.getLaunchStackId())) {
                 newBounds = TaskRecord.validateBounds(options.getLaunchBounds());

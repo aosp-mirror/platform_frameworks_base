@@ -785,7 +785,12 @@ public class ActivityInfo extends ComponentInfo
     }
 
     /** @hide */
-    public static final String resizeModeToString(int mode) {
+    public static boolean isResizeableMode(int mode) {
+        return mode == RESIZE_MODE_RESIZEABLE || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+    }
+
+    /** @hide */
+    public static String resizeModeToString(int mode) {
         switch (mode) {
             case RESIZE_MODE_UNRESIZEABLE:
                 return "RESIZE_MODE_UNRESIZEABLE";

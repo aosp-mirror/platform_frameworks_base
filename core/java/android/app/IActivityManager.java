@@ -530,7 +530,7 @@ public interface IActivityManager extends IInterface {
 
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
-    public void setTaskResizeable(int taskId, boolean resizeable) throws RemoteException;
+    public void setTaskResizeable(int taskId, int resizeableMode) throws RemoteException;
     public void resizeTask(int taskId, Rect bounds, int resizeMode) throws RemoteException;
 
     public Rect getTaskBounds(int taskId) throws RemoteException;

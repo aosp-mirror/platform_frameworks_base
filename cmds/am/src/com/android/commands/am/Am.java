@@ -166,7 +166,7 @@ public class Am extends BaseCommand {
                 "       am stack info <STACK_ID>\n" +
                 "       am task lock <TASK_ID>\n" +
                 "       am task lock stop\n" +
-                "       am task resizeable <TASK_ID> [true|false]\n" +
+                "       am task resizeable <TASK_ID> [0 (unresizeable) | 1 (crop_windows) | 2 (resizeable) | 3 (resizeable_and_pipable)]\n" +
                 "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am task drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
                 "       am task size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS] \n" +
@@ -323,7 +323,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am task lock stop: end the current task lock.\n" +
                 "\n" +
-                "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
+                "am task resizeable: change resizeable mode of <TASK_ID>.\n" +
+                "   0 (unresizeable) | 1 (crop_windows) | 2 (resizeable) | 3 (resizeable_and_pipable)\n" +
                 "\n" +
                 "am task resize: makes sure <TASK_ID> is in a stack with the specified bounds.\n" +
                 "   Forces the task to be resizeable and creates a stack if no existing stack\n" +
@@ -1985,10 +1986,10 @@ public class Am extends BaseCommand {
         final String taskIdStr = nextArgRequired();
         final int taskId = Integer.valueOf(taskIdStr);
         final String resizeableStr = nextArgRequired();
-        final boolean resizeable = Boolean.valueOf(resizeableStr);
+        final int resizeableMode = Integer.valueOf(resizeableStr);
 
         try {
-            mAm.setTaskResizeable(taskId, resizeable);
+            mAm.setTaskResizeable(taskId, resizeableMode);
         } catch (RemoteException e) {
         }
     }

@@ -119,6 +119,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -1713,7 +1714,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        if (task.mResizeable && options != null) {
+        if (task.isResizeable() && options != null) {
             int stackId = options.getLaunchStackId();
             if (canUseActivityOptionsLaunchBounds(options, stackId)) {
                 final Rect bounds = TaskRecord.validateBounds(options.getLaunchBounds());
@@ -1895,10 +1896,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mTmpBounds.clear();
         mTmpConfigs.clear();
         mTmpInsetBounds.clear();
-        ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        final ArrayList<TaskRecord> tasks = stack.getAllTasks();
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            TaskRecord task = tasks.get(i);
-            if (task.mResizeable) {
+            final TaskRecord task = tasks.get(i);
+            if (task.isResizeable()) {
                 if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
                     // For freeform stack we don't adjust the size of the tasks to match that
                     // of the stack, but we do try to make sure the tasks are still contained
@@ -2010,7 +2011,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     boolean resizeTaskLocked(TaskRecord task, Rect bounds, int resizeMode, boolean preserveWindow) {
-        if (!task.mResizeable) {
+        if (!task.isResizeable()) {
             Slog.w(TAG, "resizeTask: task " + task + " not resizeable.");
             return true;
         }
@@ -2189,13 +2190,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final boolean wasFront = isFrontStack(prevStack)
                 && (prevStack.topRunningActivityLocked() == r);
 
-        final boolean resizeable = task.mResizeable;
+        final int resizeMode = task.mResizeMode;
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
         // if a docked stack is created below which will lead to the stack we are moving from and
         // its resizeable tasks being resized.
-        task.mResizeable = false;
+        task.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
-        task.mResizeable = resizeable;
+        task.mResizeMode = resizeMode;
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         stack.addTask(task, toTop, reason);
 
@@ -2266,7 +2267,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        if (!task.mResizeable && isStackDockedInEffect(stackId)) {
+        if (!task.isResizeable() && isStackDockedInEffect(stackId)) {
             showNonResizeableDockToast(taskId);
         }
     }

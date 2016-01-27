@@ -19,8 +19,6 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
@@ -758,16 +756,11 @@ final class ActivityRecord {
     }
 
     boolean isResizeable() {
-        return !isHomeActivity() && (info.resizeMode == RESIZE_MODE_RESIZEABLE
-                || info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE);
+        return !isHomeActivity() && ActivityInfo.isResizeableMode(info.resizeMode);
     }
 
     boolean supportsPictureInPicture() {
         return !isHomeActivity() && info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
-    }
-
-    boolean cropAppWindows() {
-        return !isHomeActivity() && info.resizeMode == RESIZE_MODE_CROP_WINDOWS;
     }
 
     boolean isAlwaysFocusable() {

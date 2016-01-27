@@ -2587,9 +2587,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case SET_TASK_RESIZEABLE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            int taskId = data.readInt();
-            boolean resizeable = (data.readInt() == 1) ? true : false;
-            setTaskResizeable(taskId, resizeable);
+            final int taskId = data.readInt();
+            final int resizeableMode = data.readInt();
+            setTaskResizeable(taskId, resizeableMode);
             reply.writeNoException();
             return true;
         }
@@ -6307,12 +6307,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void setTaskResizeable(int taskId, boolean resizeable) throws  RemoteException {
+    public void setTaskResizeable(int taskId, int resizeableMode) throws  RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(taskId);
-        data.writeInt(resizeable ? 1 : 0);
+        data.writeInt(resizeableMode);
         mRemote.transact(SET_TASK_RESIZEABLE_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
