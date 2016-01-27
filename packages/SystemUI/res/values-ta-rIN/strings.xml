@@ -485,12 +485,18 @@
     <string name="tuner_full_zen_title" msgid="5905081395132280054">"ஒலி உரையாடலில் தொந்தரவு செய்ய வேண்டாம் என்பதைக் காட்டு"</string>
     <string name="tuner_full_zen_summary" msgid="6883568374520596402">"ஒலி உரையாடலில் தொந்தரவு செய்ய வேண்டாம் என்பதன் முழுக் கட்டுப்பாட்டையும் அனுமதி."</string>
     <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ஒலி மற்றும் தொந்தரவு செய்ய வேண்டாம்"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ஒலி குறைக்கும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை இயக்கு"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"ஒலி அதிகரிக்கும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கு"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"ஒலியைக் குறைக்கும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை இயக்கு"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"ஒலியைக் கூட்டும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கு"</string>
     <string name="battery" msgid="7498329822413202973">"பேட்டரி"</string>
     <string name="clock" msgid="7416090374234785905">"கடிகாரம்"</string>
     <string name="headset" msgid="4534219457597457353">"ஹெட்செட்"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ஹெட்ஃபோன்கள் இணைக்கப்பட்டன"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ஹெட்செட் இணைக்கப்பட்டது"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"நிலைப் பட்டியில் ஐகான்களைக் காட்டுவதை இயக்கும் அல்லது முடக்கும்."</string>
+    <!-- no translation found for data_saver (5037565123367048522) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
+    <skip />
 </resources>

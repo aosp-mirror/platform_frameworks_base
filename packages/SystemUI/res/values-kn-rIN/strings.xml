@@ -493,4 +493,10 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ಹೆಡ್‌ಫೋನ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ಹೆಡ್‌ಸೆಟ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಲ್ಲಿ ಐಕಾನ್‌ಗಳು ತೋರಿಸುವುದನ್ನು ಸಕ್ರಿಯ ಅಥವಾ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."</string>
+    <!-- no translation found for data_saver (5037565123367048522) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
+    <skip />
 </resources>
