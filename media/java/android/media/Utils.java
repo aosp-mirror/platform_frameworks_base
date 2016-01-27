@@ -174,7 +174,7 @@ class Utils {
         return (num + den - 1) / den;
     }
 
-    private static long divUp(long num, long den) {
+    static long divUp(long num, long den) {
         return (num + den - 1) / den;
     }
 
