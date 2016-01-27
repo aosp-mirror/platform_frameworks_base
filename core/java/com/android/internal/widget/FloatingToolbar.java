@@ -920,14 +920,14 @@ public final class FloatingToolbar {
                     mOverflowPanel.setY(mOverflowButtonSize.getHeight());  // align bottom
                 }
             } else {
-                if (hasOverflow()) {
-                    // overflow not open. Set closed state.
-                    final Size containerSize = mMainPanelSize;
-                    setSize(mContentContainer, containerSize);
-                    mMainPanel.setAlpha(1);
-                    mOverflowPanel.setAlpha(0);
-                    mOverflowButton.setImageDrawable(mOverflow);
+                // Overflow not open. Set closed state.
+                final Size containerSize = mMainPanelSize;
+                setSize(mContentContainer, containerSize);
+                mMainPanel.setAlpha(1);
+                mOverflowPanel.setAlpha(0);
+                mOverflowButton.setImageDrawable(mOverflow);
 
+                if (hasOverflow()) {
                     // Update x-coordinates depending on RTL state.
                     if (isRTL()) {
                         mContentContainer.setX(mMarginHorizontal);  // align left
@@ -960,8 +960,11 @@ public final class FloatingToolbar {
                         mOverflowPanel.setY(mOverflowButtonSize.getHeight());  // align bottom
                     }
                 } else {
-                    mContentContainer.setX(mMarginHorizontal);
-                    mContentContainer.setY(mMarginVertical);
+                    // No overflow.
+                    mContentContainer.setX(mMarginHorizontal);  // align left
+                    mContentContainer.setY(mMarginVertical);  // align top
+                    mMainPanel.setX(0);  // align left
+                    mMainPanel.setY(0);  // align top
                 }
             }
         }
@@ -1092,6 +1095,7 @@ public final class FloatingToolbar {
             final LinkedList<MenuItem> remainingMenuItems = new LinkedList<MenuItem>(menuItems);
 
             mMainPanel.removeAllViews();
+            mMainPanel.setPaddingRelative(0, 0, 0, 0);
 
             boolean isFirstItem = true;
             while (!remainingMenuItems.isEmpty()) {
@@ -1302,7 +1306,6 @@ public final class FloatingToolbar {
             overflowButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final Drawable drawable = overflowButton.getDrawable();
                     if (mIsOverflowOpen) {
                         overflowButton.setImageDrawable(mToOverflow);
                         mToOverflow.start();
@@ -1599,6 +1602,8 @@ public final class FloatingToolbar {
     private static ViewGroup createContentContainer(Context context) {
         ViewGroup contentContainer = (ViewGroup) LayoutInflater.from(context)
                 .inflate(R.layout.floating_popup_container, null);
+        contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         contentContainer.setTag(FLOATING_TOOLBAR_TAG);
         return contentContainer;
     }
