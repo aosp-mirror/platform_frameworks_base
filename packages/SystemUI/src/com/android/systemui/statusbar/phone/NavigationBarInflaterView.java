@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -37,20 +38,20 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     public static final String NAV_BAR_VIEWS = "sysui_nav_bar";
 
-    private static final String MENU_IME = "menu_ime";
-    private static final String BACK = "back";
-    private static final String HOME = "home";
-    private static final String RECENT = "recent";
-    private static final String NAVSPACE = "space";
+    protected static final String MENU_IME = "menu_ime";
+    protected static final String BACK = "back";
+    protected static final String HOME = "home";
+    protected static final String RECENT = "recent";
+    protected static final String NAVSPACE = "space";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
 
-    private final LayoutInflater mLayoutInflater;
-    private final LayoutInflater mLandscapeInflater;
+    protected final LayoutInflater mLayoutInflater;
+    protected final LayoutInflater mLandscapeInflater;
 
-    private FrameLayout mRot0;
-    private FrameLayout mRot90;
+    protected FrameLayout mRot0;
+    protected FrameLayout mRot90;
     private SparseArray<ButtonDispatcher> mButtonDispatchers;
     private String mCurrentLayout;
 
@@ -72,7 +73,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         inflateLayout(getDefaultLayout());
     }
 
-    private String getDefaultLayout() {
+    protected String getDefaultLayout() {
         return mContext.getString(R.string.config_navBarLayout);
     }
 
@@ -128,9 +129,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         }
     }
 
-    private void inflateLayout(String newLayout) {
+    protected void inflateLayout(String newLayout) {
         mCurrentLayout = newLayout;
-        String[] sets = newLayout.split(GRAVITY_SEPARATOR);
+        String[] sets = newLayout.split(GRAVITY_SEPARATOR, 3);
         String[] start = sets[0].split(BUTTON_SEPARATOR);
         String[] center = sets[1].split(BUTTON_SEPARATOR);
         String[] end = sets[2].split(BUTTON_SEPARATOR);
@@ -165,6 +166,8 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     }
 
     private void copyToLightsout(View view, ViewGroup lightsOutParent) {
+        if (view == null) return;
+
         if (view instanceof FrameLayout) {
             // The only ViewGroup we support in here is a FrameLayout, so copy those manually.
             FrameLayout original = (FrameLayout) view;
@@ -202,35 +205,33 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         return new LayoutParams(layoutParams.width, layoutParams.height);
     }
 
-    private View inflateButton(String button, ViewGroup parent, boolean landscape) {
-        View v = null;
+    @Nullable
+    protected View inflateButton(String button, ViewGroup parent, boolean landscape) {
+        View v;
+        LayoutInflater inflater = landscape ? mLandscapeInflater : mLayoutInflater;
         if (HOME.equals(button)) {
-            v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                    .inflate(R.layout.home, parent, false);
+            v = inflater.inflate(R.layout.home, parent, false);
             if (landscape && isSw600Dp()) {
                 setupLandButton(v);
             }
         } else if (BACK.equals(button)) {
-            v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                    .inflate(R.layout.back, parent, false);
+            v = inflater.inflate(R.layout.back, parent, false);
             if (landscape && isSw600Dp()) {
                 setupLandButton(v);
             }
         } else if (RECENT.equals(button)) {
-            v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                    .inflate(R.layout.recent_apps, parent, false);
+            v = inflater.inflate(R.layout.recent_apps, parent, false);
             if (landscape && isSw600Dp()) {
                 setupLandButton(v);
             }
         } else if (MENU_IME.equals(button)) {
-            v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                    .inflate(R.layout.menu_ime, parent, false);
+            v = inflater.inflate(R.layout.menu_ime, parent, false);
         } else if (NAVSPACE.equals(button)) {
-            v = (landscape ? mLandscapeInflater : mLayoutInflater)
-                    .inflate(R.layout.nav_key_space, parent, false);
+            v = inflater.inflate(R.layout.nav_key_space, parent, false);
         } else {
-            throw new IllegalArgumentException("Unknown button " + button);
+            return null;
         }
+
         parent.addView(v);
         addToDispatchers(v);
         return v;
