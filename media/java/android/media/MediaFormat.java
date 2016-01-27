@@ -563,6 +563,66 @@ public final class MediaFormat {
     /** @hide */
     public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
 
+    // The following color aspect values must be in sync with the ones in HardwareAPI.h.
+    /*
+     * An optional key describing the color primaries, white point and
+     * luminance factors for video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_STANDARD_ values.
+     */
+    public static final String KEY_COLOR_STANDARD = "color-standard";
+
+    /** BT.709 color chromacity coordinates with KR = 0.2126, KB = 0.0722. */
+    public static final int COLOR_STANDARD_BT709 = 1;
+
+    /** BT.601 625 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    public static final int COLOR_STANDARD_BT601_PAL = 2;
+
+    /** BT.601 525 color chromacity coordinates with KR = 0.299, KB = 0.114. */
+    public static final int COLOR_STANDARD_BT601_NTSC = 4;
+
+    /** BT.2020 color chromacity coordinates with KR = 0.2627, KB = 0.0593. */
+    public static final int COLOR_STANDARD_BT2020 = 6;
+
+    /**
+     * An optional key describing the opto-electronic transfer function used
+     * for the video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_TRANSFER_ values.
+     */
+    public static final String KEY_COLOR_TRANSFER = "color-transfer";
+
+    /** Linear transfer characteristic curve. */
+    public static final int COLOR_TRANSFER_LINEAR = 1;
+
+    /** SMPTE 170M transfer characteristic curve used by BT.601/BT.709/BT.2020. This is the curve
+     *  used by most non-HDR video content. */
+    public static final int COLOR_TRANSFER_SDR_VIDEO = 3;
+
+    /** SMPTE ST 2084 transfer function. This is used by some HDR video content. */
+    public static final int COLOR_TRANSFER_ST2084 = 6;
+
+    /** ARIB STD-B67 hybrid-log-gamma transfer function. This is used by some HDR video content. */
+    public static final int COLOR_TRANSFER_HLG = 7;
+
+    /**
+     * An optional key describing the range of the component values of the video content.
+     *
+     * The associated value is an integer: 0 if unspecified, or one of the
+     * COLOR_RANGE_ values.
+     */
+    public static final String KEY_COLOR_RANGE = "color-range";
+
+    /** Limited range. Y component values range from 16 to 235 for 8-bit content.
+     *  Cr, Cy values range from 16 to 240 for 8-bit content.
+     *  This is the default for video content. */
+    public static final int COLOR_RANGE_LIMITED = 2;
+
+    /** Full range. Y, Cr and Cb component values range from 0 to 255 for 8-bit content. */
+    public static final int COLOR_RANGE_FULL = 1;
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
