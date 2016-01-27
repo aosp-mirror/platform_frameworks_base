@@ -174,6 +174,7 @@ public class UserAvatarView extends View {
         float halfW = getWidth() / 2f;
         float halfH = getHeight() / 2f;
         float halfSW = Math.min(halfH, halfW);
+        updateDrawableIfDisabled();
         if (mBitmap != null && mScale > 0) {
             int saveCount = canvas.getSaveCount();
             canvas.save();
@@ -249,22 +250,25 @@ public class UserAvatarView extends View {
             return;
         }
         mIsDisabled = disabled;
+        invalidate();
+    }
+
+    private void updateDrawableIfDisabled() {
         int disabledColor = getContext().getColor(R.color.qs_tile_disabled_color);
         PorterDuffColorFilter filter = new PorterDuffColorFilter(disabledColor,
                 PorterDuff.Mode.SRC_ATOP);
         if (mBitmap != null) {
-            if (disabled) {
+            if (mIsDisabled) {
                 mBitmapPaint.setColorFilter(filter);
             } else {
                 mBitmapPaint.setColorFilter(null);
             }
         } else if (mDrawable != null) {
-            if (disabled) {
+            if (mIsDisabled) {
                 mDrawable.setColorFilter(filter);
             } else {
                 mDrawable.setColorFilter(null);
             }
         }
-        invalidate();
     }
 }
