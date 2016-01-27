@@ -165,14 +165,18 @@ public final class UsageStats implements Parcelable {
                     mPackageName + "' with UsageStats for package '" + right.mPackageName + "'.");
         }
 
-        if (right.mEndTimeStamp > mEndTimeStamp) {
+        if (right.mBeginTimeStamp > mBeginTimeStamp) {
+            // The incoming UsageStat begins after this one, so use its last time used fields
+            // as the source of truth.
+            // We use the mBeginTimeStamp due to a bug where UsageStats files can overlap with
+            // regards to their mEndTimeStamp.
             mLastEvent = right.mLastEvent;
-            mEndTimeStamp = right.mEndTimeStamp;
             mLastTimeUsed = right.mLastTimeUsed;
             mBeginIdleTime = right.mBeginIdleTime;
             mLastTimeSystemUsed = right.mLastTimeSystemUsed;
         }
         mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
+        mEndTimeStamp = Math.max(mEndTimeStamp, right.mEndTimeStamp);
         mTotalTimeInForeground += right.mTotalTimeInForeground;
         mLaunchCount += right.mLaunchCount;
     }
