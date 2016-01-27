@@ -822,7 +822,6 @@ public class MediaRecorder
      *
      * @throws IllegalStateException if it is called before start() or after
      * stop()
-     * {@hide}
      */
     public native void pause() throws IllegalStateException;
 
@@ -833,7 +832,6 @@ public class MediaRecorder
      * @throws IllegalStateException if it is called before start() or after
      * stop()
      * @see android.media.MediaRecorder#pause
-     * {@hide}
      */
     public native void resume() throws IllegalStateException;
 
