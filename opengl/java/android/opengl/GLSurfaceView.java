@@ -1291,6 +1291,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 boolean createGlInterface = false;
                 boolean lostEglContext = false;
                 boolean sizeChanged = false;
+                boolean wantRenderNotification = false;
                 boolean doRenderNotification = false;
                 boolean askedToReleaseEglContext = false;
                 int w = 0;
@@ -1448,6 +1449,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                                     }
                                     mRequestRender = false;
                                     sGLThreadManager.notifyAll();
+                                    if (mWantRenderNotification) {
+                                        wantRenderNotification = true;
+                                    }
                                     break;
                                 }
                             }
@@ -1574,8 +1578,9 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                             break;
                     }
 
-                    if (mWantRenderNotification) {
+                    if (wantRenderNotification) {
                         doRenderNotification = true;
+                        wantRenderNotification = false;
                     }
                 }
 
@@ -1625,11 +1630,21 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
         public void requestRenderAndWait() {
             synchronized(sGLThreadManager) {
+                // If we are already on the GL thread, this means a client callback
+                // has caused reentrancy, for example via updating the SurfaceView parameters.
+                // We will return to the client rendering code, so here we don't need to
+                // do anything.
+                if (Thread.currentThread() == this) {
+                    return;
+                }
+
                 mWantRenderNotification = true;
                 mRequestRender = true;
                 mRenderComplete = false;
+
                 sGLThreadManager.notifyAll();
-                while (!mExited && !mPaused && mRenderComplete == false) {
+
+                while (!mExited && !mPaused && !mRenderComplete && ableToDraw()) {
                     try {
                         sGLThreadManager.wait();
                     } catch (InterruptedException ex) {
@@ -1726,6 +1741,16 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 mSizeChanged = true;
                 mRequestRender = true;
                 mRenderComplete = false;
+
+                // If we are already on the GL thread, this means a client callback
+                // has caused reentrancy, for example via updating the SurfaceView parameters.
+                // We need to process the size change eventually though and update our EGLSurface.
+                // So we set the parameters and return so they can be processed on our
+                // next iteration.
+                if (Thread.currentThread() == this) {
+                    return;
+                }
+
                 sGLThreadManager.notifyAll();
 
                 // Wait for thread to react to resize and render a frame
