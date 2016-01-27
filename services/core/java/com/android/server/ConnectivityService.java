@@ -745,7 +745,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTestMode = SystemProperties.get("cm.test.mode").equals("true")
                 && SystemProperties.get("ro.build.type").equals("eng");
 
-        mTethering = new Tethering(mContext, mNetd, statsService, mHandler.getLooper());
+        mTethering = new Tethering(mContext, mNetd, statsService);
 
         mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 

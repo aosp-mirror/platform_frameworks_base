@@ -153,11 +153,10 @@ public class Tethering extends BaseNetworkObserver {
                                          // when RNDIS is enabled
 
     public Tethering(Context context, INetworkManagementService nmService,
-            INetworkStatsService statsService, Looper looper) {
+            INetworkStatsService statsService) {
         mContext = context;
         mNMService = nmService;
         mStatsService = statsService;
-        mLooper = looper;
 
         mPublicSync = new Object();
 
