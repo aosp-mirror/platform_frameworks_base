@@ -2099,7 +2099,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
-        if (!cancelDraw && !newSurface) {
+        if (!cancelDraw) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).startChangingAnimations();
@@ -2148,6 +2148,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
+
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
         Log.e(mTag, "OutOfResourcesException initializing HW surface", e);
         try {
