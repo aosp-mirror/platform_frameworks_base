@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
@@ -218,8 +219,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                         mDivider.getView().startDragging(false /* animate */, true /* touching*/);
                     }
                     mDockWindowTouchSlopExceeded = true;
-                    MetricsLogger.action(mContext,
-                            MetricsLogger.ACTION_WINDOW_DOCK_SWIPE);
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
 
                     return true;
                 }

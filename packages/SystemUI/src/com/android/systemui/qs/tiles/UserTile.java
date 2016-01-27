@@ -18,7 +18,7 @@ package com.android.systemui.qs.tiles;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Pair;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -52,7 +52,7 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_USER_TILE;
+        return MetricsEvent.QS_USER_TILE;
     }
 
     @Override

@@ -49,7 +49,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.BitmapHelper;
@@ -724,7 +724,7 @@ public class UserSwitcherController {
 
         @Override
         public int getMetricsCategory() {
-            return MetricsLogger.QS_USERDETAIL;
+            return MetricsEvent.QS_USERDETAIL;
         }
     };
 

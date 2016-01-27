@@ -18,7 +18,9 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Context;
 import android.content.res.Configuration;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -108,7 +110,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_ROTATIONLOCK;
+        return MetricsEvent.QS_ROTATIONLOCK;
     }
 
     /**

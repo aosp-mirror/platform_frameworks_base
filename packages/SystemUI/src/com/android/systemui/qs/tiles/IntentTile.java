@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.qs.QSTile;
 
 import java.util.Arrays;
@@ -155,7 +156,7 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_INTENT;
+        return MetricsEvent.QS_INTENT;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

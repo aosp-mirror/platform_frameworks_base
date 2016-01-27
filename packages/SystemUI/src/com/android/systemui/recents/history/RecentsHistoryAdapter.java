@@ -26,7 +26,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
@@ -132,7 +134,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             ssp.startActivityFromRecents(v.getContext(), task.key.id, task.title,
                     ActivityOptions.makeBasic());
 
-            MetricsLogger.action(v.getContext(), MetricsLogger.ACTION_OVERVIEW_SELECT,
+            MetricsLogger.action(v.getContext(), MetricsEvent.ACTION_OVERVIEW_SELECT,
                     task.key.getComponent().toString());
         }
 

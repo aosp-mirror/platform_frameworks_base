@@ -24,6 +24,7 @@ import android.net.ConnectivityManager;
 import android.provider.Settings.Global;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
@@ -85,7 +86,7 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_AIRPLANEMODE;
+        return MetricsEvent.QS_AIRPLANEMODE;
     }
 
     @Override

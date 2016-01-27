@@ -82,9 +82,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
     /**
      * Declare the category of this tile.
      *
-     * Categories are defined in {@link com.android.internal.logging.MetricsLogger}
-     * or if there is no relevant existing category you may define one in
-     * {@link com.android.systemui.qs.QSTile}.
+     * Categories are defined in {@link com.android.internal.logging.MetricsProto.MetricsEvent}
+     * by editing frameworks/base/proto/src/metrics_constants.proto.
      */
     abstract public int getMetricsCategory();
 

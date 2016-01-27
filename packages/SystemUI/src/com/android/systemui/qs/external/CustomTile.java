@@ -31,7 +31,9 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -197,7 +199,7 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_CUSTOM;
+        return MetricsEvent.QS_CUSTOM;
     }
 
     public void startUnlockAndRun() {

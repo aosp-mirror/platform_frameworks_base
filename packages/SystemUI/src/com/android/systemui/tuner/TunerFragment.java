@@ -36,6 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
 import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
@@ -84,7 +85,7 @@ public class TunerFragment extends PreferenceFragment {
         getContext().getContentResolver().registerContentObserver(
                 System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
 
-        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, true);
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER, true);
     }
 
     @Override
@@ -92,7 +93,7 @@ public class TunerFragment extends PreferenceFragment {
         super.onPause();
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
 
-        MetricsLogger.visibility(getContext(), MetricsLogger.TUNER, false);
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER, false);
     }
 
     @Override
@@ -141,7 +142,7 @@ public class TunerFragment extends PreferenceFragment {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             final boolean v = (Boolean) newValue;
-            MetricsLogger.action(getContext(), MetricsLogger.TUNER_BATTERY_PERCENTAGE, v);
+            MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
             System.putInt(getContext().getContentResolver(), SHOW_PERCENT_SETTING, v ? 1 : 0);
             return true;
         }

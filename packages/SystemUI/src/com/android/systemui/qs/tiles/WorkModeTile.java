@@ -24,7 +24,9 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 
@@ -124,7 +126,7 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsLogger.QS_WORKMODE;
+        return MetricsEvent.QS_WORKMODE;
     }
 
     @Override
