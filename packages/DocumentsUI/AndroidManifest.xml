@@ -54,7 +54,8 @@
             android:name=".LauncherActivity"
             android:theme="@android:style/Theme.NoDisplay"
             android:icon="@drawable/ic_files_app"
-            android:label="@string/files_label">
+            android:label="@string/files_label"
+            android:enabled="@bool/productivity_device">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
