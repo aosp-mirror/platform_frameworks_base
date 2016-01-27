@@ -22424,6 +22424,13 @@ package android.media.tv {
     field public static final int TYPE_VGA = 1005; // 0x3ed
   }
 
+  public static final class TvInputInfo.Builder {
+    ctor public TvInputInfo.Builder(android.content.Context, java.lang.Class<?>);
+    method public android.media.tv.TvInputInfo build() throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public android.media.tv.TvInputInfo.Builder setCanRecord(boolean);
+    method public android.media.tv.TvInputInfo.Builder setTunerCount(int);
+  }
+
   public final class TvInputManager {
     method public int getInputState(java.lang.String);
     method public android.media.tv.TvInputInfo getTvInputInfo(java.lang.String);
