@@ -471,6 +471,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static final String TAG_DISABLE_SCREEN_CAPTURE = "disable-screen-capture";
         private static final String TAG_DISABLE_ACCOUNT_MANAGEMENT = "disable-account-management";
         private static final String TAG_REQUIRE_AUTO_TIME = "require_auto_time";
+        private static final String TAG_FORCE_EPHEMERAL_USERS = "force_ephemeral_users";
         private static final String TAG_ACCOUNT_TYPE = "account-type";
         private static final String TAG_PERMITTED_ACCESSIBILITY_SERVICES
                 = "permitted-accessiblity-services";
@@ -559,6 +560,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableBluetoothContactSharing = true;
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
+        boolean forceEphemeralUsers = false; // Can only be set by a device owner.
 
         ActiveAdmin parentAdmin;
         final boolean isParent;
@@ -749,6 +751,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(requireAutoTime));
                 out.endTag(null, TAG_REQUIRE_AUTO_TIME);
             }
+            if (forceEphemeralUsers) {
+                out.startTag(null, TAG_FORCE_EPHEMERAL_USERS);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(forceEphemeralUsers));
+                out.endTag(null, TAG_FORCE_EPHEMERAL_USERS);
+            }
             if (disabledKeyguardFeatures != DEF_KEYGUARD_FEATURES_DISABLED) {
                 out.startTag(null, TAG_DISABLE_KEYGUARD_FEATURES);
                 out.attribute(null, ATTR_VALUE, Integer.toString(disabledKeyguardFeatures));
@@ -919,7 +926,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     disableScreenCapture = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_REQUIRE_AUTO_TIME.equals(tag)) {
-                    requireAutoTime= Boolean.parseBoolean(
+                    requireAutoTime = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_FORCE_EPHEMERAL_USERS.equals(tag)) {
+                    forceEphemeralUsers = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_DISABLE_KEYGUARD_FEATURES.equals(tag)) {
                     disabledKeyguardFeatures = Integer.parseInt(
@@ -1150,6 +1160,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     pw.println(disableScreenCapture);
             pw.print(prefix); pw.print("requireAutoTime=");
                     pw.println(requireAutoTime);
+            pw.print(prefix); pw.print("forceEphemeralUsers=");
+                    pw.println(forceEphemeralUsers);
             pw.print(prefix); pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
             pw.print(prefix); pw.print("crossProfileWidgetProviders=");
@@ -2407,6 +2419,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         if (packageList != null) {
             mInjector.getPackageManagerInternal().setKeepUninstalledPackages(packageList);
+        }
+
+        synchronized (this) {
+            // push the force-ephemeral-users policy to the user manager.
+            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            if (deviceOwner != null) {
+                mUserManagerInternal.setForceEphemeralUsers(deviceOwner.forceEphemeralUsers);
+            }
         }
     }
 
@@ -4789,6 +4809,46 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public void setForceEphemeralUsers(ComponentName who, boolean forceEphemeralUsers) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        boolean removeAllUsers = false;
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (deviceOwner.forceEphemeralUsers != forceEphemeralUsers) {
+                deviceOwner.forceEphemeralUsers = forceEphemeralUsers;
+                saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+                mUserManagerInternal.setForceEphemeralUsers(forceEphemeralUsers);
+                removeAllUsers = forceEphemeralUsers;
+            }
+        }
+        if (removeAllUsers) {
+            long identitity = mInjector.binderClearCallingIdentity();
+            try {
+                mUserManagerInternal.removeAllUsers();
+            } finally {
+                mInjector.binderRestoreCallingIdentity(identitity);
+            }
+        }
+    }
+
+    @Override
+    public boolean getForceEphemeralUsers(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return deviceOwner.forceEphemeralUsers;
+        }
+    }
+
     private void ensureDeviceOwnerManagingSingleUser(ComponentName who) throws SecurityException {
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -5319,6 +5379,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin != null) {
                 admin.disableCamera = false;
                 admin.userRestrictions = null;
+                admin.forceEphemeralUsers = false;
+                mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
             }
 
             clearUserPoliciesLocked(new UserHandle(UserHandle.USER_SYSTEM));

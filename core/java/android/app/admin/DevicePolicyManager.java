@@ -2770,6 +2770,45 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to set whether all users created on the device should be ephemeral.
+     *
+     * <p>The system user is exempt from this policy - it is never ephemeral.
+     *
+     * <p>The calling device admin must be the device owner. If it is not, a security exception will
+     * be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param forceEphemeralUsers If true, all the existing users will be deleted and all
+     *         subsequently created users will be ephemeral.
+     * @hide
+     */
+    public void setForceEphemeralUsers(
+            @NonNull ComponentName admin, boolean forceEphemeralUsers) {
+        if (mService != null) {
+            try {
+                mService.setForceEphemeralUsers(admin, forceEphemeralUsers);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * @return true if all users are created ephemeral.
+     * @hide
+     */
+    public boolean getForceEphemeralUsers(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getForceEphemeralUsers(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by an application that is administering the device to disable keyguard customizations,
      * such as widgets. After setting this, keyguard features will be disabled according to the
      * provided feature list.
