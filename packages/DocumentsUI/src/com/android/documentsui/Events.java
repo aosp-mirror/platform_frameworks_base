@@ -78,6 +78,27 @@ public final class Events {
     }
 
     /**
+     * Whether or not the given keyCode represents a navigation keystroke (e.g. up, down, home).
+     *
+     * @param keyCode
+     * @return
+     */
+    public static boolean isNavigationKeyCode(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_MOVE_HOME:
+            case KeyEvent.KEYCODE_MOVE_END:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+    /**
      * Returns true if the "SHIFT" bit is set.
      */
     public static boolean hasShiftBit(int metaState) {

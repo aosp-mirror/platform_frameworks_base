@@ -84,13 +84,7 @@ public abstract class DocumentHolder
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         // Event listener should always be set.
         checkNotNull(mEventListener);
-        // Intercept enter key-up events, and treat them as clicks.  Forward other events.
-        if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_ENTER) {
-            return mEventListener.onActivate(this);
-        } else if (mKeyListener != null) {
-            return mKeyListener.onKey(v, keyCode, event);
-        }
-        return false;
+        return mEventListener.onKey(this,  keyCode,  event);
     }
 
     public void addEventListener(DocumentHolder.EventListener listener) {
@@ -159,15 +153,29 @@ public abstract class DocumentHolder
      */
     interface EventListener {
         /**
+         * Handles activation events on the document holder.
+         *
          * @param doc The target DocumentHolder
          * @return Whether the event was handled.
          */
         public boolean onActivate(DocumentHolder doc);
 
         /**
+         * Handles selection events on the document holder.
+         *
          * @param doc The target DocumentHolder
          * @return Whether the event was handled.
          */
         public boolean onSelect(DocumentHolder doc);
+
+        /**
+         * Handles key events on the document holder.
+         *
+         * @param doc The target DocumentHolder.
+         * @param keyCode Key code for the event.
+         * @param event KeyEvent for the event.
+         * @return Whether the event was handled.
+         */
+        public boolean onKey(DocumentHolder doc, int keyCode, KeyEvent event);
     }
 }

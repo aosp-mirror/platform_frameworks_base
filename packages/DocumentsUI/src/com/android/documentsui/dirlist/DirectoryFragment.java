@@ -66,6 +66,7 @@ import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -99,7 +100,6 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperations;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -529,6 +529,9 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             final Cursor cursor = mModel.getItem(modelId);
             checkNotNull(cursor, "Cursor cannot be null.");
 
+            // TODO: Should this be happening in onSelectionChanged? Technically this callback is
+            // triggered on "silent" selection updates (i.e. we might be reacting to unfinalized
+            // selection changes here)
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
             if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
@@ -821,7 +824,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     @Override
     public void initDocumentHolder(DocumentHolder holder) {
         holder.addEventListener(mItemEventListener);
-        holder.addOnKeyListener(mSelectionManager);
     }
 
     @Override
@@ -1223,7 +1225,12 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private class ItemEventListener implements DocumentHolder.EventListener {
         @Override
         public boolean onActivate(DocumentHolder doc) {
-            handleViewItem(doc.modelId);
+            // Toggle selection if we're in selection mode, othewise, view item.
+            if (mSelectionManager.hasSelection()) {
+                mSelectionManager.toggleSelection(doc.modelId);
+            } else {
+                handleViewItem(doc.modelId);
+            }
             return true;
         }
 
@@ -1233,6 +1240,128 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             mSelectionManager.setSelectionRangeBegin(doc.getAdapterPosition());
             return true;
         }
+
+        @Override
+        public boolean onKey(DocumentHolder doc, int keyCode, KeyEvent event) {
+            // Only handle key-down events. This is simpler, consistent with most other UIs, and
+            // enables the handling of repeated key events from holding down a key.
+            if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                return false;
+            }
+
+            boolean handled = false;
+            if (Events.isNavigationKeyCode(keyCode)) {
+                // Find the target item and focus it.
+                int endPos = findTargetPosition(doc.itemView, keyCode);
+
+                if (endPos != RecyclerView.NO_POSITION) {
+                    focusItem(endPos);
+
+                    // Handle any necessary adjustments to selection.
+                    boolean extendSelection = event.isShiftPressed();
+                    if (extendSelection) {
+                        int startPos = doc.getAdapterPosition();
+                        mSelectionManager.selectRange(startPos, endPos);
+                    }
+                    handled = true;
+                }
+            } else {
+                // Handle enter key events
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    handled = onActivate(doc);
+                }
+            }
+
+            return handled;
+        }
+
+        /**
+         * Finds the destination position where the focus should land for a given navigation event.
+         *
+         * @param view The view that received the event.
+         * @param keyCode The key code for the event.
+         * @return The adapter position of the destination item. Could be RecyclerView.NO_POSITION.
+         */
+        private int findTargetPosition(View view, int keyCode) {
+            if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
+                return 0;
+            }
+
+            if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
+                return mAdapter.getItemCount() - 1;
+            }
+
+            // Find a navigation target based on the arrow key that the user pressed.
+            int searchDir = -1;
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_UP:
+                    searchDir = View.FOCUS_UP;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                    searchDir = View.FOCUS_DOWN;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    searchDir = View.FOCUS_LEFT;
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    searchDir = View.FOCUS_RIGHT;
+                    break;
+            }
+
+            if (searchDir != -1) {
+                View targetView = view.focusSearch(searchDir);
+                // TargetView can be null, for example, if the user pressed <down> at the bottom
+                // of the list.
+                if (targetView != null) {
+                    // Ignore navigation targets that aren't items in the RecyclerView.
+                    if (targetView.getParent() == mRecView) {
+                        return mRecView.getChildAdapterPosition(targetView);
+                    }
+                }
+            }
+
+            return RecyclerView.NO_POSITION;
+        }
+
+        /**
+         * Requests focus for the item in the given adapter position, scrolling the RecyclerView if
+         * necessary.
+         *
+         * @param pos
+         */
+        public void focusItem(final int pos) {
+            // If the item is already in view, focus it; otherwise, scroll to it and focus it.
+            RecyclerView.ViewHolder vh = mRecView.findViewHolderForAdapterPosition(pos);
+            if (vh != null) {
+                vh.itemView.requestFocus();
+            } else {
+                mRecView.smoothScrollToPosition(pos);
+                // Set a one-time listener to request focus when the scroll has completed.
+                mRecView.addOnScrollListener(
+                    new RecyclerView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged (RecyclerView view, int newState) {
+                            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                                // When scrolling stops, find the item and focus it.
+                                RecyclerView.ViewHolder vh =
+                                        view.findViewHolderForAdapterPosition(pos);
+                                if (vh != null) {
+                                    vh.itemView.requestFocus();
+                                } else {
+                                    // This might happen in weird corner cases, e.g. if the user is
+                                    // scrolling while a delete operation is in progress.  In that
+                                    // case, just don't attempt to focus the missing item.
+                                    Log.w(
+                                        TAG, "Unable to focus position " + pos + " after a scroll");
+                                }
+                                view.removeOnScrollListener(this);
+                            }
+                        }
+                    });
+            }
+        }
+
+
     }
 
     private final class ModelUpdateListener implements Model.UpdateListener {
