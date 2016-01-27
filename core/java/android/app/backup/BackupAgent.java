@@ -382,6 +382,28 @@ public abstract class BackupAgent extends ContextWrapper {
     }
 
     /**
+     * Tells the application agent that the backup data size exceeded current transport quota.
+     * Later calls to {@link #onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)}
+     * and {@link #onFullBackup(FullBackupDataOutput)} could use this information
+     * to reduce backup size under the limit.
+     * However, the quota can change, so do not assume that the value passed in here is absolute,
+     * similarly all subsequent backups should not be restricted to this size.
+     * This callback will be invoked before data has been put onto the wire in a preflight check,
+     * so it is relatively inexpensive to hit your quota.
+     * Apps that hit quota repeatedly without dealing with it can be subject to having their backup
+     * schedule reduced.
+     * The {@code quotaBytes} is a loose guideline b/c of metadata added by the backupmanager
+     * so apps should be more aggressive in trimming their backup set.
+     *
+     * @param backupDataBytes Expected or already processed amount of data.
+     *                        Could be less than total backup size if backup process was interrupted
+     *                        before finish of processing all backup data.
+     * @param quotaBytes Current amount of backup data that is allowed for the app.
+     */
+    public void onQuotaExceeded(long backupDataBytes, long quotaBytes) {
+    }
+
+    /**
      * Check whether the xml yielded any <include/> tag for the provided <code>domainToken</code>.
      * If so, perform a {@link #fullBackupFileTree} which backs up the file or recurses if the path
      * is a directory.
@@ -954,6 +976,21 @@ public abstract class BackupAgent extends ContextWrapper {
         @Override
         public void fail(String message) {
             getHandler().post(new FailRunnable(message));
+        }
+
+        @Override
+        public void doQuotaExceeded(long backupDataBytes, long quotaBytes) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.onQuotaExceeded(backupDataBytes, quotaBytes);
+            } catch (Exception e) {
+                Log.d(TAG, "onQuotaExceeded(" + BackupAgent.this.getClass().getName() + ") threw",
+                        e);
+                throw e;
+            } finally {
+                waitForSharedPrefs();
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 

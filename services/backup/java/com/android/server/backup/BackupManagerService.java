@@ -3168,8 +3168,9 @@ public class BackupManagerService {
 
             ParcelFileDescriptor backupData = null;
             mStatus = BackupTransport.TRANSPORT_OK;
+            long size = 0;
             try {
-                int size = (int) mBackupDataName.length();
+                size = mBackupDataName.length();
                 if (size > 0) {
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
                         backupData = ParcelFileDescriptor.open(mBackupDataName,
@@ -3214,6 +3215,10 @@ public class BackupManagerService {
                     sendBackupOnResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
                     EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
+                } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                    sendBackupOnResult(mObserver, pkgName,
+                            BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
+                    EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
                 } else {
                     // Actual transport-level failure to communicate the data to the backend
                     sendBackupOnResult(mObserver, pkgName, BackupManager.ERROR_TRANSPORT_ABORTED);
@@ -3233,6 +3238,20 @@ public class BackupManagerService {
                     || mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
                 // Success or single-package rejection.  Proceed with the next app if any,
                 // otherwise we're done.
+                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+            } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                if (MORE_DEBUG) {
+                    Slog.d(TAG, "Package " + mCurrentPackage.packageName +
+                            " hit quota limit on k/v backup");
+                }
+                if (mAgentBinder != null) {
+                    try {
+                        long quota = mTransport.getBackupQuota(mCurrentPackage.packageName, false);
+                        mAgentBinder.doQuotaExceeded(size, quota);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to contact backup agent for quota exceeded");
+                    }
+                }
                 nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
             } else {
                 // Any other error here indicates a transport-level failure.  That means
@@ -3476,6 +3495,7 @@ public class BackupManagerService {
         OutputStream mOutput;
         FullBackupPreflight mPreflightHook;
         IFullBackupRestoreObserver mObserver;
+        IBackupAgent mAgent;
         File mFilesDir;
         File mManifestFile;
         File mMetadataFile;
@@ -3562,14 +3582,14 @@ public class BackupManagerService {
             int result = BackupTransport.TRANSPORT_OK;
             Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
 
-            IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
+            mAgent = bindToAgentSynchronous(pkg.applicationInfo,
                     IApplicationThread.BACKUP_MODE_FULL);
-            if (agent != null) {
+            if (mAgent != null) {
                 ParcelFileDescriptor[] pipes = null;
                 try {
                     // Call the preflight hook, if any
                     if (mPreflightHook != null) {
-                        result = mPreflightHook.preflightFullBackup(pkg, agent);
+                        result = mPreflightHook.preflightFullBackup(pkg, mAgent);
                         if (MORE_DEBUG) {
                             Slog.v(TAG, "preflight returned " + result);
                         }
@@ -3592,7 +3612,7 @@ public class BackupManagerService {
                                 UserHandle.USER_SYSTEM);
 
                         final int token = generateToken();
-                        FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
+                        FullBackupRunner runner = new FullBackupRunner(pkg, mAgent, pipes[1],
                                 token, sendApk, !isSharedStorage, widgetBlob);
                         pipes[1].close();   // the runner has dup'd it
                         pipes[1] = null;
@@ -3638,6 +3658,16 @@ public class BackupManagerService {
             }
             tearDown(pkg);
             return result;
+        }
+
+        public void sendQuotaExceeded(final long backupDataBytes, final long quotaBytes) {
+            if (mAgent != null) {
+                try {
+                    mAgent.doQuotaExceeded(backupDataBytes, quotaBytes);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote exception while telling agent about quota exceeded");
+                }
+            }
         }
 
         private void writeApkToBackup(PackageInfo pkg, FullBackupDataOutput output) {
@@ -4344,6 +4374,15 @@ public class BackupManagerService {
                             }
                         } while (nRead > 0 && result == BackupTransport.TRANSPORT_OK);
 
+                        if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                            long quota = transport.getBackupQuota(currentPackage.packageName, true);
+                            if (MORE_DEBUG) {
+                                Slog.d(TAG, "Package hit quota limit " + currentPackage.packageName
+                                        + ": " + totalRead + " of " + quota);
+                            }
+                            backupRunner.sendQuotaExceeded(totalRead, quota);
+                        }
+
                         // If we've lost our running criteria, tell the transport to cancel
                         // and roll back this (partial) backup payload; otherwise tell it
                         // that we've reached the clean finish state.
@@ -4387,6 +4426,8 @@ public class BackupManagerService {
                     }
 
                     if (result == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                        sendBackupOnResult(mBackupObserver, currentPackage.packageName,
+                            BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
                         if (DEBUG) {
                             Slog.i(TAG, "Transport rejected backup of "
                                     + currentPackage.packageName
@@ -4394,35 +4435,40 @@ public class BackupManagerService {
                         }
                         EventLog.writeEvent(EventLogTags.FULL_BACKUP_AGENT_FAILURE,
                                 currentPackage.packageName, "transport rejected");
-                        sendBackupOnResult(mBackupObserver, currentPackage.packageName,
-                            BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
                         // do nothing, clean up, and continue looping
+                    } else if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                        sendBackupOnResult(mBackupObserver, currentPackage.packageName,
+                            BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
+                        Slog.w(TAG, "Transport quota exceeded; aborting backup: " + result);
+                        EventLog.writeEvent(EventLogTags.FULL_BACKUP_QUOTA_EXCEEDED,
+                                currentPackage.packageName);
+                        return;
                     } else if (result != BackupTransport.TRANSPORT_OK) {
-                        Slog.w(TAG, "Transport failed; aborting backup: " + result);
-                        EventLog.writeEvent(EventLogTags.FULL_BACKUP_TRANSPORT_FAILURE);
                         sendBackupOnResult(mBackupObserver, currentPackage.packageName,
                             BackupManager.ERROR_TRANSPORT_ABORTED);
+                        Slog.w(TAG, "Transport failed; aborting backup: " + result);
+                        EventLog.writeEvent(EventLogTags.FULL_BACKUP_TRANSPORT_FAILURE);
                         return;
                     } else {
                         // Success!
+                        sendBackupOnResult(mBackupObserver, currentPackage.packageName,
+                            BackupManager.SUCCESS);
                         EventLog.writeEvent(EventLogTags.FULL_BACKUP_SUCCESS,
                                 currentPackage.packageName);
                         logBackupComplete(currentPackage.packageName);
-                        sendBackupOnResult(mBackupObserver, currentPackage.packageName,
-                            BackupManager.SUCCESS);
                     }
                     cleanUpPipes(transportPipes);
                     cleanUpPipes(enginePipes);
                     currentPackage = null;
                 }
 
+                sendBackupFinished(mBackupObserver, BackupManager.SUCCESS);
                 if (DEBUG) {
                     Slog.i(TAG, "Full backup completed.");
                 }
-                sendBackupFinished(mBackupObserver, BackupManager.SUCCESS);
             } catch (Exception e) {
-                Slog.w(TAG, "Exception trying full transport backup", e);
                 sendBackupFinished(mBackupObserver, BackupManager.ERROR_TRANSPORT_ABORTED);
+                Slog.w(TAG, "Exception trying full transport backup", e);
             } finally {
                 cleanUpPipes(transportPipes);
                 cleanUpPipes(enginePipes);
@@ -4503,6 +4549,14 @@ public class BackupManagerService {
                     }
 
                     result = mTransport.checkFullBackupSize(totalSize);
+                    if (result == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                        final long quota = mTransport.getBackupQuota(pkg.packageName, true);
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "Package hit quota limit on preflight " +
+                                    pkg.packageName + ": " + totalSize + " of " + quota);
+                        }
+                        agent.doQuotaExceeded(totalSize, quota);
+                    }
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception preflighting " + pkg.packageName + ": " + e.getMessage());
                     result = BackupTransport.AGENT_ERROR;
@@ -4550,6 +4604,7 @@ public class BackupManagerService {
             final PackageInfo mTarget;
             final FullBackupPreflight mPreflight;
             final CountDownLatch mLatch;
+            private FullBackupEngine mEngine;
 
             SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
                     IBackupTransport transport, CountDownLatch latch) throws IOException {
@@ -4563,9 +4618,9 @@ public class BackupManagerService {
             public void run() {
                 try {
                     FileOutputStream out = new FileOutputStream(mOutput.getFileDescriptor());
-                    FullBackupEngine engine = new FullBackupEngine(out, mTarget.packageName,
+                    mEngine = new FullBackupEngine(out, mTarget.packageName,
                             mPreflight, false);
-                    engine.backupOnePackage(mTarget);
+                    mEngine.backupOnePackage(mTarget);
                 } catch (Exception e) {
                     Slog.e(TAG, "Exception during full package backup of " + mTarget);
                 } finally {
@@ -4576,6 +4631,10 @@ public class BackupManagerService {
                         Slog.w(TAG, "Error closing transport pipe in runner");
                     }
                 }
+            }
+
+            public void sendQuotaExceeded(final long backupDataBytes, final long quotaBytes) {
+                mEngine.sendQuotaExceeded(backupDataBytes, quotaBytes);
             }
 
             long expectedSize() {

@@ -108,6 +108,7 @@ option java_package com.android.server
 2826 backup_reset (Transport|3)
 2827 backup_initialize
 2828 backup_requested (Total|1|1),(Key-Value|1|1),(Full|1|1)
+2829 backup_quota_exceeded (Package|3)
 2830 restore_start (Transport|3),(Source|2|5)
 2831 restore_transport_failure
 2832 restore_agent_failure (Package|3),(Message|3)
@@ -119,6 +120,7 @@ option java_package com.android.server
 2842 full_backup_transport_failure
 2843 full_backup_success (Package|3)
 2844 full_restore_package (Package|3)
+2845 full_backup_quota_exceeded (Package|3)
 
 2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
 
