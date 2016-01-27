@@ -5349,7 +5349,29 @@ public class WindowManagerService extends IWindowManager.Stub
                 rebuildAppWindowListLocked(displayContent);
             }
             mWindowPlacerLocked.performSurfacePlacement();
+
+            // Notify whether the docked stack exists for the current user
+            getDefaultDisplayContentLocked().mDividerControllerLocked
+                    .notifyDockedStackExistsChanged(hasDockedTasksForUser(newUserId));
         }
+    }
+
+    /**
+     * Returns whether there is a docked task for the current user.
+     */
+    boolean hasDockedTasksForUser(int userId) {
+        final TaskStack stack = mStackIdToStack.get(DOCKED_STACK_ID);
+        if (stack == null) {
+            return false;
+        }
+
+        final ArrayList<Task> tasks = stack.getTasks();
+        boolean hasUserTask = false;
+        for (int i = tasks.size() - 1; i >= 0 && !hasUserTask; i--) {
+            final Task task = tasks.get(i);
+            hasUserTask = (task.mUserId == userId);
+        }
+        return hasUserTask;
     }
 
     /* Called by WindowState */

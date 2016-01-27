@@ -378,13 +378,19 @@ public class SystemServicesProxy {
         ActivityManager.StackInfo stackInfo = null;
         try {
             stackInfo = mIam.getStackInfo(DOCKED_STACK_ID);
-            if (stackInfo != null && stackInfo.userId != getCurrentUser()) {
-                return false;
-            }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        return stackInfo != null;
+
+        if (stackInfo != null) {
+            int userId = getCurrentUser();
+            boolean hasUserTask = false;
+            for (int i = stackInfo.taskUserIds.length - 1; i >= 0 && !hasUserTask; i--) {
+                hasUserTask = (stackInfo.taskUserIds[i] == userId);
+            }
+            return hasUserTask;
+        }
+        return false;
     }
 
     /**
