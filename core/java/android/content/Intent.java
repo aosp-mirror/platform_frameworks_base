@@ -5698,6 +5698,9 @@ public class Intent implements Parcelable, Cloneable {
                 case "--receiver-replace-pending":
                     intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                     break;
+                case "--receiver-foreground":
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                    break;
                 case "--selector":
                     intent.setDataAndType(data, type);
                     intent = new Intent();
@@ -5807,6 +5810,7 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
                 "        (mutiple extras passed as List<String>; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
+                "    [--f <FLAG>]",
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]",
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]",
                 "    [--debug-log-resolution] [--exclude-stopped-packages]",
@@ -5820,6 +5824,7 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--activity-single-top] [--activity-clear-task]",
                 "    [--activity-task-on-home]",
                 "    [--receiver-registered-only] [--receiver-replace-pending]",
+                "    [--receiver-foreground]",
                 "    [--selector]",
                 "    [<URI> | <PACKAGE> | <COMPONENT>]"
         };
