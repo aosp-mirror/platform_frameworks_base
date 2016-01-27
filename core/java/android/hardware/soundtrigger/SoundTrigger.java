@@ -195,6 +195,12 @@ public class SoundTrigger {
         /** Keyphrase sound model */
         public static final int TYPE_KEYPHRASE = 0;
 
+        /**
+         * A generic sound model. Use this type only for non-keyphrase sound models such as
+         * ones that match a particular sound pattern.
+         */
+        public static final int TYPE_GENERIC_SOUND = 1;
+
         /** Unique sound model identifier */
         public final UUID uuid;
 
@@ -455,6 +461,63 @@ public class SoundTrigger {
             if (!Arrays.equals(keyphrases, other.keyphrases))
                 return false;
             return true;
+        }
+    }
+
+
+    /*****************************************************************************
+     * A GenericSoundModel is a specialized {@link SoundModel} for non-voice sound
+     * patterns.
+     ****************************************************************************/
+    public static class GenericSoundModel extends SoundModel implements Parcelable {
+
+        public static final Parcelable.Creator<GenericSoundModel> CREATOR
+                = new Parcelable.Creator<GenericSoundModel>() {
+            public GenericSoundModel createFromParcel(Parcel in) {
+                return GenericSoundModel.fromParcel(in);
+            }
+
+            public GenericSoundModel[] newArray(int size) {
+                return new GenericSoundModel[size];
+            }
+        };
+
+        public GenericSoundModel(UUID uuid, UUID vendorUuid, byte[] data) {
+            super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        private static GenericSoundModel fromParcel(Parcel in) {
+            UUID uuid = UUID.fromString(in.readString());
+            UUID vendorUuid = null;
+            int length = in.readInt();
+            if (length >= 0) {
+                vendorUuid = UUID.fromString(in.readString());
+            }
+            byte[] data = in.readBlob();
+            return new GenericSoundModel(uuid, vendorUuid, data);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(uuid.toString());
+            if (vendorUuid == null) {
+                dest.writeInt(-1);
+            } else {
+                dest.writeInt(vendorUuid.toString().length());
+                dest.writeString(vendorUuid.toString());
+            }
+            dest.writeBlob(data);
+        }
+
+        @Override
+        public String toString() {
+            return "GenericSoundModel [uuid=" + uuid + ", vendorUuid=" + vendorUuid
+                    + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
         }
     }
 
@@ -1019,6 +1082,21 @@ public class SoundTrigger {
     }
 
     /**
+     * Sub-class of RecognitionEvent specifically for sound-trigger based sound
+     * models(non-keyphrase). Currently does not contain any additional fields.
+     */
+    public static class GenericRecognitionEvent extends RecognitionEvent {
+        public GenericRecognitionEvent(int status, int soundModelHandle,
+                boolean captureAvailable, int captureSession, int captureDelayMs,
+                int capturePreambleMs, boolean triggerInData, AudioFormat captureFormat,
+                byte[] data) {
+            super(status, soundModelHandle, captureAvailable, captureSession,
+                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
+                    data);
+        }
+    }
+
+    /**
      *  Status codes for {@link SoundModelEvent}
      */
     /** Sound Model was updated */
@@ -1118,7 +1196,7 @@ public class SoundTrigger {
     public static final int SERVICE_STATE_DISABLED = 1;
 
     /**
-     * Returns a list of descriptors for all harware modules loaded.
+     * Returns a list of descriptors for all hardware modules loaded.
      * @param modules A ModuleProperties array where the list will be returned.
      * @return - {@link #STATUS_OK} in case of success
      *         - {@link #STATUS_ERROR} in case of unspecified error

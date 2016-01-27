@@ -62,6 +62,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.soundtrigger.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 
@@ -79,15 +80,14 @@ public class VoiceInteractionManagerService extends SystemService {
     final Context mContext;
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
-    final SoundTriggerHelper mSoundTriggerHelper;
     final ActivityManagerInternal mAmInternal;
+    SoundTriggerInternal mSoundTriggerInternal;
 
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
-        mSoundTriggerHelper = new SoundTriggerHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
 
@@ -115,7 +115,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+        if (PHASE_SYSTEM_SERVICES_READY == phase) {
+            mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
+        } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
         }
     }
@@ -380,7 +382,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
-                    mSoundTriggerHelper.stopAllRecognitions();
+                    mSoundTriggerInternal.stopAllRecognitions();
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
                     }
@@ -736,9 +738,9 @@ public class VoiceInteractionManagerService extends SystemService {
                             mImpl.notifySoundModelsChangedLocked();
                         }
                     }
-                    return SoundTriggerHelper.STATUS_OK;
+                    return SoundTriggerInternal.STATUS_OK;
                 } else {
-                    return SoundTriggerHelper.STATUS_ERROR;
+                    return SoundTriggerInternal.STATUS_ERROR;
                 }
             } finally {
                 Binder.restoreCallingIdentity(caller);
@@ -759,7 +761,7 @@ public class VoiceInteractionManagerService extends SystemService {
             boolean deleted = false;
             try {
                 deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
-                return deleted ? SoundTriggerHelper.STATUS_OK : SoundTriggerHelper.STATUS_ERROR;
+                return deleted ? SoundTriggerInternal.STATUS_OK : SoundTriggerInternal.STATUS_ERROR;
             } finally {
                 if (deleted) {
                     synchronized (this) {
@@ -812,7 +814,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mSoundTriggerHelper.moduleProperties;
+                    return mSoundTriggerInternal.getModuleProperties();
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -845,9 +847,9 @@ public class VoiceInteractionManagerService extends SystemService {
                         || soundModel.uuid == null
                         || soundModel.keyphrases == null) {
                     Slog.w(TAG, "No matching sound model found in startRecognition");
-                    return SoundTriggerHelper.STATUS_ERROR;
+                    return SoundTriggerInternal.STATUS_ERROR;
                 } else {
-                    return mSoundTriggerHelper.startRecognition(
+                    return mSoundTriggerInternal.startRecognition(
                             keyphraseId, soundModel, callback, recognitionConfig);
                 }
             } finally {
@@ -869,7 +871,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
             final long caller = Binder.clearCallingIdentity();
             try {
-                return mSoundTriggerHelper.stopRecognition(keyphraseId, callback);
+                return mSoundTriggerInternal.stopRecognition(keyphraseId, callback);
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
@@ -1011,7 +1013,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 mImpl.dumpLocked(fd, pw, args);
             }
-            mSoundTriggerHelper.dump(fd, pw, args);
+            mSoundTriggerInternal.dump(fd, pw, args);
         }
 
         private void enforceCallingPermission(String permission) {
@@ -1060,7 +1062,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     // The user is force stopping our current interactor/recognizer.
                     // Clear the current settings and restore default state.
                     synchronized (VoiceInteractionManagerService.this) {
-                        mSoundTriggerHelper.stopAllRecognitions();
+                        mSoundTriggerInternal.stopAllRecognitions();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
                             mImpl = null;

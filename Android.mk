@@ -288,6 +288,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IBatteryStats.aidl \
 	core/java/com/android/internal/app/IEphemeralResolver.aidl \
 	core/java/com/android/internal/app/IProcessStats.aidl \
+	core/java/com/android/internal/app/ISoundTriggerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionManagerService.aidl \
 	core/java/com/android/internal/app/IVoiceInteractionSessionShowCallback.aidl \
 	core/java/com/android/internal/app/IVoiceInteractor.aidl \
