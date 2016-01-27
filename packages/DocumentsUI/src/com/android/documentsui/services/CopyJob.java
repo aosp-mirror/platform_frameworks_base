@@ -199,7 +199,7 @@ class CopyJob extends Job {
                     "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")"
                     + " to " + dstInfo.displayName + " (" + dstInfo.derivedUri + ")");
 
-            processDocument(srcInfo, dstInfo);
+            processDocument(srcInfo, null, dstInfo);
         }
     }
 
@@ -220,11 +220,15 @@ class CopyJob extends Job {
      * Copies a the given document to the given location.
      *
      * @param src DocumentInfos for the documents to copy.
+     * @param srcParent DocumentInfo for the parent of the document to process.
      * @param dstDirInfo The destination directory.
      * @return True on success, false on failure.
      * @throws RemoteException
+     *
+     * TODO: Stop passing srcParent, as it's not used for copy, but for move only.
      */
-    boolean processDocument(DocumentInfo src, DocumentInfo dstDirInfo) throws RemoteException {
+    boolean processDocument(DocumentInfo src, DocumentInfo srcParent,
+            DocumentInfo dstDirInfo) throws RemoteException {
 
         // TODO: When optimized copy kicks in, we'll not making any progress updates.
         // For now. Local storage isn't using optimized copy.
@@ -332,7 +336,7 @@ class CopyJob extends Job {
             cursor = getClient(srcDir).query(queryUri, queryColumns, null, null, null);
             while (cursor.moveToNext() && !isCanceled()) {
                 DocumentInfo src = DocumentInfo.fromCursor(cursor, srcDir.authority);
-                success &= processDocument(src, destDir);
+                success &= processDocument(src, srcDir, destDir);
             }
         } finally {
             IoUtils.closeQuietly(cursor);
@@ -509,7 +513,7 @@ class CopyJob extends Job {
                 .append("CopyJob")
                 .append("{")
                 .append("id=" + id)
-                .append("srcs=" + mSrcs)
+                .append(", srcs=" + mSrcs)
                 .append(", destination=" + stack)
                 .append("}")
                 .toString();

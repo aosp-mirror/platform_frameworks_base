@@ -19,6 +19,8 @@ package com.android.documentsui.services;
 import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
+import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -36,8 +38,9 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
     }
 
     public void testMoveVirtualTypedFile() throws Exception {
+        mDocs.createFolder(mSrcRoot, "hello");
         Uri testFile = mDocs.createVirtualFile(
-                mSrcRoot, "/virtual.sth", "virtual/mime-type",
+                mSrcRoot, "/hello/virtual.sth", "virtual/mime-type",
                 FRUITY_BYTES, "application/pdf", "text/html");
         createJob(newArrayList(testFile)).run();
 
@@ -89,9 +92,13 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
         mDocs.assertChildCount(mSrcRoot, 1);
     }
 
+    // TODO: Add test cases for moving when multi-parented.
+
     @Override
-    MoveJob createJob(List<DocumentInfo> srcs, DocumentStack stack) throws Exception {
+    MoveJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+            throws Exception {
         return new MoveJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs,
+                srcParent);
     }
 }

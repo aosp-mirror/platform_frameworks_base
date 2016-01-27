@@ -85,7 +85,7 @@ public abstract class AbstractJobTest<T extends Job> extends AndroidTestCase {
         mDestRoot = mDocs.getRoot(ROOT_1_ID);
     }
 
-    final T createJob(List<Uri> srcs, Uri destination) throws Exception {
+    final T createJob(List<Uri> srcs, Uri srcParent, Uri destination) throws Exception {
         DocumentStack stack = new DocumentStack();
         stack.push(DocumentInfo.fromUri(mResolver, destination));
 
@@ -94,8 +94,9 @@ public abstract class AbstractJobTest<T extends Job> extends AndroidTestCase {
             srcDocs.add(DocumentInfo.fromUri(mResolver, src));
         }
 
-        return createJob(srcDocs, stack);
+        return createJob(srcDocs, DocumentInfo.fromUri(mResolver, srcParent), stack);
     }
 
-    abstract T createJob(List<DocumentInfo> srcs, DocumentStack destination) throws Exception;
+    abstract T createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack destination)
+            throws Exception;
 }

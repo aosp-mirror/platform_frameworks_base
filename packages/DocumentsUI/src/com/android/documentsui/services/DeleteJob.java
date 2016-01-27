@@ -35,6 +35,7 @@ final class DeleteJob extends Job {
 
     private static final String TAG = "DeleteJob";
     private List<DocumentInfo> mSrcs;
+    final DocumentInfo mSrcParent;
 
     /**
      * Moves files to a destination identified by {@code destination}.
@@ -43,12 +44,14 @@ final class DeleteJob extends Job {
      *
      * @see @link {@link Job} constructor for most param descriptions.
      *
-     * @param srcs List of files to delete
+     * @param srcs List of files to delete.
+     * @param srcParent Parent of all source files.
      */
     DeleteJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack stack, List<DocumentInfo> srcs) {
+            String id, DocumentStack stack, List<DocumentInfo> srcs, DocumentInfo srcParent) {
         super(service, appContext, listener, OPERATION_DELETE, id, stack);
         this.mSrcs = srcs;
+        this.mSrcParent = srcParent;
     }
 
     @Override
@@ -75,6 +78,8 @@ final class DeleteJob extends Job {
     void start() throws RemoteException {
         for (DocumentInfo doc : mSrcs) {
             if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
+            // TODO: Start using mSrcParent as soon as DocumentsProvider::removeDocument() is
+            // implemented.
             if (!deleteDocument(doc)) {
                 Log.w(TAG, "Failed to delete document @ " + doc.derivedUri);
                 onFileFailed(doc);
@@ -88,7 +93,8 @@ final class DeleteJob extends Job {
                 .append("DeleteJob")
                 .append("{")
                 .append("id=" + id)
-                .append("srcs=" + mSrcs)
+                .append(", srcs=" + mSrcs)
+                .append(", srcParent=" + mSrcParent)
                 .append(", location=" + stack)
                 .append("}")
                 .toString();

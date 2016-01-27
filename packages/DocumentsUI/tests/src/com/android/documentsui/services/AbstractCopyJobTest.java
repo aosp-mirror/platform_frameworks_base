@@ -23,6 +23,7 @@ import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 
 import java.util.List;
 
@@ -109,7 +110,9 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
     public void runNoCopyDirToSelfTest() throws Exception {
         Uri testDir = mDocs.createFolder(mSrcRoot, "someDir");
 
-        createJob(newArrayList(testDir), testDir).run();
+        createJob(newArrayList(testDir),
+                DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId),
+                testDir).run();
 
         mJobListener.waitForFinished();
         mJobListener.assertFailed();
@@ -122,7 +125,9 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
         Uri testDir = mDocs.createFolder(mSrcRoot, "someDir");
         Uri destDir = mDocs.createFolder(testDir, "theDescendent");
 
-        createJob(newArrayList(testDir), destDir).run();
+        createJob(newArrayList(testDir),
+                DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId),
+                destDir).run();
 
         mJobListener.waitForFinished();
         mJobListener.assertFailed();
@@ -148,10 +153,13 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
     }
 
     /**
-     * Creates a job with a stack consisting to the default destination.
+     * Creates a job with a stack consisting to the default source and destination.
+     * TODO: Clean up, as mDestRoot.documentInfo may not really be the parent of
+     * srcs.
      */
     final T createJob(List<Uri> srcs) throws Exception {
+        Uri srcParent = DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId);
         Uri destination = DocumentsContract.buildDocumentUri(AUTHORITY, mDestRoot.documentId);
-        return createJob(srcs, destination);
+        return createJob(srcs, srcParent, destination);
     }
 }

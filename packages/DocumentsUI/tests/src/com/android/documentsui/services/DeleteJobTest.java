@@ -37,7 +37,8 @@ public class DeleteJobTest extends AbstractJobTest<DeleteJob> {
         Uri testFile2 = mDocs.createDocument(mSrcRoot, "text/plain", "test2.txt");
         mDocs.writeDocument(testFile2, FRUITY_BYTES);
 
-        createJob(newArrayList(testFile1, testFile2)).run();
+        createJob(newArrayList(testFile1, testFile2),
+                DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId)).run();
         mJobListener.waitForFinished();
 
         mDocs.assertChildCount(mSrcRoot, 0);
@@ -46,14 +47,17 @@ public class DeleteJobTest extends AbstractJobTest<DeleteJob> {
     /**
      * Creates a job with a stack consisting to the default src directory.
      */
-    private final DeleteJob createJob(List<Uri> srcs) throws Exception {
+    private final DeleteJob createJob(List<Uri> srcs, Uri srcParent) throws Exception {
         Uri stack = DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId);
-        return createJob(srcs, stack);
+        return createJob(srcs, srcParent, stack);
     }
 
     @Override
-    DeleteJob createJob(List<DocumentInfo> srcs, DocumentStack stack) throws Exception {
+    // TODO: Remove inheritance, as stack is not used for deleting, nor srcParent.
+    DeleteJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+            throws Exception {
         return new DeleteJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs,
+                srcParent);
     }
 }

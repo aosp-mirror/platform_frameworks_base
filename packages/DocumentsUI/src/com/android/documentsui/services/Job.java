@@ -274,13 +274,15 @@ abstract class Job implements Runnable {
         }
 
         Job createMove(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, List<DocumentInfo> srcs) {
-            return new MoveJob(service, appContext, listener, id, stack, srcs);
+                String id, DocumentStack stack, List<DocumentInfo> srcs,
+                DocumentInfo srcParent) {
+            return new MoveJob(service, appContext, listener, id, stack, srcs, srcParent);
         }
 
         Job createDelete(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, List<DocumentInfo> srcs) {
-            return new DeleteJob(service, appContext, listener, id, stack, srcs);
+                String id, DocumentStack stack, List<DocumentInfo> srcs,
+                DocumentInfo srcParent) {
+            return new DeleteJob(service, appContext, listener, id, stack, srcs, srcParent);
         }
     }
 
