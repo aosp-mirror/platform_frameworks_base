@@ -1418,25 +1418,32 @@ public class LockPatternUtils {
          */
         public static final int SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL = 0x10;
 
-        public static final int DEFAULT = STRONG_AUTH_REQUIRED_AFTER_BOOT;
-
         private static final int ALLOWING_FINGERPRINT = STRONG_AUTH_NOT_REQUIRED
                 | SOME_AUTH_REQUIRED_AFTER_USER_REQUEST
                 | SOME_AUTH_REQUIRED_AFTER_WRONG_CREDENTIAL;
 
         private final SparseIntArray mStrongAuthRequiredForUser = new SparseIntArray();
         private final H mHandler;
+        private final int mDefaultStrongAuthFlags;
 
-        public StrongAuthTracker() {
-            this(Looper.myLooper());
+        public StrongAuthTracker(Context context) {
+            this(context, Looper.myLooper());
         }
 
         /**
          * @param looper the looper on whose thread calls to {@link #onStrongAuthRequiredChanged}
          *               will be scheduled.
+         * @param context the current {@link Context}
          */
-        public StrongAuthTracker(Looper looper) {
+        public StrongAuthTracker(Context context, Looper looper) {
             mHandler = new H(looper);
+            mDefaultStrongAuthFlags = getDefaultFlags(context);
+        }
+
+        public static @StrongAuthFlags int getDefaultFlags(Context context) {
+            boolean strongAuthRequired = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_strongAuthRequiredOnBoot);
+            return strongAuthRequired ? STRONG_AUTH_REQUIRED_AFTER_BOOT : STRONG_AUTH_NOT_REQUIRED;
         }
 
         /**
@@ -1447,7 +1454,7 @@ public class LockPatternUtils {
          * @param userId the user for whom the state is queried.
          */
         public @StrongAuthFlags int getStrongAuthForUser(int userId) {
-            return mStrongAuthRequiredForUser.get(userId, DEFAULT);
+            return mStrongAuthRequiredForUser.get(userId, mDefaultStrongAuthFlags);
         }
 
         /**
@@ -1477,7 +1484,7 @@ public class LockPatternUtils {
 
             int oldValue = getStrongAuthForUser(userId);
             if (strongAuthFlags != oldValue) {
-                if (strongAuthFlags == DEFAULT) {
+                if (strongAuthFlags == mDefaultStrongAuthFlags) {
                     mStrongAuthRequiredForUser.delete(userId);
                 } else {
                     mStrongAuthRequiredForUser.put(userId, strongAuthFlags);

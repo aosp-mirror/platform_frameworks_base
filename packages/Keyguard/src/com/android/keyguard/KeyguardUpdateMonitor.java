@@ -188,7 +188,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     /** Tracks whether strong authentication hasn't been used since quite some time per user. */
     private ArraySet<Integer> mStrongAuthNotTimedOut = new ArraySet<>();
-    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker();
+    private final StrongAuthTracker mStrongAuthTracker;
 
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
@@ -871,6 +871,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        public StrongAuthTracker(Context context) {
+            super(context);
+        }
 
         public boolean isUnlockingWithFingerprintAllowed() {
             int userId = getCurrentUser();
@@ -981,6 +984,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mSubscriptionManager = SubscriptionManager.from(context);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
+        mStrongAuthTracker = new StrongAuthTracker(context);
 
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...

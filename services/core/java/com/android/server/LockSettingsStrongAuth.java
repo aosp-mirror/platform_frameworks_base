@@ -20,6 +20,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker;
 
 import android.app.trust.IStrongAuthTracker;
+import android.content.Context;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Message;
@@ -46,6 +47,11 @@ public class LockSettingsStrongAuth {
 
     private final ArrayList<IStrongAuthTracker> mStrongAuthTrackers = new ArrayList<>();
     private final SparseIntArray mStrongAuthForUser = new SparseIntArray();
+    private final int mDefaultStrongAuthFlags;
+
+    public LockSettingsStrongAuth(Context context) {
+        mDefaultStrongAuthFlags = StrongAuthTracker.getDefaultFlags(context);
+    }
 
     private void handleAddStrongAuthTracker(IStrongAuthTracker tracker) {
         for (int i = 0; i < mStrongAuthTrackers.size(); i++) {
@@ -87,7 +93,7 @@ public class LockSettingsStrongAuth {
     }
 
     private void handleRequireStrongAuthOneUser(int strongAuthReason, int userId) {
-        int oldValue = mStrongAuthForUser.get(userId, LockPatternUtils.StrongAuthTracker.DEFAULT);
+        int oldValue = mStrongAuthForUser.get(userId, mDefaultStrongAuthFlags);
         int newValue = strongAuthReason == STRONG_AUTH_NOT_REQUIRED
                 ? STRONG_AUTH_NOT_REQUIRED
                 : (oldValue | strongAuthReason);
@@ -101,7 +107,7 @@ public class LockSettingsStrongAuth {
         int index = mStrongAuthForUser.indexOfKey(userId);
         if (index >= 0) {
             mStrongAuthForUser.removeAt(index);
-            notifyStrongAuthTrackers(StrongAuthTracker.DEFAULT, userId);
+            notifyStrongAuthTrackers(mDefaultStrongAuthFlags, userId);
         }
     }
 

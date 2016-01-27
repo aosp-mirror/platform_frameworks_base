@@ -2462,4 +2462,11 @@
 
     <!-- If true, all guest users created on the device will be ephemeral. -->
     <bool name="config_guestUserEphemeral">false</bool>
+
+    <!-- Enforce strong auth on boot. Setting this to false represents a security risk and should
+         not be ordinarily done. The only case in which this might be permissible is in a car head
+         unit where there are hardware mechanisms to protect the device (physical keys) and not
+         much in the way of user data.
+    -->
+    <bool name="config_strongAuthRequiredOnBoot">true</bool>
 </resources>

@@ -2503,4 +2503,6 @@
   <!-- New SMS notification while phone is locked. -->
   <java-symbol type="string" name="new_sms_notification_title" />
   <java-symbol type="string" name="new_sms_notification_content" />
+
+  <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 </resources>

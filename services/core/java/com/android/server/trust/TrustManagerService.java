@@ -125,6 +125,8 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mTrustUsuallyManagedForUser = new SparseBooleanArray();
 
+    private final StrongAuthTracker mStrongAuthTracker;
+
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
@@ -134,6 +136,13 @@ public class TrustManagerService extends SystemService {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         mLockPatternUtils = new LockPatternUtils(context);
+
+        mStrongAuthTracker = new StrongAuthTracker(context) {
+            @Override
+            public void onStrongAuthRequiredChanged(int userId) {
+                refreshAgentList(userId);
+            }
+        };
     }
 
     @Override
@@ -917,13 +926,6 @@ public class TrustManagerService extends SystemService {
         @Override
         public void onPackageDisappeared(String packageName, int reason) {
             removeAgentsOfPackage(packageName);
-        }
-    };
-
-    private final StrongAuthTracker mStrongAuthTracker = new StrongAuthTracker() {
-        @Override
-        public void onStrongAuthRequiredChanged(int userId) {
-            refreshAgentList(userId);
         }
     };
 
