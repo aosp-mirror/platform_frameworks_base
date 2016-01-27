@@ -885,10 +885,10 @@ public class AudioTrack implements AudioRouting
     // postcondition:
     //    mNativeBufferSizeInBytes is valid (multiple of frame size, positive)
     private void audioBuffSizeCheck(int audioBufferSize) {
-        // NB: this section is only valid with PCM data.
+        // NB: this section is only valid with PCM or IEC61937 data.
         //     To update when supporting compressed formats
         int frameSizeInBytes;
-        if (AudioFormat.isEncodingLinearPcm(mAudioFormat)) {
+        if (AudioFormat.isEncodingLinearFrames(mAudioFormat)) {
             frameSizeInBytes = mChannelCount * AudioFormat.getBytesPerSample(mAudioFormat);
         } else {
             frameSizeInBytes = 1;
