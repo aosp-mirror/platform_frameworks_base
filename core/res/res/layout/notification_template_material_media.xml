@@ -24,8 +24,7 @@
     >
     <include layout="@layout/notification_template_header"
         android:layout_width="fill_parent"
-        android:layout_height="48dp"
-        android:layout_marginEnd="106dp"/>
+        android:layout_height="48dp" />
     <LinearLayout
         android:id="@+id/notification_main_column"
         android:layout_width="match_parent"

@@ -25,8 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.android.internal.R;
-
 import java.util.ArrayList;
 
 /**
@@ -39,6 +37,7 @@ public class NotificationHeaderView extends LinearLayout {
     public static final int NO_COLOR = -1;
     private final int mHeaderMinWidth;
     private final int mExpandTopPadding;
+    private final int mContentEndMargin;
     private View mAppName;
     private View mSubTextView;
     private OnClickListener mExpandClickListener;
@@ -51,6 +50,7 @@ public class NotificationHeaderView extends LinearLayout {
     private int mOriginalNotificationColor;
     private boolean mGroupHeader;
     private boolean mExpanded;
+    private boolean mShowWorkBadgeAtEnd;
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -68,6 +68,8 @@ public class NotificationHeaderView extends LinearLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
         mHeaderMinWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_header_shrink_min_width);
+        mContentEndMargin = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_end);
         mExpandTopPadding = (int) (1 * getResources().getDisplayMetrics().density);
     }
 
@@ -135,6 +137,9 @@ public class NotificationHeaderView extends LinearLayout {
         super.onLayout(changed, l, t, r, b);
         if (mProfileBadge.getVisibility() != View.GONE) {
             int paddingEnd = getPaddingEnd();
+            if (mShowWorkBadgeAtEnd) {
+                paddingEnd = mContentEndMargin;
+            }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                 mProfileBadge.layout(paddingEnd,
                         mProfileBadge.getTop(),
@@ -223,6 +228,13 @@ public class NotificationHeaderView extends LinearLayout {
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
         mExpandButton.setColorFilter(mOriginalNotificationColor);
         mExpandButton.setPadding(0, paddingTop, 0, 0);
+    }
+
+    public void setShowWorkBadgeAtEnd(boolean showWorkBadgeAtEnd) {
+        if (showWorkBadgeAtEnd != mShowWorkBadgeAtEnd) {
+            setClipToPadding(!showWorkBadgeAtEnd);
+            mShowWorkBadgeAtEnd = showWorkBadgeAtEnd;
+        }
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {
