@@ -26,6 +26,8 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.app.ActivityThread;
+import android.app.Application;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -33,6 +35,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
@@ -269,7 +272,7 @@ public class Html {
         int len = text.length();
 
         int next;
-        for (int i = 0; i < text.length(); i = next) {
+        for (int i = 0; i < len; i = next) {
             next = text.nextSpanTransition(i, len, ParagraphStyle.class);
             ParagraphStyle[] style = text.getSpans(i, next, ParagraphStyle.class);
             String elements = " ";
@@ -366,14 +369,12 @@ public class Html {
     }
 
     /* Returns true if the caller should close and reopen the paragraph. */
-    private static boolean withinParagraph(StringBuilder out, Spanned text,
-                                        int start, int end, int nl,
-                                        boolean last) {
+    private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end,
+            int nl, boolean last) {
         int next;
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, CharacterStyle.class);
-            CharacterStyle[] style = text.getSpans(i, next,
-                                                   CharacterStyle.class);
+            CharacterStyle[] style = text.getSpans(i, next, CharacterStyle.class);
 
             for (int j = 0; j < style.length; j++) {
                 if (style[j] instanceof StyleSpan) {
@@ -403,7 +404,7 @@ public class Html {
                     out.append("<u>");
                 }
                 if (style[j] instanceof StrikethroughSpan) {
-                    out.append("<strike>");
+                    out.append("<span style=\"text-decoration:line-through;\">");
                 }
                 if (style[j] instanceof URLSpan) {
                     out.append("<a href=\"");
@@ -419,36 +420,51 @@ public class Html {
                     i = next;
                 }
                 if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("<font size =\"");
-                    out.append(((AbsoluteSizeSpan) style[j]).getSize() / 6);
-                    out.append("\">");
+                    AbsoluteSizeSpan s = ((AbsoluteSizeSpan) style[j]);
+                    float sizeDip = s.getSize();
+                    if (!s.getDip()) {
+                        Application application = ActivityThread.currentApplication();
+                        sizeDip /= application.getResources().getDisplayMetrics().density;
+                    }
+
+                    // px in CSS is the equivalance of dip in Android
+                    out.append(String.format("<span style=\"font-size:%.0fpx\";>", sizeDip));
+                }
+                if (style[j] instanceof RelativeSizeSpan) {
+                    float sizeEm = ((RelativeSizeSpan) style[j]).getSizeChange();
+                    out.append(String.format("<span style=\"font-size:%.2fem;\">", sizeEm));
                 }
                 if (style[j] instanceof ForegroundColorSpan) {
-                    out.append("<font color =\"#");
-                    String color = Integer.toHexString(((ForegroundColorSpan)
-                            style[j]).getForegroundColor() + 0x01000000);
-                    while (color.length() < 6) {
-                        color = "0" + color;
-                    }
-                    out.append(color);
-                    out.append("\">");
+                    int color = ((ForegroundColorSpan) style[j]).getForegroundColor();
+                    out.append(String.format("<span style=\"color:#%06X;\">", 0xFFFFFF & color));
+                }
+                if (style[j] instanceof BackgroundColorSpan) {
+                    int color = ((BackgroundColorSpan) style[j]).getBackgroundColor();
+                    out.append(String.format("<span style=\"background-color:#%06X;\">",
+                            0xFFFFFF & color));
                 }
             }
 
             withinStyle(out, text, i, next);
 
             for (int j = style.length - 1; j >= 0; j--) {
+                if (style[j] instanceof BackgroundColorSpan) {
+                    out.append("</span>");
+                }
                 if (style[j] instanceof ForegroundColorSpan) {
-                    out.append("</font>");
+                    out.append("</span>");
+                }
+                if (style[j] instanceof RelativeSizeSpan) {
+                    out.append("</span>");
                 }
                 if (style[j] instanceof AbsoluteSizeSpan) {
-                    out.append("</font>");
+                    out.append("</span>");
                 }
                 if (style[j] instanceof URLSpan) {
                     out.append("</a>");
                 }
                 if (style[j] instanceof StrikethroughSpan) {
-                    out.append("</strike>");
+                    out.append("</span>");
                 }
                 if (style[j] instanceof UnderlineSpan) {
                     out.append("</u>");
