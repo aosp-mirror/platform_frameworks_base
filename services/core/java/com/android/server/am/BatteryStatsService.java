@@ -855,6 +855,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    @Override
+    public void noteBleScanStarted(WorkSource ws) {
+        enforceCallingPermission();
+        Slog.d(TAG, "BLE scan started for " + ws);
+    }
+
+    @Override
+    public void noteBleScanStopped(WorkSource ws) {
+        enforceCallingPermission();
+        Slog.d(TAG, "BLE scan stopped for " + ws);
+    }
+
     public boolean isOnBattery() {
         return mStats.isOnBattery();
     }
