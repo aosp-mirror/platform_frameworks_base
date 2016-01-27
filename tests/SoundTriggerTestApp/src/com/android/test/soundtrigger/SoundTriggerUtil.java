@@ -19,7 +19,7 @@ package com.android.test.soundtrigger;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.SoundTrigger.SoundTriggerModel;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -54,7 +54,7 @@ public class SoundTriggerUtil {
      *
      * @param soundModel The sound model to add/update.
      */
-    public boolean addOrUpdateSoundModel(SoundTriggerModel soundModel) {
+    public boolean addOrUpdateSoundModel(GenericSoundModel soundModel) {
         try {
             mSoundTriggerService.updateSoundModel(soundModel);
         } catch (RemoteException e) {
@@ -71,14 +71,14 @@ public class SoundTriggerUtil {
      * Gets the sound model for the given keyphrase, null if none exists.
      * If a sound model for a given keyphrase exists, and it needs to be updated,
      * it should be obtained using this method, updated and then passed in to
-     * {@link #addOrUpdateSoundModel(SoundTriggerModel)} without changing the IDs.
+     * {@link #addOrUpdateSoundModel(GenericSoundModel)} without changing the IDs.
      *
      * @param modelId The model ID to look-up the sound model for.
      * @return The sound model if one was found, null otherwise.
      */
     @Nullable
-    public SoundTriggerModel getSoundModel(UUID modelId) {
-        SoundTriggerModel model = null;
+    public GenericSoundModel getSoundModel(UUID modelId) {
+        GenericSoundModel model = null;
         try {
             model = mSoundTriggerService.getSoundModel(new ParcelUuid(modelId));
         } catch (RemoteException e) {

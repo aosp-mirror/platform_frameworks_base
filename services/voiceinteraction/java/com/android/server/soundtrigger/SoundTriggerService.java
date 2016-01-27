@@ -21,9 +21,9 @@ import android.content.pm.PackageManager;
 import android.Manifest;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
-import android.hardware.soundtrigger.SoundTrigger.SoundTriggerModel;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -117,12 +117,12 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public SoundTrigger.SoundTriggerModel getSoundModel(ParcelUuid soundModelId) {
+        public SoundTrigger.GenericSoundModel getSoundModel(ParcelUuid soundModelId) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (DEBUG) {
                 Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
             }
-            SoundTrigger.SoundTriggerModel model = mDbHelper.getSoundTriggerModel(soundModelId.getUuid());
+            SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(soundModelId.getUuid());
             if (model == null) {
                 Slog.e(TAG, "Null model in database.");
             }
@@ -130,12 +130,12 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public void updateSoundModel(SoundTrigger.SoundTriggerModel soundModel) {
+        public void updateSoundModel(SoundTrigger.GenericSoundModel soundModel) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (DEBUG) {
                 Slog.i(TAG, "updateSoundModel(): model = " + soundModel);
             }
-            mDbHelper.updateSoundTriggerModel(soundModel);
+            mDbHelper.updateGenericSoundModel(soundModel);
         }
 
         @Override
@@ -144,7 +144,7 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
             }
-            mDbHelper.deleteSoundTriggerModel(soundModelId.getUuid());
+            mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
         }
     }
 

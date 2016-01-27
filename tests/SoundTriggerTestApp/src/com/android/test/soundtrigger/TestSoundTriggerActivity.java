@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import android.app.Activity;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.SoundTrigger.SoundTriggerModel;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.os.Bundle;
 import android.os.UserManager;
@@ -56,7 +56,7 @@ public class TestSoundTriggerActivity extends Activity {
         // Generate a fake model to push.
         byte[] data = new byte[1024];
         mRandom.nextBytes(data);
-        SoundTriggerModel model = new SoundTriggerModel(mModelUuid, mVendorUuid, data);
+        GenericSoundModel model = new GenericSoundModel(mModelUuid, mVendorUuid, data);
 
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(model);
         if (status) {
@@ -78,7 +78,7 @@ public class TestSoundTriggerActivity extends Activity {
      * Clears the enrollment information for the user.
      */
     public void onUnEnrollButtonClicked(View v) {
-        SoundTriggerModel soundModel = mSoundTriggerUtil.getSoundModel(mModelUuid);
+        GenericSoundModel soundModel = mSoundTriggerUtil.getSoundModel(mModelUuid);
         if (soundModel == null) {
             Toast.makeText(this, "Sound model not found!!!", Toast.LENGTH_SHORT).show();
             return;
@@ -99,7 +99,7 @@ public class TestSoundTriggerActivity extends Activity {
      * Uses the previously enrolled sound model and makes changes to it before pushing it back.
      */
     public void onReEnrollButtonClicked(View v) {
-        SoundTriggerModel soundModel = mSoundTriggerUtil.getSoundModel(mModelUuid);
+        GenericSoundModel soundModel = mSoundTriggerUtil.getSoundModel(mModelUuid);
         if (soundModel == null) {
             Toast.makeText(this, "Sound model not found!!!", Toast.LENGTH_SHORT).show();
             return;
@@ -107,7 +107,7 @@ public class TestSoundTriggerActivity extends Activity {
         // Generate a fake model to push.
         byte[] data = new byte[2048];
         mRandom.nextBytes(data);
-        SoundTriggerModel updated = new SoundTriggerModel(soundModel.uuid,
+        GenericSoundModel updated = new GenericSoundModel(soundModel.uuid,
                 soundModel.vendorUuid, data);
         boolean status = mSoundTriggerUtil.addOrUpdateSoundModel(updated);
         if (status) {
