@@ -25,11 +25,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.media.browse.MediaBrowser;
+import android.media.browse.MediaBrowserUtils;
 import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.service.media.IMediaBrowserService;
@@ -40,7 +41,8 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -82,7 +84,9 @@ public abstract class MediaBrowserService extends Service {
      */
     public static final String KEY_MEDIA_ITEM = "media_item";
 
-    private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap();
+    private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 0x00000001;
+
+    private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
     private final Handler mHandler = new Handler();
     private ServiceBinder mBinder;
     MediaSession.Token mSession;
@@ -95,7 +99,7 @@ public abstract class MediaBrowserService extends Service {
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
         BrowserRoot root;
-        HashSet<String> subscriptions = new HashSet();
+        HashMap<String, List<Bundle>> subscriptions = new HashMap<>();
     }
 
     /**
@@ -115,6 +119,7 @@ public abstract class MediaBrowserService extends Service {
         private Object mDebug;
         private boolean mDetachCalled;
         private boolean mSendResultCalled;
+        private int mFlag;
 
         Result(Object debug) {
             mDebug = debug;
@@ -128,7 +133,7 @@ public abstract class MediaBrowserService extends Service {
                 throw new IllegalStateException("sendResult() called twice for: " + mDebug);
             }
             mSendResultCalled = true;
-            onResultSent(result);
+            onResultSent(result, mFlag);
         }
 
         /**
@@ -151,11 +156,15 @@ public abstract class MediaBrowserService extends Service {
             return mDetachCalled || mSendResultCalled;
         }
 
+        void setFlag(int flag) {
+            mFlag = flag;
+        }
+
         /**
          * Called when the result is sent, after assertions about not being called twice
          * have happened.
          */
-        void onResultSent(T result) {
+        void onResultSent(T result, int flag) {
         }
     }
 
@@ -228,9 +237,15 @@ public abstract class MediaBrowserService extends Service {
                 });
         }
 
+        @Override
+        public void addSubscription(final String id,
+                final IMediaBrowserServiceCallbacks callbacks) {
+            addSubscriptionWithOptions(id, null, callbacks);
+        }
 
         @Override
-        public void addSubscription(final String id, final IMediaBrowserServiceCallbacks callbacks) {
+        public void addSubscriptionWithOptions(final String id, final Bundle options,
+                final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -244,13 +259,19 @@ public abstract class MediaBrowserService extends Service {
                             return;
                         }
 
-                        MediaBrowserService.this.addSubscription(id, connection);
+                        MediaBrowserService.this.addSubscription(id, connection, options);
                     }
                 });
         }
 
         @Override
         public void removeSubscription(final String id,
+                final IMediaBrowserServiceCallbacks callbacks) {
+            removeSubscriptionWithOptions(id, null, callbacks);
+        }
+
+        @Override
+        public void removeSubscriptionWithOptions(final String id, final Bundle options,
                 final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
                 @Override
@@ -263,7 +284,7 @@ public abstract class MediaBrowserService extends Service {
                                 + id);
                         return;
                     }
-                    if (!connection.subscriptions.remove(id)) {
+                    if (!MediaBrowserService.this.removeSubscription(id, connection, options)) {
                         Log.w(TAG, "removeSubscription called for " + id
                                 + " which is not subscribed");
                     }
@@ -345,6 +366,33 @@ public abstract class MediaBrowserService extends Service {
             @NonNull Result<List<MediaBrowser.MediaItem>> result);
 
     /**
+     * Called to get information about the children of a media item.
+     * <p>
+     * Implementations must call {@link Result#sendResult result.sendResult}
+     * with the list of children. If loading the children will be an expensive
+     * operation that should be performed on another thread,
+     * {@link Result#detach result.detach} may be called before returning from
+     * this function, and then {@link Result#sendResult result.sendResult}
+     * called when the loading is complete.
+     *
+     * @param parentId The id of the parent media item whose children are to be
+     *            queried.
+     * @param result The Result to send the list of children to, or null if the
+     *            id is invalid.
+     * @param options A bundle of service-specific arguments sent from the media
+     *            browse. The information returned through the result should be
+     *            affected by the contents of this bundle.
+     */
+    public void onLoadChildren(@NonNull String parentId,
+            @NonNull Result<List<MediaBrowser.MediaItem>> result, @NonNull Bundle options) {
+        // To support backward compatibility, when the implementation of MediaBrowserService doesn't
+        // override onLoadChildren() with options, onLoadChildren() without options will be used
+        // instead, and the options will be applied in the implementation of result.onResultSent().
+        result.setFlag(RESULT_FLAG_OPTION_NOT_HANDLED);
+        onLoadChildren(parentId, result);
+    }
+
+    /**
      * Called to get information about a specific media item.
      * <p>
      * Implementations must call {@link Result#sendResult result.sendResult}. If
@@ -413,7 +461,29 @@ public abstract class MediaBrowserService extends Service {
      * @param parentId The id of the parent media item whose
      * children changed.
      */
-    public void notifyChildrenChanged(@NonNull final String parentId) {
+    public void notifyChildrenChanged(@NonNull String parentId) {
+        notifyChildrenChangedInternal(parentId, null);
+    }
+
+    /**
+     * Notifies all connected media browsers that the children of
+     * the specified parent id have changed in some way.
+     * This will cause browsers to fetch subscribed content again.
+     *
+     * @param parentId The id of the parent media item whose
+     *            children changed.
+     * @param options A bundle of service-specific arguments to send
+     *            to the media browse. The contents of this bundle may
+     *            contain the information about the change.
+     */
+    public void notifyChildrenChanged(@NonNull String parentId, @NonNull Bundle options) {
+        if (options == null) {
+            throw new IllegalArgumentException("options cannot be null in notifyChildrenChanged");
+        }
+        notifyChildrenChangedInternal(parentId, options);
+    }
+
+    private void notifyChildrenChangedInternal(final String parentId, final Bundle options) {
         if (parentId == null) {
             throw new IllegalArgumentException("parentId cannot be null in notifyChildrenChanged");
         }
@@ -422,8 +492,13 @@ public abstract class MediaBrowserService extends Service {
             public void run() {
                 for (IBinder binder : mConnections.keySet()) {
                     ConnectionRecord connection = mConnections.get(binder);
-                    if (connection.subscriptions.contains(parentId)) {
-                        performLoadChildren(parentId, connection);
+                    List<Bundle> optionsList = connection.subscriptions.get(parentId);
+                    if (optionsList != null) {
+                        for (Bundle bundle : optionsList) {
+                            if (MediaBrowserUtils.hasDuplicatedItems(options, bundle)) {
+                                performLoadChildren(parentId, connection, bundle);
+                            }
+                        }
                     }
                 }
             }
@@ -451,12 +526,42 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Save the subscription and if it is a new subscription send the results.
      */
-    private void addSubscription(String id, ConnectionRecord connection) {
+    private void addSubscription(String id, ConnectionRecord connection, Bundle options) {
         // Save the subscription
-        connection.subscriptions.add(id);
-
+        List<Bundle> optionsList = connection.subscriptions.get(id);
+        if (optionsList == null) {
+            optionsList = new ArrayList<>();
+        }
+        for (Bundle bundle : optionsList) {
+            if (MediaBrowserUtils.areSameOptions(options, bundle)) {
+                return;
+            }
+        }
+        optionsList.add(options);
+        connection.subscriptions.put(id, optionsList);
         // send the results
-        performLoadChildren(id, connection);
+        performLoadChildren(id, connection, options);
+    }
+
+    /**
+     * Remove the subscription.
+     */
+    private boolean removeSubscription(String id, ConnectionRecord connection, Bundle options) {
+        boolean removed = false;
+        List<Bundle> optionsList = connection.subscriptions.get(id);
+        if (optionsList != null) {
+            for (Bundle bundle : optionsList) {
+                if (MediaBrowserUtils.areSameOptions(options, bundle)) {
+                    removed = true;
+                    optionsList.remove(bundle);
+                    break;
+                }
+            }
+            if (optionsList.size() == 0) {
+                connection.subscriptions.remove(id);
+            }
+        }
+        return removed;
     }
 
     /**
@@ -464,11 +569,12 @@ public abstract class MediaBrowserService extends Service {
      * <p>
      * Callers must make sure that this connection is still connected.
      */
-    private void performLoadChildren(final String parentId, final ConnectionRecord connection) {
+    private void performLoadChildren(final String parentId, final ConnectionRecord connection,
+            final Bundle options) {
         final Result<List<MediaBrowser.MediaItem>> result
                 = new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
-            void onResultSent(List<MediaBrowser.MediaItem> list) {
+            void onResultSent(List<MediaBrowser.MediaItem> list, int flag) {
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                     if (DBG) {
                         Log.d(TAG, "Not sending onLoadChildren result for connection that has"
@@ -477,10 +583,13 @@ public abstract class MediaBrowserService extends Service {
                     return;
                 }
 
+                List<MediaBrowser.MediaItem> filteredList =
+                        (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
+                        ? applyOptions(list, options) : list;
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
-                        list == null ? null : new ParceledListSlice(list);
+                        filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
-                    connection.callbacks.onLoadChildren(parentId, pls);
+                    connection.callbacks.onLoadChildren(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
@@ -489,7 +598,11 @@ public abstract class MediaBrowserService extends Service {
             }
         };
 
-        onLoadChildren(parentId, result);
+        if (options == null) {
+            onLoadChildren(parentId, result);
+        } else {
+            onLoadChildren(parentId, result, options);
+        }
 
         if (!result.isDone()) {
             throw new IllegalStateException("onLoadChildren must call detach() or sendResult()"
@@ -497,11 +610,29 @@ public abstract class MediaBrowserService extends Service {
         }
     }
 
+    private List<MediaBrowser.MediaItem> applyOptions(List<MediaBrowser.MediaItem> list,
+            final Bundle options) {
+        int page = options.getInt(MediaBrowser.EXTRA_PAGE, -1);
+        int pageSize = options.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
+        if (page == -1 && pageSize == -1) {
+            return list;
+        }
+        int fromIndex = pageSize * (page - 1);
+        int toIndex = fromIndex + pageSize;
+        if (page < 1 || pageSize < 1 || fromIndex >= list.size()) {
+            return null;
+        }
+        if (toIndex > list.size()) {
+            toIndex = list.size();
+        }
+        return list.subList(fromIndex, toIndex);
+    }
+
     private void performLoadItem(String itemId, final ResultReceiver receiver) {
         final Result<MediaBrowser.MediaItem> result =
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
-            void onResultSent(MediaBrowser.MediaItem item) {
+            void onResultSent(MediaBrowser.MediaItem item, int flag) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(KEY_MEDIA_ITEM, item);
                 receiver.send(0, bundle);
