@@ -51,7 +51,7 @@ interface IAccessibilityManager {
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
-        in AccessibilityServiceInfo info);
+        in AccessibilityServiceInfo info, int flags);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 

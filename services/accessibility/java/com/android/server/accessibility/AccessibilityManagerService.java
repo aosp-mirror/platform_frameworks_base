@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.UiAutomation;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -51,6 +52,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -258,10 +260,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     UserState userState = getCurrentUserStateLocked();
                     // We have to reload the installed services since some services may
                     // have different attributes, resolve info (does not support equals),
-                    // etc. Remove them then to force reload. Do it even if automation is
-                    // running since when it goes away, we will have to reload as well.
+                    // etc. Remove them then to force reload.
                     userState.mInstalledServices.clear();
-                    if (userState.mUiAutomationService == null) {
+                    if (!userState.isUiAutomationSuppressingOtherServices()) {
                         if (readConfigurationForUserStateLocked(userState)) {
                             onUserStateChangedLocked(userState);
                         }
@@ -296,7 +297,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                                     TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                                     userState.mTouchExplorationGrantedServices, userId);
                             // We will update when the automation service dies.
-                            if (userState.mUiAutomationService == null) {
+                            if (!userState.isUiAutomationSuppressingOtherServices()) {
                                 onUserStateChangedLocked(userState);
                             }
                             return;
@@ -330,7 +331,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                                         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                                         userState.mEnabledServices, userId);
                                 // We will update when the automation service dies.
-                                if (userState.mUiAutomationService == null) {
+                                if (!userState.isUiAutomationSuppressingOtherServices()) {
                                     onUserStateChangedLocked(userState);
                                 }
                             }
@@ -362,7 +363,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                     // We will update when the automation service dies.
                     UserState userState = getCurrentUserStateLocked();
-                    if (userState.mUiAutomationService == null) {
+                    if (!userState.isUiAutomationSuppressingOtherServices()) {
                         if (readConfigurationForUserStateLocked(userState)) {
                             onUserStateChangedLocked(userState);
                         }
@@ -473,11 +474,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedUserId = mSecurityPolicy
                     .resolveCallingUserIdEnforcingPermissionsLocked(userId);
 
-            // The automation service is a fake one and should not be reported
-            // to clients as being enabled. The automation service is always the
-            // only active one, if it exists.
+            // The automation service can suppress other services.
             UserState userState = getUserStateLocked(resolvedUserId);
-            if (userState.mUiAutomationService != null) {
+            if (userState.isUiAutomationSuppressingOtherServices()) {
                 return Collections.emptyList();
             }
 
@@ -490,7 +489,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 final int serviceCount = services.size();
                 for (int i = 0; i < serviceCount; i++) {
                     Service service = services.get(i);
-                    if ((service.mFeedbackType & feedbackTypeBit) != 0) {
+                    // Don't report the UIAutomation (fake service)
+                    if (!sFakeAccessibilityServiceComponentName.equals(service.mComponentName)
+                            && (service.mFeedbackType & feedbackTypeBit) != 0) {
                         result.add(service.mAccessibilityServiceInfo);
                     }
                 }
@@ -621,7 +622,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     @Override
     public void registerUiTestAutomationService(IBinder owner,
             IAccessibilityServiceClient serviceClient,
-            AccessibilityServiceInfo accessibilityServiceInfo) {
+            AccessibilityServiceInfo accessibilityServiceInfo,
+            int flags) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE);
 
@@ -645,15 +647,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
             userState.mUiAutomationServiceOwner = owner;
             userState.mUiAutomationServiceClient = serviceClient;
-
-            // Set the temporary state.
+            userState.mUiAutomationFlags = flags;
             userState.mIsAccessibilityEnabled = true;
-            userState.mIsTouchExplorationEnabled = false;
-            userState.mIsEnhancedWebAccessibilityEnabled = false;
-            userState.mIsDisplayMagnificationEnabled = false;
-            userState.mIsAutoclickEnabled = false;
             userState.mInstalledServices.add(accessibilityServiceInfo);
-            userState.mEnabledServices.clear();
+            if (userState.isUiAutomationSuppressingOtherServices()) {
+                // Set the temporary state.
+                userState.mIsTouchExplorationEnabled = false;
+                userState.mIsEnhancedWebAccessibilityEnabled = false;
+                userState.mIsDisplayMagnificationEnabled = false;
+                userState.mIsAutoclickEnabled = false;
+                userState.mEnabledServices.clear();
+            }
             userState.mEnabledServices.add(sFakeAccessibilityServiceComponentName);
             userState.mTouchExplorationGrantedServices.add(sFakeAccessibilityServiceComponentName);
 
@@ -694,7 +698,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             UserState userState = getCurrentUserStateLocked();
 
             // This is a nop if UI automation is enabled.
-            if (userState.mUiAutomationService != null) {
+            if (userState.isUiAutomationSuppressingOtherServices()) {
                 return;
             }
 
@@ -1027,6 +1031,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         if (!mTempComponentNameSet.equals(userState.mEnabledServices)) {
             userState.mEnabledServices.clear();
             userState.mEnabledServices.addAll(mTempComponentNameSet);
+            if (userState.mUiAutomationService != null) {
+                userState.mEnabledServices.add(sFakeAccessibilityServiceComponentName);
+            }
             mTempComponentNameSet.clear();
             return true;
         }
@@ -3981,6 +3988,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean mAccessibilityFocusOnlyInActiveWindow;
 
         private Service mUiAutomationService;
+        private int mUiAutomationFlags;
         private IAccessibilityServiceClient mUiAutomationServiceClient;
 
         private IBinder mUiAutomationServiceOwner;
@@ -4044,12 +4052,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public void destroyUiAutomationService() {
             mUiAutomationService = null;
+            mUiAutomationFlags = 0;
             mUiAutomationServiceClient = null;
             if (mUiAutomationServiceOwner != null) {
                 mUiAutomationServiceOwner.unlinkToDeath(
                         mUiAutomationSerivceOnwerDeathRecipient, 0);
                 mUiAutomationServiceOwner = null;
             }
+        }
+
+        boolean isUiAutomationSuppressingOtherServices() {
+            return ((mUiAutomationService != null) && (mUiAutomationFlags
+                    & UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES) == 0);
         }
     }
 
@@ -4130,8 +4144,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // we are checking for changes only the parent settings.
                 UserState userState = getCurrentUserStateLocked();
 
-                // We will update when the automation service dies.
-                if (userState.mUiAutomationService != null) {
+                // If the automation service is suppressing, we will update when it dies.
+                if (userState.isUiAutomationSuppressingOtherServices()) {
                     return;
                 }
 

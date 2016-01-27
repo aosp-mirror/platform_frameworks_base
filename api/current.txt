@@ -4637,6 +4637,7 @@ package android.app {
     method public android.content.Context getContext();
     method public android.content.Context getTargetContext();
     method public android.app.UiAutomation getUiAutomation();
+    method public android.app.UiAutomation getUiAutomation(int);
     method public boolean invokeContextMenuAction(android.app.Activity, int, int);
     method public boolean invokeMenuActionSync(android.app.Activity, int, int);
     method public boolean isProfiling();
@@ -5533,6 +5534,7 @@ package android.app {
   public final class UiAutomation {
     method public void clearWindowAnimationFrameStats();
     method public boolean clearWindowContentFrameStats(int);
+    method public void destroy();
     method public android.view.accessibility.AccessibilityEvent executeAndWaitForEvent(java.lang.Runnable, android.app.UiAutomation.AccessibilityEventFilter, long) throws java.util.concurrent.TimeoutException;
     method public android.os.ParcelFileDescriptor executeShellCommand(java.lang.String);
     method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
@@ -5549,6 +5551,7 @@ package android.app {
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     method public android.graphics.Bitmap takeScreenshot();
     method public void waitForIdle(long, long) throws java.util.concurrent.TimeoutException;
+    field public static final int FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES = 1; // 0x1
     field public static final int ROTATION_FREEZE_0 = 0; // 0x0
     field public static final int ROTATION_FREEZE_180 = 2; // 0x2
     field public static final int ROTATION_FREEZE_270 = 3; // 0x3

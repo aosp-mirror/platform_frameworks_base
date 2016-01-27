@@ -1837,16 +1837,59 @@ public class Instrumentation {
      * {@link Instrumentation} APIs. Using both APIs at the same time is not
      * a mistake by itself but a client has to be aware of the APIs limitations.
      * </p>
-     * @return The UI automation instance.
+     * @return The UI automation instance. If none exists, a new one is created with no flags set.
      *
      * @see UiAutomation
      */
     public UiAutomation getUiAutomation() {
         if (mUiAutomationConnection != null) {
             if (mUiAutomation == null) {
+                return getUiAutomation(0);
+            }
+            return mUiAutomation;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the {@link UiAutomation} instance with flags set.
+     * <p>
+     * <strong>Note:</strong> Only one UiAutomation can be obtained. Calling this method
+     * twice with different flags will fail unless the UiAutomation obtained in the first call
+     * is released with {@link UiAutomation#destroy()}.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> The APIs exposed via the returned {@link UiAutomation}
+     * work across application boundaries while the APIs exposed by the instrumentation
+     * do not. For example, {@link Instrumentation#sendPointerSync(MotionEvent)} will
+     * not allow you to inject the event in an app different from the instrumentation
+     * target, while {@link UiAutomation#injectInputEvent(android.view.InputEvent, boolean)}
+     * will work regardless of the current application.
+     * </p>
+     * <p>
+     * A typical test case should be using either the {@link UiAutomation} or
+     * {@link Instrumentation} APIs. Using both APIs at the same time is not
+     * a mistake by itself but a client has to be aware of the APIs limitations.
+     * </p>
+     *
+     * @param flags The flags to be passed to the UiAutomation, for example
+     *        {@link UiAutomation#FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES}.
+     *
+     * @return The UI automation instance.
+     *
+     * @see UiAutomation
+     */
+    public UiAutomation getUiAutomation(int flags) {
+        if (mUiAutomationConnection != null) {
+            if ((mUiAutomation == null) || (mUiAutomation.isDestroyed())) {
                 mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
                         mUiAutomationConnection);
-                mUiAutomation.connect();
+                mUiAutomation.connect(flags);
+            } else {
+                if (mUiAutomation.getFlags() != flags) {
+                    throw new RuntimeException(
+                            "Cannot get a UiAutomation with different flags from the existing one");
+                }
             }
             return mUiAutomation;
         }
@@ -1861,8 +1904,8 @@ public class Instrumentation {
             try {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             } catch (RuntimeException e) {
-                Log.w(TAG, "Exception setting priority of instrumentation thread "                                            
-                        + Process.myTid(), e);                                                                             
+                Log.w(TAG, "Exception setting priority of instrumentation thread "
+                        + Process.myTid(), e);
             }
             if (mAutomaticPerformanceSnapshots) {
                 startPerformanceSnapshot();
