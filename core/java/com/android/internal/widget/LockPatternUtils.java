@@ -936,6 +936,13 @@ public class LockPatternUtils {
     }
 
     /**
+     * Retrieves whether the current profile and device locks can be unified.
+     */
+    public boolean isSeparateProfileChallengeAllowedToUnify(int userHandle) {
+        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle);
+    }
+
+    /**
      * Deserialize a pattern.
      * @param string The pattern serialized with {@link #patternToString}
      * @return The pattern.

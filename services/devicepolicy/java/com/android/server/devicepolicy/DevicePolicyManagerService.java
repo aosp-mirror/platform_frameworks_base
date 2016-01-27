@@ -3382,31 +3382,49 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(
-                    null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
-
+            getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, parent));
-            if (policy.mActivePasswordQuality < getPasswordQuality(null, userHandle, parent)
-                    || policy.mActivePasswordLength < getPasswordMinimumLength(
-                            null, userHandle, parent)) {
-                return false;
-            }
-            if (policy.mActivePasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
-                return true;
-            }
-            return policy.mActivePasswordUpperCase >= getPasswordMinimumUpperCase(
-                            null, userHandle, parent)
-                    && policy.mActivePasswordLowerCase >= getPasswordMinimumLowerCase(
-                            null, userHandle, parent)
-                    && policy.mActivePasswordLetters >= getPasswordMinimumLetters(
-                            null, userHandle, parent)
-                    && policy.mActivePasswordNumeric >= getPasswordMinimumNumeric(
-                            null, userHandle, parent)
-                    && policy.mActivePasswordSymbols >= getPasswordMinimumSymbols(
-                            null, userHandle, parent)
-                    && policy.mActivePasswordNonLetter >= getPasswordMinimumNonLetter(
-                            null, userHandle, parent);
+            return isActivePasswordSufficientForUserLocked(policy, userHandle, parent);
         }
+    }
+
+    @Override
+    public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
+        if (!mHasFeature) {
+            return true;
+        }
+        enforceFullCrossUsersPermission(userHandle);
+        enforceManagedProfile(userHandle, "call APIs refering to the parent profile");
+
+        synchronized (this) {
+            int targetUser = getProfileParentId(userHandle);
+            DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, false));
+            return isActivePasswordSufficientForUserLocked(policy, targetUser, false);
+        }
+    }
+
+    private boolean isActivePasswordSufficientForUserLocked(
+            DevicePolicyData policy, int userHandle, boolean parent) {
+        if (policy.mActivePasswordQuality < getPasswordQuality(null, userHandle, parent)
+                || policy.mActivePasswordLength < getPasswordMinimumLength(
+                        null, userHandle, parent)) {
+            return false;
+        }
+        if (policy.mActivePasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
+            return true;
+        }
+        return policy.mActivePasswordUpperCase >= getPasswordMinimumUpperCase(
+                    null, userHandle, parent)
+                && policy.mActivePasswordLowerCase >= getPasswordMinimumLowerCase(
+                        null, userHandle, parent)
+                && policy.mActivePasswordLetters >= getPasswordMinimumLetters(
+                        null, userHandle, parent)
+                && policy.mActivePasswordNumeric >= getPasswordMinimumNumeric(
+                        null, userHandle, parent)
+                && policy.mActivePasswordSymbols >= getPasswordMinimumSymbols(
+                        null, userHandle, parent)
+                && policy.mActivePasswordNonLetter >= getPasswordMinimumNonLetter(
+                        null, userHandle, parent);
     }
 
     @Override

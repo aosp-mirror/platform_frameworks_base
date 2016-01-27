@@ -1732,7 +1732,7 @@ public class DevicePolicyManager {
     /**
      * Determine whether the current password the user has set is sufficient
      * to meet the policy requirements (quality, minimum length) that have been
-     * requested by the admins of this user and its profiles.
+     * requested by the admins of this user and its profiles that don't have a separate challenge.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
@@ -1744,6 +1744,26 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.isActivePasswordSufficient(myUserId(), mParentInstance);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine whether the current profile password the user has set is sufficient
+     * to meet the policy requirements (quality, minimum length) that have been
+     * requested by the admins of the parent user and its profiles.
+     *
+     * @param userHandle the userId of the profile to check the password for.
+     * @return Returns true if the password would meet the current requirements, else false.
+     * @hide
+     */
+    public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.isProfileActivePasswordSufficientForParent(userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
