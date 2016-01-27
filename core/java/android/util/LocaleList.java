@@ -26,6 +26,8 @@ import android.os.Parcelable;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 
@@ -317,55 +319,72 @@ public final class LocaleList implements Parcelable {
         return supportedScr.equals(desiredScr) ? 1 : 0;
     }
 
+    private int findFirstMatchIndex(Locale supportedLocale) {
+        for (int idx = 0; idx < mList.length; idx++) {
+            final int score = matchScore(supportedLocale, mList[idx]);
+            if (score > 0) {
+                return idx;
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
     private static final Locale EN_LATN = Locale.forLanguageTag("en-Latn");
 
-    private Locale computeFirstMatch(String[] supportedLocales, boolean assumeEnglishIsSupported) {
+    private int computeFirstMatchIndex(Collection<String> supportedLocales,
+            boolean assumeEnglishIsSupported) {
         if (mList.length == 1) {  // just one locale, perhaps the most common scenario
-            return mList[0];
+            return 0;
         }
         if (mList.length == 0) {  // empty locale list
-            return null;
+            return -1;
         }
+
         int bestIndex = Integer.MAX_VALUE;
-        final int numSupportedLocales =
-                supportedLocales.length + (assumeEnglishIsSupported ? 1 : 0);
-        for (int i = 0; i < numSupportedLocales; i++) {
-            final Locale supportedLocale;
-            if (assumeEnglishIsSupported) {
-                // Try English first, so we can return early if it's in the LocaleList
-                supportedLocale = (i == 0) ? EN_LATN : Locale.forLanguageTag(supportedLocales[i-1]);
-            } else {
-                supportedLocale = Locale.forLanguageTag(supportedLocales[i]);
+        // Try English first, so we can return early if it's in the LocaleList
+        if (assumeEnglishIsSupported) {
+            final int idx = findFirstMatchIndex(EN_LATN);
+            if (idx == 0) { // We have a match on the first locale, which is good enough
+                return 0;
+            } else if (idx < bestIndex) {
+                bestIndex = idx;
             }
+        }
+        for (String languageTag : supportedLocales) {
+            final Locale supportedLocale = Locale.forLanguageTag(languageTag);
             // We expect the average length of locale lists used for locale resolution to be
             // smaller than three, so it's OK to do this as an O(mn) algorithm.
-            for (int idx = 0; idx < mList.length; idx++) {
-                final int score = matchScore(supportedLocale, mList[idx]);
-                if (score > 0) {
-                    if (idx == 0) {  // We have a match on the first locale, which is good enough
-                        return mList[0];
-                    } else if (idx < bestIndex) {
-                        bestIndex = idx;
-                    }
-                }
+            final int idx = findFirstMatchIndex(supportedLocale);
+            if (idx == 0) { // We have a match on the first locale, which is good enough
+                return 0;
+            } else if (idx < bestIndex) {
+                bestIndex = idx;
             }
         }
-        if (bestIndex == Integer.MAX_VALUE) {  // no match was found
-            return mList[0];
+        if (bestIndex == Integer.MAX_VALUE) {
+            // no match was found, so we fall back to the first locale in the locale list
+            return 0;
         } else {
-            return mList[bestIndex];
+            return bestIndex;
         }
+    }
+
+    private Locale computeFirstMatch(Collection<String> supportedLocales,
+            boolean assumeEnglishIsSupported) {
+        int bestIndex = computeFirstMatchIndex(supportedLocales, assumeEnglishIsSupported);
+        return bestIndex == -1 ? null : mList[bestIndex];
     }
 
     /**
      * Returns the first match in the locale list given an unordered array of supported locales
-     * in BCP47 format.
+     * in BCP 47 format.
      *
      * If the locale list is empty, null would be returned.
      */
     @Nullable
     public Locale getFirstMatch(String[] supportedLocales) {
-        return computeFirstMatch(supportedLocales, false /* assume English is not supported */);
+        return computeFirstMatch(Arrays.asList(supportedLocales),
+                false /* assume English is not supported */);
     }
 
     /**
@@ -374,11 +393,26 @@ public final class LocaleList implements Parcelable {
      */
     @Nullable
     public Locale getFirstMatchWithEnglishSupported(String[] supportedLocales) {
-        return computeFirstMatch(supportedLocales, true /* assume English is supported */);
+        return computeFirstMatch(Arrays.asList(supportedLocales),
+                true /* assume English is supported */);
     }
 
     /**
-     * Returns true if the array of locale tags only contains empty locales and pseudolocales.
+     * {@hide}
+     */
+    public int getFirstMatchIndexWithEnglishSupported(Collection<String> supportedLocales) {
+        return computeFirstMatchIndex(supportedLocales, true /* assume English is supported */);
+    }
+
+    /**
+     * {@hide}
+     */
+    public int getFirstMatchIndexWithEnglishSupported(String[] supportedLocales) {
+        return getFirstMatchIndexWithEnglishSupported(Arrays.asList(supportedLocales));
+    }
+
+    /**
+     * Returns true if the collection of locale tags only contains empty locales and pseudolocales.
      * Assumes that there is no repetition in the input.
      * {@hide}
      */
@@ -386,7 +420,7 @@ public final class LocaleList implements Parcelable {
         if (supportedLocales.length > NUM_PSEUDO_LOCALES + 1) {
             // This is for optimization. Since there's no repetition in the input, if we have more
             // than the number of pseudo-locales plus one for the empty string, it's guaranteed
-            // that we have some meaninful locale in the list, so the list is not "practically
+            // that we have some meaninful locale in the collection, so the list is not "practically
             // empty".
             return false;
         }
@@ -405,6 +439,8 @@ public final class LocaleList implements Parcelable {
     @GuardedBy("sLock")
     private static LocaleList sDefaultLocaleList = null;
     @GuardedBy("sLock")
+    private static LocaleList sDefaultAdjustedLocaleList = null;
+    @GuardedBy("sLock")
     private static Locale sLastDefaultLocale = null;
 
     /**
@@ -415,8 +451,8 @@ public final class LocaleList implements Parcelable {
      * secondary preference is.
      *
      * Note that the default LocaleList would change if Locale.setDefault() is called. This method
-     * takes that into account by always checking the output of Locale.getDefault() and adjusting
-     * the default LocaleList if needed.
+     * takes that into account by always checking the output of Locale.getDefault() and
+     * recalculating the default LocaleList if needed.
      */
     @NonNull @Size(min=1)
     public static LocaleList getDefault() {
@@ -426,7 +462,7 @@ public final class LocaleList implements Parcelable {
                 sLastDefaultLocale = defaultLocale;
                 // It's either the first time someone has asked for the default locale list, or
                 // someone has called Locale.setDefault() since we last set or adjusted the default
-                // locale list. So let's adjust the locale list.
+                // locale list. So let's recalculate the locale list.
                 if (sDefaultLocaleList != null
                         && defaultLocale.equals(sDefaultLocaleList.getPrimary())) {
                     // The default Locale has changed, but it happens to be the first locale in the
@@ -434,12 +470,27 @@ public final class LocaleList implements Parcelable {
                     return sDefaultLocaleList;
                 }
                 sDefaultLocaleList = new LocaleList(defaultLocale, sLastExplicitlySetLocaleList);
+                sDefaultAdjustedLocaleList = sDefaultLocaleList;
             }
             // sDefaultLocaleList can't be null, since it can't be set to null by
             // LocaleList.setDefault(), and if getDefault() is called before a call to
             // setDefault(), sLastDefaultLocale would be null and the check above would set
             // sDefaultLocaleList.
             return sDefaultLocaleList;
+        }
+    }
+
+    /**
+     * Returns the default locale list, adjusted by moving the default locale to its first
+     * position.
+     *
+     * {@hide}
+     */
+    @NonNull @Size(min=1)
+    public static LocaleList getAdjustedDefault() {
+        getDefault(); // to recalculate the default locale list, if necessary
+        synchronized (sLock) {
+            return sDefaultAdjustedLocaleList;
         }
     }
 
@@ -474,6 +525,12 @@ public final class LocaleList implements Parcelable {
             Locale.setDefault(sLastDefaultLocale);
             sLastExplicitlySetLocaleList = locales;
             sDefaultLocaleList = locales;
+            if (localeIndex == 0) {
+                sDefaultAdjustedLocaleList = sDefaultLocaleList;
+            } else {
+                sDefaultAdjustedLocaleList = new LocaleList(
+                        sLastDefaultLocale, sDefaultLocaleList);
+            }
         }
     }
 }

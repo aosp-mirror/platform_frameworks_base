@@ -35,6 +35,9 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /** @hide */
 public class ResourcesManager {
@@ -42,10 +45,14 @@ public class ResourcesManager {
     private static final boolean DEBUG = false;
 
     private static ResourcesManager sResourcesManager;
-    private final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources =
+    private final ArrayMap<ResourcesKey, WeakReference<Resources>> mActiveResources =
             new ArrayMap<>();
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>> mDisplays =
             new ArrayMap<>();
+
+    private String[] mSystemLocales = {};
+    private final HashSet<String> mNonSystemLocales = new HashSet<String>();
+    private boolean mHasNonSystemLocales = false;
 
     CompatibilityInfo mResCompatibilityInfo;
 
@@ -165,6 +172,8 @@ public class ResourcesManager {
                 ? new Configuration(overrideConfiguration) : null;
         ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfigCopy, scale);
         Resources r;
+        final boolean findSystemLocales;
+        final boolean hasNonSystemLocales;
         synchronized (this) {
             // Resources is app scale dependent.
             if (DEBUG) Slog.w(TAG, "getTopLevelResources: " + resDir + " / " + scale);
@@ -178,6 +187,8 @@ public class ResourcesManager {
                         + " key=" + key + " overrideConfig=" + overrideConfiguration);
                 return r;
             }
+            findSystemLocales = (mSystemLocales.length == 0);
+            hasNonSystemLocales = mHasNonSystemLocales;
         }
 
         //if (r != null) {
@@ -243,6 +254,18 @@ public class ResourcesManager {
         if (DEBUG) Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                 + r.getConfiguration() + " appScale=" + r.getCompatibilityInfo().applicationScale);
 
+        final String[] systemLocales = (
+                findSystemLocales ?
+                AssetManager.getSystem().getLocales() :
+                null);
+        final String[] nonSystemLocales = assets.getNonSystemLocales();
+        // Avoid checking for non-pseudo-locales if we already know there were some from a previous
+        // Resources. The default value (for when hasNonSystemLocales is true) doesn't matter,
+        // since mHasNonSystemLocales will also be true, and thus isPseudoLocalesOnly would not be
+        // able to affect mHasNonSystemLocales.
+        final boolean isPseudoLocalesOnly = hasNonSystemLocales ||
+                LocaleList.isPseudoLocalesOnly(nonSystemLocales);
+
         synchronized (this) {
             WeakReference<Resources> wr = mActiveResources.get(key);
             Resources existing = wr != null ? wr.get() : null;
@@ -255,9 +278,28 @@ public class ResourcesManager {
 
             // XXX need to remove entries when weak references go away
             mActiveResources.put(key, new WeakReference<>(r));
+            if (mSystemLocales.length == 0) {
+                mSystemLocales = systemLocales;
+            }
+            mNonSystemLocales.addAll(Arrays.asList(nonSystemLocales));
+            mHasNonSystemLocales = mHasNonSystemLocales || !isPseudoLocalesOnly;
             if (DEBUG) Slog.v(TAG, "mActiveResources.size()=" + mActiveResources.size());
             return r;
         }
+    }
+
+    /* package */ void setDefaultLocalesLocked(LocaleList locales) {
+        final int bestLocale;
+        if (mHasNonSystemLocales) {
+            bestLocale = locales.getFirstMatchIndexWithEnglishSupported(mNonSystemLocales);
+        } else {
+            // We fallback to system locales if there was no locale specifically supported by the
+            // assets. This is to properly support apps that only rely on the shared system assets
+            // and don't need assets of their own.
+            bestLocale = locales.getFirstMatchIndexWithEnglishSupported(mSystemLocales);
+        }
+        // set it for Java, this also affects newly created Resources
+        LocaleList.setDefault(locales, bestLocale);
     }
 
     final boolean applyConfigurationToResourcesLocked(Configuration config,
@@ -283,13 +325,28 @@ public class ResourcesManager {
                     | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
 
-        // set it for java, this also affects newly created Resources
-        final LocaleList localeList = config.getLocales();
-        if (!localeList.isEmpty()) {
-            LocaleList.setDefault(localeList);
+        Configuration localeAdjustedConfig = config;
+        final LocaleList configLocales = config.getLocales();
+        if (!configLocales.isEmpty()) {
+            setDefaultLocalesLocked(configLocales);
+            final LocaleList adjustedLocales = LocaleList.getAdjustedDefault();
+            if (adjustedLocales != configLocales) { // has the same result as .equals() in this case
+                // The first locale in the list was not chosen. So we create a modified
+                // configuration with the adjusted locales (which moves the chosen locale to the
+                // front).
+                localeAdjustedConfig = new Configuration();
+                localeAdjustedConfig.setTo(config);
+                localeAdjustedConfig.setLocales(adjustedLocales);
+                // Also adjust the locale list in mResConfiguration, so that the Resources created
+                // later would have the same locale list.
+                if (!mResConfiguration.getLocales().equals(adjustedLocales)) {
+                    mResConfiguration.setLocales(adjustedLocales);
+                    changes |= ActivityInfo.CONFIG_LOCALE;
+                }
+            }
         }
 
-        Resources.updateSystemConfiguration(config, defaultDisplayMetrics, compat);
+        Resources.updateSystemConfiguration(localeAdjustedConfig, defaultDisplayMetrics, compat);
 
         ApplicationPackageManager.configurationChanged();
         //Slog.i(TAG, "Configuration changed in " + currentPackageName());
@@ -301,7 +358,7 @@ public class ResourcesManager {
             Resources r = mActiveResources.valueAt(i).get();
             if (r != null) {
                 if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
-                        + r + " config to: " + config);
+                        + r + " config to: " + localeAdjustedConfig);
                 int displayId = key.mDisplayId;
                 boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
                 DisplayMetrics dm = defaultDisplayMetrics;
@@ -310,7 +367,7 @@ public class ResourcesManager {
                     if (tmpConfig == null) {
                         tmpConfig = new Configuration();
                     }
-                    tmpConfig.setTo(config);
+                    tmpConfig.setTo(localeAdjustedConfig);
                     if (!isDefaultDisplay) {
                         dm = getDisplayMetricsLocked(displayId);
                         applyNonDefaultDisplayMetricsToConfigurationLocked(dm, tmpConfig);
@@ -320,7 +377,7 @@ public class ResourcesManager {
                     }
                     r.updateConfiguration(tmpConfig, dm, compat);
                 } else {
-                    r.updateConfiguration(config, dm, compat);
+                    r.updateConfiguration(localeAdjustedConfig, dm, compat);
                 }
                 //Slog.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());
