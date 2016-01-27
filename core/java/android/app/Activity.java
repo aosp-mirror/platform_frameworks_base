@@ -2313,7 +2313,7 @@ public class Activity extends ContextThemeWrapper
      * <p>In order to use a Toolbar within the Activity's window content the application
      * must not request the window feature {@link Window#FEATURE_ACTION_BAR FEATURE_ACTION_BAR}.</p>
      *
-     * @param toolbar Toolbar to set as the Activity's action bar
+     * @param toolbar Toolbar to set as the Activity's action bar, or {@code null} to clear it
      */
     public void setActionBar(@Nullable Toolbar toolbar) {
         final ActionBar ab = getActionBar();
@@ -2332,10 +2332,17 @@ public class Activity extends ContextThemeWrapper
             ab.onDestroy();
         }
 
-        ToolbarActionBar tbab = new ToolbarActionBar(toolbar, getTitle(), this);
-        mActionBar = tbab;
-        mWindow.setCallback(tbab.getWrappedWindowCallback());
-        mActionBar.invalidateOptionsMenu();
+        if (toolbar != null) {
+            final ToolbarActionBar tbab = new ToolbarActionBar(toolbar, getTitle(), this);
+            mActionBar = tbab;
+            mWindow.setCallback(tbab.getWrappedWindowCallback());
+        } else {
+            mActionBar = null;
+            // Re-set the original window callback since we may have already set a Toolbar wrapper
+            mWindow.setCallback(this);
+        }
+
+        invalidateOptionsMenu();
     }
 
     /**
