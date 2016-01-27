@@ -99,7 +99,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഫയൽ ഇല്ലാതാക്കാൻ കഴിഞ്ഞില്ല</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"വിശദാംശങ്ങൾ കാണുന്നതിന് ടാപ്പുചെയ്യുക"</string>
-    <string name="retry" msgid="7564024179122207376">"വീണ്ടും ശ്രമിക്കുക"</string>
+    <!-- no translation found for close (3043722427445528732) -->
+    <skip />
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ഈ ഫയലുകൾ പകർത്താനായില്ല: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ഈ ഫയലുകളെ നീക്കിയില്ല: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -108,5 +109,5 @@
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"തിരഞ്ഞെടുത്ത ഫയലുകൾ ഈ ലൊക്കേഷനിൽ ഒട്ടിക്കാനാകുന്നില്ല."</string>
     <string name="menu_rename" msgid="7678802479104285353">"പേരുമാറ്റുക"</string>
-    <string name="rename_error" msgid="4203041674883412606">"ഡോക്യുമെന്റ് പേരുമാറ്റുന്നത് പരാജയപ്പെട്ടു"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ഡോക്യുമെന്റിന്റെ പേരുമാറ്റുന്നത് പരാജയപ്പെട്ടു"</string>
 </resources>

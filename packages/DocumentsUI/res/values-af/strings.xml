@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Toestelle"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Nog programme"</string>
     <string name="empty" msgid="7858882803708117596">"Geen items nie"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"Geen passings in %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Kan lêer nie oopmaak nie"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Kan sommige dokumente nie uitvee nie"</string>
     <string name="share_via" msgid="8966594246261344259">"Deel via"</string>
@@ -99,9 +98,9 @@
       <item quantity="other">Kon <xliff:g id="COUNT_1">%1$d</xliff:g> lêers nie uitvee nie</item>
       <item quantity="one">Kon <xliff:g id="COUNT_0">%1$d</xliff:g> lêer nie uitvee nie</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Tik om besonderhede te bekyk"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"Herprobeer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Hierdie lêers is nie gekopieer nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Hierdie lêers is nie geskuif nie: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="one">Het <xliff:g id="COUNT_0">%1$d</xliff:g> lêer na die knipbord gekopieer.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Kan nie die geselekteerde lêers in hierdie ligging plak nie."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"Hernoem"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Kon nie dokument hernoem nie"</string>
 </resources>

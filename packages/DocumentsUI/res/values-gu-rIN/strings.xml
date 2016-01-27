@@ -99,7 +99,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી શક્યાં નથી</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"વિગતો જોવા માટે ટૅપ કરો"</string>
-    <string name="retry" msgid="7564024179122207376">"ફરી પ્રયાસ કરો"</string>
+    <!-- no translation found for close (3043722427445528732) -->
+    <skip />
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"આ ફાઇલો ખસેડી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">

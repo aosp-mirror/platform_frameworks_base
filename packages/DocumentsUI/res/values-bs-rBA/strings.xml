@@ -110,8 +110,7 @@
     <skip />
     <!-- no translation found for empty (7858882803708117596) -->
     <skip />
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"Nema utakmica u %1$s"</string>
     <!-- no translation found for toast_no_application (1339885974067891667) -->
     <skip />
     <!-- no translation found for toast_failed_delete (2180678019407244069) -->
@@ -141,9 +140,8 @@
       <item quantity="few">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>
       <item quantity="other">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
-    <skip />
-    <!-- no translation found for retry (7564024179122207376) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite za prikaz detalja"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
     <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
     <skip />
@@ -152,8 +150,6 @@
     <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
     <!-- no translation found for clipboard_files_cannot_paste (2878324825602325706) -->
     <skip />
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"Preimenuj"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Nije uspjelo preimenovanje dokumenta"</string>
 </resources>

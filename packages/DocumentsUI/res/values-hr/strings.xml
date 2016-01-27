@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Uređaji"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Više aplikacija"</string>
     <string name="empty" msgid="7858882803708117596">"Nema stavki"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"%1$s ne sadrži podudaranja"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Datoteku nije moguće otvoriti"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće izbrisati neke dokumente"</string>
     <string name="share_via" msgid="8966594246261344259">"Dijeli putem"</string>
@@ -105,9 +104,9 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke nisu izbrisane</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteka nije izbrisano</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite da biste vidjeli pojedinosti"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"Pokušaj ponovo"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ove datoteke nisu kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Ove datoteke nisu premještene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -116,8 +115,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteka kopirano je u međuspremnik.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Nije moguće zalijepiti odabrane datoteke na ovu lokaciju."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"Promijeni naziv"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Naziv dokumenta nije promijenjen"</string>
 </resources>

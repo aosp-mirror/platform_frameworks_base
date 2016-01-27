@@ -99,7 +99,8 @@
       <item quantity="one">無法刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"輕按即可查看詳細資訊"</string>
-    <string name="retry" msgid="7564024179122207376">"重試"</string>
+    <!-- no translation found for close (3043722427445528732) -->
+    <skip />
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"未複製這些檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"未移動以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
