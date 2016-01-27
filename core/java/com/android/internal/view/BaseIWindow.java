@@ -38,7 +38,7 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
             Rect stableInsets, Rect outsets, boolean reportDraw, Configuration newConfig,
-            Rect backDropFrame) {
+            Rect backDropFrame, boolean forceLayout) {
         if (reportDraw) {
             try {
                 mSession.finishDrawing(this);
