@@ -1004,10 +1004,10 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        if (!mStartActivity.task.isResizeable()
-                && mSupervisor.isStackDockedInEffect(mTargetStack.mStackId)) {
-            mSupervisor.showNonResizeableDockToast(mStartActivity.task.taskId);
-        }
+        final int preferredLaunchStackId =
+                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
+        mSupervisor.showNonResizeableDockToastIfNeeded(
+                mStartActivity.task, preferredLaunchStackId, mTargetStack.mStackId);
 
         return START_SUCCESS;
     }

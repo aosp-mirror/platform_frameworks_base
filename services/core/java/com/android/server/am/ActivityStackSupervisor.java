@@ -2204,7 +2204,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // show up. We instead leave the task in its current stack or move it to the fullscreen
             // stack if it isn't currently in a stack.
             stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
-            // TODO: display toast that activity doesn't support multi-window mode.
             Slog.w(TAG, "Can not move unresizeable task=" + task
                     + " to docked stack. Moving to stackId=" + stackId + " instead.");
         }
@@ -2254,6 +2253,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
             mWindowManager.setReplacingWindow(topActivity.appToken, animate);
         }
+        final int preferredLaunchStackId = stackId;
         final ActivityStack stack = moveTaskToStackUncheckedLocked(
                 task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
         stackId = stack.mStackId;
@@ -2286,9 +2286,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        if (!task.isResizeable() && isStackDockedInEffect(stackId)) {
-            showNonResizeableDockToast(taskId);
-        }
+        showNonResizeableDockToastIfNeeded(task, preferredLaunchStackId, stackId);
     }
 
     boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
@@ -3240,8 +3238,17 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    void showNonResizeableDockToast(int taskId) {
-        mWindowManager.scheduleShowNonResizeableDockToast(taskId);
+    void showNonResizeableDockToastIfNeeded(
+            TaskRecord task, int preferredStackId, int actualStackId) {
+        if (!isStackDockedInEffect(actualStackId) && preferredStackId != DOCKED_STACK_ID) {
+            return;
+        }
+
+        if (!task.canGoInDockedStack() || task.inCropWindowsResizeMode()) {
+            // Display warning toast if we tried to put a non-dockable task in the docked stack or
+            // the task is running in cropped window mode.
+            mWindowManager.scheduleShowNonResizeableDockToast(task.taskId);
+        }
     }
 
     void showLockTaskToast() {
