@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityManagerNative;
 import android.os.IBinder;
 import android.os.RemoteException;
 import com.android.internal.view.IDropPermissions;
@@ -40,6 +41,8 @@ import dalvik.system.CloseGuard;
 public final class DropPermissions {
 
     private final IDropPermissions mDropPermissions;
+
+    private IBinder mPermissionOwnerToken;
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -80,11 +83,29 @@ public final class DropPermissions {
     }
 
     /**
+     * Take the permissions. Must call {@link #release} explicitly.
+     * @return True if permissions are successfully taken.
+     * @hide
+     */
+    public boolean takeTransient() {
+        try {
+            mPermissionOwnerToken = ActivityManagerNative.getDefault().
+                    newUriPermissionOwner("drop");
+            mDropPermissions.takeTransient(mPermissionOwnerToken);
+        } catch (RemoteException e) {
+            return false;
+        }
+        mCloseGuard.open("release");
+        return true;
+    }
+
+    /**
      * Revoke permissions explicitly.
      */
     public void release() {
         try {
             mDropPermissions.release();
+            mPermissionOwnerToken = null;
         } catch (RemoteException e) {
         }
         mCloseGuard.close();

@@ -17,11 +17,14 @@
 package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
+
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.StrictMode;
 import android.text.Html;
 import android.text.Spannable;
@@ -462,7 +465,12 @@ public class ClipData implements Parcelable {
                 // Check to see what data representations the content
                 // provider supports.  We would like HTML text, but if that
                 // is not possible we'll live with plan text.
-                String[] types = context.getContentResolver().getStreamTypes(mUri, "text/*");
+                String[] types = null;
+                try {
+                    types = context.getContentResolver().getStreamTypes(mUri, "text/*");
+                } catch (SecurityException e) {
+                    // No read permission for mUri, assume empty stream types list.
+                }
                 boolean hasHtml = false;
                 boolean hasText = false;
                 if (types != null) {

@@ -24,5 +24,6 @@ import android.os.IBinder;
  */
 interface IDropPermissions {
     void take(IBinder activityToken);
+    void takeTransient(IBinder permissionOwnerToken);
     void release();
 }

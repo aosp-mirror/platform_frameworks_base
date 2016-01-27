@@ -27,7 +27,7 @@ import com.android.internal.view.IDropPermissions;
 
 import java.util.ArrayList;
 
-class DropPermissionsHandler extends IDropPermissions.Stub {
+class DropPermissionsHandler extends IDropPermissions.Stub implements IBinder.DeathRecipient {
 
     private final int mSourceUid;
     private final String mTargetPackage;
@@ -38,6 +38,7 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
     private final ArrayList<Uri> mUris = new ArrayList<Uri>();
 
     private IBinder mActivityToken = null;
+    private IBinder mPermissionOwnerToken = null;
 
     DropPermissionsHandler(ClipData clipData, int sourceUid, String targetPackage, int mode,
             int sourceUserId, int targetUserId) {
@@ -52,7 +53,7 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
 
     @Override
     public void take(IBinder activityToken) throws RemoteException {
-        if (mActivityToken != null) {
+        if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
         mActivityToken = activityToken;
@@ -61,6 +62,10 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
         IBinder permissionOwner = ActivityManagerNative.getDefault().
                 getUriPermissionOwnerForActivity(mActivityToken);
 
+        doTake(permissionOwner);
+    }
+
+    private void doTake(IBinder permissionOwner) throws RemoteException {
         long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
@@ -74,25 +79,51 @@ class DropPermissionsHandler extends IDropPermissions.Stub {
     }
 
     @Override
+    public void takeTransient(IBinder permissionOwnerToken) throws RemoteException {
+        if (mActivityToken != null || mPermissionOwnerToken != null) {
+            return;
+        }
+        mPermissionOwnerToken = permissionOwnerToken;
+        mPermissionOwnerToken.linkToDeath(this, 0);
+
+        doTake(mPermissionOwnerToken);
+    }
+
+    @Override
     public void release() throws RemoteException {
-        if (mActivityToken == null) {
+        if (mActivityToken == null && mPermissionOwnerToken == null) {
             return;
         }
 
         IBinder permissionOwner = null;
-        try {
-            permissionOwner = ActivityManagerNative.getDefault().
-                    getUriPermissionOwnerForActivity(mActivityToken);
-        } catch (Exception e) {
-            // Activity is destroyed, permissions already revoked.
-            return;
-        } finally {
-            mActivityToken = null;
+        if (mActivityToken != null) {
+            try {
+                permissionOwner = ActivityManagerNative.getDefault().
+                        getUriPermissionOwnerForActivity(mActivityToken);
+            } catch (Exception e) {
+                // Activity is destroyed, permissions already revoked.
+                return;
+            } finally {
+                mActivityToken = null;
+            }
+        } else {
+            permissionOwner = mPermissionOwnerToken;
+            mPermissionOwnerToken.unlinkToDeath(this, 0);
+            mPermissionOwnerToken = null;
         }
 
         for (int i = 0; i < mUris.size(); ++i) {
             ActivityManagerNative.getDefault().revokeUriPermissionFromOwner(
                     permissionOwner, mUris.get(i), mMode, mSourceUserId);
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        try {
+            release();
+        } catch (RemoteException e) {
+            // Cannot happen, local call.
         }
     }
 }
