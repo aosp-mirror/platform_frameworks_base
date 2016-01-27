@@ -553,7 +553,7 @@ a Device Owner can now auto-accept a system
 update, for instance in the case of a kiosk device, or postpone the update and prevent it being
 taken by the user for up to 30 days. Furthermore, an administrator can set a daily time window in
 which an update must be taken, for example during the hours when a kiosk device is not in use. When
-a system update is available, the system checks if the Work Policy Controller app has set a system
+a system update is available, the system checks if the device policy controller app has set a system
 update policy, and behaves accordingly.
 </li>
 <li>

@@ -346,8 +346,8 @@ addNetwork()} method) are now removed if that work profile is deleted.
   Owners have the privilege of editing or removing any Wi-Fi configurations, including
   those not created by them.
   </li>
-<li><strong>Download Work Policy Controller via Google account addition:</strong> When a Google
-account that requires management via a Work Policy Controller (WPC) app is added to a device
+<li><strong>Download device policy controller via Google account addition:</strong> When a Google
+account that requires management via a device policy controller (DPC) app is added to a device
 outside of a managed context, the add account flow now prompts the user to install the
 appropriate WPC. This behavior also applies to accounts added via
 <strong>Settings > Accounts</strong> and in the initial device setup wizard.</li>
