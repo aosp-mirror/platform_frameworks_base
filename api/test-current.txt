@@ -5791,6 +5791,7 @@ package android.app.admin {
     method public void clearCrossProfileIntentFilters(android.content.ComponentName);
     method public void clearDeviceOwnerApp(java.lang.String);
     method public void clearPackagePersistentPreferredActivities(android.content.ComponentName, java.lang.String);
+    method public void clearProfileOwner(android.content.ComponentName);
     method public void clearUserRestriction(android.content.ComponentName, java.lang.String);
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public android.os.UserHandle createAndManageUser(android.content.ComponentName, java.lang.String, android.content.ComponentName, android.os.PersistableBundle, int);
