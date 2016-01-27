@@ -48,17 +48,21 @@ public class DockedDividerUtils {
                 outRect.top = position + dividerSize;
                 break;
         }
-        if (outRect.left >= outRect.right) {
-            outRect.left = outRect.right - 1;
+        sanitizeStackBounds(outRect);
+    }
+
+    public static void sanitizeStackBounds(Rect bounds) {
+        if (bounds.left >= bounds.right) {
+            bounds.left = bounds.right - 1;
         }
-        if (outRect.top >= outRect.bottom) {
-            outRect.top = outRect.bottom - 1;
+        if (bounds.top >= bounds.bottom) {
+            bounds.top = bounds.bottom - 1;
         }
-        if (outRect.right <= outRect.left) {
-            outRect.right = outRect.left + 1;
+        if (bounds.right <= bounds.left) {
+            bounds.right = bounds.left + 1;
         }
-        if (outRect.bottom <= outRect.top) {
-            outRect.bottom = outRect.top + 1;
+        if (bounds.bottom <= bounds.top) {
+            bounds.bottom = bounds.top + 1;
         }
     }
 

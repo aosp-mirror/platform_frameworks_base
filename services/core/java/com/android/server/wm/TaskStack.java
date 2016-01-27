@@ -587,6 +587,7 @@ public class TaskStack implements DimLayer.DimLayerUser {
                 outBounds.top = dockedBounds.bottom + dockDividerWidth;
             }
         }
+        DockedDividerUtils.sanitizeStackBounds(outBounds);
     }
 
     /** Resizes all non-docked stacks in the system to either fullscreen or the appropriate size
