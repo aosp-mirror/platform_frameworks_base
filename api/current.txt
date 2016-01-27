@@ -32230,6 +32230,7 @@ package android.provider {
   public class VoicemailContract {
     field public static final java.lang.String ACTION_FETCH_VOICEMAIL = "android.intent.action.FETCH_VOICEMAIL";
     field public static final java.lang.String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
+    field public static final java.lang.String ACTION_SYNC_VOICEMAIL = "android.intent.action.SYNC_VOICEMAIL";
     field public static final java.lang.String AUTHORITY = "com.android.voicemail";
     field public static final java.lang.String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
     field public static final java.lang.String PARAM_KEY_SOURCE_PACKAGE = "source_package";
@@ -32244,8 +32245,13 @@ package android.provider {
     field public static final int CONFIGURATION_STATE_OK = 0; // 0x0
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_CHANNEL_STATE = "data_channel_state";
+    field public static final int DATA_CHANNEL_STATE_BAD_CONFIGURATION = 3; // 0x3
+    field public static final int DATA_CHANNEL_STATE_COMMUNICATION_ERROR = 4; // 0x4
     field public static final int DATA_CHANNEL_STATE_NO_CONNECTION = 1; // 0x1
+    field public static final int DATA_CHANNEL_STATE_NO_CONNECTION_CELLULAR_REQUIRED = 2; // 0x2
     field public static final int DATA_CHANNEL_STATE_OK = 0; // 0x0
+    field public static final int DATA_CHANNEL_STATE_SERVER_CONNECTION_ERROR = 6; // 0x6
+    field public static final int DATA_CHANNEL_STATE_SERVER_ERROR = 5; // 0x5
     field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemail.source.status";
     field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail.source.status";
     field public static final java.lang.String NOTIFICATION_CHANNEL_STATE = "notification_channel_state";
