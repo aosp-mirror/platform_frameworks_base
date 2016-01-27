@@ -21,6 +21,7 @@ public interface LocationController {
     boolean setLocationEnabled(boolean enabled);
     void addSettingsChangedCallback(LocationSettingsChangeCallback cb);
     void removeSettingsChangedCallback(LocationSettingsChangeCallback cb);
+    boolean isUserLocationRestricted();
 
     /**
      * A callback for change in location settings (the user has enabled/disabled location).

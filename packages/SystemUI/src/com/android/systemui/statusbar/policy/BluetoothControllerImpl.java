@@ -16,11 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import com.android.settingslib.bluetooth.BluetoothCallback;
@@ -39,6 +42,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final LocalBluetoothManager mLocalBluetoothManager;
+    private final UserManager mUserManager;
+    private final int mCurrentUser;
 
     private boolean mEnabled;
     private int mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
@@ -54,6 +59,14 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             onBluetoothStateChanged(
                     mLocalBluetoothManager.getBluetoothAdapter().getBluetoothState());
         }
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mCurrentUser = ActivityManager.getCurrentUser();
+    }
+
+    @Override
+    public boolean canConfigBluetooth() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_BLUETOOTH,
+                UserHandle.of(mCurrentUser));
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

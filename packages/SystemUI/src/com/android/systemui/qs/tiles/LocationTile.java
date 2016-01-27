@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.os.UserManager;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -85,6 +87,8 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         // bug is fixed, this should be reverted to only hiding it on secure lock screens:
         // state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
         state.value = locationEnabled;
+        state.disabledByPolicy = mController.isUserLocationRestricted();
+        checkIfRestrictionEnforced(state, UserManager.DISALLOW_SHARE_LOCATION);
         if (locationEnabled) {
             state.icon = mEnable;
             state.label = mContext.getString(R.string.quick_settings_location_label);
