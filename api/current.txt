@@ -36405,10 +36405,15 @@ package android.telephony {
     method public int getActiveSubscriptionInfoCountMax();
     method public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
     method public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method public static int getDefaultDataSubscriptionId();
+    method public static int getDefaultSmsSubscriptionId();
+    method public static int getDefaultSubscriptionId();
+    method public static int getDefaultVoiceSubscriptionId();
     method public boolean isNetworkRoaming(int);
     method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     field public static final int DATA_ROAMING_DISABLE = 0; // 0x0
     field public static final int DATA_ROAMING_ENABLE = 1; // 0x1
+    field public static final int INVALID_SUBSCRIPTION_ID = -1; // 0xffffffff
   }
 
   public static class SubscriptionManager.OnSubscriptionsChangedListener {
@@ -36420,32 +36425,49 @@ package android.telephony {
     method public boolean canChangeDtmfToneLength();
     method public java.util.List<android.telephony.CellInfo> getAllCellInfo();
     method public int getCallState();
+    method public int getCallState(int);
     method public android.telephony.CellLocation getCellLocation();
     method public int getDataActivity();
+    method public int getDataNetworkType(int);
     method public int getDataState();
     method public java.lang.String getDeviceId();
     method public java.lang.String getDeviceId(int);
     method public java.lang.String getDeviceSoftwareVersion();
     method public java.lang.String getGroupIdLevel1();
+    method public java.lang.String getGroupIdLevel1(int);
     method public java.lang.String getIccSimChallengeResponse(int, java.lang.String);
+    method public java.lang.String getLine1AlphaTag(int);
     method public java.lang.String getLine1Number();
+    method public java.lang.String getLine1Number(int);
     method public java.lang.String getMmsUAProfUrl();
     method public java.lang.String getMmsUserAgent();
     method public deprecated java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
     method public java.lang.String getNetworkCountryIso();
+    method public java.lang.String getNetworkCountryIso(int);
     method public java.lang.String getNetworkOperator();
+    method public java.lang.String getNetworkOperator(int);
     method public java.lang.String getNetworkOperatorName();
+    method public java.lang.String getNetworkOperatorName(int);
     method public int getNetworkType();
+    method public int getNetworkType(int);
     method public int getPhoneCount();
     method public int getPhoneType();
     method public java.lang.String getSimCountryIso();
+    method public java.lang.String getSimCountryIso(int);
     method public java.lang.String getSimOperator();
+    method public java.lang.String getSimOperator(int);
     method public java.lang.String getSimOperatorName();
+    method public java.lang.String getSimOperatorName(int);
     method public java.lang.String getSimSerialNumber();
+    method public java.lang.String getSimSerialNumber(int);
     method public int getSimState();
     method public java.lang.String getSubscriberId();
+    method public java.lang.String getSubscriberId(int);
     method public java.lang.String getVoiceMailAlphaTag();
+    method public java.lang.String getVoiceMailAlphaTag(int);
     method public java.lang.String getVoiceMailNumber();
+    method public java.lang.String getVoiceMailNumber(int);
+    method public int getVoiceNetworkType(int);
     method public android.net.Uri getVoicemailRingtoneUri(android.telecom.PhoneAccountHandle);
     method public boolean hasCarrierPrivileges();
     method public boolean hasIccCard();
@@ -36456,6 +36478,7 @@ package android.telephony {
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isHearingAidCompatibilitySupported();
     method public boolean isNetworkRoaming();
+    method public boolean isNetworkRoaming(int);
     method public boolean isSmsCapable();
     method public boolean isTtyModeSupported();
     method public boolean isVoiceCapable();
@@ -36464,9 +36487,11 @@ package android.telephony {
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public boolean setLine1NumberForDisplay(java.lang.String, java.lang.String);
+    method public boolean setLine1NumberForDisplay(int, java.lang.String, java.lang.String);
     method public boolean setOperatorBrandOverride(java.lang.String);
     method public boolean setPreferredNetworkTypeToGlobal();
     method public boolean setVoiceMailNumber(java.lang.String, java.lang.String);
+    method public boolean setVoiceMailNumber(int, java.lang.String, java.lang.String);
     field public static final java.lang.String ACTION_CONFIGURE_VOICEMAIL = "android.telephony.action.CONFIGURE_VOICEMAIL";
     field public static final java.lang.String ACTION_PHONE_STATE_CHANGED = "android.intent.action.PHONE_STATE";
     field public static final java.lang.String ACTION_RESPOND_VIA_MESSAGE = "android.intent.action.RESPOND_VIA_MESSAGE";
