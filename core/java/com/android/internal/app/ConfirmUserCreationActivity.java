@@ -64,6 +64,10 @@ public class ConfirmUserCreationActivity extends AlertActivity
 
         String message = checkUserCreationRequirements();
 
+        if (message == null) {
+            finish();
+            return;
+        }
         final AlertController.AlertParams ap = mAlertParams;
         ap.mMessage = message;
         ap.mPositiveButtonText = getString(android.R.string.ok);
@@ -104,11 +108,11 @@ public class ConfirmUserCreationActivity extends AlertActivity
         mCanProceed = true;
         final String appName = appInfo.loadLabel(getPackageManager()).toString();
         if (cantCreateUser) {
-            message = getString(R.string.user_creation_cannot_add, appName);
-            mCanProceed = false;
+            setResult(UserManager.USER_CREATION_FAILED_NOT_PERMITTED);
+            return null;
         } else if (cantCreateAnyMoreUsers) {
-            message = getString(R.string.user_creation_cannot_add_any_more, appName);
-            mCanProceed = false;
+            setResult(UserManager.USER_CREATION_FAILED_NO_MORE_USERS);
+            return null;
         } else if (accountExists) {
             message = getString(R.string.user_creation_account_exists, appName, mAccountName);
         } else {

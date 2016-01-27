@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
@@ -621,6 +622,20 @@ public class UserManager {
     /** @hide */
     public static final int PIN_VERIFICATION_SUCCESS = -1;
 
+    /**
+     * Error result indicating that this user is not allowed to add other users on this device.
+     * This is a result code returned from the activity created by the intent
+     * {@link #createUserCreationIntent(String, String, String, PersistableBundle)}.
+     */
+    public static final int USER_CREATION_FAILED_NOT_PERMITTED = Activity.RESULT_FIRST_USER;
+
+    /**
+     * Error result indicating that no more users can be created on this device.
+     * This is a result code returned from the activity created by the intent
+     * {@link #createUserCreationIntent(String, String, String, PersistableBundle)}.
+     */
+    public static final int USER_CREATION_FAILED_NO_MORE_USERS = Activity.RESULT_FIRST_USER + 1;
+
     /** @hide */
     public static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -1194,7 +1209,10 @@ public class UserManager {
      * If this device does not support multiple users, null is returned.
      * <p/>
      * The intent should be launched using startActivityForResult and the return result will
-     * indicate if the user consented to adding a new user and if the operation succeeded.
+     * indicate if the user consented to adding a new user and if the operation succeeded. Any
+     * errors in creating the user will be returned in the result code. If the user cancels the
+     * request, the return result will be {@link Activity#RESULT_CANCELED}. On success, the
+     * result code will be {@link Activity#RESULT_OK}.
      * <p/>
      * The new user is created but not initialized. After switching into the user for the first
      * time, the preferred user name and account information are used by the setup process for that
@@ -1211,6 +1229,8 @@ public class UserManager {
      *                       Handler)}.
      * @return An Intent that can be launched from an Activity or null if creating users is not
      *         supported on this device.
+     * @see #USER_CREATION_FAILED_NOT_PERMITTED
+     * @see #USER_CREATION_FAILED_NO_MORE_USERS
      */
     public static Intent createUserCreationIntent(@Nullable String userName,
             @Nullable String accountName,
