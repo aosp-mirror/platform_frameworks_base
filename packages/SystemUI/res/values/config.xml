@@ -195,6 +195,10 @@
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
     <integer name="recents_svelte_level">0</integer>
 
+    <!-- In multi-window, determines whether the stack where recents lives should grow from
+         the smallest position when being launched. -->
+    <bool name="recents_grow_in_multiwindow">true</bool>
+
     <!-- Recents: The relative range of visible tasks from the current scroll position
          while the stack is focused. -->
     <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>

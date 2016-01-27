@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import android.graphics.Rect;
+
 /**
  * Due to the fact that RecentsActivity is per-user, we need to establish an
  * interface (this) for the system user to callback to the secondary users in
@@ -29,6 +31,8 @@ oneway interface IRecentsNonSystemUserCallbacks {
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents();
     void onConfigurationChanged();
+    void dockTopTask(int topTaskId, int dragMode, int stackCreateMode,
+            in Rect initialBounds);
     void onDraggingInRecents(float distanceFromTop);
     void onDraggingInRecentsEnded(float velocity);
 }

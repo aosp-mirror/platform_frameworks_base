@@ -26,4 +26,7 @@ oneway interface IRecentsSystemUserCallbacks {
 
     void updateRecentsVisibility(boolean visible);
     void startScreenPinning();
+    void sendRecentsDrawnEvent();
+    void sendDockingTopTaskEvent(int dragMode);
+    void sendLaunchRecentsEvent();
 }

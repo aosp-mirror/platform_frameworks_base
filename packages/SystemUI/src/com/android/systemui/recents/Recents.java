@@ -16,6 +16,7 @@
 
 package com.android.systemui.recents;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,8 +37,11 @@ import android.view.View;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
+import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 
@@ -366,17 +370,38 @@ public class Recents extends SystemUI
     }
 
     @Override
-    public boolean dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
+    public boolean dockTopTask(int dragMode, int stackCreateMode, Rect initialBounds) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
             return false;
         }
 
-        if (mImpl.dockTopTask(draggingInRecents, stackCreateMode,initialBounds)) {
-            if (draggingInRecents) {
-                mDraggingInRecentsCurrentUser = sSystemServicesProxy.getCurrentUser();
+        int currentUser = sSystemServicesProxy.getCurrentUser();
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
+        boolean screenPinningActive = ssp.isScreenPinningActive();
+        boolean isTopTaskHome = topTask != null && SystemServicesProxy.isHomeStack(topTask.stackId);
+        if (topTask != null && !isTopTaskHome && !screenPinningActive) {
+            if (sSystemServicesProxy.isSystemUser(currentUser)) {
+                mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
+            } else {
+                if (mSystemUserCallbacks != null) {
+                    IRecentsNonSystemUserCallbacks callbacks =
+                            mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                    if (callbacks != null) {
+                        try {
+                            callbacks.dockTopTask(topTask.id, dragMode, stackCreateMode,
+                                    initialBounds);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Callback failed", e);
+                        }
+                    } else {
+                        Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
+                    }
+                }
             }
+            mDraggingInRecentsCurrentUser = currentUser;
             return true;
         }
         return false;
@@ -516,6 +541,54 @@ public class Recents extends SystemUI
         }
     }
 
+    public final void onBusEvent(final RecentsDrawnEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (!sSystemServicesProxy.isSystemUser(processUser)) {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mCallbacksToSystemUser.sendRecentsDrawnEvent();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
+        }
+    }
+
+    public final void onBusEvent(final DockingTopTaskEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (!sSystemServicesProxy.isSystemUser(processUser)) {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mCallbacksToSystemUser.sendDockingTopTaskEvent(event.dragMode);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
+        }
+    }
+
+    public final void onBusEvent(final RecentsActivityStartingEvent event) {
+        int processUser = sSystemServicesProxy.getProcessUser();
+        if (!sSystemServicesProxy.isSystemUser(processUser)) {
+            postToSystemUser(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mCallbacksToSystemUser.sendLaunchRecentsEvent();
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Callback failed", e);
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * Attempts to register with the system user.
      */
@@ -525,7 +598,8 @@ public class Recents extends SystemUI
             @Override
             public void run() {
                 try {
-                    mCallbacksToSystemUser.registerNonSystemUserCallbacks(mImpl, processUser);
+                    mCallbacksToSystemUser.registerNonSystemUserCallbacks(
+                            new RecentsImplProxy(mImpl), processUser);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to register", e);
                 }

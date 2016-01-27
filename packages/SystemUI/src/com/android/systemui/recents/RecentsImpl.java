@@ -41,9 +41,11 @@ import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -62,6 +64,7 @@ import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
@@ -72,8 +75,7 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
  * An implementation of the Recents component for the current user.  For secondary users, this can
  * be called remotely from the system user.
  */
-public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
-        ActivityOptions.OnAnimationFinishedListener {
+public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
     // The minimum amount of time between each recents button press that we will handle
@@ -532,18 +534,14 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
         showRelativeAffiliatedTask(false);
     }
 
-    public boolean dockTopTask(boolean draggingInRecents, int stackCreateMode, Rect initialBounds) {
+    public void dockTopTask(int topTaskId, int dragMode,
+            int stackCreateMode, Rect initialBounds) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
-        boolean screenPinningActive = ssp.isScreenPinningActive();
-        boolean isTopTaskHome = SystemServicesProxy.isHomeStack(topTask.stackId);
-        if (topTask != null && !isTopTaskHome && !screenPinningActive) {
-            ssp.moveTaskToDockedStack(topTask.id, stackCreateMode, initialBounds);
-            showRecents(false /* triggeredFromAltTab */, draggingInRecents, false /* animate */,
-                    true /* reloadTasks*/);
-            return true;
-        }
-        return false;
+        ssp.moveTaskToDockedStack(topTaskId, stackCreateMode, initialBounds);
+        showRecents(false /* triggeredFromAltTab */,
+                dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS, false /* animate */,
+                true /* reloadTasks*/);
+        EventBus.getDefault().send(new DockingTopTaskEvent(dragMode));
     }
 
     /**
@@ -918,6 +916,7 @@ public class RecentsImpl extends IRecentsNonSystemUserCallbacks.Stub implements
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
         mCanReuseTaskStackViews = true;
+        EventBus.getDefault().send(new RecentsActivityStartingEvent());
     }
 
     /**** OnAnimationFinishedListener Implementation ****/

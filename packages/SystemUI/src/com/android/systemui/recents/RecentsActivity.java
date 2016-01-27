@@ -59,6 +59,7 @@ import com.android.systemui.recents.events.component.RecentsVisibilityChangedEve
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.recents.events.ui.ShowApplicationInfoEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
@@ -400,6 +401,17 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
 
         MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
+
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+
+            @Override
+            public boolean onPreDraw() {
+                mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+                EventBus.getDefault().post(new RecentsDrawnEvent());
+                return true;
+            }
+        });
     }
 
     @Override

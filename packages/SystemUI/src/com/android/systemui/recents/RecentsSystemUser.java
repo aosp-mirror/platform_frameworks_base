@@ -22,6 +22,11 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
+import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
+
 /**
  * An implementation of the system user's Recents interface to be called remotely by secondary
  * users.
@@ -69,5 +74,20 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     @Override
     public void startScreenPinning() {
         mImpl.onStartScreenPinning(mContext);
+    }
+
+    @Override
+    public void sendRecentsDrawnEvent() {
+        EventBus.getDefault().post(new RecentsDrawnEvent());
+    }
+
+    @Override
+    public void sendDockingTopTaskEvent(int dragMode) throws RemoteException {
+        EventBus.getDefault().post(new DockingTopTaskEvent(dragMode));
+    }
+
+    @Override
+    public void sendLaunchRecentsEvent() throws RemoteException {
+        EventBus.getDefault().post(new RecentsActivityStartingEvent());
     }
 }
