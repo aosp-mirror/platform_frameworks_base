@@ -48,6 +48,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
@@ -2611,6 +2612,7 @@ public abstract class Context {
             MEDIA_PROJECTION_SERVICE,
             MIDI_SERVICE,
             RADIO_SERVICE,
+            HARDWARE_PROPERTIES_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2672,6 +2674,8 @@ public abstract class Context {
      * <dt> {@link #NETWORK_STATS_SERVICE} ("netstats")
      * <dd> A {@link android.app.usage.NetworkStatsManager NetworkStatsManager} for querying network
      * usage statistics.
+     * <dt> {@link #HARDWARE_PROPERTIES_SERVICE} ("hardwareproperties")
+     * <dd> A {@link android.os.HardwarePropertiesManager} for accessing hardware properties.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2733,6 +2737,8 @@ public abstract class Context {
      * @see android.app.job.JobScheduler
      * @see #NETWORK_STATS_SERVICE
      * @see android.app.usage.NetworkStatsManager
+     * @see android.os.HardwarePropertiesManager
+     * @see #HARDWARE_PROPERTIES_SERVICE
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
@@ -3473,6 +3479,14 @@ public abstract class Context {
      * @hide
      */
     public static final String RADIO_SERVICE = "radio";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.HardwarePropertiesManager} for accessing the hardware properties service.
+     *
+     * @see #getSystemService
+     */
+    public static final String HARDWARE_PROPERTIES_SERVICE = "hardwareproperties";
 
     /**
      * Determine whether the given permission is allowed for a particular

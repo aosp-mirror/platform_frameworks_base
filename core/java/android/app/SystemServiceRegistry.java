@@ -85,6 +85,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.DropBoxManager;
+import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IUserManager;
@@ -706,6 +707,12 @@ final class SystemServiceRegistry {
             @Override
             public RadioManager createService(ContextImpl ctx) {
                 return new RadioManager(ctx);
+            }});
+        registerService(Context.HARDWARE_PROPERTIES_SERVICE, HardwarePropertiesManager.class,
+                new CachedServiceFetcher<HardwarePropertiesManager>() {
+            @Override
+            public HardwarePropertiesManager createService(ContextImpl ctx) {
+                return new HardwarePropertiesManager();
             }});
     }
 
