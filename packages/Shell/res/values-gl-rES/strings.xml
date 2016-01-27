@@ -19,10 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Estase xerando o informe de erro"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Informe de erros rexistrado"</string>
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Engadindo detalles ao informe de erro"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Agarda..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Pasa o dedo á esquerda para compartir o teu informe de erros"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca aquí para compartir o teu informe de erros"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Os informes de erros conteñen datos dos distintos ficheiros de rexistro do sistema, incluída información persoal e privada. Comparte os informes de erros unicamente con aplicacións e persoas de confianza."</string>

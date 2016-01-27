@@ -19,10 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"शेल"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"दोष अहवाल तयार केला जात आहे"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"दोष अहवाल कॅप्‍चर केला"</string>
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"दोष अहवालामध्‍ये तपशील जोडत आहे"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा करा..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"आपला दोष अहवाल सामायिक करण्यासाठी डावीकडे स्वाइप करा"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"आपला दोष अहवाल सामायिक करण्‍यासाठी स्‍पर्श करा"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"दोष अहवालांमध्‍ये वैयक्तिक आणि खाजगी माहितीसह, सिस्‍टमच्‍या अनेक लॉग फायलींमधील डेटा असतो. केवळ आपला विश्वास असलेल्‍या अ‍ॅप्‍स आणि लोकांसह दोष अहवाल सामायिक करा."</string>
