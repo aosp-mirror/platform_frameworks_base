@@ -18,6 +18,8 @@
 
 #include <stdio.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -33,6 +35,8 @@
 #include "JNIHelp.h"
 
 // ----------------------------------------------------------------------------
+
+#define EGL_QCOM_PROTECTED_CONTENT 0x32E0
 
 namespace android {
 
@@ -53,6 +57,28 @@ static fields_t fields;
 static int32_t createProcessUniqueId() {
     static volatile int32_t globalCounter = 0;
     return android_atomic_inc(&globalCounter);
+}
+
+// Check whether the current EGL context is protected.
+static bool isProtectedContext() {
+    EGLDisplay dpy = eglGetCurrentDisplay();
+    EGLContext ctx = eglGetCurrentContext();
+
+    if (dpy == EGL_NO_DISPLAY) {
+        ALOGE("isProtectedSurface: invalid current EGLDisplay");
+        return false;
+    }
+
+    if (ctx == EGL_NO_CONTEXT) {
+        ALOGE("isProtectedSurface: invalid current EGLContext");
+        return false;
+    }
+
+    EGLint isProtected = EGL_FALSE;
+    // TODO: Change the enum value below when an extension is ratified.
+    eglQueryContext(dpy, ctx, EGL_QCOM_PROTECTED_CONTENT, &isProtected);
+
+    return isProtected;
 }
 
 // ----------------------------------------------------------------------------
@@ -262,6 +288,11 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
             (isDetached ? 0 : texName),
             getpid(),
             createProcessUniqueId()));
+
+    // If the current context is protected, inform the producer.
+    if (isProtectedContext()) {
+        consumer->setConsumerUsageBits(GRALLOC_USAGE_PROTECTED);
+    }
 
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
