@@ -40,6 +40,7 @@ static struct {
     jclass clazz;
     jmethodID dispatchSensorEvent;
     jmethodID dispatchFlushCompleteEvent;
+    jmethodID dispatchAdditionalInfoEvent;
 } gBaseEventQueueClassInfo;
 
 namespace android {
@@ -266,21 +267,25 @@ class Receiver : public LooperCallback {
     sp<SensorEventQueue> mSensorQueue;
     sp<MessageQueue> mMessageQueue;
     jobject mReceiverWeakGlobal;
-    jfloatArray mScratch;
+    jfloatArray mFloatScratch;
+    jintArray   mIntScratch;
 public:
     Receiver(const sp<SensorEventQueue>& sensorQueue,
             const sp<MessageQueue>& messageQueue,
-            jobject receiverWeak, jfloatArray scratch) {
+            jobject receiverWeak) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         mSensorQueue = sensorQueue;
         mMessageQueue = messageQueue;
         mReceiverWeakGlobal = env->NewGlobalRef(receiverWeak);
-        mScratch = (jfloatArray)env->NewGlobalRef(scratch);
+
+        mIntScratch = (jintArray) env->NewGlobalRef(env->NewIntArray(16));
+        mFloatScratch = (jfloatArray) env->NewGlobalRef(env->NewFloatArray(16));
     }
     ~Receiver() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         env->DeleteGlobalRef(mReceiverWeakGlobal);
-        env->DeleteGlobalRef(mScratch);
+        env->DeleteGlobalRef(mFloatScratch);
+        env->DeleteGlobalRef(mIntScratch);
     }
     sp<SensorEventQueue> getSensorEventQueue() const {
         return mSensorQueue;
@@ -309,14 +314,19 @@ private:
                 if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
                     // step-counter returns a uint64, but the java API only deals with floats
                     float value = float(buffer[i].u64.step_counter);
-                    env->SetFloatArrayRegion(mScratch, 0, 1, &value);
+                    env->SetFloatArrayRegion(mFloatScratch, 0, 1, &value);
                 } else if (buffer[i].type == SENSOR_TYPE_DYNAMIC_SENSOR_META) {
                     float value[2];
                     value[0] = buffer[i].dynamic_sensor_meta.connected ? 1.f: 0.f;
                     value[1] = float(buffer[i].dynamic_sensor_meta.handle);
-                    env->SetFloatArrayRegion(mScratch, 0, 2, value);
+                    env->SetFloatArrayRegion(mFloatScratch, 0, 2, value);
+                } else if (buffer[i].type == SENSOR_TYPE_ADDITIONAL_INFO) {
+                    env->SetIntArrayRegion(mIntScratch, 0, 14,
+                                           buffer[i].additional_info.data_int32);
+                    env->SetFloatArrayRegion(mFloatScratch, 0, 14,
+                                             buffer[i].additional_info.data_float);
                 } else {
-                    env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
+                    env->SetFloatArrayRegion(mFloatScratch, 0, 16, buffer[i].data);
                 }
 
                 if (buffer[i].type == SENSOR_TYPE_META_DATA) {
@@ -327,7 +337,21 @@ private:
                                             gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
                                             buffer[i].meta_data.sensor);
                     }
-                } else {
+                } else if (buffer[i].type == SENSOR_TYPE_ADDITIONAL_INFO) {
+                    // This is a flush complete sensor event. Call dispatchAdditionalInfoEvent
+                    // method.
+                    if (receiverObj.get()) {
+                        int type = buffer[i].additional_info.type;
+                        int serial = buffer[i].additional_info.serial;
+                        env->CallVoidMethod(receiverObj.get(),
+                                            gBaseEventQueueClassInfo.dispatchAdditionalInfoEvent,
+                                            buffer[i].sensor,
+                                            type, serial,
+                                            mFloatScratch,
+                                            mIntScratch,
+                                            buffer[i].timestamp);
+                    }
+                }else {
                     int8_t status;
                     switch (buffer[i].type) {
                     case SENSOR_TYPE_ORIENTATION:
@@ -349,7 +373,7 @@ private:
                         env->CallVoidMethod(receiverObj.get(),
                                             gBaseEventQueueClassInfo.dispatchSensorEvent,
                                             buffer[i].sensor,
-                                            mScratch,
+                                            mFloatScratch,
                                             status,
                                             buffer[i].timestamp);
                     }
@@ -370,7 +394,7 @@ private:
 };
 
 static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorManager,
-        jobject eventQWeak, jobject msgQ, jfloatArray scratch, jstring packageName, jint mode) {
+        jobject eventQWeak, jobject msgQ, jstring packageName, jint mode) {
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
     ScopedUtfChars packageUtf(env, packageName);
     String8 clientName(packageUtf.c_str());
@@ -382,7 +406,7 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorM
         return 0;
     }
 
-    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQWeak, scratch);
+    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQWeak);
     receiver->incStrong((void*)nativeInitSensorEventQueue);
     return jlong(receiver.get());
 }
@@ -446,7 +470,7 @@ static const JNINativeMethod gSystemSensorManagerMethods[] = {
 
 static const JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-             "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;ILjava/lang/String;)J",
+             "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;Ljava/lang/String;ILjava/lang/String;)J",
              (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
@@ -490,6 +514,9 @@ int register_android_hardware_SensorManager(JNIEnv *env)
 
     gBaseEventQueueClassInfo.dispatchFlushCompleteEvent = GetMethodIDOrDie(env,
             gBaseEventQueueClassInfo.clazz, "dispatchFlushCompleteEvent", "(I)V");
+
+    gBaseEventQueueClassInfo.dispatchAdditionalInfoEvent = GetMethodIDOrDie(env,
+            gBaseEventQueueClassInfo.clazz, "dispatchAdditionalInfoEvent", "(III[F[I)V");
 
     return 0;
 }
