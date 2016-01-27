@@ -265,6 +265,7 @@ public final class Call {
         // Next PROPERTY value: 0x00000040
         //******************************************************************************************
 
+        private final String mTelecomCallId;
         private final Uri mHandle;
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
@@ -412,6 +413,11 @@ public final class Call {
             }
             builder.append("]");
             return builder.toString();
+        }
+
+        /** {@hide} */
+        public String getTelecomCallId() {
+            return mTelecomCallId;
         }
 
         /**
@@ -567,6 +573,7 @@ public final class Call {
 
         /** {@hide} */
         public Details(
+                String telecomCallId,
                 Uri handle,
                 int handlePresentation,
                 String callerDisplayName,
@@ -581,6 +588,7 @@ public final class Call {
                 StatusHints statusHints,
                 Bundle extras,
                 Bundle intentExtras) {
+            mTelecomCallId = telecomCallId;
             mHandle = handle;
             mHandlePresentation = handlePresentation;
             mCallerDisplayName = callerDisplayName;
@@ -595,6 +603,26 @@ public final class Call {
             mStatusHints = statusHints;
             mExtras = extras;
             mIntentExtras = intentExtras;
+        }
+
+        /** {@hide} */
+        public static Details createFromParcelableCall(ParcelableCall parcelableCall) {
+            return new Details(
+                    parcelableCall.getId(),
+                    parcelableCall.getHandle(),
+                    parcelableCall.getHandlePresentation(),
+                    parcelableCall.getCallerDisplayName(),
+                    parcelableCall.getCallerDisplayNamePresentation(),
+                    parcelableCall.getAccountHandle(),
+                    parcelableCall.getCapabilities(),
+                    parcelableCall.getProperties(),
+                    parcelableCall.getDisconnectCause(),
+                    parcelableCall.getConnectTimeMillis(),
+                    parcelableCall.getGatewayInfo(),
+                    parcelableCall.getVideoState(),
+                    parcelableCall.getStatusHints(),
+                    parcelableCall.getExtras(),
+                    parcelableCall.getIntentExtras());
         }
     }
 
@@ -1022,21 +1050,7 @@ public final class Call {
     /** {@hide} */
     final void internalUpdate(ParcelableCall parcelableCall, Map<String, Call> callIdMap) {
         // First, we update the internal state as far as possible before firing any updates.
-        Details details = new Details(
-                parcelableCall.getHandle(),
-                parcelableCall.getHandlePresentation(),
-                parcelableCall.getCallerDisplayName(),
-                parcelableCall.getCallerDisplayNamePresentation(),
-                parcelableCall.getAccountHandle(),
-                parcelableCall.getCapabilities(),
-                parcelableCall.getProperties(),
-                parcelableCall.getDisconnectCause(),
-                parcelableCall.getConnectTimeMillis(),
-                parcelableCall.getGatewayInfo(),
-                parcelableCall.getVideoState(),
-                parcelableCall.getStatusHints(),
-                parcelableCall.getExtras(),
-                parcelableCall.getIntentExtras());
+        Details details = Details.createFromParcelableCall(parcelableCall);
         boolean detailsChanged = !Objects.equals(mDetails, details);
         if (detailsChanged) {
             mDetails = details;

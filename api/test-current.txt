@@ -33,6 +33,7 @@ package android {
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_QUICK_SETTINGS_TILE = "android.permission.BIND_QUICK_SETTINGS_TILE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
+    field public static final java.lang.String BIND_SCREENING_SERVICE = "android.permission.BIND_SCREENING_SERVICE";
     field public static final java.lang.String BIND_TELECOM_CONNECTION_SERVICE = "android.permission.BIND_TELECOM_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
@@ -35384,6 +35385,30 @@ package android.telecom {
     field public static final int ROUTE_SPEAKER = 8; // 0x8
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
+  }
+
+  public abstract class CallScreeningService extends android.app.Service {
+    ctor public CallScreeningService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onScreenCall(android.telecom.Call.Details);
+    method public final void respondToCall(android.telecom.Call.Details, android.telecom.CallScreeningService.CallResponse);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.CallScreeningService";
+  }
+
+  public class CallScreeningService.CallResponse {
+    method public boolean getDisallowCall();
+    method public boolean getRejectCall();
+    method public boolean getSkipCallLog();
+    method public boolean getSkipNotification();
+  }
+
+  public class CallScreeningService.CallResponse.Builder {
+    ctor public CallScreeningService.CallResponse.Builder();
+    method public android.telecom.CallScreeningService.CallResponse build();
+    method public android.telecom.CallScreeningService.CallResponse.Builder setDisallowCall(boolean);
+    method public android.telecom.CallScreeningService.CallResponse.Builder setRejectCall(boolean);
+    method public android.telecom.CallScreeningService.CallResponse.Builder setSkipCallLog(boolean);
+    method public android.telecom.CallScreeningService.CallResponse.Builder setSkipNotification(boolean);
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
