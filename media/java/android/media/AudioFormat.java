@@ -251,6 +251,10 @@ public class AudioFormat {
      * @hide
      * */
     public static final int ENCODING_AAC_HE_V2 = 12;
+    /** Audio data format: compressed audio wrapped in PCM for HDMI
+     * or S/PDIF passthrough.
+     */
+    public static final int ENCODING_IEC61937 = 13;
 
     /** Invalid audio channel configuration */
     /** @deprecated Use {@link #CHANNEL_INVALID} instead.  */
@@ -418,6 +422,7 @@ public class AudioFormat {
         case ENCODING_PCM_8BIT:
             return 1;
         case ENCODING_PCM_16BIT:
+        case ENCODING_IEC61937:
         case ENCODING_DEFAULT:
             return 2;
         case ENCODING_PCM_FLOAT:
@@ -443,6 +448,7 @@ public class AudioFormat {
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_IEC61937:
             return true;
         default:
             return false;
@@ -460,6 +466,7 @@ public class AudioFormat {
         case ENCODING_E_AC3:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
+        case ENCODING_IEC61937:
             return true;
         default:
             return false;
@@ -483,6 +490,7 @@ public class AudioFormat {
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_IEC61937: // wrapped in PCM but compressed
             return false;
         case ENCODING_INVALID:
         default:
@@ -490,6 +498,30 @@ public class AudioFormat {
         }
     }
 
+    /** @hide */
+    public static boolean isEncodingLinearFrames(int audioFormat)
+    {
+        switch (audioFormat) {
+        case ENCODING_PCM_8BIT:
+        case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_FLOAT:
+        case ENCODING_IEC61937: // same size as stereo PCM
+        case ENCODING_DEFAULT:
+            return true;
+        case ENCODING_AC3:
+        case ENCODING_E_AC3:
+        case ENCODING_DTS:
+        case ENCODING_DTS_HD:
+        case ENCODING_MP3:
+        case ENCODING_AAC_LC:
+        case ENCODING_AAC_HE_V1:
+        case ENCODING_AAC_HE_V2:
+            return false;
+        case ENCODING_INVALID:
+        default:
+            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+        }
+    }
     /**
      * Returns an array of public encoding values extracted from an array of
      * encoding values.
@@ -715,6 +747,7 @@ public class AudioFormat {
                 case ENCODING_E_AC3:
                 case ENCODING_DTS:
                 case ENCODING_DTS_HD:
+                case ENCODING_IEC61937:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -859,7 +892,8 @@ public class AudioFormat {
         ENCODING_AC3,
         ENCODING_E_AC3,
         ENCODING_DTS,
-        ENCODING_DTS_HD
+        ENCODING_DTS_HD,
+        ENCODING_IEC61937
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
