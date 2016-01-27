@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.support.annotation.NonNull;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -104,7 +105,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static final int PSK_WPA2 = 2;
     private static final int PSK_WPA_WPA2 = 3;
 
-    private static final int VISIBILITY_OUTDATED_AGE_IN_MILLI = 20000;
+    public static final int SIGNAL_LEVELS = 4;
+
     private final Context mContext;
 
     private String ssid;
@@ -167,7 +169,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     @Override
-    public int compareTo(AccessPoint other) {
+    public int compareTo(@NonNull AccessPoint other) {
         // Active one goes first.
         if (isActive() && !other.isActive()) return -1;
         if (!isActive() && other.isActive()) return 1;
@@ -182,8 +184,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (networkId == WifiConfiguration.INVALID_NETWORK_ID
                 && other.networkId != WifiConfiguration.INVALID_NETWORK_ID) return 1;
 
-        // Sort by signal strength.
-        int difference = WifiManager.compareSignalLevel(other.mRssi, mRssi);
+        // Sort by signal strength, bucketed by level
+        int difference = WifiManager.calculateSignalLevel(other.mRssi, SIGNAL_LEVELS)
+                - WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
         if (difference != 0) {
             return difference;
         }
@@ -260,7 +263,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (mRssi == Integer.MAX_VALUE) {
             return -1;
         }
-        return WifiManager.calculateSignalLevel(mRssi, 4);
+        return WifiManager.calculateSignalLevel(mRssi, SIGNAL_LEVELS);
     }
 
     public int getRssi() {
