@@ -17,21 +17,48 @@
 #ifndef _ANDROID_MEDIA_UTILS_H_
 #define _ANDROID_MEDIA_UTILS_H_
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "src/piex_types.h"
+#include "src/piex.h"
 
+#include <android_runtime/AndroidRuntime.h>
+#include <jni.h>
+#include <JNIHelp.h>
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
 namespace android {
 
-/**
- * Returns true if the conversion is successful; otherwise, false.
- */
+class FileStream : public piex::StreamInterface {
+private:
+    FILE *mFile;
+    size_t mPosition;
+    size_t mSize;
+
+public:
+    FileStream(const String8 filename);
+    ~FileStream();
+
+    // Reads 'length' amount of bytes from 'offset' to 'data'. The 'data' buffer
+    // provided by the caller, guaranteed to be at least "length" bytes long.
+    // On 'kOk' the 'data' pointer contains 'length' valid bytes beginning at
+    // 'offset' bytes from the start of the stream.
+    // Returns 'kFail' if 'offset' + 'length' exceeds the stream and does not
+    // change the contents of 'data'.
+    piex::Error GetData(
+            const size_t offset, const size_t length, std::uint8_t* data) override;
+    bool exists() const;
+    size_t size() const;
+};
+
+// Reads EXIF metadata from a given raw image via piex.
+// And returns true if the operation is successful; otherwise, false.
+bool GetExifFromRawImage(
+        FileStream* stream, const String8& filename, piex::PreviewImageData& image_data);
+
+// Returns true if the conversion is successful; otherwise, false.
 bool ConvertKeyValueArraysToKeyedVector(
-    JNIEnv *env, jobjectArray keys, jobjectArray values,
-    KeyedVector<String8, String8>* vector);
+        JNIEnv *env, jobjectArray keys, jobjectArray values,
+        KeyedVector<String8, String8>* vector);
 
 struct AMessage;
 status_t ConvertMessageToMap(

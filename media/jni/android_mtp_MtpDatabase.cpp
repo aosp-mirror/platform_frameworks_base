@@ -17,25 +17,17 @@
 #define LOG_TAG "MtpDatabaseJNI"
 #include "utils/Log.h"
 
-#include <assert.h>
-#include <fcntl.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include "jni.h"
-#include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
-
+#include "android_media_Utils.h"
+#include "mtp.h"
 #include "MtpDatabase.h"
 #include "MtpDataPacket.h"
 #include "MtpObjectInfo.h"
 #include "MtpProperty.h"
 #include "MtpStringBuffer.h"
 #include "MtpUtils.h"
-#include "mtp.h"
+
+#include "src/piex_types.h"
+#include "src/piex.h"
 
 extern "C" {
 #include "libexif/exif-content.h"
@@ -43,6 +35,19 @@ extern "C" {
 #include "libexif/exif-tag.h"
 #include "libexif/exif-utils.h"
 }
+
+#include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
+#include <jni.h>
+#include <JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+
+#include <assert.h>
+#include <fcntl.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <stdio.h>
+#include <unistd.h>
 
 using namespace android;
 
@@ -823,24 +828,48 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     // read EXIF data for thumbnail information
-    if (info.mFormat == MTP_FORMAT_EXIF_JPEG || info.mFormat == MTP_FORMAT_JFIF) {
+    switch (info.mFormat) {
+        case MTP_FORMAT_EXIF_JPEG:
+        case MTP_FORMAT_JFIF: {
+            ExifData *exifdata = exif_data_new_from_file(path);
+            if (exifdata) {
+                if ((false)) {
+                    exif_data_foreach_content(exifdata, foreachcontent, NULL);
+                }
 
-        ExifData *exifdata = exif_data_new_from_file(path);
-        if (exifdata) {
-            if ((false)) {
-                exif_data_foreach_content(exifdata, foreachcontent, NULL);
+                ExifEntry *w = exif_content_get_entry(
+                        exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_X_DIMENSION);
+                ExifEntry *h = exif_content_get_entry(
+                        exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_Y_DIMENSION);
+                info.mThumbCompressedSize = exifdata->data ? exifdata->size : 0;
+                info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
+                info.mImagePixWidth = w ? getLongFromExifEntry(w) : 0;
+                info.mImagePixHeight = h ? getLongFromExifEntry(h) : 0;
+                exif_data_unref(exifdata);
+            }
+            break;
+        }
+
+        // Except DNG, all supported RAW image formats are not defined in PTP 1.2 specification.
+        // Most of RAW image formats are based on TIFF or TIFF/EP. To render Fuji's RAF format,
+        // it checks MTP_FORMAT_DEFINED case since it's designed as a custom format.
+        case MTP_FORMAT_DNG:
+        case MTP_FORMAT_TIFF:
+        case MTP_FORMAT_TIFF_EP:
+        case MTP_FORMAT_DEFINED: {
+            std::unique_ptr<FileStream> stream(new FileStream(path));
+            piex::PreviewImageData image_data;
+            if (!GetExifFromRawImage(stream.get(), path, image_data)) {
+                // Couldn't parse EXIF data from a image file via piex.
+                break;
             }
 
-            // XXX get this from exif, or parse jpeg header instead?
-            ExifEntry *w = exif_content_get_entry(
-                    exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_X_DIMENSION);
-            ExifEntry *h = exif_content_get_entry(
-                    exifdata->ifd[EXIF_IFD_EXIF], EXIF_TAG_PIXEL_Y_DIMENSION);
-            info.mThumbCompressedSize = exifdata->data ? exifdata->size : 0;
+            info.mThumbCompressedSize = image_data.thumbnail_length;
             info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
-            info.mImagePixWidth = w ? getLongFromExifEntry(w) : 0;
-            info.mImagePixHeight = h ? getLongFromExifEntry(h) : 0;
-            exif_data_unref(exifdata);
+            info.mImagePixWidth = image_data.full_width;
+            info.mImagePixHeight = image_data.full_height;
+
+            break;
         }
     }
 
@@ -855,19 +884,55 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
     void* result = NULL;
     outThumbSize = 0;
 
-    if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK
-            && (format == MTP_FORMAT_EXIF_JPEG || format == MTP_FORMAT_JFIF)) {
-
-        ExifData *exifdata = exif_data_new_from_file(path);
-        if (exifdata) {
-            if (exifdata->data) {
-                result = malloc(exifdata->size);
-                if (result) {
-                    memcpy(result, exifdata->data, exifdata->size);
-                    outThumbSize = exifdata->size;
+    if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK) {
+        switch (format) {
+            case MTP_FORMAT_EXIF_JPEG:
+            case MTP_FORMAT_JFIF: {
+                ExifData *exifdata = exif_data_new_from_file(path);
+                if (exifdata) {
+                    if (exifdata->data) {
+                        result = malloc(exifdata->size);
+                        if (result) {
+                            memcpy(result, exifdata->data, exifdata->size);
+                            outThumbSize = exifdata->size;
+                        }
+                    }
+                    exif_data_unref(exifdata);
                 }
+                break;
             }
-            exif_data_unref(exifdata);
+
+            // See the above comment on getObjectInfo() method.
+            case MTP_FORMAT_DNG:
+            case MTP_FORMAT_TIFF:
+            case MTP_FORMAT_TIFF_EP:
+            case MTP_FORMAT_DEFINED: {
+                std::unique_ptr<FileStream> stream(new FileStream(path));
+                piex::PreviewImageData image_data;
+                if (!GetExifFromRawImage(stream.get(), path, image_data)) {
+                    // Couldn't parse EXIF data from a image file via piex.
+                    break;
+                }
+
+                if (image_data.thumbnail_length == 0) {
+                    // No thumbnail.
+                    break;
+                }
+
+                result = malloc(image_data.thumbnail_length);
+                if (result) {
+                    piex::Error err = stream.get()->GetData(
+                            image_data.thumbnail_offset,
+                            image_data.thumbnail_length,
+                            (std::uint8_t *)result);
+                    if (err == piex::Error::kOk) {
+                        outThumbSize = image_data.thumbnail_length;
+                    } else {
+                        free(result);
+                    }
+                }
+                break;
+            }
         }
     }
 
