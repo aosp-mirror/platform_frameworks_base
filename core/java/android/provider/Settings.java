@@ -5073,6 +5073,14 @@ public final class Settings {
         public static final String TTS_DEFAULT_SYNTH = "tts_default_synth";
 
         /**
+         * Whether text-to-speech higher speech rate is enabled.
+         * 0 = disabled.
+         * 1 = enabled.
+         * @hide
+         */
+        public static final String TTS_DEFAULT_HIGHER_SPEECH_RATE_ENABLED =
+            "tts_default_higher_speech_rate_enabled";
+        /**
          * Default text-to-speech language.
          *
          * @deprecated this setting is no longer in use, as of the Ice Cream
@@ -5884,6 +5892,7 @@ public final class Settings {
             ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
+            TTS_DEFAULT_HIGHER_SPEECH_RATE_ENABLED,
             TTS_DEFAULT_PITCH,
             TTS_DEFAULT_SYNTH,
             TTS_DEFAULT_LANG,
