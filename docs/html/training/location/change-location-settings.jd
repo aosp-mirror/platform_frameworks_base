@@ -1,0 +1,251 @@
+page.title=Changing Location Settings
+trainingnavtop=true
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+  <h2>This lesson teaches you how to</h2>
+  <ol>
+    <li><a href="#connect">Connect to Location Services</a></li>
+    <li><a href="#location-request">Set Up a Location Request</a></li>
+    <li><a href="#get-settings">Get Current Location Settings</a></li>
+    <li><a href="#prompt">Prompt the User to Change Location Settings</a></li>
+  </ol>
+
+  <h2>You should also read</h2>
+  <ul>
+    <li>
+      <a href="https://developers.google.com/android/guides/setup"
+      class="external-link">Setting up Google Play Services</a>
+    </li>
+    <li>
+      <a href="retrieve-current.html">Getting the Last Known Location</a>
+    </li>
+   </ul>
+  </div>
+</div>
+
+<p>If your app needs to request location or receive permission updates, the
+  device needs to enable the appropriate system settings, such as GPS or Wi-Fi
+  scanning. Rather than directly enabling services such as the device's GPS,
+  your app specifies the required level of accuracy/power consumption and
+  desired update interval, and the device automatically makes the appropriate
+  changes to system settings. These settings are defined by the
+  <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest"
+  class="external-link">{@code LocationRequest}</a>
+  data object. </p>
+
+<p>This lesson shows you how to use the
+  <a href="https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi">Settings API</a>
+  to check which settings are enabled, and present the Location Settings
+  dialog for the user to update their settings with a single tap.</p>
+
+<h2 id="connect">Connect to Location Services</h2>
+
+<p>In order to use the location services provided by Google Play Services and
+  the fused location provider, connect your app using the
+  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient">Google API Client</a>,
+  then check the current location settings and prompt the user to enable the
+  required settings if needed. For details on connecting with the
+  Google API client, see <a href="retrieve-current.html">Getting the Last Known Location</a>.</p>
+
+<p>Apps that use location services must request location permissions. For this
+  lesson, coarse location detection is sufficient. Request this permission
+  with the <code>uses-permission</code> element in your app manifest, as shown
+  in the following example:</p>
+
+<pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.google.android.gms.location.sample.locationupdates" &gt;
+
+  &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/&gt;
+&lt;/manifest&gt;
+</code></pre>
+
+<p>If the device is running Android 6.0 or higher, and your app's target
+  SDK is 23 or higher, the app has to list the permissions in the manifest
+  <em>and</em> request those permissions at run time. For more information, see
+<a href="{@docRoot}training/permissions/requesting.html">Requesting Permissions at Run Time</a>.</p>
+
+<h2 id="location-request">Set Up a Location Request</h2>
+
+<p>To store parameters for requests to the fused location provider, create a
+  <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html">{@code LocationRequest}</a>.
+  The parameters determine the level of accuracy for location requests. For
+  details of all available location request options, see the
+  <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html">{@code LocationRequest}</a>
+  class reference. This lesson sets the update interval, fastest update
+  interval, and priority, as described below:</p>
+
+<dl>
+  <dt>
+    Update interval
+  </dt>
+  <dd>
+    <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">{@code setInterval()}</a>
+    - This method sets the rate in milliseconds at which your app prefers to
+    receive location updates. Note that the location updates may be faster than
+    this rate if another app is receiving updates at a faster rate, or slower
+    than this rate, or there may be no updates at all (if the device has no
+    connectivity, for example).
+  </dd>
+  <dt>
+    Fastest update interval
+  </dt>
+  <dd>
+    <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">{@code setFastestInterval()}</a>
+    - This method sets the <strong>fastest</strong> rate in milliseconds at which
+    your app can handle location updates. You need to set this rate because
+    other apps also affect the rate at which updates are sent. The Google Play
+    services location APIs send out updates at the fastest rate that any app
+    has requested with
+    <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">{@code setInterval()}</a>.
+    If this rate is faster
+    than your app can handle, you may encounter problems with UI flicker or data
+    overflow. To prevent this, call
+    <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">{@code setFastestInterval()}</a>
+    to set an upper limit to the update rate.
+  </dd>
+  <dt>Priority</dt>
+  <dd>
+    <p>
+      <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">{@code setPriority()}</a>
+      - This method sets the priority of the request, which gives the Google Play
+      services location services a strong hint about which location sources to use.
+      The following values are supported:</p>
+      <ul>
+        <li>
+          <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_BALANCED_POWER_ACCURACY">{@code PRIORITY_BALANCED_POWER_ACCURACY}</a>
+          - Use this setting to request location precision to within a city
+          block, which is an accuracy of approximately 100 meters. This is
+          considered a coarse level of accuracy, and is likely to consume less
+          power. With this setting, the location services are likely to use WiFi
+          and cell tower positioning. Note, however, that the choice of location
+          provider depends on many other factors, such as which sources are
+          available.</li>
+        <li>
+          <a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_HIGH_ACCURACY">{@code PRIORITY_HIGH_ACCURACY}</a>
+          - Use this setting to request the most precise location possible. With
+          this setting, the location services are more likely to use GPS
+          to determine the location.</li>
+        <li><a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_LOW_POWER">{@code PRIORITY_LOW_POWER}</a>
+          - Use this setting to request city-level precision, which is
+          an accuracy of approximately 10 kilometers. This is considered a
+          coarse level of accuracy, and is likely to consume less power.</li>
+        <li><a href="https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_NO_POWER">{@code PRIORITY_NO_POWER}</a>
+          - Use this setting if you need negligible impact on power consumption,
+          but want to receive location updates when available. With this
+          setting, your app does not trigger any location updates, but
+          receives locations triggered by other apps.</li>
+      </ul>
+  </dd>
+</dl>
+
+<p>Create the location request and set the parameters as shown in this
+  code sample:</p>
+
+<pre>
+protected void createLocationRequest() {
+    LocationRequest mLocationRequest = new LocationRequest();
+    mLocationRequest.setInterval(10000);
+    mLocationRequest.setFastestInterval(5000);
+    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+}
+</pre>
+
+<p>The priority of
+  <a href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_HIGH_ACCURACY">{@code PRIORITY_HIGH_ACCURACY}</a>,
+  combined with the
+  {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
+  permission setting that you've defined in the app manifest, and a fast update
+  interval of 5000 milliseconds (5 seconds), causes the fused location
+  provider to return location updates that are accurate to within a few feet.
+  This approach is appropriate for mapping apps that display the location in
+  real time.</p>
+
+<p class="note"><strong>Performance hint:</strong> If your app accesses the
+  network or does other long-running work after receiving a location update,
+  adjust the fastest interval to a slower value. This adjustment prevents your
+  app from receiving updates it can't use. Once the long-running work is done,
+  set the fastest interval back to a fast value.</p>
+
+<h2 id="get-settings">Get Current Location Settings</h2>
+
+<p>Once you have connected to Google Play services and the location services
+    API, you can get the current location settings of a user's device. To do
+    this, create a
+    <a href="{@docRoot}reference/com/google/android/gms/location/LocationSettingsRequest.Builder"><code>LocationSettingsRequest.Builder</code></a>,
+    and add one or more location requests. The following code snippet shows how
+    to add the location request that was created in the previous step:</p>
+
+<pre>LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+     .addLocationRequest(mLocationRequest);
+</pre>
+
+<p>Next check whether the current location settings are satisfied:</p>
+
+<pre>PendingResult&lt;LocationSettingsResult&gt; result =
+         LocationServices.SettingsApi.checkLocationSettings(mGoogleClient,
+                 builder.build());</pre>
+
+<p>When the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult"><code>PendingResult</code></a>
+  returns, your app can check the location settings by looking at the status
+  code from the <a href="{@docRoot}reference/com/google/android/gms/location/LocationSettingsResult"><code>LocationSettingsResult</code></a>
+  object. To get even more details about the the current state of the relevant
+  location settings, your app can call the
+  <a href="{@docRoot}reference/com/google/android/gms/location/LocationSettingsResult">{@code LocationSettingsResult}</a>
+  object's
+  <a href="{@docRoot}reference/com/google/android/gms/location/LocationSettingsResult#getLocationSettingsStates"><code>getLocationSettingsStates()</code></a>
+  method.</p>
+
+<h2 id="prompt">Prompt the User to Change Location Settings</h2>
+
+<p>To determine whether the location settings are appropriate for the location
+  request, check the status code from the
+  <a href="{@docRoot}reference/com/google/android/gms/location/LocationSettingsResult">{@code LocationSettingsResult}</a>
+  object. A status code of <code>RESOLUTION_REQUIRED</code> indicates that the
+  settings must be changed. To prompt the user for permission to modify the
+  location settings, call
+  <a href="{@docRoot}reference/com/google/android/gms/common/api/Status#startResolutionForResult(android.app.Activity, int)">
+            {@code startResolutionForResult(Activity, int)}</a>.
+  This method brings up a dialog asking for the user's permission to modify
+  location settings. The following code snippet shows how to check the location
+  settings, and how to call {@code startResolutionForResult(Activity, int)}.
+</p>
+
+<pre>result.setResultCallback(new ResultCallback&lt;LocationSettingsResult&gt;()) {
+     &#64;Override
+     public void onResult(LocationSettingsResult result) {
+         final Status status = result.getStatus();
+         final LocationSettingsStates = result.getLocationSettingsStates();
+         switch (status.getStatusCode()) {
+             case LocationSettingsStatusCodes.SUCCESS:
+                 // All location settings are satisfied. The client can
+                 // initialize location requests here.
+                 ...
+                 break;
+             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                 // Location settings are not satisfied, but this can be fixed
+                 // by showing the user a dialog.
+                 try {
+                     // Show the dialog by calling startResolutionForResult(),
+                     // and check the result in onActivityResult().
+                     status.startResolutionForResult(
+                         OuterClass.this,
+                         REQUEST_CHECK_SETTINGS);
+                 } catch (SendIntentException e) {
+                     // Ignore the error.
+                 }
+                 break;
+             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                 // Location settings are not satisfied. However, we have no way
+                 // to fix the settings so we won't show the dialog.
+                 ...
+                 break;
+         }
+     }
+ });</pre>
+
+  <p>The next lesson,
+    <a href="receive-location-updates.html">Receiving Location Updates</a>, shows
+    you how to receive periodic location updates.</p>
