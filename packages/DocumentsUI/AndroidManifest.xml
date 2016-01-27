@@ -75,6 +75,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/zip"
+                    android:host="com.android.providers.downloads.documents"
+                    android:scheme="content" />
+                <data android:mimeType="application/x-zip"
+                    android:host="com.android.providers.downloads.documents"
+                    android:scheme="content" />
+                <data android:mimeType="application/x-zip-compressed"
+                    android:host="com.android.providers.downloads.documents"
+                    android:scheme="content" />
+            </intent-filter>
         </activity>
 
         <activity

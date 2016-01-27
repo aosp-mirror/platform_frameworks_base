@@ -48,6 +48,7 @@ import libcore.io.IoUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -156,6 +157,21 @@ public class RootsCache {
                 mRoots.putAll(authority, loadRootsForAuthority(resolver, authority));
             }
             mStoppedAuthorities.clear();
+        }
+    }
+
+    /**
+     * Load roots from a stopped authority. Normal {@link UpdateTask} passes
+     * ignore stopped applications.
+     */
+    private void loadStoppedAuthority(String authority) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        synchronized (mLock) {
+            if (DEBUG) {
+                Log.d(TAG, "Loading stopped authority " + authority);
+            }
+            mRoots.putAll(authority, loadRootsForAuthority(resolver, authority));
+            mStoppedAuthorities.remove(authority);
         }
     }
 
@@ -357,6 +373,19 @@ public class RootsCache {
         loadStoppedAuthorities();
         synchronized (mLock) {
             return getMatchingRoots(mRoots.values(), state);
+        }
+    }
+
+    /**
+     * Returns a list of roots for the specified authority. If not found, then
+     * an empty list is returned.
+     */
+    public Collection<RootInfo> getRootsForAuthorityBlocking(String authority) {
+        waitForFirstLoad();
+        loadStoppedAuthority(authority);
+        synchronized (mLock) {
+            final Collection<RootInfo> roots = mRoots.get(authority);
+            return roots != null ? roots : Collections.<RootInfo>emptyList();
         }
     }
 

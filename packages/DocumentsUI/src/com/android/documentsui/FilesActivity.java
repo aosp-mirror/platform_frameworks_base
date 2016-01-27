@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
@@ -53,8 +54,10 @@ import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -109,6 +112,10 @@ public class FilesActivity extends BaseActivity {
             if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
             checkState(uri == null || LauncherActivity.isLaunchUri(uri));
             refreshCurrentRootAndDirectory(ANIM_NONE);
+        } else if (intent.getAction() == Intent.ACTION_VIEW) {
+            checkArgument(uri != null);
+            new OpenUriForViewTask().executeOnExecutor(
+                    ProviderExecutor.forAuthority(uri.getAuthority()), uri);
         } else if (DocumentsContract.isRootUri(this, uri)) {
             if (DEBUG) Log.d(TAG, "Launching with root URI.");
             // If we've got a specific root to display, restore that root using a dedicated
@@ -446,5 +453,45 @@ public class FilesActivity extends BaseActivity {
 
         setResult(Activity.RESULT_OK, intent);
         finish();
+    }
+
+    /**
+     * Builds a stack for the specific Uris. Multi roots are not supported, as it's impossible
+     * to know which root to select. Also, the stack doesn't contain intermediate directories.
+     * It's primarly used for opening ZIP archives from Downloads app.
+     */
+    final class OpenUriForViewTask extends AsyncTask<Uri, Void, Void> {
+        @Override
+        protected Void doInBackground(Uri... params) {
+            final Uri uri = params[0];
+
+            final RootsCache rootsCache = DocumentsApplication.getRootsCache(FilesActivity.this);
+            final String authority = uri.getAuthority();
+
+            final Collection<RootInfo> roots =
+                    rootsCache.getRootsForAuthorityBlocking(authority);
+            if (roots.isEmpty()) {
+                Log.e(TAG, "Failed to find root for the requested Uri: " + uri);
+                return null;
+            }
+
+            final RootInfo root = roots.iterator().next();
+            mState.stack.root = root;
+            try {
+                mState.stack.add(DocumentInfo.fromUri(getContentResolver(), uri));
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "Failed to resolve DocumentInfo from Uri: " + uri);
+            }
+            mState.stack.add(getRootDocumentBlocking(root));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (isDestroyed()) {
+                return;
+            }
+            refreshCurrentRootAndDirectory(ANIM_NONE);
+        }
     }
 }
