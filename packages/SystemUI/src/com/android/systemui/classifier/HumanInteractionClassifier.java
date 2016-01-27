@@ -35,6 +35,10 @@ import java.util.ArrayList;
 public class HumanInteractionClassifier extends Classifier {
     private static final String HIC_ENABLE = "HIC_enable";
     private static final float FINGER_DISTANCE = 0.1f;
+
+    /** Default value for the HIC_ENABLE setting: 1 - enabled, 0 - disabled */
+    private static final int HIC_ENABLE_DEFAULT = 1;
+
     private static HumanInteractionClassifier sInstance = null;
 
     private final Handler mHandler = new Handler();
@@ -101,9 +105,9 @@ public class HumanInteractionClassifier extends Classifier {
     }
 
     private void updateConfiguration() {
-        mEnableClassifier = Build.IS_DEBUGGABLE && 0 != Settings.Global.getInt(
+        mEnableClassifier = 0 != Settings.Global.getInt(
                 mContext.getContentResolver(),
-                HIC_ENABLE, 0);
+                HIC_ENABLE, HIC_ENABLE_DEFAULT);
     }
 
     public void setType(int type) {
