@@ -4542,6 +4542,7 @@ final class ActivityStack {
             }
             ci.numActivities = numActivities;
             ci.numRunning = numRunning;
+            ci.isDockable = task.canGoInDockedStack();
             list.add(ci);
         }
     }

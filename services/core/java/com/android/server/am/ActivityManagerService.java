@@ -8591,6 +8591,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (tr.mBounds != null) {
             rti.bounds = new Rect(tr.mBounds);
         }
+        rti.isDockable = tr.canGoInDockedStack();
 
         ActivityRecord base = null;
         ActivityRecord top = null;

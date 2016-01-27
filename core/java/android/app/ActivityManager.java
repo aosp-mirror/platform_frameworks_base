@@ -1195,6 +1195,12 @@ public class ActivityManager {
          */
         public Rect bounds;
 
+        /**
+         * True if the task can go in the docked stack.
+         * @hide
+         */
+        public boolean isDockable;
+
         public RecentTaskInfo() {
         }
 
@@ -1238,6 +1244,7 @@ public class ActivityManager {
             } else {
                 dest.writeInt(0);
             }
+            dest.writeInt(isDockable ? 1 : 0);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1260,6 +1267,7 @@ public class ActivityManager {
             numActivities = source.readInt();
             bounds = source.readInt() > 0 ?
                     Rect.CREATOR.createFromParcel(source) : null;
+            isDockable = source.readInt() == 1;
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -1443,6 +1451,12 @@ public class ActivityManager {
          * @hide
          */
         public long lastActiveTime;
+
+        /**
+         * True if the task can go in the docked stack.
+         * @hide
+         */
+        public boolean isDockable;
 
         public RunningTaskInfo() {
         }
