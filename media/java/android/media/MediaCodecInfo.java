@@ -2563,6 +2563,25 @@ public final class MediaCodecInfo {
         public static final int HEVCMainTierLevel62 = 0x1000000;
         public static final int HEVCHighTierLevel62 = 0x2000000;
 
+        // from OMX_VIDEO_DOLBYVISIONPROFILETYPE
+        public static final int DolbyVisionProfileDvavDer = 0x1;
+        public static final int DolbyVisionProfileDvavDen = 0x2;
+        public static final int DolbyVisionProfileDvheDer = 0x3;
+        public static final int DolbyVisionProfileDvheDen = 0x4;
+        public static final int DolbyVisionProfileDvheDtr = 0x5;
+        public static final int DolbyVisionProfileDvheStn = 0x6;
+
+        // from OMX_VIDEO_DOLBYVISIONLEVELTYPE
+        public static final int DolbyVisionLevelHd24    = 0x1;
+        public static final int DolbyVisionLevelHd30    = 0x2;
+        public static final int DolbyVisionLevelFhd24   = 0x4;
+        public static final int DolbyVisionLevelFhd30   = 0x8;
+        public static final int DolbyVisionLevelFhd60   = 0x10;
+        public static final int DolbyVisionLevelUhd24   = 0x20;
+        public static final int DolbyVisionLevelUhd30   = 0x40;
+        public static final int DolbyVisionLevelUhd48   = 0x80;
+        public static final int DolbyVisionLevelUhd60   = 0x100;
+
         /**
          * Defined in the OpenMAX IL specs, depending on the type of media
          * this can be OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263PROFILETYPE,
