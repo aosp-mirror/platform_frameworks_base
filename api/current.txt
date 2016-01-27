@@ -20764,9 +20764,11 @@ package android.media {
     method public static final int getAudioSourceMax();
     method public int getMaxAmplitude() throws java.lang.IllegalStateException;
     method public android.view.Surface getSurface();
+    method public void pause() throws java.lang.IllegalStateException;
     method public void prepare() throws java.io.IOException, java.lang.IllegalStateException;
     method public void release();
     method public void reset();
+    method public void resume() throws java.lang.IllegalStateException;
     method public void setAudioChannels(int);
     method public void setAudioEncoder(int) throws java.lang.IllegalStateException;
     method public void setAudioEncodingBitRate(int);
