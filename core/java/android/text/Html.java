@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.graphics.Color;
 import com.android.internal.util.ArrayUtils;
 import org.ccil.cowan.tagsoup.HTMLSchema;
 import org.ccil.cowan.tagsoup.Parser;
@@ -29,10 +28,12 @@ import org.xml.sax.XMLReader;
 
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AlignmentSpan;
+import android.text.style.BulletSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
@@ -85,18 +86,104 @@ public class Html {
                                  Editable output, XMLReader xmlReader);
     }
 
+    /**
+     * Option for {@link #toHtml(Spanned, int)}: Wrap consecutive lines of text delimited by '\n'
+     * inside &lt;p&gt; elements. {@link BulletSpan}s are ignored.
+     */
+    public static final int TO_HTML_PARAGRAPH_LINES_CONSECUTIVE = 0x00000000;
+
+    /**
+     * Option for {@link #toHtml(Spanned, int)}: Wrap each line of text delimited by '\n' inside a
+     * &lt;p&gt; or a &lt;li&gt; element. This allows {@link ParagraphStyle}s attached to be
+     * encoded as CSS styles within the corresponding &lt;p&gt; or &lt;li&gt; element.
+     */
+    public static final int TO_HTML_PARAGRAPH_LINES_INDIVIDUAL = 0x00000001;
+
+    /**
+     * Flag indicating that texts inside &lt;p&gt; elements will be separated from other texts with
+     * one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH = 0x00000001;
+
+    /**
+     * Flag indicating that texts inside &lt;h1&gt;~&lt;h6&gt; elements will be separated from
+     * other texts with one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_HEADING = 0x00000002;
+
+    /**
+     * Flag indicating that texts inside &lt;li&gt; elements will be separated from other texts
+     * with one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM = 0x00000004;
+
+    /**
+     * Flag indicating that texts inside &lt;ul&gt; elements will be separated from other texts
+     * with one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_LIST = 0x00000008;
+
+    /**
+     * Flag indicating that texts inside &lt;div&gt; elements will be separated from other texts
+     * with one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_DIV = 0x00000010;
+
+    /**
+     * Flag indicating that texts inside &lt;blockquote&gt; elements will be separated from other
+     * texts with one newline character by default.
+     */
+    public static final int FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE = 0x00000020;
+
+    /**
+     * Flag indicating that CSS color values should be used instead of those defined in
+     * {@link Color}.
+     */
+    public static final int FROM_HTML_OPTION_USE_CSS_COLORS = 0x00000100;
+
+    /**
+     * Flags for {@link #fromHtml(String, int, ImageGetter, TagHandler)}: Separate block-level
+     * elements with blank lines (two newline characters) in between. This is the legacy behavior
+     * prior to N.
+     */
+    public static final int FROM_HTML_MODE_LEGACY = 0x00000000;
+
+    /**
+     * Flags for {@link #fromHtml(String, int, ImageGetter, TagHandler)}: Separate block-level
+     * elements with line breaks (single newline character) in between. This inverts the
+     * {@link Spanned} to HTML string conversion done with the option
+     * {@link #TO_HTML_PARAGRAPH_LINES_INDIVIDUAL}.
+     */
+    public static final int FROM_HTML_MODE_COMPACT =
+            FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH
+            | FROM_HTML_SEPARATOR_LINE_BREAK_HEADING
+            | FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM
+            | FROM_HTML_SEPARATOR_LINE_BREAK_LIST
+            | FROM_HTML_SEPARATOR_LINE_BREAK_DIV
+            | FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE;
+
     private Html() { }
 
     /**
-     * Returns displayable styled text from the provided HTML string.
-     * Any &lt;img&gt; tags in the HTML will display as a generic
-     * replacement image which your program can then go through and
+     * Returns displayable styled text from the provided HTML string with the legacy flags
+     * {@link #FROM_HTML_MODE_LEGACY}.
+     *
+     * @deprecated use {@link #fromHtml(String, int)} instead.
+     */
+    @Deprecated
+    public static Spanned fromHtml(String source) {
+        return fromHtml(source, FROM_HTML_MODE_LEGACY, null, null);
+    }
+
+    /**
+     * Returns displayable styled text from the provided HTML string. Any &lt;img&gt; tags in the
+     * HTML will display as a generic replacement image which your program can then go through and
      * replace with real images.
      *
      * <p>This uses TagSoup to handle real HTML, including all of the brokenness found in the wild.
      */
-    public static Spanned fromHtml(String source) {
-        return fromHtml(source, null, null);
+    public static Spanned fromHtml(String source, int flags) {
+        return fromHtml(source, flags, null, null);
     }
 
     /**
@@ -109,16 +196,26 @@ public class Html {
     }
 
     /**
-     * Returns displayable styled text from the provided HTML string.
-     * Any &lt;img&gt; tags in the HTML will use the specified ImageGetter
-     * to request a representation of the image (use null if you don't
-     * want this) and the specified TagHandler to handle unknown tags
-     * (specify null if you don't want this).
+     * Returns displayable styled text from the provided HTML string with the legacy flags
+     * {@link #FROM_HTML_MODE_LEGACY}.
+     *
+     * @deprecated use {@link #fromHtml(String, int, ImageGetter, TagHandler)} instead.
+     */
+    @Deprecated
+    public static Spanned fromHtml(String source, ImageGetter imageGetter, TagHandler tagHandler) {
+        return fromHtml(source, FROM_HTML_MODE_LEGACY, imageGetter, tagHandler);
+    }
+
+    /**
+     * Returns displayable styled text from the provided HTML string. Any &lt;img&gt; tags in the
+     * HTML will use the specified ImageGetter to request a representation of the image (use null
+     * if you don't want this) and the specified TagHandler to handle unknown tags (specify null if
+     * you don't want this).
      *
      * <p>This uses TagSoup to handle real HTML, including all of the brokenness found in the wild.
      */
-    public static Spanned fromHtml(String source, ImageGetter imageGetter,
-                                   TagHandler tagHandler) {
+    public static Spanned fromHtml(String source, int flags, ImageGetter imageGetter,
+            TagHandler tagHandler) {
         Parser parser = new Parser();
         try {
             parser.setProperty(Parser.schemaProperty, HtmlParser.schema);
@@ -131,9 +228,16 @@ public class Html {
         }
 
         HtmlToSpannedConverter converter =
-                new HtmlToSpannedConverter(source, imageGetter, tagHandler,
-                        parser);
+                new HtmlToSpannedConverter(source, imageGetter, tagHandler, parser, flags);
         return converter.convert();
+    }
+
+    /**
+     * @deprecated use {@link #toHtml(Spanned, int)} instead.
+     */
+    @Deprecated
+    public static String toHtml(Spanned text) {
+        return toHtml(text, TO_HTML_PARAGRAPH_LINES_CONSECUTIVE);
     }
 
     /**
@@ -142,9 +246,11 @@ public class Html {
      * (such as "&lt;" and "&amp;") within the input text are escaped.
      *
      * @param text input text to convert
+     * @param option one of {@link #TO_HTML_PARAGRAPH_LINES_CONSECUTIVE} or
+     *     {@link #TO_HTML_PARAGRAPH_LINES_INDIVIDUAL}
      * @return string containing input converted to HTML
      */
-    public static String toHtml(Spanned text) {
+    public static String toHtml(Spanned text, int option) {
         StringBuilder out = new StringBuilder();
         withinHtml(out, text);
         return out.toString();
@@ -431,15 +537,16 @@ class HtmlToSpannedConverter implements ContentHandler {
     private SpannableStringBuilder mSpannableStringBuilder;
     private Html.ImageGetter mImageGetter;
     private Html.TagHandler mTagHandler;
+    private int mFlags;
 
-    public HtmlToSpannedConverter(
-            String source, Html.ImageGetter imageGetter, Html.TagHandler tagHandler,
-            Parser parser) {
+    public HtmlToSpannedConverter( String source, Html.ImageGetter imageGetter,
+            Html.TagHandler tagHandler, Parser parser, int flags) {
         mSource = source;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mImageGetter = imageGetter;
         mTagHandler = tagHandler;
         mReader = parser;
+        mFlags = flags;
     }
 
     public Spanned convert() {
