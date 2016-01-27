@@ -170,12 +170,13 @@ public class ScrimView extends View
             invalidate();
             return;
         }
-        area.left = Math.max(area.left, 0);
-        area.top = Math.max(area.top, 0);
-        area.right = Math.min(area.right, getWidth());
-        area.bottom = Math.min(area.bottom, getHeight());
-        mExcludedRect.set(area);
-        mHasExcludedArea = area.left < area.right && area.top < area.bottom;
+
+        int left = Math.max(area.left, 0);
+        int top = Math.max(area.top, 0);
+        int right = Math.min(area.right, getWidth());
+        int bottom = Math.min(area.bottom, getHeight());
+        mExcludedRect.set(left, top, right, bottom);
+        mHasExcludedArea = left < right && top < bottom;
         invalidate();
     }
 
