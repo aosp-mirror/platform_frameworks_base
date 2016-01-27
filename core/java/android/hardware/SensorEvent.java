@@ -396,7 +396,7 @@ public class SensorEvent {
      * dv = 216.7 *
      * (rh / 100.0 * 6.112 * Math.exp(17.62 * t / (243.12 + t)) / (273.15 + t));
      * </pre>
-     * 
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_AMBIENT_TEMPERATURE Sensor.TYPE_AMBIENT_TEMPERATURE}:
      * </h4>
      *
@@ -531,6 +531,53 @@ public class SensorEvent {
      *
      * </ul>
      *
+     *   <h4>{@link android.hardware.Sensor#TYPE_STATIONARY_DETECT
+     * Sensor.TYPE_STATIONARY_DETECT}:</h4>
+     *
+     * A TYPE_STATIONARY_DETECT event is produced if the device has been
+     * stationary for at least 5 seconds with a maximal latency of 5
+     * additional seconds. ie: it may take up anywhere from 5 to 10 seconds
+     * afte the device has been at rest to trigger this event.
+     *
+     * The only allowed value is 1.0.
+     *
+     * <ul>
+     *  <li> values[0]: 1.0 </li>
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_MOTION_DETECT
+     * Sensor.TYPE_MOTION_DETECT}:</h4>
+     *
+     * A TYPE_MOTION_DETECT event is produced if the device has been in
+     * motion  for at least 5 seconds with a maximal latency of 5
+     * additional seconds. ie: it may take up anywhere from 5 to 10 seconds
+     * afte the device has been at rest to trigger this event.
+     *
+     * The only allowed value is 1.0.
+     *
+     * <ul>
+     *  <li> values[0]: 1.0 </li>
+     * </ul>
+     *
+     *   <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT
+     * Sensor.TYPE_HEART_BEAT}:</h4>
+     *
+     * A sensor of this type returns an event everytime a hear beat peak is
+     * detected.
+     *
+     * Peak here ideally corresponds to the positive peak in the QRS complex of
+     * an ECG signal.
+     *
+     * <ul>
+     *  <li> values[0]: confidence</li>
+     * </ul>
+     *
+     * <p>
+     * A confidence value of 0.0 indicates complete uncertainty - that a peak
+     * is as likely to be at the indicated timestamp as anywhere else.
+     * A confidence value of 1.0 indicates complete certainly - that a peak is
+     * completely unlikely to be anywhere else on the QRS complex.
+     * </p>
      */
     public final float[] values;
 

@@ -557,6 +557,8 @@ public final class Sensor {
      * Similar to {@link #TYPE_ROTATION_VECTOR}, with additional delta
      * translation from an arbitrary reference point.
      *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
      * Can use camera, depth sensor etc to compute output value.
      *
      * This is expected to be a high power sensor and expected only to be
@@ -574,9 +576,55 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_POSE_6DOF = "android.sensor.pose_6dof";
 
+     /**
+     * A constant describing a stationary detect sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_STATIONARY_DETECT = 29;
+
+    /**
+     * A constant string describing a stationary detection sensor.
+     *
+     * @see #TYPE_STATIONARY_DETECT
+     */
+    public static final String STRING_TYPE_STATIONARY_DETECT = "android.sensor.stationary_detect";
+
+     /**
+     * A constant describing a motion detect sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_MOTION_DETECT = 30;
+
+    /**
+     * A constant string describing a motion detection sensor.
+     *
+     * @see #TYPE_MOTION_DETECT
+     */
+    public static final String STRING_TYPE_MOTION_DETECT = "android.sensor.motion_detect";
+
+     /**
+     * A constant describing a motion detect sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_HEART_BEAT = 31;
+
+    /**
+     * A constant string describing a heart beat sensor.
+     *
+     * @see #TYPE_HEART_BEAT
+     */
+
+    public static final String STRING_TYPE_HEART_BEAT = "android.sensor.heart_beat";
     /**
      * A constant describing all sensor types.
      */
+
     public static final int TYPE_ALL = -1;
 
     // If this flag is set, the sensor defined as a wake up sensor. This field and REPORTING_MODE_*
