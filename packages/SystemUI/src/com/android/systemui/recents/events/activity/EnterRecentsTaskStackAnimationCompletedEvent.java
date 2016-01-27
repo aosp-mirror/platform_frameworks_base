@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.ui;
+package com.android.systemui.recents.events.activity;
 
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent whenever the user interacts with the activity.
+ * This is sent when the in-app animations into Recents completes.
  */
-public class UserInteractionEvent extends EventBus.ReusableEvent {
-    // Simple Event
+public class EnterRecentsTaskStackAnimationCompletedEvent extends EventBus.AnimatedEvent {
+    // Simple event
 }

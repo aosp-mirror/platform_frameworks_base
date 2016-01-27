@@ -1179,11 +1179,6 @@
     <!-- Description for the toggle for fast-toggling recents via the recents button. DO NOT TRANSLATE -->
     <string name="overview_fast_toggle_via_button_desc">Enable launch timeout while paging</string>
 
-    <!-- Toggles the fast-toggling indicator. DO NOT TRANSLATE -->
-    <string name="overview_fast_toggle_indicator">Enable fast toggle indicator</string>
-    <!-- Description for the fast-toggling indicator. DO NOT TRANSLATE -->
-    <string name="overview_fast_toggle_indicator_desc">Show an indicator for the launch timeout</string>
-
     <!-- Toggle to set the initial scroll state to be paging or stack. DO NOT TRANSLATE -->
     <string name="overview_initial_state_paging">Initialize to paging</string>
     <!-- Description for the toggle to set the initial scroll state to be paging or stack. DO NOT TRANSLATE -->

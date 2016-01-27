@@ -23,9 +23,9 @@ import com.android.systemui.recents.events.EventBus;
  */
 public class FocusNextTaskViewEvent extends EventBus.Event {
 
-    public final boolean showTimerIndicator;
+    public final int timerIndicatorDuration;
 
-    public FocusNextTaskViewEvent(boolean showTimerIndicator) {
-        this.showTimerIndicator = showTimerIndicator;
+    public FocusNextTaskViewEvent(int timerIndicatorDuration) {
+        this.timerIndicatorDuration = timerIndicatorDuration;
     }
 }

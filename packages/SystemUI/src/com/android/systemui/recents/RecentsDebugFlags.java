@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.content.Context;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.tuner.TunerService;
 
 /**
@@ -35,6 +36,10 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean DisableBackgroundCache = false;
         // Enables the task affiliations
         public static final boolean EnableAffiliatedTaskGroups = true;
+        // Overrides the Tuner flags and enables the fast toggle and timeout
+        public static final boolean EnableFastToggleTimeoutOverride = true;
+        // Enables toggling the fast-toggle timeout immediately after entering Recents
+        public static final boolean EnableFastToggleTimeoutOnEnter = true;
 
         // Enables us to create mock recents tasks
         public static final boolean EnableMockTasks = false;
@@ -49,11 +54,9 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     }
 
     private static final String KEY_FAST_TOGGLE = "overview_fast_toggle_via_button";
-    private static final String KEY_FAST_TOGGLE_INDICATOR = "overview_fast_toggle_indicator";
     private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
 
     private boolean mFastToggleRecents;
-    private boolean mFastToggleIndicator;
     private boolean mInitialStatePaging;
 
     /**
@@ -63,28 +66,32 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_FAST_TOGGLE_INDICATOR,
-                KEY_INITIAL_STATE_PAGING);
+        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_INITIAL_STATE_PAGING);
     }
 
     /**
      * @return whether we are enabling fast toggling.
      */
     public boolean isFastToggleRecentsEnabled() {
+        // These checks EnableFastToggleTimeoutOverride
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.hasFreeformWorkspaceSupport() || ssp.hasDockedTask() ||
+                ssp.isTouchExplorationEnabled()) {
+            return false;
+        }
+        if (Static.EnableFastToggleTimeoutOverride) {
+            return true;
+        }
         return mFastToggleRecents;
-    }
-
-    /**
-     * @return whether we are enabling the fast toggle indicator.
-     */
-    public boolean isFastToggleIndicatorEnabled() {
-        return mFastToggleRecents && mFastToggleIndicator;
     }
 
     /**
      * @return whether the initial stack state is paging.
      */
     public boolean isInitialStatePaging() {
+        if (Static.EnableFastToggleTimeoutOnEnter) {
+            return true;
+        }
         return mInitialStatePaging;
     }
 
@@ -93,10 +100,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         switch (key) {
             case KEY_FAST_TOGGLE:
                 mFastToggleRecents = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
-                break;
-            case KEY_FAST_TOGGLE_INDICATOR:
-                mFastToggleIndicator = (newValue != null) &&
                         (Integer.parseInt(newValue) != 0);
                 break;
             case KEY_INITIAL_STATE_PAGING:

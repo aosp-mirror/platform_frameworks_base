@@ -44,9 +44,11 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsActivityLaunchState;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
@@ -115,7 +117,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     GradientDrawable mFreeformWorkspaceBackground;
     ObjectAnimator mFreeformWorkspaceBackgroundAnimator;
     ViewPool<TaskView, Task> mViewPool;
-    boolean mStartTimerIndicator;
 
     ArrayList<TaskView> mTaskViews = new ArrayList<>();
     ArrayList<TaskViewTransform> mCurrentTaskTransforms = new ArrayList<>();
@@ -127,6 +128,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     int mTaskCornerRadiusPx;
     private int mDividerSize;
+    private int mStartTimerIndicatorDuration;
 
     boolean mTaskViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
@@ -796,7 +798,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     private boolean setFocusedTask(int taskIndex, boolean scrollToTask,
             final boolean requestViewFocus) {
-        return setFocusedTask(taskIndex, scrollToTask, requestViewFocus, false);
+        return setFocusedTask(taskIndex, scrollToTask, requestViewFocus, 0);
     }
 
     /**
@@ -805,7 +807,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * @return whether or not the stack will scroll as a part of this focus change
      */
     private boolean setFocusedTask(int taskIndex, boolean scrollToTask,
-            final boolean requestViewFocus, final boolean showTimerIndicator) {
+            final boolean requestViewFocus, final int timerIndicatorDuration) {
         // Find the next task to focus
         int newFocusedTaskIndex = mStack.getTaskCount() > 0 ?
                 Math.max(0, Math.min(mStack.getTaskCount() - 1, taskIndex)) : -1;
@@ -815,7 +817,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Reset the last focused task state if changed
         if (mFocusedTask != null) {
             // Cancel the timer indicator, if applicable
-            if (showTimerIndicator) {
+            if (timerIndicatorDuration > 0) {
                 final TaskView tv = getChildViewForTask(mFocusedTask);
                 if (tv != null) {
                     tv.getHeaderView().cancelFocusTimerIndicator();
@@ -831,13 +833,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         if (newFocusedTask != null) {
             // Start the timer indicator, if applicable
-            if (showTimerIndicator) {
+            if (timerIndicatorDuration > 0) {
                 final TaskView tv = getChildViewForTask(mFocusedTask);
                 if (tv != null) {
-                    tv.getHeaderView().startFocusTimerIndicator();
+                    tv.getHeaderView().startFocusTimerIndicator(timerIndicatorDuration);
                 } else {
                     // The view is null; set a flag for later
-                    mStartTimerIndicator = true;
+                    mStartTimerIndicatorDuration = timerIndicatorDuration;
                 }
             }
 
@@ -902,7 +904,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
                                        boolean cancelWindowAnimations) {
-        setRelativeFocusedTask(forward, stackTasksOnly, animated, cancelWindowAnimations, false);
+        setRelativeFocusedTask(forward, stackTasksOnly, animated, cancelWindowAnimations, 0);
     }
 
     /**
@@ -916,10 +918,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *                            focus.
      * @param cancelWindowAnimations if set, will attempt to cancel window animations if a scroll
      *                               happens.
-     * @param showTimerIndicator determines whether or not to show an indicator for the task auto-advance.
+     * @param timerIndicatorDuration the duration to initialize the auto-advance timer indicator
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
-                                       boolean cancelWindowAnimations, boolean showTimerIndicator) {
+                                       boolean cancelWindowAnimations,
+                                       int timerIndicatorDuration) {
         int newIndex = mStack.indexOfStackTask(mFocusedTask);
         if (mFocusedTask != null) {
             if (stackTasksOnly) {
@@ -955,7 +958,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         if (newIndex != -1) {
             boolean willScroll = setFocusedTask(newIndex, true /* scrollToTask */,
-                    true /* requestViewFocus */, showTimerIndicator);
+                    true /* requestViewFocus */, timerIndicatorDuration);
             if (willScroll && cancelWindowAnimations) {
                 // As we iterate to the next/previous task, cancel any current/lagging window
                 // transition animations
@@ -1223,9 +1226,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Task launchTask = mStack.getLaunchTarget();
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        int focusedTaskIndex = launchTask != null
-                ? mStack.indexOfStackTask(launchTask)
-                : launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
+        int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
         if (focusedTaskIndex != -1) {
             setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
                     false /* requestViewFocus */);
@@ -1419,10 +1420,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.setClipViewInStack(true);
         if (mFocusedTask == task) {
             tv.setFocusedState(true, false /* requestViewFocus */);
-            if (mStartTimerIndicator) {
+            if (mStartTimerIndicatorDuration > 0) {
                 // The timer indicator couldn't be started before, so start it now
-                tv.getHeaderView().startFocusTimerIndicator();
-                mStartTimerIndicator = false;
+                tv.getHeaderView().startFocusTimerIndicator(mStartTimerIndicatorDuration);
+                mStartTimerIndicatorDuration = 0;
             }
         }
 
@@ -1549,7 +1550,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {
         setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */, false,
-                event.showTimerIndicator);
+                event.timerIndicatorDuration);
     }
 
     public final void onBusEvent(FocusPreviousTaskViewEvent event) {
@@ -1559,7 +1560,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(UserInteractionEvent event) {
         // Poke the doze trigger on user interaction
         mUIDozeTrigger.poke();
-        if (event.showTimerIndicator && mFocusedTask != null) {
+
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        if (debugFlags.isFastToggleRecentsEnabled() && mFocusedTask != null) {
             TaskView tv = getChildViewForTask(mFocusedTask);
             if (tv != null) {
                 tv.getHeaderView().cancelFocusTimerIndicator();
@@ -1715,8 +1718,25 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         setFocusedTask(mStack.indexOfStackTask(mFocusedTask),
                                 false /* scrollToTask */, launchState.launchedWithAltTab);
                     }
+
+                    EventBus.getDefault().send(new EnterRecentsTaskStackAnimationCompletedEvent());
                 }
             });
+        }
+    }
+
+    public final void onBusEvent(EnterRecentsTaskStackAnimationCompletedEvent event) {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled() &&
+                RecentsDebugFlags.Static.EnableFastToggleTimeoutOnEnter) {
+            if (mFocusedTask != null) {
+                int timerIndicatorDuration = getResources().getInteger(
+                        R.integer.recents_auto_advance_duration);
+                int focusedTaskIndex = mStack.indexOfStackTask(mFocusedTask);
+                setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
+                        false /* requestViewFocus */, timerIndicatorDuration);
+            }
         }
     }
 

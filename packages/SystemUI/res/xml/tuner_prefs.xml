@@ -122,12 +122,6 @@
             android:title="@string/overview_fast_toggle_via_button"
             android:summary="@string/overview_fast_toggle_via_button_desc" />
 
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="overview_fast_toggle_indicator"
-            android:title="@string/overview_fast_toggle_indicator"
-            android:summary="@string/overview_fast_toggle_indicator_desc"
-            android:dependency="overview_fast_toggle_via_button" />
-
     </PreferenceScreen>
 
     <SwitchPreference

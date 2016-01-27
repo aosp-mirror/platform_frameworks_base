@@ -64,6 +64,13 @@ public class DozeTrigger {
     }
 
     /**
+     * Updates the duration that we have to wait until dozing triggers.
+     */
+    public void setDozeDuration(int duration) {
+        mDozeDurationMilliseconds = duration;
+    }
+
+    /**
      * Poke this dozer to wake it up if it is dozing, delaying the onSleepRunnable from being
      * called for a for the doze duration.
      */

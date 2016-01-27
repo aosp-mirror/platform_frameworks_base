@@ -44,6 +44,7 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
@@ -116,6 +117,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     // The trigger to automatically launch the current task
     private int mFocusTimerDuration;
     private DozeTrigger mIterateTrigger;
+    private final UserInteractionEvent mUserInteractionEvent = new UserInteractionEvent();
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
@@ -549,7 +551,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                         EventBus.getDefault().send(new FocusPreviousTaskViewEvent());
                     } else {
                         EventBus.getDefault().send(
-                                new FocusNextTaskViewEvent(false /* showTimerIndicator */));
+                                new FocusNextTaskViewEvent(0 /* timerIndicatorDuration */));
                     }
                     mLastTabKeyEventTime = SystemClock.elapsedRealtime();
 
@@ -562,7 +564,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
             case KeyEvent.KEYCODE_DPAD_UP: {
                 EventBus.getDefault().send(
-                        new FocusNextTaskViewEvent(false /* showTimerIndicator */));
+                        new FocusNextTaskViewEvent(0 /* timerIndicatorDuration */));
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_DOWN: {
@@ -588,10 +590,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
     @Override
     public void onUserInteraction() {
-        // TODO: Prevent creating so many events here
-        final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        EventBus.getDefault().send(new UserInteractionEvent(debugFlags.isFastToggleRecentsEnabled()
-                && debugFlags.isFastToggleIndicatorEnabled()));
+        EventBus.getDefault().send(mUserInteractionEvent);
     }
 
     @Override
@@ -617,19 +616,22 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (!dismissHistory()) {
             final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
 
-            // Focus the next task
-            EventBus.getDefault().send(
-                    new FocusNextTaskViewEvent(debugFlags.isFastToggleRecentsEnabled()
-                            && debugFlags.isFastToggleIndicatorEnabled()));
-
             // Start dozing after the recents button is clicked
+            int timerIndicatorDuration = 0;
             if (debugFlags.isFastToggleRecentsEnabled()) {
+                timerIndicatorDuration = getResources().getInteger(
+                        R.integer.recents_subsequent_auto_advance_duration);
+
+                mIterateTrigger.setDozeDuration(timerIndicatorDuration);
                 if (!mIterateTrigger.isDozing()) {
                     mIterateTrigger.startDozing();
                 } else {
                     mIterateTrigger.poke();
                 }
             }
+
+            // Focus the next task
+            EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
             MetricsLogger.action(this, MetricsLogger.ACTION_OVERVIEW_PAGE);
         }
@@ -660,6 +662,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             } else {
                 dismissRecentsToHome(true /* animateTaskViews */);
             }
+
+            // Cancel any pending dozes
+            EventBus.getDefault().send(mUserInteractionEvent);
         } else {
             // Do nothing
         }
@@ -678,6 +683,21 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                         }
                     }
                 });
+            }
+        }
+    }
+
+    public final void onBusEvent(EnterRecentsTaskStackAnimationCompletedEvent event) {
+        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled() &&
+                RecentsDebugFlags.Static.EnableFastToggleTimeoutOnEnter) {
+            mIterateTrigger.setDozeDuration(
+                    getResources().getInteger(R.integer.recents_auto_advance_duration));
+            if (!mIterateTrigger.isDozing()) {
+                mIterateTrigger.startDozing();
+            } else {
+                mIterateTrigger.poke();
             }
         }
     }

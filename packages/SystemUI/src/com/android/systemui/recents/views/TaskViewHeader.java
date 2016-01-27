@@ -169,7 +169,6 @@ public class TaskViewHeader extends FrameLayout
     Interpolator mLinearOutSlowInInterpolator;
 
     private CountDownTimer mFocusTimerCountDown;
-    private long mFocusTimerDuration;
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -216,7 +215,6 @@ public class TaskViewHeader extends FrameLayout
         mOverlayBackground = new HighlightColorDrawable();
         mDimLayerPaint.setColor(Color.argb(255, 0, 0, 0));
         mDimLayerPaint.setAntiAlias(true);
-        mFocusTimerDuration = res.getInteger(R.integer.recents_auto_advance_duration);
     }
 
     /**
@@ -304,27 +302,27 @@ public class TaskViewHeader extends FrameLayout
     }
 
     /** Starts the focus timer. */
-    public void startFocusTimerIndicator() {
+    public void startFocusTimerIndicator(int duration) {
         if (mFocusTimerIndicator == null) {
             return;
         }
 
         mFocusTimerIndicator.setVisibility(View.VISIBLE);
-        mFocusTimerIndicator.setMax((int) mFocusTimerDuration);
-        if (mFocusTimerCountDown == null) {
-            mFocusTimerCountDown = new CountDownTimer(mFocusTimerDuration,
-                    FOCUS_INDICATOR_INTERVAL_MS) {
-                public void onTick(long millisUntilFinished) {
-                    mFocusTimerIndicator.setProgress((int) millisUntilFinished);
-                }
-
-                public void onFinish() {
-                    mFocusTimerIndicator.setProgress((int) mFocusTimerDuration);
-                }
-            }.start();
-        } else {
-            mFocusTimerCountDown.start();
+        mFocusTimerIndicator.setMax(duration);
+        mFocusTimerIndicator.setProgress(duration);
+        if (mFocusTimerCountDown != null) {
+            mFocusTimerCountDown.cancel();
         }
+        mFocusTimerCountDown = new CountDownTimer(duration,
+                FOCUS_INDICATOR_INTERVAL_MS) {
+            public void onTick(long millisUntilFinished) {
+                mFocusTimerIndicator.setProgress((int) millisUntilFinished);
+            }
+
+            public void onFinish() {
+                // Do nothing
+            }
+        }.start();
     }
 
     /** Cancels the focus timer. */
@@ -411,7 +409,7 @@ public class TaskViewHeader extends FrameLayout
             mMoveTaskButton.setOnClickListener(this);
         }
 
-        if (Recents.getDebugFlags().isFastToggleIndicatorEnabled()) {
+        if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
             if (mFocusTimerIndicator == null) {
                 mFocusTimerIndicator = (ProgressBar) mFocusTimerIndicatorStub.inflate();
             }

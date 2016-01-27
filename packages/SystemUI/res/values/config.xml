@@ -181,7 +181,10 @@
     <integer name="recents_animate_task_stack_scroll_duration">200</integer>
 
     <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_auto_advance_duration">2000</integer>
+    <integer name="recents_auto_advance_duration">750</integer>
+
+    <!-- The animation duration for subsequent scrolling the stack to a particular item. -->
+    <integer name="recents_subsequent_auto_advance_duration">1000</integer>
 
     <!-- The animation duration for entering and exiting the history. -->
     <integer name="recents_history_transition_duration">250</integer>

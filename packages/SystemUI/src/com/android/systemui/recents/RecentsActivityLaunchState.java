@@ -52,27 +52,12 @@ public class RecentsActivityLaunchState {
      * Returns the task to focus given the current launch state.
      */
     public int getInitialFocusTaskIndex(int numTasks) {
-        RecentsDebugFlags flags = Recents.getDebugFlags();
-        if (launchedWithAltTab) {
-            if (launchedFromAppWithThumbnail) {
-                // If alt-tabbing from another app, focus the next task
-                return numTasks - 2;
-            } else {
-                // If alt-tabbing from home, focus the first task
-                return numTasks - 1;
-            }
+        if (launchedFromAppWithThumbnail) {
+            // If coming from another app, focus the next task
+            return numTasks - 2;
         } else {
-            if (launchedFromHome) {
-                return numTasks - 1;
-            } else {
-                if (flags.isFastToggleRecentsEnabled() || !flags.isInitialStatePaging()) {
-                    // If we are not fast-toggling or are starting in the non-focused mode, then
-                    // we should assume the front most task has focus
-                    return numTasks - 1;
-                } else {
-                    return numTasks - 2;
-                }
-            }
+            // If coming from home, focus the first task
+            return numTasks - 1;
         }
     }
 }
