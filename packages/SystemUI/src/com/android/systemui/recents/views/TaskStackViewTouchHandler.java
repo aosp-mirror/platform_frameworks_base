@@ -215,8 +215,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_MOVE: {
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int y = (int) ev.getY(activePointerIndex);
+                int x = (int) ev.getX(activePointerIndex);
                 if (!mIsScrolling) {
-                    if (Math.abs(y - mDownY) > mScrollTouchSlop) {
+                    int yDiff = Math.abs(y - mDownY);
+                    int xDiff = Math.abs(x - mDownX);
+                    if (Math.abs(y - mDownY) > mScrollTouchSlop && yDiff > xDiff) {
                         mIsScrolling = true;
 
                         // Disallow parents from intercepting touch events

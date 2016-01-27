@@ -698,7 +698,7 @@ public class SurfaceView extends View {
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig, Rect backDropRect) {
+                Configuration newConfig, Rect backDropRect, boolean forceLayout) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (DEBUG) Log.v(
@@ -711,7 +711,8 @@ public class SurfaceView extends View {
                         surfaceView.mReportDrawNeeded = true;
                         surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
                     } else if (surfaceView.mWinFrame.width() != frame.width()
-                            || surfaceView.mWinFrame.height() != frame.height()) {
+                            || surfaceView.mWinFrame.height() != frame.height()
+                            || forceLayout) {
                         surfaceView.mUpdateWindowNeeded = true;
                         surfaceView.mHandler.sendEmptyMessage(UPDATE_WINDOW_MSG);
                     }

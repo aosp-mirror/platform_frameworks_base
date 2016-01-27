@@ -2061,7 +2061,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
             Configuration newConfig) throws RemoteException {
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
-                reportDraw, newConfig, getBackdropFrame(frame));
+                reportDraw, newConfig, getBackdropFrame(frame),
+                isDragResizeChanged() /* forceRelayout */);
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {

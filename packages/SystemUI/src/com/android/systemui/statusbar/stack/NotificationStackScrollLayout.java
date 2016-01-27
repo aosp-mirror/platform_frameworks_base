@@ -1649,8 +1649,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 bottom = Math.min(bottom, getHeight());
             }
         }
-        mBackgroundBounds.top = top;
-        mBackgroundBounds.bottom = bottom;
+        mBackgroundBounds.top = Math.max(0, top);
+        mBackgroundBounds.bottom = Math.min(getHeight(), bottom);
     }
 
     private ActivatableNotificationView getFirstPinnedHeadsUp() {

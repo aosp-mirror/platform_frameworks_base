@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -263,6 +264,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mNewSurfaceNeeded;
     boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
+    boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
 
     boolean mIsDrawing;
@@ -1625,7 +1627,8 @@ public final class ViewRootImpl implements ViewParent,
 
         final boolean isViewVisible = viewVisibility == View.VISIBLE;
         if (mFirst || windowShouldResize || insetsChanged ||
-                viewVisibilityChanged || params != null) {
+                viewVisibilityChanged || params != null || mForceNextWindowRelayout) {
+            mForceNextWindowRelayout = false;
 
             if (isViewVisible) {
                 // If this window is giving internal insets to the window
@@ -2099,7 +2102,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean cancelDraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || !isViewVisible;
 
-        if (!cancelDraw && !newSurface) {
+        if (!cancelDraw) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
                 for (int i = 0; i < mPendingTransitions.size(); ++i) {
                     mPendingTransitions.get(i).startChangingAnimations();
@@ -2148,6 +2151,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
     }
+
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
         Log.e(mTag, "OutOfResourcesException initializing HW surface", e);
         try {
@@ -3365,7 +3369,8 @@ public final class ViewRootImpl implements ViewParent,
                         && mPendingVisibleInsets.equals(args.arg3)
                         && mPendingOutsets.equals(args.arg7)
                         && mPendingBackDropFrame.equals(args.arg8)
-                        && args.arg4 == null) {
+                        && args.arg4 == null
+                        && args.argi1 == 0) {
                     break;
                 }
                 } // fall through...
@@ -3385,6 +3390,7 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingVisibleInsets.set((Rect) args.arg3);
                     mPendingOutsets.set((Rect) args.arg7);
                     mPendingBackDropFrame.set((Rect) args.arg8);
+                    mForceNextWindowRelayout = args.argi1 != 0;
 
                     args.recycle();
 
@@ -5829,7 +5835,7 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig, Rect backDropFrame) {
+            Configuration newConfig, Rect backDropFrame, boolean forceLayout) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -5863,6 +5869,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg6 = sameProcessCall ? new Rect(stableInsets) : stableInsets;
         args.arg7 = sameProcessCall ? new Rect(outsets) : outsets;
         args.arg8 = sameProcessCall ? new Rect(backDropFrame) : backDropFrame;
+        args.argi1 = forceLayout ? 1 : 0;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -6878,11 +6885,12 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig, Rect backDropFrame) {
+                Configuration newConfig, Rect backDropFrame, boolean forceLayout) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
-                        visibleInsets, stableInsets, outsets, reportDraw, newConfig, backDropFrame);
+                        visibleInsets, stableInsets, outsets, reportDraw, newConfig, backDropFrame,
+                        forceLayout);
             }
         }
 

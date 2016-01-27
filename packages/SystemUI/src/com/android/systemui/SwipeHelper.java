@@ -67,6 +67,7 @@ public class SwipeHelper implements Gefingerpoken {
     private FalsingManager mFalsingManager;
 
     private float mInitialTouchPos;
+    private float mPerpendicularInitialTouchPos;
     private boolean mDragging;
     private View mCurrView;
     private View mCurrAnimView;
@@ -115,6 +116,10 @@ public class SwipeHelper implements Gefingerpoken {
 
     private float getPos(MotionEvent ev) {
         return mSwipeDirection == X ? ev.getX() : ev.getY();
+    }
+
+    private float getPerpendicularPos(MotionEvent ev) {
+        return mSwipeDirection == X ? ev.getY() : ev.getX();
     }
 
     private float getTranslation(View v) {
@@ -240,6 +245,7 @@ public class SwipeHelper implements Gefingerpoken {
                     mCanCurrViewBeDimissed = mCallback.canChildBeDismissed(mCurrView);
                     mVelocityTracker.addMovement(ev);
                     mInitialTouchPos = getPos(ev);
+                    mPerpendicularInitialTouchPos = getPerpendicularPos(ev);
 
                     if (mLongPressListener != null) {
                         if (mWatchLongPress == null) {
@@ -271,8 +277,11 @@ public class SwipeHelper implements Gefingerpoken {
                 if (mCurrView != null && !mLongPressSent) {
                     mVelocityTracker.addMovement(ev);
                     float pos = getPos(ev);
+                    float perpendicularPos = getPerpendicularPos(ev);
                     float delta = pos - mInitialTouchPos;
-                    if (Math.abs(delta) > mPagingTouchSlop) {
+                    float deltaPerpendicular = perpendicularPos - mPerpendicularInitialTouchPos;
+                    if (Math.abs(delta) > mPagingTouchSlop
+                            && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
                         mCallback.onBeginDrag(mCurrView);
                         mDragging = true;
                         mInitialTouchPos = getPos(ev) - getTranslation(mCurrAnimView);
@@ -280,7 +289,6 @@ public class SwipeHelper implements Gefingerpoken {
                         removeLongPressCallback();
                     }
                 }
-
                 break;
 
             case MotionEvent.ACTION_UP:
