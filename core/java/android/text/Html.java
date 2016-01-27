@@ -165,6 +165,11 @@ public class Html {
             | FROM_HTML_SEPARATOR_LINE_BREAK_DIV
             | FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE;
 
+    /**
+     * The bit which indicates if lines delimited by '\n' will be grouped into &lt;p&gt; elements.
+     */
+    private static final int TO_HTML_PARAGRAPH_FLAG = 0x00000001;
+
     private Html() { }
 
     /**
@@ -255,7 +260,7 @@ public class Html {
      */
     public static String toHtml(Spanned text, int option) {
         StringBuilder out = new StringBuilder();
-        withinHtml(out, text);
+        withinHtml(out, text, option);
         return out.toString();
     }
 
@@ -268,7 +273,16 @@ public class Html {
         return out.toString();
     }
 
-    private static void withinHtml(StringBuilder out, Spanned text) {
+    private static void withinHtml(StringBuilder out, Spanned text, int option) {
+        if ((option & TO_HTML_PARAGRAPH_FLAG) == TO_HTML_PARAGRAPH_LINES_CONSECUTIVE) {
+            encodeTextAlignmentByDiv(out, text, option);
+            return;
+        }
+
+        withinDiv(out, text, 0, text.length(), option);
+    }
+
+    private static void encodeTextAlignmentByDiv(StringBuilder out, Spanned text, int option) {
         int len = text.length();
 
         int next;
@@ -296,7 +310,7 @@ public class Html {
                 out.append("<div ").append(elements).append(">");
             }
 
-            withinDiv(out, text, i, next);
+            withinDiv(out, text, i, next, option);
 
             if (needDiv) {
                 out.append("</div>");
@@ -304,8 +318,8 @@ public class Html {
         }
     }
 
-    private static void withinDiv(StringBuilder out, Spanned text,
-            int start, int end) {
+    private static void withinDiv(StringBuilder out, Spanned text, int start, int end,
+            int option) {
         int next;
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, QuoteSpan.class);
@@ -315,7 +329,7 @@ public class Html {
                 out.append("<blockquote>");
             }
 
-            withinBlockquote(out, text, i, next);
+            withinBlockquote(out, text, i, next, option);
 
             for (QuoteSpan quote : quotes) {
                 out.append("</blockquote>\n");
@@ -323,7 +337,7 @@ public class Html {
         }
     }
 
-    private static String getOpenParaTagWithDirection(Spanned text, int start, int end) {
+    private static String getTextDirection(Spanned text, int start, int end) {
         final int len = end - start;
         final byte[] levels = ArrayUtils.newUnpaddedByteArray(len);
         final char[] buffer = TextUtils.obtain(len);
@@ -333,16 +347,101 @@ public class Html {
                 false /* no info */);
         switch(paraDir) {
             case Layout.DIR_RIGHT_TO_LEFT:
-                return "<p dir=\"rtl\">";
+                return " dir=\"rtl\"";
             case Layout.DIR_LEFT_TO_RIGHT:
             default:
-                return "<p dir=\"ltr\">";
+                return " dir=\"ltr\"";
         }
     }
 
-    private static void withinBlockquote(StringBuilder out, Spanned text,
-                                         int start, int end) {
-        out.append(getOpenParaTagWithDirection(text, start, end));
+    private static String getTextStyles(Spanned text, int start, int end) {
+        final StringBuilder style = new StringBuilder(" style=\"margin-top:0; margin-bottom:0;");
+
+        final AlignmentSpan[] alignmentSpans = text.getSpans(start, end, AlignmentSpan.class);
+        final int len = alignmentSpans.length;
+        if (len > 0) {
+            final Layout.Alignment alignment = alignmentSpans[len - 1].getAlignment();
+            if (alignment == Layout.Alignment.ALIGN_NORMAL) {
+                style.append(" text-align:start;");
+            } else if (alignment == Layout.Alignment.ALIGN_CENTER) {
+                style.append(" text-align:center;");
+            } else if (alignment == Layout.Alignment.ALIGN_OPPOSITE) {
+                style.append(" text-align:end;");
+            }
+        }
+
+        style.append("\"");
+        return style.toString();
+    }
+
+    private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end,
+            int option) {
+        if ((option & TO_HTML_PARAGRAPH_FLAG) == TO_HTML_PARAGRAPH_LINES_CONSECUTIVE) {
+            withinBlockquoteConsecutive(out, text, start, end);
+        } else {
+            withinBlockquoteIndividual(out, text, start, end);
+        }
+    }
+
+    private static void withinBlockquoteIndividual(StringBuilder out, Spanned text, int start,
+            int end) {
+        boolean isInList = false;
+        int next;
+        for (int i = start; i <= end; i = next) {
+            next = TextUtils.indexOf(text, '\n', i, end);
+            if (next < 0) {
+                next = end;
+            }
+
+            boolean isListItem = false;
+            ParagraphStyle[] paragraphStyles = text.getSpans(i, next, ParagraphStyle.class);
+            for (ParagraphStyle paragraphStyle : paragraphStyles) {
+                final int spanFlags = text.getSpanFlags(paragraphStyle);
+                if ((spanFlags & Spanned.SPAN_PARAGRAPH) == Spanned.SPAN_PARAGRAPH
+                        && paragraphStyle instanceof BulletSpan) {
+                    isListItem = true;
+                    break;
+                }
+            }
+
+            if (isListItem && !isInList) {
+                // Current paragraph is the first item in a list
+                isInList = true;
+                out.append("<ul>\n");
+            }
+
+            if (isInList && !isListItem) {
+                // Current paragraph is no longer a list item; close the previously opened list
+                isInList = false;
+                out.append("</ul>\n");
+            }
+
+            String tagType = isListItem ? "li" : "p";
+            out.append("<").append(tagType).append(getTextDirection(text, start, next))
+                    .append(getTextStyles(text, start, next)).append(">");
+
+            if (next - i == 0) {
+                out.append("<br>");
+            } else {
+                withinParagraph(out, text, i, next);
+            }
+
+            out.append("</");
+            out.append(tagType);
+            out.append(">\n");
+
+            if (next == end && isInList) {
+                isInList = false;
+                out.append("</ul>\n");
+            }
+
+            next++;
+        }
+    }
+
+    private static void withinBlockquoteConsecutive(StringBuilder out, Spanned text, int start,
+            int end) {
+        out.append("<p").append(getTextDirection(text, start, end)).append(">");
 
         int next;
         for (int i = start; i < end; i = next) {
@@ -358,19 +457,26 @@ public class Html {
                 next++;
             }
 
-            if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
-                /* Paragraph should be closed */
-                out.append("</p>\n");
-                out.append(getOpenParaTagWithDirection(text, next, end));
+            withinParagraph(out, text, i, next - nl);
+
+            if (nl == 1) {
+                out.append("<br>\n");
+            } else {
+                for (int j = 2; j < nl; j++) {
+                    out.append("<br>");
+                }
+                if (next != end) {
+                    /* Paragraph should be closed and reopened */
+                    out.append("</p>\n");
+                    out.append("<p").append(getTextDirection(text, start, end)).append(">");
+                }
             }
         }
 
         out.append("</p>\n");
     }
 
-    /* Returns true if the caller should close and reopen the paragraph. */
-    private static boolean withinParagraph(StringBuilder out, Spanned text, int start, int end,
-            int nl, boolean last) {
+    private static void withinParagraph(StringBuilder out, Spanned text, int start, int end) {
         int next;
         for (int i = start; i < end; i = next) {
             next = text.nextSpanTransition(i, end, CharacterStyle.class);
@@ -493,16 +599,6 @@ public class Html {
                     }
                 }
             }
-        }
-
-        if (nl == 1) {
-            out.append("<br>\n");
-            return false;
-        } else {
-            for (int i = 2; i < nl; i++) {
-                out.append("<br>");
-            }
-            return !last;
         }
     }
 
