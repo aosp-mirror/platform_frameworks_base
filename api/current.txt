@@ -30675,6 +30675,8 @@ package android.telephony {
 
   public final class CellIdentityGsm implements android.os.Parcelable {
     method public int describeContents();
+    method public int getArfcn();
+    method public int getBsic();
     method public int getCid();
     method public int getLac();
     method public int getMcc();
@@ -30687,6 +30689,7 @@ package android.telephony {
   public final class CellIdentityLte implements android.os.Parcelable {
     method public int describeContents();
     method public int getCi();
+    method public int getEarfcn();
     method public int getMcc();
     method public int getMnc();
     method public int getPci();
@@ -30702,6 +30705,7 @@ package android.telephony {
     method public int getMcc();
     method public int getMnc();
     method public int getPsc();
+    method public int getUarfcn();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.CellIdentityWcdma> CREATOR;
   }
