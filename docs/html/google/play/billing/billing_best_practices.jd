@@ -100,6 +100,12 @@ Google Play returns this string together with the purchase details.</p>
 made the purchase, so that you can later verify that this is a legitimate purchase by
 that user. For consumable items, you can use a randomly generated string, but for non-
 consumable items you should use a string that uniquely identifies the user.</p>
+
+<p class="note">
+  <strong>Note:</strong> Do not use the user's
+  email address in the payload string, since that address may change.
+</p>
+
 <p>When you get back the response from Google Play, make sure to verify that the
 developer payload string matches the token that you sent previously with the purchase
 request. As a further security precaution, you should perform the verification on your
