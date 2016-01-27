@@ -334,10 +334,19 @@ public class RecentsTaskLoader {
         }
     }
 
-    /** Acquires the task resource data directly from the pool. */
-    public void loadTaskData(Task t) {
+    /**
+     * Acquires the task resource data directly from the cache, loading if necessary.
+     *
+     * @param fetchAndInvalidateThumbnails If set, will try loading thumbnails, invalidating them
+     *                                     in the cache and loading if necessary. Otherwise, do not
+     *                                     load the thumbnail unless the icon also has to be loaded.
+     */
+    public void loadTaskData(Task t, boolean fetchAndInvalidateThumbnails) {
         Drawable icon = mIconCache.getAndInvalidateIfModified(t.key);
-        Bitmap thumbnail = mThumbnailCache.getAndInvalidateIfModified(t.key);
+        Bitmap thumbnail = mDefaultThumbnail;
+        if (fetchAndInvalidateThumbnails) {
+            thumbnail = mThumbnailCache.getAndInvalidateIfModified(t.key);
+        }
 
         // Grab the thumbnail/icon from the cache, if either don't exist, then trigger a reload and
         // use the default assets in their place until they load
@@ -360,6 +369,8 @@ public class RecentsTaskLoader {
         mLoadQueue.removeTask(t);
         mThumbnailCache.remove(t.key);
         mIconCache.remove(t.key);
+        mActivityLabelCache.remove(t.key);
+        mContentDescriptionCache.remove(t.key);
         mActivityInfoCache.remove(t.key.getComponent());
         if (notifyTaskDataUnloaded) {
             t.notifyTaskDataUnloaded(null, mDefaultIcon);
