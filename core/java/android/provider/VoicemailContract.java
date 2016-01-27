@@ -101,6 +101,12 @@ public class VoicemailContract {
     public static final String ACTION_FETCH_VOICEMAIL = "android.intent.action.FETCH_VOICEMAIL";
 
     /**
+     * Broadcast intent to request all voicemail sources to perform a sync with the remote server.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SYNC_VOICEMAIL = "android.intent.action.SYNC_VOICEMAIL";
+
+    /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
      * receiving package made this change.
      */
@@ -393,6 +399,14 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String CONFIGURATION_STATE = "configuration_state";
+        /**
+         * Value of {@link #CONFIGURATION_STATE} passed into
+         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
+         * {@link #CONFIGURATION_STATE} field is not to be changed
+         *
+         * @hide
+         */
+        public static final int CONFIGURATION_STATE_IGNORE = -1;
         /** Value of {@link #CONFIGURATION_STATE} to indicate an all OK configuration status. */
         public static final int CONFIGURATION_STATE_OK = 0;
         /**
@@ -418,14 +432,49 @@ public class VoicemailContract {
          */
         public static final String DATA_CHANNEL_STATE = "data_channel_state";
         /**
+         * Value of {@link #DATA_CHANNEL_STATE} passed into
+         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
+         * {@link #DATA_CHANNEL_STATE} field is not to be changed
+         *
+         * @hide
+         */
+        public static final int DATA_CHANNEL_STATE_IGNORE = -1;
+        /**
          *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel is working fine.
          */
         public static final int DATA_CHANNEL_STATE_OK = 0;
         /**
-         * Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel connection is not
-         * working.
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel failed to find a
+         *  suitable network to connect to the server.
          */
         public static final int DATA_CHANNEL_STATE_NO_CONNECTION = 1;
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel failed to find a
+         *  suitable network to connect to the server, and the carrier requires using cellular
+         *  data network to connect to the server.
+         */
+        public static final int DATA_CHANNEL_STATE_NO_CONNECTION_CELLULAR_REQUIRED = 2;
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel received incorrect
+         *  settings or credentials to connect to the server
+         */
+        public static final int DATA_CHANNEL_STATE_BAD_CONFIGURATION = 3;
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that a error has occurred in the data
+         *  channel while communicating with the server
+         */
+        public static final int DATA_CHANNEL_STATE_COMMUNICATION_ERROR = 4;
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that the server reported an internal
+         *  error to the data channel.
+         */
+        public static final int DATA_CHANNEL_STATE_SERVER_ERROR = 5;
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that while there is a suitable network,
+         *  the data channel is unable to establish a connection with the server.
+         */
+        public static final int DATA_CHANNEL_STATE_SERVER_CONNECTION_ERROR = 6;
+
         /**
          * The notification channel state of the voicemail source. This is the channel through which
          * the source gets notified of new voicemails on the remote server.
@@ -437,6 +486,14 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String NOTIFICATION_CHANNEL_STATE = "notification_channel_state";
+        /**
+         * Value of {@link #NOTIFICATION_CHANNEL_STATE} passed into
+         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
+         * {@link #NOTIFICATION_CHANNEL_STATE} field is not to be changed
+         *
+         * @hide
+         */
+        public static final int NOTIFICATION_CHANNEL_STATE_IGNORE = -1;
         /**
          * Value of {@link #NOTIFICATION_CHANNEL_STATE} to indicate that the notification channel is
          * working fine.
@@ -497,21 +554,22 @@ public class VoicemailContract {
          */
         public static void setStatus(Context context, PhoneAccountHandle accountHandle,
                 int configurationState, int dataChannelState, int notificationChannelState) {
-            ContentResolver contentResolver = context.getContentResolver();
-            Uri statusUri = buildSourceUri(context.getPackageName());
             ContentValues values = new ContentValues();
             values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
                     accountHandle.getComponentName().flattenToString());
             values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
-            values.put(Status.CONFIGURATION_STATE, configurationState);
-            values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
-            values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
-
-            if (isStatusPresent(contentResolver, statusUri)) {
-                contentResolver.update(statusUri, values, null, null);
-            } else {
-                contentResolver.insert(statusUri, values);
+            if(configurationState != CONFIGURATION_STATE_IGNORE) {
+                values.put(Status.CONFIGURATION_STATE, configurationState);
             }
+            if(dataChannelState != DATA_CHANNEL_STATE_IGNORE) {
+                values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
+            }
+            if(notificationChannelState != NOTIFICATION_CHANNEL_STATE_IGNORE) {
+                values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
+            }
+            ContentResolver contentResolver = context.getContentResolver();
+            Uri statusUri = buildSourceUri(context.getPackageName());
+            contentResolver.insert(statusUri, values);
         }
 
         /**
@@ -540,28 +598,7 @@ public class VoicemailContract {
 
             ContentResolver contentResolver = context.getContentResolver();
             Uri statusUri = buildSourceUri(context.getPackageName());
-            if (isStatusPresent(contentResolver, statusUri)) {
-                contentResolver.update(statusUri, values, null, null);
-            } else {
-                contentResolver.insert(statusUri, values);
-            }
-        }
-
-        /**
-         * Determines if a voicemail source exists in the status table.
-         *
-         * @param contentResolver A content resolver constructed from the appropriate context.
-         * @param statusUri The content uri for the source.
-         * @return {@code true} if a status entry for this source exists
-         */
-        private static boolean isStatusPresent(ContentResolver contentResolver, Uri statusUri) {
-            Cursor cursor = null;
-            try {
-                cursor = contentResolver.query(statusUri, null, null, null, null);
-                return cursor != null && cursor.getCount() != 0;
-            } finally {
-                if (cursor != null) cursor.close();
-            }
+            contentResolver.insert(statusUri, values);
         }
     }
 }
