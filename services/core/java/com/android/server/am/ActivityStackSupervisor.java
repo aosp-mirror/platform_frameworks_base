@@ -1723,7 +1723,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     stackId = task.getLaunchStackId();
                 }
                 if (stackId != task.stack.mStackId) {
-                    moveTaskToStackUncheckedLocked(task, stackId, ON_TOP, !FORCE_FOCUS, reason);
+                    final ActivityStack stack = moveTaskToStackUncheckedLocked(
+                            task, stackId, ON_TOP, !FORCE_FOCUS, reason);
+                    stackId = stack.mStackId;
                     // moveTaskToStackUncheckedLocked() should already placed the task on top,
                     // still need moveTaskToFrontLocked() below for any transition settings.
                 }
@@ -2133,7 +2135,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
     private boolean restoreRecentTaskLocked(TaskRecord task, int stackId) {
         if (stackId == INVALID_STACK_ID) {
             stackId = task.getLaunchStackId();
+        } else if (stackId == DOCKED_STACK_ID && !task.canGoInDockedStack()) {
+            // Preferred stack is the docked stack, but the task can't go in the docked stack.
+            // Put it in the fullscreen stack.
+            stackId = FULLSCREEN_WORKSPACE_STACK_ID;
         }
+
         if (task.stack != null) {
             // Task has already been restored once. See if we need to do anything more
             if (task.stack.mStackId == stackId) {
@@ -2169,8 +2176,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
      * Moves the specified task record to the input stack id.
      * WARNING: This method performs an unchecked/raw move of the task and
      * can leave the system in an unstable state if used incorrectly.
-     * Use {@link #moveTaskToStackLocked} to perform safe task movement
-     * to a stack.
+     * Use {@link #moveTaskToStackLocked} to perform safe task movement to a stack.
      * @param task Task to move.
      * @param stackId Id of stack to move task to.
      * @param toTop True if the task should be placed at the top of the stack.
@@ -2191,6 +2197,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 && (prevStack.topRunningActivityLocked() == r);
 
         final int resizeMode = task.mResizeMode;
+
+        if (stackId == DOCKED_STACK_ID && resizeMode == RESIZE_MODE_UNRESIZEABLE) {
+            // We don't allow moving a unresizeable task to the docked stack since the docked
+            // stack is used for split-screen mode and will cause things like the docked divider to
+            // show up. We instead leave the task in its current stack or move it to the fullscreen
+            // stack if it isn't currently in a stack.
+            stackId = (prevStack != null) ? prevStack.mStackId : FULLSCREEN_WORKSPACE_STACK_ID;
+            // TODO: display toast that activity doesn't support multi-window mode.
+            Slog.w(TAG, "Can not move unresizeable task=" + task
+                    + " to docked stack. Moving to stackId=" + stackId + " instead.");
+        }
+
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
         // if a docked stack is created below which will lead to the stack we are moving from and
         // its resizeable tasks being resized.
@@ -2238,6 +2256,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         final ActivityStack stack = moveTaskToStackUncheckedLocked(
                 task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
+        stackId = stack.mStackId;
 
         if (!animate) {
             stack.mNoAnimActivities.add(topActivity);
