@@ -68,6 +68,7 @@ class UserUsageStatsService {
 
     interface StatsUpdatedListener {
         void onStatsUpdated();
+        void onStatsReloaded();
         long getAppIdleRollingWindowDurationMillis();
     }
 
@@ -545,6 +546,9 @@ class UserUsageStatsService {
         Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +
                 sDateFormat.format(mDailyExpiryDate.getTimeInMillis()) + "(" +
                 tempCal.getTimeInMillis() + ")");
+
+        // Tell the listener that the stats reloaded, which may have changed idle states.
+        mListener.onStatsReloaded();
     }
 
     private static void mergePackageStats(IntervalStats dst, IntervalStats src,
