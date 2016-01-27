@@ -68,6 +68,10 @@ static struct {
     jfieldID    data;
 } gSoundModelFields;
 
+static const char* const kGenericSoundModelClassPathName =
+                                     "android/hardware/soundtrigger/SoundTrigger$GenericSoundModel";
+static jclass gGenericSoundModelClass;
+
 static const char* const kKeyphraseClassPathName =
                                      "android/hardware/soundtrigger/SoundTrigger$Keyphrase";
 static jclass gKeyphraseClass;
@@ -104,6 +108,11 @@ static const char* const kKeyphraseRecognitionEventClassPathName =
                              "android/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionEvent";
 static jclass gKeyphraseRecognitionEventClass;
 static jmethodID   gKeyphraseRecognitionEventCstor;
+
+static const char* const kGenericRecognitionEventClassPathName =
+                             "android/hardware/soundtrigger/SoundTrigger$GenericRecognitionEvent";
+static jclass gGenericRecognitionEventClass;
+static jmethodID   gGenericRecognitionEventCstor;
 
 static const char* const kKeyphraseRecognitionExtraClassPathName =
                              "android/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra";
@@ -266,6 +275,12 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
                                 event->capture_preamble_ms, event->trigger_in_data,
                                 jAudioFormat, jData, jExtras);
         env->DeleteLocalRef(jExtras);
+    } else if (event->type == SOUND_MODEL_TYPE_GENERIC) {
+        jEvent = env->NewObject(gGenericRecognitionEventClass, gGenericRecognitionEventCstor,
+                                event->status, event->model, event->capture_available,
+                                event->capture_session, event->capture_delay_ms,
+                                event->capture_preamble_ms, event->trigger_in_data,
+                                jAudioFormat, jData);
     } else {
         jEvent = env->NewObject(gRecognitionEventClass, gRecognitionEventCstor,
                                 event->status, event->model, event->capture_available,
@@ -524,6 +539,9 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
     if (env->IsInstanceOf(jSoundModel, gKeyphraseSoundModelClass)) {
         offset = sizeof(struct sound_trigger_phrase_sound_model);
         type = SOUND_MODEL_TYPE_KEYPHRASE;
+    } else if (env->IsInstanceOf(jSoundModel, gGenericSoundModelClass)) {
+        offset = sizeof(struct sound_trigger_generic_sound_model);
+        type = SOUND_MODEL_TYPE_GENERIC;
     } else {
         offset = sizeof(struct sound_trigger_sound_model);
         type = SOUND_MODEL_TYPE_UNKNOWN;
@@ -631,6 +649,8 @@ android_hardware_SoundTrigger_loadSoundModel(JNIEnv *env, jobject thiz,
             env->DeleteLocalRef(jPhrase);
         }
         env->DeleteLocalRef(jPhrases);
+    } else if (type == SOUND_MODEL_TYPE_GENERIC) {
+        /* No initialization needed */
     }
     status = module->loadSoundModel(memory, &handle);
     ALOGV("loadSoundModel status %d handle %d", status, handle);
@@ -831,6 +851,9 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
                                                    "Ljava/util/UUID;");
     gSoundModelFields.data = GetFieldIDOrDie(env, soundModelClass, "data", "[B");
 
+    jclass genericSoundModelClass = FindClassOrDie(env, kGenericSoundModelClassPathName);
+    gGenericSoundModelClass = MakeGlobalRefOrDie(env, genericSoundModelClass);
+
     jclass keyphraseClass = FindClassOrDie(env, kKeyphraseClassPathName);
     gKeyphraseClass = MakeGlobalRefOrDie(env, keyphraseClass);
     gKeyphraseFields.id = GetFieldIDOrDie(env, keyphraseClass, "id", "I");
@@ -857,6 +880,11 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
     gKeyphraseRecognitionEventCstor = GetMethodIDOrDie(env, keyphraseRecognitionEventClass, "<init>",
               "(IIZIIIZLandroid/media/AudioFormat;[B[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;)V");
 
+    jclass genericRecognitionEventClass = FindClassOrDie(env,
+                                                           kGenericRecognitionEventClassPathName);
+    gGenericRecognitionEventClass = MakeGlobalRefOrDie(env, genericRecognitionEventClass);
+    gGenericRecognitionEventCstor = GetMethodIDOrDie(env, genericRecognitionEventClass, "<init>",
+                                              "(IIZIIIZLandroid/media/AudioFormat;[B)V");
 
     jclass keyRecognitionConfigClass = FindClassOrDie(env, kRecognitionConfigClassPathName);
     gRecognitionConfigClass = MakeGlobalRefOrDie(env, keyRecognitionConfigClass);
