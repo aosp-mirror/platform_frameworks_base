@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Enheter"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Flere apper"</string>
     <string name="empty" msgid="7858882803708117596">"Ingen elementer"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"Ingen treff i %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Kan ikke åpne filen"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Enkelte dokumenter kunne ikke slettes"</string>
     <string name="share_via" msgid="8966594246261344259">"Del via"</string>
@@ -99,9 +98,9 @@
       <item quantity="other">Kunne ikke slette <xliff:g id="COUNT_1">%1$d</xliff:g> filer</item>
       <item quantity="one">Kunne ikke slette <xliff:g id="COUNT_0">%1$d</xliff:g> fil</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Trykk for å se detaljer"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"Prøv på nytt"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Disse filene ble ikke kopiert: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Disse filene ble ikke flyttet: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="one">Kopierte <xliff:g id="COUNT_0">%1$d</xliff:g> fil til utklippstavlen.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Kan ikke lime inn de valgte filene her."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"Gi nytt navn"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Kunne ikke gi dokumentet nytt navn"</string>
 </resources>

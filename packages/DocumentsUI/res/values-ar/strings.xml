@@ -123,7 +123,8 @@
       <item quantity="one">تعذر حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"انقر لعرض التفاصيل."</string>
-    <string name="retry" msgid="7564024179122207376">"إعادة المحاولة"</string>
+    <!-- no translation found for close (3043722427445528732) -->
+    <skip />
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"لم يتم نقل الملفات التالية: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">

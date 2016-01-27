@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"ಸಾಧನಗಳು"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"ಇನ್ನಷ್ಟು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
     <string name="empty" msgid="7858882803708117596">"ಯಾವುದೇ ಐಟಂಗಳಿಲ್ಲ"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"%1$s ರಲ್ಲಿ ಯಾವುದೇ ಹೊಂದಾಣಿಕೆಗಳಿಲ್ಲ"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ಫೈಲ್ ತೆರೆಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ಕೆಲವು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="share_via" msgid="8966594246261344259">"ಈ ಮೂಲಕ ಹಂಚಿಕೊಳ್ಳಿ"</string>
@@ -99,9 +98,9 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"ಮರುಪ್ರಯತ್ನಿಸು"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ಈ ಫೈಲ್‌ಗಳನ್ನು ನಕಲು ಮಾಡಿಲ್ಲ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ಈ ಫೈಲ್‌ಗಳನ್ನು ಸರಿಸಲಾಗಿಲ್ಲ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="other">ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ <xliff:g id="COUNT_1">%1$d</xliff:g> ಫೈಲ್‌ಗಳನ್ನು ನಕಲಿಸಲಾಗಿದೆ.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ಈ ಸ್ಥಳದಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿದ ಫೈಲ್‌ಗಳನ್ನು ಅಂಟಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"ಮರುಹೆಸರಿಸು"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ಡಾಕ್ಯುಮೆಂಟ್ ಮರುಹೆಸರಿಸಲು ವಿಫಲವಾಗಿದೆ"</string>
 </resources>

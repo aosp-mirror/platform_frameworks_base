@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"Уреди"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Повеќе апликации"</string>
     <string name="empty" msgid="7858882803708117596">"Нема ставки"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"Нема совпаѓања во %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Датотеката не се отвора"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Некои документи не може да се избришат"</string>
     <string name="share_via" msgid="8966594246261344259">"Сподели преку"</string>
@@ -99,9 +98,9 @@
       <item quantity="one">Не можеше да се избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
       <item quantity="other">Не можеше да се избришат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Допрете за да ги погледнете деталите"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"Обидете се повторно"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Овие датотеки не се преместија: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="other">Копирани се <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки на таблата со исечоци.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Не може да ги залепи избраните датотеки на локацијава."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"Преименувај"</string>
+    <string name="rename_error" msgid="4203041674883412606">"Не успеа да се преименува документот"</string>
 </resources>

@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"ອຸປະກອນ"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"ແອັບຯອື່ນໆ"</string>
     <string name="empty" msgid="7858882803708117596">"ບໍ່ມີລາຍການ"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"ບໍ່ພົບສິ່ງກົງກັນໃນ %1$s"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ບໍ່ສາມດາເປີດໄຟລ໌ໄດ້"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ບໍ່ສາມາດລຶບບາງເອກະສານໄດ້"</string>
     <string name="share_via" msgid="8966594246261344259">"ແບ່ງປັນຜ່ານ"</string>
@@ -99,9 +98,9 @@
       <item quantity="other">ບໍ່​ສາ​ມາດ​ລຶບ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌</item>
       <item quantity="one">ບໍ່ສາມາດລຶບ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟລ໌</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດ"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"ລອງໃໝ່"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖື​ກ​ອັດ​ສຳ​ເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ໄຟ​ລ໌​ເຫຼົ່າ​ນີ້​ບໍ່​ຖືກ​ຍ້າຍ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="one">ອັດ​ສຳ​ເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟ​ລ໌​ໃສ່​ຄ​ລິບບອດ​ແລ້ວ.</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ບໍ່​ສາ​ມາດ​ແປະ​ໄຟ​ລ໌​ເລືອກ​ໄວ້​ຢູ່​ໃນ​ທີ່​ຕັ້ງ​ນີ້​ໄດ້."</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"ປ່ຽນຊື່"</string>
+    <string name="rename_error" msgid="4203041674883412606">"ປ່ຽນຊື່ເອກະສານບໍ່ສຳເລັດ"</string>
 </resources>

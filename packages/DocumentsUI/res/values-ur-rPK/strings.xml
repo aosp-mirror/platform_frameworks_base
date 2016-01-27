@@ -63,8 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"آلات"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"مزید ایپس"</string>
     <string name="empty" msgid="7858882803708117596">"کوئی آئٹمز نہيں ہیں"</string>
-    <!-- no translation found for no_results (6622510343880730446) -->
-    <skip />
+    <string name="no_results" msgid="6622510343880730446">"‏%1$s میں کوئی مماثل نہیں"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"فائل نہيں کھول سکتے ہیں"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"کچھ دستاویزات کو حذف کرنے سے قاصر"</string>
     <string name="share_via" msgid="8966594246261344259">"اشتراک کریں بذریعہ"</string>
@@ -99,9 +98,9 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں حذف نہیں ہو سکیں</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل حذف نہیں ہو سکی</item>
     </plurals>
-    <!-- no translation found for notification_touch_for_details (6268189413228855582) -->
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"تفصیلات دیکھنے کیلئے تھپتھپائیں"</string>
+    <!-- no translation found for close (3043722427445528732) -->
     <skip />
-    <string name="retry" msgid="7564024179122207376">"دوبارہ کوشش کریں"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"یہ فائلز کاپی نہیں کی گئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"یہ فائلیں منتقل نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
@@ -109,8 +108,6 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کلپ بورڈ پر کاپی کی گئی۔</item>
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"منتخب کردہ فائلز کو اس مقام پر پیسٹ نہیں کیا جا سکتا۔"</string>
-    <!-- no translation found for menu_rename (7678802479104285353) -->
-    <skip />
-    <!-- no translation found for rename_error (4203041674883412606) -->
-    <skip />
+    <string name="menu_rename" msgid="7678802479104285353">"نام تبدیل کریں"</string>
+    <string name="rename_error" msgid="4203041674883412606">"دستاویز کا نام تبدیل کرنے میں ناکام"</string>
 </resources>

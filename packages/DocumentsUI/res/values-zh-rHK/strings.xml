@@ -63,7 +63,7 @@
     <string name="root_type_device" msgid="7121342474653483538">"裝置"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"更多應用程式"</string>
     <string name="empty" msgid="7858882803708117596">"沒有項目"</string>
-    <string name="no_results" msgid="6622510343880730446">"沒有與「%1$s」相符的結果"</string>
+    <string name="no_results" msgid="6622510343880730446">"「%1$s」中沒有相符結果"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"無法開啟檔案"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>
@@ -99,7 +99,8 @@
       <item quantity="one">無法刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"輕按即可查看詳細資訊"</string>
-    <string name="retry" msgid="7564024179122207376">"重試"</string>
+    <!-- no translation found for close (3043722427445528732) -->
+    <skip />
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下檔案未能複製：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"這些檔案並未移動：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
