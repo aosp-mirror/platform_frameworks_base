@@ -670,14 +670,14 @@ public final class Settings {
             "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS";
 
     /**
-     * Activity Action: Ask the user to allow an to ignore battery optimizations (that is,
+     * Activity Action: Ask the user to allow an app to ignore battery optimizations (that is,
      * put them on the whitelist of apps shown by
      * {@link #ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}).  For an app to use this, it also
      * must hold the {@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
      * permission.
      * <p><b>Note:</b> most applications should <em>not</em> use this; there are many facilities
      * provided by the platform for applications to operate correctly in the various power
-     * saving mode.  This is only for unusual applications that need to deeply control their own
+     * saving modes.  This is only for unusual applications that need to deeply control their own
      * execution, at the potential expense of the user's battery life.  Note that these applications
      * greatly run the risk of showing to the user as high power consumers on their device.</p>
      * <p>
@@ -693,6 +693,24 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS =
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
+
+    /**
+     * Activity Action: Show screen for controlling which apps can ignore background data
+     * restrictions.
+     * <p>
+     * Input: if the Intent's data URI is set with an application name (using the "package" schema,
+     * like "package:com.my.app"), then when the screen is displayed it will focus on such app. If
+     * the data is not set, it will just open the screen.
+     * <p>
+     * Output: Nothing.
+     * <p>
+     * Applications can also use {@link android.net.ConnectivityManager#getRestrictBackgroundStatus
+     * ConnectivityManager#getRestrictBackgroundStatus()} to determine the status of the background
+     * data restrictions for them.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS =
+            "android.settings.IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS";
 
     /**
      * @hide
