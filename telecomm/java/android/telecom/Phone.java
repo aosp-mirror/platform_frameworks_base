@@ -97,6 +97,13 @@ public final class Phone {
          * @param canAddCall Indicates whether an additional call can be added.
          */
         public void onCanAddCallChanged(Phone phone, boolean canAddCall) { }
+
+        /**
+         * Called to silence the ringer if a ringing call exists.
+         *
+         * @param phone The {@code Phone} calling this method.
+         */
+        public void onSilenceRinger(Phone phone) { }
     }
 
     // A Map allows us to track each Call by its Telecom-specified call ID
@@ -177,6 +184,10 @@ public final class Phone {
             mCanAddCall = canAddCall;
             fireCanAddCallChanged(canAddCall);
         }
+    }
+
+    final void internalSilenceRinger() {
+        fireSilenceRinger();
     }
 
     /**
@@ -327,6 +338,12 @@ public final class Phone {
     private void fireCanAddCallChanged(boolean canAddCall) {
         for (Listener listener : mListeners) {
             listener.onCanAddCallChanged(this, canAddCall);
+        }
+    }
+
+    private void fireSilenceRinger() {
+        for (Listener listener : mListeners) {
+            listener.onSilenceRinger(this);
         }
     }
 

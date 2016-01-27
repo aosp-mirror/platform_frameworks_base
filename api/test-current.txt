@@ -35625,6 +35625,7 @@ package android.telecom {
     method public void onCallAudioStateChanged(android.telecom.CallAudioState);
     method public void onCallRemoved(android.telecom.Call);
     method public void onCanAddCallChanged(boolean);
+    method public void onSilenceRinger();
     method public final void setAudioRoute(int);
     method public final void setMuted(boolean);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.InCallService";
@@ -35885,6 +35886,7 @@ package android.telecom {
     field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
     field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecom.extra.GATEWAY_ORIGINAL_ADDRESS";
     field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecom.extra.GATEWAY_PROVIDER_PACKAGE";
+    field public static final java.lang.String METADATA_IN_CALL_SERVICE_RINGING = "android.telecom.IN_CALL_SERVICE_RINGING";
     field public static final java.lang.String METADATA_IN_CALL_SERVICE_UI = "android.telecom.IN_CALL_SERVICE_UI";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4

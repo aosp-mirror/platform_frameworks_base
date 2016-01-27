@@ -73,6 +73,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_ON_CALL_AUDIO_STATE_CHANGED = 5;
     private static final int MSG_BRING_TO_FOREGROUND = 6;
     private static final int MSG_ON_CAN_ADD_CALL_CHANGED = 7;
+    private static final int MSG_SILENCE_RINGER = 8;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -113,6 +114,9 @@ public abstract class InCallService extends Service {
                     break;
                 case MSG_ON_CAN_ADD_CALL_CHANGED:
                     mPhone.internalSetCanAddCall(msg.arg1 == 1);
+                    break;
+                case MSG_SILENCE_RINGER:
+                    mPhone.internalSilenceRinger();
                     break;
                 default:
                     break;
@@ -165,6 +169,11 @@ public abstract class InCallService extends Service {
             mHandler.obtainMessage(MSG_ON_CAN_ADD_CALL_CHANGED, canAddCall ? 1 : 0, 0)
                     .sendToTarget();
         }
+
+        @Override
+        public void silenceRinger() {
+            mHandler.obtainMessage(MSG_SILENCE_RINGER).sendToTarget();
+        }
     }
 
     private Phone.Listener mPhoneListener = new Phone.Listener() {
@@ -200,6 +209,12 @@ public abstract class InCallService extends Service {
         @Override
         public void onCanAddCallChanged(Phone phone, boolean canAddCall) {
             InCallService.this.onCanAddCallChanged(canAddCall);
+        }
+
+        /** ${inheritDoc} */
+        @Override
+        public void onSilenceRinger(Phone phone) {
+            InCallService.this.onSilenceRinger();
         }
 
     };
@@ -402,6 +417,12 @@ public abstract class InCallService extends Service {
      * @param canAddCall Indicates whether an additional call can be added.
      */
     public void onCanAddCallChanged(boolean canAddCall) {
+    }
+
+    /**
+     * Called to silence the ringer if a ringing call exists.
+     */
+    public void onSilenceRinger() {
     }
 
     /**

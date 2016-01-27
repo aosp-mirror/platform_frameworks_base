@@ -308,6 +308,15 @@ public class TelecomManager {
             "android.telecom.IN_CALL_SERVICE_CAR_MODE_UI";
 
     /**
+     * A boolean meta-data value indicating whether an {@link InCallService} implements ringing.
+     * Dialer implementations (see {@link #getDefaultDialerPackage()}) which would also like to
+     * override the system provided ringing should set this meta-data to {@code true} in the
+     * manifest registration of their {@link InCallService}.
+     */
+    public static final String METADATA_IN_CALL_SERVICE_RINGING =
+            "android.telecom.IN_CALL_SERVICE_RINGING";
+
+    /**
      * The dual tone multi-frequency signaling character sent to indicate the dialing system should
      * pause for a predefined period.
      */
