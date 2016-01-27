@@ -359,6 +359,9 @@
     <!-- Content description of the data connection with no SIM for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_no_sim">No SIM.</string>
 
+    <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_cell_data_off">Cellular Data Off</string>
+
     <!-- Content description of the bluetooth tethering icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_tether">Bluetooth tethering.</string>
 
