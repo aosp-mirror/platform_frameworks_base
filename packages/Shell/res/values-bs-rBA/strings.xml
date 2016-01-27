@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_label (3701846017049540910) -->
+    <skip />
+    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_title (2293711546892863898) -->
+    <skip />
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodavanje detalja u izvještaj o greškama"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Pričekajte..."</string>
+    <!-- no translation found for bugreport_finished_text (8389172248433597683) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_text (3559904746859400732) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm (5130698467795669780) -->
+    <skip />
+    <!-- no translation found for bugreport_confirm_repeat (4926842460688645058) -->
+    <skip />
+    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
+    <skip />
+    <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
+    <skip />
+    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
+    <skip />
+    <!-- no translation found for bugreport_info_action (2158204228510576227) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_taken (7175343181767429088) -->
+    <skip />
+    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
+    <skip />
+    <!-- no translation found for bugreport_info_dialog_title (3113549839798564645) -->
+    <skip />
+    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
+    <skip />
+    <!-- no translation found for bugreport_info_title (5599558206004371052) -->
+    <skip />
+    <!-- no translation found for bugreport_info_description (4117088998733546784) -->
+    <skip />
+</resources>

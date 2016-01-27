@@ -19,10 +19,8 @@
     <string name="app_label" msgid="3701846017049540910">"Командалык кабык"</string>
     <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Мүчүлүштүктөр тууралуу билдирүү түзүлүүдө"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Ката тууралуу билдирүү түзүлдү"</string>
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"Мүчүлүштүк жөнүндө кабардын чоо-жайы кошулууда"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Күтө туруңуз…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Ката жөнүндө кабар менен бөлүшүү үчүн солго серпип коюңуз"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Ката тууралуу билдирүүңүздү жөнөтүш үчүн, тийиңиз"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Ката тууралуу билдирүүлөр системанын ар кандай лог файлдарынын берилиштерин камтыйт, аларга өздүк жана купуя маалыматтар дагы кирет. Ката тууралуу билдирүүлөрдү сиз ишенген колдонмолор жана адамдар менен гана бөлүшүңүз."</string>
