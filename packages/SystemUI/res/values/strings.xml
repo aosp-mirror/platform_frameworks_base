@@ -1338,4 +1338,9 @@
     <!-- Accessibility description for data saver being off [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_saver_off">Data Saver is off</string>
 
+    <!-- Resolver target actions strings -->
+    <string name="pin_target">Pin</string>
+    <string name="unpin_target">Unpin</string>
+    <string name="app_info">App info</string>
+
 </resources>
