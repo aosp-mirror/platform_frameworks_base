@@ -4342,6 +4342,7 @@ public class AccountManagerService
             String opPackageName) {
         List<String> permissionsToCheck = new ArrayList<String>(2);
         permissionsToCheck.add(Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
+        long id = Binder.clearCallingIdentity();
         try {
             ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
                     opPackageName, 0 /* flags */);
@@ -4363,6 +4364,8 @@ public class AccountManagerService
         } catch (NameNotFoundException e) {
             // No application associated with the specified package.
             Log.w(TAG, "No application associated with package: " + opPackageName);
+        } finally {
+            Binder.restoreCallingIdentity(id);
         }
         boolean isPermitted = isPermitted(opPackageName, callingUid, permissionsToCheck);
         return getTypesForCaller(callingUid, userId, isPermitted);
