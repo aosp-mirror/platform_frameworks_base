@@ -5343,7 +5343,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        UserHandle callingUser = mInjector.binderGetCallingUserHandle();
+        final UserHandle callingUser = mInjector.binderGetCallingUserHandle();
+        final int userId = callingUser.getIdentifier();
+        enforceNotManagedProfile(userId, "clear profile owner");
         // Check if this is the profile owner who is calling
         final ActiveAdmin admin =
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5351,7 +5353,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             admin.disableCamera = false;
             admin.userRestrictions = null;
             clearUserPoliciesLocked(callingUser);
-            final int userId = callingUser.getIdentifier();
             mOwners.removeProfileOwner(userId);
             mOwners.writeProfileOwner(userId);
         }

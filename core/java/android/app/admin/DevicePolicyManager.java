@@ -3185,15 +3185,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
      * Clears the active profile owner and removes all user restrictions. The caller must
      * be from the same package as the active profile owner for this user, otherwise a
      * SecurityException will be thrown.
      *
+     * <p>This doesn't work for managed profile owners.
+     *
      * @param admin The component to remove as the profile owner.
-     * @return
      */
-    @SystemApi
     public void clearProfileOwner(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
