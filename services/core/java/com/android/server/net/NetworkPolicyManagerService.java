@@ -255,6 +255,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_RESTRICT_BACKGROUND_CHANGED = 6;
     private static final int MSG_ADVISE_PERSIST_THRESHOLD = 7;
     private static final int MSG_SCREEN_ON_CHANGED = 8;
+    private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1842,6 +1843,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             writePolicyLocked();
             // TODO: call other update methods like updateNetworkRulesLocked?
         }
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
     }
 
     @Override
@@ -1851,6 +1853,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             removeRestrictBackgroundWhitelistedUidLocked(uid);
         }
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
     }
 
     private void removeRestrictBackgroundWhitelistedUidLocked(int uid) {
@@ -2548,6 +2551,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                     }
                     mListeners.finishBroadcast();
+                    final Intent intent =
+                            new Intent(ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED);
+                    intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                    return true;
+                }
+                case MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED: {
+                    final int uid = msg.arg1;
+                    final PackageManager pm = mContext.getPackageManager();
+                    final String[] packages = pm.getPackagesForUid(uid);
+                    final int userId = UserHandle.getUserId(uid);
+                    for (String packageName : packages) {
+                        final Intent intent =
+                                new Intent(ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED);
+                        intent.setPackage(packageName);
+                        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                    }
+
                     return true;
                 }
                 case MSG_ADVISE_PERSIST_THRESHOLD: {
