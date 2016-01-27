@@ -6525,7 +6525,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             final long id = mInjector.binderClearCallingIdentity();
             try {
-                UserInfo userInfo = mUserManager.createUser(name, 0 /* flags */);
+                int userInfoFlags = 0;
+                if ((flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0) {
+                    userInfoFlags |= UserInfo.FLAG_EPHEMERAL;
+                }
+                UserInfo userInfo = mUserManager.createUser(name, userInfoFlags);
                 if (userInfo != null) {
                     user = userInfo.getUserHandle();
                 }
