@@ -82,7 +82,7 @@ private:
 };
 
 
-thread_local Choreographer* gChoreographer;
+static thread_local Choreographer* gChoreographer;
 Choreographer* Choreographer::getForThread() {
     if (gChoreographer == nullptr) {
         sp<Looper> looper = Looper::getForThread();
