@@ -20091,6 +20091,7 @@ package android.media {
     field public static final deprecated int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
     field public static final deprecated int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public static final java.lang.String FEATURE_AdaptivePlayback = "adaptive-playback";
+    field public static final java.lang.String FEATURE_IntraRefresh = "intra-refresh";
     field public static final java.lang.String FEATURE_SecurePlayback = "secure-playback";
     field public static final java.lang.String FEATURE_TunneledPlayback = "tunneled-playback";
     field public int[] colorFormats;
@@ -20479,6 +20480,7 @@ package android.media {
     field public static final java.lang.String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
     field public static final java.lang.String KEY_FRAME_RATE = "frame-rate";
     field public static final java.lang.String KEY_HEIGHT = "height";
+    field public static final java.lang.String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
     field public static final java.lang.String KEY_IS_ADTS = "is-adts";
     field public static final java.lang.String KEY_IS_AUTOSELECT = "is-autoselect";
     field public static final java.lang.String KEY_IS_DEFAULT = "is-default";
