@@ -219,6 +219,15 @@ public final class PowerManager {
     public static final int DRAW_WAKE_LOCK = 0x00000080;
 
     /**
+     * Wake lock level: Enables Sustained Performance Mode.
+     * <p>
+     * This is used by Gaming and VR applications to ensure the device provides
+     * will provide consistent performance over a large amount of time.
+     * </p>
+     */
+    public static final int SUSTAINED_PERFORMANCE_WAKE_LOCK = 0x00000100;
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -525,6 +534,7 @@ public final class PowerManager {
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
             case DOZE_WAKE_LOCK:
             case DRAW_WAKE_LOCK:
+            case SUSTAINED_PERFORMANCE_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");
