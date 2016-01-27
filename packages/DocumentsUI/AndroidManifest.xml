@@ -78,6 +78,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".OpenExternalDirectoryActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.OPEN_EXTERNAL_DIRECTORY" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name=".RecentsProvider"
             android:authorities="com.android.documentsui.recents"

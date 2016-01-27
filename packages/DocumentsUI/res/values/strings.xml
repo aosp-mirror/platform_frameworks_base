@@ -196,4 +196,13 @@
     <string name="menu_rename">Rename</string>
     <!-- Toast shown when renaming document failed with an error [CHAR LIMIT=48] -->
     <string name="rename_error">Failed to rename document</string>
+
+    <!--  DO NOT TRANSLATE - final phrase has not been decided yet (b/26750152) -->
+    <string name="open_external_dialog_request">Grant <xliff:g id="appName" example="System Settings"><b>^1</b></xliff:g>
+        access to <xliff:g id="directory" example="Pictures"><i>^2</i></xliff:g> folder on
+        <xliff:g id="storage" example="SD Card"><i>^3</i></xliff:g>?</string>
+    <!-- Text in the button asking user to allow access to a given directory. -->
+    <string name="allow">Allow</string>
+    <!-- Text in the button asking user to deny access to a given directory. -->
+    <string name="deny">Deny</string>
 </resources>
