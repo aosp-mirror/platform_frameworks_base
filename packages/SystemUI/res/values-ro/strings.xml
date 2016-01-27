@@ -56,7 +56,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Permiteți aplicației <xliff:g id="APPLICATION">%1$s</xliff:g> să acceseze accesoriul USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui dispozitiv USB?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui accesoriu USB?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aplic. instal. nu funcţ. cu acest acces. USB. Aflaţi despre acest accesoriu la <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aplic. instal. nu funcţ. cu acest acces. USB. Aflați despre acest accesoriu la <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Accesoriu USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Afişaţi"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utilizaţi în mod prestabilit pt. acest dispoz. USB"</string>
@@ -494,4 +494,10 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Căștile sunt conectate"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Setul căști-microfon este conectat"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Activați sau dezactivați afișarea pictogramelor în bara de stare."</string>
+    <!-- no translation found for data_saver (5037565123367048522) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
+    <skip />
+    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
+    <skip />
 </resources>

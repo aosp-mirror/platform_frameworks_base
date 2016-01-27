@@ -20,5 +20,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="car_lockscreen_disclaimer_title" msgid="7997539137376896441">"Vozite sigurno"</string>
-    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Uvijek budite upoznati s uslovima za vožnju i poštujte važeće zakone. Upute za kretanje mogu biti netačne, nepotpune, opasne, neprikladne, zabranjene ili takve da obuhvataju suprotstavljene administrativne oblasti. Poslovne informacije mogu biti netačne ili nepotpune. Podaci nisu u realnom vremenu, a tačnost lokacije se ne može garantirati. U vožnji nemojte rukovati mobilnim uređajm ili koristiti aplikacije koje nisu namijenjene za Android Auto."</string>
+    <string name="car_lockscreen_disclaimer_text" msgid="3061224684092952864">"Uvijek budite upoznati s uslovima za vožnju i poštujte važeće zakone. Upute za kretanje mogu biti netačne, nepotpune, opasne, neprikladne, zabranjene ili takve da obuhvataju prelaženje preko administrativnih područja. Poslovne informacije takođe mogu biti netačne ili nepotpune. Podaci nisu u realnom vremenu, a tačnost lokacije se ne može garantirati. U vožnji nemojte rukovati mobilnim uređajem ili koristiti aplikacije koje nisu namijenjene za Android Auto."</string>
 </resources>
