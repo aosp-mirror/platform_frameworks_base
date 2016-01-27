@@ -5,10 +5,7 @@
 ?>sdk/index.html"><span class="en">Download</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>sdk/installing/index.html">
-          <span class="en">Installing the SDK</span></a></li>
-
-      <li><a href="<?cs var:toroot ?>sdk/installing/adding-packages.html">
-          <span class="en">Adding SDK Packages</span></a></li>
+          <span class="en">Install Android Studio</span></a></li>
     </ul>
   </li>
 

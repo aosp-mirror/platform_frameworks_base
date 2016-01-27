@@ -1,5 +1,6 @@
 <?cs
 set:studio.version='1.5.1.0' ?><?cs
+set:studio.release.date='April 4, 2016' ?><?cs
 
 
 set:studio.linux_bundle_download='android-studio-ide-141.2456560-linux.zip' ?><?cs
@@ -54,3 +55,8 @@ set:ndk.win32_download='android-ndk-r11c-windows-x86.zip' ?><?cs
 set:ndk.win32_bytes='728899082' ?><?cs
 set:ndk.win32_checksum='ff939bde6cd374eecbd2c3b2ad218697f9a5038c'
 ?>
+<?cs
+def:size_in_mb(bytes)
+  ?><?cs set:mb = bytes / 1024 / 1024
+  ?><?cs var:mb ?><?cs
+/def ?>

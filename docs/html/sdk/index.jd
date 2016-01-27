@@ -1,60 +1,80 @@
 page.title=Download Android Studio and SDK Tools
-page.tags="sdk, android studio,tools"
+page.tags=sdk, android studio
 page.template=sdk
-page.image=images/cards/android-studio_2x.png
+section.landing=true
 header.hide=1
+nonavpage=true
+fullpage=true
+page.image=images/cards/android-studio_2x.png
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
 @jd:body
 
-<style type="text/css">
-  .offline {display:none;}
-  h2.feature {
-    padding-top:30px;
-    margin-top:0;
-    clear:both;
-  }
-  .feature-blurb {
-  margin:0px; font-size:16px; font-weight:300;
-  padding-top:40px;
-  }
-
-  .landing-button .small {
-    font-size: 12px;
-    font-weight: normal;
-    line-height: 12px;
-    display: block;
-  }
-
-  h1.studio-logo {
-    width:226px;
-    height:78px;
-    display:block;
-    padding:0;
-    white-space: nowrap;
-    text-indent: -10000px;
-    font-size:0px;
-    background: url(../images/tools/studio-logo.png);
-    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
-    background-size: 226px 78px;
-  }
-
+<style>
+.download-bundle-button {line-height:18px;}
+.download-bundle-button .small {font-size: 12px; opacity: 0.7;}
 </style>
 
+ <section class="dac-expand dac-hero dac-light">
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-1of2 col-push-1of2 dac-hero-figure">
+        <img class="dac-hero-image" src="/images/develop/hero_image_studio5_2x.png" srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x">
+      </div>
+      <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
+<h1 class="dac-hero-title">Android Studio<br>
+<span style="font-size: 65%;">The Official IDE for Android</span></h1>
+
+<p class="dac-hero-description">Android Studio provides the fastest tools for
+building apps on every type of Android device.</p>
+
+<p class="dac-hero-description">World-class code editing, debugging,
+performance tooling, a flexible build system, and an instant build/deploy
+system all allow you to focus on building unique and high quality apps.</p>
+
+<p style="margin-top:24px">
+  <a class="landing-button green download-bundle-button"
+    data-modal-toggle="studio_tos">Download Android Studio 2.0<br>
+  <span class="small"></span></a>
+</p>
+
+<p style="margin:24px 0 0">
+  <a class="dac-hero-cta" href="{@docRoot}tools/studio/index.html">
+  <span class="dac-sprite dac-auto-chevron"></span>
+  Read the docs</a>
+  <a class="dac-hero-cta" href="{@docRoot}tools/revisions/studio.html">
+  <span class="dac-sprite dac-auto-chevron"></span>
+  See the release notes</a>
+</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 
 
 
-<div style="position:relative;">
-
-
-<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
-<div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
-
-<h1 id="tos-header" style="margin-top:0">Download</h1>
-
-<p class="sdk-terms-intro">Before installing Android Studio or the standalone SDK tools,
-you must agree to the following terms and conditions.</p>
+<!-- start studio download modal -->
+<div data-modal="studio_tos" class="dac-modal" id="langform">
+  <div class="dac-modal-container">
+    <div class="dac-modal-window">
+      <header class="dac-modal-header">
+        <div class="dac-modal-header-actions">
+          <button class="dac-modal-header-close" data-modal-toggle></button>
+        </div>
+        <section class="dac-swap-section dac-active dac-down">
+          <h2 class="norule dac-modal-header-title" id="tos-header">Download Android Studio</h2>
+        </section>
+      </header>
+      <section class="dac-swap-section dac-active dac-left">
+          <section class="dac-modal-content">
+            <fieldset class="dac-form-fieldset">
+              <div class="cols">
+                <div class="col-2of2 tos-leftCol">
+                  <p class="sdk-terms-intro">Before downloading,
+                  you must agree to the following terms
+                  and conditions.</p>
+                </div>
 
 <div class="sdk-terms" onfocus="this.blur()">
 <h2 class="norule">Terms and Conditions</h2>
@@ -188,9 +208,7 @@ This is the Android Software Development Kit License Agreement
 14.7 The License Agreement, and your relationship with Google under the License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from the License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
 
 <em>November 20, 2015</em>
-</div>
-
-
+</div><!-- close sdk-terms -->
 
 
 
@@ -198,10 +216,7 @@ This is the Android Software Development Kit License Agreement
   <p>You're just a few steps away from building apps for Android!</p>
   <p>In a moment, you'll be redirected to
   <a id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>.</p>
-
 </div><!-- end next-steps -->
-
-
 
 <div id="sdk-terms-form">
 <p>
@@ -209,232 +224,306 @@ This is the Android Software Development Kit License Agreement
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
 <p><a href="" class="dac-button dac-raised dac-primary disabled ndk" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+</div><!-- end sdk-terms-form -->
+
+
+</div><!-- end cols -->
+
+            </fieldset>
+          </section>
+      </section>
+    </div><!-- end dac-modal-window -->
+  </div><!-- end dac-modal-container -->
+</div><!-- end #langform, .dac-modal -->
+<!-- end studio_tos modal -->
+
+<div id="useOldTemplates" class="actions-bar dac-expand dac-invert">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button="" href="#features">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <div class="actions">
+      <div><a href="#features">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Features
+      </a></div>
+      <div><a href="#latest">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Latest
+      </a></div>
+      <div><a href="#resources">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Resources
+      </a></div>
+      <div><a href="#videos">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Videos
+      </a></div>
+      <div><a href="#downloads">
+        <span class="dac-sprite dac-auto-chevron-large"></span>
+        Download Options
+      </a></div>
+    </div><!-- end .actions -->
+  </div><!-- end .wrap -->
 </div>
 
 
-</div><!-- end TOS -->
+<div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
+  <div class="wrap dac-offset-parent">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#features">
+      <i class="dac-sprite dac-arrow-down-gray"></i>
+    </a>
+    <ul class="dac-actions">
+      <li class="dac-action">
+        <a class="dac-action-link" href="#features">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Features
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="#latest">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Latest
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="#resources">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Resources
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="#videos">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Videos
+        </a>
+      </li>
+      <li class="dac-action">
+        <a class="dac-action-link" href="#downloads">
+          <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
+          Download Options
+        </a>
+      </li>
+    </ul>
+  </div><!-- end .wrap -->
+</div><!-- end new templates -->
 
 
 
+<section id="features" class="dac-section dac-small">
+<div class="dac-toggle">
 
-
-
-<div id="landing">
-
-<div class="col-13">&nbsp;</div><!-- provides top margin for content -->
-
-<img src="{@docRoot}images/tools/studio-hero.png"
-srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
-width="760" alt="" />
-
-<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
-
-<h1 class="studio-logo" style="margin:0 0 35px !important;padding:0 !important">Android Studio</h1>
-
-<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
-width: 400px;text-align: center;">The official Android IDE</p>
-
-<ul style="font-size:12px;line-height:19px;">
-<li>Android Studio IDE</li>
-<li>Android SDK tools</li>
-<li>Android 6.0 (Marshmallow) Platform</li>
-<li>Android 6.0 emulator system image with Google APIs</li>
-</ul>
-
-<a class="online landing-button green download-bundle-button"
-href="#Other" >Download Android Studio<br/><span class='small'></span></a>
-
-<!-- this appears when viewing the offline docs -->
-<p class="offline">
-To get Android Studio or stand-alone SDK tools, visit <a
-href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
-</p>
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 col-push-1of2 dac-hero-figure">
+      <img src="/images/tools/studio/studio-feature-instant-run_2x.png">
+    </div>
+    <div class="col-1of2 col-pull-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Instant Run</h1>
+<p class="dac-hero-description">Push code and resource
+changes to your app running on a device or emulator and see the
+changes instantly come to life.</p>
+<p class="dac-hero-description">Instant Run dramatically speeds up your edit,
+build, and run cycles, keeping you "in the flow."</p>
+      <a class="dac-hero-cta"
+        href="/tools/building/building-studio.html#instant-run">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Learn more</a>
+    </div>
+  </div>
 </div>
 
-<ul>
-  <li><a href="#Requirements">System Requirements</a></li>
-  <li><a href="#Other">Other Download Options</a></li>
-  <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a></li>
-  <li><a href="https://www.google.com/intl/en/usability/index.html?l=9&reserved=0&pType=devel&productTag=0&campaignType=ghc&campaignDate=0&labelTag=0&referral_code=ASDWNLD">Participate in usability research</a></li>
-  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform"
-target="_blank">Take a Survey</a></li>
-</ul>
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 dac-hero-figure">
+      <img src="/images/tools/codeeditor-low.gif" >
+    </div>
+    <div class="col-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Intelligent code editor</h1>
+<p class="dac-hero-description">Write better code, work faster, and be more productive with an intelligent code editor that helps you each step of the way.</p>
+<p class="dac-hero-description">Android Studio is built on IntelliJ and is capable of advanced code completion, refactoring, and code analysis.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 col-push-1of2 dac-hero-figure">
+      <img src="/images/tools/studio/studio-feature-emulator_2x.jpg">
+    </div>
+    <div class="col-1of2 col-pull-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Fast and feature-rich emulator</h1>
+<p class="dac-hero-description">Install and run your apps faster than with a physical device and test your app on virtually any Android device configuration: Android phones, Android tablets, Android Wear, and Android TV devices.</p>
+<p class="dac-hero-description">The new Android Emulator 2.0 is faster than ever and allows you to dynamically resize the emulator and access a suite of sensor controls.</p>
+      <a class="dac-hero-cta"
+        href="/tools/devices/emulator.html">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Learn more</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 dac-hero-figure">
+      <img src="/images/tools/studio/studio-feature-gradle_2x.png">
+    </div>
+    <div class="col-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Robust and flexible build system</h1>
+<p class="dac-hero-description">Easily configure your project to include code libraries and generate multiple build variants from a single project.</p>
+<p class="dac-hero-description">With Gradle, Android Studio offers high-performance build automation, robust dependency management, and customizable build configurations.</p>
+      <a class="dac-hero-cta"
+        href="/tools/building/plugin-for-gradle.html">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Learn more</a>
+    </div>
+  </div>
+</div>
+
+<div class="dac-toggle-content clearfix">
+
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 col-push-1of2 dac-hero-figure">
+      <img src="/images/tools/studio/studio-feature-devices_2x.png">
+    </div>
+    <div class="col-1of2 col-pull-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Develop for all&nbsp;<wbr>Android&nbsp;devices</h1>
+<p class="dac-hero-description">Target multiple form factors with a single
+project to easily share code among your different versions of your app.</p>
+<p class="dac-hero-description">Android Studio provides a unified environment
+to develop apps for Android phones, tablets, Android Wear, Android TV, and
+Android Auto.</p>
+
+      <a class="dac-hero-cta"
+        href="/tools/building/configuring-gradle.html#workBuildVariants">
+        <span class="dac-sprite dac-auto-chevron"></span>
+        Learn more</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap feature">
+  <div class="cols dac-hero-content">
+    <div class="col-1of2 dac-hero-figure">
+      <img src="/images/tools/studio/studio-feature-github_2x.png">
+    </div>
+    <div class="col-1of2">
+      <div class="dac-hero-tag"></div>
+      <h1 class="dac-hero-title">Code templates and GitHub integration</h1>
+      <p class="dac-hero-description">Start projects with code templates for patterns such as navigation drawer and view pagers, or import Google code samples from GitHub.</p>
+      <p class="dac-hero-description">Android Studio's project wizards make it easier than ever to add code in a new project.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end dac-toggle-content -->
+
+<div class="dac-section-links dac-text-center feature-more">
+  <div class="dac-section-link" data-toggle="section">
+    <span class="dac-toggle-expand">More
+      <i class="dac-sprite dac-auto-unfold-more"></i>
+    </span>
+    <span class="dac-toggle-collapse">Less
+      <i class="dac-sprite dac-auto-unfold-less"></i>
+    </span>
+  </div>
+</div>
+
+</div>
+</section><!-- end features -->
 
 
 
+<section id="latest" class="dac-section dac-light dac-small"><div class="wrap">
+  <h1 class="dac-section-title">Latest News</h1>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:tools/landing/latest"
+       data-cardSizes="6x6"
+       data-items-per-page="3"
+       data-initial-results="3"
+       data-maxResults="3"></div>
+  </div>
+</section>
+
+<section id="resources" class="dac-section dac-small"><div class="wrap">
+  <h1 class="dac-section-title">Resources</h1>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:tools/landing/resources"
+       data-cardSizes="6x6"
+       data-initial-results="3"
+       data-items-per-page="3"
+       data-maxResults="3"></div>
+  </div>
+</section>
+
+<section class="dac-section dac-light dac-small dac-gray" id="videos"><div class="wrap">
+  <h1 class="dac-section-title">Videos</h1>
+  <div class="resource-widget resource-flow-layout col-16"
+       data-query="collection:develop/landing/tools"
+       data-sortOrder="-timestamp"
+       data-cardSizes="6x6"
+       data-maxResults="3"></div>
+  </div>
+</section>
+
+
+
+<section id="Requirements" class="dac-section dac-light dac-small">
+<div class="wrap">
+
+<h2 class="norule">System Requirements</h2>
 
 <div class="cols">
-<h2 class="feature norule col-13">Intelligent code editor</h2>
 
-<div class="col-9">
-  <img src="{@docRoot}images/tools/studio-hero-code.png"
-srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
-</div><!-- end col-9 (left column) -->
-
-<div class="col-4 feature-blurb">
-  <p>At the core of Android Studio is an intelligent code editor capable of advanced
-  code completion, refactoring, and code analysis.</p>
-  <p>The powerful code editor helps you be a more productive Android app developer.</p>
-</div>
-
-
-
-
-
-<h2 class="feature norule col-13">Code templates and GitHub integration</h2>
-
-<div class="col-9">
-  <img src="{@docRoot}images/tools/studio-hero-import.png"
-srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
-</div><!-- end col-9 (left column) -->
-
-<div class="col-4 feature-blurb">
-  <p>New project wizards make it easier than ever to start a new project.</p>
-
-  <p>Start projects using template code for patterns such as navigation drawer and view pagers,
-  and even import Google code samples from GitHub.</p>
-</div>
-
-
-
-
-<h2 class="feature norule col-13">Multi-screen app development</h2>
-
-<div class="col-9">
-  <img src="{@docRoot}images/tools/studio-hero-screens.png"
-srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
-</div><!-- end col-9 (left column) -->
-
-<div class="col-4 feature-blurb">
-  <p>Build apps for Android phones, tablets, Android Wear,
-  Android TV, Android Auto and Google Glass.</p>
-  <p>With the new Android Project View and module support in Android Studio, it's easier
-  to manage app projects and resources.
-</div>
-
-
-
-
-<h2 class="feature norule col-13">Virtual devices for all shapes and sizes</h2>
-
-<div class="col-9">
-  <img src="{@docRoot}images/tools/studio-hero-avds.png"
-srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
-</div><!-- end col-9 (left column) -->
-
-<div class="col-4 feature-blurb">
-  <p>Android Studio comes pre-configured with an optimized emulator image.</p>
-  <p>The updated and streamlined Virtual Device Manager provides
-  pre-defined device profiles for common Android devices.</p>
-</div>
-
-
-
-
-<h2 class="feature norule col-13">
-Android builds evolved, with Gradle</h2>
-
-<div class="col-9">
-  <img src="{@docRoot}images/tools/studio-hero-gradle.png"
-srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
-</div><!-- end col-9 (left column) -->
-
-<div class="col-4 feature-blurb">
-  <p>Create multiple APKs for your Android app with different features using the same project.</p>
-  <p>Manage app dependencies with Maven.</p>
-  <p>Build APKs from Android Studio or the command line.</p>
-</div>
-
-</div>
-
-<h2 class="feature norule">More about Android Studio</h2>
-<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
-
-<a class="online landing-button green download-bundle-button"
-style="margin:0 0 40px 60px;float:right"
-href="" >Download Android Studio</a>
-
-  <ul>
-  <li>Built on IntelliJ IDEA Community Edition, the popular Java IDE by JetBrains.</li>
-  <li>Flexible Gradle-based build system.</li>
-  <li>Build variants and multiple APK generation.</li>
-  <li>Expanded template support for Google Services and various device types.</li>
-  <li>Rich layout editor with support for theme editing.</li>
-  <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
-  <li>ProGuard and app-signing capabilities.</li>
-  <li>Built-in support for Google Cloud Platform, making it easy to integrate Google Cloud
-  Messaging and App Engine.</li>
-  </ul>
-
-<p style="margin:0">
-For more details about features available in Android Studio,
-read the overview at <a href="{@docRoot}tools/studio/index.html">Android Studio</a>.</p>
-</div>
-
-
-<p>If you have been using Eclipse with ADT, be aware that Android Studio is now the official IDE
-for Android, so you should migrate to Android Studio to receive all the
-latest IDE updates. For help moving projects,
-see <a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android
-Studio</a>.</p>
-
-
-
-
-
-
-
-<h2 id="Requirements">System Requirements</h2>
-
-<h3>Windows</h3>
-
+<div class="col-2of6">
+<h4>Windows</h4>
 <ul>
-<li>Microsoft&reg;  Windows&reg;  8/7/Vista (32- or 64-bit)</li>
-<li>2 GB RAM minimum, 4 GB RAM recommended</li>
-<li>400 MB hard disk space</li>
-<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>Microsoft&reg;  Windows&reg;  7/8/10 (32 or 64-bit)</li>
+<li>2 GB RAM minimum, 8 GB RAM recommended</li>
+<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image). 4 GB Recommended.</li>
 <li>1280 x 800  minimum screen resolution</li>
-<li>Java Development Kit (JDK) 7 </li>
-<li>Optional for accelerated emulator: Intel® processor with support for Intel® VT-x, Intel® EM64T
-(Intel® 64), and Execute Disable (XD) Bit functionality</li>
+<li>Java Development Kit (JDK) 8</li>
+<li>Optional for accelerated emulator: Intel® processor with support for Intel®
+VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality</li>
 </ul>
+</div>
 
-
-<h3>Mac OS X</h3>
-
+<div class="col-2of6">
+<h4>Mac</h4>
 <ul>
-<li>Mac&reg;  OS X&reg;  10.8.5 or higher, up to 10.9 (Mavericks)</li>
-<li>2 GB RAM minimum, 4 GB RAM recommended</li>
-<li>400 MB hard disk space</li>
-<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>Mac&reg;  OS X&reg;  10.8.5 or higher, up to 10.11.4 (El Capitan)</li>
+<li>2 GB RAM minimum, 8 GB RAM recommended</li>
+<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image). 4 GB Recommended.</li>
 <li>1280 x 800 minimum screen resolution</li>
-<li>Java Runtime Environment (JRE) 6</li>
-<li>Java Development Kit (JDK) 7</li>
+<li>Java Development Kit (JDK) 8</li>
 </ul>
+</div>
 
-<p>On Mac OS, run Android Studio with Java Runtime Environment (JRE) 6 for optimized font
-rendering. You can then configure your project to use Java Development Kit (JDK) 6 or JDK 7.</p>
-
-
-
-<h3>Linux</h3>
-
+<div class="col-2of6">
+<h4>Linux</h4>
 <ul>
-<li>GNOME or KDE desktop</li>
-<li>GNU C Library (glibc) 2.15 or later</li>
-<li>2 GB RAM minimum, 4 GB RAM recommended</li>
-<li>400 MB hard disk space</li>
-<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>GNOME or KDE desktop
+<p><i>Tested on Ubuntu®  12.04, Precise Pangolin (64-bit distribution
+capable of running 32-bit applications)</i></li>
+<li>GNU C Library (glibc) 2.11 or later</li>
+<li>2 GB RAM minimum, 8 GB RAM recommended</li>
+<li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
+Android SDK and emulator system image). 4 GB Recommended.</li>
 <li>1280 x 800 minimum screen resolution</li>
-<li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
-<li>64-bit distribution capable of running 32-bit applications</li>
+<li>Java Development Kit (JDK) 8</li>
 </ul>
-<p>Tested on Ubuntu&reg;  14.04, Trusty Tahr (64-bit distribution capable of running
-32-bit applications).</p>
+</div>
 
+</div>
+</div>
 
+</section>
 
-
-<h2 id="Other" style="clear:left">Other Download Options</h2>
-
-<!-- alternative SDK options follows -->

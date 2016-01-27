@@ -128,7 +128,6 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=3PIc-DuEU2s&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX",
       "https://www.youtube.com/watch?v=cD7NPxuuXYY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=JLLnhwtDoHw&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
       "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
@@ -1769,6 +1768,22 @@ var RESOURCE_COLLECTIONS = {
       "training/articles/assistant.html",
       "training/testing/performance.html",
       "https://developers.google.com/android/nexus/images"
+    ]
+  },
+  "tools/landing/resources": {
+    "title": "",
+    "resources": [
+    "tools/studio/index.html",
+    "tools/studio/studio-features.html",
+    "sdk/installing/studio-tips.html",
+    ]
+  },
+  "tools/landing/latest": {
+    "title": "",
+    "resources": [
+    "https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
+    "http://android-developers.blogspot.com/2016/02/android-studio-20-beta.html",
+    "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
 }

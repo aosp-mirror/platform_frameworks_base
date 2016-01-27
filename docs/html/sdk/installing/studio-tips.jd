@@ -1,7 +1,8 @@
 page.title=Android Studio Tips and Tricks
 page.image=images/tools/studio-previewall.png
-page.tags="sdk", "studio", "android studio"
-meta.tags="studio"
+page.metaDescription=Tips to help you get started with Android Studio's most common tasks and productivity enhancements.
+page.tags=studio,tips
+meta.tags="studio", "tools"
 @jd:body
 
 <div id="qv-wrapper">
