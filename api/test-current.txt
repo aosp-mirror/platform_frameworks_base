@@ -36036,6 +36036,7 @@ package android.telephony {
     field public static final java.lang.String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOLEAN = "vvm_cellular_data_required";
     field public static final java.lang.String KEY_VVM_DESTINATION_NUMBER_STRING = "vvm_destination_number_string";
     field public static final java.lang.String KEY_VVM_PORT_NUMBER_INT = "vvm_port_number_int";
+    field public static final java.lang.String KEY_VVM_PREFETCH_BOOLEAN = "vvm_prefetch";
     field public static final java.lang.String KEY_VVM_TYPE_STRING = "vvm_type_string";
     field public static final java.lang.String KEY_WORLD_PHONE_BOOL = "world_phone_bool";
   }
