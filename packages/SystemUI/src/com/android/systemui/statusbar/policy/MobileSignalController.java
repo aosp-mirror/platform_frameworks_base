@@ -206,7 +206,8 @@ public class MobileSignalController extends SignalController<
 
         // Show icon in QS when we are connected or need to show roaming.
         boolean showDataIcon = mCurrentState.dataConnected
-                || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
+                || mCurrentState.iconGroup == TelephonyIcons.ROAMING
+                || mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
         IconState statusIcon = new IconState(mCurrentState.enabled && !mCurrentState.airplaneMode,
                 getCurrentIconId(), contentDescription);
 
@@ -227,7 +228,8 @@ public class MobileSignalController extends SignalController<
                         && !mCurrentState.carrierNetworkChangeMode
                         && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault
-                || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
+                || mCurrentState.iconGroup == TelephonyIcons.ROAMING
+                || mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
         mCallbackHandler.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
@@ -385,6 +387,8 @@ public class MobileSignalController extends SignalController<
             mCurrentState.iconGroup = TelephonyIcons.CARRIER_NETWORK_CHANGE;
         } else if (isRoaming()) {
             mCurrentState.iconGroup = TelephonyIcons.ROAMING;
+        } else if (isDataDisabled()) {
+            mCurrentState.iconGroup = TelephonyIcons.DATA_DISABLED;
         }
         if (isEmergencyOnly() != mCurrentState.isEmergency) {
             mCurrentState.isEmergency = isEmergencyOnly();
@@ -397,6 +401,10 @@ public class MobileSignalController extends SignalController<
         }
 
         notifyListenersIfNecessary();
+    }
+
+    private boolean isDataDisabled() {
+        return !mPhone.getDataEnabled(mSubscriptionInfo.getSubscriptionId());
     }
 
     @VisibleForTesting
