@@ -65,13 +65,9 @@
     <string name="menu_paste_from_clipboard">Paste</string>
 
     <!-- Menu item that reveals internal storage built into the device [CHAR LIMIT=24] -->
-    <string name="menu_advanced_show" product="nosdcard">Show internal storage</string>
-    <!-- Menu item that reveals SD cards built into the device [CHAR LIMIT=24] -->
-    <string name="menu_advanced_show" product="default">Show SD card</string>
+    <string name="menu_advanced_show">Show internal storage</string>
     <!-- Menu item that hides internal storage built into the device [CHAR LIMIT=24] -->
-    <string name="menu_advanced_hide" product="nosdcard">Hide internal storage</string>
-    <!-- Menu item that hides SD cards built into the device [CHAR LIMIT=24] -->
-    <string name="menu_advanced_hide" product="default">Hide SD card</string>
+    <string name="menu_advanced_hide">Hide internal storage</string>
 
     <!-- Menu item that reveals the sizes of displayed files [CHAR LIMIT=24] -->
     <string name="menu_file_size_show">Show file size</string>
