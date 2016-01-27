@@ -20,6 +20,7 @@ import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothA2dpSink;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
@@ -76,6 +77,7 @@ public final class LocalBluetoothProfileManager {
     private A2dpProfile mA2dpProfile;
     private A2dpSinkProfile mA2dpSinkProfile;
     private HeadsetProfile mHeadsetProfile;
+    private HfpClientProfile mHfpClientProfile;
     private MapProfile mMapProfile;
     private final HidProfile mHidProfile;
     private OppProfile mOppProfile;
@@ -150,6 +152,7 @@ public final class LocalBluetoothProfileManager {
             Log.w(TAG, "Warning: A2DP profile was previously added but the UUID is now missing.");
         }
 
+        // A2DP SINK
         if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.AudioSink)) {
             if (mA2dpSinkProfile == null) {
                 if(DEBUG) Log.d(TAG, "Adding local A2DP Sink profile");
@@ -173,6 +176,22 @@ public final class LocalBluetoothProfileManager {
             }
         } else if (mHeadsetProfile != null) {
             Log.w(TAG, "Warning: HEADSET profile was previously added but the UUID is now missing.");
+        }
+
+        // Headset HF
+        if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Handsfree)) {
+            if (mHfpClientProfile == null) {
+                if(DEBUG) Log.d(TAG, "Adding local HfpClient profile");
+                mHfpClientProfile =
+                    new HfpClientProfile(mContext, mLocalAdapter, mDeviceManager, this);
+                addProfile(mHfpClientProfile, HfpClientProfile.NAME,
+                        BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED);
+            }
+        } else if (mHfpClientProfile != null) {
+            Log.w(TAG,
+                "Warning: Hfp Client profile was previously added but the UUID is now missing.");
+        } else {
+            Log.d(TAG, "Handsfree Uuid not found.");
         }
 
         // OPP
@@ -312,15 +331,24 @@ public final class LocalBluetoothProfileManager {
         return mA2dpProfile;
     }
 
-    A2dpSinkProfile getA2dpSinkProfile() {
-        if ((mA2dpSinkProfile != null)&&(mA2dpSinkProfile.isProfileReady()))
-        return mA2dpSinkProfile;
-        else
+    public A2dpSinkProfile getA2dpSinkProfile() {
+        if ((mA2dpSinkProfile != null) && (mA2dpSinkProfile.isProfileReady())) {
+            return mA2dpSinkProfile;
+        } else {
             return null;
+        }
     }
 
     public HeadsetProfile getHeadsetProfile() {
         return mHeadsetProfile;
+    }
+
+    public HfpClientProfile getHfpClientProfile() {
+        if ((mHfpClientProfile != null) && (mHfpClientProfile.isProfileReady())) {
+            return mHfpClientProfile;
+        } else {
+          return null;
+        }
     }
 
     public PbapServerProfile getPbapProfile(){
