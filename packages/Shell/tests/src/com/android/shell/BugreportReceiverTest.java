@@ -461,6 +461,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private void sendBugreportStarted(int max) throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra(EXTRA_PID, PID);
         intent.putExtra(EXTRA_NAME, NAME);
         intent.putExtra(EXTRA_MAX, max);
@@ -518,6 +519,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private void sendBugreportFinished(Integer pid, String bugreportPath, String screenshotPath) {
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         if (pid != null) {
             intent.putExtra(EXTRA_PID, pid);
         }
