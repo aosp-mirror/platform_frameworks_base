@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.phone.ActivityStarter;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -62,8 +63,8 @@ class CarNavigationBarController {
     private SimpleArrayMap<String, Integer> mFacetPackageMap
             = new SimpleArrayMap<String, Integer>();
 
-    private List<Intent> mIntents = new ArrayList<Intent>();
-    private List<Intent> mLongPressIntents = new ArrayList<Intent>();
+    private List<Intent> mIntents;
+    private List<Intent> mLongPressIntents;
 
     private List<CarNavigationButton> mNavButtons = new ArrayList<CarNavigationButton>();
 
@@ -112,16 +113,19 @@ class CarNavigationBarController {
             throw new RuntimeException("car_facet array lengths do not match");
         }
 
+        mIntents = createEmptyIntentList(icons.length());
+        mLongPressIntents = createEmptyIntentList(icons.length());
+
         for (int i = 0; i < icons.length(); i++) {
             Drawable icon = icons.getDrawable(i);
             try {
-                mIntents.add(i,
+                mIntents.set(i,
                         Intent.parseUri(intents.getString(i), Intent.URI_INTENT_SCHEME));
 
                 String longpressUri = longpressIntents.getString(i);
                 boolean hasLongpress = !longpressUri.isEmpty();
                 if (hasLongpress) {
-                    mLongPressIntents.add(i,
+                    mLongPressIntents.set(i,
                             Intent.parseUri(longpressUri, Intent.URI_INTENT_SCHEME));
                 }
 
@@ -298,5 +302,9 @@ class CarNavigationBarController {
     private void onFacetLongClicked(int index) {
         setCurrentFacet(index);
         startActivity(mLongPressIntents.get(index));
+    }
+
+    private List<Intent> createEmptyIntentList(int size) {
+        return Arrays.asList(new Intent[size]);
     }
 }
