@@ -202,11 +202,11 @@ final class UserController {
         }
     }
 
-    void finishUserBoot(UserState uss) {
+    private void finishUserBoot(UserState uss) {
         finishUserBoot(uss, null);
     }
 
-    void finishUserBoot(UserState uss, IIntentReceiver resultTo) {
+    private void finishUserBoot(UserState uss, IIntentReceiver resultTo) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -711,7 +711,7 @@ final class UserController {
                         moveUserToForegroundLocked(uss, oldUserId, userId);
                     }
                 } else {
-                    mService.mStackSupervisor.startBackgroundUserLocked(userId, uss);
+                    mService.mUserController.finishUserBoot(uss);
                 }
 
                 if (needStart) {
