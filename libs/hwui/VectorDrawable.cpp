@@ -201,7 +201,6 @@ void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float str
         needsFill = true;
     } else if (mFillColor != SK_ColorTRANSPARENT) {
         mPaint.setColor(applyAlpha(mFillColor, mFillAlpha));
-        outCanvas->drawPath(renderPath, mPaint);
         needsFill = true;
     }
 
