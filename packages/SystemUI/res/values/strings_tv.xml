@@ -18,15 +18,15 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Button to close PIP on PIP UI -->
-    <string name="pip_exit">Close PIP</string>
+    <string name="pip_exit" translatable="false">Close PIP</string>
     <!-- Button to move PIP screen to the fullscreen on PIP UI -->
-    <string name="pip_fullscreen">Full screen</string>
+    <string name="pip_fullscreen" translatable="false">Full screen</string>
     <!-- Button to play the current media on PIP UI -->
-    <string name="pip_play">Play</string>
+    <string name="pip_play" translatable="false">Play</string>
     <!-- Button to pause the current media on PIP UI -->
-    <string name="pip_pause">Pause</string>
+    <string name="pip_pause" translatable="false">Pause</string>
     <!-- Button to close PIP overlay menu on PIP UI -->
-    <string name="pip_cancel">Cancel</string>
+    <string name="pip_cancel" translatable="false">Cancel</string>
     <!-- Overlay text on PIP -->
-    <string name="pip_hold_home">Hold HOME to control PIP</string>
+    <string name="pip_hold_home" translatable="false">Hold HOME to control PIP</string>
 </resources>
