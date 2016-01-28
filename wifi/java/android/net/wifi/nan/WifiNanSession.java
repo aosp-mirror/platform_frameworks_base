@@ -103,8 +103,11 @@ public class WifiNanSession {
      * @param message The message to be transmitted.
      * @param messageLength The number of bytes from the {@code message} to be
      *            transmitted.
+     * @param messageId An arbitrary integer used by the caller to identify the
+     *            message. The same integer ID will be returned in the callbacks
+     *            indicated message send success or failure.
      */
-    public void sendMessage(int peerId, byte[] message, int messageLength) {
-        mManager.sendMessage(mSessionId, peerId, message, messageLength);
+    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
+        mManager.sendMessage(mSessionId, peerId, message, messageLength, messageId);
     }
 }

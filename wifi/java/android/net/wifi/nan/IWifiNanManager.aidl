@@ -43,7 +43,8 @@ interface IWifiNanManager
     void publish(int sessionId, in PublishData publishData, in PublishSettings publishSettings);
     void subscribe(int sessionId, in SubscribeData subscribeData,
             in SubscribeSettings subscribeSettings);
-    void sendMessage(int sessionId, int peerId, in byte[] message, int messageLength);
+    void sendMessage(int sessionId, int peerId, in byte[] message, int messageLength,
+            int messageId);
     void stopSession(int sessionId);
     void destroySession(int sessionId);
 }
