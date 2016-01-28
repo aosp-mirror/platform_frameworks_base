@@ -26,7 +26,10 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** Test {@link UserManager} functionality. */
@@ -194,6 +197,17 @@ public class UserManagerTest extends AndroidTestCase {
         assertFalse(serialNumber1 == serialNumber2);
         assertEquals(serialNumber2, mUserManager.getUserSerialNumber(user2.id));
         assertEquals(user2.id, mUserManager.getUserHandle(serialNumber2));
+    }
+
+    public void testGetSerialNumbersOfUsers() {
+        UserInfo user1 = createUser("User 1", 0);
+        UserInfo user2 = createUser("User 2", 0);
+        long[] serialNumbersOfUsers = mUserManager.getSerialNumbersOfUsers(false);
+        String errMsg = "Array " + Arrays.toString(serialNumbersOfUsers) + " should contain ";
+        assertTrue(errMsg + user1.serialNumber,
+                ArrayUtils.contains(serialNumbersOfUsers, user1.serialNumber));
+        assertTrue(errMsg + user2.serialNumber,
+                ArrayUtils.contains(serialNumbersOfUsers, user2.serialNumber));
     }
 
     public void testMaxUsers() {

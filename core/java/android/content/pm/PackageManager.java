@@ -3632,7 +3632,7 @@ public abstract class PackageManager {
      *         {@link #MATCH_ENCRYPTION_AWARE_AND_UNAWARE}, {@link #MATCH_ENCRYPTION_UNAWARE},
      *         {@link #MATCH_SYSTEM_ONLY}, {@link #MATCH_UNINSTALLED_PACKAGES}
      *         to modify the data returned.
-     * @param userId The userId of the user being queried.
+     * @param userHandle UserHandle of the user being queried.
      *
      * @return Returns a List of ResolveInfo objects containing one entry for each
      *         matching receiver, ordered from best to worst. If there are no matching
@@ -3653,8 +3653,18 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @SystemApi
+    public List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
+            @ResolveInfoFlags int flags, UserHandle userHandle) {
+        return queryBroadcastReceiversAsUser(intent, flags, userHandle.getIdentifier());
+    }
+
+    /**
+     * @hide
+     */
     public abstract List<ResolveInfo> queryBroadcastReceiversAsUser(Intent intent,
             @ResolveInfoFlags int flags, @UserIdInt int userId);
+
 
     /** {@hide} */
     @Deprecated

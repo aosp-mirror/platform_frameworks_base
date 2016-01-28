@@ -1382,7 +1382,7 @@ public class UserManager {
     /**
      * Returns information for all users on this device.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * @return the list of users that were created.
+     * @return the list of users that exist on the device.
      * @hide
      */
     public List<UserInfo> getUsers() {
@@ -1390,6 +1390,29 @@ public class UserManager {
             return mService.getUsers(false);
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get user list", re);
+            return null;
+        }
+    }
+
+    /**
+     * Returns serial numbers of all users on this device.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param excludeDying specify if the list should exclude users being removed.
+     * @return the list of serial numbers of users that exist on the device.
+     * @hide
+     */
+    @SystemApi
+    public long[] getSerialNumbersOfUsers(boolean excludeDying) {
+        try {
+            List<UserInfo> users = mService.getUsers(excludeDying);
+            long[] result = new long[users.size()];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = users.get(i).serialNumber;
+            }
+            return result;
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not get users list", re);
             return null;
         }
     }
