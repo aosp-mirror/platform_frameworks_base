@@ -608,7 +608,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     jlong capabilities = 0;
 
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
-    if (uid == AID_BLUETOOTH) {
+    if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
       capabilities |= (1LL << CAP_WAKE_ALARM);
     }
 
