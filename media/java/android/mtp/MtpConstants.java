@@ -690,4 +690,6 @@ public final class MtpConstants {
     public static final int OPERATION_SET_OBJECT_REFERENCES = 0x9811;
     /** Operation code for Skip */
     public static final int OPERATION_SKIP = 0x9820;
+    /** Operation code for GetPartialObject64 */
+    public static final int OPERATION_GET_PARTIAL_OBJECT_64 = 0x95C1;
 }

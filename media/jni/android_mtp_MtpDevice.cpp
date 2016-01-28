@@ -447,6 +447,60 @@ android_mtp_MtpDevice_get_partial_object(JNIEnv *env,
     return static_cast<jlong>(written_size);
 }
 
+static jint
+android_mtp_MtpDevice_get_partial_object_64(JNIEnv *env,
+                                            jobject thiz,
+                                            jint objectID,
+                                            jlong offset,
+                                            jlong size,
+                                            jbyteArray array) {
+    if (!array) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Array must not be null.");
+        return -1;
+    }
+
+    if (offset < 0) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalArgumentException",
+                "Offset argument must not be a negative value.");
+        return -1;
+    }
+
+    if (size < 0 || 0xffffffffL < size) {
+        jniThrowException(
+                env,
+                "java/lang/IllegalArgumentException",
+                "Size argument must be a 32-bit unsigned integer.");
+        return -1;
+    }
+
+    MtpDevice* const device = get_device_from_object(env, thiz);
+    if (!device) {
+        jniThrowException(env, "java/io/IOException", "Failed to obtain MtpDevice.");
+        return -1;
+    }
+
+    const uint32_t native_object_handle = static_cast<uint32_t>(objectID);
+    const uint64_t native_offset = static_cast<uint64_t>(offset);
+    const uint32_t native_size = static_cast<uint32_t>(size);
+
+    JavaArrayWriter writer(env, array);
+    uint32_t written_size;
+    const bool success = device->readPartialObject64(
+            native_object_handle,
+            native_offset,
+            native_size,
+            &written_size,
+            JavaArrayWriter::writeTo,
+            &writer);
+    if (!success) {
+        jniThrowException(env, "java/io/IOException", "Failed to read data.");
+        return -1;
+    }
+    return static_cast<jint>(written_size);
+}
+
 static jbyteArray
 android_mtp_MtpDevice_get_thumbnail(JNIEnv *env, jobject thiz, jint objectID)
 {
@@ -663,6 +717,8 @@ static const JNINativeMethod gMethods[] = {
                                         (void *)android_mtp_MtpDevice_get_object_info},
     {"native_get_object",       "(IJ)[B",(void *)android_mtp_MtpDevice_get_object},
     {"native_get_partial_object", "(IJJ[B)J", (void *)android_mtp_MtpDevice_get_partial_object},
+    {"native_get_partial_object_64", "(IJJ[B)I",
+                                        (void *)android_mtp_MtpDevice_get_partial_object_64},
     {"native_get_thumbnail",    "(I)[B",(void *)android_mtp_MtpDevice_get_thumbnail},
     {"native_delete_object",    "(I)Z", (void *)android_mtp_MtpDevice_delete_object},
     {"native_get_parent",       "(I)I", (void *)android_mtp_MtpDevice_get_parent},

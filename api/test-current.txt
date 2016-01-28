@@ -23135,6 +23135,7 @@ package android.mtp {
     field public static final int OPERATION_GET_OBJECT_PROP_VALUE = 38915; // 0x9803
     field public static final int OPERATION_GET_OBJECT_REFERENCES = 38928; // 0x9810
     field public static final int OPERATION_GET_PARTIAL_OBJECT = 4123; // 0x101b
+    field public static final int OPERATION_GET_PARTIAL_OBJECT_64 = 38337; // 0x95c1
     field public static final int OPERATION_GET_STORAGE_INFO = 4101; // 0x1005
     field public static final int OPERATION_GET_STORAGE_I_DS = 4100; // 0x1004
     field public static final int OPERATION_GET_THUMB = 4106; // 0x100a
@@ -23172,6 +23173,7 @@ package android.mtp {
     method public android.mtp.MtpObjectInfo getObjectInfo(int);
     method public long getParent(int);
     method public long getPartialObject(int, long, long, byte[]) throws java.io.IOException;
+    method public long getPartialObject64(int, long, long, byte[]) throws java.io.IOException;
     method public long getStorageId(int);
     method public int[] getStorageIds();
     method public android.mtp.MtpStorageInfo getStorageInfo(int);
