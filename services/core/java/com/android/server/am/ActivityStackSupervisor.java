@@ -1548,14 +1548,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     mService.mUserController.finishUserSwitch(startingUsers.get(i));
                 }
             }
-            // Complete starting up of background users
-            if (mStartingBackgroundUsers.size() > 0) {
-                startingUsers = new ArrayList<UserState>(mStartingBackgroundUsers);
-                mStartingBackgroundUsers.clear();
-                for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.mUserController.finishUserBoot(startingUsers.get(i));
-                }
-            }
         }
 
         mService.trimApplications();
@@ -2745,15 +2737,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             resumeHomeStackTask(HOME_ACTIVITY_TYPE, null, "switchUserOnOtherDisplay");
         }
         return homeInFront;
-    }
-
-    /**
-     * Add background users to send boot completed events to.
-     * @param userId The user being started in the background
-     * @param uss The state object for the user.
-     */
-    public void startBackgroundUserLocked(int userId, UserState uss) {
-        mStartingBackgroundUsers.add(uss);
     }
 
     /** Checks whether the userid is a profile of the current user. */
