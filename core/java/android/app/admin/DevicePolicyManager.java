@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -5343,6 +5344,22 @@ public class DevicePolicyManager {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return null;
         }
+    }
+
+    /**
+     * Called by the system to obtain a {@link DevicePolicyManager} whose calls act on the parent
+     * profile.
+     *
+     * @hide
+     */
+    public DevicePolicyManager getParentProfileInstance(UserInfo uInfo) {
+        mContext.checkSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        if (!uInfo.isManagedProfile()) {
+            throw new SecurityException("The user " + uInfo.id
+                    + " does not have a parent profile.");
+        }
+        return new DevicePolicyManager(mContext, true);
     }
 
     /**
