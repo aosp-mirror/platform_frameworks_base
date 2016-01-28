@@ -26,7 +26,7 @@
 >
 
 
-    <TextView
+    <Button
             android:id="@+id/aerr_restart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             style="@style/aerr_list_item"
     />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_reset"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
             style="@style/aerr_list_item"
     />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
             style="@style/aerr_list_item"
     />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_close"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             style="@style/aerr_list_item"
     />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_mute"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
