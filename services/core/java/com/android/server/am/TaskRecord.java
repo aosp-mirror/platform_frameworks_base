@@ -24,7 +24,8 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
-import static android.content.pm.ActivityInfo.FLAG_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
@@ -447,7 +448,9 @@ final class TaskRecord {
         } else {
             autoRemoveRecents = false;
         }
-        mResizeable = (info.flags & FLAG_RESIZEABLE) != 0 || mService.mForceResizableActivities;
+        mResizeable = info.resizeMode == RESIZE_MODE_RESIZEABLE
+                || info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
+                || mService.mForceResizableActivities;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();

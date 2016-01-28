@@ -16,15 +16,12 @@
 
 package android.content.pm;
 
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -55,15 +52,6 @@ import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.jar.StrictJarFile;
 import android.view.Gravity;
 
-import com.android.internal.R;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.XmlUtils;
-
-import libcore.io.IoUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,6 +74,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
+
+import libcore.io.IoUtils;
+
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -3219,23 +3226,28 @@ public class PackageParser {
                 a.info.flags |= ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
             }
 
-            if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity,
-                    owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N)) {
-                a.info.flags |= ActivityInfo.FLAG_RESIZEABLE;
+            a.info.screenOrientation = sa.getInt(
+                    R.styleable.AndroidManifestActivity_screenOrientation,
+                    SCREEN_ORIENTATION_UNSPECIFIED);
 
-                if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
-                        false)) {
-                    a.info.flags |= ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+            a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+            if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+                if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity, true)) {
+                    if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
+                            false)) {
+                        a.info.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+                    } else {
+                        a.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+                    }
                 }
+            } else if (a.info.screenOrientation == SCREEN_ORIENTATION_UNSPECIFIED
+                    && (a.info.flags & FLAG_IMMERSIVE) == 0) {
+                a.info.resizeMode = RESIZE_MODE_CROP_WINDOWS;
             }
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
-                a.info.flags |= ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+                a.info.flags |= FLAG_ALWAYS_FOCUSABLE;
             }
-
-            a.info.screenOrientation = sa.getInt(
-                    R.styleable.AndroidManifestActivity_screenOrientation,
-                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
             a.info.lockTaskLaunchMode =
                     sa.getInt(R.styleable.AndroidManifestActivity_lockTaskMode, 0);
@@ -3478,6 +3490,7 @@ public class PackageParser {
         info.parentActivityName = target.info.parentActivityName;
         info.maxRecents = target.info.maxRecents;
         info.layout = target.info.layout;
+        info.resizeMode = target.info.resizeMode;
 
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {

@@ -19,8 +19,9 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_RESIZEABLE;
-import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
@@ -354,6 +355,9 @@ final class ActivityRecord {
         }
         if (connections != null) {
             pw.print(prefix); pw.print("connections="); pw.println(connections);
+        }
+        if (info != null) {
+            pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));
         }
     }
 
@@ -754,11 +758,16 @@ final class ActivityRecord {
     }
 
     boolean isResizeable() {
-        return (info.flags & FLAG_RESIZEABLE) != 0;
+        return !isHomeActivity() && (info.resizeMode == RESIZE_MODE_RESIZEABLE
+                || info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE);
     }
 
     boolean supportsPictureInPicture() {
-        return (info.flags & FLAG_SUPPORTS_PICTURE_IN_PICTURE) != 0;
+        return !isHomeActivity() && info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+    }
+
+    boolean cropAppWindows() {
+        return !isHomeActivity() && info.resizeMode == RESIZE_MODE_CROP_WINDOWS;
     }
 
     boolean isAlwaysFocusable() {
