@@ -1225,16 +1225,22 @@ public abstract class BaseStatusBar extends SystemUI implements
             final boolean allowedByUser = 0 != Settings.Secure.getIntForUser(
                     mContext.getContentResolver(),
                     Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, userHandle);
-            final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(null /* admin */,
-                    userHandle);
-            final boolean allowedByDpm = (dpmFlags
-                    & DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
+            final boolean allowedByDpm = adminAllowsUnredactedNotifications(userHandle);
             final boolean allowed = allowedByUser && allowedByDpm;
             mUsersAllowingPrivateNotifications.append(userHandle, allowed);
             return allowed;
         }
 
         return mUsersAllowingPrivateNotifications.get(userHandle);
+    }
+
+    private boolean adminAllowsUnredactedNotifications(int userHandle) {
+        if (userHandle == UserHandle.USER_ALL) {
+            return true;
+        }
+        final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(null /* admin */,
+                    userHandle);
+        return (dpmFlags & DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
     }
 
     /**
@@ -2045,6 +2051,21 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         entry.row.onNotificationUpdated(entry);
         entry.row.resetHeight();
+    }
+
+    protected void updatePublicContentView(Entry entry,
+            StatusBarNotification sbn) {
+        final RemoteViews publicContentView = entry.cachedPublicContentView;
+        if (publicContentView != null && entry.getPublicContentView() != null) {
+            final boolean disabledByPolicy =
+                    !adminAllowsUnredactedNotifications(entry.notification.getUserId());
+            publicContentView.setTextViewText(android.R.id.title,
+                    mContext.getString(disabledByPolicy
+                            ? com.android.internal.R.string.notification_hidden_by_policy_text
+                            : com.android.internal.R.string.notification_hidden_text));
+            publicContentView.reapply(sbn.getPackageContext(mContext),
+                    entry.getPublicContentView(), mOnClickHandler);
+        }
     }
 
     protected void notifyHeadsUpScreenOff() {
