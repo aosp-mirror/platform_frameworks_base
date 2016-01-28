@@ -181,6 +181,8 @@
     <string name="copy_failure_alert_content">These files weren\'t copied: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the moving failure alert dialog. [CHAR LIMIT=48] -->
     <string name="move_failure_alert_content">These files weren\'t moved: <xliff:g id="list">%1$s</xliff:g></string>
+    <!-- Contents of the copying warning dialog due to converted files. [CHAR LIMIT=64] -->
+    <string name="copy_converted_warning_content">These files were converted to another format: <xliff:g id="list" example="Document.pdf, Photo.jpg, Song.ogg">%1$s</xliff:g></string>
     <!-- Toast shown when a user copies files to clipboard. -->
     <plurals name="clipboard_files_clipped">
         <item quantity="one">Copied <xliff:g id="count" example="1">%1$d</xliff:g> file to clipboard.</item>
@@ -192,6 +194,9 @@
     <string name="menu_rename">Rename</string>
     <!-- Toast shown when renaming document failed with an error [CHAR LIMIT=48] -->
     <string name="rename_error">Failed to rename document</string>
+    <!-- First line for notifications saying that some files were converted to a different format
+         during a copy. [CHAR LIMIT=48] -->
+    <string name="notification_copy_files_converted_title">Some files were converted</string>
 
     <!--  DO NOT TRANSLATE - final phrase has not been decided yet (b/26750152) -->
     <string name="open_external_dialog_request">Grant <xliff:g id="appName" example="System Settings"><b>^1</b></xliff:g>

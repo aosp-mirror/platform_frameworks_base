@@ -55,6 +55,7 @@ public class FileOperationService extends Service implements Job.Listener {
     private static final int POOL_SIZE = 2;  // "pool size", not *max* "pool size".
     private static final int NOTIFICATION_ID_PROGRESS = 0;
     private static final int NOTIFICATION_ID_FAILURE = 1;
+    private static final int NOTIFICATION_ID_WARNING = 2;
 
     public static final String TAG = "FileOperationService";
 
@@ -63,7 +64,7 @@ public class FileOperationService extends Service implements Job.Listener {
     public static final String EXTRA_OPERATION = "com.android.documentsui.OPERATION";
     public static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
-    public static final String EXTRA_FAILURE = "com.android.documentsui.FAILURE";
+    public static final String EXTRA_DIALOG_TYPE = "com.android.documentsui.DIALOG_TYPE";
 
     // This extra is used only for moving and deleting. Currently it's not the case,
     // but in the future those files may be from multiple different parents. In
@@ -306,6 +307,18 @@ public class FileOperationService extends Service implements Job.Listener {
         // Dismiss the ongoing copy notification when the copy is done.
         mNotificationManager.cancel(job.id, NOTIFICATION_ID_PROGRESS);
 
+        if (job.hasFailures()) {
+            Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
+            mNotificationManager.notify(
+                job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
+        }
+
+        if (job.hasWarnings()) {
+            if (DEBUG) Log.d(TAG, "Job finished with warnings.");
+            mNotificationManager.notify(
+                    job.id, NOTIFICATION_ID_WARNING, job.getWarningNotification());
+        }
+
         synchronized (mRunning) {
             deleteJob(job);
         }
@@ -316,15 +329,6 @@ public class FileOperationService extends Service implements Job.Listener {
         if (DEBUG) Log.d(TAG, "onProgress: " + job.id);
         mNotificationManager.notify(
                 job.id, NOTIFICATION_ID_PROGRESS, job.getProgressNotification());
-    }
-
-    @Override
-    public void onFailed(Job job) {
-        if (DEBUG) Log.d(TAG, "onFailed: " + job.id);
-        checkArgument(job.failed());
-        Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
-        mNotificationManager.notify(job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
-        onFinished(job);  // Failed jobs don't call finished, so we do.
     }
 
     private static final class JobRecord {

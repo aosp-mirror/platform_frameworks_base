@@ -18,11 +18,10 @@ package com.android.documentsui.services;
 
 import static com.android.documentsui.DocumentsApplication.acquireUnstableProviderOrThrow;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
-import static com.android.documentsui.services.FileOperationService.EXTRA_FAILURE;
+import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG_TYPE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
-import static com.android.documentsui.services.FileOperationService.FAILURE_COPY;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -42,6 +41,7 @@ import android.provider.DocumentsContract;
 import android.util.Log;
 
 import com.android.documentsui.FilesActivity;
+import com.android.documentsui.OperationDialogFragment;
 import com.android.documentsui.R;
 import com.android.documentsui.Shared;
 import com.android.documentsui.model.DocumentInfo;
@@ -57,8 +57,7 @@ import java.util.Map;
  * A mashup of work item and ui progress update factory. Used by {@link FileOperationService}
  * to do work and show progress relating to this work.
  */
-abstract class Job implements Runnable {
-
+abstract public class Job implements Runnable {
     private static final String TAG = "Job";
     final Context service;
     final Context appContext;
@@ -114,13 +113,9 @@ abstract class Job implements Runnable {
             // to resolve business in an orderly fashion. That'll
             // ensure the service is shut down and notifications
             // shown/closed.
-            listener.onFailed(this);
+            Log.e(TAG, "Operation failed due to an exception.", e);
         } finally {
-            if (failed()) {
-                listener.onFailed(this);
-            } else {
-                listener.onFinished(this);
-            }
+            listener.onFinished(this);
         }
     }
 
@@ -130,6 +125,8 @@ abstract class Job implements Runnable {
     // TODO: Progress notification for deletes.
     // abstract Notification getProgressNotification(long bytesCopied);
     abstract Notification getFailureNotification();
+
+    abstract Notification getWarningNotification();
 
     ContentProviderClient getClient(DocumentInfo doc) throws RemoteException {
         ContentProviderClient client = mClients.get(doc.authority);
@@ -167,8 +164,12 @@ abstract class Job implements Runnable {
         failedFiles.add(file);
     }
 
-    final boolean failed() {
+    final boolean hasFailures() {
         return !failedFiles.isEmpty();
+    }
+
+    boolean hasWarnings() {
+        return false;
     }
 
     final boolean deleteDocument(DocumentInfo doc) {
@@ -190,7 +191,7 @@ abstract class Job implements Runnable {
 
     Notification getFailureNotification(@PluralsRes int titleId, @DrawableRes int icon) {
         final Intent navigateIntent = buildNavigateIntent();
-        navigateIntent.putExtra(EXTRA_FAILURE, FAILURE_COPY);
+        navigateIntent.putExtra(EXTRA_DIALOG_TYPE, OperationDialogFragment.DIALOG_TYPE_FAILURE);
         navigateIntent.putExtra(EXTRA_OPERATION, operationType);
 
         navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, failedFiles);
@@ -291,7 +292,6 @@ abstract class Job implements Runnable {
      */
     interface Listener {
         void onStart(Job job);
-        void onFailed(Job job);
         void onFinished(Job job);
         void onProgress(CopyJob job);
     }

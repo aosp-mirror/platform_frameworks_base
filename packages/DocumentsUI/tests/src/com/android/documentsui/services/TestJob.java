@@ -63,6 +63,11 @@ public class TestJob extends Job {
     }
 
     @Override
+    Notification getWarningNotification() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     Builder createProgressBuilder() {
         // the "copy" stuff was just convenient and available :)
         return super.createProgressBuilder(

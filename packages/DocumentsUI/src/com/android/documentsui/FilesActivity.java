@@ -20,6 +20,8 @@ import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkState;
+import static com.android.documentsui.OperationDialogFragment.DialogType;
+import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_UNKNOWN;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -121,20 +123,20 @@ public class FilesActivity extends BaseActivity {
                     ProviderExecutor.forAuthority(homeUri.getAuthority()));
         }
 
-        final int failure = intent.getIntExtra(FileOperationService.EXTRA_FAILURE, 0);
-        final int opType = intent.getIntExtra(
-                FileOperationService.EXTRA_OPERATION,
-                FileOperationService.OPERATION_COPY);
-
+        final @DialogType int dialogType = intent.getIntExtra(
+                FileOperationService.EXTRA_DIALOG_TYPE, DIALOG_TYPE_UNKNOWN);
         // DialogFragment takes care of restoring the dialog on configuration change.
         // Only show it manually for the first time (icicle is null).
-        if (icicle == null && failure != 0) {
-            final ArrayList<DocumentInfo> failedSrcList =
+        if (icicle == null && dialogType != DIALOG_TYPE_UNKNOWN) {
+            final int opType = intent.getIntExtra(
+                    FileOperationService.EXTRA_OPERATION,
+                    FileOperationService.OPERATION_COPY);
+            final ArrayList<DocumentInfo> srcList =
                     intent.getParcelableArrayListExtra(FileOperationService.EXTRA_SRC_LIST);
-            FailureDialogFragment.show(
+            OperationDialogFragment.show(
                     getFragmentManager(),
-                    failure,
-                    failedSrcList,
+                    dialogType,
+                    srcList,
                     mState.stack,
                     opType);
         }

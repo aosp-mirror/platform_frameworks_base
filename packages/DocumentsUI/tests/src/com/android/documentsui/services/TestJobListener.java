@@ -33,17 +33,11 @@ public class TestJobListener implements Job.Listener {
     private final CountDownLatch latch = new CountDownLatch(1);
     private final List<Job> progress = new ArrayList<>();
     @Nullable private Job started;
-    @Nullable private Job failed;
     @Nullable private Job finished;
 
     @Override
     public void onStart(Job job) {
         started = job;
-    }
-
-    @Override
-    public void onFailed(Job job) {
-        failed = job;
     }
 
     @Override
@@ -70,28 +64,28 @@ public class TestJobListener implements Job.Listener {
     }
 
     public void assertFailed() {
-        if (failed == null) {
+        if (finished == null || !finished.hasFailures()) {
             fail("Job didn't fail. onFailed never called.");
         }
     }
 
     public void assertFilesFailed(ArrayList<String> names) {
-        if (failed == null) {
+        if (finished == null || !finished.hasFailures()) {
             fail("Can't test failed documetns. Job didn't fail.");
         }
 
-        assertEquals(failed.failedFiles.size(), names.size());
+        assertEquals(finished.failedFiles.size(), names.size());
         for (String name : names) {
             assertFileFailed(name);
         }
     }
 
     public void assertFileFailed(String name) {
-        if (failed == null) {
+        if (finished == null || !finished.hasFailures()) {
             fail("Can't test failed documetns. Job didn't fail.");
         }
 
-        for (DocumentInfo failed : failed.failedFiles) {
+        for (DocumentInfo failed : finished.failedFiles) {
             if (name.equals(failed.displayName)) {
                 return;
             }
