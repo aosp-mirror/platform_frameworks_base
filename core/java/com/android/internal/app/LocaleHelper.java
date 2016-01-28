@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.icu.util.ULocale;
+import android.icu.text.ListFormatter;
 import android.util.LocaleList;
 
 import java.text.Collator;
@@ -145,20 +146,16 @@ public class LocaleHelper {
      * @return the locale aware list of locale names
      */
     public static String getDisplayLocaleList(LocaleList locales, Locale displayLocale) {
-        final StringBuilder result = new StringBuilder();
-
         final Locale dispLocale = displayLocale == null ? Locale.getDefault() : displayLocale;
+
         int localeCount = locales.size();
+        final String[] localeNames = new String[localeCount];
         for (int i = 0; i < localeCount; i++) {
-            Locale locale = locales.get(i);
-            result.append(LocaleHelper.getDisplayName(locale, dispLocale, false));
-            // TODO: language aware list formatter. ICU has one.
-            if (i < localeCount - 1) {
-                result.append(", ");
-            }
+            localeNames[i] = LocaleHelper.getDisplayName(locales.get(i), dispLocale, false);
         }
 
-        return result.toString();
+        ListFormatter lfn = ListFormatter.getInstance(dispLocale);
+        return lfn.format(localeNames);
     }
 
     /**
