@@ -559,6 +559,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                     expected.getMessage().contains("already has a device owner"));
         }
 
+        // DO admin can't be deactivated.
+        dpm.removeActiveAdmin(admin1);
+        assertTrue(dpm.isAdminActive(admin1));
+
         // TODO Test getDeviceOwnerName() too.  To do so, we need to change
         // DPMS.getApplicationLabel() because Context.createPackageContextAsUser() is not mockable.
     }
@@ -763,6 +767,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
 
+        dpm.addUserRestriction(admin1, UserManager.DISALLOW_ADD_USER);
+
+        assertTrue(dpm.isAdminActive(admin1));
+        assertFalse(dpm.isRemovingAdmin(admin1, UserHandle.USER_SYSTEM));
+
         // Set up other mocks.
         when(mContext.userManager.getUserRestrictions()).thenReturn(new Bundle());
 
@@ -770,10 +779,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(mContext.packageManager).getPackageUidAsUser(
                 eq(admin1.getPackageName()),
                 anyInt());
+        reset(mContext.userManagerInternal);
         dpm.clearDeviceOwnerApp(admin1.getPackageName());
 
         // Now DO shouldn't be set.
         assertNull(dpm.getDeviceOwnerComponentOnAnyUser());
+
+        verify(mContext.userManagerInternal).setDevicePolicyUserRestrictions(
+                eq(UserHandle.USER_SYSTEM),
+                MockUtils.checkUserRestrictions(),
+                MockUtils.checkUserRestrictions()
+        );
+
+        assertTrue(dpm.isAdminActive(admin1));
+        assertTrue(dpm.isRemovingAdmin(admin1, UserHandle.USER_SYSTEM));
 
         // TODO Check other calls.
     }
@@ -823,6 +842,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetProfileOwner() throws Exception {
         setAsProfileOwner(admin1);
 
+        // PO admin can't be deactivated.
+        dpm.removeActiveAdmin(admin1);
+        assertTrue(dpm.isAdminActive(admin1));
+
         // Try setting DO on the same user, which should fail.
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID);
         dpm.setActiveAdmin(admin2, /* refreshing= */ true, DpmMockContext.CALLER_USER_HANDLE);
@@ -833,6 +856,22 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertTrue("Message was: " + expected.getMessage(),
                     expected.getMessage().contains("already has a profile owner"));
         }
+    }
+
+    public void testClearProfileOwner() throws Exception {
+        setAsProfileOwner(admin1);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        assertTrue(dpm.isProfileOwnerApp(admin1.getPackageName()));
+        assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+
+        // Clear
+        dpm.clearProfileOwner(admin1);
+
+        // Check
+        assertFalse(dpm.isProfileOwnerApp(admin1.getPackageName()));
+        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
     }
 
     public void testSetProfileOwner_failures() throws Exception {
