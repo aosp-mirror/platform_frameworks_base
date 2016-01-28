@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * This class encapsulates information about an object on an MTP device.
  * This corresponds to the ObjectInfo Dataset described in
@@ -96,7 +98,17 @@ public final class MtpObjectInfo {
      * @return the object size
      */
     public final int getCompressedSize() {
+        Preconditions.checkState(mCompressedSize >= 0);
         return mCompressedSize;
+    }
+
+    /**
+     * Returns the size of the MTP object
+     *
+     * @return the object size
+     */
+    public final long getCompressedSizeLong() {
+        return uint32ToLong(mCompressedSize);
     }
 
     /**
@@ -116,7 +128,18 @@ public final class MtpObjectInfo {
      * @return the thumbnail size
      */
     public final int getThumbCompressedSize() {
+        Preconditions.checkState(mThumbCompressedSize >= 0);
         return mThumbCompressedSize;
+    }
+
+    /**
+     * Returns the size of the MTP object's thumbnail
+     * Will be zero for objects with no thumbnail
+     *
+     * @return the thumbnail size
+     */
+    public final long getThumbCompressedSizeLong() {
+        return uint32ToLong(mThumbCompressedSize);
     }
 
     /**
@@ -126,7 +149,18 @@ public final class MtpObjectInfo {
      * @return the thumbnail width
      */
     public final int getThumbPixWidth() {
+        Preconditions.checkState(mThumbPixWidth >= 0);
         return mThumbPixWidth;
+    }
+
+    /**
+     * Returns the width of the MTP object's thumbnail in pixels
+     * Will be zero for objects with no thumbnail
+     *
+     * @return the thumbnail width
+     */
+    public final long getThumbPixWidthLong() {
+        return uint32ToLong(mThumbPixWidth);
     }
 
     /**
@@ -136,7 +170,18 @@ public final class MtpObjectInfo {
      * @return the thumbnail height
      */
     public final int getThumbPixHeight() {
+        Preconditions.checkState(mThumbPixHeight >= 0);
         return mThumbPixHeight;
+    }
+
+    /**
+     * Returns the height of the MTP object's thumbnail in pixels
+     * Will be zero for objects with no thumbnail
+     *
+     * @return the thumbnail height
+     */
+    public final long getThumbPixHeightLong() {
+        return uint32ToLong(mThumbPixHeight);
     }
 
     /**
@@ -146,7 +191,18 @@ public final class MtpObjectInfo {
      * @return the image width
      */
     public final int getImagePixWidth() {
+        Preconditions.checkState(mImagePixWidth >= 0);
         return mImagePixWidth;
+    }
+
+    /**
+     * Returns the width of the MTP object in pixels
+     * Will be zero for non-image objects
+     *
+     * @return the image width
+     */
+    public final long getImagePixWidthLong() {
+        return uint32ToLong(mImagePixWidth);
     }
 
     /**
@@ -156,7 +212,18 @@ public final class MtpObjectInfo {
      * @return the image height
      */
     public final int getImagePixHeight() {
+        Preconditions.checkState(mImagePixHeight >= 0);
         return mImagePixHeight;
+    }
+
+    /**
+     * Returns the height of the MTP object in pixels
+     * Will be zero for non-image objects
+     *
+     * @return the image height
+     */
+    public final long getImagePixHeightLong() {
+        return uint32ToLong(mImagePixHeight);
     }
 
     /**
@@ -166,7 +233,18 @@ public final class MtpObjectInfo {
      * @return the image depth
      */
     public final int getImagePixDepth() {
+        Preconditions.checkState(mImagePixDepth >= 0);
         return mImagePixDepth;
+    }
+
+    /**
+     * Returns the depth of the MTP object in bits per pixel
+     * Will be zero for non-image objects
+     *
+     * @return the image depth
+     */
+    public final long getImagePixDepthLong() {
+        return uint32ToLong(mImagePixDepth);
     }
 
     /**
@@ -203,7 +281,7 @@ public final class MtpObjectInfo {
         return mAssociationDesc;
     }
 
-   /**
+    /**
      * Returns the sequence number for the MTP object
      * This field is typically not used for MTP devices,
      * but is sometimes used to define a sequence of photos
@@ -212,7 +290,20 @@ public final class MtpObjectInfo {
      * @return the object's sequence number
      */
     public final int getSequenceNumber() {
+        Preconditions.checkState(mSequenceNumber >= 0);
         return mSequenceNumber;
+    }
+
+    /**
+     * Returns the sequence number for the MTP object
+     * This field is typically not used for MTP devices,
+     * but is sometimes used to define a sequence of photos
+     * on PTP cameras.
+     *
+     * @return the object's sequence number
+     */
+    public final long getSequenceNumberLong() {
+        return uint32ToLong(mSequenceNumber);
     }
 
    /**
@@ -309,8 +400,8 @@ public final class MtpObjectInfo {
             return this;
         }
 
-        public Builder setCompressedSize(int value) {
-            mObjectInfo.mCompressedSize = value;
+        public Builder setCompressedSize(long value) {
+            mObjectInfo.mCompressedSize = longToUint32(value, "value");
             return this;
         }
 
@@ -329,18 +420,18 @@ public final class MtpObjectInfo {
             return this;
         }
 
-        public Builder setImagePixDepth(int value) {
-            mObjectInfo.mImagePixDepth = value;
+        public Builder setImagePixDepth(long value) {
+            mObjectInfo.mImagePixDepth = longToUint32(value, "value");
             return this;
         }
 
-        public Builder setImagePixHeight(int value) {
-            mObjectInfo.mImagePixHeight = value;
+        public Builder setImagePixHeight(long value) {
+            mObjectInfo.mImagePixHeight = longToUint32(value, "value");
             return this;
         }
 
-        public Builder setImagePixWidth(int value) {
-            mObjectInfo.mImagePixWidth = value;
+        public Builder setImagePixWidth(long value) {
+            mObjectInfo.mImagePixWidth = longToUint32(value, "value");
             return this;
         }
 
@@ -364,8 +455,8 @@ public final class MtpObjectInfo {
             return this;
         }
 
-        public Builder setSequenceNumber(int value) {
-            mObjectInfo.mSequenceNumber = value;
+        public Builder setSequenceNumber(long value) {
+            mObjectInfo.mSequenceNumber = longToUint32(value, "value");
             return this;
         }
 
@@ -374,8 +465,8 @@ public final class MtpObjectInfo {
             return this;
         }
 
-        public Builder setThumbCompressedSize(int value) {
-            mObjectInfo.mThumbCompressedSize = value;
+        public Builder setThumbCompressedSize(long value) {
+            mObjectInfo.mThumbCompressedSize = longToUint32(value, "value");
             return this;
         }
 
@@ -384,13 +475,13 @@ public final class MtpObjectInfo {
             return this;
         }
 
-        public Builder setThumbPixHeight(int value) {
-            mObjectInfo.mThumbPixHeight = value;
+        public Builder setThumbPixHeight(long value) {
+            mObjectInfo.mThumbPixHeight = longToUint32(value, "value");
             return this;
         }
 
-        public Builder setThumbPixWidth(int value) {
-            mObjectInfo.mThumbPixWidth = value;
+        public Builder setThumbPixWidth(long value) {
+            mObjectInfo.mThumbPixWidth = longToUint32(value, "value");
             return this;
         }
 
@@ -406,5 +497,14 @@ public final class MtpObjectInfo {
             mObjectInfo = null;
             return result;
         }
+    }
+
+    private static long uint32ToLong(int value) {
+        return value < 0 ? 0x100000000L + value : value;
+    }
+
+    private static int longToUint32(long value, String valueName) {
+        Preconditions.checkArgumentInRange(value, 0, 0xffffffffL, valueName);
+        return (int) value;
     }
 }
