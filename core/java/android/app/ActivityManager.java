@@ -560,11 +560,13 @@ public class ActivityManager {
         }
 
         /**
-         * Returns true if the windows of tasks being moved to this stack should be preserved so
-         * there isn't a display gap.
+         * Returns true if the windows of tasks being moved to the target stack from the source
+         * stack should be replaced, meaning that window manager will keep the old window around
+         * until the new is ready.
          */
-        public static boolean preserveWindowOnTaskMove(int stackId) {
-            return stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+        public static boolean replaceWindowsOnTaskMove(int sourceStackId, int targetStackId) {
+            return sourceStackId == FREEFORM_WORKSPACE_STACK_ID
+                    || targetStackId == FREEFORM_WORKSPACE_STACK_ID;
         }
 
         /**
