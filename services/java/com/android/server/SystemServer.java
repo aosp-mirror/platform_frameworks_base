@@ -68,6 +68,7 @@ import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
+import com.android.internal.widget.ILockSettings;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
 import com.android.server.media.MediaResourceMonitorService;
@@ -143,6 +144,8 @@ public final class SystemServer {
             "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
             "com.android.server.job.JobSchedulerService";
+    private static final String LOCK_SETTINGS_SERVICE_CLASS =
+            "com.android.server.LockSettingsService$Lifecycle";
     private static final String MOUNT_SERVICE_CLASS =
             "com.android.server.MountService$Lifecycle";
     private static final String SEARCH_MANAGER_SERVICE_CLASS =
@@ -607,7 +610,7 @@ public final class SystemServer {
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
         TextServicesManagerService tsms = null;
-        LockSettingsService lockSettings = null;
+        ILockSettings lockSettings = null;
         AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
 
@@ -680,8 +683,9 @@ public final class SystemServer {
             if (!disableNonCoreServices) {
                 traceBeginAndSlog("StartLockSettingsService");
                 try {
-                    lockSettings = new LockSettingsService(context);
-                    ServiceManager.addService("lock_settings", lockSettings);
+                    mSystemServiceManager.startService(LOCK_SETTINGS_SERVICE_CLASS);
+                    lockSettings = ILockSettings.Stub.asInterface(
+                            ServiceManager.getService("lock_settings"));
                 } catch (Throwable e) {
                     reportWtf("starting LockSettingsService service", e);
                 }

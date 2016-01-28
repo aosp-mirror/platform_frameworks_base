@@ -17,11 +17,12 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
-import android.app.AppGlobals;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
-import android.app.trust.ITrustManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -30,6 +31,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
+
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.content.Context.USER_SERVICE;
 import static android.Manifest.permission.READ_CONTACTS;
@@ -40,7 +43,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
-import android.os.storage.StorageManager;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -70,25 +72,69 @@ import java.util.List;
  * @hide
  */
 public class LockSettingsService extends ILockSettings.Stub {
-
-    private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
-
     private static final String TAG = "LockSettingsService";
+    private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
+    private static final Intent ACTION_NULL; // hack to ensure notification shows the bouncer
+    private static final int FBE_ENCRYPTED_NOTIFICATION = 0;
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
-
     private final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
 
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
     private IGateKeeperService mGateKeeperService;
+    private NotificationManager mNotificationManager;
+    private UserManager mUserManager;
+
+    static {
+        // Just launch the home screen, which happens anyway
+        ACTION_NULL = new Intent(Intent.ACTION_MAIN);
+        ACTION_NULL.addCategory(Intent.CATEGORY_HOME);
+    }
 
     private interface CredentialUtil {
         void setCredential(String credential, String savedCredential, int userId)
                 throws RemoteException;
         byte[] toHash(String credential, int userId);
         String adjustForKeystore(String credential);
+    }
+
+    // This class manages life cycle events for encrypted users on File Based Encryption (FBE)
+    // devices. The most basic of these is to show/hide notifications about missing features until
+    // the user unlocks the account and credential-encrypted storage is available.
+    public static final class Lifecycle extends SystemService {
+        private LockSettingsService mLockSettingsService;
+
+        public Lifecycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mLockSettingsService = new LockSettingsService(getContext());
+            publishBinderService("lock_settings", mLockSettingsService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mLockSettingsService.maybeShowEncryptionNotification(UserHandle.ALL);
+            } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+                // TODO
+            }
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mLockSettingsService.onUnlockUser(userHandle);
+        }
+
+        @Override
+        public void onCleanupUser(int userHandle) {
+            mLockSettingsService.onCleanupUser(userHandle);
+        }
     }
 
     public LockSettingsService(Context context) {
@@ -117,6 +163,71 @@ public class LockSettingsService extends ILockSettings.Stub {
                 }
             }
         });
+        mNotificationManager = (NotificationManager)
+                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+    }
+
+    /**
+     * If the account is credential-encrypted, show notification requesting the user to unlock
+     * the device.
+     */
+    private void maybeShowEncryptionNotification(UserHandle userHandle) {
+        if (UserHandle.ALL.equals(userHandle)) {
+            final List<UserInfo> users = mUserManager.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                UserHandle user = users.get(i).getUserHandle();
+                if (!mUserManager.isUserUnlocked(user)) {
+                    showEncryptionNotification(user);
+                }
+            }
+        } else if (!mUserManager.isUserUnlocked(userHandle)){
+            showEncryptionNotification(userHandle);
+        }
+    }
+
+    private void showEncryptionNotification(UserHandle user) {
+        if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
+        Resources r = mContext.getResources();
+        CharSequence title = r.getText(
+                com.android.internal.R.string.user_encrypted_title);
+        CharSequence message = r.getText(
+                com.android.internal.R.string.user_encrypted_message);
+        CharSequence detail = r.getText(
+                com.android.internal.R.string.user_encrypted_detail);
+
+        PendingIntent intent = PendingIntent.getBroadcast(mContext, 0, ACTION_NULL,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification.Builder(mContext)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
+                .setWhen(0)
+                .setOngoing(true)
+                .setTicker(title)
+                .setDefaults(0)  // please be quiet
+                .setPriority(Notification.PRIORITY_MAX)
+                .setColor(mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(message)
+                .setContentInfo(detail)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setContentIntent(intent)
+                .build();
+        mNotificationManager.notifyAsUser(null, FBE_ENCRYPTED_NOTIFICATION, notification, user);
+    }
+
+    public void hideEncryptionNotification(UserHandle userHandle) {
+        if (DEBUG) Slog.v(TAG, "hide encryption notification, user: "+ userHandle.getIdentifier());
+        mNotificationManager.cancelAsUser(null, FBE_ENCRYPTED_NOTIFICATION, userHandle);
+    }
+
+    public void onCleanupUser(int userId) {
+        hideEncryptionNotification(new UserHandle(userId));
+    }
+
+    public void onUnlockUser(int userHandle) {
+        hideEncryptionNotification(new UserHandle(userHandle));
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -144,6 +255,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     };
 
+    @Override // binder interface
     public void systemReady() {
         migrateOldData();
         try {

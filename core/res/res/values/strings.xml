@@ -4190,4 +4190,12 @@
     <string name="new_sms_notification_title">You have new messages</string>
     <!-- Notification content shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
     <string name="new_sms_notification_content">Open SMS app to view</string>
+
+    <!-- Notification title shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
+    <string name="user_encrypted_title">Device encrypted</string>
+    <!-- Notification message shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
+    <string name="user_encrypted_message">Some functions might not be available</string>
+    <!-- Notification detail shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
+    <string name="user_encrypted_detail">Touch to continue</string>
+
 </resources>

@@ -2505,4 +2505,10 @@
   <java-symbol type="string" name="new_sms_notification_content" />
 
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
+
+  <!-- Encryption notification while accounts are locked by credential encryption -->
+  <java-symbol type="string" name="user_encrypted_title" />
+  <java-symbol type="string" name="user_encrypted_message" />
+  <java-symbol type="string" name="user_encrypted_detail" />
+
 </resources>
