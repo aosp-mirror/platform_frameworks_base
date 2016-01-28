@@ -17,14 +17,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!-- Status Bar Scrim View -->
-    <ImageView
-        android:id="@+id/status_bar_scrim"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|top"
-        android:scaleType="fitXY"
-        android:src="@drawable/recents_status_gradient" />
 
     <!-- Recents View -->
     <com.android.systemui.recents.views.RecentsView
@@ -32,12 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </com.android.systemui.recents.views.RecentsView>
-
-    <!-- History View -->
-    <ViewStub android:id="@+id/history_view_stub"
-           android:layout="@layout/recents_history"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent" />
 
     <!-- Nav Bar Scrim View -->
     <ImageView

@@ -21,7 +21,7 @@ import com.android.systemui.recents.events.EventBus;
 /**
  * This is sent when the history view will be closed.
  */
-public class HideHistoryEvent extends EventBus.AnimatedEvent {
+public class HideHistoryEvent extends EventBus.Event {
 
     public final boolean animate;
 

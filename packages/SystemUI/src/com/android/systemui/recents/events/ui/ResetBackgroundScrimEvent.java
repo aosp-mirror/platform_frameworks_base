@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.events.activity;
+package com.android.systemui.recents.events.ui;
 
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * This is sent when the history view button is clicked.
+ * This is sent to reset the background scrim back to the initial state.
  */
-public class ShowHistoryEvent extends EventBus.Event {
-
+public class ResetBackgroundScrimEvent extends EventBus.Event {
     // Simple event
-
 }

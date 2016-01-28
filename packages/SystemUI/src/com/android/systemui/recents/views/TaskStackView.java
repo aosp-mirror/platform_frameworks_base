@@ -64,6 +64,7 @@ import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
+import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -74,11 +75,13 @@ import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
 import com.android.systemui.recents.misc.DozeTrigger;
+import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1117,12 +1120,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // We can get spurious measure passes with the old bounds when docking, and since we are
         // using the current stack bounds during drag and drop, don't overwrite them until we
         // actually get new bounds
+        boolean requiresLayout = false;
         if (!taskStackBounds.equals(mStableStackBounds)) {
             mStableStackBounds.set(taskStackBounds);
             mStackBounds.set(taskStackBounds);
+            requiresLayout = true;
         }
-        mLayoutAlgorithm.setSystemInsets(systemInsets);
-        requestLayout();
+        if (!systemInsets.equals(mLayoutAlgorithm.mSystemInsets)) {
+            mLayoutAlgorithm.setSystemInsets(systemInsets);
+            requiresLayout = true;
+        }
+        if (requiresLayout) {
+            requestLayout();
+        }
     }
 
     /**
@@ -1235,7 +1245,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the history button visibility
         if (shouldShowHistoryButton() &&
                 mStackScroller.getStackScroll() < SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-            EventBus.getDefault().send(new ShowHistoryButtonEvent());
+            EventBus.getDefault().send(new ShowHistoryButtonEvent(false /* translate */));
         } else {
             EventBus.getDefault().send(new HideHistoryButtonEvent());
         }
@@ -1468,13 +1478,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             relayoutTaskViewsOnNextFrame(animation);
         }
 
-        if (shouldShowHistoryButton() &&
-                prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-            EventBus.getDefault().send(new ShowHistoryButtonEvent());
-        } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
-                curScroll >= HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD) {
-            EventBus.getDefault().send(new HideHistoryButtonEvent());
+        if (mEnterAnimationComplete) {
+            if (shouldShowHistoryButton() &&
+                    prevScroll > SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll <= SHOW_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new ShowHistoryButtonEvent(true /* translate */));
+            } else if (prevScroll < HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD &&
+                    curScroll >= HIDE_HISTORY_BUTTON_SCROLL_THRESHOLD) {
+                EventBus.getDefault().send(new HideHistoryButtonEvent());
+            }
         }
     }
 
@@ -1753,11 +1765,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(ShowHistoryEvent event) {
-        mAnimationHelper.startShowHistoryAnimation(event.getAnimationTrigger());
+        ReferenceCountedTrigger postAnimTrigger = new ReferenceCountedTrigger();
+        postAnimTrigger.addLastDecrementRunnable(new Runnable() {
+            @Override
+            public void run() {
+                setVisibility(View.INVISIBLE);
+            }
+        });
+        mAnimationHelper.startShowHistoryAnimation(postAnimTrigger);
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
-        mAnimationHelper.startHideHistoryAnimation(event.getAnimationTrigger());
+        setVisibility(View.VISIBLE);
+        mAnimationHelper.startHideHistoryAnimation();
     }
 
     /**

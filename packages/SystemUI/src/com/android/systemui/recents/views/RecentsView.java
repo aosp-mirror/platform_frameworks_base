@@ -18,9 +18,13 @@ package com.android.systemui.recents.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Outline;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.ArraySet;
@@ -28,7 +32,9 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -45,20 +51,24 @@ import com.android.systemui.recents.RecentsAppWidgetHostView;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.RecentsDebugFlags;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
+import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
+import com.android.systemui.recents.events.activity.ToggleHistoryEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
+import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
+import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
+import com.android.systemui.recents.history.RecentsHistoryView;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
@@ -80,6 +90,8 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 public class RecentsView extends FrameLayout {
 
     private static final int DOCK_AREA_OVERLAY_TRANSITION_DURATION = 135;
+    private static final int DEFAULT_UPDATE_SCRIM_DURATION = 200;
+    private static final float DEFAULT_SCRIM_ALPHA = 0.33f;
 
     private final Handler mHandler;
 
@@ -88,10 +100,15 @@ public class RecentsView extends FrameLayout {
     private RecentsAppWidgetHostView mSearchBar;
     private TextView mHistoryButton;
     private View mEmptyView;
+    private RecentsHistoryView mHistoryView;
+
     private boolean mAwaitingFirstLayout = true;
     private boolean mLastTaskLaunchedWasFreeform;
     private Rect mSystemInsets = new Rect();
     private int mDividerSize;
+
+    private ColorDrawable mBackgroundScrim = new ColorDrawable(Color.BLACK);
+    private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
     private RecentsViewTouchHandler mTouchHandler;
@@ -127,17 +144,28 @@ public class RecentsView extends FrameLayout {
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
 
+        final float cornerRadius = context.getResources().getDimensionPixelSize(
+                R.dimen.recents_task_view_rounded_corners_radius);
         LayoutInflater inflater = LayoutInflater.from(context);
         mHistoryButton = (TextView) inflater.inflate(R.layout.recents_history_button, this, false);
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().send(new ShowHistoryEvent());
+                EventBus.getDefault().send(new ToggleHistoryEvent());
+            }
+        });
+        mHistoryButton.setClipToOutline(true);
+        mHistoryButton.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
             }
         });
         addView(mHistoryButton);
         mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
+
+        setBackground(mBackgroundScrim);
     }
 
     /** Set/get the bsp root node */
@@ -162,6 +190,15 @@ public class RecentsView extends FrameLayout {
             addView(mTaskStackView);
         }
 
+        // If we are already occluded by the app, then just set the default background scrim now.
+        // Otherwise, defer until the enter animation completes to animate the scrim with the
+        // tasks for the home animation.
+        if (launchState.launchedFromAppWithThumbnail || mStack.getTaskCount() == 0) {
+            mBackgroundScrim.setAlpha((int) (DEFAULT_SCRIM_ALPHA * 255));
+        } else {
+            mBackgroundScrim.setAlpha(0);
+        }
+
         // Update the top level view's visibilities
         if (stack.getTaskCount() > 0) {
             hideEmptyView();
@@ -178,6 +215,13 @@ public class RecentsView extends FrameLayout {
      */
     public boolean isLastTaskLaunchedFreeform() {
         return mLastTaskLaunchedWasFreeform;
+    }
+
+    /**
+     * Returns whether the history is visible or not.
+     */
+    public boolean isHistoryVisible() {
+        return mHistoryView != null && mHistoryView.isVisible();
     }
 
     /**
@@ -304,13 +348,6 @@ public class RecentsView extends FrameLayout {
         mHistoryButton.bringToFront();
     }
 
-    /**
-     * Returns the last known system insets.
-     */
-    public Rect getSystemInsets() {
-        return mSystemInsets;
-    }
-
     @Override
     protected void onAttachedToWindow() {
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
@@ -352,17 +389,23 @@ public class RecentsView extends FrameLayout {
             mTaskStackView.measure(widthMeasureSpec, heightMeasureSpec);
         }
 
-        // Measure the empty view
-        measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        // Measure the empty view to the full size of the screen
+        if (mEmptyView.getVisibility() != GONE) {
+            measureChild(mEmptyView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        }
 
-        // Measure the history button with the full space above the stack, but width-constrained
-        // to the stack
+        // Measure the history view
+        if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
+            measureChild(mHistoryView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+        }
+
+        // Measure the history button within the constraints of the space above the stack
         Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
         measureChild(mHistoryButton,
-                MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(historyButtonRect.height(),
-                        MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.AT_MOST),
+                MeasureSpec.makeMeasureSpec(historyButtonRect.height(), MeasureSpec.AT_MOST));
 
         setMeasuredDimension(width, height);
     }
@@ -389,13 +432,24 @@ public class RecentsView extends FrameLayout {
         }
 
         // Layout the empty view
-        mEmptyView.layout(left, top, right, bottom);
+        if (mEmptyView.getVisibility() != GONE) {
+            mEmptyView.layout(left, top, right, bottom);
+        }
 
-        // Layout the history button left-aligned with the stack, but offset from the top of the
-        // view
+        // Layout the history view
+        if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
+            mHistoryView.layout(left, top, right, bottom);
+        }
+
+        // Layout the history button such that its drawable is left-aligned with the stack,
+        // vertically centered in the available space above the stack
         Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
-        mHistoryButton.layout(historyButtonRect.left, historyButtonRect.top,
-                historyButtonRect.right, historyButtonRect.bottom);
+        int historyLeft = historyButtonRect.left - mHistoryButton.getPaddingStart();
+        int historyTop = historyButtonRect.top +
+                (historyButtonRect.height() - mHistoryButton.getMeasuredHeight()) / 2;
+        mHistoryButton.layout(historyLeft, historyTop,
+                historyLeft + mHistoryButton.getMeasuredWidth(),
+                historyTop + mHistoryButton.getMeasuredHeight());
 
         if (mAwaitingFirstLayout) {
             mAwaitingFirstLayout = false;
@@ -464,10 +518,8 @@ public class RecentsView extends FrameLayout {
         // Hide the history button
         int taskViewExitToHomeDuration = getResources().getInteger(
                 R.integer.recents_task_exit_to_home_duration);
-        hideHistoryButton(taskViewExitToHomeDuration);
-
-        // If we are going home, cancel the previous task's window transition
-        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
+        hideHistoryButton(taskViewExitToHomeDuration, false /* translate */);
+        animateBackgroundScrim(0f, taskViewExitToHomeDuration);
     }
 
     public final void onBusEvent(DragStartEvent event) {
@@ -572,57 +624,127 @@ public class RecentsView extends FrameLayout {
         animator.start();
     }
 
-    public final void onBusEvent(ShowHistoryEvent event) {
-        // Hide the history button when the history view is shown
-        hideHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
-                event.getAnimationTrigger());
-        event.addPostAnimationCallback(new Runnable() {
-            @Override
-            public void run() {
-                setAlpha(0f);
-            }
-        });
-    }
-
-    public final void onBusEvent(HideHistoryEvent event) {
-        // Show the history button when the history view is hidden
-        setAlpha(1f);
-        showHistoryButton(getResources().getInteger(R.integer.recents_history_transition_duration),
-                event.getAnimationTrigger());
-    }
-
-    public final void onBusEvent(ShowHistoryButtonEvent event) {
-        showHistoryButton(150);
-    }
-
-    public final void onBusEvent(HideHistoryButtonEvent event) {
-        hideHistoryButton(100);
-    }
-
     public final void onBusEvent(TaskStackUpdatedEvent event) {
         mStack.setTasks(event.stack.computeAllTasksList(), true /* notifyStackChanges */);
         mStack.createAffiliatedGroupings(getContext());
     }
 
+    public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+        if (!launchState.launchedFromAppWithThumbnail && mStack.getTaskCount() > 0) {
+            int taskViewEnterFromHomeDuration = getResources().getInteger(
+                    R.integer.recents_task_enter_from_home_duration);
+            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, taskViewEnterFromHomeDuration);
+        }
+    }
+
+    public final void onBusEvent(UpdateBackgroundScrimEvent event) {
+        animateBackgroundScrim(event.alpha, DEFAULT_UPDATE_SCRIM_DURATION);
+    }
+
+    public final void onBusEvent(ResetBackgroundScrimEvent event) {
+        animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, DEFAULT_UPDATE_SCRIM_DURATION);
+    }
+
+    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
+        if (!event.visible) {
+            // Reset the view state
+            mAwaitingFirstLayout = true;
+            mLastTaskLaunchedWasFreeform = false;
+            hideHistoryButton(0, false /* translate */);
+        }
+    }
+
+    public final void onBusEvent(ToggleHistoryEvent event) {
+        if (mHistoryView != null && mHistoryView.isVisible()) {
+            EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
+        } else {
+            EventBus.getDefault().send(new ShowHistoryEvent());
+        }
+    }
+
+    public final void onBusEvent(ShowHistoryEvent event) {
+        if (mHistoryView == null) {
+            mHistoryView = (RecentsHistoryView) LayoutInflater.from(getContext()).inflate(
+                    R.layout.recents_history, this, false);
+            addView(mHistoryView);
+
+            // Since this history view is inflated by a view stub after the insets have already
+            // been applied, we have to set them ourselves initial from the insets that were last
+            // provided.
+            mHistoryView.setSystemInsets(mSystemInsets);
+            mHistoryView.setHeaderHeight(mHistoryButton.getMeasuredHeight());
+            mHistoryButton.bringToFront();
+        }
+
+        // Animate the empty view in parallel with the history view (the task view animations are
+        // handled in TaskStackView)
+        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mStackRect;
+        if (mEmptyView.getVisibility() == View.VISIBLE) {
+            int historyTransitionDuration = getResources().getInteger(
+                    R.integer.recents_history_transition_duration);
+            mEmptyView.animate()
+                    .alpha(0f)
+                    .translationY(stackRect.bottom)
+                    .setDuration(historyTransitionDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            mEmptyView.setVisibility(View.INVISIBLE);
+                        }
+                    })
+                    .start();
+        }
+
+        mHistoryView.show(mStack, stackRect.height());
+    }
+
+    public final void onBusEvent(HideHistoryEvent event) {
+        // Animate the empty view in parallel with the history view (the task view animations are
+        // handled in TaskStackView)
+        Rect stackRect = mTaskStackView.mLayoutAlgorithm.mStackRect;
+        if (mStack.getTaskCount() == 0) {
+            int historyTransitionDuration = getResources().getInteger(
+                    R.integer.recents_history_transition_duration);
+            mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.animate()
+                    .alpha(1f)
+                    .translationY(0)
+                    .setDuration(historyTransitionDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .start();
+        }
+
+        mHistoryView.hide(event.animate, stackRect.height());
+    }
+
+    public final void onBusEvent(ShowHistoryButtonEvent event) {
+        showHistoryButton(150, event.translate);
+    }
+
+    public final void onBusEvent(HideHistoryButtonEvent event) {
+        hideHistoryButton(100, true /* translate */);
+    }
+
     /**
      * Shows the history button.
      */
-    private void showHistoryButton(final int duration) {
-        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
-        showHistoryButton(duration, postAnimationTrigger);
-        postAnimationTrigger.flushLastDecrementRunnables();
-    }
-
-    private void showHistoryButton(final int duration,
-            final ReferenceCountedTrigger postHideHistoryAnimationTrigger) {
-        mHistoryButton.setText(getContext().getString(R.string.recents_history_label_format,
-                mStack.getHistoricalTasks().size()));
+    private void showHistoryButton(final int duration, final boolean translate) {
+        final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         if (mHistoryButton.getVisibility() == View.INVISIBLE) {
             mHistoryButton.setVisibility(View.VISIBLE);
             mHistoryButton.setAlpha(0f);
-            postHideHistoryAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+            if (translate) {
+                mHistoryButton.setTranslationY(-mHistoryButton.getMeasuredHeight() * 0.25f);
+            }
+            postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
                 @Override
                 public void run() {
+                    if (translate) {
+                        mHistoryButton.animate()
+                            .translationY(0f);
+                    }
                     mHistoryButton.animate()
                             .alpha(1f)
                             .setDuration(duration)
@@ -632,34 +754,42 @@ public class RecentsView extends FrameLayout {
                 }
             });
         }
+        postAnimationTrigger.flushLastDecrementRunnables();
     }
 
     /**
      * Hides the history button.
      */
-    private void hideHistoryButton(int duration) {
-        ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
-        hideHistoryButton(duration, postAnimationTrigger);
+    private void hideHistoryButton(int duration, boolean translate) {
+        final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
+        hideHistoryButton(duration, translate, postAnimationTrigger);
         postAnimationTrigger.flushLastDecrementRunnables();
     }
 
-    private void hideHistoryButton(int duration,
-            final ReferenceCountedTrigger postHideStackAnimationTrigger) {
+    /**
+     * Hides the history button.
+     */
+    private void hideHistoryButton(int duration, boolean translate,
+            final ReferenceCountedTrigger postAnimationTrigger) {
         if (mHistoryButton.getVisibility() == View.VISIBLE) {
+            if (translate) {
+                mHistoryButton.animate()
+                    .translationY(-mHistoryButton.getMeasuredHeight() * 0.25f);
+            }
             mHistoryButton.animate()
                     .alpha(0f)
                     .setDuration(duration)
-                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .setInterpolator(mFastOutSlowInInterpolator)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
                             mHistoryButton.setVisibility(View.INVISIBLE);
-                            postHideStackAnimationTrigger.decrement();
+                            postAnimationTrigger.decrement();
                         }
                     })
                     .withLayer()
                     .start();
-            postHideStackAnimationTrigger.increment();
+            postAnimationTrigger.increment();
         }
     }
 
@@ -696,11 +826,18 @@ public class RecentsView extends FrameLayout {
         }
     }
 
-    public final void onBusEvent(RecentsVisibilityChangedEvent event) {
-        if (!event.visible) {
-            // Reset the view state
-            mAwaitingFirstLayout = true;
-            mLastTaskLaunchedWasFreeform = false;
-        }
+    /**
+     * Animates the background scrim to the given {@param alpha}.
+     */
+    private void animateBackgroundScrim(float alpha, int duration) {
+        Utilities.cancelAnimationWithoutCallbacks(mBackgroundScrimAnimator);
+        int alphaInt = (int) (alpha * 255);
+        mBackgroundScrimAnimator = ObjectAnimator.ofInt(mBackgroundScrim, Utilities.DRAWABLE_ALPHA,
+                mBackgroundScrim.getAlpha(), alphaInt);
+        mBackgroundScrimAnimator.setDuration(duration);
+        mBackgroundScrimAnimator.setInterpolator(alphaInt > mBackgroundScrim.getAlpha()
+                ? PhoneStatusBar.ALPHA_OUT
+                : PhoneStatusBar.ALPHA_IN);
+        mBackgroundScrimAnimator.start();
     }
 }

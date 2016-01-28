@@ -37,6 +37,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 
 
@@ -130,6 +131,7 @@ public class RecentsTaskLoadPlan {
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
+        Formatter dismissDescFormatter = new Formatter();
         long lastStackActiveTime = Prefs.getLong(mContext,
                 Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
         if (RecentsDebugFlags.Static.EnableMockTasks) {
@@ -168,7 +170,8 @@ public class RecentsTaskLoadPlan {
             // Load the title, icon, and color
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
             String contentDescription = loader.getAndUpdateContentDescription(taskKey, res);
-            String dismissDescription = String.format(dismissDescFormat, contentDescription);
+            String dismissDescription = dismissDescFormatter.format(dismissDescFormat,
+                    contentDescription).toString();
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;

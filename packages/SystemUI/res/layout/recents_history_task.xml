@@ -15,7 +15,6 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:theme="@android:style/Theme.Material"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:orientation="horizontal"
@@ -27,7 +26,8 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_gravity="center"
-        android:layout_marginStart="16dp" />
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="12dp" />
     <TextView
         android:id="@+id/description"
         android:layout_width="0dp"

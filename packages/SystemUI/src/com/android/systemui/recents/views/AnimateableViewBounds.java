@@ -48,10 +48,16 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     @Override
     public void getOutline(View view, Outline outline) {
         outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
-        outline.setRoundRect(mClipRect.left, mClipRect.top,
-                mSourceView.getWidth() - mClipRect.right,
-                mSourceView.getHeight() - mClipRect.bottom,
-                mCornerRadius);
+        if (mCornerRadius > 0) {
+            outline.setRoundRect(mClipRect.left, mClipRect.top,
+                    mSourceView.getWidth() - mClipRect.right,
+                    mSourceView.getHeight() - mClipRect.bottom,
+                    mCornerRadius);
+        } else {
+            outline.setRect(mClipRect.left, mClipRect.top,
+                    mSourceView.getWidth() - mClipRect.right,
+                    mSourceView.getHeight() - mClipRect.bottom);
+        }
     }
 
     /** Sets the view outline alpha. */
@@ -61,6 +67,17 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
             // TODO, If both clip and alpha change in the same frame, only invalidate once
             mSourceView.invalidateOutline();
         }
+    }
+
+    /** Sets the top clip. */
+    public void setClipTop(int top) {
+        mClipRect.top = top;
+        updateClipBounds();
+    }
+
+    /** Returns the top clip. */
+    public int getClipTop() {
+        return mClipRect.top;
     }
 
     /** Sets the bottom clip. */
