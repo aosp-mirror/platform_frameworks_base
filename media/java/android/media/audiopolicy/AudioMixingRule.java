@@ -146,7 +146,8 @@ public class AudioMixingRule {
     }
 
     private static boolean isValidSystemApiRule(int rule) {
-        switch(rule) {
+        // API rules only expose the RULE_MATCH_* rules
+        switch (rule) {
             case RULE_MATCH_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
@@ -155,9 +156,9 @@ public class AudioMixingRule {
                 return false;
         }
     }
-
     private static boolean isValidAttributesSystemApiRule(int rule) {
-        switch(rule) {
+        // API rules only expose the RULE_MATCH_* rules
+        switch (rule) {
             case RULE_MATCH_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
                 return true;
@@ -167,13 +168,11 @@ public class AudioMixingRule {
     }
 
     private static boolean isValidRule(int rule) {
-        switch(rule) {
+        final int match_rule = rule & ~RULE_EXCLUSION_MASK;
+        switch (match_rule) {
             case RULE_MATCH_ATTRIBUTE_USAGE:
-            case RULE_EXCLUDE_ATTRIBUTE_USAGE:
             case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-            case RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET:
             case RULE_MATCH_UID:
-            case RULE_EXCLUDE_UID:
                 return true;
             default:
                 return false;
@@ -327,24 +326,10 @@ public class AudioMixingRule {
         private Builder checkAddRuleObjInternal(int rule, Object property)
                 throws IllegalArgumentException {
             if (property == null) {
-                throw new IllegalArgumentException("Illegal null Object argument");
+                throw new IllegalArgumentException("Illegal null argument for mixing rule");
             }
             if (!isValidRule(rule)) {
                 throw new IllegalArgumentException("Illegal rule value " + rule);
-            } else {
-                // as rules are added to the Builder, we verify they are consistent with the type
-                // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
-                if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
-                    if (isPlayerRule(rule)) {
-                        mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
-                    } else {
-                        mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
-                    }
-                } else if (((mTargetMixType == AudioMix.MIX_TYPE_PLAYERS) && !isPlayerRule(rule))
-                        || ((mTargetMixType == AudioMix.MIX_TYPE_RECORDERS) && isPlayerRule(rule)))
-                {
-                    throw new IllegalArgumentException("Incompatible rule for mix");
-                }
             }
             final int match_rule = rule & ~RULE_EXCLUSION_MASK;
             if (isAudioAttributeRule(match_rule)) {
@@ -379,6 +364,19 @@ public class AudioMixingRule {
          */
         private Builder addRuleInternal(AudioAttributes attrToMatch, Integer intProp, int rule)
                 throws IllegalArgumentException {
+            // as rules are added to the Builder, we verify they are consistent with the type
+            // of mix being built. When adding the first rule, the mix type is MIX_TYPE_INVALID.
+            if (mTargetMixType == AudioMix.MIX_TYPE_INVALID) {
+                if (isPlayerRule(rule)) {
+                    mTargetMixType = AudioMix.MIX_TYPE_PLAYERS;
+                } else {
+                    mTargetMixType = AudioMix.MIX_TYPE_RECORDERS;
+                }
+            } else if (((mTargetMixType == AudioMix.MIX_TYPE_PLAYERS) && !isPlayerRule(rule))
+                    || ((mTargetMixType == AudioMix.MIX_TYPE_RECORDERS) && isPlayerRule(rule)))
+            {
+                throw new IllegalArgumentException("Incompatible rule for mix");
+            }
             synchronized (mCriteria) {
                 Iterator<AttributeMatchCriterion> crIterator = mCriteria.iterator();
                 final int match_rule = rule & ~RULE_EXCLUSION_MASK;
@@ -430,6 +428,7 @@ public class AudioMixingRule {
                     }
                 }
                 // rule didn't exist, add it
+                // FIXME doesn't work with RULE_MATCH_UID yet
                 mCriteria.add(new AttributeMatchCriterion(attrToMatch, rule));
             }
             return this;
