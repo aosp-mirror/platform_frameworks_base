@@ -2032,8 +2032,7 @@ public class ActivityManager {
         public static final int FLAG_PERSISTENT = 1<<1;
 
         /**
-         * Constant for {@link #flags}: this process is associated with a
-         * persistent system app.
+         * Constant for {@link #flags}: this process has running activities.
          * @hide
          */
         public static final int FLAG_HAS_ACTIVITIES = 1<<2;
