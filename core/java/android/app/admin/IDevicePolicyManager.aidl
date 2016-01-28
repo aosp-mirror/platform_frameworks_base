@@ -174,10 +174,12 @@ interface IDevicePolicyManager {
     boolean setPermittedAccessibilityServices(in ComponentName admin,in List packageList);
     List getPermittedAccessibilityServices(in ComponentName admin);
     List getPermittedAccessibilityServicesForUser(int userId);
+    boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
     boolean setPermittedInputMethods(in ComponentName admin,in List packageList);
     List getPermittedInputMethods(in ComponentName admin);
     List getPermittedInputMethodsForCurrentUser();
+    boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
     boolean setApplicationHidden(in ComponentName admin, in String packageName, boolean hidden);
     boolean isApplicationHidden(in ComponentName admin, in String packageName);

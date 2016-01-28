@@ -4124,7 +4124,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void choosePrivateKeyAlias(final int uid, final Uri uri, final String alias,
             final IBinder response) {
         // Caller UID needs to be trusted, so we restrict this method to SYSTEM_UID callers.
-        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+        if (!isCallerWithSystemUid()) {
             return;
         }
 
@@ -5843,8 +5843,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
-        if (hasUserSetupCompleted(userHandle)
-                && !UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)) {
+        if (hasUserSetupCompleted(userHandle) && !isCallerWithSystemUid()) {
             throw new IllegalStateException("Cannot set the profile owner on a user which is "
                     + "already set-up");
         }
@@ -5904,8 +5903,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void enforceManageUsers() {
         final int callingUid = mInjector.binderGetCallingUid();
-        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
-                || callingUid == Process.ROOT_UID)) {
+        if (!(isCallerWithSystemUid() || callingUid == Process.ROOT_UID)) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         }
     }
@@ -5928,8 +5926,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (userHandle == UserHandle.getUserId(callingUid)) {
             return;
         }
-        if (!(UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
-                || callingUid == Process.ROOT_UID)) {
+        if (!(isCallerWithSystemUid() || callingUid == Process.ROOT_UID)) {
             mContext.enforceCallingOrSelfPermission(permission,
                     "Must be system or have " + permission + " permission");
         }
@@ -5945,6 +5942,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if(isManagedProfile(userHandle)) {
             throw new SecurityException("You can not " + message + " for a managed profile.");
         }
+    }
+
+    private boolean isCallerWithSystemUid() {
+        return UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID);
     }
 
     private int getProfileParentId(int userHandle) {
@@ -6231,7 +6232,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public ComponentName getRestrictionsProvider(int userHandle) {
         synchronized (this) {
-            if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+            if (!isCallerWithSystemUid()) {
                 throw new SecurityException("Only the system can query the permission provider");
             }
             DevicePolicyData userData = getUserData(userHandle);
@@ -6304,8 +6305,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * permittedList or are a system app.
      */
     private boolean checkPackagesInPermittedListOrSystem(List<String> enabledPackages,
-            List<String> permittedList) {
-        int userIdToCheck = UserHandle.getCallingUserId();
+            List<String> permittedList, int userIdToCheck) {
         long id = mInjector.binderClearCallingIdentity();
         try {
             // If we have an enabled packages list for a managed profile the packages
@@ -6372,7 +6372,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 for (AccessibilityServiceInfo service : enabledServices) {
                     enabledPackages.add(service.getResolveInfo().serviceInfo.packageName);
                 }
-                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList)) {
+                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList,
+                        userId)) {
                     Slog.e(LOG_TAG, "Cannot set permitted accessibility services, "
                             + "because it contains already enabled accesibility services.");
                     return false;
@@ -6464,6 +6465,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public boolean isAccessibilityServicePermittedByAdmin(ComponentName who, String packageName,
+            int userHandle) {
+        if (!mHasFeature) {
+            return true;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(packageName, "packageName is null");
+        if (!isCallerWithSystemUid()){
+            throw new SecurityException(
+                    "Only the system can query if an accessibility service is disabled by admin");
+        }
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin.permittedAccessiblityServices == null) {
+                return true;
+            }
+            return checkPackagesInPermittedListOrSystem(Arrays.asList(packageName),
+                    admin.permittedAccessiblityServices, userHandle);
+        }
+    }
+
     private boolean checkCallerIsCurrentUserOrProfile() {
         int callingUserId = UserHandle.getCallingUserId();
         long token = mInjector.binderClearCallingIdentity();
@@ -6519,7 +6542,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 for (InputMethodInfo ime : enabledImes) {
                     enabledPackages.add(ime.getPackageName());
                 }
-                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList)) {
+                if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList,
+                        mInjector.binderGetCallingUserHandle().getIdentifier())) {
                     Slog.e(LOG_TAG, "Cannot set permitted input methods, "
                             + "because it contains already enabled input method.");
                     return false;
@@ -6608,6 +6632,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
             return result;
+        }
+    }
+
+    @Override
+    public boolean isInputMethodPermittedByAdmin(ComponentName who, String packageName,
+            int userHandle) {
+        if (!mHasFeature) {
+            return true;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(packageName, "packageName is null");
+        if (!isCallerWithSystemUid()) {
+            throw new SecurityException(
+                    "Only the system can query if an input method is disabled by admin");
+        }
+        synchronized (this) {
+            ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            if (admin.permittedInputMethods == null) {
+                return true;
+            }
+            return checkPackagesInPermittedListOrSystem(Arrays.asList(packageName),
+                    admin.permittedInputMethods, userHandle);
         }
     }
 
@@ -7404,7 +7450,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userHandle) {
-        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+        if (!isCallerWithSystemUid()) {
             throw new SecurityException("notifyLockTaskModeChanged can only be called by system");
         }
         synchronized (this) {
@@ -8159,7 +8205,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+        if (!isCallerWithSystemUid()) {
             throw new SecurityException("Only the system can query support message for user");
         }
         synchronized (this) {
@@ -8177,7 +8223,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        if (!UserHandle.isSameApp(mInjector.binderGetCallingUid(), Process.SYSTEM_UID)) {
+        if (!isCallerWithSystemUid()) {
             throw new SecurityException("Only the system can query support message for user");
         }
         synchronized (this) {

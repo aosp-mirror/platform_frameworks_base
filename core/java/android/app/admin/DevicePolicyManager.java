@@ -4068,6 +4068,29 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by the system to check if a specific accessibility service is disabled by admin.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName Accessibility service package name that needs to be checked.
+     * @param userHandle user id the admin is running as.
+     * @return true if the accessibility service is permitted, otherwise false.
+     *
+     * @hide
+     */
+    public boolean isAccessibilityServicePermittedByAdmin(@NonNull ComponentName admin,
+            @NonNull String packageName, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.isAccessibilityServicePermittedByAdmin(admin, packageName,
+                        userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * Returns the list of accessibility services permitted by the device or profiles
      * owners of this user.
      *
@@ -4144,6 +4167,28 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Called by the system to check if a specific input method is disabled by admin.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName Input method package name that needs to be checked.
+     * @param userHandle user id the admin is running as.
+     * @return true if the input method is permitted, otherwise false.
+     *
+     * @hide
+     */
+    public boolean isInputMethodPermittedByAdmin(@NonNull ComponentName admin,
+            @NonNull String packageName, int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.isInputMethodPermittedByAdmin(admin, packageName, userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+        return false;
     }
 
     /**
