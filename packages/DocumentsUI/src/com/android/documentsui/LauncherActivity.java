@@ -74,6 +74,9 @@ public class LauncherActivity extends Activity {
 
     private void startTask() {
         Intent intent = createLaunchIntent(this);
+
+        // Forward any flags from the original intent.
+        intent.setFlags(getIntent().getFlags());
         if (DEBUG) Log.d(TAG, "Starting new task > " + intent.getData());
         startActivity(intent);
     }
@@ -84,7 +87,7 @@ public class LauncherActivity extends Activity {
         startActivity(intent);
     }
 
-    static Intent createLaunchIntent(Context context) {
+    static final Intent createLaunchIntent(Context context) {
         Intent intent = new Intent(context, FilesActivity.class);
         intent.setData(buildLaunchUri());
         return intent;
