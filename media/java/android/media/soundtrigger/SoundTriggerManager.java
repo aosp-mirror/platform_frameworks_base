@@ -37,8 +37,8 @@ import java.util.UUID;
  * OEMs to write apps that can manage non-voice based sound trigger models.
  *
  * @hide
- * TODO: Mark this as a SystemApi and get approval.
  */
+@SystemApi
 public final class SoundTriggerManager {
     private static final boolean DBG = false;
     private static final String TAG = "SoundTriggerManager";
