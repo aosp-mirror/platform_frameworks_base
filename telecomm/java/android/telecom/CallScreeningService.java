@@ -89,7 +89,7 @@ public abstract class CallScreeningService extends Service {
     /*
      * Information about how to respond to an incoming call.
      */
-    public class CallResponse {
+    public static class CallResponse {
         private final boolean mShouldDisallowCall;
         private final boolean mShouldRejectCall;
         private final boolean mShouldSkipCallLog;
@@ -140,7 +140,7 @@ public abstract class CallScreeningService extends Service {
             return mShouldSkipNotification;
         }
 
-        public class Builder {
+        public static class Builder {
             private boolean mShouldDisallowCall;
             private boolean mShouldRejectCall;
             private boolean mShouldSkipCallLog;
