@@ -226,6 +226,10 @@ public class CustomTile extends QSTile<QSTile.State> {
         return 0;
     }
 
+    public static String toSpec(ComponentName name) {
+        return PREFIX + name.flattenToShortString() + ")";
+    }
+
     public static ComponentName getComponentFromSpec(String spec) {
         final String action = spec.substring(PREFIX.length(), spec.length() - 1);
         if (action.isEmpty()) {

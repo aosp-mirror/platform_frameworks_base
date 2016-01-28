@@ -229,7 +229,7 @@ public class TileAdapter extends BaseAdapter {
             for (ResolveInfo info : services) {
                 String packageName = info.serviceInfo.packageName;
                 ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
-                String spec = CustomTile.PREFIX + componentName.flattenToShortString() + ")";
+                String spec = CustomTile.toSpec(componentName);
                 if (mCurrentTiles.contains(spec)) {
                     continue;
                 }

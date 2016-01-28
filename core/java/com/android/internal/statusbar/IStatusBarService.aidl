@@ -16,6 +16,7 @@
 
 package com.android.internal.statusbar;
 
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -103,4 +104,8 @@ interface IStatusBarService
      * Picture-in-picture overlay menu will be shown instead otherwise.
      */
     void requestTvPictureInPicture();
+
+    void addTile(in ComponentName tile);
+    void remTile(in ComponentName tile);
+    void clickTile(in ComponentName tile);
 }

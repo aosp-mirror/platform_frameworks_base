@@ -17,13 +17,16 @@
 package com.android.server.statusbar;
 
 import android.app.StatusBarManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -31,11 +34,13 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.FastPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -217,6 +222,39 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.animateExpandSettingsPanel(subPanel);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void addTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.addQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void remTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.remQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    public void clickTile(ComponentName component) {
+        enforceStatusBarOrShell();
+
+        if (mBar != null) {
+            try {
+                mBar.clickQsTile(component);
             } catch (RemoteException ex) {
             }
         }
@@ -552,6 +590,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+    private void enforceStatusBarOrShell() {
+        if (Binder.getCallingUid() == Process.SHELL_UID) {
+            return;
+        }
+        enforceStatusBar();
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");
@@ -726,6 +771,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ResultReceiver resultReceiver) throws RemoteException {
+        (new StatusBarShellCommand(this)).exec(
+                this, in, out, err, args, resultReceiver);
     }
 
     // ================================================================================
