@@ -2887,6 +2887,19 @@
                  android:theme="@style/Theme.Material.DayNight.DarkActionBar"
                  android:forceDeviceEncrypted="true"
                  android:encryptionAware="true">
+        <activity android:name="com.android.internal.app.ChooserActivity"
+                android:theme="@style/Theme.DeviceDefault.Resolver"
+                android:finishOnCloseSystemDialogs="true"
+                android:excludeFromRecents="true"
+                android:documentLaunchMode="never"
+                android:relinquishTaskIdentity="true"
+                android:process=":ui">
+            <intent-filter>
+                <action android:name="android.intent.action.CHOOSER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.VOICE" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
                 android:finishOnCloseSystemDialogs="true"
                 android:theme="@style/Theme.NoDisplay"
