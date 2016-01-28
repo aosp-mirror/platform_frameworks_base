@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.chooser;
+package com.android.internal.app;
 
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
@@ -36,7 +35,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -67,12 +65,9 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import com.android.internal.R;
-import com.android.internal.app.IntentForwarderActivity;
-import com.android.internal.app.ResolverActivity;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -95,11 +90,6 @@ public class ChooserActivity extends ResolverActivity {
 
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
-
-    private SharedPreferences mPinnedSharedPrefs;
-    private static final float PINNED_TARGET_SCORE_BOOST = 1000.f;
-    private static final String PINNED_SHARED_PREFS_NAME = "chooser_pin_settings";
-    private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
 
@@ -217,16 +207,10 @@ public class ChooserActivity extends ResolverActivity {
         mRefinementIntentSender = intent.getParcelableExtra(
                 Intent.EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER);
         setSafeForwardingMode(true);
-
-        mPinnedSharedPrefs = getPinnedSharedPrefs(this);
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
 
         MetricsLogger.action(this, MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN);
-    }
-
-    static SharedPreferences getPinnedSharedPrefs(Context context) {
-        return context.getSharedPreferences(PINNED_SHARED_PREFS_NAME, MODE_PRIVATE);
     }
 
     @Override
@@ -259,7 +243,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public void onActivityStarted(TargetInfo cti) {
+    void onActivityStarted(TargetInfo cti) {
         if (mChosenComponentSender != null) {
             final ComponentName target = cti.getResolvedComponentName();
             if (target != null) {
@@ -275,7 +259,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
+    void onPrepareAdapterView(AbsListView adapterView, ResolveListAdapter adapter,
             boolean alwaysUseOption) {
         final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
         mChooserListAdapter = (ChooserListAdapter) adapter;
@@ -288,17 +272,17 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public int getLayoutResource() {
+    int getLayoutResource() {
         return R.layout.chooser_grid;
     }
 
     @Override
-    public boolean shouldGetActivityMetadata() {
+    boolean shouldGetActivityMetadata() {
         return true;
     }
 
     @Override
-    public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
+    boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
         final Intent intent = target.getResolvedIntent();
         final ResolveInfo resolve = target.getResolveInfo();
 
@@ -313,16 +297,6 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         return false;
-    }
-
-    @Override
-    public void showTargetDetails(ResolveInfo ri) {
-        ComponentName name = ri.activityInfo.getComponentName();
-        boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
-        ResolverTargetActionsDialogFragment f =
-                new ResolverTargetActionsDialogFragment(ri.loadLabel(getPackageManager()),
-                        name, pinned);
-        f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
     private void modifyTargetIntent(Intent in) {
@@ -366,7 +340,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public void startSelected(int which, boolean always, boolean filtered) {
+    void startSelected(int which, boolean always, boolean filtered) {
         super.startSelected(which, always, filtered);
 
         if (mChooserListAdapter != null) {
@@ -497,7 +471,7 @@ public class ChooserActivity extends ResolverActivity {
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
     }
 
-    public void onSetupVoiceInteraction() {
+    void onSetupVoiceInteraction() {
         // Do nothing. We'll send the voice stuff ourselves.
     }
 
@@ -569,7 +543,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public ResolveListAdapter createAdapter(Context context, List<Intent> payloadIntents,
+    ResolveListAdapter createAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, int launchedFromUid,
             boolean filterLastUsed) {
         final ChooserListAdapter adapter = new ChooserListAdapter(context, payloadIntents,
@@ -737,11 +711,6 @@ public class ChooserActivity extends ResolverActivity {
             }
             return results;
         }
-
-        @Override
-        public boolean isPinned() {
-            return mSourceInfo != null ? mSourceInfo.isPinned() : false;
-        }
     }
 
     public class ChooserListAdapter extends ResolveListAdapter {
@@ -805,20 +774,6 @@ public class ChooserActivity extends ResolverActivity {
         public boolean showsExtendedInfo(TargetInfo info) {
             // We have badges so we don't need this text shown.
             return false;
-        }
-
-        @Override
-        public boolean isComponentPinned(ComponentName name) {
-            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
-        }
-
-        @Override
-        public float getScore(DisplayResolveInfo target) {
-            float score = super.getScore(target);
-            if (target.isPinned()) {
-                score += PINNED_TARGET_SCORE_BOOST;
-            }
-            return score;
         }
 
         @Override
@@ -1166,7 +1121,7 @@ public class ChooserActivity extends ResolverActivity {
                 v.setOnLongClickListener(new OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        showTargetDetails(
+                        showAppDetails(
                                 mChooserListAdapter.resolveInfoForPosition(
                                         holder.itemIndices[column], true));
                         return true;

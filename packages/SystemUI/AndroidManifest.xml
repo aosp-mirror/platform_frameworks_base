@@ -155,10 +155,6 @@
     <!-- TV picture-in-picture -->
     <uses-permission android:name="android.permission.RECEIVE_MEDIA_RESOURCE_USAGE" />
 
-    <!-- ChooserActivity -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-    <uses-permission android:name="android.permission.BIND_CHOOSER_TARGET_SERVICE" />
-
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -442,20 +438,5 @@
                 <action android:name="com.android.systemui.action.CLEAR_TUNER" />
             </intent-filter>
         </receiver>
-
-        <activity android:name=".chooser.ChooserActivity"
-                android:theme="@*android:style/Theme.DeviceDefault.Resolver"
-                android:finishOnCloseSystemDialogs="true"
-                android:excludeFromRecents="true"
-                android:documentLaunchMode="never"
-                android:relinquishTaskIdentity="true"
-                android:process=":chooser">
-            <intent-filter>
-                <action android:name="android.intent.action.CHOOSER" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.VOICE" />
-            </intent-filter>
-        </activity>
-
     </application>
 </manifest>

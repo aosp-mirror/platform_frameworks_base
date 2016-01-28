@@ -100,7 +100,7 @@ public class IntentForwarderActivity extends Activity  {
             final boolean shouldShowDisclosure = ri == null || ri.activityInfo == null ||
                     !"android".equals(ri.activityInfo.packageName) ||
                     !(ResolverActivity.class.getName().equals(ri.activityInfo.name)
-                    || "com.android.systemui.chooser.ChooserActivity".equals(ri.activityInfo.name));
+                    || ChooserActivity.class.getName().equals(ri.activityInfo.name));
 
             try {
                 startActivityAsCaller(newIntent, null, false, targetUserId);

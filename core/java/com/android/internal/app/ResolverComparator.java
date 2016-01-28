@@ -48,7 +48,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
     private static final boolean DEBUG = false;
 
     // Two weeks
-    private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 7;
+    private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
 
     private static final long RECENCY_TIME_PERIOD = 1000 * 60 * 60 * 12;
 
@@ -171,27 +171,15 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
             }
         }
 
-        final boolean lPinned = lhsp.isPinned();
-        final boolean rPinned = rhsp.isPinned();
+        if (mStats != null) {
+            final ScoredTarget lhsTarget = mScoredTargets.get(new ComponentName(
+                    lhs.activityInfo.packageName, lhs.activityInfo.name));
+            final ScoredTarget rhsTarget = mScoredTargets.get(new ComponentName(
+                    rhs.activityInfo.packageName, rhs.activityInfo.name));
+            final float diff = rhsTarget.score - lhsTarget.score;
 
-        if (lPinned && !rPinned) {
-            return -1;
-        } else if (!lPinned && rPinned) {
-            return 1;
-        }
-
-        // Pinned items stay stable within a normal lexical sort and ignore scoring.
-        if (!lPinned && !rPinned) {
-            if (mStats != null) {
-                final ScoredTarget lhsTarget = mScoredTargets.get(new ComponentName(
-                        lhs.activityInfo.packageName, lhs.activityInfo.name));
-                final ScoredTarget rhsTarget = mScoredTargets.get(new ComponentName(
-                        rhs.activityInfo.packageName, rhs.activityInfo.name));
-                final float diff = rhsTarget.score - lhsTarget.score;
-
-                if (diff != 0) {
-                    return diff > 0 ? 1 : -1;
-                }
+            if (diff != 0) {
+                return diff > 0 ? 1 : -1;
             }
         }
 
