@@ -2017,6 +2017,11 @@ public abstract class PackageManager {
     public static final String FEATURE_SECURELY_REMOVES_USERS
             = "android.software.securely_removes_users";
 
+    /** {@hide} */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FILE_BASED_ENCRYPTION
+            = "android.software.file_based_encryption";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device has a full implementation of the android.webkit.* APIs. Devices

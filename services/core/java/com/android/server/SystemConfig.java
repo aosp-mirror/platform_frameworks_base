@@ -16,19 +16,23 @@
 
 package com.android.server;
 
+import static com.android.internal.util.ArrayUtils.appendInt;
+
 import android.app.ActivityManager;
 import android.content.pm.FeatureInfo;
-import android.os.*;
+import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.Process;
+import android.os.storage.StorageManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
-import libcore.io.IoUtils;
-
 import com.android.internal.util.XmlUtils;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -37,8 +41,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
-import static com.android.internal.util.ArrayUtils.appendInt;
 
 /**
  * Loads global system configuration info.
@@ -351,10 +353,7 @@ public class SystemConfig {
                         Slog.w(TAG, "<feature> without name in " + permFile + " at "
                                 + parser.getPositionDescription());
                     } else if (allowed) {
-                        //Log.i(TAG, "Got feature " + fname);
-                        FeatureInfo fi = new FeatureInfo();
-                        fi.name = fname;
-                        mAvailableFeatures.put(fname, fi);
+                        addFeature(fname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -443,10 +442,29 @@ public class SystemConfig {
             IoUtils.closeQuietly(permReader);
         }
 
-        for (String fname : mUnavailableFeatures) {
-            if (mAvailableFeatures.remove(fname) != null) {
-                Slog.d(TAG, "Removed unavailable feature " + fname);
-            }
+        // Some devices can be field-converted to FBE, so offer to splice in
+        // those features if not already defined by the static config
+        if (StorageManager.isNativeFileBasedEncryptionEnabled()) {
+            addFeature(PackageManager.FEATURE_FILE_BASED_ENCRYPTION);
+            addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS);
+        }
+
+        for (String featureName : mUnavailableFeatures) {
+            removeFeature(featureName);
+        }
+    }
+
+    private void addFeature(String featureName) {
+        if (!mAvailableFeatures.containsKey(featureName)) {
+            final FeatureInfo fi = new FeatureInfo();
+            fi.name = featureName;
+            mAvailableFeatures.put(featureName, fi);
+        }
+    }
+
+    private void removeFeature(String featureName) {
+        if (mAvailableFeatures.remove(featureName) != null) {
+            Slog.d(TAG, "Removed unavailable feature " + featureName);
         }
     }
 
