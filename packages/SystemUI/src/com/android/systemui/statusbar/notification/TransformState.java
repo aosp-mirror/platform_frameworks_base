@@ -286,6 +286,9 @@ public class TransformState {
     }
 
     public void setVisible(boolean visible) {
+        if (mTransformedView.getVisibility() == View.GONE) {
+            return;
+        }
         mTransformedView.animate().cancel();
         mTransformedView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         mTransformedView.setAlpha(visible ? 1.0f : 0.0f);
