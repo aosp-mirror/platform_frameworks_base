@@ -13436,11 +13436,34 @@ package android.hardware {
     field public static final deprecated int TYPE_TEMPERATURE = 7; // 0x7
   }
 
+  public class SensorAdditionalInfo {
+    field public static final int TYPE_FRAME_BEGIN = 0; // 0x0
+    field public static final int TYPE_FRAME_END = 1; // 0x1
+    field public static final int TYPE_INTERNAL_TEMPERATURE = 65537; // 0x10001
+    field public static final int TYPE_SAMPLING = 65540; // 0x10004
+    field public static final int TYPE_SENSOR_PLACEMENT = 65539; // 0x10003
+    field public static final int TYPE_UNTRACKED_DELAY = 65536; // 0x10000
+    field public static final int TYPE_VEC3_CALIBRATION = 65538; // 0x10002
+    field public final float[] floatValues;
+    field public final int[] intValues;
+    field public final android.hardware.Sensor sensor;
+    field public final int serial;
+    field public final int type;
+  }
+
   public class SensorEvent {
     field public int accuracy;
     field public android.hardware.Sensor sensor;
     field public long timestamp;
     field public final float[] values;
+  }
+
+  public abstract class SensorEventCallback implements android.hardware.SensorEventListener2 {
+    ctor public SensorEventCallback();
+    method public void onAccuracyChanged(android.hardware.Sensor, int);
+    method public void onFlushCompleted(android.hardware.Sensor);
+    method public void onSensorAdditionalInfo(android.hardware.SensorAdditionalInfo);
+    method public void onSensorChanged(android.hardware.SensorEvent);
   }
 
   public abstract interface SensorEventListener {

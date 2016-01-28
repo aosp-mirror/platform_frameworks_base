@@ -490,7 +490,7 @@ public class SystemSensorManager extends SensorManager {
      */
     private static abstract class BaseEventQueue {
         private static native long nativeInitBaseEventQueue(long nativeManager,
-                WeakReference<BaseEventQueue> eventQWeak, MessageQueue msgQ, float[] scratch,
+                WeakReference<BaseEventQueue> eventQWeak, MessageQueue msgQ,
                 String packageName, int mode, String opPackageName);
         private static native int nativeEnableSensor(long eventQ, int handle, int rateUs,
                 int maxBatchReportLatencyUs);
@@ -504,7 +504,6 @@ public class SystemSensorManager extends SensorManager {
         private final SparseBooleanArray mActiveSensors = new SparseBooleanArray();
         protected final SparseIntArray mSensorAccuracies = new SparseIntArray();
         private final CloseGuard mCloseGuard = CloseGuard.get();
-        private final float[] mScratch = new float[16];
         protected final SystemSensorManager mManager;
 
         protected static final int OPERATING_MODE_NORMAL = 0;
@@ -513,7 +512,7 @@ public class SystemSensorManager extends SensorManager {
         BaseEventQueue(Looper looper, SystemSensorManager manager, int mode, String packageName) {
             if (packageName == null) packageName = "";
             nSensorEventQueue = nativeInitBaseEventQueue(manager.mNativeInstance,
-                    new WeakReference<>(this), looper.getQueue(), mScratch,
+                    new WeakReference<>(this), looper.getQueue(),
                     packageName, mode, manager.mContext.getOpPackageName());
             mCloseGuard.open("dispose");
             mManager = manager;
@@ -625,6 +624,11 @@ public class SystemSensorManager extends SensorManager {
                 long timestamp);
         protected abstract void dispatchFlushCompleteEvent(int handle);
 
+        protected void dispatchAdditionalInfoEvent(
+                int handle, int type, int serial, float[] floatValues, int[] intValues) {
+            // default implementation is do nothing
+        }
+
         protected abstract void addSensorEvent(Sensor sensor);
         protected abstract void removeSensorEvent(Sensor sensor);
     }
@@ -691,7 +695,9 @@ public class SystemSensorManager extends SensorManager {
             mListener.onSensorChanged(t);
         }
 
+        // Called from native code.
         @SuppressWarnings("unused")
+        @Override
         protected void dispatchFlushCompleteEvent(int handle) {
             if (mListener instanceof SensorEventListener2) {
                 final Sensor sensor = mManager.mHandleToSensor.get(handle);
@@ -702,6 +708,23 @@ public class SystemSensorManager extends SensorManager {
                 ((SensorEventListener2)mListener).onFlushCompleted(sensor);
             }
             return;
+        }
+
+        // Called from native code.
+        @SuppressWarnings("unused")
+        @Override
+        protected void dispatchAdditionalInfoEvent(
+                int handle, int type, int serial, float[] floatValues, int[] intValues) {
+            if (mListener instanceof SensorEventCallback) {
+                final Sensor sensor = mManager.mHandleToSensor.get(handle);
+                if (sensor == null) {
+                    // sensor disconnected
+                    return;
+                }
+                SensorAdditionalInfo info =
+                        new SensorAdditionalInfo(sensor, type, serial, intValues, floatValues);
+                ((SensorEventCallback)mListener).onSensorAdditionalInfo(info);
+            }
         }
     }
 
