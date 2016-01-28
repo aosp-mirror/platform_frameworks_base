@@ -205,6 +205,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private float mAvailableWidth;
 
     String mLogTag = TAG;
+    private final Rect mFloatingInsets = new Rect();
+    private boolean mApplyFloatingVerticalInsets = false;
+    private boolean mApplyFloatingHorizontalInsets = false;
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -567,6 +570,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final int heightMode = getMode(heightMeasureSpec);
 
         boolean fixedWidth = false;
+        mApplyFloatingHorizontalInsets = false;
         if (widthMode == AT_MOST) {
             final TypedValue tvw = isPortrait ? mWindow.mFixedWidthMinor : mWindow.mFixedWidthMajor;
             if (tvw != null && tvw.type != TypedValue.TYPE_NULL) {
@@ -584,10 +588,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(
                             Math.min(w, widthSize), EXACTLY);
                     fixedWidth = true;
+                } else {
+                    widthMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            widthMeasureSpec - mFloatingInsets.left - mFloatingInsets.right,
+                            AT_MOST);
+                    mApplyFloatingHorizontalInsets = true;
                 }
             }
         }
 
+        mApplyFloatingVerticalInsets = false;
         if (heightMode == AT_MOST) {
             final TypedValue tvh = isPortrait ? mWindow.mFixedHeightMajor
                     : mWindow.mFixedHeightMinor;
@@ -601,10 +611,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     h = 0;
                 }
                 if (DEBUG_MEASURE) Log.d(mLogTag, "Fixed height: " + h);
+                final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
                 if (h > 0) {
-                    final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                             Math.min(h, heightSize), EXACTLY);
+                } else if ((mWindow.getAttributes().flags & FLAG_FULLSCREEN) == 0) {
+                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                            heightSize - mFloatingInsets.top - mFloatingInsets.bottom, AT_MOST);
+                    mApplyFloatingVerticalInsets = true;
                 }
             }
         }
@@ -671,6 +685,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         if (mOutsets.top > 0) {
             offsetTopAndBottom(-mOutsets.top);
+        }
+        if (mApplyFloatingVerticalInsets) {
+            offsetTopAndBottom(mFloatingInsets.top);
+        }
+        if (mApplyFloatingHorizontalInsets) {
+            offsetLeftAndRight(mFloatingInsets.left);
         }
 
         // If the application changed its SystemUI metrics, we might also have to adapt
@@ -868,6 +888,25 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        final WindowManager.LayoutParams attrs = mWindow.getAttributes();
+        mFloatingInsets.setEmpty();
+        if ((attrs.flags & FLAG_FULLSCREEN) == 0) {
+            // For dialog windows we want to make sure they don't go over the status bar or nav bar.
+            // We consume the system insets and we will reuse them later during the measure phase.
+            // We allow the app to ignore this and handle insets itself by using FLAG_FULLSCREEN.
+            if (attrs.height == WindowManager.LayoutParams.WRAP_CONTENT) {
+                mFloatingInsets.top = insets.getSystemWindowInsetTop();
+                mFloatingInsets.bottom = insets.getSystemWindowInsetBottom();
+                insets = insets.replaceSystemWindowInsets(insets.getSystemWindowInsetLeft(), 0,
+                        insets.getSystemWindowInsetRight(), 0);
+            }
+            if (mWindow.getAttributes().width == WindowManager.LayoutParams.WRAP_CONTENT) {
+                mFloatingInsets.left = insets.getSystemWindowInsetTop();
+                mFloatingInsets.right = insets.getSystemWindowInsetBottom();
+                insets = insets.replaceSystemWindowInsets(0, insets.getSystemWindowInsetTop(),
+                        0, insets.getSystemWindowInsetBottom());
+            }
+        }
         mFrameOffsets.set(insets.getSystemWindowInsets());
         insets = updateColorViews(insets, true /* animate */);
         insets = updateStatusGuard(insets);

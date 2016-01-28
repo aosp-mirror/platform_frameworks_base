@@ -232,7 +232,6 @@ public class AlertController {
         int contentView = selectContentView();
         mWindow.setContentView(contentView);
         setupView();
-        setupDecor();
     }
 
     private int selectContentView() {
@@ -427,27 +426,6 @@ public class AlertController {
     @SuppressWarnings({"UnusedDeclaration"})
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return mScrollView != null && mScrollView.executeKeyEvent(event);
-    }
-
-    private void setupDecor() {
-        final View decor = mWindow.getDecorView();
-        final View parent = mWindow.findViewById(R.id.parentPanel);
-        if (parent != null && decor != null) {
-            decor.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                @Override
-                public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
-                    if (insets.isRound()) {
-                        // TODO: Get the padding as a function of the window size.
-                        int roundOffset = mContext.getResources().getDimensionPixelOffset(
-                                R.dimen.alert_dialog_round_padding);
-                        parent.setPadding(roundOffset, roundOffset, roundOffset, roundOffset);
-                    }
-                    return insets.consumeSystemWindowInsets();
-                }
-            });
-            decor.setFitsSystemWindows(true);
-            decor.requestApplyInsets();
-        }
     }
 
     /**
