@@ -52,10 +52,12 @@ import android.net.RouteInfo;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
+import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -1296,6 +1298,36 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mWiFiNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 500;
         mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), false);
         validatedCallback.expectCallback(CallbackState.LOST);
+    }
+
+    @SmallTest
+    public void testInvalidNetworkSpecifier() {
+        boolean execptionCalled = true;
+
+        try {
+            NetworkRequest.Builder builder = new NetworkRequest.Builder();
+            builder.setNetworkSpecifier(MATCH_ALL_REQUESTS_NETWORK_SPECIFIER);
+            execptionCalled = false;
+        } catch (IllegalArgumentException e) {
+            // do nothing - should get here
+        }
+
+        assertTrue("NetworkReqeuest builder with MATCH_ALL_REQUESTS_NETWORK_SPECIFIER",
+                execptionCalled);
+
+        try {
+            NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+            networkCapabilities.addTransportType(TRANSPORT_WIFI)
+                    .setNetworkSpecifier(NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER);
+            mService.requestNetwork(networkCapabilities, null, 0, null,
+                    ConnectivityManager.TYPE_WIFI);
+            execptionCalled = false;
+        } catch (IllegalArgumentException e) {
+            // do nothing - should get here
+        }
+
+        assertTrue("ConnectivityService requestNetwork with MATCH_ALL_REQUESTS_NETWORK_SPECIFIER",
+                execptionCalled);
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {

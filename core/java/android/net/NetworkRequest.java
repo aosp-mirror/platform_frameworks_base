@@ -188,6 +188,10 @@ public class NetworkRequest implements Parcelable {
          *                         networks.
          */
         public Builder setNetworkSpecifier(String networkSpecifier) {
+            if (NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(networkSpecifier)) {
+                throw new IllegalArgumentException("Invalid network specifier - must not be '"
+                        + NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER + "'");
+            }
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
             return this;
         }

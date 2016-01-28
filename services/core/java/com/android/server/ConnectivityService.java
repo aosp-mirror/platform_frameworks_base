@@ -3800,6 +3800,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalArgumentException("Bad timeout specified");
         }
 
+        if (NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER
+                .equals(networkCapabilities.getNetworkSpecifier())) {
+            throw new IllegalArgumentException("Invalid network specifier - must not be '"
+                    + NetworkCapabilities.MATCH_ALL_REQUESTS_NETWORK_SPECIFIER + "'");
+        }
+
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId());
         NetworkRequestInfo nri = new NetworkRequestInfo(messenger, networkRequest, binder,
