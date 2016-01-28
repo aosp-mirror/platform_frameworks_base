@@ -695,7 +695,7 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request that the listener be rebound, after a previous call to (@link requestUnbind).
      *
-     * <P>This method will fail for assistants that have
+     * <P>This method will fail for listeners that have
      * not been granted the permission by the user.
      *
      * <P>The service should wait for the {@link #onListenerConnected()} event
@@ -1022,8 +1022,7 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
-         * If the importance has been overriden by user preference, or by a
-         * {@link NotificationAssistantService}, then this will be non-null,
+         * If the importance has been overriden by user preference, then this will be non-null,
          * and should be displayed to the user.
          *
          * @return the explanation for the importance, or null if it is the natural importance
