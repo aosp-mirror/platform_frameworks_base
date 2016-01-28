@@ -238,7 +238,7 @@ static jobject ExifInterface_getRawMetadata(
             map.add(
                     String8("GPSTimeStamp"),
                     String8::format(
-                            "%2u:%2u:%2u",
+                            "%02u:%02u:%02u",
                             image_data.gps.time_stamp[0].numerator
                             / image_data.gps.time_stamp[0].denominator,
                             image_data.gps.time_stamp[1].numerator
