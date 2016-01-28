@@ -169,6 +169,14 @@ public class AudioPolicyConfig implements Parcelable {
                         textDump += "  match capture preset ";
                         textDump += criterion.mAttr.getCapturePreset();
                         break;
+                    case AudioMixingRule.RULE_MATCH_UID:
+                        textDump += "  match UID ";
+                        textDump += criterion.mIntProp.toString();
+                        break;
+                    case AudioMixingRule.RULE_EXCLUDE_UID:
+                        textDump += "  exclude UID ";
+                        textDump += criterion.mIntProp.toString();
+                        break;
                     default:
                         textDump += "invalid rule!";
                 }
