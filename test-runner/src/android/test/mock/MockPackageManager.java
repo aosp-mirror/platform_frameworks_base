@@ -60,12 +60,7 @@ import java.util.List;
  * A mock {@link android.content.pm.PackageManager} class.  All methods are non-functional and throw
  * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you
  * need.
- *
- * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
- * New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
-@Deprecated
 public class MockPackageManager extends PackageManager {
 
     @Override

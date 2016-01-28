@@ -25,18 +25,15 @@ import android.net.Uri;
 import android.os.Bundle;
 
 /**
+ * <P>
  * A mock {@link android.database.Cursor} class that isolates the test code from real
  * Cursor implementation.
- *
- * <p>
+ * </P>
+ * <P>
  * All methods including ones related to querying the state of the cursor are
  * are non-functional and throw {@link java.lang.UnsupportedOperationException}.
- *
- * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
- * New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+ * </P>
  */
-@Deprecated
 public class MockCursor implements Cursor {
     @Override
     public int getColumnCount() {

@@ -21,7 +21,6 @@ import junit.framework.TestSuite;
 /**
  * Implementors will know how to get a test suite.
  */
-@Deprecated
 public interface TestSuiteProvider {
 
     TestSuite getTestSuite();

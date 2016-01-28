@@ -41,12 +41,7 @@ import java.util.ArrayList;
  * Mock implementation of ContentProvider.  All methods are non-functional and throw
  * {@link java.lang.UnsupportedOperationException}.  Tests can extend this class to
  * implement behavior needed for tests.
- *
- * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
- * New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
-@Deprecated
 public class MockContentProvider extends ContentProvider {
     /*
      * Note: if you add methods to ContentProvider, you must add similar methods to
