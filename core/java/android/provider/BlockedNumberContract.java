@@ -91,14 +91,6 @@ public class BlockedNumberContract {
         /**
          * Phone number to block.  The system generates it from {@link #COLUMN_ORIGINAL_NUMBER}
          * by removing all formatting characters.
-         * <p>Must NOT be specified in {@code insert}.
-         * <p>TYPE: String</p>
-         */
-        public static final String COLUMN_STRIPPED_NUMBER = "stripped_number";
-
-        /**
-         * Phone number to block.  The system generates it from {@link #COLUMN_ORIGINAL_NUMBER}
-         * by removing all formatting characters.
          * <p>Optional in {@code insert}.  When not specified, the system tries to generate it
          * assuming the current country. (Which will still be null if the number is not valid.)
          * <p>TYPE: String</p>
@@ -112,17 +104,32 @@ public class BlockedNumberContract {
     /** @hide */
     public static final String RES_NUMBER_IS_BLOCKED = "blocked";
 
+    /** @hide */
+    public static final String METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS =
+            "can_current_user_block_numbers";
+
+    /** @hide */
+    public static final String RES_CAN_BLOCK_NUMBERS = "can_block";
+
     /**
      * Returns whether a given number is in the blocked list.
-     *
-     * TODO This should probably catch IllegalArgumentException to guard against the case where
-     * the provider is encrypted or the user is not running.
-     * (See addEntryAndRemoveExpiredEntries() in
-     * http://ag/#/c/844426/3/core/java/android/provider/CallLog.java)
+     * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
+     * context {@code context}, this method will throw an {@link UnsupportedOperationException}.
      */
     public static boolean isBlocked(Context context, String phoneNumber) {
         final Bundle res = context.getContentResolver().call(AUTHORITY_URI,
                 METHOD_IS_BLOCKED, phoneNumber, null);
         return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
     }
+
+    /**
+     * Returns {@code true} if blocking numbers is supported for the current user.
+     * <p> Typically, blocking numbers is only supported for the primary user.
+     */
+    public static boolean canCurrentUserBlockNumbers(Context context) {
+        final Bundle res = context.getContentResolver().call(
+                AUTHORITY_URI, METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS, null, null);
+        return res != null && res.getBoolean(RES_CAN_BLOCK_NUMBERS, false);
+    }
+
 }
