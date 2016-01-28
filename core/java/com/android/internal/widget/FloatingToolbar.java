@@ -1264,7 +1264,7 @@ public final class FloatingToolbar {
         }
 
         private void maybeComputeTransitionDurationScale() {
-            if (mMainPanelSize == null || mOverflowPanel == null) {
+            if (mMainPanelSize != null && mOverflowPanelSize != null) {
                 int w = mMainPanelSize.getWidth() - mOverflowPanelSize.getWidth();
                 int h = mOverflowPanelSize.getHeight() - mMainPanelSize.getHeight();
                 mTransitionDurationScale = (int) (Math.sqrt(w * w + h * h) /
