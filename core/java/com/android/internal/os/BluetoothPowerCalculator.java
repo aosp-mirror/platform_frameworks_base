@@ -40,15 +40,15 @@ public class BluetoothPowerCalculator extends PowerCalculator {
     @Override
     public void calculateRemaining(BatterySipper app, BatteryStats stats, long rawRealtimeUs,
                                    long rawUptimeUs, int statsType) {
-        final long idleTimeMs = stats.getBluetoothControllerActivity(
-                BatteryStats.CONTROLLER_IDLE_TIME, statsType);
-        final long txTimeMs = stats.getBluetoothControllerActivity(
-                BatteryStats.CONTROLLER_TX_TIME, statsType);
-        final long rxTimeMs = stats.getBluetoothControllerActivity(
-                BatteryStats.CONTROLLER_RX_TIME, statsType);
+        final BatteryStats.ControllerActivityCounter counter =
+                stats.getBluetoothControllerActivity();
+
+        final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(statsType);
+        final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(statsType);
+        final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(statsType);
         final long totalTimeMs = idleTimeMs + txTimeMs + rxTimeMs;
-        double powerMah = stats.getBluetoothControllerActivity(
-                BatteryStats.CONTROLLER_POWER_DRAIN, statsType) / (double)(1000*60*60);
+        double powerMah = counter.getPowerCounter().getCountLocked(statsType)
+                 / (double)(1000*60*60);
 
         if (powerMah == 0) {
             // Some devices do not report the power, so calculate it.

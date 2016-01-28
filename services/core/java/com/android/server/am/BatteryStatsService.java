@@ -40,6 +40,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.IntArray;
@@ -51,6 +52,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.telephony.ITelephony;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 
@@ -1329,6 +1331,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         return null;
     }
 
+    @GuardedBy("mExternalStatsLock")
+    private ModemActivityInfo pullModemActivityInfoLocked() {
+        ITelephony tm = ITelephony.Stub.asInterface(ServiceManager.getService(
+                Context.TELEPHONY_SERVICE));
+        try {
+            if (tm != null) {
+                ModemActivityInfo info = tm.getModemActivityInfo();
+                if (info == null || info.isValid()) {
+                    return info;
+                }
+                Slog.wtf(TAG, "Modem activity info is invalid: " + info);
+            }
+        } catch (RemoteException e) {
+            // Nothing to do.
+        }
+        return null;
+    }
+
     /**
      * Fetches data from external sources (WiFi controller, bluetooth chipset) and updates
      * batterystats with that information.
@@ -1358,6 +1378,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 wifiEnergyInfo = pullWifiEnergyInfoLocked();
             }
 
+            ModemActivityInfo modemActivityInfo = null;
+            if ((updateFlags & UPDATE_RADIO) != 0) {
+                modemActivityInfo = pullModemActivityInfoLocked();
+            }
+
             BluetoothActivityEnergyInfo bluetoothEnergyInfo = null;
             if ((updateFlags & UPDATE_BT) != 0) {
                 // We only pull bluetooth stats when we have to, as we are not distributing its
@@ -1379,7 +1404,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
 
                 if ((updateFlags & UPDATE_RADIO) != 0) {
-                    mStats.updateMobileRadioStateLocked(elapsedRealtime);
+                    mStats.updateMobileRadioStateLocked(elapsedRealtime, modemActivityInfo);
                 }
 
                 if ((updateFlags & UPDATE_WIFI) != 0) {

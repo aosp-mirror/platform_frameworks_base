@@ -93,6 +93,12 @@ public class PowerProfile {
     public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
             "bluetooth.controller.voltage";
 
+    public static final String POWER_MODEM_CONTROLLER_IDLE = "modem.controller.idle";
+    public static final String POWER_MODEM_CONTROLLER_RX = "modem.controller.rx";
+    public static final String POWER_MODEM_CONTROLLER_TX = "modem.controller.tx";
+    public static final String POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE =
+            "modem.controller.voltage";
+
     /**
      * Power consumption when GPS is on.
      */
@@ -100,17 +106,23 @@ public class PowerProfile {
 
     /**
      * Power consumption when Bluetooth driver is on.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_ON = "bluetooth.on";
 
     /**
      * Power consumption when Bluetooth driver is transmitting/receiving.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_ACTIVE = "bluetooth.active";
 
     /**
      * Power consumption when Bluetooth driver gets an AT command.
+     * @deprecated
      */
+    @Deprecated
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
 
