@@ -20483,6 +20483,16 @@ package android.media {
     method public final void setInteger(java.lang.String, int);
     method public final void setLong(java.lang.String, long);
     method public final void setString(java.lang.String, java.lang.String);
+    field public static final int COLOR_RANGE_FULL = 1; // 0x1
+    field public static final int COLOR_RANGE_LIMITED = 2; // 0x2
+    field public static final int COLOR_STANDARD_BT2020 = 6; // 0x6
+    field public static final int COLOR_STANDARD_BT601_NTSC = 4; // 0x4
+    field public static final int COLOR_STANDARD_BT601_PAL = 2; // 0x2
+    field public static final int COLOR_STANDARD_BT709 = 1; // 0x1
+    field public static final int COLOR_TRANSFER_HLG = 7; // 0x7
+    field public static final int COLOR_TRANSFER_LINEAR = 1; // 0x1
+    field public static final int COLOR_TRANSFER_SDR_VIDEO = 3; // 0x3
+    field public static final int COLOR_TRANSFER_ST2084 = 6; // 0x6
     field public static final java.lang.String KEY_AAC_DRC_ATTENUATION_FACTOR = "aac-drc-cut-level";
     field public static final java.lang.String KEY_AAC_DRC_BOOST_FACTOR = "aac-drc-boost-level";
     field public static final java.lang.String KEY_AAC_DRC_HEAVY_COMPRESSION = "aac-drc-heavy-compression";
@@ -20498,6 +20508,9 @@ package android.media {
     field public static final java.lang.String KEY_CHANNEL_COUNT = "channel-count";
     field public static final java.lang.String KEY_CHANNEL_MASK = "channel-mask";
     field public static final java.lang.String KEY_COLOR_FORMAT = "color-format";
+    field public static final java.lang.String KEY_COLOR_RANGE = "color-range";
+    field public static final java.lang.String KEY_COLOR_STANDARD = "color-standard";
+    field public static final java.lang.String KEY_COLOR_TRANSFER = "color-transfer";
     field public static final java.lang.String KEY_COMPLEXITY = "complexity";
     field public static final java.lang.String KEY_DURATION = "durationUs";
     field public static final java.lang.String KEY_FLAC_COMPRESSION_LEVEL = "flac-compression-level";
