@@ -863,7 +863,7 @@ class PackageManagerShellCommand extends ShellCommand {
             if (inPath != null) {
                 in = new FileInputStream(inPath);
             } else {
-                in = new SizedInputStream(getInputStream(), sizeBytes);
+                in = new SizedInputStream(getRawInputStream(), sizeBytes);
             }
             out = session.openWrite(splitName, 0, sizeBytes);
 
