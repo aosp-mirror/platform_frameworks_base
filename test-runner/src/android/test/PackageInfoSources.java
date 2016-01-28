@@ -19,6 +19,7 @@ package android.test;
 /**
  * {@hide} Not needed for SDK.
  */
+@Deprecated
 public class PackageInfoSources {
 
     private static ClassPathPackageInfoSource classPathSource;

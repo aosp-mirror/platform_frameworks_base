@@ -30,6 +30,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * {@hide} Pending approval for public API.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TimedTest {
     boolean includeDetailedStats() default false;

@@ -22,13 +22,19 @@ import android.app.Activity;
  * If you would like to test a single activity with an
  * {@link android.test.InstrumentationTestCase}, this provides some of the boiler plate to
  * launch and finish the activity in {@link #setUp} and {@link #tearDown}.
- * 
- * This launches the activity only once for the entire class instead of doing it 
+ *
+ * This launches the activity only once for the entire class instead of doing it
  * in every setup / teardown call.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/rule/ActivityTestRule.html">
+ * ActivityTestRule</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public abstract class SingleLaunchActivityTestCase<T extends Activity>
         extends InstrumentationTestCase {
-    
+
     String mPackage;
     Class<T> mActivityClass;
     private static int sTestCaseCounter = 0;
@@ -44,10 +50,10 @@ public abstract class SingleLaunchActivityTestCase<T extends Activity>
      */
     public SingleLaunchActivityTestCase(String pkg, Class<T> activityClass) {
         mPackage = pkg;
-        mActivityClass = activityClass;        
-        sTestCaseCounter ++;                
+        mActivityClass = activityClass;
+        sTestCaseCounter ++;
     }
-    
+
     /**
      * The activity that will be set up for use in each test method.
      */
@@ -66,7 +72,7 @@ public abstract class SingleLaunchActivityTestCase<T extends Activity>
             getInstrumentation().setInTouchMode(false);
             sActivity = launchActivity(mPackage, mActivityClass, null);
             sActivityLaunchedFlag = true;
-        }                        
+        }
     }
 
     @Override
@@ -75,7 +81,7 @@ public abstract class SingleLaunchActivityTestCase<T extends Activity>
         sTestCaseCounter --;
         if (sTestCaseCounter == 0) {
             sActivity.finish();
-        }        
+        }
         super.tearDown();
     }
 

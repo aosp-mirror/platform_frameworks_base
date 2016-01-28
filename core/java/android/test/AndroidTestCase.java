@@ -29,7 +29,13 @@ import java.lang.reflect.Modifier;
 
 /**
  * Extend this if you need to access Resources or other things that depend on Activity Context.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+ * InstrumentationRegistry</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class AndroidTestCase extends TestCase {
 
     protected Context mContext;

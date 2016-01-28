@@ -201,7 +201,7 @@ package android.provider {
 
 package android.test.mock {
 
-  public class MockPackageManager extends android.content.pm.PackageManager {
+  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
     method public deprecated java.lang.String getDefaultBrowserPackageName(int);
     method public deprecated boolean setDefaultBrowserPackageName(java.lang.String, int);
   }
