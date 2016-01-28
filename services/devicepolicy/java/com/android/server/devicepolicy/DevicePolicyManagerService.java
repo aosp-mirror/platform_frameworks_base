@@ -1983,7 +1983,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ResolveInfo ri = infos.get(0);
 
         if (!permission.BIND_DEVICE_ADMIN.equals(ri.activityInfo.permission)) {
-            final String message = "DeviceAdminReceiver " + adminName + " must be protected with"
+            final String message = "DeviceAdminReceiver " + adminName + " must be protected with "
                     + permission.BIND_DEVICE_ADMIN;
             Slog.w(LOG_TAG, message);
             if (throwForMissiongPermission &&
