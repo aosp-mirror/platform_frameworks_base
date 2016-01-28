@@ -2872,6 +2872,7 @@ public class Editor {
         protected PopupWindow mPopupWindow;
         protected ViewGroup mContentView;
         int mPositionX, mPositionY;
+        int mClippingLimitLeft, mClippingLimitRight;
 
         protected abstract void createPopupWindow();
         protected abstract void initContentView();
@@ -2939,8 +2940,9 @@ public class Editor {
             // Horizontal clipping
             final DisplayMetrics displayMetrics = mTextView.getResources().getDisplayMetrics();
             final int width = mContentView.getMeasuredWidth();
-            positionX = Math.min(displayMetrics.widthPixels - width, positionX);
-            positionX = Math.max(0, positionX);
+            positionX = Math.min(
+                    displayMetrics.widthPixels - width + mClippingLimitRight, positionX);
+            positionX = Math.max(-mClippingLimitLeft, positionX);
 
             if (isShowing()) {
                 mPopupWindow.update(positionX, positionY, -1, -1);
@@ -3118,6 +3120,8 @@ public class Editor {
         private TextView mAddToDictionaryButton;
         private TextView mDeleteButton;
         private SuggestionSpan mMisspelledSpan;
+        private int mContainerMarginWidth;
+        private int mContainerMarginTop;
 
         private class CustomPopupWindow extends PopupWindow {
             @Override
@@ -3155,10 +3159,20 @@ public class Editor {
         protected void initContentView() {
             final LayoutInflater inflater = (LayoutInflater) mTextView.getContext().
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final LinearLayout linearLayout = (LinearLayout) inflater.inflate(
+            final ViewGroup relativeLayout = (ViewGroup) inflater.inflate(
                     mTextView.mTextEditSuggestionContainerLayout, null);
 
-            final ListView suggestionListView = (ListView) linearLayout.findViewById(
+            final LinearLayout suggestionWindowContainer =
+                    (LinearLayout) relativeLayout.findViewById(
+                            com.android.internal.R.id.suggestionWindowContainer);
+            ViewGroup.MarginLayoutParams lp =
+                    (ViewGroup.MarginLayoutParams) suggestionWindowContainer.getLayoutParams();
+            mContainerMarginWidth = lp.leftMargin + lp.rightMargin;
+            mContainerMarginTop = lp.topMargin;
+            mClippingLimitLeft = lp.leftMargin;
+            mClippingLimitRight = lp.rightMargin;
+
+            final ListView suggestionListView = (ListView) relativeLayout.findViewById(
                     com.android.internal.R.id.suggestionContainer);
 
             mSuggestionsAdapter = new SuggestionAdapter();
@@ -3171,9 +3185,9 @@ public class Editor {
                 mSuggestionInfos[i] = new SuggestionInfo();
             }
 
-            mContentView = linearLayout;
+            mContentView = relativeLayout;
 
-            mAddToDictionaryButton = (TextView) linearLayout.findViewById(
+            mAddToDictionaryButton = (TextView) relativeLayout.findViewById(
                     com.android.internal.R.id.addToDictionaryButton);
             mAddToDictionaryButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -3197,7 +3211,7 @@ public class Editor {
                 }
             });
 
-            mDeleteButton = (TextView) linearLayout.findViewById(
+            mDeleteButton = (TextView) relativeLayout.findViewById(
                     com.android.internal.R.id.deleteButton);
             mDeleteButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -3306,6 +3320,8 @@ public class Editor {
             mDeleteButton.measure(horizontalMeasure, verticalMeasure);
             width = Math.max(width, mDeleteButton.getMeasuredWidth());
 
+            width += mContainerMarginWidth;
+
             // Enforce the width based on actual text widths
             mContentView.measure(
                     View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
@@ -3327,7 +3343,7 @@ public class Editor {
 
         @Override
         protected int getVerticalLocalPosition(int line) {
-            return mTextView.getLayout().getLineBottom(line);
+            return mTextView.getLayout().getLineBottom(line) - mContainerMarginTop;
         }
 
         @Override

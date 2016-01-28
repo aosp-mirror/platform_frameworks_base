@@ -14,32 +14,41 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="@drawable/text_edit_suggestions_window"
-    android:dropDownSelector="@drawable/list_selector_background"
-    android:divider="@null">
-    <ListView
-        android:id="@+id/suggestionContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="?android:attr/dividerHorizontal">
-        <!-- Suggestions will be added here. -->
-    </ListView>
-
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/suggestionWindowContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:divider="?android:attr/dividerHorizontal"
-        android:showDividers="middle">
-        <TextView
-            style="@android:style/Widget.Holo.SuggestionButton"
-            android:id="@+id/addToDictionaryButton"
-            android:text="@string/addToDictionary" />
-        <TextView
-            style="@android:style/Widget.Holo.SuggestionButton"
-            android:id="@+id/deleteButton"
-            android:text="@string/deleteText" />
+        android:elevation="2dp"
+        android:layout_margin="20dp"
+        android:background="@drawable/text_edit_suggestions_window"
+        android:dropDownSelector="@drawable/list_selector_background"
+        android:divider="@null">
+        <ListView
+            android:id="@+id/suggestionContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="?android:attr/dividerHorizontal">
+            <!-- Suggestions will be added here. -->
+        </ListView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="?android:attr/dividerHorizontal"
+            android:showDividers="middle">
+            <TextView
+                style="@android:style/Widget.Holo.SuggestionButton"
+                android:id="@+id/addToDictionaryButton"
+                android:text="@string/addToDictionary" />
+            <TextView
+                style="@android:style/Widget.Holo.SuggestionButton"
+                android:id="@+id/deleteButton"
+                android:text="@string/deleteText" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>
