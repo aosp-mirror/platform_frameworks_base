@@ -37,6 +37,7 @@ public class ServiceState implements Parcelable {
 
     static final String LOG_TAG = "PHONE";
     static final boolean DBG = true;
+    static final boolean VDBG = false;  // STOPSHIP if true
 
     /**
      * Normal operation condition, the phone is registered
@@ -829,7 +830,7 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setDataRegState(int state) {
         mDataRegState = state;
-        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
+        if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
     }
 
     public void setRoaming(boolean roaming) {
@@ -1017,7 +1018,8 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public void setRilDataRadioTechnology(int rt) {
         this.mRilDataRadioTechnology = rt;
-        if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRadioTechnology=" + mRilDataRadioTechnology);
+        if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setRilDataRadioTechnology=" +
+                mRilDataRadioTechnology);
     }
 
     /** @hide */
