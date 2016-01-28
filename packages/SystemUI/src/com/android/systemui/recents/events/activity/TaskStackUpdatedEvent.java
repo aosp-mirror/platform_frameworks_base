@@ -22,7 +22,7 @@ import com.android.systemui.recents.model.TaskStack;
 /**
  * This is sent by the activity whenever the task stach has changed.
  */
-public class TaskStackUpdatedEvent extends EventBus.Event {
+public class TaskStackUpdatedEvent extends EventBus.AnimatedEvent {
 
     /**
      * A new TaskStack instance representing the latest stack state.

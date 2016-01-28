@@ -59,6 +59,7 @@ import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
+import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
@@ -142,6 +143,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     Rect mStableStackBounds = new Rect();
     // The current stack bounds are dynamic and may change as the user drags and drops
     Rect mStackBounds = new Rect();
+
     int[] mTmpVisibleRange = new int[2];
     Rect mTmpRect = new Rect();
     ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();
@@ -860,8 +862,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 // TODO: Center the newly focused task view, only if not freeform
                 float newScroll = mLayoutAlgorithm.getStackScrollForTask(newFocusedTask);
                 if (Float.compare(newScroll, mStackScroller.getStackScroll()) != 0) {
-                    mStackScroller.animateScroll(mStackScroller.getStackScroll(), newScroll,
-                            focusTaskRunnable);
+                    mStackScroller.animateScroll(newScroll, focusTaskRunnable);
                     willScroll = true;
                 } else {
                     focusTaskRunnable.run();
@@ -1586,8 +1587,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(DragStartEvent event) {
         if (event.task.isFreeformTask()) {
             // Animate to the front of the stack
-            mStackScroller.animateScroll(mStackScroller.getStackScroll(),
-                    mLayoutAlgorithm.mInitialScrollP, null);
+            mStackScroller.animateScroll(mLayoutAlgorithm.mInitialScrollP, null);
         }
 
         // Enlarge the dragged view slightly
@@ -1613,7 +1613,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
-            addIgnoreTask(event.task);
             final TaskStack.DockState dockState = (TaskStack.DockState) event.dropTarget;
             mStackBounds.set(dockState.getDockedTaskStackBounds(getMeasuredWidth(),
                     getMeasuredHeight(), mDividerSize, mLayoutAlgorithm.mSystemInsets,
@@ -1773,6 +1772,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(HideHistoryEvent event) {
         setVisibility(View.VISIBLE);
         mAnimationHelper.startHideHistoryAnimation();
+    }
+
+    public final void onBusEvent(TaskStackUpdatedEvent event) {
+        // Scroll the stack to the front after it has been updated
+        event.addPostAnimationCallback(new Runnable() {
+            @Override
+            public void run() {
+                mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP,
+                        null /* postScrollRunnable */);
+            }
+        });
     }
 
     /**
