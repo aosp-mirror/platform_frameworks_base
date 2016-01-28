@@ -873,14 +873,15 @@ static void dump_image(int w, int h, png_bytepp rows, int color_type)
 
 static void analyze_image(const char *imageName, image_info &imageInfo, int grayscaleTolerance,
                           png_colorp rgbPalette, png_bytep alphaPalette,
-                          int *paletteEntries, bool *hasTransparency, int *colorType,
-                          png_bytepp outRows)
+                          int *paletteEntries, int *alphaPaletteEntries, bool *hasTransparency,
+                          int *colorType, png_bytepp outRows)
 {
     int w = imageInfo.width;
     int h = imageInfo.height;
-    int i, j, rr, gg, bb, aa, idx;
-    uint32_t colors[256], col;
-    int num_colors = 0;
+    int i, j, rr, gg, bb, aa, idx;;
+    uint32_t opaqueColors[256], alphaColors[256];
+    uint32_t col;
+    int numOpaqueColors = 0, numAlphaColors = 0;
     int maxGrayDeviation = 0;
 
     bool isOpaque = true;
@@ -891,6 +892,10 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     // 1. Every pixel has R == G == B (grayscale)
     // 2. Every pixel has A == 255 (opaque)
     // 3. There are no more than 256 distinct RGBA colors
+    //        We will track opaque colors separately from colors with
+    //        alpha.  This allows us to reencode the color table more
+    //        efficiently (color tables entries without a corresponding
+    //        alpha value are assumed to be opaque).
 
     if (kIsDebug) {
         printf("Initial image data:\n");
@@ -943,26 +948,53 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
             if (isPalette) {
                 col = (uint32_t) ((rr << 24) | (gg << 16) | (bb << 8) | aa);
                 bool match = false;
-                for (idx = 0; idx < num_colors; idx++) {
-                    if (colors[idx] == col) {
-                        match = true;
-                        break;
+
+                if (aa == 0xff) {
+                    for (idx = 0; idx < numOpaqueColors; idx++) {
+                        if (opaqueColors[idx] == col) {
+                            match = true;
+                            break;
+                        }
                     }
+
+                    if (!match) {
+                        if (numOpaqueColors < 256) {
+                            opaqueColors[numOpaqueColors] = col;
+                        }
+                        numOpaqueColors++;
+                    }
+
+                    // Write the palette index for the pixel to outRows optimistically.
+                    // We might overwrite it later if we decide to encode as gray or
+                    // gray + alpha.  We may also need to overwrite it when we combine
+                    // into a single palette.
+                    *out++ = idx;
+                } else {
+                    for (idx = 0; idx < numAlphaColors; idx++) {
+                        if (alphaColors[idx] == col) {
+                            match = true;
+                            break;
+                        }
+                    }
+
+                    if (!match) {
+                        if (numAlphaColors < 256) {
+                            alphaColors[numAlphaColors] = col;
+                        }
+                        numAlphaColors++;
+                    }
+
+                    // Write the palette index for the pixel to outRows optimistically.
+                    // We might overwrite it later if we decide to encode as gray or
+                    // gray + alpha.
+                    *out++ = idx;
                 }
 
-                // Write the palette index for the pixel to outRows optimistically
-                // We might overwrite it later if we decide to encode as gray or
-                // gray + alpha
-                *out++ = idx;
-                if (!match) {
-                    if (num_colors == 256) {
-                        if (kIsDebug) {
-                            printf("Found 257th color at %d, %d\n", i, j);
-                        }
-                        isPalette = false;
-                    } else {
-                        colors[num_colors++] = col;
+                if (numOpaqueColors + numAlphaColors > 256) {
+                    if (kIsDebug) {
+                        printf("Found 257th color at %d, %d\n", i, j);
                     }
+                    isPalette = false;
                 }
             }
         }
@@ -970,9 +1002,9 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
 
     *paletteEntries = 0;
     *hasTransparency = !isOpaque;
-    int bpp = isOpaque ? 3 : 4;
-    int paletteSize = w * h + bpp * num_colors;
+    int paletteSize = w * h + 3 * numOpaqueColors + 4 * numAlphaColors;
 
+    int bpp = isOpaque ? 3 : 4;
     if (kIsDebug) {
         printf("isGrayscale = %s\n", isGrayscale ? "true" : "false");
         printf("isOpaque = %s\n", isOpaque ? "true" : "false");
@@ -1017,16 +1049,37 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
     // color type chosen
 
     if (*colorType == PNG_COLOR_TYPE_PALETTE) {
+        // Combine the alphaColors and the opaqueColors into a single palette.
+        // The alphaColors must be at the start of the palette.
+        uint32_t* colors = alphaColors;
+        memcpy(colors + numAlphaColors, opaqueColors, 4 * numOpaqueColors);
+
+        // Fix the indices of the opaque colors in the image.
+        for (j = 0; j < h; j++) {
+            png_bytep row = imageInfo.rows[j];
+            png_bytep out = outRows[j];
+            for (i = 0; i < w; i++) {
+                uint32_t pixel = ((uint32_t*) row)[i];
+                if (pixel >> 24 == 0xFF) {
+                    out[i] += numAlphaColors;
+                }
+            }
+        }
+
         // Create separate RGB and Alpha palettes and set the number of colors
-        *paletteEntries = num_colors;
+        int numColors = numOpaqueColors + numAlphaColors;
+        *paletteEntries = numColors;
+        *alphaPaletteEntries = numAlphaColors;
 
         // Create the RGB and alpha palettes
-        for (int idx = 0; idx < num_colors; idx++) {
+        for (int idx = 0; idx < numColors; idx++) {
             col = colors[idx];
             rgbPalette[idx].red   = (png_byte) ((col >> 24) & 0xff);
             rgbPalette[idx].green = (png_byte) ((col >> 16) & 0xff);
             rgbPalette[idx].blue  = (png_byte) ((col >>  8) & 0xff);
-            alphaPalette[idx]     = (png_byte)  (col        & 0xff);
+            if (idx < numAlphaColors) {
+                alphaPalette[idx] = (png_byte)  (col        & 0xff);
+            }
         }
     } else if (*colorType == PNG_COLOR_TYPE_GRAY || *colorType == PNG_COLOR_TYPE_GRAY_ALPHA) {
         // If the image is gray or gray + alpha, compact the pixels into outRows
@@ -1090,10 +1143,10 @@ static void write_png(const char* imageName,
     png_color rgbPalette[256];
     png_byte alphaPalette[256];
     bool hasTransparency;
-    int paletteEntries;
+    int paletteEntries, alphaPaletteEntries;
 
     analyze_image(imageName, imageInfo, grayscaleTolerance, rgbPalette, alphaPalette,
-                  &paletteEntries, &hasTransparency, &color_type, outRows);
+                  &paletteEntries, &alphaPaletteEntries, &hasTransparency, &color_type, outRows);
 
     if (kIsDebug) {
         switch (color_type) {
@@ -1124,7 +1177,8 @@ static void write_png(const char* imageName,
     if (color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_PLTE(write_ptr, write_info, rgbPalette, paletteEntries);
         if (hasTransparency) {
-            png_set_tRNS(write_ptr, write_info, alphaPalette, paletteEntries, (png_color_16p) 0);
+            png_set_tRNS(write_ptr, write_info, alphaPalette, alphaPaletteEntries,
+                    (png_color_16p) 0);
         }
        png_set_filter(write_ptr, 0, PNG_NO_FILTERS);
     } else {
