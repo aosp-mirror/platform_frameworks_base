@@ -73,6 +73,7 @@ class UserUsageStatsService {
 
     interface StatsUpdatedListener {
         void onStatsUpdated();
+        void onStatsReloaded();
         long getAppIdleRollingWindowDurationMillis();
     }
 
@@ -523,6 +524,9 @@ class UserUsageStatsService {
 
         mStatsChanged = false;
         updateRolloverDeadline();
+
+        // Tell the listener that the stats reloaded, which may have changed idle states.
+        mListener.onStatsReloaded();
     }
 
     private void updateRolloverDeadline() {
