@@ -81,7 +81,8 @@ size_t FileStream::size() const {
 
 bool GetExifFromRawImage(
         FileStream* stream, const String8& filename, piex::PreviewImageData& image_data) {
-    memset(&image_data, 0, sizeof(image_data));
+    // Reset the PreviewImageData to its default.
+    image_data = piex::PreviewImageData();
 
     if (!stream->exists()) {
         // File is not exists.
