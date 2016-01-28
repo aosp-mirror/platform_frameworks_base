@@ -726,12 +726,11 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the information about a given TV input is changed.
+         * This is called when the information about a given TV input has been changed.
          *
-         * @param inputId The ID of the TV input.
          * @param inputInfo TvInputInfo object that contains the information about the TV input.
          */
-        public void onTvInputInfoChanged(String inputId, TvInputInfo inputInfo) {
+        public void onTvInputInfoChanged(TvInputInfo inputInfo) {
         }
     }
 
@@ -784,11 +783,11 @@ public final class TvInputManager {
             });
         }
 
-        public void postTvInputInfoChanged(final String inputId, final TvInputInfo inputInfo) {
+        public void postTvInputInfoChanged(final TvInputInfo inputInfo) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onTvInputInfoChanged(inputId, inputInfo);
+                    mCallback.onTvInputInfoChanged(inputInfo);
                 }
             });
         }
@@ -1089,10 +1088,10 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTvInputInfoChanged(String inputId, TvInputInfo inputInfo) {
+            public void onTvInputInfoChanged(TvInputInfo inputInfo) {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
-                        record.postTvInputInfoChanged(inputId, inputInfo);
+                        record.postTvInputInfoChanged(inputInfo);
                     }
                 }
             }
@@ -1139,6 +1138,23 @@ public final class TvInputManager {
             return mService.getTvInputInfo(inputId, mUserId);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Sets a new TvInputInfo object for a given input.
+     *
+     * <p>This is called internally only by {@link TvInputService}.
+     *
+     * @param inputInfo The TvInputInfo object to set.
+     * @throws IllegalArgumentException if the argument is {@code null}.
+     */
+    void setTvInputInfo(@NonNull TvInputInfo inputInfo) {
+        Preconditions.checkNotNull(inputInfo);
+        try {
+            mService.setTvInputInfo(inputInfo, mUserId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("Error trying to set " + inputInfo, e);
         }
     }
 

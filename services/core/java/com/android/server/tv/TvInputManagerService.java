@@ -71,6 +71,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.InputChannel;
@@ -779,15 +780,14 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private void notifyTvInputInfoChanged(UserState userState, String inputId,
-            TvInputInfo inputInfo) {
+    private void setTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyTvInputInfoChanged(inputId=" + inputId + ", inputInfo=" + inputInfo
-                    + ")");
+            Slog.d(TAG, "setTvInputInfoLocked(inputInfo=" + inputInfo + ")");
         }
+        // TODO: Also update the internal input list.
         for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                callback.onTvInputInfoChanged(inputId, inputInfo);
+                callback.onTvInputInfoChanged(inputInfo);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report changed input info to callback", e);
             }
@@ -844,6 +844,36 @@ public final class TvInputManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        public void setTvInputInfo(TvInputInfo inputInfo, int userId) {
+            String inputInfoPackageName = inputInfo.getServiceInfo().packageName;
+            String callingPackageName = getCallingPackageName();
+            if (!TextUtils.equals(inputInfoPackageName, callingPackageName)) {
+                throw new IllegalArgumentException("calling package " + callingPackageName
+                        + " is not allowed to change TvInputInfo for " + inputInfoPackageName);
+            }
+
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "setTvInputInfoChanged");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getOrCreateUserStateLocked(resolvedUserId);
+                    setTvInputInfoLocked(userState, inputInfo);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private String getCallingPackageName() {
+            final String[] packages = mContext.getPackageManager().getPackagesForUid(
+                    Binder.getCallingUid());
+            if (packages != null && packages.length > 0) {
+                return packages[0];
+            }
+            return "unknown";
         }
 
         @Override
@@ -2231,18 +2261,6 @@ public final class TvInputManagerService extends SystemService {
                 } else {
                     Slog.e(TAG, "failed to remove input " + inputId);
                 }
-            }
-        }
-
-        @Override
-        public void setTvInputInfo(String inputId, TvInputInfo inputInfo) {
-            ensureValidInput(inputInfo);
-            synchronized (mLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "setTvInputInfo(" + inputInfo + ")");
-                }
-                UserState userState = getOrCreateUserStateLocked(mUserId);
-                notifyTvInputInfoChanged(userState, inputId, inputInfo);
             }
         }
     }

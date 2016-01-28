@@ -262,16 +262,16 @@ public abstract class TvInputService extends Service {
      * <p>The system service automatically creates the TvInputInfo for each TV input based on
      * information collected from the AndroidManifest.xml, thus it is not necessary to call this
      * method unless the TV input has additional information to pass such as ability to record and
-     * tuner count.
+     * tuner count. Attempting to change information about a TV input that the calling package does
+     * not own does nothing.
      *
-     * @param inputId The ID of the TV input.
+     * @param context The application context.
      * @param inputInfo The TvInputInfo object that contains that new information.
      */
-    public final void setTvInputInfo(String inputId, TvInputInfo inputInfo) {
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = inputId;
-        args.arg2 = inputInfo;
-        mServiceHandler.obtainMessage(ServiceHandler.DO_SET_TV_INPUT_INFO, args).sendToTarget();
+    public static final void setTvInputInfo(Context context, TvInputInfo inputInfo) {
+        TvInputManager manager = (TvInputManager) context.getSystemService(
+                Context.TV_INPUT_SERVICE);
+        manager.setTvInputInfo(inputInfo);
     }
 
     private boolean isPassthroughInput(String inputId) {
@@ -1938,7 +1938,6 @@ public abstract class TvInputService extends Service {
         private static final int DO_REMOVE_HARDWARE_TV_INPUT = 5;
         private static final int DO_ADD_HDMI_TV_INPUT = 6;
         private static final int DO_REMOVE_HDMI_TV_INPUT = 7;
-        private static final int DO_SET_TV_INPUT_INFO = 8;
 
         private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
@@ -1971,18 +1970,6 @@ public abstract class TvInputService extends Service {
                     mCallbacks.getBroadcastItem(i).removeTvInput(inputId);
                 } catch (RemoteException e) {
                     Log.e(TAG, "error in broadcastRemoveTvInput", e);
-                }
-            }
-            mCallbacks.finishBroadcast();
-        }
-
-        private void broadcastSetTvInputInfo(String inputId, TvInputInfo inputInfo) {
-            int n = mCallbacks.beginBroadcast();
-            for (int i = 0; i < n; ++i) {
-                try {
-                    mCallbacks.getBroadcastItem(i).setTvInputInfo(inputId, inputInfo);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "error in broadcastSetTvInputInfo", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -2118,16 +2105,6 @@ public abstract class TvInputService extends Service {
                     if (inputId != null) {
                         broadcastRemoveTvInput(inputId);
                     }
-                    return;
-                }
-                case DO_SET_TV_INPUT_INFO: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String inputId = (String) args.arg1;
-                    TvInputInfo inputInfo = (TvInputInfo) args.arg2;
-                    if (inputInfo != null) {
-                        broadcastSetTvInputInfo(inputId, inputInfo);
-                    }
-                    args.recycle();
                     return;
                 }
                 default: {
