@@ -565,6 +565,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private Runnable mTouchModeReset;
 
     /**
+     * Whether the most recent touch event stream resulted in a successful
+     * long-press action. This is reset on TOUCH_DOWN.
+     */
+    private boolean mHasPerformedLongPress;
+
+    /**
      * This view is in transcript mode -- it shows the bottom of the list when the data
      * changes
      */
@@ -3108,7 +3114,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         handled = performLongPress(child, longPressPosition, longPressId);
                     }
                 }
+
                 if (handled) {
+                    mHasPerformedLongPress = true;
                     mTouchMode = TOUCH_MODE_REST;
                     setPressed(false);
                     child.setPressed(false);
@@ -3811,6 +3819,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void onTouchDown(MotionEvent ev) {
+        mHasPerformedLongPress = false;
         mActivePointerId = ev.getPointerId(0);
 
         if (mTouchMode == TOUCH_MODE_OVERFLING) {
@@ -3874,6 +3883,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void onTouchMove(MotionEvent ev, MotionEvent vtev) {
+        if (mHasPerformedLongPress) {
+            // Consume all move events following a successful long press.
+            return;
+        }
+
         int pointerIndex = ev.findPointerIndex(mActivePointerId);
         if (pointerIndex == -1) {
             pointerIndex = 0;
