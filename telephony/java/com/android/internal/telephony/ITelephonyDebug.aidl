@@ -16,8 +16,9 @@
 
 package com.android.internal.telephony;
 
-import android.os.Bundle;
+import com.android.internal.telephony.ITelephonyDebugSubscriber;
 
+import android.os.Bundle;
 
 /**
  * Interface used to interact with the Telephony debug service.
@@ -36,4 +37,7 @@ interface ITelephonyDebug {
      * @param data optional
      */
     void writeEvent(long timestamp, int phoneId, int tag, int param1, int param2, in Bundle data);
+
+    void subscribe(in ITelephonyDebugSubscriber subscriber);
+    void unsubscribe(in ITelephonyDebugSubscriber subscriber);
 }
