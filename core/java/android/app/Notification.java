@@ -4384,7 +4384,17 @@ public class Notification implements Parcelable
                     view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
-            handleImage(view  /* addPaddingToMainColumn */);
+            handleImage(view);
+            // handle the content margin
+            int endMargin;
+            if (mBuilder.mN.mLargeIcon != null) {
+                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_picture_margin_media);
+            } else {
+                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_margin_end);
+            }
+            view.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
             return view;
         }
 
