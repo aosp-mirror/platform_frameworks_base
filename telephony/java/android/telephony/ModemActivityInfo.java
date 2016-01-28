@@ -48,7 +48,9 @@ public class ModemActivityInfo implements Parcelable {
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
-        System.arraycopy(txTimeMs, 0, mTxTimeMs, 0, Math.min(txTimeMs.length, TX_POWER_LEVELS));
+        if (txTimeMs != null) {
+            System.arraycopy(txTimeMs, 0, mTxTimeMs, 0, Math.min(txTimeMs.length, TX_POWER_LEVELS));
+        }
         mRxTimeMs = rxTimeMs;
         mEnergyUsed = energyUsed;
     }
