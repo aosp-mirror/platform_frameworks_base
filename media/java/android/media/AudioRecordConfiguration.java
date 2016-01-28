@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /**
  * The AudioRecordConfiguration class collects the information describing an audio recording
- * session. This information is returned through the 
+ * session. This information is returned through the
  * {@link AudioManager#getActiveRecordConfigurations()} method.
  *
  */
@@ -33,12 +33,32 @@ public class AudioRecordConfiguration implements Parcelable {
 
     private final int mClientSource;
 
+    private final AudioFormat mDeviceFormat;
+    private final AudioFormat mClientFormat;
+
+    private final AudioDeviceInfo mRecDevice;
+
     /**
      * @hide
      */
     public AudioRecordConfiguration(int session, int source) {
         mSessionId = session;
         mClientSource = source;
+        mDeviceFormat = new AudioFormat.Builder().build();
+        mClientFormat = new AudioFormat.Builder().build();
+        mRecDevice = null;
+    }
+
+    /**
+     * @hide
+     */
+    public AudioRecordConfiguration(int session, int source, AudioFormat devFormat,
+            AudioFormat clientFormat, AudioDeviceInfo device) {
+        mSessionId = session;
+        mClientSource = source;
+        mDeviceFormat = devFormat;
+        mClientFormat = clientFormat;
+        mRecDevice = device;
     }
 
     /**
@@ -57,7 +77,28 @@ public class AudioRecordConfiguration implements Parcelable {
      * Returns the session number of the recording, see {@link AudioRecord#getAudioSessionId()}.
      * @return the session number.
      */
-    public int getAudioSessionId() { return mSessionId; }
+    public int getClientAudioSessionId() { return mSessionId; }
+
+    /**
+     * Returns the audio format at which audio is recorded on this Android device.
+     * Note that it may differ from the client application recording format
+     * (see {@link #getClientFormat()}).
+     * @return the device recording format
+     */
+    public AudioFormat getFormat() { return mDeviceFormat; }
+
+    /**
+     * Returns the audio format at which the client application is recording audio.
+     * Note that it may differ from the actual recording format (see {@link #getFormat()}).
+     * @return the recording format
+     */
+    public AudioFormat getClientFormat() { return mClientFormat; }
+
+    /**
+     * Returns the audio input device used for this recording.
+     * @return the audio recording device
+     */
+    public AudioDeviceInfo getAudioDevice() { return mRecDevice; }
 
     public static final Parcelable.Creator<AudioRecordConfiguration> CREATOR
             = new Parcelable.Creator<AudioRecordConfiguration>() {
@@ -93,6 +134,9 @@ public class AudioRecordConfiguration implements Parcelable {
     private AudioRecordConfiguration(Parcel in) {
         mSessionId = in.readInt();
         mClientSource = in.readInt();
+        mDeviceFormat = new AudioFormat.Builder().build();
+        mClientFormat = new AudioFormat.Builder().build();
+        mRecDevice = null;
     }
 
     @Override
