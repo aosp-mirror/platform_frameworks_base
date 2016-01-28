@@ -1248,7 +1248,9 @@ public class ResolverActivity extends Activity {
                 }
 
                 // Filter out any activities that the launched uid does not
-                // have permission for.  We don't do this when we have an explicit
+                // have permission for.
+                // Also filter out those that are suspended because they couldn't
+                // be started. We don't do this when we have an explicit
                 // list of resolved activities, because that only happens when
                 // we are being subclassed, so we can safely launch whatever
                 // they gave us.
@@ -1259,7 +1261,9 @@ public class ResolverActivity extends Activity {
                         int granted = ActivityManager.checkComponentPermission(
                                 ai.permission, mLaunchedFromUid,
                                 ai.applicationInfo.uid, ai.exported);
-                        if (granted != PackageManager.PERMISSION_GRANTED) {
+                        boolean suspended = (ai.applicationInfo.flags
+                                & ApplicationInfo.FLAG_SUSPENDED) != 0;
+                        if (granted != PackageManager.PERMISSION_GRANTED || suspended) {
                             // Access not allowed!
                             if (mOrigResolveList == currentResolveList) {
                                 mOrigResolveList = new ArrayList<>(mOrigResolveList);
