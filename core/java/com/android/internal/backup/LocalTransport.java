@@ -101,9 +101,6 @@ public class LocalTransport extends BackupTransport {
 
     private void makeDataDirs() {
         mCurrentSetDir.mkdirs();
-        if (!SELinux.restorecon(mCurrentSetDir)) {
-            Log.e(TAG, "SELinux restorecon failed for " + mCurrentSetDir);
-        }
         mCurrentSetFullDir.mkdir();
         mCurrentSetIncrementalDir.mkdir();
     }

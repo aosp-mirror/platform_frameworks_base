@@ -1049,7 +1049,9 @@ public class BackupManagerService {
         if (!SELinux.restorecon(mBaseStateDir)) {
             Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);
         }
-        mDataDir = Environment.getDownloadCacheDirectory();
+
+        // This dir on /cache is managed directly in init.rc
+        mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
 
         mPasswordVersion = 1;       // unless we hear otherwise
         mPasswordVersionFile = new File(mBaseStateDir, "pwversion");
@@ -8112,10 +8114,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE);
 
-                if (!SELinux.restorecon(mBackupDataName)) {
-                    if (MORE_DEBUG) Slog.e(TAG, "SElinux restorecon failed for " + downloadFile);
-                }
-
                 if (mTransport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
                     // Transport-level failure, so we wind everything up and
                     // terminate the restore operation.
@@ -8169,6 +8167,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
                 // Okay, we have the data.  Now have the agent do the restore.
                 stage.close();
+
                 mBackupData = ParcelFileDescriptor.open(mBackupDataName,
                         ParcelFileDescriptor.MODE_READ_ONLY);
 
@@ -9056,25 +9055,30 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 Slog.d(TAG, "fullTransportBackup()");
             }
 
-            CountDownLatch latch = new CountDownLatch(1);
-            PerformFullTransportBackupTask task = new PerformFullTransportBackupTask(null, pkgNames,
-                    false, null, latch, null, false /* userInitiated */);
-            // Acquiring wakelock for PerformFullTransportBackupTask before its start.
-            mWakelock.acquire();
-            (new Thread(task, "full-transport-master")).start();
-            do {
-                try {
-                    latch.await();
-                    break;
-                } catch (InterruptedException e) {
-                    // Just go back to waiting for the latch to indicate completion
-                }
-            } while (true);
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                CountDownLatch latch = new CountDownLatch(1);
+                PerformFullTransportBackupTask task = new PerformFullTransportBackupTask(null,
+                        pkgNames, false, null, latch, null, false /* userInitiated */);
+                // Acquiring wakelock for PerformFullTransportBackupTask before its start.
+                mWakelock.acquire();
+                (new Thread(task, "full-transport-master")).start();
+                do {
+                    try {
+                        latch.await();
+                        break;
+                    } catch (InterruptedException e) {
+                        // Just go back to waiting for the latch to indicate completion
+                    }
+                } while (true);
 
-            // We just ran a backup on these packages, so kick them to the end of the queue
-            final long now = System.currentTimeMillis();
-            for (String pkg : pkgNames) {
-                enqueueFullBackup(pkg, now);
+                // We just ran a backup on these packages, so kick them to the end of the queue
+                final long now = System.currentTimeMillis();
+                for (String pkg : pkgNames) {
+                    enqueueFullBackup(pkg, now);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
             }
         }
 
