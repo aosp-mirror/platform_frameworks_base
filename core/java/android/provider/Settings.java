@@ -501,6 +501,23 @@ public final class Settings {
             "android.settings.USER_DICTIONARY_SETTINGS";
 
     /**
+     * Activity Action: Show settings to configure the hardware keyboard layout.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     *
+     * @see android.hardware.input.InputManager#ACTION_QUERY_KEYBOARD_LAYOUTS
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_KEYBOARD_LAYOUT_SETTINGS =
+            "android.settings.KEYBOARD_LAYOUT_SETTINGS";
+
+    /**
      * Activity Action: Adds a word to the user dictionary.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
