@@ -16,8 +16,6 @@
 
 package com.android.mtp;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -40,7 +38,6 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -391,16 +388,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     private class AppFuseCallback implements AppFuse.Callback {
-        final byte[] mBytes = new byte[AppFuse.MAX_READ];
-
         @Override
-        public byte[] getObjectBytes(int inode, long offset, int size) throws IOException {
+        public long readObjectBytes(
+                int inode, long offset, long size, byte[] buffer) throws IOException {
             final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
-            final long readSize = mMtpManager.getPartialObject(
-                    identifier.mDeviceId, identifier.mObjectHandle, offset, size, mBytes);
-            // TODO: Change signature so that getObjectBytes can return read size without copying
-            // bytes.
-            return Arrays.copyOf(mBytes, (int) readSize);
+            return mMtpManager.getPartialObject(
+                    identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
         }
 
         @Override

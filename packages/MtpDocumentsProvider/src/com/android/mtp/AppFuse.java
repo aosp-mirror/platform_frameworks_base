@@ -16,9 +16,11 @@
 
 package com.android.mtp;
 
+import android.annotation.WorkerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.storage.StorageManager;
+import android.system.OsConstants;
 import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
@@ -40,6 +42,13 @@ public class AppFuse {
 
     private final String mName;
     private final Callback mCallback;
+
+    /**
+     * Buffer for read bytes request.
+     * Don't use the buffer from the out of AppFuseMessageThread.
+     */
+    private byte[] mBuffer = new byte[MAX_READ];
+
     private Thread mMessageThread;
     private ParcelFileDescriptor mDeviceFd;
 
@@ -82,28 +91,48 @@ public class AppFuse {
     }
 
     static interface Callback {
+        /**
+         * Returns file size for the given inode.
+         * @param inode
+         * @return File size. Must not be negative.
+         * @throws FileNotFoundException
+         */
         long getFileSize(int inode) throws FileNotFoundException;
-        byte[] getObjectBytes(int inode, long offset, int size) throws IOException;
+
+        /**
+         * Returns flie bytes for the give inode.
+         * @param inode
+         * @param offset Offset for file bytes.
+         * @param size Size for file bytes.
+         * @param bytes Buffer to store file bytes.
+         * @return Number of read bytes. Must not be negative.
+         * @throws IOException
+         */
+        long readObjectBytes(int inode, long offset, long size, byte[] bytes) throws IOException;
     }
 
     @UsedByNative("com_android_mtp_AppFuse.cpp")
+    @WorkerThread
     private long getFileSize(int inode) {
         try {
             return mCallback.getFileSize(inode);
-        } catch (IOException e) {
-            return -1;
+        } catch (FileNotFoundException e) {
+            return -OsConstants.ENOENT;
         }
     }
 
     @UsedByNative("com_android_mtp_AppFuse.cpp")
-    private byte[] getObjectBytes(int inode, long offset, int size) {
+    @WorkerThread
+    private long readObjectBytes(int inode, long offset, long size) {
         if (offset < 0 || size < 0 || size > MAX_READ) {
-            return null;
+            return -OsConstants.EINVAL;
         }
         try {
-            return mCallback.getObjectBytes(inode, offset, size);
+            // It's OK to share the same mBuffer among requests because the requests are processed
+            // by AppFuseMessageThread sequentially.
+            return mCallback.readObjectBytes(inode, offset, size, mBuffer);
         } catch (IOException e) {
-            return null;
+            return -OsConstants.EIO;
         }
     }
 

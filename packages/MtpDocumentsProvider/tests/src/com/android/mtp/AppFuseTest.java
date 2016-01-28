@@ -77,30 +77,35 @@ public class AppFuseTest extends AndroidTestCase {
 
     public void testReadFile() throws IOException {
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
-        final int INODE = 10;
-        final byte[] BYTES = new byte[] { 'a', 'b', 'c', 'd', 'e' };
+        final int fileInode = 10;
+        final byte[] fileBytes = new byte[] { 'a', 'b', 'c', 'd', 'e' };
         final AppFuse appFuse = new AppFuse(
                 "test",
                 new TestCallback() {
                     @Override
                     public long getFileSize(int inode) throws FileNotFoundException {
-                        if (inode == INODE) {
-                            return BYTES.length;
+                        if (inode == fileInode) {
+                            return fileBytes.length;
                         }
                         return super.getFileSize(inode);
                     }
 
                     @Override
-                    public byte[] getObjectBytes(int inode, long offset, int size)
+                    public long readObjectBytes(int inode, long offset, long size, byte[] bytes)
                             throws IOException {
-                        if (inode == INODE) {
-                            return Arrays.copyOfRange(BYTES, (int) offset, (int) offset + size);
+                        if (inode == fileInode) {
+                            int i = 0;
+                            while (i < size && i + offset < fileBytes.length)  {
+                                bytes[i] = fileBytes[(int) (i + offset)];
+                                i++;
+                            }
+                            return i;
                         }
-                        return super.getObjectBytes(inode, offset, size);
+                        return super.readObjectBytes(inode, offset, size, bytes);
                     }
                 });
         appFuse.mount(storageManager);
-        final ParcelFileDescriptor fd = appFuse.openFile(INODE);
+        final ParcelFileDescriptor fd = appFuse.openFile(fileInode);
         try (final ParcelFileDescriptor.AutoCloseInputStream stream =
                 new ParcelFileDescriptor.AutoCloseInputStream(fd)) {
             final byte[] buffer = new byte[1024];
@@ -117,7 +122,7 @@ public class AppFuseTest extends AndroidTestCase {
         }
 
         @Override
-        public byte[] getObjectBytes(int inode, long offset, int size)
+        public long readObjectBytes(int inode, long offset, long size, byte[] bytes)
                 throws IOException {
             throw new IOException();
         }

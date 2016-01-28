@@ -50,7 +50,8 @@ constexpr size_t MAX_REQUEST_SIZE = sizeof(struct fuse_in_header) +
 
 static jclass app_fuse_class;
 static jmethodID app_fuse_get_file_size;
-static jmethodID app_fuse_get_object_bytes;
+static jmethodID app_fuse_read_object_bytes;
+static jfieldID app_fuse_buffer;
 
 // NOTE:
 // FuseRequest and FuseResponse shares the same buffer to save memory usage, so the handlers must
@@ -282,7 +283,7 @@ private:
         out->prepare_buffer(0);
         const int64_t result = get_object_bytes(it->second, offset, size, out->data());
         if (result < 0) {
-            return -EIO;
+            return result;
         }
         out->set_size(result);
         return 0;
@@ -332,20 +333,24 @@ private:
             uint64_t offset,
             uint32_t size,
             void* buf) {
-        ScopedLocalRef<jbyteArray> array(env_, static_cast<jbyteArray>(env_->CallObjectMethod(
+        const jlong read_size = env_->CallLongMethod(
                 self_,
-                app_fuse_get_object_bytes,
-                inode,
-                offset,
-                size)));
+                app_fuse_read_object_bytes,
+                static_cast<jint>(inode),
+                static_cast<jlong>(offset),
+                static_cast<jlong>(size));
+        if (read_size <= 0) {
+            return read_size;
+        }
+        ScopedLocalRef<jbyteArray> array(
+                env_, static_cast<jbyteArray>(env_->GetObjectField(self_, app_fuse_buffer)));
         if (array.get() == nullptr) {
-            return -1;
+            return -EFAULT;
         }
         ScopedByteArrayRO bytes(env_, array.get());
         if (bytes.get() == nullptr) {
-            return -1;
+            return -ENOMEM;
         }
-        const uint32_t read_size = std::min(static_cast<uint32_t>(bytes.size()), size);
         memcpy(buf, bytes.get(), read_size);
         return read_size;
     }
@@ -451,10 +456,16 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
         return -1;
     }
 
-    app_fuse_get_object_bytes = env->GetMethodID(
-            app_fuse_class, "getObjectBytes", "(IJI)[B");
-    if (app_fuse_get_object_bytes == nullptr) {
-        ALOGE("Can't find getObjectBytes");
+    app_fuse_read_object_bytes = env->GetMethodID(
+            app_fuse_class, "readObjectBytes", "(IJJ)J");
+    if (app_fuse_read_object_bytes == nullptr) {
+        ALOGE("Can't find readObjectBytes");
+        return -1;
+    }
+
+    app_fuse_buffer = env->GetFieldID(app_fuse_class, "mBuffer", "[B");
+    if (app_fuse_buffer == nullptr) {
+        ALOGE("Can't find mBuffer");
         return -1;
     }
 
