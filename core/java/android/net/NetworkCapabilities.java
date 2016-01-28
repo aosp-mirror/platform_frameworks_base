@@ -197,6 +197,19 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_CAPTIVE_PORTAL);
 
     /**
+     * Network specifier for factories which want to match any network specifier
+     * (NS) in a request. Behavior:
+     * <li>Empty NS in request matches any network factory NS</li>
+     * <li>Empty NS in the network factory NS only matches a request with an
+     * empty NS</li>
+     * <li>"*" (this constant) NS in the network factory matches requests with
+     * any NS</li>
+     *
+     * @hide
+     */
+    public static final String MATCH_ALL_REQUESTS_NETWORK_SPECIFIER = "*";
+
+    /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
      * NetworkFactory / NetworkAgent model does not deal well with the situation where a
      * capability's presence cannot be known in advance. If such a capability is requested, then we
@@ -596,7 +609,8 @@ public final class NetworkCapabilities implements Parcelable {
     }
     private boolean satisfiedBySpecifier(NetworkCapabilities nc) {
         return (TextUtils.isEmpty(mNetworkSpecifier) ||
-                mNetworkSpecifier.equals(nc.mNetworkSpecifier));
+                mNetworkSpecifier.equals(nc.mNetworkSpecifier) ||
+                MATCH_ALL_REQUESTS_NETWORK_SPECIFIER.equals(nc.mNetworkSpecifier));
     }
     private boolean equalsSpecifier(NetworkCapabilities nc) {
         if (TextUtils.isEmpty(mNetworkSpecifier)) {
