@@ -184,7 +184,7 @@ public class TvRecordingClient {
      * Callback used to receive various status updates on the
      * {@link android.media.tv.TvInputService.RecordingSession}
      */
-    public class RecordingCallback {
+    public abstract static class RecordingCallback {
         /**
          * This is called when a recording session initiated by a call to
          * {@link #connect(String, Uri)} has been established.

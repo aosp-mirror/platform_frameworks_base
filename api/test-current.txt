@@ -22978,7 +22978,7 @@ package android.media.tv {
     method public void stopRecording();
   }
 
-  public class TvRecordingClient.RecordingCallback {
+  public static abstract class TvRecordingClient.RecordingCallback {
     ctor public TvRecordingClient.RecordingCallback();
     method public void onConnected();
     method public void onDisconnected();
