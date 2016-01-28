@@ -16,7 +16,9 @@
 
 package com.android.server.input;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.LocaleList;
 import android.view.Display;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
@@ -780,8 +782,10 @@ public class InputManagerService extends IInputManager.Stub
                         || layout.getProductId() != d.getProductId()) {
                     return;
                 }
-                for (Locale l : layout.getLocales()) {
-                    if (isCompatibleLocale(systemLocale, l)) {
+                final LocaleList locales = layout.getLocales();
+                final int numLocales = locales.size();
+                for (int localeIndex = 0; localeIndex < numLocales; ++localeIndex) {
+                    if (isCompatibleLocale(systemLocale, locales.get(localeIndex))) {
                         layouts.add(layout);
                         break;
                     }
@@ -799,9 +803,12 @@ public class InputManagerService extends IInputManager.Stub
         final int N = layouts.size();
         for (int i = 0; i < N; i++) {
             KeyboardLayout layout = layouts.get(i);
-            for (Locale l : layout.getLocales()) {
-                if (l.getCountry().equals(systemLocale.getCountry())
-                        && l.getVariant().equals(systemLocale.getVariant())) {
+            final LocaleList locales = layout.getLocales();
+            final int numLocales = locales.size();
+            for (int localeIndex = 0; localeIndex < numLocales; ++localeIndex) {
+                final Locale locale = locales.get(localeIndex);
+                if (locale.getCountry().equals(systemLocale.getCountry())
+                        && locale.getVariant().equals(systemLocale.getVariant())) {
                     return layout.getDescriptor();
                 }
             }
@@ -809,8 +816,11 @@ public class InputManagerService extends IInputManager.Stub
         // Then try an exact match of language and country
         for (int i = 0; i < N; i++) {
             KeyboardLayout layout = layouts.get(i);
-            for (Locale l : layout.getLocales()) {
-                if (l.getCountry().equals(systemLocale.getCountry())) {
+            final LocaleList locales = layout.getLocales();
+            final int numLocales = locales.size();
+            for (int localeIndex = 0; localeIndex < numLocales; ++localeIndex) {
+                final Locale locale = locales.get(localeIndex);
+                if (locale.getCountry().equals(systemLocale.getCountry())) {
                     return layout.getDescriptor();
                 }
             }
@@ -1170,7 +1180,7 @@ public class InputManagerService extends IInputManager.Stub
                                     0);
                             String languageTags = a.getString(
                                     com.android.internal.R.styleable.KeyboardLayout_locale);
-                            Locale[] locales = getLocalesFromLanguageTags(languageTags);
+                            LocaleList locales = getLocalesFromLanguageTags(languageTags);
                             int vid = a.getInt(
                                     com.android.internal.R.styleable.KeyboardLayout_vendorId, -1);
                             int pid = a.getInt(
@@ -1210,16 +1220,12 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    private static Locale[] getLocalesFromLanguageTags(String languageTags) {
+    @NonNull
+    private static LocaleList getLocalesFromLanguageTags(String languageTags) {
         if (TextUtils.isEmpty(languageTags)) {
-            return new Locale[0];
+            return LocaleList.getEmptyLocaleList();
         }
-        String[] tags = languageTags.split("\\|");
-        Locale[] locales = new Locale[tags.length];
-        for (int i = 0; i < tags.length; i++) {
-            locales[i] = Locale.forLanguageTag(tags[i]);
-        }
-        return locales;
+        return LocaleList.forLanguageTags(languageTags.replace('|', ','));
     }
 
     /**

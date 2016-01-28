@@ -16,8 +16,10 @@
 
 package android.hardware.input;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.LocaleList;
 
 import java.util.Locale;
 
@@ -32,7 +34,8 @@ public final class KeyboardLayout implements Parcelable,
     private final String mLabel;
     private final String mCollection;
     private final int mPriority;
-    private final Locale[] mLocales;
+    @NonNull
+    private final LocaleList mLocales;
     private final int mVendorId;
     private final int mProductId;
 
@@ -47,16 +50,12 @@ public final class KeyboardLayout implements Parcelable,
     };
 
     public KeyboardLayout(String descriptor, String label, String collection, int priority,
-            Locale[] locales, int vid, int pid) {
+            LocaleList locales, int vid, int pid) {
         mDescriptor = descriptor;
         mLabel = label;
         mCollection = collection;
         mPriority = priority;
-        if (locales != null) {
-            mLocales = locales;
-        } else {
-            mLocales = new Locale[0];
-        }
+        mLocales = locales;
         mVendorId = vid;
         mProductId = pid;
     }
@@ -66,11 +65,7 @@ public final class KeyboardLayout implements Parcelable,
         mLabel = source.readString();
         mCollection = source.readString();
         mPriority = source.readInt();
-        int N = source.readInt();
-        mLocales = new Locale[N];
-        for (int i = 0; i < N; i++) {
-            mLocales[i] = Locale.forLanguageTag(source.readString());
-        }
+        mLocales = LocaleList.CREATOR.createFromParcel(source);
         mVendorId = source.readInt();
         mProductId = source.readInt();
     }
@@ -108,7 +103,7 @@ public final class KeyboardLayout implements Parcelable,
      * This may be empty if a locale has not been assigned to this keyboard layout.
      * @return The keyboard layout's intended locale.
      */
-    public Locale[] getLocales() {
+    public LocaleList getLocales() {
         return mLocales;
     }
 
@@ -141,14 +136,7 @@ public final class KeyboardLayout implements Parcelable,
         dest.writeString(mLabel);
         dest.writeString(mCollection);
         dest.writeInt(mPriority);
-        if (mLocales != null) {
-            dest.writeInt(mLocales.length);
-            for (Locale l : mLocales) {
-                dest.writeString(l.toLanguageTag());
-            }
-        } else {
-            dest.writeInt(0);
-        }
+        mLocales.writeToParcel(dest, 0);
         dest.writeInt(mVendorId);
         dest.writeInt(mProductId);
     }
