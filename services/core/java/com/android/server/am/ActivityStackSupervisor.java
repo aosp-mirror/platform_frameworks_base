@@ -98,6 +98,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static android.Manifest.permission.START_ANY_ACTIVITY;
@@ -2019,7 +2020,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // If this is a forced resize, let it go through even if the bounds is not changing,
         // as we might need a relayout due to surface size change (to/from fullscreen).
         final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
-        if (task.mBounds != null && task.mBounds.equals(bounds) && !forced) {
+        if (Objects.equals(task.mBounds, bounds) && !forced) {
             // Nothing to do here...
             return true;
         }
@@ -2257,10 +2258,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // If we didn't actual do a relaunch (indicated by kept==true meaning we kept the old
             // window), we need to clear the replace window settings. Otherwise, we schedule a
             // timeout to remove the old window if the replacing window is not coming in time.
-            // In case of the pinned stack we don't resize the task during the move, but we will
-            // resize the stack soon after so we want to retain the replacing window.
-            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken,
-                    !kept || stackId == PINNED_STACK_ID);
+            mWindowManager.scheduleClearReplacingWindowIfNeeded(topActivity.appToken, !kept);
         }
 
         // The task might have already been running and its visibility needs to be synchronized with
@@ -2294,7 +2292,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        moveActivityToStackLocked(r, PINNED_STACK_ID, "moveTopActivityToPinnedStack", bounds);
+        moveActivityToStackLocked(r, PINNED_STACK_ID, "moveTopActivityToPinnedStack", null);
+        mWindowManager.animateResizePinnedStack(bounds);
         return true;
     }
 

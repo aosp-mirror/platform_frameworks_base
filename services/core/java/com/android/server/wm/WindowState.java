@@ -57,6 +57,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
@@ -2051,10 +2052,21 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // until the window to small size, otherwise the multithread renderer will shift last
         // one or more frame to wrong offset. So here we send fullscreen backdrop if either
         // isDragResizing() or isDragResizeChanged() is true.
+        boolean resizing = isDragResizing() || isDragResizeChanged();
+        if (StackId.useWindowFrameForBackdrop(getStackId()) || !resizing) {
+            return frame;
+        }
         DisplayInfo displayInfo = getDisplayInfo();
         mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
-        boolean resizing = isDragResizing() || isDragResizeChanged();
-        return (inFreeformWorkspace() || !resizing) ? frame : mTmpRect;
+        return mTmpRect;
+    }
+
+    private int getStackId() {
+        final TaskStack stack = getStack();
+        if (stack == null) {
+            return INVALID_STACK_ID;
+        }
+        return stack.mStackId;
     }
 
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,

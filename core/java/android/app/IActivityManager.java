@@ -146,8 +146,8 @@ public interface IActivityManager extends IInterface {
     public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) throws RemoteException;
     public boolean moveTopActivityToPinnedStack(int stackId, Rect bounds) throws RemoteException;
-    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode)
-            throws RemoteException;
+    public void resizeStack(int stackId, Rect bounds, boolean allowResizeInDockedMode,
+            boolean preserveWindows, boolean animate) throws RemoteException;
 
     /**
      * Resizes the docked stack, and all other stacks as the result of the dock stack bounds change.

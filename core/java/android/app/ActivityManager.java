@@ -564,8 +564,7 @@ public class ActivityManager {
          * there isn't a display gap.
          */
         public static boolean preserveWindowOnTaskMove(int stackId) {
-            return stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                    || stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID;
+            return stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
         }
 
         /**
@@ -615,6 +614,14 @@ public class ActivityManager {
          */
         public static boolean keepVisibleDeadAppWindowOnScreen(int stackId) {
             return stackId != PINNED_STACK_ID;
+        }
+
+        /**
+         * Returns true if the backdrop on the client side should match the frame of the window.
+         * Returns false, if the backdrop should be fullscreen.
+         */
+        public static boolean useWindowFrameForBackdrop(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
         }
     }
 
