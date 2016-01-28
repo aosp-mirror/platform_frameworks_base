@@ -21,6 +21,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
@@ -219,6 +220,26 @@ public class RestrictedLockUtils {
                     admin = dpm.getDeviceOwnerComponentOnCallingUser();
                 }
                 return new EnforcedAdmin(admin, UserHandle.myUserId());
+            }
+        } catch (RemoteException e) {
+            // Nothing to do
+        }
+        return null;
+    }
+
+    /**
+     * Check if an application is suspended.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} if the application is not suspended.
+     */
+    public static EnforcedAdmin checkIfApplicationIsSuspended(Context context, String packageName,
+            int userId) {
+        IPackageManager ipm = AppGlobals.getPackageManager();
+        try {
+            ApplicationInfo ai = ipm.getApplicationInfo(packageName, 0, userId);
+            if (ai != null && ((ai.flags & ApplicationInfo.FLAG_SUSPENDED) != 0)) {
+                return getProfileOrDeviceOwnerOnCallingUser(context);
             }
         } catch (RemoteException e) {
             // Nothing to do
