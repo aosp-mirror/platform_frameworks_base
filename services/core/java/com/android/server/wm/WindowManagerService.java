@@ -161,6 +161,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -8075,8 +8076,29 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case UPDATE_DOCKED_STACK_DIVIDER: {
                     synchronized (mWindowMap) {
-                        getDefaultDisplayContentLocked().getDockedDividerController()
-                                .reevaluateVisibility(false);
+                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+                        displayContent.getDockedDividerController().reevaluateVisibility(false);
+
+                        final WindowState imeWin = mInputMethodWindow;
+                        final TaskStack focusedStack =
+                                mCurrentFocus != null ? mCurrentFocus.getStack() : null;
+                        if (imeWin != null && focusedStack != null && imeWin.isVisibleNow()
+                                && focusedStack.getDockSide() == DOCKED_BOTTOM){
+                            final ArrayList<TaskStack> stacks = displayContent.getStacks();
+                            for (int i = stacks.size() - 1; i >= 0; --i) {
+                                final TaskStack stack = stacks.get(i);
+                                if (stack.isVisibleLocked()) {
+                                    stack.adjustForIME(imeWin);
+                                }
+                            }
+                        } else {
+                            final ArrayList<TaskStack> stacks = displayContent.getStacks();
+                            for (int i = stacks.size() - 1; i >= 0; --i) {
+                                final TaskStack stack = stacks.get(i);
+                                stack.adjustForIME(null);
+                            }
+                        }
                     }
                 }
                 break;

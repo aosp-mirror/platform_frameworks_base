@@ -74,6 +74,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /** Content limits relative to the DisplayContent this sits in. */
     private Rect mBounds = new Rect();
 
+    /** Screen content area excluding IM windows, etc. */
+    private final Rect mContentBounds = new Rect();
+
+    /** Stack bounds adjusted to screen content area (taking into account IM windows, etc.) */
+    private final Rect mAdjustedBounds = new Rect();
+
     /** Whether mBounds is fullscreen */
     private boolean mFullscreen = true;
 
@@ -164,6 +170,85 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mTmpRect.equals(bounds);
     }
 
+    void alignTasksToAdjustedBounds(final Rect adjustedBounds) {
+        if (mFullscreen) {
+            return;
+        }
+        // Update bounds of containing tasks.
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final Task task = mTasks.get(taskNdx);
+            if (task.isTwoFingerScrollMode()) {
+                // If we're scrolling we don't care about your bounds or configs,
+                // they should be null as if we were in fullscreen.
+                task.resizeLocked(null, null, false /* forced */);
+                task.getBounds(mTmpRect2);
+                task.scrollLocked(mTmpRect2);
+            } else if (task.isResizeable()) {
+                task.getBounds(mTmpRect2);
+                mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
+                task.resizeLocked(mTmpRect2, task.mOverrideConfig, false /* forced */);
+            }
+        }
+    }
+
+    void adjustForIME(final WindowState imeWin) {
+        final int dockedSide = getDockSide();
+        final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
+        final Rect adjustedBounds = mAdjustedBounds;
+        if (imeWin == null || !dockedTopOrBottom) {
+            // If mContentBounds is already empty, it means we're not applying
+            // any adjustments, so nothing to do; otherwise clear any adjustments.
+            if (!mContentBounds.isEmpty()) {
+                mContentBounds.setEmpty();
+                adjustedBounds.set(mBounds);
+                alignTasksToAdjustedBounds(adjustedBounds);
+            }
+            return;
+        }
+
+        final Rect displayContentRect = mTmpRect;
+        final Rect contentBounds = mTmpRect2;
+
+        // Calculate the content bounds excluding the area occupied by IME
+        mDisplayContent.getContentRect(displayContentRect);
+        contentBounds.set(displayContentRect);
+        int imeTop = Math.max(imeWin.getDisplayFrameLw().top, contentBounds.top);
+        imeTop += imeWin.getGivenContentInsetsLw().top;
+        if (contentBounds.bottom > imeTop) {
+            contentBounds.bottom = imeTop;
+        }
+
+        // If content bounds not changing, nothing to do.
+        if (mContentBounds.equals(contentBounds)) {
+            return;
+        }
+
+        // Content bounds changed, need to apply adjustments depending on dock sides.
+        mContentBounds.set(contentBounds);
+        adjustedBounds.set(mBounds);
+        final int yOffset = displayContentRect.bottom - contentBounds.bottom;
+
+        if (dockedSide == DOCKED_TOP) {
+            // If this stack is docked on top, we make it smaller so the bottom stack is not
+            // occluded by IME. We shift its bottom up by the height of the IME (capped by
+            // the display content rect). Note that we don't change the task bounds.
+            adjustedBounds.bottom = Math.max(
+                    adjustedBounds.bottom - yOffset, displayContentRect.top);
+        } else {
+            // If this stack is docked on bottom, we shift it up so that it's not occluded by
+            // IME. We try to move it up by the height of the IME window (although the best
+            // we could do is to make the top stack fully collapsed).
+            final int dividerWidth = mDisplayContent.mDividerControllerLocked.getContentWidth();
+            adjustedBounds.top = Math.max(
+                    adjustedBounds.top - yOffset, displayContentRect.top + dividerWidth);
+            adjustedBounds.bottom = adjustedBounds.top + mBounds.height();
+
+            // We also move the member tasks together, taking care not to resize them.
+            // Resizing might cause relaunch, and IME window may not come back after that.
+            alignTasksToAdjustedBounds(adjustedBounds);
+        }
+    }
+
     private boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
         int rotation = Surface.ROTATION_0;
@@ -193,6 +278,16 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         mBounds.set(bounds);
         mRotation = rotation;
+
+        // Clear the adjusted content bounds as they're no longer valid.
+        // If IME is still visible, these will be re-applied.
+        // Note that we don't clear mContentBounds here, so that we know the last IME
+        // adjust we applied.
+        // If user starts dragging the dock divider while IME is visible, the new bounds
+        // we received are based on the actual screen location of the divider. It already
+        // accounted for the IME window, so we don't want to adjust again.
+        mAdjustedBounds.set(mBounds);
+
         return true;
     }
 
@@ -217,9 +312,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     public void getBounds(Rect out) {
         if (useCurrentBounds()) {
-            // No need to adjust the output bounds if fullscreen or the docked stack is visible
+            // If we're currently adjusting for IME, we use the adjusted bounds; otherwise,
+            // no need to adjust the output bounds if fullscreen or the docked stack is visible
             // since it is already what we want to represent to the rest of the system.
-            out.set(mBounds);
+            if (!mContentBounds.isEmpty()) {
+                out.set(mAdjustedBounds);
+            } else {
+                out.set(mBounds);
+            }
             return;
         }
 
