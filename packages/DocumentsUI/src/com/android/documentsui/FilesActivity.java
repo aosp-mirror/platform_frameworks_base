@@ -16,12 +16,11 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_UNKNOWN;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkState;
-import static com.android.documentsui.OperationDialogFragment.DialogType;
-import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_UNKNOWN;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -45,6 +44,7 @@ import android.widget.BaseAdapter;
 import android.widget.Spinner;
 import android.widget.Toolbar;
 
+import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
@@ -287,6 +287,14 @@ public class FilesActivity extends BaseActivity {
         Metrics.logMultiWindow(this);
         Intent intent = LauncherActivity.createLaunchIntent(this);
         intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
+
+        // With new multi-window mode we have to pick how we are launched.
+        // By default we'd be launched in-place above the existing app.
+        // By setting launch-to-side ActivityManager will open us to side.
+        if (inMultiWindowMode()) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE);
+        }
+
         startActivity(intent);
     }
 
