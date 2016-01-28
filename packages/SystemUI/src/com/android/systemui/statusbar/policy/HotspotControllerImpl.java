@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Log;
 
 import com.android.settingslib.TetherUtil;
@@ -39,13 +42,17 @@ public class HotspotControllerImpl implements HotspotController {
     private final Receiver mReceiver = new Receiver();
     private final ConnectivityManager mConnectivityManager;
     private final Context mContext;
+    private final UserManager mUserManager;
+    private final int mCurrentUser;
 
     private int mHotspotState;
 
     public HotspotControllerImpl(Context context) {
         mContext = context;
-        mConnectivityManager = (ConnectivityManager)context.getSystemService(
+        mConnectivityManager = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
+        mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mCurrentUser = ActivityManager.getCurrentUser();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -93,6 +100,12 @@ public class HotspotControllerImpl implements HotspotController {
     @Override
     public boolean isHotspotSupported() {
         return TetherUtil.isTetheringSupported(mContext);
+    }
+
+    @Override
+    public boolean isTetheringAllowed() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING,
+                UserHandle.of(mCurrentUser));
     }
 
     static final class OnStartTetheringCallback extends

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -271,7 +271,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     protected void checkIfRestrictionEnforced(State state, String userRestriction) {
         EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
-                userRestriction, UserHandle.myUserId());
+                userRestriction, ActivityManager.getCurrentUser());
         if (admin != null) {
             state.disabledByPolicy = true;
             state.enforcedAdmin = admin;

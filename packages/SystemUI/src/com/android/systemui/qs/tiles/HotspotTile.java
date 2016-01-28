@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.os.UserManager;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -66,6 +68,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
+        state.disabledByPolicy = mController.isTetheringAllowed();
+        checkIfRestrictionEnforced(state, UserManager.DISALLOW_CONFIG_TETHERING);
         if (arg instanceof Boolean) {
             state.value = (boolean) arg;
         } else {
