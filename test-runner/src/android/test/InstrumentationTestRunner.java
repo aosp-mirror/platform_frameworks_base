@@ -155,6 +155,10 @@ import junit.textui.ResultPrinter;
  * -e coverageFile /sdcard/myFile.ec
  * <br/>
  * in addition to the other arguments.
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
+ * AndroidJUnitRunner</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
 
 /* (not JavaDoc)
@@ -170,6 +174,7 @@ import junit.textui.ResultPrinter;
  *
  * This model is used by many existing app tests, but can probably be deprecated.
  */
+@Deprecated
 public class InstrumentationTestRunner extends Instrumentation implements TestSuiteProvider {
 
     /** @hide */

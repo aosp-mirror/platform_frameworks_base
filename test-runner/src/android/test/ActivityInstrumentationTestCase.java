@@ -23,15 +23,15 @@ import android.app.Activity;
  * be created using the system infrastructure (by calling InstrumentationTestCase.launchActivity())
  * and you will then be able to manipulate your Activity directly.  Most of the work is handled
  * automatically here by {@link #setUp} and {@link #tearDown}.
- * 
+ *
  * <p>If you prefer an isolated unit test, see {@link android.test.ActivityUnitTestCase}.
- * 
- * @deprecated new tests should be written using 
+ *
+ * @deprecated new tests should be written using
  * {@link android.test.ActivityInstrumentationTestCase2}, which provides more options for
  * configuring the Activity under test
  */
 @Deprecated
-public abstract class ActivityInstrumentationTestCase<T extends Activity> 
+public abstract class ActivityInstrumentationTestCase<T extends Activity>
         extends ActivityTestCase {
     String mPackage;
     Class<T> mActivityClass;
@@ -39,7 +39,7 @@ public abstract class ActivityInstrumentationTestCase<T extends Activity>
 
     /**
      * Creates an {@link ActivityInstrumentationTestCase} in non-touch mode.
-     * 
+     *
      * @param pkg ignored - no longer in use.
      * @param activityClass The activity to test. This must be a class in the instrumentation
      * targetPackage specified in the AndroidManifest.xml
@@ -56,7 +56,7 @@ public abstract class ActivityInstrumentationTestCase<T extends Activity>
      * targetPackage specified in the AndroidManifest.xml
      * @param initialTouchMode true = in touch mode
      */
-    public ActivityInstrumentationTestCase(String pkg, Class<T> activityClass, 
+    public ActivityInstrumentationTestCase(String pkg, Class<T> activityClass,
             boolean initialTouchMode) {
         mActivityClass = activityClass;
         mInitialTouchMode = initialTouchMode;
@@ -80,8 +80,8 @@ public abstract class ActivityInstrumentationTestCase<T extends Activity>
     protected void tearDown() throws Exception {
         getActivity().finish();
         setActivity(null);
-        
-        // Scrub out members - protects against memory leaks in the case where someone 
+
+        // Scrub out members - protects against memory leaks in the case where someone
         // creates a non-static inner class (thus referencing the test case) and gives it to
         // someone else to hold onto
         scrubClass(ActivityInstrumentationTestCase.class);

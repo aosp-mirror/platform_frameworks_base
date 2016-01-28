@@ -41,6 +41,7 @@ import android.util.Log;
  *
  * @hide
  */
+@Deprecated
 public class InstrumentationCoreTestRunner extends InstrumentationTestRunner {
 
     /**

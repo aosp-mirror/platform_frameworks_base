@@ -26,7 +26,12 @@ import java.lang.annotation.ElementType;
  * suite. If the annotation appears on the class then no tests in that class will be included. If
  * the annotation appears only on a test method then only that method will be excluded.
  *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/filters/Suppress.html">
+ * Suppress</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Suppress {

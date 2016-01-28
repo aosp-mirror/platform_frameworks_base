@@ -24,9 +24,10 @@ import java.util.Set;
 /**
  * The Package object doesn't allow you to iterate over the contained
  * classes and subpackages of that package.  This is a version that does.
- * 
+ *
  * {@hide} Not needed for 1.0 SDK.
  */
+@Deprecated
 public class ClassPathPackageInfo {
 
     private final ClassPathPackageInfoSource source;

@@ -36807,7 +36807,7 @@ package android.test {
     method public void testActivityTestCaseSetUpProperly() throws java.lang.Exception;
   }
 
-  public abstract class ActivityInstrumentationTestCase2 extends android.test.ActivityTestCase {
+  public abstract deprecated class ActivityInstrumentationTestCase2 extends android.test.ActivityTestCase {
     ctor public deprecated ActivityInstrumentationTestCase2(java.lang.String, java.lang.Class<T>);
     ctor public ActivityInstrumentationTestCase2(java.lang.Class<T>);
     method public T getActivity();
@@ -36815,14 +36815,14 @@ package android.test {
     method public void setActivityIntent(android.content.Intent);
   }
 
-  public abstract class ActivityTestCase extends android.test.InstrumentationTestCase {
+  public abstract deprecated class ActivityTestCase extends android.test.InstrumentationTestCase {
     ctor public ActivityTestCase();
     method protected android.app.Activity getActivity();
     method protected void scrubClass(java.lang.Class<?>) throws java.lang.IllegalAccessException;
     method protected void setActivity(android.app.Activity);
   }
 
-  public abstract class ActivityUnitTestCase extends android.test.ActivityTestCase {
+  public abstract deprecated class ActivityUnitTestCase extends android.test.ActivityTestCase {
     ctor public ActivityUnitTestCase(java.lang.Class<T>);
     method public T getActivity();
     method public int getFinishedActivityRequest();
@@ -36835,7 +36835,7 @@ package android.test {
     method protected T startActivity(android.content.Intent, android.os.Bundle, java.lang.Object);
   }
 
-  public class AndroidTestCase extends junit.framework.TestCase {
+  public deprecated class AndroidTestCase extends junit.framework.TestCase {
     ctor public AndroidTestCase();
     method public void assertActivityRequiresPermission(java.lang.String, java.lang.String, java.lang.String);
     method public void assertReadingContentUriRequiresPermission(android.net.Uri, java.lang.String);
@@ -36847,7 +36847,7 @@ package android.test {
     field protected android.content.Context mContext;
   }
 
-  public class AndroidTestRunner extends junit.runner.BaseTestRunner {
+  public deprecated class AndroidTestRunner extends junit.runner.BaseTestRunner {
     ctor public AndroidTestRunner();
     method public void addTestListener(junit.framework.TestListener);
     method public void clearTestListeners();
@@ -36868,7 +36868,7 @@ package android.test {
     method public void testStarted(java.lang.String);
   }
 
-  public abstract class ApplicationTestCase extends android.test.AndroidTestCase {
+  public abstract deprecated class ApplicationTestCase extends android.test.AndroidTestCase {
     ctor public ApplicationTestCase(java.lang.Class<T>);
     method protected final void createApplication();
     method public T getApplication();
@@ -36886,10 +36886,10 @@ package android.test {
     ctor public ComparisonFailure(java.lang.String, java.lang.String, java.lang.String);
   }
 
-  public abstract class FlakyTest implements java.lang.annotation.Annotation {
+  public abstract deprecated class FlakyTest implements java.lang.annotation.Annotation {
   }
 
-  public class InstrumentationTestCase extends junit.framework.TestCase {
+  public deprecated class InstrumentationTestCase extends junit.framework.TestCase {
     ctor public InstrumentationTestCase();
     method public android.app.Instrumentation getInstrumentation();
     method public deprecated void injectInsrumentation(android.app.Instrumentation);
@@ -36902,7 +36902,7 @@ package android.test {
     method public void sendRepeatedKeys(int...);
   }
 
-  public class InstrumentationTestRunner extends android.app.Instrumentation implements android.test.TestSuiteProvider {
+  public deprecated class InstrumentationTestRunner extends android.app.Instrumentation implements android.test.TestSuiteProvider {
     ctor public InstrumentationTestRunner();
     method public junit.framework.TestSuite getAllTests();
     method protected android.test.AndroidTestRunner getAndroidTestRunner();
@@ -36921,14 +36921,14 @@ package android.test {
     field public static final int REPORT_VALUE_RESULT_START = 1; // 0x1
   }
 
-  public class InstrumentationTestSuite extends junit.framework.TestSuite {
+  public deprecated class InstrumentationTestSuite extends junit.framework.TestSuite {
     ctor public InstrumentationTestSuite(android.app.Instrumentation);
     ctor public InstrumentationTestSuite(java.lang.String, android.app.Instrumentation);
     ctor public InstrumentationTestSuite(java.lang.Class, android.app.Instrumentation);
     method public void addTestSuite(java.lang.Class);
   }
 
-  public class IsolatedContext extends android.content.ContextWrapper {
+  public deprecated class IsolatedContext extends android.content.ContextWrapper {
     ctor public IsolatedContext(android.content.ContentResolver, android.content.Context);
     method public java.util.List<android.content.Intent> getAndClearBroadcastIntents();
   }
@@ -36938,7 +36938,7 @@ package android.test {
     method public T getLoaderResultSynchronously(android.content.Loader<T>);
   }
 
-  public final class MoreAsserts {
+  public final deprecated class MoreAsserts {
     method public static void assertAssignableFrom(java.lang.Class<?>, java.lang.Object);
     method public static void assertAssignableFrom(java.lang.Class<?>, java.lang.Class<?>);
     method public static java.util.regex.MatchResult assertContainsRegex(java.lang.String, java.lang.String, java.lang.String);
@@ -36977,7 +36977,7 @@ package android.test {
     method public static void checkEqualsAndHashCodeMethods(java.lang.Object, java.lang.Object, boolean);
   }
 
-  public abstract interface PerformanceTestCase {
+  public abstract deprecated interface PerformanceTestCase {
     method public abstract boolean isPerformanceOnly();
     method public abstract int startPerformance(android.test.PerformanceTestCase.Intermediates);
   }
@@ -37006,7 +37006,7 @@ package android.test {
     method public static android.content.ContentResolver newResolverWithContentProviderFromSql(android.content.Context, java.lang.String, java.lang.Class<T>, java.lang.String, java.lang.String, int, java.lang.String) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
   }
 
-  public class RenamingDelegatingContext extends android.content.ContextWrapper {
+  public deprecated class RenamingDelegatingContext extends android.content.ContextWrapper {
     ctor public RenamingDelegatingContext(android.content.Context, java.lang.String);
     ctor public RenamingDelegatingContext(android.content.Context, android.content.Context, java.lang.String);
     method public java.lang.String getDatabasePrefix();
@@ -37015,7 +37015,7 @@ package android.test {
     method public static T providerWithRenamedContext(java.lang.Class<T>, android.content.Context, java.lang.String, boolean) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
   }
 
-  public abstract class ServiceTestCase extends android.test.AndroidTestCase {
+  public abstract deprecated class ServiceTestCase extends android.test.AndroidTestCase {
     ctor public ServiceTestCase(java.lang.Class<T>);
     method protected android.os.IBinder bindService(android.content.Intent);
     method public android.app.Application getApplication();
@@ -37028,23 +37028,23 @@ package android.test {
     method public void testServiceTestCaseSetUpProperly() throws java.lang.Exception;
   }
 
-  public abstract class SingleLaunchActivityTestCase extends android.test.InstrumentationTestCase {
+  public abstract deprecated class SingleLaunchActivityTestCase extends android.test.InstrumentationTestCase {
     ctor public SingleLaunchActivityTestCase(java.lang.String, java.lang.Class<T>);
     method public T getActivity();
     method public void testActivityTestCaseSetUpProperly() throws java.lang.Exception;
   }
 
-  public class SyncBaseInstrumentation extends android.test.InstrumentationTestCase {
+  public deprecated class SyncBaseInstrumentation extends android.test.InstrumentationTestCase {
     ctor public SyncBaseInstrumentation();
     method protected void cancelSyncsandDisableAutoSync();
     method protected void syncProvider(android.net.Uri, java.lang.String, java.lang.String) throws java.lang.Exception;
   }
 
-  public abstract interface TestSuiteProvider {
+  public abstract deprecated interface TestSuiteProvider {
     method public abstract junit.framework.TestSuite getTestSuite();
   }
 
-  public class TouchUtils {
+  public deprecated class TouchUtils {
     ctor public TouchUtils();
     method public static void clickView(android.test.InstrumentationTestCase, android.view.View);
     method public static deprecated void drag(android.test.ActivityInstrumentationTestCase, float, float, float, float, int);
@@ -37079,10 +37079,10 @@ package android.test {
     method public static void touchAndCancelView(android.test.InstrumentationTestCase, android.view.View);
   }
 
-  public abstract class UiThreadTest implements java.lang.annotation.Annotation {
+  public abstract deprecated class UiThreadTest implements java.lang.annotation.Annotation {
   }
 
-  public class ViewAsserts {
+  public deprecated class ViewAsserts {
     method public static void assertBaselineAligned(android.view.View, android.view.View);
     method public static void assertBottomAligned(android.view.View, android.view.View);
     method public static void assertBottomAligned(android.view.View, android.view.View, int);
@@ -37107,11 +37107,11 @@ package android.test {
 
 package android.test.mock {
 
-  public class MockApplication extends android.app.Application {
+  public deprecated class MockApplication extends android.app.Application {
     ctor public MockApplication();
   }
 
-  public class MockContentProvider extends android.content.ContentProvider {
+  public deprecated class MockContentProvider extends android.content.ContentProvider {
     ctor protected MockContentProvider();
     ctor public MockContentProvider(android.content.Context);
     ctor public MockContentProvider(android.content.Context, java.lang.String, java.lang.String, android.content.pm.PathPermission[]);
@@ -37123,13 +37123,13 @@ package android.test.mock {
     method public int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
   }
 
-  public class MockContentResolver extends android.content.ContentResolver {
+  public deprecated class MockContentResolver extends android.content.ContentResolver {
     ctor public MockContentResolver();
     ctor public MockContentResolver(android.content.Context);
     method public void addProvider(java.lang.String, android.content.ContentProvider);
   }
 
-  public class MockContext extends android.content.Context {
+  public deprecated class MockContext extends android.content.Context {
     ctor public MockContext();
     method public boolean bindService(android.content.Intent, android.content.ServiceConnection, int);
     method public int checkCallingOrSelfPermission(java.lang.String);
@@ -37230,7 +37230,7 @@ package android.test.mock {
     method public void unregisterReceiver(android.content.BroadcastReceiver);
   }
 
-  public class MockCursor implements android.database.Cursor {
+  public deprecated class MockCursor implements android.database.Cursor {
     ctor public MockCursor();
     method public void close();
     method public void copyStringToBuffer(int, android.database.CharArrayBuffer);
@@ -37275,13 +37275,13 @@ package android.test.mock {
     method public void unregisterDataSetObserver(android.database.DataSetObserver);
   }
 
-  public class MockDialogInterface implements android.content.DialogInterface {
+  public deprecated class MockDialogInterface implements android.content.DialogInterface {
     ctor public MockDialogInterface();
     method public void cancel();
     method public void dismiss();
   }
 
-  public class MockPackageManager extends android.content.pm.PackageManager {
+  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
     ctor public MockPackageManager();
     method public void addPackageToPreferred(java.lang.String);
     method public boolean addPermission(android.content.pm.PermissionInfo);
@@ -37369,7 +37369,7 @@ package android.test.mock {
     method public void verifyPendingInstall(int, int);
   }
 
-  public class MockResources extends android.content.res.Resources {
+  public deprecated class MockResources extends android.content.res.Resources {
     ctor public MockResources();
   }
 
@@ -37410,19 +37410,19 @@ package android.test.suitebuilder {
 
 package android.test.suitebuilder.annotation {
 
-  public abstract class LargeTest implements java.lang.annotation.Annotation {
+  public abstract deprecated class LargeTest implements java.lang.annotation.Annotation {
   }
 
-  public abstract class MediumTest implements java.lang.annotation.Annotation {
+  public abstract deprecated class MediumTest implements java.lang.annotation.Annotation {
   }
 
-  public abstract class SmallTest implements java.lang.annotation.Annotation {
+  public abstract deprecated class SmallTest implements java.lang.annotation.Annotation {
   }
 
-  public abstract class Smoke implements java.lang.annotation.Annotation {
+  public abstract deprecated class Smoke implements java.lang.annotation.Annotation {
   }
 
-  public abstract class Suppress implements java.lang.annotation.Annotation {
+  public abstract deprecated class Suppress implements java.lang.annotation.Annotation {
   }
 
 }

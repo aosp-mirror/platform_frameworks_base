@@ -52,10 +52,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * A mock {@link android.content.Context} class.  All methods are non-functional and throw 
+ * A mock {@link android.content.Context} class.  All methods are non-functional and throw
  * {@link java.lang.UnsupportedOperationException}.  You can use this to inject other dependencies,
  * mocks, or monitors into the classes you are testing.
+ *
+ * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
+ * New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class MockContext extends Context {
 
     @Override
@@ -82,12 +87,12 @@ public class MockContext extends Context {
     public Looper getMainLooper() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public Context getApplicationContext() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public void setTheme(int resid) {
         throw new UnsupportedOperationException();
@@ -124,7 +129,7 @@ public class MockContext extends Context {
     public ApplicationInfo getApplicationInfo() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public String getPackageResourcePath() {
         throw new UnsupportedOperationException();
@@ -194,7 +199,7 @@ public class MockContext extends Context {
     public File getObbDir() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public File getCacheDir() {
         throw new UnsupportedOperationException();
@@ -216,7 +221,7 @@ public class MockContext extends Context {
     }
 
     @Override
-    public SQLiteDatabase openOrCreateDatabase(String file, int mode, 
+    public SQLiteDatabase openOrCreateDatabase(String file, int mode,
             SQLiteDatabase.CursorFactory factory) {
         throw new UnsupportedOperationException();
     }
@@ -310,7 +315,7 @@ public class MockContext extends Context {
             Bundle options) throws IntentSender.SendIntentException {
         startIntentSender(intent, fillInIntent, flagsMask, flagsValues, extraFlags);
     }
-    
+
     @Override
     public void sendBroadcast(Intent intent) {
         throw new UnsupportedOperationException();

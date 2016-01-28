@@ -32,10 +32,15 @@ import android.graphics.Movie;
 import java.io.InputStream;
 
 /**
- * A mock {@link android.content.res.Resources} class.  All methods are non-functional and throw 
- * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you 
+ * A mock {@link android.content.res.Resources} class. All methods are non-functional and throw
+ * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you
  * need.
+ *
+ * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
+ * New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class MockResources extends Resources {
 
     public MockResources() {
