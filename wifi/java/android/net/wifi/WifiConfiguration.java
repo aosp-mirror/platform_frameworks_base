@@ -704,24 +704,6 @@ public class WifiConfiguration implements Parcelable {
      */
     public int numUserTriggeredJoinAttempts;
 
-    /**
-     * @hide
-     * Connect choices
-     *
-     * remember the keys identifying the known WifiConfiguration over which this configuration
-     * was preferred by user or a "WiFi Network Management app", that is,
-     * a WifiManager.CONNECT_NETWORK or SELECT_NETWORK was received while this configuration
-     * was visible to the user:
-     * configKey is : "SSID"-WEP-WPA_PSK-WPA_EAP
-     *
-     * The integer represents the configuration's RSSI at that time (useful?)
-     *
-     * The overall auto-join algorithm make use of past connect choice so as to sort configuration,
-     * the exact algorithm still fluctuating as of 5/7/2014
-     *
-     */
-    public HashMap<String, Integer> connectChoices;
-
     /** @hide
      * Boost given to RSSI on a home network for the purpose of calculating the score
      * This adds stickiness to home networks, as defined by:
@@ -831,6 +813,16 @@ public class WifiConfiguration implements Parcelable {
          */
         public static final long INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP = -1L;
 
+        /**
+         *  This constant indicates the current configuration has connect choice set
+         */
+        private static final int CONNECT_CHOICE_EXISTS = 1;
+
+        /**
+         *  This constant indicates the current configuration does not have connect choice set
+         */
+        private static final int CONNECT_CHOICE_NOT_EXISTS = -1;
+
         // fields for QualityNetwork Selection
         /**
          * Network selection status, should be in one of three status: enable, temporaily disabled
@@ -854,7 +846,128 @@ public class WifiConfiguration implements Parcelable {
         private int[] mNetworkSeclectionDisableCounter = new int[NETWORK_SELECTION_DISABLED_MAX];
 
         /**
-         * return current Quality network selection status in String (for debug purpose)
+         * Connect Choice over this configuration
+         *
+         * When current wifi configuration is visible to the user but user explicitly choose to
+         * connect to another network X, the another networks X's configure key will be stored here.
+         * We will consider user has a preference of X over this network. And in the future,
+         * network selection will always give X a higher preference over this configuration.
+         * configKey is : "SSID"-WEP-WPA_PSK-WPA_EAP
+         */
+        private String mConnectChoice;
+
+        /**
+         * The system timestamp when we records the connectChoice. This value is obtained from
+         * System.currentTimeMillis
+         */
+        private long mConnectChoiceTimestamp = INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP;
+
+        /**
+         * Used to cache the temporary candidate during the network selection procedure. It will be
+         * kept updating once a new scan result has a higher score than current one
+         */
+        private ScanResult mCandidate;
+
+        /**
+         * Used to cache the score of the current temporary candidate during the network
+         * selection procedure.
+         */
+        private int mCandidateScore;
+
+        /**
+         * Indicate whether this network is visible in latest Qualified Network Selection. This
+         * means there is scan result found related to this Configuration and meet the minimum
+         * requirement. The saved network need not join latest Qualified Network Selection. For
+         * example, it is disabled. True means network is visible in latest Qualified Network
+         * Selection and false means network is invisible
+         */
+        private boolean mSeenInLastQualifiedNetworkSelection;
+
+        /**
+         * set whether this network is visible in latest Qualified Network Selection
+         * @param seen value set to candidate
+         */
+        public void setSeenInLastQualifiedNetworkSelection(boolean seen) {
+            mSeenInLastQualifiedNetworkSelection =  seen;
+        }
+
+        /**
+         * get whether this network is visible in latest Qualified Network Selection
+         * @return returns true -- network is visible in latest Qualified Network Selection
+         *         false -- network is invisible in latest Qualified Network Selection
+         */
+        public boolean getSeenInLastQualifiedNetworkSelection() {
+            return mSeenInLastQualifiedNetworkSelection;
+        }
+        /**
+         * set the temporary candidate of current network selection procedure
+         * @param scanCandidate {@link ScanResult} the candidate set to mCandidate
+         */
+        public void setCandidate(ScanResult scanCandidate) {
+            mCandidate = scanCandidate;
+        }
+
+        /**
+         * get the temporary candidate of current network selection procedure
+         * @return  returns {@link ScanResult} temporary candidate of current network selection
+         * procedure
+         */
+        public ScanResult getCandidate() {
+            return mCandidate;
+        }
+
+        /**
+         * set the score of the temporary candidate of current network selection procedure
+         * @param score value set to mCandidateScore
+         */
+        public void setCandidateScore(int score) {
+            mCandidateScore = score;
+        }
+
+        /**
+         * get the score of the temporary candidate of current network selection procedure
+         * @return returns score of the temporary candidate of current network selection procedure
+         */
+        public int getCandidateScore() {
+            return mCandidateScore;
+        }
+
+        /**
+         * get user preferred choice over this configuration
+         *@return returns configKey of user preferred choice over this configuration
+         */
+        public String getConnectChoice() {
+            return mConnectChoice;
+        }
+
+        /**
+         * set user preferred choice over this configuration
+         * @param newConnectChoice, the configKey of user preferred choice over this configuration
+         */
+        public void setConnectChoice(String newConnectChoice) {
+            mConnectChoice = newConnectChoice;
+        }
+
+        /**
+         * get the timeStamp when user select a choice over this configuration
+         * @return returns when current connectChoice is set (time from System.currentTimeMillis)
+         */
+        public long getConnectChoiceTimestamp() {
+            return mConnectChoiceTimestamp;
+        }
+
+        /**
+         * set the timeStamp when user select a choice over this configuration
+         * @param timeStamp, the timestamp set to connectChoiceTimestamp, expected timestamp should
+         *        be obtained from System.currentTimeMillis
+         */
+        public void setConnectChoiceTimestamp(long timeStamp) {
+            mConnectChoiceTimestamp = timeStamp;
+        }
+
+        /**
+         * get current Quality network selection status
+         * @return returns current Quality network selection status in String (for debug purpose)
          */
         public String getNetworkStatusString() {
             return QUALITY_NETWORK_SELECTION_STATUS[mStatus];
@@ -874,6 +987,7 @@ public class WifiConfiguration implements Parcelable {
             }
         }
         /**
+         * get current network disable reason
          * @return current network disable reason in String (for debug purpose)
          */
         public String getNetworkDisableReasonString() {
@@ -882,6 +996,7 @@ public class WifiConfiguration implements Parcelable {
 
         /**
          * get current network network selection status
+         * @return return current network network selection status
          */
         public int getNetworkSelectionStatus() {
             return mStatus;
@@ -901,12 +1016,14 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /**
-         * return whether current network is permanently disabled
+         * @return returns whether current network is permanently disabled
          */
         public boolean isNetworkPermanentlyDisabled() {
             return mStatus == NETWORK_SELECTION_PERMANENTLY_DISABLED;
         }
+
         /**
+         * set current networ work selection status
          * @param status network selection status to set
          */
         public void setNetworkSelectionStatus(int status) {
@@ -914,14 +1031,16 @@ public class WifiConfiguration implements Parcelable {
                 mStatus = status;
             }
         }
+
         /**
-         * @return current network's disable reason
+         * @return returns current network's disable reason
          */
         public int getNetworkSelectionDisableReason() {
             return mNetworkSelectionDisableReason;
         }
 
         /**
+         * set Network disable reason
          * @param  reason Network disable reason
          */
         public void setNetworkSelectionDisableReason(int reason) {
@@ -931,12 +1050,17 @@ public class WifiConfiguration implements Parcelable {
                 throw new IllegalArgumentException("Illegal reason value: " + reason);
             }
         }
+
         /**
-         * @param reason whether current network is disabled by this reason
+         * check whether network is disabled by this reason
+         * @param reason a specific disable reason
+         * @return true -- network is disabled for this reason
+         *         false -- network is not disabled for this reason
          */
         public boolean isDisabledByReason(int reason) {
             return mNetworkSelectionDisableReason == reason;
         }
+
         /**
          * @param timeStamp Set when current network is disabled in millisecond since January 1,
          * 1970 00:00:00.0 UTC
@@ -946,7 +1070,7 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /**
-         * @return Get when current network is disabled in millisecond since January 1,
+         * @return returns when current network is disabled in millisecond since January 1,
          * 1970 00:00:00.0 UTC
          */
         public long getDisableTime() {
@@ -954,6 +1078,7 @@ public class WifiConfiguration implements Parcelable {
         }
 
         /**
+         * get the disable counter of a specific reason
          * @param  reason specific failure reason
          * @exception throw IllegalArgumentException for illegal input
          * @return counter number for specific error reason.
@@ -992,6 +1117,7 @@ public class WifiConfiguration implements Parcelable {
                 throw new IllegalArgumentException("Illegal reason value: " + reason);
             }
         }
+
         /**
          * clear the counter of a specific failure reason
          * @hide
@@ -1005,6 +1131,7 @@ public class WifiConfiguration implements Parcelable {
                 throw new IllegalArgumentException("Illegal reason value: " + reason);
             }
         }
+
         /**
          * clear all the failure reason counters
          */
@@ -1043,6 +1170,8 @@ public class WifiConfiguration implements Parcelable {
             }
             mTemporarilyDisabledTimestamp = source.mTemporarilyDisabledTimestamp;
             mNetworkSelectionBSSID = source.mNetworkSelectionBSSID;
+            setConnectChoice(source.getConnectChoice());
+            setConnectChoiceTimestamp(source.getConnectChoiceTimestamp());
         }
 
         public void writeToParcel(Parcel dest) {
@@ -1054,6 +1183,13 @@ public class WifiConfiguration implements Parcelable {
             }
             dest.writeLong(getDisableTime());
             dest.writeString(getNetworkSelectionBSSID());
+            if (getConnectChoice() != null) {
+                dest.writeInt(CONNECT_CHOICE_EXISTS);
+                dest.writeString(getConnectChoice());
+                dest.writeLong(getConnectChoiceTimestamp());
+            } else {
+                dest.writeInt(CONNECT_CHOICE_NOT_EXISTS);
+            }
         }
 
         public void readFromParcel(Parcel in) {
@@ -1065,6 +1201,13 @@ public class WifiConfiguration implements Parcelable {
             }
             setDisableTime(in.readLong());
             setNetworkSelectionBSSID(in.readString());
+            if (in.readInt() == CONNECT_CHOICE_EXISTS) {
+                setConnectChoice(in.readString());
+                setConnectChoiceTimestamp(in.readLong());
+            } else {
+                setConnectChoice(null);
+                setConnectChoiceTimestamp(INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP);
+            }
         }
     }
 
@@ -1184,7 +1327,11 @@ public class WifiConfiguration implements Parcelable {
                 }
             }
         }
-
+        if (mNetworkSelectionStatus.getConnectChoice() != null) {
+            sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
+            sbuf.append(" connect choice set time: ").append(mNetworkSelectionStatus
+                    .getConnectChoiceTimestamp());
+        }
 
         if (this.numAssociation > 0) {
             sbuf.append(" numAssociation ").append(this.numAssociation).append("\n");
@@ -1336,16 +1483,7 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append('\n');
             }
         }
-        if (this.connectChoices != null) {
-            for(String key : this.connectChoices.keySet()) {
-                Integer choice = this.connectChoices.get(key);
-                if (choice != null) {
-                    sbuf.append(" choice: ").append(key);
-                    sbuf.append(" = ").append(choice);
-                    sbuf.append('\n');
-                }
-            }
-        }
+
         sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
         sbuf.append(" triggeredBad: ").append(this.numUserTriggeredWifiDisableBadRSSI);
         sbuf.append(" triggeredNotHigh: ").append(this.numUserTriggeredWifiDisableNotHighRSSI);
@@ -1631,11 +1769,6 @@ public class WifiConfiguration implements Parcelable {
             defaultGwMacAddress = source.defaultGwMacAddress;
 
             mIpConfiguration = new IpConfiguration(source.mIpConfiguration);
-
-            if ((source.connectChoices != null) && (source.connectChoices.size() > 0)) {
-                connectChoices = new HashMap<String, Integer>();
-                connectChoices.putAll(source.connectChoices);
-            }
 
             if ((source.linkedConfigurations != null)
                     && (source.linkedConfigurations.size() > 0)) {
