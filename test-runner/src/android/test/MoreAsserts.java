@@ -30,7 +30,10 @@ import java.util.regex.Pattern;
 
 /**
  * Contains additional assertion methods not found in JUnit.
+ * @deprecated Use
+ * <a href="https://github.com/hamcrest">Hamcrest matchers</a> instead.
  */
+@Deprecated
 public final class MoreAsserts {
 
     private MoreAsserts() { }
@@ -375,7 +378,7 @@ public final class MoreAsserts {
                 failWithMessage(message, "Extra object in actual: (" + actualObj.toString() + ")");
             }
         }
-        
+
         if (expectedMap.size() > 0) {
             failWithMessage(message, "Extra objects in expected.");
         }

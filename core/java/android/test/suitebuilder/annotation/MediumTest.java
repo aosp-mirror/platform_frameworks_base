@@ -24,7 +24,12 @@ import java.lang.annotation.Target;
 /**
  * Marks a test that should run as part of the medium tests.
  *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/filters/MediumTest.html">
+ * MediumTest</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface MediumTest {

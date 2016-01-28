@@ -23,7 +23,15 @@ import android.view.ViewGroup;
 
 /**
  * Some useful assertions about views.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/espresso/matcher/ViewMatchers.html">Espresso
+ * View Matchers</a> instead. New test should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+ * For more information about UI testing, take the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Espresso UI testing</a> training.
  */
+@Deprecated
 public class ViewAsserts {
 
     private ViewAsserts() {}

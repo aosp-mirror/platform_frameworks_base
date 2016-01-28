@@ -42,6 +42,7 @@ import com.google.android.collect.Lists;
  *
  * {@hide} Not needed for 1.0 SDK.
  */
+@Deprecated
 public class TestRunner implements PerformanceTestCase.Intermediates {
     public static final int REGRESSION = 0;
     public static final int PERFORMANCE = 1;

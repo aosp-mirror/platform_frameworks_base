@@ -27,7 +27,13 @@ import android.accounts.Account;
  * If you would like to test sync a single provider with an
  * {@link InstrumentationTestCase}, this provides some of the boiler plate in {@link #setUp} and
  * {@link #tearDown}.
+ *
+ * @deprecated Use
+ * <a href="{@docRoot}reference/android/support/test/InstrumentationRegistry.html">
+ * InstrumentationRegistry</a> instead. New tests should be written using the
+ * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
+@Deprecated
 public class SyncBaseInstrumentation extends InstrumentationTestCase {
     private Context mTargetContext;
     ContentResolver mContentResolver;
