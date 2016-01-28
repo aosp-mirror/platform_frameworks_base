@@ -195,7 +195,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * MS_PER_DAY; // 5 days, in ms
 
-    protected static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
+    private static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION
             = "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
 
     private static final int MONITORING_CERT_NOTIFICATION_ID = R.string.ssl_ca_cert_warning;
@@ -1703,8 +1703,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Set an alarm for an upcoming event - expiration warning, expiration, or post-expiration
      * reminders.  Clears alarm if no expirations are configured.
      */
-    private void setExpirationAlarmCheckLocked(Context context, int userHandle) {
-        final long expiration = getPasswordExpirationLocked(null, userHandle, /* parent */ false);
+    private void setExpirationAlarmCheckLocked(Context context, int userHandle, boolean parent) {
+        final long expiration = getPasswordExpirationLocked(null, userHandle, parent);
         final long now = System.currentTimeMillis();
         final long timeToExpire = expiration - now;
         final long alarmTime;
@@ -1726,11 +1726,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         long token = mInjector.binderClearCallingIdentity();
         try {
+            int affectedUserHandle = parent ? getProfileParentId(userHandle) : userHandle;
             AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             PendingIntent pi = PendingIntent.getBroadcastAsUser(context, REQUEST_EXPIRE_PASSWORD,
                     new Intent(ACTION_EXPIRED_PASSWORD_NOTIFICATION),
                     PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT,
-                    UserHandle.of(userHandle));
+                    UserHandle.of(affectedUserHandle));
             am.cancel(pi);
             if (alarmTime != 0) {
                 am.set(AlarmManager.RTC, alarmTime, pi);
@@ -2489,7 +2490,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             final long now = System.currentTimeMillis();
 
-            // Return the strictest policy across all participating admins.
             List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(
                     userHandle, /* parent */ false);
             final int N = admins.size();
@@ -2503,7 +2503,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING);
                 }
             }
-            setExpirationAlarmCheckLocked(mContext, userHandle);
+            setExpirationAlarmCheckLocked(mContext, userHandle, /* parent */ false);
         }
     }
 
@@ -2976,8 +2976,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             saveSettingsLocked(userHandle);
 
             // in case this is the first one, set the alarm on the appropriate user.
-            int affectedUserHandle = parent ? getProfileParentId(userHandle) : userHandle;
-            setExpirationAlarmCheckLocked(mContext, affectedUserHandle);
+            setExpirationAlarmCheckLocked(mContext, userHandle, parent);
         }
     }
 
@@ -4324,7 +4323,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 policy.mFailedPasswordAttempts = 0;
                 saveSettingsLocked(userHandle);
                 updatePasswordExpirationsLocked(userHandle);
-                setExpirationAlarmCheckLocked(mContext, userHandle);
+                setExpirationAlarmCheckLocked(mContext, userHandle, /* parent */ false);
 
                 // Send a broadcast to each profile using this password as its primary unlock.
                 sendAdminCommandForLockscreenPoliciesLocked(
