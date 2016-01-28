@@ -34,7 +34,8 @@ public class SecurityLog {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TAG_ADB_SHELL_INTERACTIVE, TAG_ADB_SHELL_CMD, TAG_SYNC_RECV_FILE, TAG_SYNC_SEND_FILE,
-        TAG_APP_PROCESS_START, TAG_DEVICE_UNLOCK_ATTEMPT, TAG_DEVICE_LOCKED})
+        TAG_APP_PROCESS_START, TAG_KEYGUARD_DISMISSED, TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
+        TAG_KEYGUARD_SECURED})
     public @interface SECURITY_LOG_TAG {}
 
     /**
@@ -68,21 +69,24 @@ public class SecurityLog {
      * seinfo tag (String), SHA-256 hash of the APK in hexadecimal (String)
      */
     public static final int TAG_APP_PROCESS_START = SecurityLogTags.SECURITY_APP_PROCESS_START;
-
     /**
-     * Indicate that there has been an attempt to unlock the device. The log entry contains the
-     * following information about the attempt in order, accessible via
-     * {@link SecurityEvent#getData()}}: unlock result (integer, 1 for successful unlock, 0 for
-     * unsuccessful), unlock method (String)
+     * Indicate that keyguard is being dismissed.
+     * There is no extra payload in the log event.
      */
-    public static final int TAG_DEVICE_UNLOCK_ATTEMPT =
-            SecurityLogTags.SECURITY_DEVICE_UNLOCK_ATTEMPT;
-
+    public static final int TAG_KEYGUARD_DISMISSED =
+            SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
+    /**
+     * Indicate that there has been an authentication attempt to dismiss the keyguard. The log entry
+     * contains the attempt result (integer, 1 for successful, 0 for unsuccessful), accessible via
+     * {@link SecurityEvent#getData()}}
+     */
+    public static final int TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT =
+            SecurityLogTags.SECURITY_KEYGUARD_DISMISS_AUTH_ATTEMPT;
     /**
      * Indicate that the device has been locked, either by user or by timeout.
+     * There is no extra payload in the log event.
      */
-    public static final int TAG_DEVICE_LOCKED = SecurityLogTags.SECURITY_DEVICE_LOCKED;
-
+    public static final int TAG_KEYGUARD_SECURED = SecurityLogTags.SECURITY_KEYGUARD_SECURED;
 
     /**
      * Returns if device logging is enabled. Log producers should only write new logs if this is
@@ -128,7 +132,9 @@ public class SecurityLog {
          * Returns the tag of this log entry, which specifies entry's semantics.
          * Could be one of {@link SecurityLog#TAG_SYNC_RECV_FILE},
          * {@link SecurityLog#TAG_SYNC_SEND_FILE}, {@link SecurityLog#TAG_ADB_SHELL_CMD},
-         * {@link SecurityLog#TAG_ADB_SHELL_INTERACTIVE}, {@link SecurityLog#TAG_APP_PROCESS_START}.
+         * {@link SecurityLog#TAG_ADB_SHELL_INTERACTIVE}, {@link SecurityLog#TAG_APP_PROCESS_START},
+         * {@link SecurityLog#TAG_KEYGUARD_DISMISSED}, {@link SecurityLog#TAG_KEYGUARD_SECURED},
+         * {@link SecurityLog#TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT}.
          */
         public @SECURITY_LOG_TAG int getTag() {
             return mEvent.getTag();

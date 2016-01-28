@@ -116,6 +116,9 @@ interface IDevicePolicyManager {
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
 
+    void reportKeyguardDismissed();
+    void reportKeyguardSecured();
+
     boolean setDeviceOwner(in ComponentName who, String ownerName, int userId);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
     String getDeviceOwnerName();

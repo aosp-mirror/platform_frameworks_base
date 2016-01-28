@@ -2973,6 +2973,34 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Should be called when keyguard has been dismissed.
+     * @hide
+     */
+    public void reportKeyguardDismissed() {
+        if (mService != null) {
+            try {
+                mService.reportKeyguardDismissed();
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * Should be called when keyguard view has been shown to the user.
+     * @hide
+     */
+    public void reportKeyguardSecured() {
+        if (mService != null) {
+            try {
+                mService.reportKeyguardSecured();
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
      * @hide
      * Sets the given package as the device owner.
      * Same as {@link #setDeviceOwner(ComponentName, String)} but without setting a device owner name.

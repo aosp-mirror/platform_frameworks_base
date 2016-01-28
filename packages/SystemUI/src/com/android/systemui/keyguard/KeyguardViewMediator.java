@@ -24,7 +24,6 @@ import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
-import android.auditing.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -1371,10 +1370,8 @@ public class KeyguardViewMediator extends SystemUI {
      * @see #KEYGUARD_DONE
      */
     private void handleKeyguardDone(boolean authenticated) {
-        if (SecurityLog.isLoggingEnabled()
-                && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
-            SecurityLog.writeEvent(SecurityLog.TAG_DEVICE_UNLOCK_ATTEMPT,
-                    (authenticated ? 1 : 0), "Unknown");
+        if (mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
+            mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed();
         }
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         synchronized (this) {
@@ -1487,9 +1484,8 @@ public class KeyguardViewMediator extends SystemUI {
      * @see #SHOW
      */
     private void handleShow(Bundle options) {
-        if (SecurityLog.isLoggingEnabled()
-                && mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
-            SecurityLog.writeEvent(SecurityLog.TAG_DEVICE_LOCKED, "");
+        if (mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
+            mLockPatternUtils.getDevicePolicyManager().reportKeyguardSecured();
         }
         synchronized (KeyguardViewMediator.this) {
             if (!mSystemReady) {
