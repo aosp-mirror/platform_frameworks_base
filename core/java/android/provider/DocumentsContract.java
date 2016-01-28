@@ -234,6 +234,9 @@ public final class DocumentsContract {
          * @see #FLAG_DIR_PREFERS_LAST_MODIFIED
          * @see #FLAG_VIRTUAL_DOCUMENT
          * @see #FLAG_ARCHIVE
+         * @see #FLAG_SUPPORTS_COPY
+         * @see #FLAG_SUPPORTS_MOVE
+         * @see #FLAG_SUPPORTS_REMOVE
          */
         public static final String COLUMN_FLAGS = "flags";
 
@@ -369,6 +372,15 @@ public final class DocumentsContract {
          * @see DocumentsProvider#queryChildDocuments(String, String[], String)
          */
         public static final int FLAG_ARCHIVE = 1 << 10;
+
+        /**
+         * Flag indicating that a document can be removed from a parent.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#removeDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsProvider#removeDocument(String, String)
+         */
+        public static final int FLAG_SUPPORTS_REMOVE = 1 << 11;
 
         /**
          * Flag indicating that document titles should be hidden when viewing
@@ -612,6 +624,8 @@ public final class DocumentsContract {
     public static final String METHOD_MOVE_DOCUMENT = "android:moveDocument";
     /** {@hide} */
     public static final String METHOD_IS_CHILD_DOCUMENT = "android:isChildDocument";
+    /** {@hide} */
+    public static final String METHOD_REMOVE_DOCUMENT = "android:removeDocument";
 
     /** {@hide} */
     public static final String EXTRA_PARENT_URI = "parentUri";
@@ -1201,6 +1215,41 @@ public final class DocumentsContract {
 
         final Bundle out = client.call(METHOD_MOVE_DOCUMENT, null, in);
         return out.getParcelable(DocumentsContract.EXTRA_URI);
+    }
+
+    /**
+     * Removes the given document from a parent directory.
+     *
+     * <p>In contrast to {@link #deleteDocument} it requires specifying the parent.
+     * This method is especially useful if the document can be in multiple parents.
+     *
+     * @param documentUri document with {@link Document#FLAG_SUPPORTS_REMOVE}
+     * @param parentDocumentUri parent document of the document to remove.
+     * @return true if the document was removed successfully.
+     */
+    public static boolean removeDocument(ContentResolver resolver, Uri documentUri,
+            Uri parentDocumentUri) {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                documentUri.getAuthority());
+        try {
+            removeDocument(client, documentUri, parentDocumentUri);
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to remove document", e);
+            return false;
+        } finally {
+            ContentProviderClient.releaseQuietly(client);
+        }
+    }
+
+    /** {@hide} */
+    public static void removeDocument(ContentProviderClient client, Uri documentUri,
+            Uri parentDocumentUri) throws RemoteException {
+        final Bundle in = new Bundle();
+        in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
+        in.putParcelable(DocumentsContract.EXTRA_PARENT_URI, parentDocumentUri);
+
+        client.call(METHOD_REMOVE_DOCUMENT, null, in);
     }
 
     /**

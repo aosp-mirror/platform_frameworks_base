@@ -21,6 +21,7 @@ import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_RENAME_DOCUMENT;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.buildDocumentUriMaybeUsingTree;
@@ -300,6 +301,25 @@ public abstract class DocumentsProvider extends ContentProvider {
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Move not supported");
     }
+
+    /**
+     * Removes the requested document or a document tree.
+     *
+     * <p>In contrast to {@link #deleteDocument} it requires specifying the parent.
+     * This method is especially useful if the document can be in multiple parents.
+     *
+     * <p>It's the responsibility of the provider to revoke grants if the document is
+     * removed from the last parent, and effectively the document is deleted.
+     *
+     * @param documentId the document to remove.
+     * @param parentDocumentId the parent of the document to move.
+     */
+    @SuppressWarnings("unused")
+    public boolean removeDocument(String documentId, String parentDocumentId)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Remove not supported");
+    }
+
     /**
      * Return all roots currently provided. To display to users, you must define
      * at least one root. You should avoid making network requests to keep this
@@ -821,6 +841,17 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // Original document no longer exists, clean up any grants.
             revokeDocumentPermission(documentId);
+
+        } else if (METHOD_REMOVE_DOCUMENT.equals(method)) {
+            final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
+            final String parentSourceId = DocumentsContract.getDocumentId(parentSourceUri);
+
+            enforceReadPermissionInner(parentSourceUri, getCallingPackage(), null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(), null);
+            removeDocument(documentId, parentSourceId);
+
+            // It's responsibility of the provider to revoke any grants, as the document may be
+            // still attached to another parents.
 
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);

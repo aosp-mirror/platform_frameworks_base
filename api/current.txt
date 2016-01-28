@@ -31545,6 +31545,7 @@ package android.provider {
     method public static java.lang.String getTreeDocumentId(android.net.Uri);
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
     method public static android.net.Uri moveDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri, android.net.Uri);
+    method public static boolean removeDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri);
     method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
     field public static final java.lang.String EXTRA_ERROR = "error";
     field public static final java.lang.String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
@@ -31570,6 +31571,7 @@ package android.provider {
     field public static final int FLAG_SUPPORTS_COPY = 128; // 0x80
     field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
     field public static final int FLAG_SUPPORTS_MOVE = 256; // 0x100
+    field public static final int FLAG_SUPPORTS_REMOVE = 2048; // 0x800
     field public static final int FLAG_SUPPORTS_RENAME = 64; // 0x40
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 1; // 0x1
     field public static final int FLAG_SUPPORTS_WRITE = 2; // 0x2
@@ -31617,6 +31619,7 @@ package android.provider {
     method public android.database.Cursor queryRecentDocuments(java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
     method public abstract android.database.Cursor queryRoots(java.lang.String[]) throws java.io.FileNotFoundException;
     method public android.database.Cursor querySearchDocuments(java.lang.String, java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
+    method public boolean removeDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public java.lang.String renameDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public final void revokeDocumentPermission(java.lang.String);
     method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
