@@ -104,7 +104,6 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mProductivityDevice = getResources().getBoolean(R.bool.productivity_device);
         mState = (icicle != null)
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                         : buildState();

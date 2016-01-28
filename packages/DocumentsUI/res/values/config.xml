@@ -18,7 +18,6 @@
     <!-- Allow Advanced Devices default value to be customised -->
     <bool name="config_defaultAdvancedDevices">false</bool>
 
-    <bool name="productivity_device">true</bool>
     <!-- Intentionally unset. Vendors should set this in an overlay. -->
     <string name="trusted_quick_viewer_package"></string>
 </resources>

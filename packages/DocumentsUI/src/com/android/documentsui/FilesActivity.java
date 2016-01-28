@@ -256,9 +256,6 @@ public class FilesActivity extends BaseActivity {
 
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
 
-        newWindow.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        newWindow.setVisible(mProductivityDevice);
-
         Menus.disableHiddenItems(menu, pasteFromCb);
         return true;
     }
