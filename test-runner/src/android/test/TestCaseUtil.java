@@ -35,7 +35,6 @@ import java.util.Set;
  * @hide - This is part of a framework that is under development and should not be used for
  * active development.
  */
-@Deprecated
 public class TestCaseUtil {
 
     private TestCaseUtil() {
@@ -68,7 +67,7 @@ public class TestCaseUtil {
              */
             if (test instanceof TestCase &&
                     ((TestCase)test).getName() == null) {
-                workingTest = invokeSuiteMethodIfPossible(test.getClass(),
+                workingTest = invokeSuiteMethodIfPossible(test.getClass(), 
                         seen);
             }
             if (workingTest == null) {
@@ -156,7 +155,7 @@ public class TestCaseUtil {
     public static TestSuite createTestSuite(Class<? extends Test> testClass)
             throws InstantiationException, IllegalAccessException {
 
-        Test test = invokeSuiteMethodIfPossible(testClass,
+        Test test = invokeSuiteMethodIfPossible(testClass, 
                 new HashSet<Class<?>>());
         if (test == null) {
             return new TestSuite(testClass);

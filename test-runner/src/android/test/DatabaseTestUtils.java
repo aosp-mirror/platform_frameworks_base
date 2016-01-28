@@ -27,7 +27,6 @@ import java.util.Set;
  * A collection of utilities for writing unit tests for database code.
  * @hide pending API council approval
  */
-@Deprecated
 public class DatabaseTestUtils {
 
     /**
