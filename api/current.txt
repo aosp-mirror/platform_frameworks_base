@@ -31544,6 +31544,7 @@ package android.provider {
     method public static java.lang.String getSearchDocumentsQuery(android.net.Uri);
     method public static java.lang.String getTreeDocumentId(android.net.Uri);
     method public static boolean isDocumentUri(android.content.Context, android.net.Uri);
+    method public static boolean isTreeUri(android.net.Uri);
     method public static android.net.Uri moveDocument(android.content.ContentResolver, android.net.Uri, android.net.Uri, android.net.Uri);
     method public static android.net.Uri renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
     field public static final java.lang.String EXTRA_ERROR = "error";
