@@ -178,7 +178,7 @@ public class RestrictedLockUtils {
                     if (userInfo.isManagedProfile()) {
                         // If userInfo.id is a managed profile, we also need to look at
                         // the policies set on the parent.
-                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(admin);
+                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(userInfo);
                         if ((parentDpm.getKeyguardDisabledFeatures(admin, userInfo.id)
                                 & keyguardFeatures) != 0) {
                             if (enforcedAdmin == null) {
@@ -375,7 +375,7 @@ public class RestrictedLockUtils {
                     if (userInfo.isManagedProfile()) {
                         // If userInfo.id is a managed profile, we also need to look at
                         // the policies set on the parent.
-                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(admin);
+                        DevicePolicyManager parentDpm = dpm.getParentProfileInstance(userInfo);
                         if (parentDpm.getMaximumTimeToLock(admin, userInfo.id) > 0) {
                             if (enforcedAdmin == null) {
                                 enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
