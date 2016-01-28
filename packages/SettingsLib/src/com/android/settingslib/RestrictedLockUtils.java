@@ -126,7 +126,7 @@ public class RestrictedLockUtils {
      * {@link UserHandle#USER_NULL}.
      */
     public static EnforcedAdmin checkIfKeyguardFeaturesDisabled(Context context,
-            int keyguardFeatures) {
+            int keyguardFeatures, int userId) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         if (dpm == null) {
@@ -135,7 +135,6 @@ public class RestrictedLockUtils {
         final UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
         EnforcedAdmin enforcedAdmin = null;
-        final int userId = UserHandle.myUserId();
         if (um.getUserInfo(userId).isManagedProfile()) {
             final List<ComponentName> admins = dpm.getActiveAdminsAsUser(userId);
             if (admins == null) {
