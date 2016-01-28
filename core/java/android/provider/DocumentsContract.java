@@ -835,7 +835,12 @@ public final class DocumentsContract {
         return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme());
     }
 
-    /** {@hide} */
+    /**
+     * Test if the given URI represents a {@link Document} tree.
+     *
+     * @see #buildTreeDocumentUri(String, String)
+     * @see #getTreeDocumentId(Uri, String)
+     */
     public static boolean isTreeUri(Uri uri) {
         final List<String> paths = uri.getPathSegments();
         return (paths.size() >= 2 && PATH_TREE.equals(paths.get(0)));
