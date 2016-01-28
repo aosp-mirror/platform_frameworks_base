@@ -492,6 +492,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             return;
         }
 
+        if (DirectoryFragment.get(getFragmentManager()).onBackPressed()) {
+            return;
+        }
+
         if (!mState.hasLocationChanged()) {
             super.onBackPressed();
             return;
