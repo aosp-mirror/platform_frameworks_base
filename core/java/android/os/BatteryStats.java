@@ -147,6 +147,11 @@ public abstract class BatteryStats implements Parcelable {
     public static final int WAKE_TYPE_DRAW = 18;
 
     /**
+     * A constant indicating a bluetooth scan timer.
+     */
+    public static final int BLUETOOTH_SCAN_ON = 19;
+
+    /**
      * Include all of the data in the stats, including previously saved data.
      */
     public static final int STATS_SINCE_CHARGED = 0;
@@ -438,6 +443,7 @@ public abstract class BatteryStats implements Parcelable {
         public abstract Timer getFlashlightTurnedOnTimer();
         public abstract Timer getCameraTurnedOnTimer();
         public abstract Timer getForegroundActivityTimer();
+        public abstract Timer getBluetoothScanTimer();
 
         // Time this uid has any processes in the top state.
         public static final int PROCESS_STATE_TOP = 0;
@@ -1179,6 +1185,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_PHONE_IN_CALL_FLAG = 1<<23;
         public static final int STATE2_BLUETOOTH_ON_FLAG = 1<<22;
         public static final int STATE2_CAMERA_FLAG = 1<<21;
+        public static final int STATE2_BLUETOOTH_SCAN_FLAG = 1 << 20;
 
         public static final int MOST_INTERESTING_STATES2 =
             STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_MASK
@@ -1922,6 +1929,7 @@ public abstract class BatteryStats implements Parcelable {
                 HistoryItem.STATE2_WIFI_SUPPL_STATE_SHIFT, "wifi_suppl", "Wsp",
                 WIFI_SUPPL_STATE_NAMES, WIFI_SUPPL_STATE_SHORT_NAMES),
         new BitDescription(HistoryItem.STATE2_CAMERA_FLAG, "camera", "ca"),
+        new BitDescription(HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG, "ble_scan", "bles"),
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
@@ -2041,6 +2049,13 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract long getCameraOnTime(long elapsedRealtimeUs, int which);
 
+    /**
+     * Returns the time in microseconds that bluetooth scans were running while the device was
+     * on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getBluetoothScanTime(long elapsedRealtimeUs, int which);
 
     public static final int NETWORK_MOBILE_RX_DATA = 0;
     public static final int NETWORK_MOBILE_TX_DATA = 1;
@@ -2797,9 +2812,12 @@ public abstract class BatteryStats implements Parcelable {
         final long mobileTxTotalPackets = getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which);
         final long wifiRxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
         final long wifiTxTotalPackets = getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+        final long btRxTotalBytes = getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
+        final long btTxTotalBytes = getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
         dumpLine(pw, 0 /* uid */, category, GLOBAL_NETWORK_DATA,
                 mobileRxTotalBytes, mobileTxTotalBytes, wifiRxTotalBytes, wifiTxTotalBytes,
-                mobileRxTotalPackets, mobileTxTotalPackets, wifiRxTotalPackets, wifiTxTotalPackets);
+                mobileRxTotalPackets, mobileTxTotalPackets, wifiRxTotalPackets, wifiTxTotalPackets,
+                btRxTotalBytes, btTxTotalBytes);
 
         // Dump Modem controller stats
         dumpControllerActivityLine(pw, 0 /* uid */, category, GLOBAL_MODEM_CONTROLLER_DATA,
@@ -3017,14 +3035,18 @@ public abstract class BatteryStats implements Parcelable {
             final int mobileActiveCount = u.getMobileRadioActiveCount(which);
             final long wifiPacketsRx = u.getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which);
             final long wifiPacketsTx = u.getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which);
+            final long btBytesRx = u.getNetworkActivityBytes(NETWORK_BT_RX_DATA, which);
+            final long btBytesTx = u.getNetworkActivityBytes(NETWORK_BT_TX_DATA, which);
             if (mobileBytesRx > 0 || mobileBytesTx > 0 || wifiBytesRx > 0 || wifiBytesTx > 0
                     || mobilePacketsRx > 0 || mobilePacketsTx > 0 || wifiPacketsRx > 0
-                    || wifiPacketsTx > 0 || mobileActiveTime > 0 || mobileActiveCount > 0) {
+                    || wifiPacketsTx > 0 || mobileActiveTime > 0 || mobileActiveCount > 0
+                    || btBytesRx > 0 || btBytesTx > 0) {
                 dumpLine(pw, uid, category, NETWORK_DATA, mobileBytesRx, mobileBytesTx,
                         wifiBytesRx, wifiBytesTx,
                         mobilePacketsRx, mobilePacketsTx,
                         wifiPacketsRx, wifiPacketsTx,
-                        mobileActiveTime, mobileActiveCount);
+                        mobileActiveTime, mobileActiveCount,
+                        btBytesRx, btBytesTx);
             }
 
             // Dump modem controller data, per UID.
@@ -3045,6 +3067,9 @@ public abstract class BatteryStats implements Parcelable {
 
             dumpControllerActivityLine(pw, uid, category, WIFI_CONTROLLER_DATA,
                     u.getWifiControllerActivity(), which);
+
+            dumpControllerActivityLine(pw, uid, category, BLUETOOTH_CONTROLLER_DATA,
+                    u.getBluetoothControllerActivity(), which);
 
             if (u.hasUserActivity()) {
                 args = new Object[Uid.NUM_USER_ACTIVITY_TYPES];
@@ -3668,6 +3693,12 @@ public abstract class BatteryStats implements Parcelable {
         pw.print("  Bluetooth total received: "); pw.print(formatBytesLocked(btRxTotalBytes));
         pw.print(", sent: "); pw.println(formatBytesLocked(btTxTotalBytes));
 
+        final long bluetoothScanTimeMs = getBluetoothScanTime(rawRealtime, which) / 1000;
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  Bluetooth scan time: "); formatTimeMs(sb, bluetoothScanTimeMs);
+        pw.println(sb.toString());
+
         printControllerActivity(pw, sb, prefix, "Bluetooth", getBluetoothControllerActivity(),
                 which);
 
@@ -3792,6 +3823,10 @@ public abstract class BatteryStats implements Parcelable {
                     if (bs.wifiPowerMah != 0) {
                         pw.print(" wifi=");
                         printmAh(pw, bs.wifiPowerMah);
+                    }
+                    if (bs.bluetoothPowerMah != 0) {
+                        pw.print(" bt=");
+                        printmAh(pw, bs.bluetoothPowerMah);
                     }
                     if (bs.gpsPowerMah != 0) {
                         pw.print(" gps=");
@@ -4034,6 +4069,9 @@ public abstract class BatteryStats implements Parcelable {
                 pw.print(formatBytesLocked(btTxBytes));
                 pw.println(" sent");
             }
+
+            uidActivity |= printTimer(pw, sb, u.getBluetoothScanTimer(), rawRealtime, which, prefix,
+                    "Bluetooth Scan");
 
             if (u.hasUserActivity()) {
                 boolean hasData = false;

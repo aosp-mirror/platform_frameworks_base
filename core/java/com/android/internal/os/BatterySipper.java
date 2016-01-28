@@ -44,6 +44,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public long wakeLockTimeMs;
     public long cameraTimeMs;
     public long flashlightTimeMs;
+    public long bluetoothRunningTimeMs;
 
     public long mobileRxPackets;
     public long mobileTxPackets;
@@ -56,6 +57,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public long mobileTxBytes;
     public long wifiRxBytes;
     public long wifiTxBytes;
+    public long btRxBytes;
+    public long btTxBytes;
     public double percent;
     public double noCoveragePercent;
     public String[] mPackages;
@@ -71,6 +74,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double sensorPowerMah;
     public double cameraPowerMah;
     public double flashlightPowerMah;
+    public double bluetoothPowerMah;
 
     public enum DrainType {
         IDLE,
@@ -142,6 +146,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
         wakeLockTimeMs += other.wakeLockTimeMs;
         cameraTimeMs += other.cameraTimeMs;
         flashlightTimeMs += other.flashlightTimeMs;
+        bluetoothRunningTimeMs += other.bluetoothRunningTimeMs;
         mobileRxPackets += other.mobileRxPackets;
         mobileTxPackets += other.mobileTxPackets;
         mobileActive += other.mobileActive;
@@ -152,6 +157,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
         mobileTxBytes += other.mobileTxBytes;
         wifiRxBytes += other.wifiRxBytes;
         wifiTxBytes += other.wifiTxBytes;
+        btRxBytes += other.btRxBytes;
+        btTxBytes += other.btTxBytes;
         wifiPowerMah += other.wifiPowerMah;
         gpsPowerMah += other.gpsPowerMah;
         cpuPowerMah += other.cpuPowerMah;
@@ -160,6 +167,7 @@ public class BatterySipper implements Comparable<BatterySipper> {
         wakeLockPowerMah += other.wakeLockPowerMah;
         cameraPowerMah += other.cameraPowerMah;
         flashlightPowerMah += other.flashlightPowerMah;
+        bluetoothPowerMah += other.bluetoothPowerMah;
     }
 
     /**
@@ -169,6 +177,6 @@ public class BatterySipper implements Comparable<BatterySipper> {
     public double sumPower() {
         return totalPowerMah = usagePowerMah + wifiPowerMah + gpsPowerMah + cpuPowerMah +
                 sensorPowerMah + mobileRadioPowerMah + wakeLockPowerMah + cameraPowerMah +
-                flashlightPowerMah;
+                flashlightPowerMah + bluetoothPowerMah;
     }
 }

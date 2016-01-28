@@ -29,6 +29,7 @@ public class WifiPowerCalculator extends PowerCalculator {
     private final double mTxCurrentMa;
     private final double mRxCurrentMa;
     private double mTotalAppPowerDrain = 0;
+    private long mTotalAppRunningTime = 0;
 
     public WifiPowerCalculator(PowerProfile profile) {
         mIdleCurrentMa = profile.getAveragePower(PowerProfile.POWER_WIFI_CONTROLLER_IDLE);
@@ -48,6 +49,8 @@ public class WifiPowerCalculator extends PowerCalculator {
         final long txTime = counter.getTxTimeCounters()[0].getCountLocked(statsType);
         final long rxTime = counter.getRxTimeCounter().getCountLocked(statsType);
         app.wifiRunningTimeMs = idleTime + rxTime + txTime;
+        mTotalAppRunningTime += app.wifiRunningTimeMs;
+
         app.wifiPowerMah =
                 ((idleTime * mIdleCurrentMa) + (txTime * mTxCurrentMa) + (rxTime * mRxCurrentMa))
                 / (1000*60*60);
@@ -76,7 +79,9 @@ public class WifiPowerCalculator extends PowerCalculator {
         final long idleTimeMs = counter.getIdleTimeCounter().getCountLocked(statsType);
         final long txTimeMs = counter.getTxTimeCounters()[0].getCountLocked(statsType);
         final long rxTimeMs = counter.getRxTimeCounter().getCountLocked(statsType);
-        app.wifiRunningTimeMs = idleTimeMs + rxTimeMs + txTimeMs;
+
+        app.wifiRunningTimeMs = Math.max(0,
+                (idleTimeMs + rxTimeMs + txTimeMs) - mTotalAppRunningTime);
 
         double powerDrainMah = counter.getPowerCounter().getCountLocked(statsType)
                 / (double)(1000*60*60);
@@ -95,5 +100,6 @@ public class WifiPowerCalculator extends PowerCalculator {
     @Override
     public void reset() {
         mTotalAppPowerDrain = 0;
+        mTotalAppRunningTime = 0;
     }
 }
