@@ -77,6 +77,10 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             // This callback is only made for TaskRow view holders
             ImageView iv = (ImageView) content.findViewById(R.id.icon);
             iv.setImageDrawable(task.icon);
+            iv.animate()
+                    .alpha(1f)
+                    .setDuration(100)
+                    .start();
         }
 
         @Override
@@ -84,6 +88,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             // This callback is only made for TaskRow view holders
             ImageView iv = (ImageView) content.findViewById(R.id.icon);
             iv.setImageBitmap(null);
+            iv.animate().cancel();
         }
 
         @Override
@@ -265,8 +270,10 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
                 taskRow.task.addCallback(holder);
                 TextView tv = (TextView) holder.content.findViewById(R.id.description);
                 tv.setText(taskRow.task.title);
+                ImageView iv = (ImageView) holder.content.findViewById(R.id.icon);
+                iv.setAlpha(0f);
                 holder.content.setOnClickListener(taskRow);
-                loader.loadTaskData(taskRow.task);
+                loader.loadTaskData(taskRow.task, false /* fetchAndInvalidateThumbnails */);
                 break;
             }
         }
@@ -275,17 +282,23 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     @Override
     public void onViewRecycled(ViewHolder holder) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
-
         int position = holder.getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             Row row = mRows.get(position);
             int viewType = row.getViewType();
             if (viewType == TASK_ROW_VIEW_TYPE) {
                 TaskRow taskRow = (TaskRow) row;
-                taskRow.task.removeCallback(holder);
                 loader.unloadTaskData(taskRow.task);
+                taskRow.task.removeCallback(holder);
             }
         }
+    }
+
+    @Override
+    public boolean onFailedToRecycleView(ViewHolder holder) {
+        // Always recycle views, even if it is animating
+        onViewRecycled(holder);
+        return true;
     }
 
     public void onTaskRemoved(Task task, int position) {

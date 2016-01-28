@@ -1417,7 +1417,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.onTaskBound(task);
 
         // Load the task data
-        Recents.getTaskLoader().loadTaskData(task);
+        Recents.getTaskLoader().loadTaskData(task, true /* fetchAndInvalidateThumbnails */);
 
         // If the doze trigger has already fired, then update the state for this task view
         tv.setNoUserInteractionState();
