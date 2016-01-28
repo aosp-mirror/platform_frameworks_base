@@ -346,11 +346,13 @@ public class DocumentsActivity extends BaseActivity {
             } else {
                 DirectoryFragment.showRecentsOpen(fm, anim);
 
-                // Start recents in grid when requesting visual things
-                final boolean visualMimes = MimePredicate.mimeMatches(
+                // In recents we pick layout mode based on the mimetype,
+                // picking GRID for visual types. We intentionally don't
+                // consult a user's saved preferences here since they are
+                // set per root (not per root and per mimetype).
+                boolean visualMimes = MimePredicate.mimeMatches(
                         MimePredicate.VISUAL_MIMES, mState.acceptMimes);
-                mState.userMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
-                mState.derivedMode = mState.userMode;
+                mState.derivedMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
             }
         } else {
             if (mSearchManager.isSearching()) {

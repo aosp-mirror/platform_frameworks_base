@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
-import static com.android.documentsui.State.MODE_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
@@ -92,7 +91,6 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
             case MODE_LIST:
                 holder = new ListDocumentHolder(mEnv.getContext(), parent, mIconHelper);
                 break;
-            case MODE_UNKNOWN:
             default:
                 throw new IllegalStateException("Unsupported layout mode.");
         }

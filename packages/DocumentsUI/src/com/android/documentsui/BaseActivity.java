@@ -17,11 +17,13 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_DOWN;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_UP;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -51,8 +53,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
-import com.android.documentsui.SearchManager;
 import com.android.documentsui.SearchManager.SearchManagerListener;
+import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -204,6 +206,8 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     void onStackRestored(boolean restored, boolean external) {}
 
     void onRootPicked(RootInfo root) {
+        mState.derivedMode = LocalPreferences.getViewMode(this, root, MODE_GRID);
+
         // Clear entire backstack and start in new root
         mState.onRootChanged(root);
         mSearchManager.update(root);
@@ -260,11 +264,11 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
                 return true;
 
             case R.id.menu_grid:
-                setUserMode(State.MODE_GRID);
+                setViewMode(State.MODE_GRID);
                 return true;
 
             case R.id.menu_list:
-                setUserMode(State.MODE_LIST);
+                setViewMode(State.MODE_LIST);
                 return true;
 
             case R.id.menu_paste_from_clipboard:
@@ -419,24 +423,27 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         invalidateOptionsMenu();
     }
 
-    public void onStateChanged() {
-        invalidateOptionsMenu();
-    }
-
     /**
      * Set state sort order based on explicit user action.
      */
     void setUserSortOrder(int sortOrder) {
         mState.userSortOrder = sortOrder;
-        DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
+        DirectoryFragment.get(getFragmentManager()).onSortOrderChanged();
     }
 
     /**
-     * Set state mode based on explicit user action.
+     * Set mode based on explicit user action.
      */
-    void setUserMode(int mode) {
-        mState.userMode = mode;
-        DirectoryFragment.get(getFragmentManager()).onUserModeChanged();
+    void setViewMode(@ViewMode int mode) {
+        checkState(mState.stack.root != null);
+        LocalPreferences.setViewMode(this, mState.stack.root, mode);
+        mState.derivedMode = mode;
+
+        // view icon needs to be updated, but we *could* do it
+        // in onOptionsItemSelected, and not do the full invalidation
+        // But! That's a larger refactoring we'll save for another day.
+        invalidateOptionsMenu();
+        DirectoryFragment.get(getFragmentManager()).onViewModeChanged();
     }
 
     public void setPending(boolean pending) {

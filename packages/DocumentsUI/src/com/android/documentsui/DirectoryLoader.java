@@ -16,11 +16,11 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
 import static com.android.documentsui.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
-import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
 import android.content.ContentProviderClient;
@@ -35,7 +35,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
-import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -52,10 +51,10 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
     private final int mType;
     private final RootInfo mRoot;
-    private DocumentInfo mDoc;
     private final Uri mUri;
     private final int mUserSortOrder;
 
+    private DocumentInfo mDoc;
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
@@ -64,9 +63,9 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         super(context, ProviderExecutor.forAuthority(root.authority));
         mType = type;
         mRoot = root;
-        mDoc = doc;
         mUri = uri;
         mUserSortOrder = userSortOrder;
+        mDoc = doc;
     }
 
     @Override
@@ -83,8 +82,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
         final DirectoryResult result = new DirectoryResult();
 
-        int userMode = State.MODE_UNKNOWN;
-
         // Use default document when searching
         if (mType == DirectoryFragment.TYPE_SEARCH) {
             final Uri docUri = DocumentsContract.buildDocumentUri(
@@ -96,25 +93,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                 result.exception = e;
                 return result;
             }
-        }
-
-        // Pick up any custom modes requested by user
-        Cursor cursor = null;
-        try {
-            final Uri stateUri = RecentsProvider.buildState(
-                    mRoot.authority, mRoot.rootId, mDoc.documentId);
-            cursor = resolver.query(stateUri, null, null, null, null);
-            if (cursor.moveToFirst()) {
-                userMode = getCursorInt(cursor, StateColumns.MODE);
-            }
-        } finally {
-            IoUtils.closeQuietly(cursor);
-        }
-
-        if (userMode != State.MODE_UNKNOWN) {
-            result.mode = userMode;
-        } else {
-            result.mode = State.MODE_GRID;
         }
 
         if (mUserSortOrder != State.SORT_ORDER_UNKNOWN) {
@@ -132,13 +110,13 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             result.sortOrder = State.SORT_ORDER_UNKNOWN;
         }
 
-        Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + mUserSortOrder + " --> mode="
-                + result.mode + ", sortOrder=" + result.sortOrder);
+        if (DEBUG)
+                Log.d(TAG, "userSortOrder=" + mUserSortOrder + ", sortOrder=" + result.sortOrder);
 
         ContentProviderClient client = null;
+        Cursor cursor = null;
         try {
             client = DocumentsApplication.acquireUnstableProviderOrThrow(resolver, authority);
-
             cursor = client.query(
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
             if (cursor == null) {

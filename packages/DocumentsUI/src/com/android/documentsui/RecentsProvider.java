@@ -85,6 +85,8 @@ public class RecentsProvider extends ContentProvider {
         public static final String AUTHORITY = "authority";
         public static final String ROOT_ID = Root.COLUMN_ROOT_ID;
         public static final String DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID;
+
+        @Deprecated  // mode is tracked in local preferences now...by root only
         public static final String MODE = "mode";
         public static final String SORT_ORDER = "sortOrder";
     }
