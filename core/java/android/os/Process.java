@@ -150,6 +150,12 @@ public class Process {
     public static final int AUDIOSERVER_UID = 1041;
 
     /**
+     * Defines the UID/GID for the cameraserver process
+     * @hide
+     */
+    public static final int CAMERASERVER_UID = 1046;
+
+    /**
      * Defines the start of a range of UIDs (and GIDs), going from this
      * number to {@link #LAST_APPLICATION_UID} that are reserved for assigning
      * to applications.

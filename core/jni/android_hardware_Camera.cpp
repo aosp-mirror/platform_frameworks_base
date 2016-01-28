@@ -534,7 +534,7 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
         // Default path: hal version is don't care, do normal camera connect.
         camera = Camera::connect(cameraId, clientName,
-                Camera::USE_CALLING_UID);
+                Camera::USE_CALLING_UID, Camera::USE_CALLING_PID);
     } else {
         jint status = Camera::connectLegacy(cameraId, halVersion, clientName,
                 Camera::USE_CALLING_UID, camera);
