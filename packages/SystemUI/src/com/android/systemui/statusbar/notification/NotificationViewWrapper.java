@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.TransformableView;
 public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
+    protected boolean mDark;
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -56,13 +57,17 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * @param fade whether to animate the transition if the mode changes
      * @param delay if fading, the delay of the animation
      */
-    public abstract void setDark(boolean dark, boolean fade, long delay);
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mDark = dark;
+    }
 
     /**
      * Notifies this wrapper that the content of the view might have changed.
      * @param notification
      */
-    public void notifyContentUpdated(StatusBarNotification notification) {};
+    public void notifyContentUpdated(StatusBarNotification notification) {
+        mDark = false;
+    };
 
     /**
      * Update the appearance of the expand button.

@@ -460,16 +460,16 @@ public class NotificationContentView extends FrameLayout {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
         dark = dark && !mShowingLegacyBackground;
-        if (mVisibleType == VISIBLE_TYPE_CONTRACTED) {
+        if (mVisibleType == VISIBLE_TYPE_CONTRACTED || !dark) {
             mContractedWrapper.setDark(dark, fade, delay);
         }
-        if (mVisibleType == VISIBLE_TYPE_EXPANDED) {
+        if (mVisibleType == VISIBLE_TYPE_EXPANDED || (mExpandedChild != null && !dark)) {
             mExpandedWrapper.setDark(dark, fade, delay);
         }
-        if (mVisibleType == VISIBLE_TYPE_HEADSUP) {
+        if (mVisibleType == VISIBLE_TYPE_HEADSUP || (mHeadsUpChild != null && !dark)) {
             mHeadsUpWrapper.setDark(dark, fade, delay);
         }
-        if (mSingleLineView != null && mVisibleType == VISIBLE_TYPE_SINGLELINE) {
+        if (mSingleLineView != null && (mVisibleType == VISIBLE_TYPE_SINGLELINE || !dark)) {
             mSingleLineView.setDark(dark, fade, delay);
         }
     }

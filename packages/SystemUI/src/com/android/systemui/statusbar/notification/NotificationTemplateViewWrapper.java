@@ -172,6 +172,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
+        if (dark == mDark) {
+            return;
+        }
         super.setDark(dark, fade, delay);
         setPictureGrayscale(dark, fade, delay);
         setProgressBarDark(dark, fade, delay);

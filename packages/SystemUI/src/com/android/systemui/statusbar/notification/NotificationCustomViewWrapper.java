@@ -35,6 +35,10 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
+        if (dark == mDark) {
+            return;
+        }
+        super.setDark(dark, fade, delay);
         if (fade) {
             mInvertHelper.fade(dark, delay);
         } else {

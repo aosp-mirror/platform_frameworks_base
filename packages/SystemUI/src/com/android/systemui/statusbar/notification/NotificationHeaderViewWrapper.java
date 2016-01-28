@@ -95,6 +95,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     @Override
     public void notifyContentUpdated(StatusBarNotification notification) {
+        super.notifyContentUpdated(notification);
         // Reinspect the notification.
         resolveHeaderViews();
         updateInvertHelper();
@@ -150,6 +151,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
+        if (dark == mDark) {
+            return;
+        }
+        super.setDark(dark, fade, delay);
         if (fade) {
             mInvertHelper.fade(dark, delay);
         } else {
