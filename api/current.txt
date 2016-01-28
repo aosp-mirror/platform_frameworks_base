@@ -29221,6 +29221,8 @@ package android.os {
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
     field public static final java.lang.String ENSURE_VERIFY_APPS = "ensure_verify_apps";
     field public static final java.lang.String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+    field public static final int USER_CREATION_FAILED_NOT_PERMITTED = 1; // 0x1
+    field public static final int USER_CREATION_FAILED_NO_MORE_USERS = 2; // 0x2
   }
 
   public abstract class Vibrator {
