@@ -3491,6 +3491,7 @@ public class PackageParser {
         info.maxRecents = target.info.maxRecents;
         info.layout = target.info.layout;
         info.resizeMode = target.info.resizeMode;
+        info.encryptionAware = target.info.encryptionAware;
 
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {
