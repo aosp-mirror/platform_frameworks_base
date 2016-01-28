@@ -29216,6 +29216,8 @@ package android.preference {
     method public static void setDefaultValues(android.content.Context, java.lang.String, int, int, boolean);
     method public void setSharedPreferencesMode(int);
     method public void setSharedPreferencesName(java.lang.String);
+    method public void setStorageDefault();
+    method public void setStorageDeviceEncrypted();
     field public static final java.lang.String KEY_HAS_SET_DEFAULT_VALUES = "_has_set_default_values";
     field public static final java.lang.String METADATA_KEY_PREFERENCES = "android.preference";
   }

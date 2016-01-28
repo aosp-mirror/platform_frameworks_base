@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.SystemApi;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.content.Context;
@@ -24,8 +25,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.util.Log;
@@ -110,7 +111,13 @@ public class PreferenceManager {
      * managed by this instance.
      */
     private int mSharedPreferencesMode;
-    
+
+    private static final int STORAGE_DEFAULT = 0;
+    private static final int STORAGE_DEVICE_ENCRYPTED = 1;
+    private static final int STORAGE_CREDENTIAL_ENCRYPTED = 2;
+
+    private int mStorage = STORAGE_DEFAULT;
+
     /**
      * The {@link PreferenceScreen} at the root of the preference hierarchy.
      */
@@ -343,6 +350,46 @@ public class PreferenceManager {
     }
 
     /**
+     * Sets the storage location used internally by this class to be the default
+     * provided by the hosting {@link Context}.
+     */
+    public void setStorageDefault() {
+        mStorage = STORAGE_DEFAULT;
+        mSharedPreferences = null;
+    }
+
+    /**
+     * Explicitly set the storage location used internally by this class to be
+     * device-encrypted storage.
+     * <p>
+     * Data stored in device-encrypted storage is typically encrypted with a key
+     * tied to the physical device, and it can be accessed when the device has
+     * booted successfully, both <em>before and after</em> the user has
+     * authenticated with their credentials (such as a lock pattern or PIN).
+     * Because device-encrypted data is available before user authentication,
+     * you should carefully consider what data you store using this mode.
+     *
+     * @see Context#createDeviceEncryptedStorageContext()
+     */
+    public void setStorageDeviceEncrypted() {
+        mStorage = STORAGE_DEVICE_ENCRYPTED;
+        mSharedPreferences = null;
+    }
+
+    /**
+     * Explicitly set the storage location used internally by this class to be
+     * credential-encrypted storage.
+     *
+     * @see Context#createCredentialEncryptedStorageContext()
+     * @hide
+     */
+    @SystemApi
+    public void setStorageCredentialEncrypted() {
+        mStorage = STORAGE_CREDENTIAL_ENCRYPTED;
+        mSharedPreferences = null;
+    }
+
+    /**
      * Gets a SharedPreferences instance that preferences managed by this will
      * use.
      * 
@@ -351,7 +398,20 @@ public class PreferenceManager {
      */
     public SharedPreferences getSharedPreferences() {
         if (mSharedPreferences == null) {
-            mSharedPreferences = mContext.getSharedPreferences(mSharedPreferencesName,
+            final Context storageContext;
+            switch (mStorage) {
+                case STORAGE_DEVICE_ENCRYPTED:
+                    storageContext = mContext.createDeviceEncryptedStorageContext();
+                    break;
+                case STORAGE_CREDENTIAL_ENCRYPTED:
+                    storageContext = mContext.createCredentialEncryptedStorageContext();
+                    break;
+                default:
+                    storageContext = mContext;
+                    break;
+            }
+
+            mSharedPreferences = storageContext.getSharedPreferences(mSharedPreferencesName,
                     mSharedPreferencesMode);
         }
         
