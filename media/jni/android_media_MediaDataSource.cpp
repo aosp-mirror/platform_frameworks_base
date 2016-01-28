@@ -150,4 +150,8 @@ void JMediaDataSource::close() {
     mJavaObjStatus = UNKNOWN_ERROR;
 }
 
+uint32_t JMediaDataSource::getFlags() {
+    return 0;
+}
+
 }  // namespace android
