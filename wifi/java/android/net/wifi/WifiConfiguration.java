@@ -58,6 +58,9 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
 
+    /** {@hide} */
+    private String mPasspointManagementObjectTree;
+
     /**
      * Recognized key management schemes.
      */
@@ -79,11 +82,16 @@ public class WifiConfiguration implements Parcelable {
           * @hide
           */
         public static final int WPA2_PSK = 4;
+        /**
+         * Hotspot 2.0 r2 OSEN:
+         * @hide
+         */
+        public static final int OSEN = 5;
 
         public static final String varName = "key_mgmt";
 
         public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X",
-                "WPA2_PSK" };
+                "WPA2_PSK", "OSEN" };
     }
 
     /**
@@ -96,10 +104,14 @@ public class WifiConfiguration implements Parcelable {
         public static final int WPA = 0;
         /** WPA2/IEEE 802.11i */
         public static final int RSN = 1;
+        /** HS2.0 r2 OSEN
+         * @hide
+         */
+        public static final int OSEN = 2;
 
         public static final String varName = "proto";
 
-        public static final String[] strings = { "WPA", "RSN" };
+        public static final String[] strings = { "WPA", "RSN", "OSEN" };
     }
 
     /**
@@ -158,10 +170,15 @@ public class WifiConfiguration implements Parcelable {
         public static final int TKIP = 2;
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 3;
+        /** Hotspot 2.0 r2 OSEN
+         * @hide
+         */
+        public static final int GTK_NOT_USED = 4;
 
         public static final String varName = "group";
 
-        public static final String[] strings = { "WEP40", "WEP104", "TKIP", "CCMP" };
+        public static final String[] strings =
+                { "WEP40", "WEP104", "TKIP", "CCMP", "GTK_NOT_USED" };
     }
 
     /** Possible status of a network configuration. */
@@ -1734,6 +1751,16 @@ public class WifiConfiguration implements Parcelable {
         return shared || (UserHandle.getUserId(creatorUid) == userId);
     }
 
+    /** @hide */
+    public void setPasspointManagementObjectTree(String passpointManagementObjectTree) {
+        mPasspointManagementObjectTree = passpointManagementObjectTree;
+    }
+
+    /** @hide */
+    public String getMoTree() {
+        return mPasspointManagementObjectTree;
+    }
+
     /** copy constructor {@hide} */
     public WifiConfiguration(WifiConfiguration source) {
         if (source != null) {
@@ -1885,6 +1912,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
         dest.writeInt(shared ? 1 : 0);
+        dest.writeString(mPasspointManagementObjectTree);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1953,6 +1981,7 @@ public class WifiConfiguration implements Parcelable {
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
                 config.shared = in.readInt() != 0;
+                config.mPasspointManagementObjectTree = in.readString();
                 return config;
             }
 
