@@ -303,8 +303,8 @@ public class WifiNanSessionListener {
      * message). Override to implement your custom response.
      * <p>
      * Note that either this callback or
-     * {@link WifiNanSessionListener#onMessageSendFail(int)} will be received -
-     * never both.
+     * {@link WifiNanSessionListener#onMessageSendFail(int, int)} will be
+     * received - never both.
      */
     public void onMessageSendSuccess(int messageId) {
         if (VDBG) Log.v(TAG, "onMessageSendSuccess: called in stub - override if interested");
@@ -319,8 +319,8 @@ public class WifiNanSessionListener {
      * message). Override to implement your custom response.
      * <p>
      * Note that either this callback or
-     * {@link WifiNanSessionListener#onMessageSendSuccess()} will be received -
-     * never both
+     * {@link WifiNanSessionListener#onMessageSendSuccess(int)} will be received
+     * - never both
      *
      * @param reason The failure reason using {@code NanSessionListener.FAIL_*}
      *            codes.
