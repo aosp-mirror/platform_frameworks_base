@@ -2691,6 +2691,11 @@
     <public type="attr" name="canPerformGestures" />
     <public type="attr" name="externalService" />
     <public type="attr" name="supportsLocalInteraction" />
+    <public type="attr" name="startX" />
+    <public type="attr" name="startY" />
+    <public type="attr" name="endX" />
+    <public type="attr" name="endY" />
+    <public type="attr" name="offset" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />

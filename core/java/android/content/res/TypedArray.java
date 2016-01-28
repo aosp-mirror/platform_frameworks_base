@@ -454,6 +454,39 @@ public class TypedArray {
     }
 
     /**
+     * Retrieve the ComplexColor for the attribute at <var>index</var>.
+     * The value may be either a {@link android.content.res.ColorStateList} which can wrap a simple
+     * color value or a {@link android.content.res.GradientColor}
+     * <p>
+     * This method will return {@code null} if the attribute is not defined or
+     * is not an integer color, color state list or GradientColor.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return ComplexColor for the attribute, or {@code null} if not defined.
+     * @throws RuntimeException if the attribute if the TypedArray has already
+     *         been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer color, color state list or GradientColor.
+     */
+    @Nullable
+    public ComplexColor getComplexColor(@StyleableRes int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        final TypedValue value = mValue;
+        if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            if (value.type == TypedValue.TYPE_ATTRIBUTE) {
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
+            }
+            return mResources.loadComplexColor(value, value.resourceId, mTheme);
+        }
+        return null;
+    }
+
+    /**
      * Retrieve the ColorStateList for the attribute at <var>index</var>.
      * The value may be either a single solid color or a reference to
      * a color or complex {@link android.content.res.ColorStateList}

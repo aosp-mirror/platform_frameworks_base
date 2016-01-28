@@ -90,6 +90,18 @@ static void updateFullPathPropertiesAndStrokeStyles(JNIEnv*, jobject, jlong full
             strokeLineJoin);
 }
 
+static void updateFullPathFillGradient(JNIEnv*, jobject, jlong pathPtr, jlong fillGradientPtr) {
+    VectorDrawable::FullPath* path = reinterpret_cast<VectorDrawable::FullPath*>(pathPtr);
+    SkShader* fillShader = reinterpret_cast<SkShader*>(fillGradientPtr);
+    path->setFillGradient(fillShader);
+}
+
+static void updateFullPathStrokeGradient(JNIEnv*, jobject, jlong pathPtr, jlong strokeGradientPtr) {
+    VectorDrawable::FullPath* path = reinterpret_cast<VectorDrawable::FullPath*>(pathPtr);
+    SkShader* strokeShader = reinterpret_cast<SkShader*>(strokeGradientPtr);
+    path->setStrokeGradient(strokeShader);
+}
+
 static jboolean getFullPathProperties(JNIEnv* env, jobject, jlong fullPathPtr,
         jbyteArray outProperties, jint length) {
     VectorDrawable::FullPath* fullPath = reinterpret_cast<VectorDrawable::FullPath*>(fullPathPtr);
@@ -331,6 +343,8 @@ static const JNINativeMethod gMethods[] = {
         {"nCreateFullPath", "!()J", (void*)createEmptyFullPath},
         {"nCreateFullPath", "!(J)J", (void*)createFullPath},
         {"nUpdateFullPathProperties", "!(JFIFIFFFFFII)V", (void*)updateFullPathPropertiesAndStrokeStyles},
+        {"nUpdateFullPathFillGradient", "!(JJ)V", (void*)updateFullPathFillGradient},
+        {"nUpdateFullPathStrokeGradient", "!(JJ)V", (void*)updateFullPathStrokeGradient},
         {"nGetFullPathProperties", "(J[BI)Z", (void*)getFullPathProperties},
         {"nGetGroupProperties", "(J[FI)Z", (void*)getGroupProperties},
 

@@ -18,6 +18,7 @@
 
 #include "PathParser.h"
 #include "SkImageInfo.h"
+#include "SkShader.h"
 #include <utils/Log.h>
 #include "utils/Macros.h"
 #include "utils/VectorDrawableUtils.h"
@@ -49,7 +50,7 @@ void Path::draw(SkCanvas* outCanvas, const SkMatrix& groupStackedMatrix, float s
 
     float minScale = fmin(scaleX, scaleY);
     float strokeScale = minScale * matrixScale;
-    drawPath(outCanvas, renderPath, strokeScale);
+    drawPath(outCanvas, renderPath, strokeScale, pathMatrix);
 }
 
 void Path::setPathData(const Data& data) {
@@ -148,6 +149,9 @@ FullPath::FullPath(const FullPath& path) : Path(path) {
     mStrokeMiterLimit = path.mStrokeMiterLimit;
     mStrokeLineCap = path.mStrokeLineCap;
     mStrokeLineJoin = path.mStrokeLineJoin;
+
+    SkRefCnt_SafeAssign(mStrokeGradient, path.mStrokeGradient);
+    SkRefCnt_SafeAssign(mFillGradient, path.mFillGradient);
 }
 
 const SkPath& FullPath::getUpdatedPath() {
@@ -186,22 +190,44 @@ inline SkColor applyAlpha(SkColor color, float alpha) {
     return SkColorSetA(color, alphaBytes * alpha);
 }
 
-void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float strokeScale){
-    // Draw path's fill, if fill color isn't transparent.
-    if (mFillColor != SK_ColorTRANSPARENT) {
-        mPaint.setStyle(SkPaint::Style::kFill_Style);
-        mPaint.setAntiAlias(true);
+void FullPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath, float strokeScale,
+                        const SkMatrix& matrix){
+    // Draw path's fill, if fill color or gradient is valid
+    bool needsFill = false;
+    if (mFillGradient != nullptr) {
+        mPaint.setColor(applyAlpha(SK_ColorBLACK, mFillAlpha));
+        SkShader* newShader = mFillGradient->newWithLocalMatrix(matrix);
+        mPaint.setShader(newShader);
+        needsFill = true;
+    } else if (mFillColor != SK_ColorTRANSPARENT) {
         mPaint.setColor(applyAlpha(mFillColor, mFillAlpha));
         outCanvas->drawPath(renderPath, mPaint);
+        needsFill = true;
     }
-    // Draw path's stroke, if stroke color isn't transparent
-    if (mStrokeColor != SK_ColorTRANSPARENT) {
+
+    if (needsFill) {
+        mPaint.setStyle(SkPaint::Style::kFill_Style);
+        mPaint.setAntiAlias(true);
+        outCanvas->drawPath(renderPath, mPaint);
+    }
+
+    // Draw path's stroke, if stroke color or gradient is valid
+    bool needsStroke = false;
+    if (mStrokeGradient != nullptr) {
+        mPaint.setColor(applyAlpha(SK_ColorBLACK, mStrokeAlpha));
+        SkShader* newShader = mStrokeGradient->newWithLocalMatrix(matrix);
+        mPaint.setShader(newShader);
+        needsStroke = true;
+    } else if (mStrokeColor != SK_ColorTRANSPARENT) {
+        mPaint.setColor(applyAlpha(mStrokeColor, mStrokeAlpha));
+        needsStroke = true;
+    }
+    if (needsStroke) {
         mPaint.setStyle(SkPaint::Style::kStroke_Style);
         mPaint.setAntiAlias(true);
         mPaint.setStrokeJoin(mStrokeLineJoin);
         mPaint.setStrokeCap(mStrokeLineCap);
         mPaint.setStrokeMiter(mStrokeMiterLimit);
-        mPaint.setColor(applyAlpha(mStrokeColor, mStrokeAlpha));
         mPaint.setStrokeWidth(mStrokeWidth * strokeScale);
         outCanvas->drawPath(renderPath, mPaint);
     }
@@ -288,7 +314,7 @@ bool FullPath::getProperties(int8_t* outProperties, int length) {
 }
 
 void ClipPath::drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
-        float strokeScale){
+        float strokeScale, const SkMatrix& matrix){
     outCanvas->clipPath(renderPath, SkRegion::kIntersect_Op);
 }
 

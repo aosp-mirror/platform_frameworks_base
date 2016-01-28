@@ -26,6 +26,7 @@
 #include <SkPath.h>
 #include <SkPathMeasure.h>
 #include <SkRect.h>
+#include <SkShader.h>
 
 #include <cutils/compiler.h>
 #include <stddef.h>
@@ -95,7 +96,7 @@ public:
 protected:
     virtual const SkPath& getUpdatedPath();
     virtual void drawPath(SkCanvas *outCanvas, const SkPath& renderPath,
-            float strokeScale) = 0;
+            float strokeScale, const SkMatrix& matrix) = 0;
     Data mData;
     SkPath mSkPath;
     bool mSkPathDirty = true;
@@ -107,6 +108,11 @@ public:
     FullPath(const char* path, size_t strLength) : Path(path, strLength) {}
     FullPath() : Path() {}
     FullPath(const Data& nodes) : Path(nodes) {}
+
+    ~FullPath() {
+        SkSafeUnref(mFillGradient);
+        SkSafeUnref(mStrokeGradient);
+    }
 
     void updateProperties(float strokeWidth, SkColor strokeColor,
             float strokeAlpha, SkColor fillColor, float fillAlpha,
@@ -162,10 +168,18 @@ public:
     }
     bool getProperties(int8_t* outProperties, int length);
 
+    void setFillGradient(SkShader* fillGradient) {
+        SkRefCnt_SafeAssign(mFillGradient, fillGradient);
+    };
+    void setStrokeGradient(SkShader* strokeGradient) {
+        SkRefCnt_SafeAssign(mStrokeGradient, strokeGradient);
+    };
+
+
 protected:
     const SkPath& getUpdatedPath() override;
     void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
-            float strokeScale) override;
+            float strokeScale, const SkMatrix& matrix) override;
 
 private:
     // Applies trimming to the specified path.
@@ -174,6 +188,8 @@ private:
     SkColor mStrokeColor = SK_ColorTRANSPARENT;
     float mStrokeAlpha = 1;
     SkColor mFillColor = SK_ColorTRANSPARENT;
+    SkShader* mStrokeGradient = nullptr;
+    SkShader* mFillGradient = nullptr;
     float mFillAlpha = 1;
     float mTrimPathStart = 0;
     float mTrimPathEnd = 1;
@@ -195,7 +211,7 @@ public:
 
 protected:
     void drawPath(SkCanvas* outCanvas, const SkPath& renderPath,
-            float strokeScale) override;
+            float strokeScale, const SkMatrix& matrix) override;
 };
 
 class ANDROID_API Group: public Node {

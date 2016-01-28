@@ -506,6 +506,8 @@ package android {
     field public static final int encryptionAware = 16844038; // 0x1010506
     field public static final int end = 16843996; // 0x10104dc
     field public static final int endColor = 16843166; // 0x101019e
+    field public static final int endX = 16844051; // 0x1010513
+    field public static final int endY = 16844052; // 0x1010514
     field public static final deprecated int endYear = 16843133; // 0x101017d
     field public static final int enterFadeDuration = 16843532; // 0x101030c
     field public static final int entries = 16842930; // 0x10100b2
@@ -881,6 +883,7 @@ package android {
     field public static final int numbersTextColor = 16843937; // 0x10104a1
     field public static final deprecated int numeric = 16843109; // 0x1010165
     field public static final int numericShortcut = 16843236; // 0x10101e4
+    field public static final int offset = 16844053; // 0x1010515
     field public static final int onClick = 16843375; // 0x101026f
     field public static final int oneshot = 16843159; // 0x1010197
     field public static final int opacity = 16843550; // 0x101031e
@@ -1128,6 +1131,8 @@ package android {
     field public static final int startColor = 16843165; // 0x101019d
     field public static final int startDelay = 16843746; // 0x10103e2
     field public static final int startOffset = 16843198; // 0x10101be
+    field public static final int startX = 16844049; // 0x1010511
+    field public static final int startY = 16844050; // 0x1010512
     field public static final deprecated int startYear = 16843132; // 0x101017c
     field public static final int stateListAnimator = 16843848; // 0x1010448
     field public static final int stateNotNeeded = 16842774; // 0x1010016
@@ -9949,7 +9954,7 @@ package android.content.res {
     method public final long skip(long) throws java.io.IOException;
   }
 
-  public class ColorStateList implements android.os.Parcelable {
+  public class ColorStateList extends android.content.res.ComplexColor implements android.os.Parcelable {
     ctor public ColorStateList(int[][], int[]);
     method public static deprecated android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -9958,11 +9963,16 @@ package android.content.res {
     method public int getColorForState(int[], int);
     method public int getDefaultColor();
     method public boolean isOpaque();
-    method public boolean isStateful();
     method public static android.content.res.ColorStateList valueOf(int);
     method public android.content.res.ColorStateList withAlpha(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.res.ColorStateList> CREATOR;
+  }
+
+  public abstract class ComplexColor {
+    ctor public ComplexColor();
+    method public abstract int getDefaultColor();
+    method public boolean isStateful();
   }
 
   public final class Configuration implements java.lang.Comparable android.os.Parcelable {
@@ -10068,6 +10078,11 @@ package android.content.res {
     field public int uiMode;
   }
 
+  public class GradientColor extends android.content.res.ComplexColor {
+    method public static android.content.res.GradientColor createFromXml(android.content.res.Resources, android.content.res.XmlResourceParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public int getDefaultColor();
+  }
+
   public class ObbInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -10127,6 +10142,7 @@ package android.content.res {
     method public void getValue(java.lang.String, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method public void getValueForDensity(int, int, android.util.TypedValue, boolean) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.XmlResourceParser getXml(int) throws android.content.res.Resources.NotFoundException;
+    method public android.content.res.ComplexColor loadComplexColor(android.util.TypedValue, int, android.content.res.Resources.Theme);
     method public final android.content.res.Resources.Theme newTheme();
     method public android.content.res.TypedArray obtainAttributes(android.util.AttributeSet, int[]);
     method public android.content.res.TypedArray obtainTypedArray(int) throws android.content.res.Resources.NotFoundException;
@@ -10162,6 +10178,7 @@ package android.content.res {
     method public int getChangingConfigurations();
     method public int getColor(int, int);
     method public android.content.res.ColorStateList getColorStateList(int);
+    method public android.content.res.ComplexColor getComplexColor(int);
     method public float getDimension(int, float);
     method public int getDimensionPixelOffset(int, int);
     method public int getDimensionPixelSize(int, int);
