@@ -40,6 +40,7 @@ import java.util.UUID;
  *
  * @hide
  */
+@SystemApi
 public final class SoundTriggerDetector {
     private static final boolean DBG = false;
     private static final String TAG = "SoundTriggerDetector";
@@ -132,6 +133,9 @@ public final class SoundTriggerDetector {
         return true;
     }
 
+    /**
+     * @hide
+     */
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             // TODO: Dump useful debug information.
