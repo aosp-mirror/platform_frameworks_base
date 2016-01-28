@@ -32,7 +32,7 @@ oneway interface IWifiNanSessionListener
     void onMatch(int peerId, in byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, in byte[] matchFilter, int matchFilterLength);
 
-    void onMessageSendSuccess();
-    void onMessageSendFail(int reason);
+    void onMessageSendSuccess(int messageId);
+    void onMessageSendFail(int messageId, int reason);
     void onMessageReceived(int peerId, in byte[] message, int messageLength);
 }

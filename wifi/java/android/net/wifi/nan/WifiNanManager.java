@@ -319,13 +319,14 @@ public class WifiNanManager {
     /**
      * {@hide}
      */
-    public void sendMessage(int sessionId, int peerId, byte[] message, int messageLength) {
+    public void sendMessage(int sessionId, int peerId, byte[] message, int messageLength,
+            int messageId) {
         try {
             if (VDBG) {
                 Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
-                        + ", messageLength=" + messageLength);
+                        + ", messageLength=" + messageLength + ", messageId=" + messageId);
             }
-            mService.sendMessage(sessionId, peerId, message, messageLength);
+            mService.sendMessage(sessionId, peerId, message, messageLength, messageId);
         } catch (RemoteException e) {
             Log.w(TAG, "subscribe RemoteException (FYI - ignoring): " + e);
         }
