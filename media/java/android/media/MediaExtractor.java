@@ -34,7 +34,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -224,6 +226,46 @@ final public class MediaExtractor {
      * Count the number of tracks found in the data source.
      */
     public native final int getTrackCount();
+
+    /**
+     * Extract DRM initialization data if it exists
+     *
+     * @return DRM initialization data in the content, or {@code null}
+     * if no recognizable DRM format is found;
+     * @see DrmInitData
+     */
+    public DrmInitData getDrmInitData() {
+        Map<String, Object> formatMap = getFileFormatNative();
+        if (formatMap == null) {
+            return null;
+        }
+        if (formatMap.containsKey("pssh")) {
+            Map<UUID, byte[]> psshMap = getPsshInfo();
+            final Map<UUID, DrmInitData.SchemeInitData> initDataMap =
+                new HashMap<UUID, DrmInitData.SchemeInitData>();
+            for (Map.Entry<UUID, byte[]> e: psshMap.entrySet()) {
+                UUID uuid = e.getKey();
+                byte[] data = e.getValue();
+                initDataMap.put(uuid, new DrmInitData.SchemeInitData("cenc", data));
+            }
+            return new DrmInitData() {
+                public SchemeInitData get(UUID schemeUuid) {
+                    return initDataMap.get(schemeUuid);
+                }
+            };
+        } else if (formatMap.containsKey("crypto-key")) {
+            ByteBuffer buf = (ByteBuffer) formatMap.get("crypto-key");
+            buf.rewind();
+            final byte[] data = new byte[buf.remaining()];
+            buf.get(data);
+            return new DrmInitData() {
+                public SchemeInitData get(UUID schemeUuid) {
+                    return new DrmInitData.SchemeInitData("webm", data);
+                }
+            };
+        }
+        return null;
+    }
 
     /**
      * Get the PSSH info if present.
