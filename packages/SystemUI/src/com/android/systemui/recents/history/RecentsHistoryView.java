@@ -37,13 +37,12 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.ClearHistoryEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
 import com.android.systemui.recents.events.ui.ResetBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.AnimateableViewBounds;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 /**
  * A list of the recent tasks that are not in the stack.
@@ -96,7 +95,7 @@ public class RecentsHistoryView extends LinearLayout
     /**
      * Updates this history view with the recent tasks, and then shows it.
      */
-    public void show(TaskStack stack, int stackHeight) {
+    public void show(TaskStack stack, int stackHeight, View clearAllButton) {
         setVisibility(View.VISIBLE);
         setAlpha(0f);
         setTranslationY(-stackHeight * TRANSLATION_Y_PCT);
@@ -106,6 +105,13 @@ public class RecentsHistoryView extends LinearLayout
                 .setDuration(mHistoryTransitionDuration)
                 .setInterpolator(mFastOutSlowInInterpolator)
                 .setUpdateListener(this)
+                .start();
+        clearAllButton.setVisibility(View.VISIBLE);
+        clearAllButton.setAlpha(0f);
+        clearAllButton.animate()
+                .alpha(1f)
+                .setDuration(mHistoryTransitionDuration)
+                .setInterpolator(mFastOutSlowInInterpolator)
                 .withLayer()
                 .start();
         mAdapter.updateTasks(getContext(), stack);
@@ -118,7 +124,7 @@ public class RecentsHistoryView extends LinearLayout
     /**
      * Hides this history view.
      */
-    public void hide(boolean animate, int stackHeight) {
+    public void hide(boolean animate, int stackHeight, final View clearAllButton) {
         if (animate) {
             animate()
                     .alpha(0f)
@@ -132,11 +138,25 @@ public class RecentsHistoryView extends LinearLayout
                             setVisibility(View.INVISIBLE);
                         }
                     })
+                    .start();
+            clearAllButton.animate()
+                    .alpha(0f)
+                    .translationY(0f)
+                    .setDuration(mHistoryTransitionDuration)
+                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            clearAllButton.setVisibility(View.INVISIBLE);
+                        }
+                    })
                     .withLayer()
                     .start();
         } else {
             setAlpha(0f);
             setVisibility(View.INVISIBLE);
+            clearAllButton.setAlpha(0f);
+            clearAllButton.setVisibility(View.INVISIBLE);
         }
         mIsVisible = false;
         EventBus.getDefault().send(new ResetBackgroundScrimEvent());
@@ -222,9 +242,18 @@ public class RecentsHistoryView extends LinearLayout
         mViewBounds.setClipTop(top);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
     /**** EventBus Events ****/
 
     public final void onBusEvent(PackagesChangedEvent event) {
         mAdapter.removeTasks(event.packageName, event.userId);
+    }
+
+    public final void onBusEvent(ClearHistoryEvent event) {
+        mAdapter.removeAllTasks();
     }
 }

@@ -716,6 +716,8 @@
     <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Recents: Show history string. [CHAR LIMIT=NONE] -->
     <string name="recents_history_button_label">History</string>
+    <!-- Recents: History clear all string. [CHAR LIMIT=NONE] -->
+    <string name="recents_history_clear_all_button_label">Clear</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>

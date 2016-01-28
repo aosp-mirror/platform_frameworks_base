@@ -34,7 +34,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
@@ -57,7 +56,6 @@ import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.ShowHistoryEvent;
 import com.android.systemui.recents.events.activity.TaskStackUpdatedEvent;
-import com.android.systemui.recents.events.activity.ToggleHistoryEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
 import com.android.systemui.recents.events.component.ScreenPinningRequestEvent;
@@ -71,7 +69,6 @@ import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusNextTaskViewEvent;
 import com.android.systemui.recents.events.ui.focus.FocusPreviousTaskViewEvent;
-import com.android.systemui.recents.history.RecentsHistoryView;
 import com.android.systemui.recents.misc.DozeTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.RecentsPackageMonitor;
@@ -82,8 +79,6 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.statusbar.BaseStatusBar;
-
-import java.util.ArrayList;
 
 /**
  * The main Recents activity that is started from AlternateRecentsComponent.

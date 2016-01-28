@@ -64,7 +64,6 @@ import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
-import com.android.systemui.recents.events.ui.UpdateBackgroundScrimEvent;
 import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEvent;
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
@@ -81,7 +80,6 @@ import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
-import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.List;
 
