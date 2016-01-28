@@ -1189,7 +1189,7 @@ public class ConnectivityManager {
             return TYPE_NONE;
         }
 
-        // Do this only for SUPL, until GpsLocationProvider is fixed. http://b/25876485 .
+        // Do this only for SUPL, until GnssLocationProvider is fixed. http://b/25876485 .
         if (!netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
             // NOTE: if this causes app breakage, we should not just comment out this early return;
             // instead, we should make this early return conditional on the requesting app's target
@@ -3170,7 +3170,7 @@ public class ConnectivityManager {
 
     // Checks whether the calling app can use the legacy routing API (startUsingNetworkFeature,
     // stopUsingNetworkFeature, requestRouteToHost), and if not throw UnsupportedOperationException.
-    // TODO: convert the existing system users (Tethering, GpsLocationProvider) to the new APIs and
+    // TODO: convert the existing system users (Tethering, GnssLocationProvider) to the new APIs and
     // remove these exemptions. Note that this check is not secure, and apps can still access these
     // functions by accessing ConnectivityService directly. However, it should be clear that doing
     // so is unsupported and may break in the future. http://b/22728205

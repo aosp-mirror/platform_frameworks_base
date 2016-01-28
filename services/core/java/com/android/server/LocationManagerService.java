@@ -24,10 +24,10 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.FlpHardwareProvider;
 import com.android.server.location.FusedProxy;
+import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
-import com.android.server.location.GpsLocationProvider;
 import com.android.server.location.GpsMeasurementsProvider;
 import com.android.server.location.GpsNavigationMessageProvider;
 import com.android.server.location.LocationBlacklist;
@@ -61,11 +61,11 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IGnssStatusListener;
+import android.location.IGnssStatusProvider;
 import android.location.IGpsGeofenceHardware;
 import android.location.IGpsMeasurementsListener;
 import android.location.IGpsNavigationMessageListener;
-import android.location.IGpsStatusListener;
-import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.INetInitiatedListener;
@@ -157,7 +157,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PowerManager mPowerManager;
     private UserManager mUserManager;
     private GeocoderProxy mGeocodeProvider;
-    private IGpsStatusProvider mGpsStatusProvider;
+    private IGnssStatusProvider mGnssStatusProvider;
     private INetInitiatedListener mNetInitiatedListener;
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
@@ -213,6 +213,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
     private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_SYSTEM };
+
+    private GnssLocationProvider.GpsSystemInfoProvider mGpsSystemInfoProvider;
 
     public LocationManagerService(Context context) {
         super();
@@ -456,17 +458,18 @@ public class LocationManagerService extends ILocationManager.Stub {
         mEnabledProviders.add(passiveProvider.getName());
         mPassiveProvider = passiveProvider;
 
-        if (GpsLocationProvider.isSupported()) {
+        if (GnssLocationProvider.isSupported()) {
             // Create a gps location provider
-            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
+            GnssLocationProvider gnssProvider = new GnssLocationProvider(mContext, this,
                     mLocationHandler.getLooper());
-            mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
-            mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
-            addProviderLocked(gpsProvider);
-            mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
-            mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
-            mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
-            mGpsGeofenceProxy = gpsProvider.getGpsGeofenceProxy();
+            mGpsSystemInfoProvider = gnssProvider.getGpsSystemInfoProvider();
+            mGnssStatusProvider = gnssProvider.getGnssStatusProvider();
+            mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
+            addProviderLocked(gnssProvider);
+            mRealProviders.put(LocationManager.GPS_PROVIDER, gnssProvider);
+            mGpsMeasurementsProvider = gnssProvider.getGpsMeasurementsProvider();
+            mGpsNavigationMessageProvider = gnssProvider.getGpsNavigationMessageProvider();
+            mGpsGeofenceProxy = gnssProvider.getGpsGeofenceProxy();
         }
 
         /*
@@ -983,6 +986,18 @@ public class LocationManagerService extends ILocationManager.Stub {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
+        }
+    }
+
+    /**
+     * Returns the system information of the GPS hardware.
+     */
+    @Override
+    public int getGpsYearOfHardware() {
+        if (mGpsNavigationMessageProvider != null) {
+            return mGpsSystemInfoProvider.getGpsYearOfHardware();
+        } else {
+            return 0;
         }
     }
 
@@ -1867,7 +1882,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
 
     @Override
-    public boolean addGpsStatusListener(IGpsStatusListener listener, String packageName) {
+    public boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName) {
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
@@ -1883,26 +1898,26 @@ public class LocationManagerService extends ILocationManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
-        if (mGpsStatusProvider == null) {
+        if (mGnssStatusProvider == null) {
             return false;
         }
 
         try {
-            mGpsStatusProvider.addGpsStatusListener(listener);
+            mGnssStatusProvider.registerGnssStatusCallback(callback);
         } catch (RemoteException e) {
-            Slog.e(TAG, "mGpsStatusProvider.addGpsStatusListener failed", e);
+            Slog.e(TAG, "mGpsStatusProvider.registerGnssStatusCallback failed", e);
             return false;
         }
         return true;
     }
 
     @Override
-    public void removeGpsStatusListener(IGpsStatusListener listener) {
+    public void unregisterGnssStatusCallback(IGnssStatusListener callback) {
         synchronized (mLock) {
             try {
-                mGpsStatusProvider.removeGpsStatusListener(listener);
+                mGnssStatusProvider.unregisterGnssStatusCallback(callback);
             } catch (Exception e) {
-                Slog.e(TAG, "mGpsStatusProvider.removeGpsStatusListener failed", e);
+                Slog.e(TAG, "mGpsStatusProvider.unregisterGnssStatusCallback failed", e);
             }
         }
     }
