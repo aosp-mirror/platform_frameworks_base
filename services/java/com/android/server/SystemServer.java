@@ -979,6 +979,7 @@ public final class SystemServer {
                     Slog.i(TAG, "Gesture Launcher Service");
                     mSystemServiceManager.startService(GestureLauncherService.class);
                 }
+                mSystemServiceManager.startService(SensorNotificationService.class);
             }
 
             traceBeginAndSlog("StartDiskStatsService");

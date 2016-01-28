@@ -17,8 +17,10 @@
 
 package android.hardware;
 
-import android.os.Build;
 import android.annotation.SystemApi;
+import android.os.Build;
+
+import java.util.UUID;
 
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
@@ -622,6 +624,29 @@ public final class Sensor {
 
     public static final String STRING_TYPE_HEART_BEAT = "android.sensor.heart_beat";
     /**
+     * A constant describing a dynamic sensor meta event sensor.
+     *
+     * A sensor event of this type is received when a dynamic sensor is added to or removed from
+     * the system. This sensor type should always use special trigger report mode ({@code
+     * SensorManager.REPORTING_MODE_SPECIAL_TRIGGER}).
+     *
+     * @hide This sensor is expected to be used only by system services.
+     */
+    @SystemApi
+    public static final int TYPE_DYNAMIC_SENSOR_META = 32;
+
+    /**
+     * A constant string describing a dynamic sensor meta event sensor.
+     *
+     * @see #TYPE_DYNAMIC_SENSOR_META
+     *
+     * @hide This sensor is expected to only be used by the system service
+     */
+    @SystemApi
+    public static final String STRING_TYPE_DYNAMIC_SENSOR_META =
+            "android.sensor.dynamic_sensor_meta";
+
+    /**
      * A constant describing all sensor types.
      */
 
@@ -708,7 +733,11 @@ public final class Sensor {
             1, // SENSOR_TYPE_PICK_UP_GESTURE
             1, // SENSOR_TYPE_WRIST_TILT_GESTURE
             1, // SENSOR_TYPE_DEVICE_ORIENTATION
-            16, // SENSOR_TYPE_POSE_6DOF
+            16,// SENSOR_TYPE_POSE_6DOF
+            1, // SENSOR_TYPE_STATIONARY_DETECT
+            1, // SENSOR_TYPE_MOTION_DETECT
+            1, // SENSOR_TYPE_HEART_BEAT
+            2, // SENSOR_TYPE_DYNAMIC_SENSOR_META
     };
 
     /**
@@ -734,12 +763,10 @@ public final class Sensor {
         }
         int offset = sensor.mType;
         if (offset >= sSensorReportingModes.length) {
-            // we don't know about this sensor, so this is probably a
-            // vendor-defined sensor, in that case, we don't know how many value
-            // it has
-            // so we return the maximum and assume the app will know.
-            // FIXME: sensor HAL should advertise how much data is returned per
-            // sensor
+            // we don't know about this sensor, so this is probably a vendor-defined sensor, in that
+            // case, we don't know how many value it has so we return the maximum and assume the app
+            // will know.
+            // FIXME: sensor HAL should advertise how much data is returned per sensor
             return 16;
         }
         return sSensorReportingModes[offset];
@@ -763,6 +790,7 @@ public final class Sensor {
     private String  mRequiredPermission;
     private int     mMaxDelay;
     private int     mFlags;
+    private UUID    mUuid;
 
     Sensor() {
     }
@@ -848,6 +876,13 @@ public final class Sensor {
      */
     public String getStringType() {
         return mStringType;
+    }
+
+    /**
+     * @return The type of this sensor as a string.
+     */
+    public UUID getUuid() {
+        return mUuid;
     }
 
     /**
@@ -1032,6 +1067,9 @@ public final class Sensor {
                 return true;
             case TYPE_DEVICE_ORIENTATION:
                 mStringType = STRING_TYPE_DEVICE_ORIENTATION;
+                return true;
+            case TYPE_DYNAMIC_SENSOR_META:
+                mStringType = STRING_TYPE_DYNAMIC_SENSOR_META;
                 return true;
             default:
                 return false;

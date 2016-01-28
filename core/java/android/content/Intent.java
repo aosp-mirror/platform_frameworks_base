@@ -2618,8 +2618,7 @@ public class Intent implements Parcelable, Cloneable {
      *   turned off</li>
      * </ul>
      *
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
@@ -3209,6 +3208,18 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String
             ACTION_OPEN_EXTERNAL_DIRECTORY = "android.intent.action.OPEN_EXTERNAL_DIRECTORY";
+
+    /**
+     * Broadcast Action: List of dynamic sensor is changed due to new sensor being connected or
+     * exisiting sensor being disconnected.
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.</p>
+     *
+     * {@hide}
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String
+            ACTION_DYNAMIC_SENSOR_CHANGED = "android.intent.action.DYNAMIC_SENSOR_CHANGED";
 
     /** {@hide} */
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
