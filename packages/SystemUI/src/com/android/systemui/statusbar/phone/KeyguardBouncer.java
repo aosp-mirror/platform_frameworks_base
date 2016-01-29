@@ -21,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -99,7 +100,20 @@ public class KeyguardBouncer {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
             showPromptReason(mBouncerPromptReason);
-            mKeyguardView.startAppearAnimation();
+            if (mKeyguardView.getHeight() != 0) {
+                mKeyguardView.startAppearAnimation();
+            } else {
+                mKeyguardView.getViewTreeObserver().addOnPreDrawListener(
+                        new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                mKeyguardView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                mKeyguardView.startAppearAnimation();
+                                return true;
+                            }
+                        });
+                mKeyguardView.requestLayout();
+            }
             mShowingSoon = false;
             mKeyguardView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
