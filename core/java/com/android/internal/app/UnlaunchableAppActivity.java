@@ -32,6 +32,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,12 +70,11 @@ public class UnlaunchableAppActivity extends Activity
         }
 
         String dialogTitle;
-        String dialogMessage;
+        String dialogMessage = null;
         if (mReason == UNLAUNCHABLE_REASON_QUIET_MODE) {
             dialogTitle = getResources().getString(R.string.work_mode_off_title);
             dialogMessage = getResources().getString(R.string.work_mode_off_message);
         } else if (mReason == UNLAUNCHABLE_REASON_SUSPENDED_PACKAGE) {
-            PackageManager pm = getPackageManager();
             DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(
                     Context.DEVICE_POLICY_SERVICE);
             String packageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
@@ -91,12 +91,19 @@ public class UnlaunchableAppActivity extends Activity
             }
             dialogTitle = String.format(getResources().getString(R.string.suspended_package_title),
                     packageLabel);
-            dialogMessage = dpm.getShortSupportMessageForUser(dpm.getProfileOwnerAsUser(mUserId),
-                    mUserId);
-            if (dialogMessage == null) {
-                dialogMessage = String.format(
-                        getResources().getString(R.string.suspended_package_message),
-                        dpm.getProfileOwnerNameAsUser(mUserId));
+            ComponentName profileOwner = dpm.getProfileOwnerAsUser(mUserId);
+            String profileOwnerName = null;
+            if (profileOwner != null) {
+                dialogMessage = dpm.getShortSupportMessageForUser(profileOwner, mUserId);
+                profileOwnerName = dpm.getProfileOwnerNameAsUser(mUserId);
+            }
+            // Fall back to standard message if profile owner hasn't set something specific.
+            if (TextUtils.isEmpty(dialogMessage)) {
+                if (TextUtils.isEmpty(profileOwnerName)) {
+                    profileOwnerName = getResources().getString(R.string.unknownName);
+                }
+                dialogMessage = getResources().getString(R.string.suspended_package_message,
+                        profileOwnerName);
             }
         } else {
             Log.wtf(TAG, "Invalid unlaunchable type: " + mReason);
