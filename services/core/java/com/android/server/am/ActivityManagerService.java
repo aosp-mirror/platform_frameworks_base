@@ -12970,9 +12970,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final StringBuilder sb = new StringBuilder(1024);
         appendDropBoxProcessHeaders(process, processName, sb);
-        sb.append("Foreground: ")
-                .append(process.isInterestingToUserLocked() ? "Yes" : "No")
-                .append("\n");
+        if (process != null) {
+            sb.append("Foreground: ")
+                    .append(process.isInterestingToUserLocked() ? "Yes" : "No")
+                    .append("\n");
+        }
         if (activity != null) {
             sb.append("Activity: ").append(activity.shortComponentName).append("\n");
         }
