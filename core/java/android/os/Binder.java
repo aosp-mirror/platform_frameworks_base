@@ -468,6 +468,9 @@ public class Binder implements IBinder {
     /**
      * Handle a call to {@link #shellCommand}.  The default implementation simply prints
      * an error message.  Override and replace with your own.
+     * <p class="caution">Note: no permission checking is done before calling this method; you must
+     * apply any security checks as appropriate for the command being executed.
+     * Consider using {@link ShellCommand} to help in the implementation.</p>
      * @hide
      */
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,

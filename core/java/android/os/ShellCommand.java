@@ -24,9 +24,11 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 /**
+ * Helper for implementing {@link Binder#onShellCommand Binder.onShellCommand}.
  * @hide
  */
 public abstract class ShellCommand {
@@ -44,6 +46,10 @@ public abstract class ShellCommand {
     private int mArgPos;
     private String mCurArgData;
 
+    private FileInputStream mFileIn;
+    private FileOutputStream mFileOut;
+    private FileOutputStream mFileErr;
+
     private FastPrintWriter mOutPrintWriter;
     private FastPrintWriter mErrPrintWriter;
     private InputStream mInputStream;
@@ -59,8 +65,12 @@ public abstract class ShellCommand {
         mCmd = null;
         mArgPos = firstArgPos;
         mCurArgData = null;
+        mFileIn = null;
+        mFileOut = null;
+        mFileErr = null;
         mOutPrintWriter = null;
         mErrPrintWriter = null;
+        mInputStream = null;
     }
 
     public int exec(Binder target, FileDescriptor in, FileDescriptor out, FileDescriptor err,
@@ -112,28 +122,65 @@ public abstract class ShellCommand {
         return res;
     }
 
+    /**
+     * Return direct raw access (not buffered) to the command's output data stream.
+     */
+    public OutputStream getRawOutputStream() {
+        if (mFileOut == null) {
+            mFileOut = new FileOutputStream(mOut);
+        }
+        return mFileOut;
+    }
+
+    /**
+     * Return a PrintWriter for formatting output to {@link #getRawOutputStream()}.
+     */
     public PrintWriter getOutPrintWriter() {
         if (mOutPrintWriter == null) {
-            FileOutputStream fout = new FileOutputStream(mOut);
-            mOutPrintWriter = new FastPrintWriter(fout);
+            mOutPrintWriter = new FastPrintWriter(getRawOutputStream());
         }
         return mOutPrintWriter;
     }
 
+    /**
+     * Return direct raw access (not buffered) to the command's error output data stream.
+     */
+    public OutputStream getRawErrorStream() {
+        if (mFileErr == null) {
+            mFileErr = new FileOutputStream(mErr);
+        }
+        return mFileErr;
+    }
+
+    /**
+     * Return a PrintWriter for formatting output to {@link #getRawErrorStream()}.
+     */
     public PrintWriter getErrPrintWriter() {
         if (mErr == null) {
             return getOutPrintWriter();
         }
         if (mErrPrintWriter == null) {
-            FileOutputStream fout = new FileOutputStream(mErr);
-            mErrPrintWriter = new FastPrintWriter(fout);
+            mErrPrintWriter = new FastPrintWriter(getRawErrorStream());
         }
         return mErrPrintWriter;
     }
 
-    public InputStream getInputStream() {
+    /**
+     * Return direct raw access (not buffered) to the command's input data stream.
+     */
+    public InputStream getRawInputStream() {
+        if (mFileIn == null) {
+            mFileIn = new FileInputStream(mIn);
+        }
+        return mFileIn;
+    }
+
+    /**
+     * Return buffered access to the command's {@link #getRawInputStream()}.
+     */
+    public InputStream getBufferedInputStream() {
         if (mInputStream == null) {
-            mInputStream = new BufferedInputStream(new FileInputStream(mIn));
+            mInputStream = new BufferedInputStream(getRawInputStream());
         }
         return mInputStream;
     }
@@ -214,7 +261,28 @@ public abstract class ShellCommand {
         return -1;
     }
 
+    /**
+     * Implement parsing and execution of a command.  If it isn't a command you understand,
+     * call {@link #handleDefaultCommands(String)} and return its result as a last resort.
+     * User {@link #getNextOption()}, {@link #getNextArg()}, and {@link #getNextArgRequired()}
+     * to process additional command line arguments.  Command output can be written to
+     * {@link #getOutPrintWriter()} and errors to {@link #getErrPrintWriter()}.
+     *
+     * <p class="caution">Note that no permission checking has been done before entering this function,
+     * so you need to be sure to do your own security verification for any commands you
+     * are executing.  The easiest way to do this is to have the ShellCommand contain
+     * only a reference to your service's aidl interface, and do all of your command
+     * implementations on top of that -- that way you can rely entirely on your executing security
+     * code behind that interface.</p>
+     *
+     * @param cmd The first command line argument representing the name of the command to execute.
+     * @return Return the command result; generally 0 or positive indicates success and
+     * negative values indicate error.
+     */
     public abstract int onCommand(String cmd);
 
+    /**
+     * Implement this to print help text about your command to {@link #getOutPrintWriter()}.
+     */
     public abstract void onHelp();
 }
