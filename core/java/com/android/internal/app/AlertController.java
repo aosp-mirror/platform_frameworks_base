@@ -43,7 +43,6 @@ import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -115,6 +114,8 @@ public class AlertController {
     private int mSingleChoiceItemLayout;
     private int mListItemLayout;
 
+    private boolean mShowTitle;
+
     private int mButtonPanelLayoutHint = AlertDialog.LAYOUT_HINT_NONE;
 
     private Handler mHandler;
@@ -150,7 +151,7 @@ public class AlertController {
         private WeakReference<DialogInterface> mDialog;
 
         public ButtonHandler(DialogInterface dialog) {
-            mDialog = new WeakReference<DialogInterface>(dialog);
+            mDialog = new WeakReference<>(dialog);
         }
 
         @Override
@@ -200,6 +201,7 @@ public class AlertController {
         mListItemLayout = a.getResourceId(
                 R.styleable.AlertDialog_listItemLayout,
                 R.layout.select_dialog_item);
+        mShowTitle = a.getBoolean(R.styleable.AlertDialog_showTitle, true);
 
         a.recycle();
     }
@@ -600,21 +602,21 @@ public class AlertController {
     }
 
     private void setupTitle(ViewGroup topPanel) {
-        if (mCustomTitleView != null) {
+        if (mCustomTitleView != null && mShowTitle) {
             // Add the custom title view directly to the topPanel layout
-            LayoutParams lp = new LayoutParams(
+            final LayoutParams lp = new LayoutParams(
                     LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
             topPanel.addView(mCustomTitleView, 0, lp);
 
             // Hide the title template
-            View titleTemplate = mWindow.findViewById(R.id.title_template);
+            final View titleTemplate = mWindow.findViewById(R.id.title_template);
             titleTemplate.setVisibility(View.GONE);
         } else {
             mIconView = (ImageView) mWindow.findViewById(R.id.icon);
 
             final boolean hasTextTitle = !TextUtils.isEmpty(mTitle);
-            if (hasTextTitle) {
+            if (hasTextTitle && mShowTitle) {
                 // Display the title if a title is supplied, else hide it.
                 mTitleView = (TextView) mWindow.findViewById(R.id.alertTitle);
                 mTitleView.setText(mTitle);

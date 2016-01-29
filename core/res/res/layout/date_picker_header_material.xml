@@ -21,12 +21,6 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-    <ViewStub
-        android:id="@id/topPanel"
-        android:layout="@layout/alert_dialog_title_material"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
+            android:includeFontPadding="false"
             android:layout_marginStart="-8dp"
             android:layout_marginEnd="-8dp"
             android:layout_marginTop="-8dp"
@@ -57,6 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Material.DatePicker.DateLabel"
+            android:includeFontPadding="false"
             android:gravity="start"
             android:maxLines="2"
             android:ellipsize="none" />

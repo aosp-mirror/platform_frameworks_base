@@ -1178,7 +1178,11 @@ please see styles_device_defaults.xml.
         <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
     </style>
 
-    <style name="AlertDialog.Material.Light"/>
+    <style name="AlertDialog.Material.Light" />
+
+    <style name="DatePickerDialog.Material" parent="AlertDialog.Material">
+        <item name="showTitle">true</item>
+    </style>
 
     <!-- Window title -->
     <style name="WindowTitleBackground.Material">
