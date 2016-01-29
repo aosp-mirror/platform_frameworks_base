@@ -231,8 +231,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     protected void onAttachedToWindow() {
         EventBus.getDefault().register(this, RecentsActivity.EVENT_BUS_PRIORITY + 1);
-        readSystemFlags();
         super.onAttachedToWindow();
+        readSystemFlags();
     }
 
     @Override
@@ -1417,7 +1417,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Recents.getTaskLoader().loadTaskData(task, true /* fetchAndInvalidateThumbnails */);
 
         // If the doze trigger has already fired, then update the state for this task view
-        tv.setNoUserInteractionState();
+        if (mUIDozeTrigger.hasTriggered()) {
+            tv.setNoUserInteractionState();
+        }
 
         // Set the new state for this view, including the callbacks and view clipping
         tv.setCallbacks(this);
