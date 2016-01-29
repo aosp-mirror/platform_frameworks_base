@@ -434,6 +434,10 @@ class ZygoteConnection {
                     debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
                 } else if (arg.equals("--generate-debug-info")) {
                     debugFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+                } else if (arg.equals("--always-jit")) {
+                    debugFlags |= Zygote.DEBUG_ALWAYS_JIT;
+                } else if (arg.equals("--native-debuggable")) {
+                    debugFlags |= Zygote.DEBUG_NATIVE_DEBUGGABLE;
                 } else if (arg.equals("--enable-jni-logging")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
                 } else if (arg.equals("--enable-assert")) {

@@ -121,7 +121,7 @@ public class Am extends BaseCommand {
         PrintWriter pw = new PrintWriter(out);
         pw.println(
                 "usage: am [subcommand] [options]\n" +
-                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
+                "usage: am start [-D] [-N] [-W] [-P <FILE>] [--start-profiler <FILE>]\n" +
                 "               [--sampling INTERVAL] [-R COUNT] [-S]\n" +
                 "               [--track-allocation] [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
@@ -180,6 +180,7 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
+                "    -N: enable native debugging\n" +
                 "    -W: wait for launch to complete\n" +
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
                 "    --sampling INTERVAL: use sample profiling with INTERVAL microseconds\n" +
@@ -473,6 +474,8 @@ public class Am extends BaseCommand {
             public boolean handleOption(String opt, ShellCommand cmd) {
                 if (opt.equals("-D")) {
                     mStartFlags |= ActivityManager.START_FLAG_DEBUG;
+                } else if (opt.equals("-N")) {
+                    mStartFlags |= ActivityManager.START_FLAG_NATIVE_DEBUGGING;
                 } else if (opt.equals("-W")) {
                     mWaitOption = true;
                 } else if (opt.equals("-P")) {
