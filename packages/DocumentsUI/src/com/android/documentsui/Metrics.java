@@ -17,7 +17,10 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.internal.util.Preconditions.checkArgument;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -25,8 +28,15 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
+import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.internal.logging.MetricsLogger;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /** @hide */
 public final class Metrics {
@@ -47,6 +57,9 @@ public final class Metrics {
     private static final String COUNT_BROWSE_ROOT = "docsui_browse_root";
     private static final String COUNT_MANAGE_ROOT = "docsui_manage_root";
     private static final String COUNT_MULTI_WINDOW = "docsui_multi_window";
+    private static final String COUNT_FILEOP_SYSTEM = "docsui_fileop_system";
+    private static final String COUNT_FILEOP_EXTERNAL = "docsui_fileop_external";
+    private static final String COUNT_FILEOP_CANCELED = "docsui_fileop_canceled";
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
@@ -65,6 +78,21 @@ public final class Metrics {
     // are logged analogously to roots. Use negative numbers to identify apps.
     private static final int ROOT_THIRD_PARTY_APP = -1;
 
+    @IntDef(flag = true, value = {
+            ROOT_NONE,
+            ROOT_OTHER,
+            ROOT_AUDIO,
+            ROOT_DEVICE_STORAGE,
+            ROOT_DOWNLOADS,
+            ROOT_HOME,
+            ROOT_IMAGES,
+            ROOT_RECENTS,
+            ROOT_VIDEOS,
+            ROOT_THIRD_PARTY_APP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Root {}
+
     // Indices for bucketing mime types.
     private static final int MIME_OTHER = -2; // anything not enumerated below
     private static final int MIME_NONE = -1; // null mime
@@ -76,6 +104,66 @@ public final class Metrics {
     private static final int MIME_MULTIPART = 5; // multipart/*
     private static final int MIME_TEXT = 6; // text/*
     private static final int MIME_VIDEO = 7; // video/*
+
+    @IntDef(flag = true, value = {
+            MIME_OTHER,
+            MIME_NONE,
+            MIME_ANY,
+            MIME_APPLICATION,
+            MIME_AUDIO,
+            MIME_IMAGE,
+            MIME_MESSAGE,
+            MIME_MULTIPART,
+            MIME_TEXT,
+            MIME_VIDEO
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Mime {}
+
+    // Codes representing different kinds of file operations. These are used for bucketing
+    // operations in the COUNT_FILEOP_{SYSTEM|EXTERNAL} histograms.
+    private static final int FILEOP_OTHER = 0; // any file operation not listed below
+    private static final int FILEOP_COPY_INTRA_PROVIDER = 1; // Copy within a provider
+    private static final int FILEOP_COPY_SYSTEM_PROVIDER = 2; // Copy to a system provider.
+    private static final int FILEOP_COPY_EXTERNAL_PROVIDER = 3; // Copy to a 3rd-party provider.
+    private static final int FILEOP_MOVE_INTRA_PROVIDER = 4; // Move within a provider.
+    private static final int FILEOP_MOVE_SYSTEM_PROVIDER = 5; // Move to a system provider.
+    private static final int FILEOP_MOVE_EXTERNAL_PROVIDER = 6; // Move to a 3rd-party provider.
+    private static final int FILEOP_DELETE = 7;
+    private static final int FILEOP_OTHER_ERROR = -1;
+    private static final int FILEOP_COPY_ERROR = -2;
+    private static final int FILEOP_MOVE_ERROR = -3;
+    private static final int FILEOP_DELETE_ERROR = -4;
+
+    @IntDef(flag = true, value = {
+            FILEOP_OTHER,
+            FILEOP_COPY_INTRA_PROVIDER,
+            FILEOP_COPY_SYSTEM_PROVIDER,
+            FILEOP_COPY_EXTERNAL_PROVIDER,
+            FILEOP_MOVE_INTRA_PROVIDER,
+            FILEOP_MOVE_SYSTEM_PROVIDER,
+            FILEOP_MOVE_EXTERNAL_PROVIDER,
+            FILEOP_DELETE,
+            FILEOP_OTHER_ERROR,
+            FILEOP_COPY_ERROR,
+            FILEOP_MOVE_ERROR,
+            FILEOP_DELETE_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FileOp {}
+
+    // Codes representing different provider types.  Used for sorting file operations when logging.
+    private static final int PROVIDER_INTRA = 0;
+    private static final int PROVIDER_SYSTEM = 1;
+    private static final int PROVIDER_EXTERNAL = 2;
+
+    @IntDef(flag = true, value = {
+            PROVIDER_INTRA,
+            PROVIDER_SYSTEM,
+            PROVIDER_EXTERNAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Provider {}
 
     /**
      * Logs when DocumentsUI is started, and how. Call this when DocumentsUI first starts up.
@@ -140,6 +228,99 @@ public final class Metrics {
     }
 
     /**
+     * Logs file operation stats. Call this when a file operation has completed. The given
+     * DocumentInfo is only used to distinguish broad categories of actions (e.g. copying from one
+     * provider to another vs copying within a given provider).  No PII is logged.
+     *
+     * @param context
+     * @param operationType
+     * @param srcs
+     * @param dst
+     */
+    public static void logFileOperation(
+            Context context,
+            @OpType int operationType,
+            List<DocumentInfo> srcs,
+            @Nullable DocumentInfo dst) {
+        ProviderCounts counts = countProviders(srcs, dst);
+
+        if (counts.intraProvider > 0) {
+            logIntraProviderFileOps(context, dst.authority, operationType);
+        }
+        if (counts.systemProvider > 0) {
+            // Log file operations on system providers.
+            logInterProviderFileOps(context, COUNT_FILEOP_SYSTEM, dst, operationType);
+        }
+        if (counts.externalProvider > 0) {
+            // Log file operations on external providers.
+            logInterProviderFileOps(context, COUNT_FILEOP_EXTERNAL, dst, operationType);
+        }
+    }
+
+    /**
+     * Logs some kind of file operation error. Call this when a file operation (e.g. copy, delete)
+     * fails.
+     *
+     * @param context
+     * @param operationType
+     * @param failedFiles
+     */
+    public static void logFileOperationErrors(Context context, @OpType int operationType,
+            List<DocumentInfo> failedFiles) {
+        ProviderCounts counts = countProviders(failedFiles, null);
+
+        @FileOp int opCode = FILEOP_OTHER_ERROR;
+        switch (operationType) {
+            case FileOperationService.OPERATION_COPY:
+                opCode = FILEOP_COPY_ERROR;
+                break;
+            case FileOperationService.OPERATION_DELETE:
+                opCode = FILEOP_DELETE_ERROR;
+                break;
+            case FileOperationService.OPERATION_MOVE:
+                opCode = FILEOP_MOVE_ERROR;
+                break;
+        }
+        if (counts.systemProvider > 0) {
+            logHistogram(context, COUNT_FILEOP_SYSTEM, opCode);
+        }
+        if (counts.externalProvider > 0) {
+            logHistogram(context, COUNT_FILEOP_EXTERNAL, opCode);
+        }
+    }
+
+    /**
+     * Log the cancellation of a file operation.  Call this when a Job is canceled.
+     * @param context
+     * @param operationType
+     */
+    public static void logFileOperationCancelled(Context context, @OpType int operationType) {
+        logHistogram(context, COUNT_FILEOP_CANCELED, operationType);
+    }
+
+    private static void logInterProviderFileOps(
+            Context context,
+            String histogram,
+            DocumentInfo dst,
+            @OpType int operationType) {
+        if (operationType == FileOperationService.OPERATION_DELETE) {
+            logHistogram(context, histogram, FILEOP_DELETE);
+        } else {
+            checkArgument(dst != null);
+            @Provider int providerType =
+                    isSystemProvider(dst.authority) ? PROVIDER_SYSTEM : PROVIDER_EXTERNAL;
+            logHistogram(context, histogram, getOpCode(operationType, providerType));
+        }
+    }
+
+    private static void logIntraProviderFileOps(
+            Context context, String authority, @OpType int operationType) {
+        // Find the right histogram to log to, then log the operation.
+        String histogram = isSystemProvider(authority) ? COUNT_FILEOP_SYSTEM : COUNT_FILEOP_EXTERNAL;
+        logHistogram(context, histogram, getOpCode(operationType, PROVIDER_INTRA));
+    }
+
+    /**
      * Internal method for making a MetricsLogger.count call. Increments the given counter by 1.
      *
      * @param context
@@ -167,7 +348,7 @@ public final class Metrics {
      * small set of hard-coded roots (ones provided by the system). Other roots are all grouped into
      * a single ROOT_OTHER bucket.
      */
-    private static int sanitizeRoot(Uri uri) {
+    private static @Root int sanitizeRoot(Uri uri) {
         if (LauncherActivity.isLaunchUri(uri)) {
             return ROOT_NONE;
         }
@@ -198,7 +379,7 @@ public final class Metrics {
     }
 
     /** @see #sanitizeRoot(Uri) */
-    private static int sanitizeRoot(RootInfo root) {
+    private static @Root int sanitizeRoot(RootInfo root) {
         if (root.isRecents()) {
             // Recents root is special and only identifiable via this method call. Other roots are
             // identified by URI.
@@ -209,7 +390,7 @@ public final class Metrics {
     }
 
     /** @see #sanitizeRoot(Uri) */
-    private static int sanitizeRoot(ResolveInfo info) {
+    private static @Root int sanitizeRoot(ResolveInfo info) {
         // Log all apps under a single bucket in the roots histogram.
         return ROOT_THIRD_PARTY_APP;
     }
@@ -221,7 +402,7 @@ public final class Metrics {
      * @param mimeType
      * @return
      */
-    private static int sanitizeMime(String mimeType) {
+    private static @Mime int sanitizeMime(String mimeType) {
         if (mimeType == null) {
             return MIME_NONE;
         } else if ("*/*".equals(mimeType)) {
@@ -247,5 +428,76 @@ public final class Metrics {
         }
         // Bucket all other types into one bucket.
         return MIME_OTHER;
+    }
+
+    private static boolean isSystemProvider(String authority) {
+        switch (authority) {
+            case AUTHORITY_MEDIA:
+            case AUTHORITY_STORAGE:
+            case AUTHORITY_DOWNLOADS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @param operation
+     * @param providerType
+     * @return An opcode, suitable for use as histogram bucket, for the given operation/provider
+     *         combination.
+     */
+    private static @FileOp int getOpCode(@OpType int operation, @Provider int providerType) {
+        switch (operation) {
+            case FileOperationService.OPERATION_COPY:
+                switch (providerType) {
+                    case PROVIDER_INTRA:
+                        return FILEOP_COPY_INTRA_PROVIDER;
+                    case PROVIDER_SYSTEM:
+                        return FILEOP_COPY_SYSTEM_PROVIDER;
+                    case PROVIDER_EXTERNAL:
+                        return FILEOP_COPY_EXTERNAL_PROVIDER;
+                }
+            case FileOperationService.OPERATION_MOVE:
+                switch (providerType) {
+                    case PROVIDER_INTRA:
+                        return FILEOP_MOVE_INTRA_PROVIDER;
+                    case PROVIDER_SYSTEM:
+                        return FILEOP_MOVE_SYSTEM_PROVIDER;
+                    case PROVIDER_EXTERNAL:
+                        return FILEOP_MOVE_EXTERNAL_PROVIDER;
+                }
+            case FileOperationService.OPERATION_DELETE:
+                return FILEOP_DELETE;
+            default:
+                Log.w(TAG, "Unrecognized operation type when logging a file operation");
+                return FILEOP_OTHER;
+        }
+    }
+
+    /**
+     * Count the given src documents and provide a tally of how many come from the same provider as
+     * the dst document (if a dst is provided), how many come from system providers, and how many
+     * come from external 3rd-party providers.
+     */
+    private static ProviderCounts countProviders(
+            List<DocumentInfo> srcs, @Nullable DocumentInfo dst) {
+        ProviderCounts counts = new ProviderCounts();
+        for (DocumentInfo doc: srcs) {
+            if (dst != null && doc.authority.equals(dst.authority)) {
+                counts.intraProvider++;
+            } else if (isSystemProvider(doc.authority)){
+                counts.systemProvider++;
+            } else {
+                counts.externalProvider++;
+            }
+        }
+        return counts;
+    }
+
+    private static class ProviderCounts {
+        int intraProvider;
+        int systemProvider;
+        int externalProvider;
     }
 }
