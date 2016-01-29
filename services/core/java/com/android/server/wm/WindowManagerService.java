@@ -114,7 +114,6 @@ import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.Toast;
-
 import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
@@ -220,8 +219,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
@@ -1889,6 +1888,12 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if (type == TYPE_ACCESSIBILITY_OVERLAY) {
                 if (token.windowType != TYPE_ACCESSIBILITY_OVERLAY) {
                     Slog.w(TAG_WM, "Attempted to add Accessibility overlay window with bad token "
+                            + attrs.token + ".  Aborting.");
+                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
+                }
+            } else if (type == TYPE_QS_DIALOG) {
+                if (token.windowType != TYPE_QS_DIALOG) {
+                    Slog.w(TAG_WM, "Attempted to add QS dialog window with bad token "
                             + attrs.token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
