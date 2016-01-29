@@ -448,6 +448,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int[] mSubtypeIds;
     private Locale mLastSystemLocale;
     private boolean mShowImeWithHardKeyboard;
+    private boolean mAccessibilityRequestingNoSoftKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final IPackageManager mIPackageManager;
     private final String mSlotIme;
@@ -485,15 +486,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE), false, this, userId);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, userId);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE), false, this, userId);
             mRegistered = true;
         }
 
         @Override public void onChange(boolean selfChange, Uri uri) {
-            final Uri showImeUri =
-                    Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
+            final Uri showImeUri = Settings.Secure.getUriFor(
+                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
+            final Uri accessibilityRequestingNoImeUri = Settings.Secure.getUriFor(
+                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
             synchronized (mMethodMap) {
                 if (showImeUri.equals(uri)) {
                     updateKeyboardFromSettingsLocked();
+                } else if (accessibilityRequestingNoImeUri.equals(uri)) {
+                    mAccessibilityRequestingNoSoftKeyboard = Settings.Secure.getIntForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                            0, mUserId) == 1;
+                    if (mAccessibilityRequestingNoSoftKeyboard) {
+                        final boolean showRequested = mShowRequested;
+                        hideCurrentInputLocked(0, null);
+                        mShowRequested = showRequested;
+                    } else if (mShowRequested) {
+                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                    }
                 } else {
                     boolean enabledChanged = false;
                     String newEnabled = mSettings.getEnabledInputMethodsStr();
@@ -655,7 +672,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 boolean changed = false;
 
                 if (curIm != null) {
-                    int change = isPackageDisappearing(curIm.getPackageName()); 
+                    int change = isPackageDisappearing(curIm.getPackageName());
                     if (change == PACKAGE_TEMPORARY_CHANGE
                             || change == PACKAGE_PERMANENT_CHANGE) {
                         ServiceInfo si = null;
@@ -2073,12 +2090,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     boolean showCurrentInputLocked(int flags, ResultReceiver resultReceiver) {
         mShowRequested = true;
-        if ((flags&InputMethodManager.SHOW_IMPLICIT) == 0) {
-            mShowExplicitlyRequested = true;
+        if (mAccessibilityRequestingNoSoftKeyboard) {
+            return false;
         }
+
         if ((flags&InputMethodManager.SHOW_FORCED) != 0) {
             mShowExplicitlyRequested = true;
             mShowForced = true;
+        } else if ((flags&InputMethodManager.SHOW_IMPLICIT) == 0) {
+            mShowExplicitlyRequested = true;
         }
 
         if (!mSystemReady) {
@@ -3265,7 +3285,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         "Requires permission "
                         + android.Manifest.permission.WRITE_SECURE_SETTINGS);
             }
-            
+
             long ident = Binder.clearCallingIdentity();
             try {
                 return setInputMethodEnabledLocked(id, enabled);

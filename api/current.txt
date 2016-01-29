@@ -2625,6 +2625,7 @@ package android.accessibilityservice {
     method public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
+    method public final android.accessibilityservice.AccessibilityService.SoftKeyboardController getSoftKeyboardController();
     method public java.util.List<android.view.accessibility.AccessibilityWindowInfo> getWindows();
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
@@ -2681,6 +2682,18 @@ package android.accessibilityservice {
 
   public static abstract interface AccessibilityService.MagnificationController.OnMagnificationChangedListener {
     method public abstract void onMagnificationChanged(android.accessibilityservice.AccessibilityService.MagnificationController, android.graphics.Region, float, float, float);
+  }
+
+  public static final class AccessibilityService.SoftKeyboardController {
+    method public void addOnShowModeChangedListener(android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener);
+    method public void addOnShowModeChangedListener(android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener, android.os.Handler);
+    method public int getShowMode();
+    method public boolean removeOnShowModeChangedListener(android.accessibilityservice.AccessibilityService.SoftKeyboardController.OnShowModeChangedListener);
+    method public boolean setShowMode(int);
+  }
+
+  public static abstract interface AccessibilityService.SoftKeyboardController.OnShowModeChangedListener {
+    method public abstract void onShowModeChanged(android.accessibilityservice.AccessibilityService.SoftKeyboardController, int);
   }
 
   public class AccessibilityServiceInfo implements android.os.Parcelable {

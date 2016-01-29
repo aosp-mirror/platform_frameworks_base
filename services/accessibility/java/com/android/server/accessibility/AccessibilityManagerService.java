@@ -958,7 +958,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         final UserState state = getCurrentUserStateLocked();
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             final Service service = state.mBoundServices.get(i);
-            service.notifyMagnificationChanged(region, scale, centerX, centerY);
+            service.notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+        }
+    }
+
+    private void notifySoftKeyboardShowModeChangedLocked(int showMode) {
+        final UserState state = getCurrentUserStateLocked();
+        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
+            final Service service = state.mBoundServices.get(i);
+            service.notifySoftKeyboardShowModeChangedLocked(showMode);
         }
     }
 
@@ -1407,6 +1415,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         updateEnhancedWebAccessibilityLocked(userState);
         updateDisplayColorAdjustmentSettingsLocked(userState);
         updateMagnificationLocked(userState);
+        updateSoftKeyboardShowModeLocked(userState);
         scheduleUpdateInputFilter(userState);
         scheduleUpdateClientsIfNeededLocked(userState);
     }
@@ -1623,6 +1632,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         return false;
     }
 
+    private boolean readSoftKeyboardShowModeChangedLocked(UserState userState) {
+        final int softKeyboardShowMode = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0,
+                userState.mUserId);
+        if (softKeyboardShowMode != userState.mSoftKeyboardShowMode) {
+            userState.mSoftKeyboardShowMode = softKeyboardShowMode;
+            return true;
+        }
+        return false;
+    }
+
     private void updateTouchExplorationLocked(UserState userState) {
         boolean enabled = false;
         final int serviceCount = userState.mBoundServices.size();
@@ -1755,6 +1776,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
         return false;
+    }
+
+    private void updateSoftKeyboardShowModeLocked(UserState userState) {
+        final int userId = userState.mUserId;
+        if (userId == mCurrentUserId) {
+            // Check whether any Accessibility Services are still enabled and, if not, remove flag
+            // requesting no soft keyboard
+            final boolean accessibilityRequestingNoIme = userState.mSoftKeyboardShowMode == 1;
+            if (accessibilityRequestingNoIme && !userState.mIsAccessibilityEnabled) {
+                // No active Accessibility Services can be requesting the soft keyboard to be hidden
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                        0,
+                        userState.mUserId);
+                userState.mSoftKeyboardShowMode = 0;
+            }
+
+            notifySoftKeyboardShowModeChangedLocked(userState.mSoftKeyboardShowMode);
+        }
     }
 
     private MagnificationSpec getCompatibleMagnificationSpecLocked(int windowId) {
@@ -2102,7 +2142,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         };
 
         // Handler for scheduling method invocations on the main thread.
-        public InvocationHandler mInvocationHandler = new InvocationHandler(
+        public final InvocationHandler mInvocationHandler = new InvocationHandler(
                 mMainHandler.getLooper());
 
         public Service(int userId, ComponentName componentName,
@@ -2297,17 +2337,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
         }
 
+        private boolean isCalledForCurrentUserLocked() {
+            // We treat calls from a profile as if made by its parent as profiles
+            // share the accessibility state of the parent. The call below
+            // performs the current profile parent resolution.
+            final int resolvedUserId = mSecurityPolicy
+                    .resolveCallingUserIdEnforcingPermissionsLocked(UserHandle.USER_CURRENT);
+            return resolvedUserId == mCurrentUserId;
+        }
+
         @Override
         public List<AccessibilityWindowInfo> getWindows() {
             ensureWindowsAvailableTimed();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its perent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return null;
                 }
                 final boolean permissionGranted =
@@ -2335,13 +2378,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public AccessibilityWindowInfo getWindow(int windowId) {
             ensureWindowsAvailableTimed();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return null;
                 }
                 final boolean permissionGranted =
@@ -2368,13 +2405,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -2425,13 +2456,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -2482,13 +2507,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -2539,13 +2558,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdForFindFocusLocked(
@@ -2597,13 +2610,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             IAccessibilityInteractionConnection connection = null;
             Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -2670,13 +2677,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
@@ -2709,13 +2710,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public boolean performGlobalAction(int action) {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
             }
@@ -2750,13 +2745,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public float getMagnificationScale() {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return 1.0f;
                 }
             }
@@ -2771,13 +2760,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public Region getMagnifiedRegion() {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return Region.obtain();
                 }
             }
@@ -2794,13 +2777,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public float getMagnificationCenterX() {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return 0.0f;
                 }
             }
@@ -2815,13 +2792,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public float getMagnificationCenterY() {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return 0.0f;
                 }
             }
@@ -2836,13 +2807,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public boolean resetMagnification(boolean animate) {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 final boolean permissionGranted = mSecurityPolicy.canControlMagnification(this);
@@ -2862,13 +2827,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public boolean setMagnificationScaleAndCenter(float scale, float centerX, float centerY,
                 boolean animate) {
             synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
+                if (!isCalledForCurrentUserLocked()) {
                     return false;
                 }
                 final boolean permissionGranted = mSecurityPolicy.canControlMagnification(this);
@@ -2888,6 +2847,33 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public void setMagnificationCallbackEnabled(boolean enabled) {
             mInvocationHandler.setMagnificationCallbackEnabled(enabled);
+        }
+
+        @Override
+        public boolean setSoftKeyboardShowMode(int showMode) {
+            final UserState userState;
+            synchronized (mLock) {
+                if (!isCalledForCurrentUserLocked()) {
+                    return false;
+                }
+
+                userState = getCurrentUserStateLocked();
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, showMode,
+                        userState.mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return true;
+        }
+
+        @Override
+        public void setSoftKeyboardCallbackEnabled(boolean enabled) {
+            mInvocationHandler.setSoftKeyboardCallbackEnabled(enabled);
         }
 
         @Override
@@ -3080,9 +3066,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     InvocationHandler.MSG_CLEAR_ACCESSIBILITY_CACHE);
         }
 
-        public void notifyMagnificationChanged(@NonNull Region region,
+        public void notifyMagnificationChangedLocked(@NonNull Region region,
                 float scale, float centerX, float centerY) {
-            mInvocationHandler.notifyMagnificationChanged(region, scale, centerX, centerY);
+            mInvocationHandler
+                    .notifyMagnificationChangedLocked(region, scale, centerX, centerY);
+        }
+
+        public void notifySoftKeyboardShowModeChangedLocked(int showState) {
+            mInvocationHandler.notifySoftKeyboardShowModeChangedLocked(showState);
         }
 
         /**
@@ -3100,6 +3091,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     listener.onMagnificationChanged(region, scale, centerX, centerY);
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
+                }
+            }
+        }
+
+        /**
+         * Called by the invocation handler to notify the service that the state of the soft
+         * keyboard show mode has changed.
+         */
+        private void notifySoftKeyboardShowModeChangedInternal(int showState) {
+            final IAccessibilityServiceClient listener;
+            synchronized (mLock) {
+                listener = mServiceInterface;
+            }
+            if (listener != null) {
+                try {
+                    listener.onSoftKeyboardShowModeChanged(showState);
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error sending soft keyboard show mode changes to " + mService,
+                            re);
                 }
             }
         }
@@ -3239,8 +3249,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public static final int MSG_CLEAR_ACCESSIBILITY_CACHE = 2;
 
             private static final int MSG_ON_MAGNIFICATION_CHANGED = 5;
+            private static final int MSG_ON_SOFT_KEYBOARD_STATE_CHANGED = 6;
 
             private boolean mIsMagnificationCallbackEnabled = false;
+            private boolean mIsSoftKeyboardCallbackEnabled = false;
 
             public InvocationHandler(Looper looper) {
                 super(looper, null, true);
@@ -3268,13 +3280,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         notifyMagnificationChangedInternal(region, scale, centerX, centerY);
                     } break;
 
+                    case MSG_ON_SOFT_KEYBOARD_STATE_CHANGED: {
+                        final int showState = (int) message.arg1;
+                        notifySoftKeyboardShowModeChangedInternal(showState);
+                    } break;
+
                     default: {
                         throw new IllegalArgumentException("Unknown message: " + type);
                     }
                 }
             }
 
-            public void notifyMagnificationChanged(@NonNull Region region, float scale,
+            public void notifyMagnificationChangedLocked(@NonNull Region region, float scale,
                     float centerX, float centerY) {
                 if (!mIsMagnificationCallbackEnabled) {
                     // Callback is disabled, don't bother packing args.
@@ -3294,8 +3311,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             public void setMagnificationCallbackEnabled(boolean enabled) {
                 mIsMagnificationCallbackEnabled = enabled;
             }
-        }
 
+            public void notifySoftKeyboardShowModeChangedLocked(int showState) {
+                if (!mIsSoftKeyboardCallbackEnabled) {
+                    return;
+                }
+
+                final Message msg = obtainMessage(MSG_ON_SOFT_KEYBOARD_STATE_CHANGED, showState, 0);
+                msg.sendToTarget();
+            }
+
+            public void setSoftKeyboardCallbackEnabled(boolean enabled) {
+                mIsSoftKeyboardCallbackEnabled = enabled;
+            }
+        }
     }
 
     final class WindowsForAccessibilityCallback implements
@@ -3976,6 +4005,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int mLastSentClientState = -1;
 
+        public int mSoftKeyboardShowMode = 0;
+
         public boolean mIsAccessibilityEnabled;
         public boolean mIsTouchExplorationEnabled;
         public boolean mIsTextHighContrastEnabled;
@@ -4048,6 +4079,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mIsEnhancedWebAccessibilityEnabled = false;
             mIsDisplayMagnificationEnabled = false;
             mIsAutoclickEnabled = false;
+            mSoftKeyboardShowMode = 0;
         }
 
         public void destroyUiAutomationService() {
@@ -4105,6 +4137,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         private final Uri mHighTextContrastUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
 
+        private final Uri mAccessibilitySoftKeyboardModeUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
+
         public AccessibilityContentObserver(Handler handler) {
             super(handler);
         }
@@ -4135,6 +4170,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     mDisplayColorMatrixUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mHighTextContrastUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAccessibilitySoftKeyboardModeUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -4187,6 +4224,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     updateDisplayColorAdjustmentSettingsLocked(userState);
                 } else if (mHighTextContrastUri.equals(uri)) {
                     if (readHighTextContrastEnabledSettingLocked(userState)) {
+                        onUserStateChangedLocked(userState);
+                    }
+                } else if (mAccessibilitySoftKeyboardModeUri.equals(uri)) {
+                    if (readSoftKeyboardShowModeChangedLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
                 }

@@ -1088,6 +1088,11 @@ public final class UiAutomation {
                 }
 
                 @Override
+                public void onSoftKeyboardShowModeChanged(int showMode) {
+                    /* do nothing */
+                }
+
+                @Override
                 public void onPerformGestureResult(int sequence, boolean completedSuccessfully) {
                     /* do nothing */
                 }

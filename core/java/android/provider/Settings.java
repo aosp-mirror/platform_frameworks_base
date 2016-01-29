@@ -4856,6 +4856,29 @@ public final class Settings {
                 "accessibility_display_magnification_auto_update";
 
         /**
+         * Setting that specifies what mode the soft keyboard is in (default or hidden). Can be
+         * modified from an AccessibilityService using the SoftKeyboardController.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_SOFT_KEYBOARD_MODE =
+                "accessibility_soft_keyboard_mode";
+
+        /**
+         * Default soft keyboard behavior.
+         *
+         * @hide
+         */
+        public static final int SHOW_MODE_AUTO = 0;
+
+        /**
+         * Soft keyboard is never shown.
+         *
+         * @hide
+         */
+        public static final int SHOW_MODE_HIDDEN = 1;
+
+        /**
          * Setting that specifies whether timed text (captions) should be
          * displayed in video content. Text display properties are controlled by
          * the following settings:
