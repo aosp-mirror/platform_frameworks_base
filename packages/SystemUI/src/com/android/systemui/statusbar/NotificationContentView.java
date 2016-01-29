@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
-import android.graphics.Outline;
 import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
@@ -27,7 +26,6 @@ import android.util.AttributeSet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
@@ -53,6 +51,7 @@ public class NotificationContentView extends FrameLayout {
 
     private final Rect mClipBounds = new Rect();
     private final int mMinContractedHeight;
+    private final int mNotificationContentMarginEnd;
     private final OnLayoutChangeListener mLayoutUpdater = new OnLayoutChangeListener() {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom,
@@ -109,6 +108,8 @@ public class NotificationContentView extends FrameLayout {
         mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
         mMinContractedHeight = getResources().getDimensionPixelSize(
                 R.dimen.min_notification_layout_height);
+        mNotificationContentMarginEnd = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_end);
         reset(true);
     }
 
@@ -128,6 +129,19 @@ public class NotificationContentView extends FrameLayout {
             maxSize = MeasureSpec.getSize(heightMeasureSpec);
         }
         int maxChildHeight = 0;
+        if (mExpandedChild != null) {
+            int size = Math.min(maxSize, mNotificationMaxHeight);
+            ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
+            if (layoutParams.height >= 0) {
+                // An actual height is set
+                size = Math.min(maxSize, layoutParams.height);
+            }
+            int spec = size == Integer.MAX_VALUE
+                    ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+                    : MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
+            mExpandedChild.measure(widthMeasureSpec, spec);
+            maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
+        }
         if (mContractedChild != null) {
             int heightSpec;
             if (shouldContractedBeFixedSize()) {
@@ -143,19 +157,9 @@ public class NotificationContentView extends FrameLayout {
                 mContractedChild.measure(widthMeasureSpec, heightSpec);
             }
             maxChildHeight = Math.max(maxChildHeight, measuredHeight);
-        }
-        if (mExpandedChild != null) {
-            int size = Math.min(maxSize, mNotificationMaxHeight);
-            ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
-            if (layoutParams.height >= 0) {
-                // An actual height is set
-                size = Math.min(maxSize, layoutParams.height);
+            if (updateContractedHeaderWidth()) {
+                mContractedChild.measure(widthMeasureSpec, heightSpec);
             }
-            int spec = size == Integer.MAX_VALUE
-                    ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-                    : MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
-            mExpandedChild.measure(widthMeasureSpec, spec);
-            maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
         }
         if (mHeadsUpChild != null) {
             int size = Math.min(maxSize, mHeadsUpHeight);
@@ -176,6 +180,44 @@ public class NotificationContentView extends FrameLayout {
         int ownHeight = Math.min(maxChildHeight, maxSize);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         setMeasuredDimension(width, ownHeight);
+    }
+
+    private boolean updateContractedHeaderWidth() {
+        // We need to update the expanded and the collapsed header to have exactly the same with to
+        // have the expand buttons laid out at the same location.
+        NotificationHeaderView contractedHeader = mContractedWrapper.getNotificationHeader();
+        if (contractedHeader != null) {
+            if (mExpandedChild != null
+                    && mExpandedWrapper.getNotificationHeader() != null) {
+                NotificationHeaderView expandedHeader = mExpandedWrapper.getNotificationHeader();
+                int expandedSize = expandedHeader.getMeasuredWidth()
+                        - expandedHeader.getPaddingEnd();
+                int collapsedSize = contractedHeader.getMeasuredWidth()
+                        - expandedHeader.getPaddingEnd();
+                if (expandedSize != collapsedSize) {
+                    int paddingEnd = contractedHeader.getMeasuredWidth() - expandedSize;
+                    contractedHeader.setPadding(
+                            isLayoutRtl() ? paddingEnd : contractedHeader.getPaddingLeft(),
+                            contractedHeader.getPaddingTop(),
+                            isLayoutRtl() ? contractedHeader.getPaddingLeft() : paddingEnd,
+                            contractedHeader.getPaddingBottom());
+                    contractedHeader.setShowWorkBadgeAtEnd(true);
+                    return true;
+                }
+            } else {
+                int paddingEnd = mNotificationContentMarginEnd;
+                if (contractedHeader.getPaddingEnd() != paddingEnd) {
+                    contractedHeader.setPadding(
+                            isLayoutRtl() ? paddingEnd : contractedHeader.getPaddingLeft(),
+                            contractedHeader.getPaddingTop(),
+                            isLayoutRtl() ? contractedHeader.getPaddingLeft() : paddingEnd,
+                            contractedHeader.getPaddingBottom());
+                    contractedHeader.setShowWorkBadgeAtEnd(false);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean shouldContractedBeFixedSize() {

@@ -169,6 +169,15 @@
     <!-- The minimum height of the content if there are at least two lines or a picture-->
     <dimen name="notification_min_content_height">41dp</dimen>
 
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_max_size">94dp</dimen>
+
+    <!-- The maximum size of the image in the expanded media notification -->
+    <dimen name="media_notification_expanded_image_margin_bottom">16dp</dimen>
+
+    <!-- The margin of the content to an image-->
+    <dimen name="notification_content_image_margin_end">8dp</dimen>
+
     <!-- Preferred width of the search view. -->
     <dimen name="search_view_preferred_width">320dip</dimen>
 
