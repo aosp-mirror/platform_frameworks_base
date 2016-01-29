@@ -6319,7 +6319,6 @@ package android.app.usage {
   public static class NetworkStats.Bucket {
     ctor public NetworkStats.Bucket();
     method public long getEndTimeStamp();
-    method public int getMetering();
     method public int getRoaming();
     method public long getRxBytes();
     method public long getRxPackets();
@@ -6328,9 +6327,6 @@ package android.app.usage {
     method public long getTxBytes();
     method public long getTxPackets();
     method public int getUid();
-    field public static final int METERING_ALL = -1; // 0xffffffff
-    field public static final int METERING_DEFAULT = 1; // 0x1
-    field public static final int METERING_METERED = 2; // 0x2
     field public static final int ROAMING_ALL = -1; // 0xffffffff
     field public static final int ROAMING_DEFAULT = 1; // 0x1
     field public static final int ROAMING_ROAMING = 2; // 0x2
