@@ -20,7 +20,6 @@ public interface HotspotController {
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
     boolean isHotspotEnabled();
-    boolean isHotspotSupported();
     void setHotspotEnabled(boolean enabled);
     boolean isTetheringAllowed();
 
