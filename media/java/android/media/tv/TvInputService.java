@@ -525,7 +525,7 @@ public abstract class TvInputService extends Service {
         public void notifyVideoUnavailable(final int reason) {
             if (reason < TvInputManager.VIDEO_UNAVAILABLE_REASON_START
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
-                throw new IllegalArgumentException("Unknown reason: " + reason);
+                Log.e(TAG, "notifyVideoUnavailable - unknown reason: " + reason);
             }
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
