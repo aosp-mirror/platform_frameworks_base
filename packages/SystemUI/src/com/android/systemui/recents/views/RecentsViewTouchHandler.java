@@ -150,7 +150,8 @@ public class RecentsViewTouchHandler {
         }
 
         // Request other drop targets to register themselves
-        EventBus.getDefault().send(new DragStartInitializeDropTargetsEvent(event.task, this));
+        EventBus.getDefault().send(new DragStartInitializeDropTargetsEvent(event.task,
+                event.taskView, this));
     }
 
     public final void onBusEvent(DragEndEvent event) {

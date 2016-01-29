@@ -19,6 +19,7 @@ package com.android.systemui.recents.events.ui.dragndrop;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.RecentsViewTouchHandler;
+import com.android.systemui.recents.views.TaskView;
 
 /**
  * This event is sent by the drag manager when it requires drop targets to register themselves for
@@ -27,10 +28,13 @@ import com.android.systemui.recents.views.RecentsViewTouchHandler;
 public class DragStartInitializeDropTargetsEvent extends EventBus.Event {
 
     public final Task task;
+    public final TaskView taskView;
     public final RecentsViewTouchHandler handler;
 
-    public DragStartInitializeDropTargetsEvent(Task task, RecentsViewTouchHandler handler) {
+    public DragStartInitializeDropTargetsEvent(Task task, TaskView taskView,
+            RecentsViewTouchHandler handler) {
         this.task = task;
+        this.taskView = taskView;
         this.handler = handler;
     }
 }

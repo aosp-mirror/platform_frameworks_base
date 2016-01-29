@@ -320,22 +320,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     @Override
-    public void onMultiWindowModeChanged(boolean multiWindowMode) {
-        super.onMultiWindowModeChanged(multiWindowMode);
-        if (!multiWindowMode) {
-            RecentsTaskLoader loader = Recents.getTaskLoader();
-            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-            launchOpts.loadIcons = false;
-            launchOpts.loadThumbnails = false;
-            launchOpts.onlyLoadForCache = true;
-            RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-            loader.preloadTasks(loadPlan, -1, false);
-            loader.loadTasks(this, loadPlan, launchOpts);
-            EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack()));
-        }
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP: {

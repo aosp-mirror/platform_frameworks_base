@@ -27,6 +27,8 @@ import android.widget.OverScroller;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 
 /* The scrolling logic for a TaskStackView */
@@ -111,8 +113,13 @@ public class TaskStackViewScroller {
      * @return whether the stack progress changed.
      */
     public boolean setStackScrollToInitialState() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         float prevStackScrollP = mStackScrollP;
-        setStackScroll(getBoundedStackScroll(mLayoutAlgorithm.mInitialScrollP));
+        if (ssp.hasDockedTask()) {
+            setStackScroll(mLayoutAlgorithm.mMaxScrollP);
+        } else {
+            setStackScroll(mLayoutAlgorithm.mInitialScrollP);
+        }
         return Float.compare(prevStackScrollP, mStackScrollP) != 0;
     }
 
@@ -169,13 +176,13 @@ public class TaskStackViewScroller {
         float newScroll = getBoundedStackScroll(curScroll);
         if (Float.compare(newScroll, curScroll) != 0) {
             // Start a new scroll animation
-            animateScroll(curScroll, newScroll, null);
+            animateScroll(newScroll, null /* postScrollRunnable */);
         }
         return mScrollAnimator;
     }
 
     /** Animates the stack scroll */
-    void animateScroll(float curScroll, float newScroll, final Runnable postRunnable) {
+    void animateScroll(float newScroll, final Runnable postRunnable) {
         // Finish any current scrolling animations
         if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
             setStackScroll(mFinalAnimatedScroll);
@@ -185,7 +192,7 @@ public class TaskStackViewScroller {
         stopBoundScrollAnimation();
 
         mFinalAnimatedScroll = newScroll;
-        mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, curScroll, newScroll);
+        mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
         mScrollAnimator.setDuration(mContext.getResources().getInteger(
                 R.integer.recents_animate_task_stack_scroll_duration));
         mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);

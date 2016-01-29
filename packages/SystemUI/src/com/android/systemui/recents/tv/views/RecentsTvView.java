@@ -227,19 +227,12 @@ public class RecentsTvView extends FrameLayout {
         EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(null));
     }
 
-    public final void onBusEvent(TaskStackUpdatedEvent event) {
-        mStack.setTasks(event.stack.computeAllTasksList(), true /* notifyStackChanges */);
-        mStack.createAffiliatedGroupings(getContext());
-    }
-
-
     public final void onBusEvent(RecentsVisibilityChangedEvent event) {
         if (!event.visible) {
             // Reset the view state
             mAwaitingFirstLayout = true;
         }
     }
-
 
     public void setTaskStackViewAdapter(TaskStackHorizontalViewAdapter taskStackViewAdapter) {
         if(mTaskStackHorizontalView != null) {

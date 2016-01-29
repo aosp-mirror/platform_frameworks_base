@@ -400,7 +400,12 @@ public class TaskStack {
             // Calculate the task stack bounds from the new window bounds
             Rect searchBarSpaceBounds = new Rect();
             Rect taskStackBounds = new Rect();
-            config.getTaskStackBounds(newWindowBounds, insets.top, insets.right,
+            // If the task stack bounds is specifically under the dock area, then ignore the top
+            // inset
+            int top = dockArea.bottom < 1f
+                    ? 0
+                    : insets.top;
+            config.getTaskStackBounds(newWindowBounds, top, insets.right,
                     searchBarSpaceBounds, taskStackBounds);
             return taskStackBounds;
         }
