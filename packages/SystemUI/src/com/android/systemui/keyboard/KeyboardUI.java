@@ -16,10 +16,8 @@
 
 package com.android.systemui.keyboard;
 
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -29,7 +27,6 @@ import android.bluetooth.le.ScanSettings;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Handler;
@@ -42,7 +39,6 @@ import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.view.WindowManager;
 
 import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -58,7 +54,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeChangedListener {

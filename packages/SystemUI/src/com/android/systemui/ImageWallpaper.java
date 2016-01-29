@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import static android.opengl.GLES20.*;
+
 import static javax.microedition.khronos.egl.EGL10.*;
 
 import android.app.ActivityManager;

@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import com.android.systemui.statusbar.phone.SystemUIDialog;
-
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -33,6 +31,8 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
+
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 /**
  * Manages notification when a guest session is resumed.

@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile.Host.Callback;

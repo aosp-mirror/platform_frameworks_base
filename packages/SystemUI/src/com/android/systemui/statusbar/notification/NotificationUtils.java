@@ -16,12 +16,10 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.view.View;
 import android.widget.ImageView;
 
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarIconView;
 
 /**
  * A util class for various reusable functions

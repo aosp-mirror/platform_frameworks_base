@@ -14,11 +14,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.statusbar.policy.KeyButtonView;
-
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.util.ArrayList;
 

@@ -25,8 +25,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FloatProperty;
 import android.util.Property;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -212,7 +212,6 @@ public class TaskStackLayoutAlgorithm {
     }
 
     Context mContext;
-    private Interpolator mLinearOutSlowInInterpolator;
     private StackState mState = StackState.SPLIT;
     private TaskStackLayoutAlgorithmCallbacks mCb;
 
@@ -299,8 +298,6 @@ public class TaskStackLayoutAlgorithm {
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         mFreeformLayoutAlgorithm = new FreeformWorkspaceLayoutAlgorithm(context);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.linear_out_slow_in);
     }
 
     /**
@@ -489,7 +486,7 @@ public class TaskStackLayoutAlgorithm {
                     newState);
             mFocusStateAnimator.setDuration(mContext.getResources().getInteger(
                     R.integer.recents_animate_task_stack_scroll_duration));
-            mFocusStateAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+            mFocusStateAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             mFocusStateAnimator.start();
         }
     }

@@ -37,8 +37,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -54,7 +54,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
 
@@ -128,8 +127,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     Point mDownTouchPos = new Point();
 
-    Interpolator mFastOutSlowInInterpolator;
-
     public TaskView(Context context) {
         this(context, null);
     }
@@ -149,8 +146,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mMaxDimScale = res.getInteger(R.integer.recents_max_task_stack_view_dim) / 255f;
         mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius));
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
         if (config.fakeShadows) {
             setBackground(new FakeShadowDrawable(res, config));
         }
@@ -456,7 +451,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
                     .scaleX(1f)
                     .scaleY(1f)
                     .setDuration(fadeInDuration)
-                    .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                    .setInterpolator(Interpolators.ALPHA_IN)
                     .start();
         } else {
             mActionButtonView.setScaleX(1f);
@@ -483,7 +478,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             mActionButtonView.animate()
                     .alpha(0f)
                     .setDuration(fadeOutDuration)
-                    .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -529,7 +524,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         if (mDimAlpha > 0) {
             ObjectAnimator anim = ObjectAnimator.ofInt(this, DIM, getDim(), 0);
             anim.setDuration(duration);
-            anim.setInterpolator(PhoneStatusBar.ALPHA_OUT);
+            anim.setInterpolator(Interpolators.ALPHA_OUT);
             anim.start();
         }
 

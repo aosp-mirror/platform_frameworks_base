@@ -35,13 +35,12 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -76,7 +75,6 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +111,6 @@ public class RecentsView extends FrameLayout {
 
     private RecentsTransitionHelper mTransitionHelper;
     private RecentsViewTouchHandler mTouchHandler;
-
-    private final Interpolator mFastOutSlowInInterpolator;
-    private final Interpolator mFastOutLinearInInterpolator;
     private final FlingAnimationUtils mFlingAnimationUtils;
 
     public RecentsView(Context context) {
@@ -137,10 +132,6 @@ public class RecentsView extends FrameLayout {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mHandler = new Handler();
         mTransitionHelper = new RecentsTransitionHelper(getContext(), mHandler);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
         mDividerSize = ssp.getDockedDividerSize(context);
         mTouchHandler = new RecentsViewTouchHandler(this);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
@@ -597,7 +588,7 @@ public class RecentsView extends FrameLayout {
             tmpTransform.scale = 1f;
             tmpTransform.rect.set(taskViewRect);
             mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
-                    new TaskViewAnimation(125, PhoneStatusBar.ALPHA_OUT,
+                    new TaskViewAnimation(125, Interpolators.ALPHA_OUT,
                             new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
@@ -609,7 +600,7 @@ public class RecentsView extends FrameLayout {
                                     // Animate the stack accordingly
                                     TaskViewAnimation stackAnim = new TaskViewAnimation(
                                             TaskStackView.DEFAULT_SYNC_STACK_DURATION,
-                                            mFastOutSlowInInterpolator);
+                                            Interpolators.FAST_OUT_SLOW_IN);
                                     mTaskStackView.getStack().removeTask(event.task, stackAnim);
                                 }
                             }));
@@ -731,7 +722,7 @@ public class RecentsView extends FrameLayout {
                     .alpha(0f)
                     .translationY(stackRect.height() / 2)
                     .setDuration(historyTransitionDuration)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -756,7 +747,7 @@ public class RecentsView extends FrameLayout {
                     .alpha(1f)
                     .translationY(0)
                     .setDuration(historyTransitionDuration)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .start();
         }
 
@@ -794,7 +785,7 @@ public class RecentsView extends FrameLayout {
                     mHistoryButton.animate()
                             .alpha(1f)
                             .setDuration(duration)
-                            .setInterpolator(mFastOutSlowInInterpolator)
+                            .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                             .withLayer()
                             .start();
                 }
@@ -825,7 +816,7 @@ public class RecentsView extends FrameLayout {
             mHistoryButton.animate()
                     .alpha(0f)
                     .setDuration(duration)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -854,7 +845,7 @@ public class RecentsView extends FrameLayout {
             if (newDockStates == null || !newDockStatesSet.contains(dockState)) {
                 // This is no longer visible, so hide it
                 viewState.startAnimation(null, 0, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
-                        PhoneStatusBar.ALPHA_OUT, animateAlpha, animateBounds);
+                        Interpolators.ALPHA_OUT, animateAlpha, animateBounds);
             } else {
                 // This state is now visible, update the bounds and show it
                 int alpha = (overrideAlpha != -1 ? overrideAlpha : viewState.dockAreaAlpha);
@@ -867,7 +858,7 @@ public class RecentsView extends FrameLayout {
                     viewState.dockAreaOverlay.setBounds(bounds);
                 }
                 viewState.startAnimation(bounds, alpha, DOCK_AREA_OVERLAY_TRANSITION_DURATION,
-                        PhoneStatusBar.ALPHA_IN, animateAlpha, animateBounds);
+                        Interpolators.ALPHA_IN, animateAlpha, animateBounds);
             }
         }
     }
@@ -882,8 +873,8 @@ public class RecentsView extends FrameLayout {
                 mBackgroundScrim.getAlpha(), alphaInt);
         mBackgroundScrimAnimator.setDuration(duration);
         mBackgroundScrimAnimator.setInterpolator(alphaInt > mBackgroundScrim.getAlpha()
-                ? PhoneStatusBar.ALPHA_OUT
-                : PhoneStatusBar.ALPHA_IN);
+                ? Interpolators.ALPHA_OUT
+                : Interpolators.ALPHA_IN);
         mBackgroundScrimAnimator.start();
     }
 }

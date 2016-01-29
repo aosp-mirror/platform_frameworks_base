@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.PagedTileLayout;
 import com.android.systemui.qs.PagedTileLayout.TilePage;

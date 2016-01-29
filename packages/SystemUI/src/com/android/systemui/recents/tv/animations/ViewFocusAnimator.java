@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+
 import com.android.systemui.R;
 
 public class ViewFocusAnimator implements View.OnFocusChangeListener {

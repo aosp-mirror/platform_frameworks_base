@@ -19,7 +19,6 @@ package com.android.systemui.classifier;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.SensorEvent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;

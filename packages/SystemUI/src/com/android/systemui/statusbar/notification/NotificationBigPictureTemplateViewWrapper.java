@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 

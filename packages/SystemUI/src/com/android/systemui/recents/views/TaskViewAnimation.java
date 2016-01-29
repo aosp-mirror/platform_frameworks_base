@@ -19,7 +19,8 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
+
+import com.android.systemui.Interpolators;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ import java.util.List;
 public class TaskViewAnimation {
 
     public static final TaskViewAnimation IMMEDIATE = new TaskViewAnimation(0,
-            new LinearInterpolator());
+            Interpolators.LINEAR);
 
     public final int startDelay;
     public final int duration;

@@ -14,8 +14,6 @@
 
 package com.android.systemui.tuner;
 
-import com.android.systemui.R;
-
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -34,7 +32,6 @@ import android.provider.Settings;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -49,26 +46,28 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.systemui.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BACK;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BUTTON_SEPARATOR;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.CLIPBOARD;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.GRAVITY_SEPARATOR;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.HOME;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_END;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_CODE_START;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.KEY_IMAGE_DELIM;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BACK;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.BUTTON_SEPARATOR;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.GRAVITY_SEPARATOR;
-import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.HOME;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.MENU_IME;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAVSPACE;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAV_BAR_VIEWS;
 import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.RECENT;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_END;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.SIZE_MOD_START;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractButton;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.extractSize;
 
 public class NavBarTuner extends Fragment implements TunerService.Tunable {
 

@@ -27,6 +27,7 @@ import android.view.ViewConfiguration;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 

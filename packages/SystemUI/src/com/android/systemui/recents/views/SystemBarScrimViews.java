@@ -19,8 +19,8 @@ package com.android.systemui.recents.views;
 import android.app.Activity;
 import android.content.Context;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
@@ -37,18 +37,11 @@ public class SystemBarScrimViews {
 
     int mNavBarScrimEnterDuration;
 
-    Interpolator mFastOutSlowInInterpolator;
-    Interpolator mQuintOutInterpolator;
-
     public SystemBarScrimViews(Activity activity) {
         mContext = activity;
         mNavBarScrimView = activity.findViewById(R.id.nav_bar_scrim);
         mNavBarScrimEnterDuration = activity.getResources().getInteger(
                 R.integer.recents_nav_bar_scrim_enter_duration);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(activity,
-                        com.android.internal.R.interpolator.fast_out_slow_in);
-        mQuintOutInterpolator = AnimationUtils.loadInterpolator(activity,
-                com.android.internal.R.interpolator.decelerate_quint);
     }
 
     /**
@@ -74,7 +67,7 @@ public class SystemBarScrimViews {
             mNavBarScrimView.animate()
                     .translationY(0)
                     .setDuration(mNavBarScrimEnterDuration)
-                    .setInterpolator(mQuintOutInterpolator)
+                    .setInterpolator(Interpolators.DECELERATE_QUINT)
                     .withStartAction(new Runnable() {
                         @Override
                         public void run() {
@@ -97,7 +90,7 @@ public class SystemBarScrimViews {
                     .translationY(mNavBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
                     .setDuration(taskViewExitToAppDuration)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .start();
         }
     }

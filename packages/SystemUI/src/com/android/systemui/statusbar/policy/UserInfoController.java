@@ -36,9 +36,9 @@ import android.provider.ContactsContract;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.util.UserIcons;
 import com.android.systemui.BitmapHelper;
 import com.android.systemui.R;
-import com.android.internal.util.UserIcons;
 
 import java.util.ArrayList;
 

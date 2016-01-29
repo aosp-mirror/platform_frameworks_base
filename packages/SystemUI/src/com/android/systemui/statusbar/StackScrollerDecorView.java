@@ -21,6 +21,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.systemui.Interpolators;
+
 /**
  * A common base class for all views in the notification stack scroller which don't have a
  * background.

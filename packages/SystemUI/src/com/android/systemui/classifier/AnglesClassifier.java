@@ -18,8 +18,6 @@ package com.android.systemui.classifier;
 
 import android.view.MotionEvent;
 
-import java.lang.Math;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

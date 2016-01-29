@@ -41,7 +41,6 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
-import android.service.notification.ZenModeConfig;
 import android.util.Log;
 import android.util.SparseArray;
 

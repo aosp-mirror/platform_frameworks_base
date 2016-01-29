@@ -14,9 +14,10 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui;
 
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
@@ -32,4 +33,5 @@ public class Interpolators {
     public static final Interpolator ALPHA_OUT = new PathInterpolator(0f, 0f, 0.8f, 1f);
     public static final Interpolator LINEAR = new LinearInterpolator();
     public static final Interpolator ACCELERATE_DECELERATE = new AccelerateDecelerateInterpolator();
+    public static final Interpolator DECELERATE_QUINT = new DecelerateInterpolator(2.5f);
 }

@@ -24,6 +24,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.view.View;
 import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 
 public class QSTileBaseView extends LinearLayout {

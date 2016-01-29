@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.util.SimpleArrayMap;
 import android.view.View;
 import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.ActivityStarter;
 

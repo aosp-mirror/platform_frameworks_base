@@ -20,8 +20,8 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 

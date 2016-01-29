@@ -25,8 +25,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.stack.StackStateAnimator;

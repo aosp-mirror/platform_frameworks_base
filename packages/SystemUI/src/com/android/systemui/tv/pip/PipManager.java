@@ -16,6 +16,7 @@
 
 package com.android.systemui.tv.pip;
 
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -36,8 +37,6 @@ import java.util.List;
 
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-
-import android.app.ActivityManager.RunningTaskInfo;
 
 /**
  * Manages the picture-in-picture (PIP) UI and states.

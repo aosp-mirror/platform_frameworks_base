@@ -48,11 +48,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import com.android.internal.logging.MetricsLogger;
-
 import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 // It's like LLand, but "M"ultiplayer.
 public class MLand extends FrameLayout {

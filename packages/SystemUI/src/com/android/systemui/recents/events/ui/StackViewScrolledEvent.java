@@ -17,6 +17,7 @@
 package com.android.systemui.recents.events.ui;
 
 import android.util.MutableInt;
+
 import com.android.systemui.recents.events.EventBus;
 
 /**

@@ -36,9 +36,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -148,8 +149,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     TaskViewTransform mTmpTransform = new TaskViewTransform();
     LayoutInflater mInflater;
 
-    Interpolator mFastOutSlowInInterpolator;
-
     // A convenience update listener to request updating clipping of tasks
     private ValueAnimator.AnimatorUpdateListener mRequestUpdateClippingListener =
             new ValueAnimator.AnimatorUpdateListener() {
@@ -200,8 +199,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mStackScroller = new TaskStackViewScroller(context, this, mLayoutAlgorithm);
         mTouchHandler = new TaskStackViewTouchHandler(context, this, mStackScroller);
         mAnimationHelper = new TaskStackAnimationHelper(context, this);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
         mTaskCornerRadiusPx = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         mDividerSize = ssp.getDockedDividerSize(context);
@@ -1227,7 +1224,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Animate in the freeform workspace
         animateFreeformWorkspaceBackgroundAlpha(
                 mLayoutAlgorithm.getStackState().freeformBackgroundAlpha, 150,
-                mFastOutSlowInInterpolator);
+                Interpolators.FAST_OUT_SLOW_IN);
 
         // Set the task focused state without requesting view focus, and leave the focus animations
         // until after the enter-animation
@@ -1321,7 +1318,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Animate all the tasks into place
         relayoutTaskViews(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
-                mFastOutSlowInInterpolator));
+                Interpolators.FAST_OUT_SLOW_IN));
     }
 
     /**
@@ -1534,7 +1531,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewExitToHomeDuration = getResources().getInteger(
                 R.integer.recents_task_exit_to_home_duration);
         animateFreeformWorkspaceBackgroundAlpha(0, taskViewExitToHomeDuration,
-                mFastOutSlowInInterpolator);
+                Interpolators.FAST_OUT_SLOW_IN);
     }
 
     public final void onBusEvent(DismissFocusedTaskViewEvent event) {
@@ -1600,7 +1597,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTmpTransform.scale = finalScale;
         mTmpTransform.translationZ = mLayoutAlgorithm.mMaxTranslationZ + 1;
         updateTaskViewToTransform(event.taskView, mTmpTransform,
-                new TaskViewAnimation(DRAG_SCALE_DURATION, mFastOutSlowInInterpolator));
+                new TaskViewAnimation(DRAG_SCALE_DURATION, Interpolators.FAST_OUT_SLOW_IN));
     }
 
     public final void onBusEvent(DragStartInitializeDropTargetsEvent event) {
@@ -1612,7 +1609,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragDropTargetChangedEvent event) {
-        TaskViewAnimation animation = new TaskViewAnimation(250, mFastOutSlowInInterpolator);
+        TaskViewAnimation animation = new TaskViewAnimation(250, Interpolators.FAST_OUT_SLOW_IN);
         if (event.dropTarget instanceof TaskStack.DockState) {
             // Calculate the new task stack bounds that matches the window size that Recents will
             // have after the drop
@@ -1686,9 +1683,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mTmpTransform, null);
         event.getAnimationTrigger().increment();
         relayoutTaskViews(new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
-                mFastOutSlowInInterpolator));
+                Interpolators.FAST_OUT_SLOW_IN));
         updateTaskViewToTransform(event.taskView, mTmpTransform,
-                new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION, mFastOutSlowInInterpolator,
+                new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN,
                         event.getAnimationTrigger().decrementOnAnimationEnd()));
         removeIgnoreTask(event.task);
     }
@@ -1789,7 +1786,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Remove the task from the stack
         mStack.removeTask(task, new TaskViewAnimation(DEFAULT_SYNC_STACK_DURATION,
-                mFastOutSlowInInterpolator));
+                Interpolators.FAST_OUT_SLOW_IN));
     }
 
     /**

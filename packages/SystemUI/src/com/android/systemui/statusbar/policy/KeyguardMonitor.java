@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.view.WindowManagerGlobal;
+
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.settings.CurrentUserTracker;

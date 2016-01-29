@@ -25,10 +25,10 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.FlingAnimationUtils;
-import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 
 /**

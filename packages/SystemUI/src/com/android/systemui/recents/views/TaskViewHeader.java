@@ -37,13 +37,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewStub;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.Recents;
@@ -163,10 +163,6 @@ public class TaskViewHeader extends FrameLayout
     // Header dim, which is only used when task view hardware layers are not used
     private Paint mDimLayerPaint = new Paint();
 
-    Interpolator mFastOutSlowInInterpolator;
-    Interpolator mFastOutLinearInInterpolator;
-    Interpolator mLinearOutSlowInInterpolator;
-
     private CountDownTimer mFocusTimerCountDown;
 
     public TaskViewHeader(Context context) {
@@ -199,13 +195,6 @@ public class TaskViewHeader extends FrameLayout
         mDarkFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_dark);
         mLightInfoIcon = context.getDrawable(R.drawable.recents_info_light);
         mDarkInfoIcon = context.getDrawable(R.drawable.recents_info_dark);
-
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.linear_out_slow_in);
 
         // Configure the background and dim
         mBackground = new HighlightColorDrawable();
@@ -440,7 +429,7 @@ public class TaskViewHeader extends FrameLayout
             mDismissButton.animate()
                     .alpha(1f)
                     .setStartDelay(0)
-                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
                     .setDuration(getResources().getInteger(
                             R.integer.recents_task_enter_from_app_duration))
                     .start();
@@ -557,7 +546,7 @@ public class TaskViewHeader extends FrameLayout
         Animator revealAnim = ViewAnimationUtils.createCircularReveal(mAppOverlayView, x, y, 0,
                 getWidth());
         revealAnim.setDuration(OVERLAY_REVEAL_DURATION);
-        revealAnim.setInterpolator(mLinearOutSlowInInterpolator);
+        revealAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         revealAnim.start();
     }
 
@@ -578,7 +567,7 @@ public class TaskViewHeader extends FrameLayout
             Animator revealAnim = ViewAnimationUtils.createCircularReveal(mAppOverlayView, x, y,
                     getWidth(), 0);
             revealAnim.setDuration(OVERLAY_REVEAL_DURATION);
-            revealAnim.setInterpolator(mLinearOutSlowInInterpolator);
+            revealAnim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             revealAnim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {

@@ -20,9 +20,10 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.android.systemui.R;
-import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
 
 public class TaskCardView extends RelativeLayout {
 

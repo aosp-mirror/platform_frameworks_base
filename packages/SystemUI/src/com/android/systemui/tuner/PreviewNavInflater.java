@@ -14,11 +14,11 @@
 
 package com.android.systemui.tuner;
 
-import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+
+import com.android.systemui.statusbar.phone.NavigationBarInflaterView;
 
 public class PreviewNavInflater extends NavigationBarInflaterView {
 

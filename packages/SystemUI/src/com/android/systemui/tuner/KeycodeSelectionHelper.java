@@ -18,14 +18,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
-import android.util.Pair;
 import android.view.KeyEvent;
+
+import com.android.systemui.R;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import com.android.systemui.R;
 
 public class KeycodeSelectionHelper {
 

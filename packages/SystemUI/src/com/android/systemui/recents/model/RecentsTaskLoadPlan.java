@@ -22,12 +22,12 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Debug;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;

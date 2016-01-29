@@ -18,7 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.view.View;
 
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.Interpolators;
 
 /**
  * A helper to fade views in and out.

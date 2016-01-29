@@ -22,8 +22,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.RectF;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -31,7 +31,6 @@ import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.List;
 
@@ -66,20 +65,10 @@ public class TaskStackAnimationHelper {
 
     private TaskStackView mStackView;
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mFastOutLinearInInterpolator;
-    private Interpolator mQuintOutInterpolator;
-
     private TaskViewTransform mTmpTransform = new TaskViewTransform();
 
     public TaskStackAnimationHelper(Context context, TaskStackView stackView) {
         mStackView = stackView;
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
-        mQuintOutInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.decelerate_quint);
     }
 
     /**
@@ -198,7 +187,7 @@ public class TaskStackAnimationHelper {
                     // Animate the task up if it was occluding the launch target
                     if (currentTaskOccludesLaunchTarget) {
                         TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                                taskViewEnterFromAffiliatedAppDuration, PhoneStatusBar.ALPHA_IN,
+                                taskViewEnterFromAffiliatedAppDuration, Interpolators.ALPHA_IN,
                                 new AnimatorListenerAdapter() {
                                     @Override
                                     public void onAnimationEnd(Animator animation) {
@@ -219,7 +208,7 @@ public class TaskStackAnimationHelper {
                         frontIndex * taskViewEnterFromHomeStaggerDelay;
 
                 TaskViewAnimation taskAnimation = new TaskViewAnimation(delay,
-                        duration, mQuintOutInterpolator,
+                        duration, Interpolators.DECELERATE_QUINT,
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
@@ -253,7 +242,7 @@ public class TaskStackAnimationHelper {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
             TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                    animated ? taskViewExitToHomeDuration : 0, mFastOutLinearInInterpolator,
+                    animated ? taskViewExitToHomeDuration : 0, Interpolators.FAST_OUT_LINEAR_IN,
                     postAnimationTrigger.decrementOnAnimationEnd());
             postAnimationTrigger.increment();
 
@@ -295,7 +284,7 @@ public class TaskStackAnimationHelper {
             } else if (currentTaskOccludesLaunchTarget) {
                 // Animate this task out of view
                 TaskViewAnimation taskAnimation = new TaskViewAnimation(
-                        taskViewExitToAppDuration, PhoneStatusBar.ALPHA_OUT,
+                        taskViewExitToAppDuration, Interpolators.ALPHA_OUT,
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
 
@@ -327,7 +316,7 @@ public class TaskStackAnimationHelper {
 
         // Compose the new animation and transform and star the animation
         TaskViewAnimation taskAnimation = new TaskViewAnimation(taskViewRemoveAnimDuration,
-                PhoneStatusBar.ALPHA_OUT, new AnimatorListenerAdapter() {
+                Interpolators.ALPHA_OUT, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 postAnimationTrigger.decrement();
@@ -364,7 +353,7 @@ public class TaskStackAnimationHelper {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
             TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
-                    historyTransitionDuration, mFastOutSlowInInterpolator,
+                    historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN,
                     postAnimationTrigger.decrementOnAnimationEnd());
             postAnimationTrigger.increment();
 
@@ -393,7 +382,7 @@ public class TaskStackAnimationHelper {
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
-                    historyTransitionDuration, mFastOutSlowInInterpolator);
+                    historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN);
             stackLayout.getStackTransform(tv.getTask(), stackScroller.getStackScroll(),
                     mTmpTransform, null);
             mTmpTransform.alpha = 1f;

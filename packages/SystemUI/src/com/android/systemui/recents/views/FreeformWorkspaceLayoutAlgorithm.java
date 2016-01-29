@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.content.Context;
 import android.graphics.RectF;
 import android.util.ArrayMap;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
 

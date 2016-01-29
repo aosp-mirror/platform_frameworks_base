@@ -19,7 +19,6 @@ package com.android.systemui.tv.pip;
 import android.app.Activity;
 import android.media.session.MediaController;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.R;

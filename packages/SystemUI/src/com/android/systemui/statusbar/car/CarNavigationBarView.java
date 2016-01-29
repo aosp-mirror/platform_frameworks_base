@@ -17,19 +17,12 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.R.color;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NavigationBarView;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * A custom navigation bar for the automotive use case.

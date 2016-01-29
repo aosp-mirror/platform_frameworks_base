@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.WindowManagerGlobal;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsDebugFlags;

@@ -23,9 +23,9 @@ import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.OverScroller;
+
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Utilities;
 
@@ -69,16 +69,12 @@ public class TaskStackViewScroller {
     ObjectAnimator mScrollAnimator;
     float mFinalAnimatedScroll;
 
-    private Interpolator mLinearOutSlowInInterpolator;
-
     public TaskStackViewScroller(Context context, TaskStackViewScrollerCallbacks cb,
             TaskStackLayoutAlgorithm layoutAlgorithm) {
         mContext = context;
         mCb = cb;
         mScroller = new OverScroller(context);
         mLayoutAlgorithm = layoutAlgorithm;
-        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.linear_out_slow_in);
     }
 
     /** Resets the task scroller. */
@@ -192,7 +188,7 @@ public class TaskStackViewScroller {
         mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, curScroll, newScroll);
         mScrollAnimator.setDuration(mContext.getResources().getInteger(
                 R.integer.recents_animate_task_stack_scroll_duration));
-        mScrollAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+        mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
         mScrollAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
