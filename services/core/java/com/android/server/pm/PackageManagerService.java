@@ -2175,13 +2175,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             scanDirTracedLI(oemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanFlags, 0);
 
-            if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
-            try {
-                mInstaller.moveFiles();
-            } catch (InstallerException e) {
-                logCriticalInfo(Log.WARN, "Update commands failed: " + e);
-            }
-
             // Prune any system packages that no longer exist.
             final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<String>();
             if (!mOnlyCore) {
