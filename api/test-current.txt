@@ -22901,6 +22901,7 @@ package android.media.tv {
     method public void onInputAdded(java.lang.String);
     method public void onInputRemoved(java.lang.String);
     method public void onInputStateChanged(java.lang.String, int);
+    method public void onInputUpdated(java.lang.String);
     method public void onTvInputInfoChanged(android.media.tv.TvInputInfo);
   }
 
