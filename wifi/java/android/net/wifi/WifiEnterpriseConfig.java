@@ -101,6 +101,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** @hide */
     public static final String CA_CERT_KEY         = "ca_cert";
     /** @hide */
+    public static final String CA_PATH_KEY         = "ca_path";
+    /** @hide */
     public static final String ENGINE_KEY          = "engine";
     /** @hide */
     public static final String ENGINE_ID_KEY       = "engine_id";
@@ -651,6 +653,33 @@ public class WifiEnterpriseConfig implements Parcelable {
      */
     public void resetCaCertificate() {
         mCaCerts = null;
+    }
+
+    /**
+     * Set the ca_path directive on wpa_supplicant.
+     *
+     * From wpa_supplicant documentation:
+     *
+     * Directory path for CA certificate files (PEM). This path may contain
+     * multiple CA certificates in OpenSSL format. Common use for this is to
+     * point to system trusted CA list which is often installed into directory
+     * like /etc/ssl/certs. If configured, these certificates are added to the
+     * list of trusted CAs. ca_cert may also be included in that case, but it is
+     * not required.
+     * @param domain The path for CA certificate files
+     * @hide
+     */
+    public void setCaPath(String path) {
+        setFieldValue(CA_PATH_KEY, path);
+    }
+
+    /**
+     * Get the domain_suffix_match value. See setDomSuffixMatch.
+     * @return The path for CA certificate files.
+     * @hide
+     */
+    public String getCaPath() {
+        return getFieldValue(CA_PATH_KEY, "");
     }
 
     /** Set Client certificate alias.
