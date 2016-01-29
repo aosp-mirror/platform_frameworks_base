@@ -2506,6 +2506,7 @@
   <java-symbol type="dimen" name="media_notification_expanded_image_max_size" />
   <java-symbol type="dimen" name="media_notification_expanded_image_margin_bottom" />
   <java-symbol type="dimen" name="notification_content_image_margin_end" />
+  <java-symbol type="dimen" name="notification_content_picture_margin_media" />
 
   <java-symbol type="bool" name="config_strongAuthRequiredOnBoot" />
 
