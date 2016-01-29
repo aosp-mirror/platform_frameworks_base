@@ -8875,7 +8875,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setTaskResizeable(int taskId, boolean resizeable) {
+    public void setTaskResizeable(int taskId, int resizeableMode) {
         synchronized (this) {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(
                     taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID);
@@ -8883,9 +8883,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
             }
-            if (task.mResizeable != resizeable) {
-                task.mResizeable = resizeable;
-                mWindowManager.setTaskResizeable(taskId, resizeable);
+            if (task.mResizeMode != resizeableMode) {
+                task.mResizeMode = resizeableMode;
+                mWindowManager.setTaskResizeable(taskId, resizeableMode);
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
@@ -8904,10 +8904,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 int stackId = task.stack.mStackId;
-                // First, check if this is a non-resizeble task in docked stack or if the task size
-                // is affected by the docked stack changing size. If so, instead of resizing, we
-                // can only scroll the task. No need to update configuration.
-                if (bounds != null && !task.mResizeable
+                // We allow the task to scroll instead of resizing if this is a non-resizeable task
+                // in crop windows resize mode or if the task size is affected by the docked stack
+                // changing size. No need to update configuration.
+                if (bounds != null && task.inCropWindowsResizeMode()
                         && mStackSupervisor.isStackDockedInEffect(stackId)) {
                     mWindowManager.scrollTask(task.taskId, bounds);
                     return;
@@ -12164,6 +12164,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
             mForceResizableActivities = forceResizable;
+            mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
             mSupportsPictureInPicture = supportsPictureInPicture || forceResizable;
             // This happens before any activities are started, so we can

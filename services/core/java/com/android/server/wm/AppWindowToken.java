@@ -125,9 +125,6 @@ class AppWindowToken extends WindowToken {
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
-    // True if the windows associated with this token should be cropped to their stack bounds.
-    boolean mCropWindowsToStack;
-
     boolean mAlwaysFocusable;
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();

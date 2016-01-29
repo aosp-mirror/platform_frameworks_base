@@ -24,8 +24,9 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
@@ -118,7 +119,10 @@ final class TaskRecord {
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
+    // TODO(b/26847884): Currently needed while migrating to resize_mode.
+    // Can be removed at some later point.
     private static final String ATTR_RESIZEABLE = "resizeable";
+    private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
 
@@ -156,8 +160,8 @@ final class TaskRecord {
 
     int numFullscreen;      // Number of fullscreen activities.
 
-    boolean mResizeable;    // Activities in the task resizeable. Based on the resizable setting of
-                            // the root activity.
+    int mResizeMode;        // The resize mode of this task and its activities.
+                            // Based on the {@link ActivityInfo#resizeMode} of the root activity.
     int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
                             // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
@@ -309,7 +313,7 @@ final class TaskRecord {
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            boolean resizeable, boolean privileged, boolean realActivitySuspended) {
+            int resizeMode, boolean privileged, boolean _realActivitySuspended) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -323,7 +327,7 @@ final class TaskRecord {
         voiceSession = null;
         voiceInteractor = null;
         realActivity = _realActivity;
-        realActivitySuspended = realActivitySuspended;
+        realActivitySuspended = _realActivitySuspended;
         origActivity = _origActivity;
         rootWasReset = _rootWasReset;
         isAvailable = true;
@@ -346,7 +350,7 @@ final class TaskRecord {
         mNextAffiliateTaskId = nextTaskId;
         mCallingUid = callingUid;
         mCallingPackage = callingPackage;
-        mResizeable = resizeable || mService.mForceResizableActivities;
+        mResizeMode = resizeMode;
         mPrivileged = privileged;
         ActivityInfo info = (mActivities.size() > 0) ? mActivities.get(0).info : null;
         mMinimalSize = info != null && info.layout != null ? info.layout.minimalSize : -1;
@@ -448,9 +452,7 @@ final class TaskRecord {
         } else {
             autoRemoveRecents = false;
         }
-        mResizeable = info.resizeMode == RESIZE_MODE_RESIZEABLE
-                || info.resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
-                || mService.mForceResizableActivities;
+        mResizeMode = info.resizeMode;
         mLockTaskMode = info.lockTaskLaunchMode;
         mPrivileged = (info.applicationInfo.privateFlags & PRIVATE_FLAG_PRIVILEGED) != 0;
         setLockTaskAuth();
@@ -705,9 +707,6 @@ final class TaskRecord {
         // Only set this based on the first activity
         if (mActivities.isEmpty()) {
             taskType = r.mActivityType;
-            if (taskType == HOME_ACTIVITY_TYPE && mService.mForceResizableActivities) {
-                mResizeable = r.isResizeable();
-            }
             isPersistable = r.isPersistable();
             mCallingUid = r.launchedFromUid;
             mCallingPackage = r.launchedFromPackage;
@@ -935,6 +934,15 @@ final class TaskRecord {
         return mTaskToReturnTo == HOME_ACTIVITY_TYPE || mTaskToReturnTo == RECENTS_ACTIVITY_TYPE;
     }
 
+    boolean isResizeable() {
+        return !isHomeTask() && (mService.mForceResizableActivities
+                || ActivityInfo.isResizeableMode(mResizeMode));
+    }
+
+    boolean inCropWindowsResizeMode() {
+        return !isResizeable() && mResizeMode == RESIZE_MODE_CROP_WINDOWS;
+    }
+
     /**
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
@@ -1073,7 +1081,7 @@ final class TaskRecord {
         out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
         out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
         out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
-        out.attribute(null, ATTR_RESIZEABLE, String.valueOf(mResizeable));
+        out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
         out.attribute(null, ATTR_PRIVILEGED, String.valueOf(mPrivileged));
         if (mLastNonFullscreenBounds != null) {
             out.attribute(
@@ -1139,7 +1147,7 @@ final class TaskRecord {
         int nextTaskId = INVALID_TASK_ID;
         int callingUid = -1;
         String callingPackage = "";
-        boolean resizeable = false;
+        int resizeMode = RESIZE_MODE_UNRESIZEABLE;
         boolean privileged = false;
         Rect bounds = null;
 
@@ -1200,7 +1208,10 @@ final class TaskRecord {
             } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
                 callingPackage = attrValue;
             } else if (ATTR_RESIZEABLE.equals(attrName)) {
-                resizeable = Boolean.valueOf(attrValue);
+                resizeMode = Boolean.valueOf(attrValue)
+                        ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_CROP_WINDOWS;
+            } else if (ATTR_RESIZE_MODE.equals(attrName)) {
+                resizeMode = Integer.valueOf(attrValue);
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.valueOf(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
@@ -1264,7 +1275,7 @@ final class TaskRecord {
                 autoRemoveRecents, askedCompatMode, taskType, userId, effectiveUid, lastDescription,
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
-                taskAffiliationColor, callingUid, callingPackage, resizeable, privileged,
+                taskAffiliationColor, callingUid, callingPackage, resizeMode, privileged,
                 realActivitySuspended);
         task.updateOverrideConfiguration(bounds);
 
@@ -1404,7 +1415,7 @@ final class TaskRecord {
         }
 
         if (inStack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
-            if (!mResizeable) {
+            if (!isResizeable()) {
                 throw new IllegalArgumentException("Can not position non-resizeable task="
                         + this + " in stack=" + inStack);
             }
@@ -1450,8 +1461,8 @@ final class TaskRecord {
         final int stackId = stack.mStackId;
         if (stackId == HOME_STACK_ID
                 || stackId == FULLSCREEN_WORKSPACE_STACK_ID
-                || (stackId == DOCKED_STACK_ID && !mResizeable)) {
-            return mResizeable ? stack.mBounds : null;
+                || (stackId == DOCKED_STACK_ID && !isResizeable())) {
+            return isResizeable() ? stack.mBounds : null;
         } else if (!StackId.persistTaskBounds(stackId)) {
             return stack.mBounds;
         }
@@ -1554,12 +1565,12 @@ final class TaskRecord {
         if (stack != null) {
             pw.print(prefix); pw.print("stackId="); pw.println(stack.mStackId);
         }
-        pw.print(prefix); pw.print("hasBeenVisible="); pw.print(hasBeenVisible);
-                pw.print(" mResizeable="); pw.print(mResizeable);
-                pw.print(" firstActiveTime="); pw.print(lastActiveTime);
-                pw.print(" lastActiveTime="); pw.print(lastActiveTime);
-                pw.print(" (inactive for ");
-                pw.print((getInactiveDuration()/1000)); pw.println("s)");
+        pw.print(prefix + "hasBeenVisible=" + hasBeenVisible);
+                pw.print(" mResizeMode=" + ActivityInfo.resizeModeToString(mResizeMode));
+                pw.print(" isResizeable=" + isResizeable());
+                pw.print(" firstActiveTime=" + lastActiveTime);
+                pw.print(" lastActiveTime=" + lastActiveTime);
+                pw.println(" (inactive for " + (getInactiveDuration() / 1000) + "s)");
     }
 
     @Override

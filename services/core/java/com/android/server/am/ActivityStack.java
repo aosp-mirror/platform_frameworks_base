@@ -1410,10 +1410,11 @@ final class ActivityStack {
         }
 
         if (mStackId == DOCKED_STACK_ID) {
-            // Docked stack is always visible, except in the case where the top running activity in
-            // the focus stack doesn't support any form of resizing.
+            // Docked stack is always visible, except in the case where the top running activity
+            // task in the focus stack doesn't support any form of resizing.
             final ActivityRecord r = focusedStack.topRunningActivityLocked();
-            return r == null || r.isResizeable() || r.cropAppWindows()
+            final TaskRecord task = r != null ? r.task : null;
+            return task == null || task.isResizeable() || task.inCropWindowsResizeMode()
                     ? STACK_VISIBLE : STACK_INVISIBLE;
         }
 
@@ -4751,7 +4752,7 @@ final class ActivityStack {
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mLockScreenShown == LOCK_SCREEN_SHOWN;
-        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.mResizeable
+        if (!layoutTaskInStack(task, info.layout) && mBounds != null && task.isResizeable()
                 && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
         }
@@ -4816,8 +4817,7 @@ final class ActivityStack {
                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
                 task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
-                r.cropAppWindows() | r.isResizeable(), r.isAlwaysFocusable());
-        mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
+                task.mResizeMode, r.isAlwaysFocusable(), task.isHomeTask());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
@@ -4869,9 +4869,8 @@ final class ActivityStack {
 
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
-        mWindowManager.setAppTask(
-                r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig);
-        mWindowManager.setTaskResizeable(task.taskId, task.mResizeable);
+        mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig,
+                task.mResizeMode, task.isHomeTask());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

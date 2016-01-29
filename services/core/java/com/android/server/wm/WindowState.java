@@ -1002,11 +1002,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * @param bounds The rect which gets the bounds.
      */
     void getVisibleBounds(Rect bounds) {
-        boolean intersectWithStackBounds = mAppToken != null && mAppToken.mCropWindowsToStack;
+        final Task task = getTask();
+        boolean intersectWithStackBounds = task != null && task.cropWindowsToStackBounds();
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
-            final TaskStack stack = getStack();
+            final TaskStack stack = task.mStack;
             if (stack != null) {
                 stack.getDimBounds(mTmpRect);
             } else {
@@ -1932,11 +1933,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void cropRegionToStackBoundsIfNeeded(Region region) {
-        if (mAppToken == null || !mAppToken.mCropWindowsToStack) {
+        final Task task = getTask();
+        if (task == null || !task.cropWindowsToStackBounds()) {
             return;
         }
 
-        final TaskStack stack = getStack();
+        final TaskStack stack = task.mStack;
         if (stack == null) {
             return;
         }

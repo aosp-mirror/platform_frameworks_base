@@ -491,6 +491,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private final SparseIntArray mTmpTaskIds = new SparseIntArray();
 
+    boolean mForceResizableTasks = false;
+
     int getDragLayerLocked() {
         return mPolicy.windowTypeToLayerLw(LayoutParams.TYPE_DRAG) * TYPE_LAYER_MULTIPLIER
                 + TYPE_LAYER_OFFSET;
@@ -3219,8 +3221,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
-            Rect taskBounds, Configuration config, boolean cropWindowsToStack,
-            boolean alwaysFocusable) {
+            Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
+            boolean homeTask) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3254,7 +3256,6 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.layoutConfigChanges = (configChanges &
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
             atoken.mLaunchTaskBehind = launchTaskBehind;
-            atoken.mCropWindowsToStack = cropWindowsToStack;
             atoken.mAlwaysFocusable = alwaysFocusable;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
@@ -3263,7 +3264,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (task == null) {
                 task = createTaskLocked(taskId, stackId, userId, atoken, taskBounds, config);
             }
-            task.addAppToken(addPos, atoken);
+            task.addAppToken(addPos, atoken, taskResizeMode, homeTask);
 
             mTokenMap.put(token.asBinder(), atoken);
 
@@ -3274,8 +3275,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setAppTask(
-            IBinder token, int taskId, int stackId, Rect taskBounds, Configuration config) {
+    public void setAppTask(IBinder token, int taskId, int stackId, Rect taskBounds,
+            Configuration config, int taskResizeMode, boolean homeTask) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3295,7 +3296,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 newTask = createTaskLocked(
                         taskId, stackId, oldTask.mUserId, atoken, taskBounds, config);
             }
-            newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken);
+            newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken, taskResizeMode, homeTask);
         }
     }
 
@@ -10331,12 +10332,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setTaskResizeable(int taskId, boolean resizeable) {
+    public void setTaskResizeable(int taskId, int resizeMode) {
         synchronized (mWindowMap) {
-            Task task = mTaskIdToTask.get(taskId);
+            final Task task = mTaskIdToTask.get(taskId);
             if (task != null) {
-                task.setResizeable(resizeable);
+                task.setResizeable(resizeMode);
             }
+        }
+    }
+
+    public void setForceResizableTasks(boolean forceResizableTasks) {
+        synchronized (mWindowMap) {
+            mForceResizableTasks = forceResizableTasks;
         }
     }
 
