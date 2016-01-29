@@ -826,30 +826,25 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
+    protected View bindVetoButtonClickListener(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        if (n.isClearable()) {
-            final String _pkg = n.getPackageName();
-            final String _tag = n.getTag();
-            final int _id = n.getId();
-            final int _userId = n.getUserId();
-            vetoButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                        // Accessibility feedback
-                        v.announceForAccessibility(
-                                mContext.getString(R.string.accessibility_notification_dismissed));
-                        try {
-                            mBarService.onNotificationClear(_pkg, _tag, _id, _userId);
+        final String _pkg = n.getPackageName();
+        final String _tag = n.getTag();
+        final int _id = n.getId();
+        final int _userId = n.getUserId();
+        vetoButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Accessibility feedback
+                v.announceForAccessibility(
+                        mContext.getString(R.string.accessibility_notification_dismissed));
+                try {
+                    mBarService.onNotificationClear(_pkg, _tag, _id, _userId);
 
-                        } catch (RemoteException ex) {
-                            // system process is dead if we're here.
-                        }
-                    }
-                });
-            vetoButton.setVisibility(View.VISIBLE);
-        } else {
-            vetoButton.setVisibility(View.GONE);
-        }
+                } catch (RemoteException ex) {
+                    // system process is dead if we're here.
+                }
+            }
+        });
         vetoButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         return vetoButton;
     }
@@ -1368,7 +1363,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         workAroundBadLayerDrawableOpacity(row);
-        View vetoButton = updateNotificationVetoButton(row, sbn);
+        View vetoButton = bindVetoButtonClickListener(row, sbn);
         vetoButton.setContentDescription(mContext.getString(
                 R.string.accessibility_remove_notification));
 
@@ -2008,7 +2003,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         // Update the veto button accordingly (and as a result, whether this row is
         // swipe-dismissable)
-        updateNotificationVetoButton(entry.row, notification);
+        bindVetoButtonClickListener(entry.row, notification);
 
         if (DEBUG) {
             // Is this for you?

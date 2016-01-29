@@ -211,7 +211,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mStatusBarNotification = entry.notification;
         mPrivateLayout.onNotificationUpdated(entry);
         mPublicLayout.onNotificationUpdated(entry);
-        updateVetoButton();
+        mShowingPublicInitialized = false;
+        updateClearability();
         if (mIsSummaryWithChildren) {
             recreateNotificationHeader();
         }
@@ -910,7 +911,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
 
         mPrivateLayout.updateExpandButtons(isExpandable());
-        updateVetoButton();
+        updateClearability();
         mShowingPublicInitialized = true;
     }
 
@@ -946,7 +947,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    private void updateVetoButton() {
+    private void updateClearability() {
         // public versions cannot be dismissed
         mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);
     }
