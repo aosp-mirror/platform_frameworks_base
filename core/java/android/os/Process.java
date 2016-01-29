@@ -635,6 +635,12 @@ public class Process {
             if ((debugFlags & Zygote.DEBUG_GENERATE_DEBUG_INFO) != 0) {
                 argsForZygote.add("--generate-debug-info");
             }
+            if ((debugFlags & Zygote.DEBUG_ALWAYS_JIT) != 0) {
+                argsForZygote.add("--always-jit");
+            }
+            if ((debugFlags & Zygote.DEBUG_NATIVE_DEBUGGABLE) != 0) {
+                argsForZygote.add("--native-debuggable");
+            }
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
             }
