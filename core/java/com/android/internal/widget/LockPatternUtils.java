@@ -17,7 +17,6 @@
 package com.android.internal.widget;
 
 import android.annotation.IntDef;
-import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
@@ -503,9 +502,8 @@ public class LockPatternUtils {
         if (userHandle == UserHandle.USER_SYSTEM) {
             // Set the encryption password to default.
             updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+            setCredentialRequiredToDecrypt(false);
         }
-
-        setCredentialRequiredToDecrypt(false);
 
         getDevicePolicyManager().setActivePasswordState(
                 DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0, userHandle);
@@ -1340,9 +1338,9 @@ public class LockPatternUtils {
     }
 
     public void setCredentialRequiredToDecrypt(boolean required) {
-        if (ActivityManager.getCurrentUser() != UserHandle.USER_SYSTEM) {
-            Log.w(TAG, "Only device owner may call setCredentialRequiredForDecrypt()");
-            return;
+        if (!(getUserManager().isSystemUser() || getUserManager().isPrimaryUser())) {
+            throw new IllegalStateException(
+                    "Only the system or primary user may call setCredentialRequiredForDecrypt()");
         }
 
         if (isDeviceEncryptionEnabled()){
