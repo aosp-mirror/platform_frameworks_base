@@ -538,7 +538,7 @@ public class BackupManager {
         @Override
         public void onResult(String currentPackage, int status) {
             mHandler.sendMessage(
-                mHandler.obtainMessage(MSG_FINISHED, status, 0, currentPackage));
+                mHandler.obtainMessage(MSG_RESULT, status, 0, currentPackage));
         }
 
         @Override
