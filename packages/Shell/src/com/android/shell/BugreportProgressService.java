@@ -786,7 +786,8 @@ public class BugreportProgressService extends Service {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setType(mimeType);
 
-        final String subject = info.title != null ? info.title : bugreportUri.getLastPathSegment();
+        final String subject = !TextUtils.isEmpty(info.title) ?
+                info.title : bugreportUri.getLastPathSegment();
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.

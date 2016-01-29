@@ -114,6 +114,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String NO_SCREENSHOT = null;
     private static final String NO_TITLE = null;
     private static final Integer NO_PID = null;
+    private static final boolean RENAMED_SCREENSHOTS = true;
+    private static final boolean DIDNT_RENAME_SCREENSHOTS = false;
 
     private String mDescription;
 
@@ -171,7 +173,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras =
                 sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 1, true);
+                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -202,7 +204,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = acceptBugreportAndGetSharedIntent();
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 2, true);
+                NAME, NO_TITLE, NO_DESCRIPTION, 2, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -231,13 +233,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         Bundle extras = acceptBugreportAndGetSharedIntent();
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 1, true);
+                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
 
     public void testProgress_changeDetailsInvalidInput() throws Exception {
-
         resetProperties();
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
@@ -277,7 +278,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
                 mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 1, true);
+                NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -291,7 +292,6 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void changeDetailsTest(boolean plainText) throws Exception {
-
         resetProperties();
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
@@ -316,7 +316,26 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID,
                 plainText? mPlainTextPath : mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 1, true);
+                NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
+
+        assertServiceNotRunning();
+    }
+
+    public void testProgress_changeJustDetails() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot);
+
+        detailsUi.nameField.setText("");
+        detailsUi.titleField.setText("");
+        detailsUi.descField.setText(mDescription);
+        detailsUi.clickOk();
+
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mZipPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
+                NO_NAME, NO_TITLE, mDescription, 1, DIDNT_RENAME_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -367,7 +386,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         // Finally, share bugreport.
         Bundle extras = acceptBugreportAndGetSharedIntent();
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
-                NAME, TITLE, mDescription, 1, true);
+                NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -539,7 +558,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
         assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, ZIP_FILE,
-                NO_NAME, NO_TITLE, NO_DESCRIPTION, 0, false);
+                NO_NAME, NO_TITLE, NO_DESCRIPTION, 0, DIDNT_RENAME_SCREENSHOTS);
     }
 
     /**
