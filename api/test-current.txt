@@ -34107,6 +34107,7 @@ package android.security.keystore {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
+    method public boolean isInvalidatedByBiometricEnrollment();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
     method public boolean isUserAuthenticationValidWhileOnBody();
@@ -34124,6 +34125,7 @@ package android.security.keystore {
     method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateSubject(javax.security.auth.x500.X500Principal);
     method public android.security.keystore.KeyGenParameterSpec.Builder setDigests(java.lang.String...);
     method public android.security.keystore.KeyGenParameterSpec.Builder setEncryptionPaddings(java.lang.String...);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setInvalidatedByBiometricEnrollment(boolean);
     method public android.security.keystore.KeyGenParameterSpec.Builder setKeySize(int);
     method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
@@ -34150,6 +34152,7 @@ package android.security.keystore {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isInsideSecureHardware();
+    method public boolean isInvalidatedByBiometricEnrollment();
     method public boolean isUserAuthenticationRequired();
     method public boolean isUserAuthenticationRequirementEnforcedBySecureHardware();
     method public boolean isUserAuthenticationValidWhileOnBody();
@@ -34213,6 +34216,7 @@ package android.security.keystore {
     method public java.lang.String[] getSignaturePaddings();
     method public int getUserAuthenticationValidityDurationSeconds();
     method public boolean isDigestsSpecified();
+    method public boolean isInvalidatedByBiometricEnrollment();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
     method public boolean isUserAuthenticationValidWhileOnBody();
@@ -34224,6 +34228,7 @@ package android.security.keystore {
     method public android.security.keystore.KeyProtection.Builder setBlockModes(java.lang.String...);
     method public android.security.keystore.KeyProtection.Builder setDigests(java.lang.String...);
     method public android.security.keystore.KeyProtection.Builder setEncryptionPaddings(java.lang.String...);
+    method public android.security.keystore.KeyProtection.Builder setInvalidatedByBiometricEnrollment(boolean);
     method public android.security.keystore.KeyProtection.Builder setKeyValidityEnd(java.util.Date);
     method public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
