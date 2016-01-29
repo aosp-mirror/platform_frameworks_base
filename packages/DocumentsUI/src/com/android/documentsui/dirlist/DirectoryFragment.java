@@ -642,10 +642,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     return true;
 
                 case R.id.menu_copy_to_clipboard:
-                    if (!selection.isEmpty()) {
-                        copySelectionToClipboard(selection);
-                        mode.finish();
-                    }
+                    copySelectedToClipboard();
                     return true;
 
                 case R.id.menu_select_all:
@@ -662,6 +659,15 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     return false;
             }
         }
+    }
+
+    public final boolean onBackPressed() {
+        if (mSelectionManager.hasSelection()) {
+            if (DEBUG) Log.d(TAG, "Clearing selection on back pressed.");
+            mSelectionManager.clearSelection();
+            return true;
+        }
+        return false;
     }
 
     private void cancelThumbnailTask(View view) {
@@ -993,6 +999,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         Selection selection = mSelectionManager.getSelection(new Selection());
         if (!selection.isEmpty()) {
             copySelectionToClipboard(selection);
+            mSelectionManager.clearSelection();
         }
     }
 
