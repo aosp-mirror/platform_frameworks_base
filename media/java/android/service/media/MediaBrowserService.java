@@ -589,7 +589,14 @@ public abstract class MediaBrowserService extends Service {
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
                         filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
-                    connection.callbacks.onLoadChildren(parentId, pls, options);
+                    // NOTE: Do not call onLoadChildrenWithOptions when options are null. Otherwise,
+                    // it will break the action of support library which expects onLoadChildren will
+                    // be called when options are null.
+                    if (options == null) {
+                        connection.callbacks.onLoadChildren(parentId, pls);
+                    } else {
+                        connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
+                    }
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId

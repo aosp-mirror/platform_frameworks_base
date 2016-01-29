@@ -16,7 +16,7 @@ import android.os.ResultReceiver;
 oneway interface IMediaBrowserService {
 
     // Warning: DO NOT CHANGE the methods signature and order of methods.
-    // The change of the order or the method signatures could break the support library.
+    // A change of the order or the method signatures could break the support library.
 
     void connect(String pkg, in Bundle rootHints, IMediaBrowserServiceCallbacks callbacks);
     void disconnect(IMediaBrowserServiceCallbacks callbacks);

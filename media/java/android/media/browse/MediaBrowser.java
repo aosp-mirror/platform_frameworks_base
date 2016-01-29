@@ -473,8 +473,9 @@ public final class MediaBrowser {
         // the service will be told when we connect.
         if (mState == CONNECT_STATE_CONNECTED) {
             try {
-                // NOTE: In order not to break the behavior of the support library, call
-                // addSubscription instead of addSubscriptionWithOptions when the options are null.
+                // NOTE: Do not call addSubscriptionWithOptions when options are null. Otherwise,
+                // it will break the action of support library which expects addSubscription will
+                // be called when options are null.
                 if (options == null) {
                     mServiceBinder.addSubscription(parentId, mServiceCallbacks);
                 } else {
@@ -500,9 +501,9 @@ public final class MediaBrowser {
         // Tell the service if necessary.
         if (sub != null && sub.remove(options) && mState == CONNECT_STATE_CONNECTED) {
             try {
-                // NOTE: In order not to break the behavior of the support library, call
-                // removeSubscription instead of removeSubscriptionWithOptions when the options
-                // are null.
+                // NOTE: Do not call removeSubscriptionWithOptions when options are null. Otherwise,
+                // it will break the action of support library which expects removeSubscription will
+                // be called when options are null.
                 if (options == null) {
                     mServiceBinder.removeSubscription(parentId, mServiceCallbacks);
                 } else {
@@ -572,9 +573,9 @@ public final class MediaBrowser {
                     Subscription sub = subscriptionEntry.getValue();
                     for (Bundle options : sub.getOptionsList()) {
                         try {
-                            // NOTE: In order not to break the behavior of the support library,
-                            // call addSubscription instead of addSubscriptionWithOptions when
-                            // the options are null.
+                            // NOTE: Do not call addSubscriptionWithOptions when options are null.
+                            // Otherwise, it will break the action of support library which expects
+                            // addSubscription will be called when options are null.
                             if (options == null) {
                                 mServiceBinder.addSubscription(id, mServiceCallbacks);
                             } else {
@@ -1034,7 +1035,7 @@ public final class MediaBrowser {
          * are the initial data as requested.
          */
         @Override
-        public void onConnect(final String root, final MediaSession.Token session,
+        public void onConnect(String root, MediaSession.Token session,
                 final Bundle extras) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
@@ -1054,7 +1055,12 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(final String parentId, final ParceledListSlice list,
+        public void onLoadChildren(String parentId, ParceledListSlice list) {
+            onLoadChildrenWithOptions(parentId, list, null);
+        }
+
+        @Override
+        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
                 final Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
