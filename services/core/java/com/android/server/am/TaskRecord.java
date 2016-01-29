@@ -943,6 +943,10 @@ final class TaskRecord {
         return !isResizeable() && mResizeMode == RESIZE_MODE_CROP_WINDOWS;
     }
 
+    boolean canGoInDockedStack() {
+        return isResizeable() || inCropWindowsResizeMode();
+    }
+
     /**
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.

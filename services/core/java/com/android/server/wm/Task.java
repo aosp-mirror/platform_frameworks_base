@@ -19,9 +19,11 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -41,12 +43,14 @@ import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
+import com.android.internal.R;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 class Task implements DimLayer.DimLayerUser {
+    static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
     // Return value from {@link setBounds} indicating no change was made to the Task bounds.
     static final int BOUNDS_CHANGE_NONE = 0;
     // Return value from {@link setBounds} indicating the position of the Task bounds changed.
@@ -129,35 +133,51 @@ class Task implements DimLayer.DimLayerUser {
 
         mShowNonResizeableDockToast = false;
 
+        if (isResizeable()) {
+            Slog.wtf(TAG,
+                    "Trying to show non-resizeable toast when task is resizeable task=" + this);
+            return;
+        }
+
+        if (mResizeMode == RESIZE_MODE_UNRESIZEABLE) {
+            final String text =
+                    mService.mContext.getString(R.string.dock_non_resizeble_failed_to_dock_text);
+            mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST, 0, 0, text).sendToTarget();
+            return;
+        }
+
         final int dockSide = mStack.getDockSide();
+        if (!inCropWindowsResizeMode() || dockSide == DOCKED_INVALID) {
+            return;
+        }
+
         int xOffset = 0;
         int yOffset = 0;
-        if (dockSide != DOCKED_INVALID) {
-            mStack.getBounds(mTmpRect);
+        mStack.getBounds(mTmpRect);
 
-            if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
-                // The toast was originally placed at the bottom and centered. To place it
-                // at the bottom-center of the stack, we offset it horizontally by the diff
-                // between the center of the stack bounds vs. the center of the screen.
-                displayContent.getLogicalDisplayRect(mTmpRect2);
-                xOffset = mTmpRect.centerX() - mTmpRect2.centerX();
-            } else if (dockSide == DOCKED_TOP) {
-                // The toast was originally placed at the bottom and centered. To place it
-                // at the bottom center of the top stack, we offset it vertically by the diff
-                // between the bottom of the stack bounds vs. the bottom of the content rect.
-                //
-                // Note here we use the content rect instead of the display rect, as we want
-                // the toast's distance to the dock divider (when it's placed at the top half)
-                // to be the same as it's distance to the top of the navigation bar (when it's
-                // placed at the bottom).
+        if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
+            // The toast was originally placed at the bottom and centered. To place it at the
+            // bottom-center of the stack, we offset it horizontally by the diff between the center
+            // of the stack bounds vs. the center of the screen.
+            displayContent.getLogicalDisplayRect(mTmpRect2);
+            xOffset = mTmpRect.centerX() - mTmpRect2.centerX();
+        } else if (dockSide == DOCKED_TOP) {
+            // The toast was originally placed at the bottom and centered. To place it at the bottom
+            // center of the top stack, we offset it vertically by the diff between the bottom of
+            // the stack bounds vs. the bottom of the content rect.
+            //
+            // Note here we use the content rect instead of the display rect, as we want the toast's
+            // distance to the dock divider (when it's placed at the top half) to be the same as
+            // it's distance to the top of the navigation bar (when it's placed at the bottom).
 
-                // We don't adjust for DOCKED_BOTTOM case since it's already at the bottom.
-                displayContent.getContentRect(mTmpRect2);
-                yOffset = mTmpRect2.bottom - mTmpRect.bottom;
-            }
-            mService.mH.obtainMessage(
-                    SHOW_NON_RESIZEABLE_DOCK_TOAST, xOffset, yOffset).sendToTarget();
+            // We don't adjust for DOCKED_BOTTOM case since it's already at the bottom.
+            displayContent.getContentRect(mTmpRect2);
+            yOffset = mTmpRect2.bottom - mTmpRect.bottom;
         }
+        final String text =
+                mService.mContext.getString(R.string.dock_cropped_windows_text);
+        mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST,
+                xOffset, yOffset, text).sendToTarget();
     }
 
     void addAppToken(int addPos, AppWindowToken wtoken, int resizeMode, boolean homeTask) {
@@ -190,11 +210,11 @@ class Task implements DimLayer.DimLayerUser {
 
     void removeLocked() {
         if (hasAppTokensAlive() && mStack.isAnimating()) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: deferring removing taskId=" + mTaskId);
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: removing taskId=" + mTaskId);
+        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
         DisplayContent content = getDisplayContent();
@@ -209,7 +229,7 @@ class Task implements DimLayer.DimLayerUser {
         if (stack == mStack) {
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG_WM, "moveTaskToStack: removing taskId=" + mTaskId
+        if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: removing taskId=" + mTaskId
                 + " from stack=" + mStack);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
         if (mStack != null) {
@@ -220,7 +240,7 @@ class Task implements DimLayer.DimLayerUser {
 
     void positionTaskInStack(TaskStack stack, int position, Rect bounds, Configuration config) {
         if (mStack != null && stack != mStack) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskInStack: removing taskId=" + mTaskId
+            if (DEBUG_STACK) Slog.i(TAG, "positionTaskInStack: removing taskId=" + mTaskId
                     + " from stack=" + mStack);
             EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "moveTask");
             mStack.removeTask(this);
@@ -566,7 +586,7 @@ class Task implements DimLayer.DimLayerUser {
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (!resizingWindows.contains(win)) {
-                    if (DEBUG_RESIZE) Slog.d(TAG_WM, "resizeWindows: Resizing " + win);
+                    if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + win);
                     resizingWindows.add(win);
                 }
             }
@@ -578,7 +598,7 @@ class Task implements DimLayer.DimLayerUser {
             final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
-                if (DEBUG_RESIZE) Slog.d(TAG_WM, "moveWindows: Moving " + win);
+                if (DEBUG_RESIZE) Slog.d(TAG, "moveWindows: Moving " + win);
                 win.mMovedByResize = true;
             }
         }

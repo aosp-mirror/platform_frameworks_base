@@ -1004,10 +1004,10 @@ class ActivityStarter {
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        if (!mStartActivity.task.isResizeable()
-                && mSupervisor.isStackDockedInEffect(mTargetStack.mStackId)) {
-            mSupervisor.showNonResizeableDockToast(mStartActivity.task.taskId);
-        }
+        final int preferredLaunchStackId =
+                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
+        mSupervisor.showNonResizeableDockToastIfNeeded(
+                mStartActivity.task, preferredLaunchStackId, mTargetStack.mStackId);
 
         return START_SUCCESS;
     }
@@ -1484,8 +1484,9 @@ class ActivityStarter {
             mInTask.updateOverrideConfiguration(mLaunchBounds);
             int stackId = mInTask.getLaunchStackId();
             if (stackId != mInTask.stack.mStackId) {
-                mSupervisor.moveTaskToStackUncheckedLocked(
+                final ActivityStack stack = mSupervisor.moveTaskToStackUncheckedLocked(
                         mInTask, stackId, ON_TOP, !FORCE_FOCUS, "inTaskToFront");
+                stackId = stack.mStackId;
             }
             if (StackId.resizeStackWithLaunchBounds(stackId)) {
                 mSupervisor.resizeStackLocked(stackId, mLaunchBounds,
@@ -1627,10 +1628,9 @@ class ActivityStarter {
         // If the freeform or docked stack has focus, and the activity to be launched is resizeable,
         // we can also put it in the focused stack.
         final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
-        final boolean canUseFocusedStack =
-                focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
-                        || focusedStackId == DOCKED_STACK_ID
-                        || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeable());
+        final boolean canUseFocusedStack = focusedStackId == FULLSCREEN_WORKSPACE_STACK_ID
+                || (focusedStackId == DOCKED_STACK_ID && r.canGoInDockedStack())
+                || (focusedStackId == FREEFORM_WORKSPACE_STACK_ID && r.isResizeableOrForced());
         if (canUseFocusedStack && (!newTask
                 || mSupervisor.mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
@@ -1666,6 +1666,10 @@ class ActivityStarter {
 
         if (isValidLaunchStackId(launchStackId, r)) {
             return mSupervisor.getStack(launchStackId, CREATE_IF_NEEDED, ON_TOP);
+        } else if (launchStackId == DOCKED_STACK_ID) {
+            // The preferred launch stack is the docked stack, but it isn't a valid launch stack
+            // for this activity, so we put the activity in the fullscreen stack.
+            return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
 
         if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_TO_SIDE) == 0) {
@@ -1701,9 +1705,11 @@ class ActivityStarter {
             return false;
         }
 
-        final boolean resizeable = r.isResizeable() || mService.mForceResizableActivities;
+        if (stackId == DOCKED_STACK_ID && r.canGoInDockedStack()) {
+            return true;
+        }
 
-        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID && !resizeable) {
+        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID && !r.isResizeableOrForced()) {
             return false;
         }
 

@@ -1414,8 +1414,7 @@ final class ActivityStack {
             // task in the focus stack doesn't support any form of resizing.
             final ActivityRecord r = focusedStack.topRunningActivityLocked();
             final TaskRecord task = r != null ? r.task : null;
-            return task == null || task.isResizeable() || task.inCropWindowsResizeMode()
-                    ? STACK_VISIBLE : STACK_INVISIBLE;
+            return task == null || task.canGoInDockedStack() ? STACK_VISIBLE : STACK_INVISIBLE;
         }
 
         // Find the first stack below focused stack that actually got something visible.
@@ -4543,6 +4542,7 @@ final class ActivityStack {
             }
             ci.numActivities = numActivities;
             ci.numRunning = numRunning;
+            ci.isDockable = task.canGoInDockedStack();
             list.add(ci);
         }
     }
