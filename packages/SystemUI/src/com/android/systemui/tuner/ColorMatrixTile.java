@@ -17,6 +17,7 @@ package com.android.systemui.tuner;
 
 import android.app.ActivityManager;
 import android.provider.Settings;
+
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;

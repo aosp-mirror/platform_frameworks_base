@@ -16,10 +16,11 @@
 package com.android.systemui.recents.tv.views;
 
 
+import android.content.Context;
 import android.support.v17.leanback.widget.HorizontalGridView;
 import android.util.AttributeSet;
-import android.content.Context;
 import android.view.View;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.RecentsActivity;
 import com.android.systemui.recents.events.EventBus;

@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar.stack;
 
-import android.view.View;
-
-import com.android.systemui.statusbar.ExpandableView;
-
 /**
 * A state of an expandable view
 */

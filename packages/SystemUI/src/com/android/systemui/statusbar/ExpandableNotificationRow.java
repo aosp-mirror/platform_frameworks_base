@@ -28,7 +28,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Chronometer;

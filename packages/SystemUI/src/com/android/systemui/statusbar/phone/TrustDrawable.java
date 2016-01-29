@@ -31,8 +31,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.animation.Interpolator;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Interpolators;
 
 public class TrustDrawable extends Drawable {
 

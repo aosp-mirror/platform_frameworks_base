@@ -20,14 +20,17 @@ import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
+
 import com.android.systemui.R;
-import com.android.systemui.recents.*;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsActivityLaunchState;
+import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.RecentsImpl;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;

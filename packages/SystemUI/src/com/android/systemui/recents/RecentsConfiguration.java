@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 

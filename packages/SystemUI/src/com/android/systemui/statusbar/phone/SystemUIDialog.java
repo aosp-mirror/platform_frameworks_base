@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
-import com.android.systemui.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.view.WindowManager;
+
+import com.android.systemui.R;
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.

@@ -31,7 +31,9 @@ import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.recents.Constants;
@@ -121,7 +123,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
             @Override
             protected void prepareSnapBackAnimation(View v, Animator anim) {
-                anim.setInterpolator(mSv.mFastOutSlowInInterpolator);
+                anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
                 mSwipeHelperAnimations.put(v, anim);
             }
         };

@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.MutableBoolean;
+
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 
 import java.lang.ref.WeakReference;

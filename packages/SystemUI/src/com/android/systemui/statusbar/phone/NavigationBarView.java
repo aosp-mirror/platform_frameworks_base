@@ -21,7 +21,6 @@ import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.StatusBarManager;
 import android.content.Context;
@@ -47,6 +46,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;

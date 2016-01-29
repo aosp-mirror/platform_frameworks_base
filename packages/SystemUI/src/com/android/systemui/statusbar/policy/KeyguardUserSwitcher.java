@@ -21,20 +21,18 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.Interpolator;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
 import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.tiles.UserDetailItemView;
-import com.android.systemui.statusbar.Interpolators;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 

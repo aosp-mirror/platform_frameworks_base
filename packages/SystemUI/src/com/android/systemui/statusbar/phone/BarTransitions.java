@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -29,10 +28,9 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Interpolators;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;

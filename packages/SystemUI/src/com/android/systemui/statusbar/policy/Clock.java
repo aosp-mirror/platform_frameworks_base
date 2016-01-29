@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import libcore.icu.LocaleData;
+
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,12 +38,12 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
+
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-import libcore.icu.LocaleData;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

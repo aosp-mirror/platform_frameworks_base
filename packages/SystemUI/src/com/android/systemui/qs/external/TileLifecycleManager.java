@@ -15,6 +15,8 @@
  */
 package com.android.systemui.qs.external;
 
+import libcore.util.Objects;
+
 import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,7 +37,6 @@ import android.service.quicksettings.Tile;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
-import libcore.util.Objects;
 
 import java.util.Set;
 

@@ -18,6 +18,7 @@ package com.android.systemui.recents.model;
 
 import android.content.Context;
 import android.os.UserHandle;
+
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.systemui.recents.events.EventBus;

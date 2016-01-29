@@ -19,6 +19,7 @@ package com.android.systemui.recents.history;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.events.EventBus;

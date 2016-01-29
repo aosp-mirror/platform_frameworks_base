@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
 import com.android.systemui.R;
 
 import java.util.ArrayList;

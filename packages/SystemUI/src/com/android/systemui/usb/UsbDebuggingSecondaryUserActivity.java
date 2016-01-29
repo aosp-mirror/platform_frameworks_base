@@ -22,12 +22,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.UserInfo;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.os.UserManager;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;

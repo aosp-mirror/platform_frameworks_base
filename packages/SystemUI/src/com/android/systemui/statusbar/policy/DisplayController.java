@@ -14,15 +14,17 @@
 
 package com.android.systemui.statusbar.policy;
 
+import libcore.util.Objects;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.provider.Settings;
+
 import com.android.systemui.R;
 import com.android.systemui.tuner.TunerService;
-import libcore.util.Objects;
 
 import java.util.ArrayList;
 

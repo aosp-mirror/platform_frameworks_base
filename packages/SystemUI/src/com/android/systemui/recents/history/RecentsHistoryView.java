@@ -26,12 +26,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivity;
@@ -61,8 +60,6 @@ public class RecentsHistoryView extends LinearLayout
     private Rect mSystemInsets = new Rect();
     private int mHeaderHeight;
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mFastOutLinearInInterpolator;
     private int mHistoryTransitionDuration;
 
     public RecentsHistoryView(Context context) {
@@ -84,10 +81,6 @@ public class RecentsHistoryView extends LinearLayout
         mAdapter = new RecentsHistoryAdapter(context);
         mItemTouchHandler = new RecentsHistoryItemTouchCallbacks(context, mAdapter);
         mHistoryTransitionDuration = res.getInteger(R.integer.recents_history_transition_duration);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
-        mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_linear_in);
         mViewBounds = new AnimateableViewBounds(this, 0);
         setOutlineProvider(mViewBounds);
     }
@@ -103,7 +96,7 @@ public class RecentsHistoryView extends LinearLayout
                 .alpha(1f)
                 .translationY(0f)
                 .setDuration(mHistoryTransitionDuration)
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setUpdateListener(this)
                 .start();
         clearAllButton.setVisibility(View.VISIBLE);
@@ -111,7 +104,7 @@ public class RecentsHistoryView extends LinearLayout
         clearAllButton.animate()
                 .alpha(1f)
                 .setDuration(mHistoryTransitionDuration)
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .withLayer()
                 .start();
         mAdapter.updateTasks(getContext(), stack);
@@ -130,7 +123,7 @@ public class RecentsHistoryView extends LinearLayout
                     .alpha(0f)
                     .translationY(-stackHeight * TRANSLATION_Y_PCT)
                     .setDuration(mHistoryTransitionDuration)
-                    .setInterpolator(mFastOutLinearInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
                     .setUpdateListener(this)
                     .withEndAction(new Runnable() {
                         @Override
@@ -143,7 +136,7 @@ public class RecentsHistoryView extends LinearLayout
                     .alpha(0f)
                     .translationY(0f)
                     .setDuration(mHistoryTransitionDuration)
-                    .setInterpolator(mFastOutSlowInInterpolator)
+                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {

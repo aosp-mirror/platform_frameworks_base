@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.car;
 
-import android.content.Context;
-import android.provider.Settings;
 import android.view.View;
 import android.view.ViewStub;
 

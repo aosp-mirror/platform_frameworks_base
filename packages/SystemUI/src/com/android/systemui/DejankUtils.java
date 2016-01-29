@@ -18,7 +18,6 @@ package com.android.systemui;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.os.StrictMode;
 import android.view.Choreographer;
 
 import java.util.ArrayList;

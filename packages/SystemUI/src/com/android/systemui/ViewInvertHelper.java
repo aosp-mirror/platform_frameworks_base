@@ -25,8 +25,6 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.view.View;
 
-import com.android.systemui.statusbar.Interpolators;
-
 import java.util.ArrayList;
 
 /**

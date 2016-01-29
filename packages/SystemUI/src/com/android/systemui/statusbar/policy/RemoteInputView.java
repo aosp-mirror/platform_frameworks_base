@@ -16,12 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.RemoteInputController;
-
-import android.annotation.NonNull;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -47,7 +41,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.RemoteInputController;
 
 /**
  * Host for the remote input.

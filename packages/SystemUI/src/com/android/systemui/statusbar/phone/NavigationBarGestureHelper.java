@@ -28,13 +28,15 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
+import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.stackdivider.Divider;
-import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.tuner.TunerService;
 
-import static android.view.WindowManager.*;
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_TOP;
 
 /**
  * Class to detect gestures on the navigation bar.

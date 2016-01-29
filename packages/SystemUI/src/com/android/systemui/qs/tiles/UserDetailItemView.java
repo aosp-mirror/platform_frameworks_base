@@ -16,11 +16,6 @@
 
 package com.android.systemui.qs.tiles;
 
-import com.android.internal.util.ArrayUtils;
-import com.android.systemui.FontSizeUtils;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.UserAvatarView;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -33,6 +28,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.android.internal.util.ArrayUtils;
+import com.android.systemui.FontSizeUtils;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.UserAvatarView;
 
 /**
  * Displays one user in the {@link UserDetailView} view.

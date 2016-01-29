@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;

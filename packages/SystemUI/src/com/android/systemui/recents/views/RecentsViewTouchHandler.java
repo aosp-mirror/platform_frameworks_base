@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;

@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.Context;
+
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.misc.SystemServicesProxy;

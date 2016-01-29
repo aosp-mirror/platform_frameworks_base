@@ -26,6 +26,7 @@ import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
 import android.view.ViewParent;
+
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskViewTransform;
 

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
@@ -31,8 +30,6 @@ import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
-
-import java.util.ArrayList;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.

@@ -28,8 +28,7 @@ import android.graphics.Rect;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
 
@@ -51,8 +50,6 @@ public class TaskViewThumbnail extends View {
     Paint mDrawPaint = new Paint();
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
-
-    Interpolator mFastOutSlowInInterpolator;
 
     // Task bar clipping, the top of this thumbnail can be clipped against the opaque header
     // bar that overlaps this thumbnail
@@ -82,8 +79,6 @@ public class TaskViewThumbnail extends View {
         mDrawPaint.setAntiAlias(true);
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
     }
 
     /**

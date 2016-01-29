@@ -46,9 +46,9 @@ import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.R;
-import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;

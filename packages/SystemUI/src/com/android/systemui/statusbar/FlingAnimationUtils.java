@@ -22,6 +22,8 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.systemui.Interpolators;
+
 /**
  * Utility class to calculate general fling animation when the finger is released.
  */

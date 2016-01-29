@@ -33,8 +33,8 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.AnimationUtils;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.Interpolators;
 
 /**
  * Visually discloses that contextual data was provided to an assistant.

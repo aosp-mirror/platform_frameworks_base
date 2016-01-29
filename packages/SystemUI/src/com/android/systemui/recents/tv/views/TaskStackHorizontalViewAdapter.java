@@ -16,15 +16,15 @@
 package com.android.systemui.recents.tv.views;
 
 import android.app.Activity;
+import android.app.ActivityManagerNative;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
-import android.support.v7.widget.RecyclerView;
-import android.app.ActivityManagerNative;
-import android.app.IActivityManager;
 
 import java.util.ArrayList;
 import java.util.List;

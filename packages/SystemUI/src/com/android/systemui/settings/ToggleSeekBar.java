@@ -19,7 +19,6 @@ package com.android.systemui.settings;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.SeekBar;
 
