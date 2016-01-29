@@ -906,10 +906,34 @@ static void analyze_image(const char *imageName, image_info &imageInfo, int gray
         png_bytep row = imageInfo.rows[j];
         png_bytep out = outRows[j];
         for (i = 0; i < w; i++) {
-            rr = *row++;
-            gg = *row++;
-            bb = *row++;
-            aa = *row++;
+
+            // Make sure any zero alpha pixels are fully zeroed.  On average,
+            // each of our PNG assets seem to have about four distinct pixels
+            // with zero alpha.
+            // There are several advantages to setting these to zero:
+            // (1) Images are more likely able to be encodable with a palette.
+            // (2) Image palettes will be smaller.
+            // (3) Premultiplied and unpremultiplied PNG decodes can skip
+            //     writing zeros to memory, often saving significant numbers
+            //     of memory pages.
+            aa = *(row + 3);
+            if (aa == 0) {
+                rr = 0;
+                gg = 0;
+                bb = 0;
+
+                // Also set red, green, and blue to zero in "row".  If we later
+                // decide to encode the PNG as RGB or RGBA, we will use the
+                // values stored there.
+                *(row) = 0;
+                *(row + 1) = 0;
+                *(row + 2) = 0;
+            } else {
+                rr = *(row);
+                gg = *(row + 1);
+                bb = *(row + 2);
+            }
+            row += 4;
 
             int odev = maxGrayDeviation;
             maxGrayDeviation = MAX(ABS(rr - gg), maxGrayDeviation);
