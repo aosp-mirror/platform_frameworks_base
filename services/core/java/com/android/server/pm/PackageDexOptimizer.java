@@ -70,7 +70,8 @@ final class PackageDexOptimizer {
     }
 
     static boolean canOptimizePackage(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        return pkg.canHaveOatDir() &&
+                ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0);
     }
 
     /**
