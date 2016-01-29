@@ -16,29 +16,38 @@
 
 <!-- Background of the popup window is the same as the one of the floating toolbar.
      Use floating toolbar background style. -->
-<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="?android:attr/floatingToolbarPopupBackgroundDrawable"
-    android:divider="?android:attr/listDivider"
-    android:showDividers="middle" >
-    <ListView
-        android:id="@+id/suggestionContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="8dip"
-        android:paddingBottom="0dip"
-        android:divider="@null" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/suggestionWindowContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-          <TextView
-              style="@android:style/Widget.Material.SuggestionButton"
-              android:id="@+id/addToDictionaryButton"
-              android:text="@string/addToDictionary" />
-          <TextView
-              style="@android:style/Widget.Material.SuggestionButton"
-              android:id="@+id/deleteButton"
-              android:text="@string/deleteText" />
+        android:background="?android:attr/floatingToolbarPopupBackgroundDrawable"
+        android:elevation="2dp"
+        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:divider="?android:attr/listDivider"
+        android:showDividers="middle">
+        <ListView
+            android:id="@+id/suggestionContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="0dp"
+            android:divider="@null" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                style="@android:style/Widget.Material.SuggestionButton"
+                android:id="@+id/addToDictionaryButton"
+                android:text="@string/addToDictionary" />
+            <TextView
+                style="@android:style/Widget.Material.SuggestionButton"
+                android:id="@+id/deleteButton"
+                android:text="@string/deleteText" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>
