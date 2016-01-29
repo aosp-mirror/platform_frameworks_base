@@ -616,6 +616,18 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
+     * Like {@link #getStackTransform}, but in screen coordinates
+     */
+    public TaskViewTransform getStackTransformScreenCoordinates(Task task, float stackScroll,
+            TaskViewTransform transformOut, TaskViewTransform frontTransform) {
+        Rect windowRect = Recents.getSystemServices().getWindowRect();
+        TaskViewTransform transform = getStackTransform(task, stackScroll, transformOut,
+                frontTransform);
+        transform.rect.offset(windowRect.left, windowRect.top);
+        return transform;
+    }
+
+    /**
      * Update/get the transform.
      *
      * @param ignoreSingleTaskCase When set, will ensure that the transform computed does not take

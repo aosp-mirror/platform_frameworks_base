@@ -47,6 +47,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -977,6 +978,16 @@ public class SystemServicesProxy {
         mWm.requestAppKeyboardShortcuts(receiver);
     }
 
+    public void getStableInsets(Rect outStableInsets) {
+        if (mWm == null) return;
+
+        try {
+            WindowManagerGlobal.getWindowManagerService().getStableInsets(outStableInsets);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void focusPinnedStack() {
         try {
             mIam.setFocusedStack(PINNED_STACK_ID);

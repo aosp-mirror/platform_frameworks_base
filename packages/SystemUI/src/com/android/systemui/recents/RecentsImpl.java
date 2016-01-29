@@ -599,10 +599,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         SystemServicesProxy ssp = Recents.getSystemServices();
+        Rect systemInsets = new Rect();
+        ssp.getStableInsets(systemInsets);
         Rect windowRect = ssp.getWindowRect();
+        calculateWindowStableInsets(systemInsets, windowRect);
+        windowRect.offsetTo(0, 0);
 
         // Update the configuration for the current state
-        config.update(windowRect);
+        config.update(systemInsets);
 
         if (RecentsDebugFlags.Static.EnableSearchBar && tryAndBindSearchWidget) {
             // Try and pre-emptively bind the search widget on startup to ensure that we
@@ -612,9 +616,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 config.getSearchBarBounds(windowRect, mStatusBarHeight, mSearchBarBounds);
             }
         }
-        Rect systemInsets = new Rect(0, mStatusBarHeight,
-                (config.hasTransposedNavBar ? mNavBarWidth : 0),
-                (config.hasTransposedNavBar ? 0 : mNavBarHeight));
         config.getTaskStackBounds(windowRect, systemInsets.top, systemInsets.right,
                 mSearchBarBounds, mTaskStackBounds);
 
@@ -638,6 +639,26 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 mHeaderBar.layout(0, 0, taskViewWidth, mTaskBarHeight);
             }
         }
+    }
+
+    /**
+     * Given the stable insets and the rect for our window, calculates the insets that affect our
+     * window.
+     */
+    private void calculateWindowStableInsets(Rect inOutInsets, Rect windowRect) {
+        Rect displayRect = Recents.getSystemServices().getDisplayRect();
+
+        // Display rect without insets - available app space
+        Rect appRect = new Rect(displayRect);
+        appRect.inset(inOutInsets);
+
+        // Our window intersected with available app space
+        Rect windowRectWithInsets = new Rect(windowRect);
+        windowRectWithInsets.intersect(appRect);
+        inOutInsets.left = windowRectWithInsets.left - windowRect.left;
+        inOutInsets.top = windowRectWithInsets.top - windowRect.top;
+        inOutInsets.right = windowRect.right - windowRectWithInsets.right;
+        inOutInsets.bottom = windowRect.bottom - windowRectWithInsets.bottom;
     }
 
     /**
@@ -721,8 +742,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
                 if (task.isFreeformTask()) {
-                    mTmpTransform = stackView.getStackAlgorithm().getStackTransform(task,
-                            stackView.getScroller().getStackScroll(), mTmpTransform, null);
+                    mTmpTransform = stackView.getStackAlgorithm()
+                            .getStackTransformScreenCoordinates(task,
+                                    stackView.getScroller().getStackScroll(), mTmpTransform, null);
                     Rect toTaskRect = new Rect();
                     mTmpTransform.rect.round(toTaskRect);
                     Bitmap thumbnail = getThumbnailBitmap(topTask, task, mTmpTransform);
@@ -783,7 +805,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         // Get the transform for the running task
         stackView.getScroller().setStackScrollToInitialState();
-        mTmpTransform = stackView.getStackAlgorithm().getStackTransform(launchTask,
+        mTmpTransform = stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;
     }

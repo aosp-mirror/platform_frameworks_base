@@ -103,12 +103,9 @@ public class RecentsConfiguration {
     /**
      * Updates the configuration based on the current state of the system
      */
-    void update(Rect windowRect) {
-        // Recompute some values based on the given state, since we can not rely on the resource
-        // system to get certain values.
-        boolean isLandscape = windowRect.width() > windowRect.height();
-        hasTransposedNavBar = isLandscape && !isXLargeScreen;
-        hasTransposedSearchBar = isLandscape && !isXLargeScreen;
+    void update(Rect systemInsets) {
+        hasTransposedNavBar = systemInsets.right > 0;
+        hasTransposedSearchBar = systemInsets.right > 0;
     }
 
     /**

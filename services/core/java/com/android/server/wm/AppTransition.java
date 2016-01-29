@@ -483,6 +483,62 @@ public class AppTransition implements Dump {
      * and inner rectangles.
      */
     private static float computePivot(int startPos, float finalScale) {
+
+        /*
+        Theorem of intercepting lines:
+
+          +      +   +-----------------------------------------------+
+          |      |   |                                               |
+          |      |   |                                               |
+          |      |   |                                               |
+          |      |   |                                               |
+        x |    y |   |                                               |
+          |      |   |                                               |
+          |      |   |                                               |
+          |      |   |                                               |
+          |      |   |                                               |
+          |      +   |             +--------------------+            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             |                    |            |
+          |          |             +--------------------+            |
+          |          |                                               |
+          |          |                                               |
+          |          |                                               |
+          |          |                                               |
+          |          |                                               |
+          |          |                                               |
+          |          |                                               |
+          |          +-----------------------------------------------+
+          |
+          |
+          |
+          |
+          |
+          |
+          |
+          |
+          |
+          +                                 ++
+                                         p  ++
+
+        scale = (x - y) / x
+        <=> x = -y / (scale - 1)
+        */
         final float denom = finalScale-1;
         if (Math.abs(denom) < .0001f) {
             return startPos;
@@ -733,14 +789,14 @@ public class AppTransition implements Dump {
         float unscaledHeight = thumbHeight * scaleW;
         getNextAppTransitionStartRect(taskId, mTmpRect);
         final float unscaledStartY = mTmpRect.top - (unscaledHeight - thumbHeight) / 2f;
-        final float toY = appRect.top + mNextAppTransitionInsets.top + -unscaledStartY;
+        final float toY = appRect.top + -unscaledStartY;
         if (mNextAppTransitionScaleUp) {
             // Animation up from the thumbnail to the full screen
             Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
                     mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
             scale.setInterpolator(mTouchResponseInterpolator);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
-            Animation alpha = new AlphaAnimation(1, 0);
+            Animation alpha = new AlphaAnimation(1f, 0f);
             alpha.setInterpolator(mThumbnailFadeOutInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
             final float toX = appRect.left + appRect.width() / 2 -
@@ -809,35 +865,27 @@ public class AppTransition implements Dump {
                             containingFrame, surfaceInsets, taskId);
                 } else {
                     mTmpFromClipRect.set(containingFrame);
-                    // exclude top screen decor (status bar) region from the source clip.
-                    mTmpFromClipRect.top = contentInsets.top;
-                    // App window scaling up to become full screen
                     mTmpToClipRect.set(containingFrame);
-                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        // In portrait, we scale the width and clip to the top/left square
-                        scale = thumbWidth / appWidth;
-                        scaledTopDecor = (int) (scale * contentInsets.top);
-                        int unscaledThumbHeight = (int) (thumbHeight / scale);
-                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
-                    } else {
-                        // In landscape, we scale the height and clip to the top/left square. We
-                        // only scale the part that is not covered by status bar and the nav bar.
-                        scale = thumbHeight / (appHeight - contentInsets.top
-                                - contentInsets.bottom);
-                        scaledTopDecor = (int) (scale * contentInsets.top);
-                        int unscaledThumbWidth = (int) (thumbWidth / scale);
-                        mTmpFromClipRect.right = mTmpFromClipRect.left + unscaledThumbWidth;
-                        // This removes the navigation bar from the first frame, so it better
-                        // matches the thumbnail. We need to do this explicitly in landscape,
-                        // because in portrait we already crop vertically.
-                        mTmpFromClipRect.bottom = mTmpFromClipRect.bottom - contentInsets.bottom;
-                    }
+
+                    // Containing frame is in screen space, but we need the clip rect in the
+                    // app space.
+                    mTmpFromClipRect.offsetTo(0, 0);
+                    mTmpToClipRect.offsetTo(0, 0);
+
+                    // Exclude insets region from the source clip.
+                    mTmpFromClipRect.inset(contentInsets);
+
+                    // We scale the width and clip to the top/left square
+                    scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
+                    mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
                     mNextAppTransitionInsets.set(contentInsets);
 
                     Animation scaleAnim = new ScaleAnimation(scale, 1, scale, 1,
-                            computePivot(mTmpRect.left, scale),
-                            computePivot(mTmpRect.top, scale));
+                            computePivot(mTmpRect.left - containingFrame.left, scale),
+                            computePivot(mTmpRect.top - containingFrame.top, scale));
                     Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
                     Animation translateAnim = new TranslateAnimation(0, 0, -scaledTopDecor, 0);
 
@@ -879,32 +927,26 @@ public class AppTransition implements Dump {
                 } else {
                     mTmpFromClipRect.set(containingFrame);
                     mTmpToClipRect.set(containingFrame);
-                    // exclude top screen decor (status bar) region from the destination clip.
-                    mTmpToClipRect.top = contentInsets.top;
-                    if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        // In portrait, we scale the width and clip to the top/left square
-                        scale = thumbWidth / appWidth;
-                        scaledTopDecor = (int) (scale * contentInsets.top);
-                        int unscaledThumbHeight = (int) (thumbHeight / scale);
-                        mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
-                    } else {
-                        // In landscape, we scale the height and clip to the top/left square. We only
-                        // scale the part that is not covered by status bar and the nav bar.
-                        scale = thumbHeight / (appHeight - contentInsets.top - contentInsets.bottom);
-                        scaledTopDecor = (int) (scale * contentInsets.top);
-                        int unscaledThumbWidth = (int) (thumbWidth / scale);
-                        mTmpToClipRect.right = mTmpToClipRect.left + unscaledThumbWidth;
-                        // This removes the navigation bar from the last frame, so it better matches the
-                        // thumbnail. We need to do this explicitly in landscape, because in portrait we
-                        // already crop vertically.
-                        mTmpToClipRect.bottom = mTmpToClipRect.bottom - contentInsets.bottom;
-                    }
+
+                    // Containing frame is in screen space, but we need the clip rect in the
+                    // app space.
+                    mTmpFromClipRect.offsetTo(0, 0);
+                    mTmpToClipRect.offsetTo(0, 0);
+
+                    // Exclude insets region from the target clip.
+                    mTmpToClipRect.inset(contentInsets);
+
+                    // We scale the width and clip to the top/left square
+                    scale = thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
+                    scaledTopDecor = (int) (scale * contentInsets.top);
+                    int unscaledThumbHeight = (int) (thumbHeight / scale);
+                    mTmpToClipRect.bottom = mTmpToClipRect.top + unscaledThumbHeight;
 
                     mNextAppTransitionInsets.set(contentInsets);
 
                     Animation scaleAnim = new ScaleAnimation(1, scale, 1, scale,
-                            computePivot(mTmpRect.left, scale),
-                            computePivot(mTmpRect.top, scale));
+                            computePivot(mTmpRect.left - containingFrame.left, scale),
+                            computePivot(mTmpRect.top - containingFrame.top, scale));
                     Animation clipAnim = new ClipRectAnimation(mTmpFromClipRect, mTmpToClipRect);
                     Animation translateAnim = new TranslateAnimation(0, 0, 0, -scaledTopDecor);
 
