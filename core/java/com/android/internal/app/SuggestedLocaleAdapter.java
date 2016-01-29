@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -164,6 +165,14 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 } else {
                     localized.setVisibility(View.VISIBLE);
                     text.setTextLocale(Locale.getDefault());
+                }
+                if (mCountryMode) {
+                    int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
+                    //noinspection ResourceType
+                    convertView.setLayoutDirection(layoutDir);
+                    text.setTextDirection(layoutDir == View.LAYOUT_DIRECTION_RTL
+                            ? View.TEXT_DIRECTION_RTL
+                            : View.TEXT_DIRECTION_LTR);
                 }
         }
         return convertView;
