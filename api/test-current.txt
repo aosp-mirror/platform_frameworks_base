@@ -39902,6 +39902,7 @@ package android.util {
     field public static final int DENSITY_420 = 420; // 0x1a4
     field public static final int DENSITY_560 = 560; // 0x230
     field public static final int DENSITY_DEFAULT = 160; // 0xa0
+    field public static final int DENSITY_DEVICE_STABLE;
     field public static final int DENSITY_HIGH = 240; // 0xf0
     field public static final int DENSITY_LOW = 120; // 0x78
     field public static final int DENSITY_MEDIUM = 160; // 0xa0
