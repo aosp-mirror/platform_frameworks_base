@@ -14,6 +14,10 @@ page.tags=androidm,marshmallow
         <li><a href="#web-assoc">Declare Website Associations</a></li>
         <li><a href="#testing">Test App Links</a></li>
     </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing API Support in Android Studio</a></li>
+  </ol>
   </div>
 </div>
 

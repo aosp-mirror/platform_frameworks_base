@@ -43,6 +43,11 @@ avd</code>) the emulator (<code>emulator</code>), and the Dalvik Debug Monitor S
   <dt><a href="{@docRoot}tools/help/android.html">android</a></dt>
     <dd>Lets you manage AVDs, projects, and the installed components of the SDK.</dd>
 
+  <dt><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing API Support</a></dt>
+    <dd>Helps you add deep links, app indexing, and search functionality to your apps.
+  These features can make it easier to find content in an installed app, drive more traffic to your
+  app, discover which app content is used most, and attract new users.</dd>
+
   <dt><a href="{@docRoot}tools/help/hierarchy-viewer.html">Hierarchy Viewer (hierarchyviewer)</a></dt>
     <dd>Provides a visual representation of the layout's View hierarchy with performance information
         for each node in the layout, and a magnified view of the display to closely examine the
@@ -139,7 +144,7 @@ content is allowed.</dd>
 
 <dt><a href="{@docRoot}tools/help/image-asset-studio.html">Image Asset Studio</a></dt>
     <dd>Helps you to generate custom icons for your Android applications from existing images, cliparts, or text.
-     It generates a set of icons at the appropriate resolution for each generalized screen density that your app 
+     It generates a set of icons at the appropriate resolution for each generalized screen density that your app
      supports.</dd>
 
 <dt><a href="{@docRoot}tools/help/vector-asset-studio.html">Vector Asset Studio</a></dt>
