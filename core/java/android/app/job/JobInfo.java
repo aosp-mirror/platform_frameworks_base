@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -35,6 +36,7 @@ import java.util.ArrayList;
  * accomplish. Doing otherwise with throw an exception in your app.
  */
 public class JobInfo implements Parcelable {
+    private static String TAG = "JobInfo";
     /** Default. */
     public static final int NETWORK_TYPE_NONE = 0;
     /** This job requires network connectivity. */
@@ -526,7 +528,8 @@ public class JobInfo implements Parcelable {
         /**
          * Specify that this job should recur with the provided interval and flex. The job can
          * execute at any time in a window of flex length at the end of the period.
-         * @param intervalMillis Millisecond interval for which this job will repeat.
+         * @param intervalMillis Millisecond interval for which this job will repeat. A minimum
+         *                       value of {@link #MIN_PERIOD_MILLIS} is enforced.
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
          *                   {@link #MIN_FLEX_MILLIS} or 5 percent of the period, whichever is
          *                   higher.
@@ -635,7 +638,16 @@ public class JobInfo implements Parcelable {
                         " back-off policy, so calling setBackoffCriteria with" +
                         " setRequiresDeviceIdle is an error.");
             }
-            return new JobInfo(this);
+            JobInfo job = new JobInfo(this);
+            if (job.intervalMillis != job.getIntervalMillis()) {
+                Log.w(TAG, "Specified interval is less than minimum interval. Clamped to "
+                        + job.getIntervalMillis());
+            }
+            if (job.flexMillis != job.getFlexMillis()) {
+                Log.w(TAG, "Specified flex is less than minimum flex. Clamped to "
+                        + job.getFlexMillis());
+            }
+            return job;
         }
     }
 

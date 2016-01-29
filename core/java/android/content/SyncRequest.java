@@ -303,10 +303,11 @@ public class SyncRequest implements Parcelable {
          * be thrown.
          *
          * @param pollFrequency the amount of time in seconds that you wish
-         *            to elapse between periodic syncs.
+         *            to elapse between periodic syncs. A minimum period of 1 hour is enforced.
          * @param beforeSeconds the amount of flex time in seconds before
          *            {@code pollFrequency} that you permit for the sync to take
-         *            place. Must be less than {@code pollFrequency}.
+         *            place. Must be less than {@code pollFrequency} and greater than
+         *            MAX(5% of {@code pollFrequency}, 5 minutes)
          */
         public Builder syncPeriodic(long pollFrequency, long beforeSeconds) {
             if (mSyncType != SYNC_TYPE_UNKNOWN) {
