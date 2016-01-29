@@ -293,4 +293,7 @@ interface IDevicePolicyManager {
     boolean getDeviceLoggingEnabled(in ComponentName admin);
     ParceledListSlice retrieveDeviceLogs(in ComponentName admin);
     ParceledListSlice retrievePreviousDeviceLogs(in ComponentName admin);
+
+    boolean isUninstallInQueue(String packageName);
+    void uninstallPackageWithActiveAdmins(String packageName);
 }
