@@ -139,9 +139,7 @@ public final class PointerIcon implements Parcelable {
 
     private static final PointerIcon gNullIcon = new PointerIcon(STYLE_NULL);
     private static final SparseArray<PointerIcon> gSystemIcons = new SparseArray<PointerIcon>();
-
-    /** @hide */
-    public static boolean sUseLargeIcons = false;
+    private static boolean sUseLargeIcons = false;
 
     private final int mStyle;
     private int mSystemIconResourceId;
@@ -232,6 +230,15 @@ public final class PointerIcon implements Parcelable {
         }
         gSystemIcons.append(style, icon);
         return icon;
+    }
+
+    /**
+     * Updates wheter accessibility large icons are used or not.
+     * @hide
+     */
+    public static void setUseLargeIcons(boolean use) {
+        sUseLargeIcons = use;
+        gSystemIcons.clear();
     }
 
     /**

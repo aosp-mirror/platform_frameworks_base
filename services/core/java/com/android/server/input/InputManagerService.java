@@ -1602,7 +1602,7 @@ public class InputManagerService extends IInputManager.Stub
         final int accessibilityConfig = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
                 0, UserHandle.USER_CURRENT);
-        PointerIcon.sUseLargeIcons = (accessibilityConfig == 1);
+        PointerIcon.setUseLargeIcons(accessibilityConfig == 1);
         nativeReloadPointerIcons(mPtr);
     }
 
