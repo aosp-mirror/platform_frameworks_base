@@ -47,6 +47,7 @@ public final class Metrics {
     private static final String AUTHORITY_MEDIA = "com.android.providers.media.documents";
     private static final String AUTHORITY_STORAGE = "com.android.externalstorage.documents";
     private static final String AUTHORITY_DOWNLOADS = "com.android.providers.downloads.documents";
+    private static final String AUTHORITY_MTP = "com.android.mtp.documents";
 
     // These strings have to be whitelisted in tron. Do not change them.
     private static final String COUNT_LAUNCH_ACTION = "docsui_launch_action";
@@ -65,6 +66,8 @@ public final class Metrics {
     // root that is not explicitly recognized by the Metrics code (see {@link
     // #getSanitizedRootIndex}). Apps are also bucketed in this histogram using negative indices
     // (see below).
+    // Do not change or rearrange these values, that will break historical data. Only add to the end
+    // of the list.
     private static final int ROOT_NONE = 0;
     private static final int ROOT_OTHER = 1;
     private static final int ROOT_AUDIO = 2;
@@ -74,6 +77,7 @@ public final class Metrics {
     private static final int ROOT_IMAGES = 6;
     private static final int ROOT_RECENTS = 7;
     private static final int ROOT_VIDEOS = 8;
+    private static final int ROOT_MTP = 9;
     // Apps aren't really "roots", but they are treated as such in the roots fragment UI and so they
     // are logged analogously to roots. Use negative numbers to identify apps.
     private static final int ROOT_THIRD_PARTY_APP = -1;
@@ -88,6 +92,7 @@ public final class Metrics {
             ROOT_IMAGES,
             ROOT_RECENTS,
             ROOT_VIDEOS,
+            ROOT_MTP,
             ROOT_THIRD_PARTY_APP
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -373,6 +378,8 @@ public final class Metrics {
                 }
             case AUTHORITY_DOWNLOADS:
                 return ROOT_DOWNLOADS;
+            case AUTHORITY_MTP:
+                return ROOT_MTP;
             default:
                 return ROOT_OTHER;
         }
