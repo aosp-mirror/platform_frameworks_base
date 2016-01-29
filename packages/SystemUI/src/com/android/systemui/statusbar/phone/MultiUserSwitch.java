@@ -66,6 +66,9 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
     }
 
     public boolean hasMultipleUsers() {
+        if (mUserListener == null) {
+            return false;
+        }
         return mUserListener.getCount() != 0;
     }
 
