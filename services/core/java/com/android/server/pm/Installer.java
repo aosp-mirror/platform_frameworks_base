@@ -189,10 +189,6 @@ public final class Installer extends SystemService {
         mInstaller.execute("freecache", uuid, freeStorageSize);
     }
 
-    public void moveFiles() throws InstallerException {
-        mInstaller.execute("movefiles");
-    }
-
     /**
      * Links the 32 bit native library directory in an application's data
      * directory to the real location for backward compatibility. Note that no
