@@ -12,4 +12,9 @@ LOCAL_SRC_FILES += \
 LOCAL_JAVA_LIBRARIES := services.net telephony-common
 LOCAL_STATIC_JAVA_LIBRARIES := tzdata_update
 
+ifneq ($(INCREMENTAL_BUILDS),)
+    LOCAL_PROGUARD_ENABLED := disabled
+    LOCAL_JACK_ENABLED := incremental
+endif
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
