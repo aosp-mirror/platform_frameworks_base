@@ -24,6 +24,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Printer;
@@ -46,7 +47,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -243,42 +243,15 @@ public final class StrictMode {
 
     // Byte 3: Penalty
 
-    /**
-     * @hide
-     */
+    /** {@hide} */
     public static final int PENALTY_LOG = 0x01 << 16;  // normal android.util.Log
-
-    // Used for both process and thread policy:
-
-    /**
-     * @hide
-     */
+    /** {@hide} */
     public static final int PENALTY_DIALOG = 0x02 << 16;
-
-    /**
-     * Death on any detected violation.
-     *
-     * @hide
-     */
+    /** {@hide} */
     public static final int PENALTY_DEATH = 0x04 << 16;
-
-    /**
-     * Death just for detected network usage.
-     *
-     * @hide
-     */
-    public static final int PENALTY_DEATH_ON_NETWORK = 0x08 << 16;
-
-    /**
-     * Flash the screen during violations.
-     *
-     * @hide
-     */
+    /** {@hide} */
     public static final int PENALTY_FLASH = 0x10 << 16;
-
-    /**
-     * @hide
-     */
+    /** {@hide} */
     public static final int PENALTY_DROPBOX = 0x20 << 16;
 
     /**
@@ -294,12 +267,28 @@ public final class StrictMode {
      */
     public static final int PENALTY_GATHER = 0x40 << 16;
 
+    // Byte 4: Special cases
+
+    /**
+     * Death when network traffic is detected on main thread.
+     *
+     * @hide
+     */
+    public static final int PENALTY_DEATH_ON_NETWORK = 0x01 << 24;
+
     /**
      * Death when cleartext network traffic is detected.
      *
      * @hide
      */
-    public static final int PENALTY_DEATH_ON_CLEARTEXT_NETWORK = 0x80 << 16;
+    public static final int PENALTY_DEATH_ON_CLEARTEXT_NETWORK = 0x02 << 24;
+
+    /**
+     * Death when file exposure is detected.
+     *
+     * @hide
+     */
+    public static final int PENALTY_DEATH_ON_FILE_URI_EXPOSURE = 0x04 << 24;
 
     /**
      * Mask of all the penalty bits valid for thread policies.
@@ -312,7 +301,7 @@ public final class StrictMode {
      * Mask of all the penalty bits valid for VM policies.
      */
     private static final int VM_PENALTY_MASK = PENALTY_LOG | PENALTY_DEATH | PENALTY_DROPBOX
-            | PENALTY_DEATH_ON_CLEARTEXT_NETWORK;
+            | PENALTY_DEATH_ON_CLEARTEXT_NETWORK | PENALTY_DEATH_ON_FILE_URI_EXPOSURE;
 
     /** {@hide} */
     public static final int NETWORK_POLICY_ACCEPT = 0;
@@ -748,10 +737,22 @@ public final class StrictMode {
             }
 
             /**
-             * Detect when a {@code file://} {@link android.net.Uri} is exposed beyond this
-             * app. The receiving app may not have access to the sent path.
-             * Instead, when sharing files between apps, {@code content://}
-             * should be used with permission grants.
+             * Detect when this application exposes a {@code file://}
+             * {@link android.net.Uri} to another app.
+             * <p>
+             * This exposure is discouraged since the receiving app may not have
+             * access to the shared path. For example, the receiving app may not
+             * have requested the
+             * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} runtime
+             * permission, or the platform may be sharing the
+             * {@link android.net.Uri} across user profile boundaries.
+             * <p>
+             * Instead, apps should use {@code content://} Uris so the platform
+             * can extend temporary permission for the receiving app to access
+             * the resource.
+             *
+             * @see android.support.v4.content.FileProvider
+             * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
              */
             public Builder detectFileUriExposure() {
                 return enable(DETECT_VM_FILE_URI_EXPOSURE);
@@ -795,6 +796,16 @@ public final class StrictMode {
              */
             public Builder penaltyDeathOnCleartextNetwork() {
                 return enable(PENALTY_DEATH_ON_CLEARTEXT_NETWORK);
+            }
+
+            /**
+             * Crashes the whole process when a {@code file://}
+             * {@link android.net.Uri} is exposed beyond this app.
+             *
+             * @see #detectFileUriExposure()
+             */
+            public Builder penaltyDeathOnFileUriExposure() {
+                return enable(PENALTY_DEATH_ON_FILE_URI_EXPOSURE);
             }
 
             /**
@@ -1108,6 +1119,25 @@ public final class StrictMode {
         int oldPolicy = getThreadPolicyMask();
         int newPolicy = oldPolicy | DETECT_NETWORK | PENALTY_DEATH_ON_NETWORK;
         setThreadPolicyMask(newPolicy);
+    }
+
+    /**
+     * Used by the framework to make file usage a fatal error.
+     *
+     * @hide
+     */
+    public static void enableDeathOnFileUriExposure() {
+        sVmPolicyMask |= DETECT_VM_FILE_URI_EXPOSURE | PENALTY_DEATH_ON_FILE_URI_EXPOSURE;
+    }
+
+    /**
+     * Used by lame internal apps that haven't done the hard work to get
+     * themselves off file:// Uris yet.
+     *
+     * @hide
+     */
+    public static void disableDeathOnFileUriExposure() {
+        sVmPolicyMask &= ~(DETECT_VM_FILE_URI_EXPOSURE | PENALTY_DEATH_ON_FILE_URI_EXPOSURE);
     }
 
     /**
@@ -1755,9 +1785,13 @@ public final class StrictMode {
     /**
      * @hide
      */
-    public static void onFileUriExposed(String location) {
-        final String message = "file:// Uri exposed through " + location;
-        onVmPolicyViolation(null, new Throwable(message));
+    public static void onFileUriExposed(Uri uri, String location) {
+        final String message = uri + " exposed beyond app through " + location;
+        if ((sVmPolicyMask & PENALTY_DEATH_ON_FILE_URI_EXPOSURE) != 0) {
+            throw new FileUriExposedException(message);
+        } else {
+            onVmPolicyViolation(null, new Throwable(message));
+        }
     }
 
     /**

@@ -8912,23 +8912,46 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    public void prepareToLeaveProcess() {
+    public void prepareToLeaveProcess(Context context) {
+        final boolean leavingPackage = (mComponent == null)
+                || !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        prepareToLeaveProcess(leavingPackage);
+    }
+
+    /**
+     * Prepare this {@link Intent} to leave an app process.
+     *
+     * @hide
+     */
+    public void prepareToLeaveProcess(boolean leavingPackage) {
         setAllowFds(false);
 
         if (mSelector != null) {
-            mSelector.prepareToLeaveProcess();
+            mSelector.prepareToLeaveProcess(leavingPackage);
         }
         if (mClipData != null) {
-            mClipData.prepareToLeaveProcess();
+            mClipData.prepareToLeaveProcess(leavingPackage);
         }
 
-        if (mData != null && StrictMode.vmFileUriExposureEnabled()) {
-            // There are several ACTION_MEDIA_* broadcasts that send file://
-            // Uris, so only check common actions.
-            if (ACTION_VIEW.equals(mAction) ||
-                    ACTION_EDIT.equals(mAction) ||
-                    ACTION_ATTACH_DATA.equals(mAction)) {
-                mData.checkFileUriExposed("Intent.getData()");
+        if (mData != null && StrictMode.vmFileUriExposureEnabled() && leavingPackage) {
+            switch (mAction) {
+                case ACTION_MEDIA_REMOVED:
+                case ACTION_MEDIA_UNMOUNTED:
+                case ACTION_MEDIA_CHECKING:
+                case ACTION_MEDIA_NOFS:
+                case ACTION_MEDIA_MOUNTED:
+                case ACTION_MEDIA_SHARED:
+                case ACTION_MEDIA_UNSHARED:
+                case ACTION_MEDIA_BAD_REMOVAL:
+                case ACTION_MEDIA_UNMOUNTABLE:
+                case ACTION_MEDIA_EJECT:
+                case ACTION_MEDIA_SCANNER_STARTED:
+                case ACTION_MEDIA_SCANNER_FINISHED:
+                case ACTION_MEDIA_SCANNER_SCAN_FILE:
+                    // Ignore legacy actions
+                    break;
+                default:
+                    mData.checkFileUriExposed("Intent.getData()");
             }
         }
     }

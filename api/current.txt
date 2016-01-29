@@ -28536,6 +28536,10 @@ package android.os {
     field public static final int OPEN = 32; // 0x20
   }
 
+  public class FileUriExposedException extends java.lang.RuntimeException {
+    ctor public FileUriExposedException(java.lang.String);
+  }
+
   public class Handler {
     ctor public Handler();
     ctor public Handler(android.os.Handler.Callback);
@@ -29127,6 +29131,7 @@ package android.os {
     method public android.os.StrictMode.VmPolicy.Builder detectLeakedSqlLiteObjects();
     method public android.os.StrictMode.VmPolicy.Builder penaltyDeath();
     method public android.os.StrictMode.VmPolicy.Builder penaltyDeathOnCleartextNetwork();
+    method public android.os.StrictMode.VmPolicy.Builder penaltyDeathOnFileUriExposure();
     method public android.os.StrictMode.VmPolicy.Builder penaltyDropBox();
     method public android.os.StrictMode.VmPolicy.Builder penaltyLog();
     method public android.os.StrictMode.VmPolicy.Builder setClassInstanceLimit(java.lang.Class, int);

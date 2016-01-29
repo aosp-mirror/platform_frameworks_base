@@ -752,7 +752,7 @@ class ContextImpl extends Context {
             String resolvedType = null;
             if (fillInIntent != null) {
                 fillInIntent.migrateExtraStreamToClipData();
-                fillInIntent.prepareToLeaveProcess();
+                fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -773,7 +773,7 @@ class ContextImpl extends Context {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, false,
@@ -790,7 +790,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
@@ -805,7 +805,7 @@ class ContextImpl extends Context {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
@@ -822,7 +822,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
@@ -839,7 +839,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
@@ -856,7 +856,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
@@ -919,7 +919,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermissions, appOp,
@@ -933,7 +933,7 @@ class ContextImpl extends Context {
     public void sendBroadcastAsUser(Intent intent, UserHandle user) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(mMainThread.getApplicationThread(),
                     intent, resolvedType, null, Activity.RESULT_OK, null, null, null,
                     AppOpsManager.OP_NONE, null, false, false, user.getIdentifier());
@@ -955,7 +955,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                     mMainThread.getApplicationThread(), intent, resolvedType, null,
                     Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
@@ -1006,7 +1006,7 @@ class ContextImpl extends Context {
         String[] receiverPermissions = receiverPermission == null ? null
                 : new String[] {receiverPermission};
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, receiverPermissions,
@@ -1022,7 +1022,7 @@ class ContextImpl extends Context {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true,
@@ -1058,7 +1058,7 @@ class ContextImpl extends Context {
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
@@ -1077,7 +1077,7 @@ class ContextImpl extends Context {
             intent.setDataAndType(intent.getData(), resolvedType);
         }
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, getUserId());
         } catch (RemoteException e) {
@@ -1090,7 +1090,7 @@ class ContextImpl extends Context {
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true,
@@ -1105,7 +1105,7 @@ class ContextImpl extends Context {
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user, Bundle options) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, null,
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, options, false, true,
@@ -1140,7 +1140,7 @@ class ContextImpl extends Context {
         }
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().broadcastIntent(
                 mMainThread.getApplicationThread(), intent, resolvedType, rd,
                 initialCode, initialData, initialExtras, null,
@@ -1159,7 +1159,7 @@ class ContextImpl extends Context {
             intent.setDataAndType(intent.getData(), resolvedType);
         }
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(this);
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, user.getIdentifier());
         } catch (RemoteException e) {
@@ -1262,7 +1262,7 @@ class ContextImpl extends Context {
     private ComponentName startServiceCommon(Intent service, UserHandle user) {
         try {
             validateServiceIntent(service);
-            service.prepareToLeaveProcess();
+            service.prepareToLeaveProcess(this);
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service, service.resolveTypeIfNeeded(
                             getContentResolver()), getOpPackageName(), user.getIdentifier());
@@ -1291,7 +1291,7 @@ class ContextImpl extends Context {
     private boolean stopServiceCommon(Intent service, UserHandle user) {
         try {
             validateServiceIntent(service);
-            service.prepareToLeaveProcess();
+            service.prepareToLeaveProcess(this);
             int res = ActivityManagerNative.getDefault().stopService(
                 mMainThread.getApplicationThread(), service,
                 service.resolveTypeIfNeeded(getContentResolver()), user.getIdentifier());
@@ -1339,7 +1339,7 @@ class ContextImpl extends Context {
                     < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 flags |= BIND_WAIVE_PRIORITY;
             }
-            service.prepareToLeaveProcess();
+            service.prepareToLeaveProcess(this);
             int res = ActivityManagerNative.getDefault().bindService(
                 mMainThread.getApplicationThread(), getActivityToken(), service,
                 service.resolveTypeIfNeeded(getContentResolver()),
