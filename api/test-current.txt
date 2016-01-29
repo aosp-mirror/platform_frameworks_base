@@ -34092,6 +34092,7 @@ package android.security.keystore {
     method public boolean isDigestsSpecified();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
+    method public boolean isUserAuthenticationValidWhileOnBody();
   }
 
   public static final class KeyGenParameterSpec.Builder {
@@ -34114,6 +34115,7 @@ package android.security.keystore {
     method public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
     method public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
     method public android.security.keystore.KeyGenParameterSpec.Builder setUserAuthenticationRequired(boolean);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setUserAuthenticationValidWhileOnBody(boolean);
     method public android.security.keystore.KeyGenParameterSpec.Builder setUserAuthenticationValidityDurationSeconds(int);
   }
 
@@ -34133,6 +34135,7 @@ package android.security.keystore {
     method public boolean isInsideSecureHardware();
     method public boolean isUserAuthenticationRequired();
     method public boolean isUserAuthenticationRequirementEnforcedBySecureHardware();
+    method public boolean isUserAuthenticationValidWhileOnBody();
   }
 
   public class KeyNotYetValidException extends java.security.InvalidKeyException {
@@ -34195,6 +34198,7 @@ package android.security.keystore {
     method public boolean isDigestsSpecified();
     method public boolean isRandomizedEncryptionRequired();
     method public boolean isUserAuthenticationRequired();
+    method public boolean isUserAuthenticationValidWhileOnBody();
   }
 
   public static final class KeyProtection.Builder {
@@ -34210,6 +34214,7 @@ package android.security.keystore {
     method public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
     method public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
     method public android.security.keystore.KeyProtection.Builder setUserAuthenticationRequired(boolean);
+    method public android.security.keystore.KeyProtection.Builder setUserAuthenticationValidWhileOnBody(boolean);
     method public android.security.keystore.KeyProtection.Builder setUserAuthenticationValidityDurationSeconds(int);
   }
 

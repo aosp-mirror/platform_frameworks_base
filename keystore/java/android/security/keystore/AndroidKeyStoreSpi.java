@@ -498,7 +498,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         KeyProperties.SignaturePadding.allToKeymaster(spec.getSignaturePaddings()));
                 KeymasterUtils.addUserAuthArgs(importArgs,
                         spec.isUserAuthenticationRequired(),
-                        spec.getUserAuthenticationValidityDurationSeconds());
+                        spec.getUserAuthenticationValidityDurationSeconds(),
+                        spec.isUserAuthenticationValidWhileOnBody());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                         spec.getKeyValidityStart());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
@@ -692,7 +693,8 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             args.addEnums(KeymasterDefs.KM_TAG_PADDING, keymasterPaddings);
             KeymasterUtils.addUserAuthArgs(args,
                     params.isUserAuthenticationRequired(),
-                    params.getUserAuthenticationValidityDurationSeconds());
+                    params.getUserAuthenticationValidityDurationSeconds(),
+                    params.isUserAuthenticationValidWhileOnBody());
             KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                     args,
                     keymasterAlgorithm,

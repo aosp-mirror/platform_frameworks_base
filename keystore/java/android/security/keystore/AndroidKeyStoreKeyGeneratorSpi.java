@@ -233,7 +233,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 // not set up).
                 KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
                         spec.isUserAuthenticationRequired(),
-                        spec.getUserAuthenticationValidityDurationSeconds());
+                        spec.getUserAuthenticationValidityDurationSeconds(),
+                        spec.isUserAuthenticationValidWhileOnBody());
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -271,7 +272,8 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
         KeymasterUtils.addUserAuthArgs(args,
                 spec.isUserAuthenticationRequired(),
-                spec.getUserAuthenticationValidityDurationSeconds());
+                spec.getUserAuthenticationValidityDurationSeconds(),
+                spec.isUserAuthenticationValidWhileOnBody());
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,

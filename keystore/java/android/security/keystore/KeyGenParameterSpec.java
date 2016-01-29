@@ -252,6 +252,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final int mUserAuthenticationValidityDurationSeconds;
     private final byte[] mAttestationChallenge;
     private final boolean mUniqueIdIncluded;
+    private final boolean mUserAuthenticationValidWhileOnBody;
 
     /**
      * @hide should be built with Builder
@@ -277,7 +278,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             byte[] attestationChallenge,
-            boolean uniqueIdIncluded) {
+            boolean uniqueIdIncluded,
+            boolean userAuthenticationValidWhileOnBody) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -321,6 +323,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
         mUniqueIdIncluded = uniqueIdIncluded;
+        mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
     }
 
     /**
@@ -587,6 +590,23 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if the key will remain authorized while the device is on the user's
+     * body, even after the validity duration has expired.  This option has no effect on keys that
+     * don't have an authentication validity duration, and has no effect if the device lacks a
+     * secure on-body sensor.
+     *
+     * <p>Authorization applies only to secret key and private key operations. Public key operations
+     * are not restricted.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setUserAuthenticationValidWhileOnBody(boolean)
+     */
+    public boolean isUserAuthenticationValidWhileOnBody() {
+        return mUserAuthenticationValidWhileOnBody;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -612,6 +632,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private int mUserAuthenticationValidityDurationSeconds = -1;
         private byte[] mAttestationChallenge = null;
         private boolean mUniqueIdIncluded = false;
+        private boolean mUserAuthenticationValidWhileOnBody;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -1061,6 +1082,34 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether the key is authorized for use after the authentication validity period is
+         * expired (see {@link #setUserAuthenticationValidityDurationSeconds} and {@link
+         * #setUserAuthenticationRequired}) if the device has a secure on-body sensor and if the
+         * device has not been removed from the user's body since the last successful
+         * authentication.
+         *
+         * <p>On devices that do not have a secure on-body sensor, creating a key with this
+         * parameter set to {@code true} will have no effect; the private or secret key will no
+         * longer be authorized for use after the validity period ends, and a fresh authentication
+         * will be required to use it again.
+         *
+         * <p>Note that "secure" on-body sensors are required by Android to have a secure path to
+         * the secure hardware, but the sensors themselves may not be difficult to fool.  It is
+         * recommended that this feature be used to increase slightly the security of keys which
+         * would otherwise have to allow unauthenticated access, or have a very long validity
+         * period. Keys that require high assurance of user authorization should not use this
+         * feature and should set a short validity period.
+         *
+         * @param remainsValid if {@code true}, and if the device supports secure on-body detection,
+         * key will remain valid after authentication validity duration has expired.
+         */
+        @NonNull
+        public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
+            mUserAuthenticationValidWhileOnBody = remainsValid;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1086,7 +1135,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
                     mAttestationChallenge,
-                    mUniqueIdIncluded);
+                    mUniqueIdIncluded,
+                    mUserAuthenticationValidWhileOnBody);
         }
     }
 }
