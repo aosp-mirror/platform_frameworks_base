@@ -151,21 +151,6 @@ public final class NetworkStats implements AutoCloseable {
         public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
         /**
-         * Combined usage across all metering states.
-         */
-        public static final int METERING_ALL = -1;
-
-        /**
-         * Usage not accounted for in any other metering state.
-         */
-        public static final int METERING_DEFAULT = 0x1;
-
-        /**
-         * Metered usage.
-         */
-        public static final int METERING_METERED = 0x2;
-
-        /**
          * Combined usage across all roaming states.
          */
         public static final int ROAMING_ALL = -1;
@@ -182,7 +167,6 @@ public final class NetworkStats implements AutoCloseable {
 
         private int mUid;
         private int mState;
-        private int mMetering;
         private int mRoaming;
         private long mBeginTimeStamp;
         private long mEndTimeStamp;
@@ -244,18 +228,6 @@ public final class NetworkStats implements AutoCloseable {
          */
         public int getState() {
             return mState;
-        }
-
-        /**
-         * Metering state. One of the following values:<p/>
-         * <ul>
-         * <li>{@link #METERING_ALL}</li>
-         * <li>{@link #METERING_DEFAULT}</li>
-         * <li>{@link #METERING_METERED}</li>
-         * </ul>
-         */
-        public int getMetering() {
-            return mMetering;
         }
 
         /**
@@ -463,8 +435,6 @@ public final class NetworkStats implements AutoCloseable {
     private void fillBucketFromSummaryEntry(Bucket bucketOut) {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
-        // TODO: Implement metering tracking.
-        bucketOut.mMetering = Bucket.METERING_ALL;
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
         bucketOut.mEndTimeStamp = mEndTimeStamp;
@@ -512,7 +482,6 @@ public final class NetworkStats implements AutoCloseable {
                         mRecycledHistoryEntry);
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mState = Bucket.STATE_ALL;
-                bucketOut.mMetering = Bucket.METERING_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;
                 bucketOut.mEndTimeStamp = mRecycledHistoryEntry.bucketStart +
