@@ -100,6 +100,15 @@ public class CustomTile extends QSTile<QSTile.State> {
         mIsShowingDialog = true;
     }
 
+    public void onDialogHidden() {
+        mIsShowingDialog = false;
+        try {
+            if (DEBUG) Log.d(TAG, "Removing token");
+            mWindowManager.removeWindowToken(mToken);
+        } catch (RemoteException e) {
+        }
+    }
+
     @Override
     public void setListening(boolean listening) {
         if (mListening == listening) return;

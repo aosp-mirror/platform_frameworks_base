@@ -197,6 +197,18 @@ public class TileServices extends IQSService.Stub {
         if (customTile != null) {
             customTile.onDialogShown();
             mHost.collapsePanels();
+            mServices.get(customTile).setShowingDialog(true);
+        }
+    }
+
+    @Override
+    public void onDialogHidden(Tile tile) {
+        ComponentName componentName = tile.getComponentName();
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            mServices.get(customTile).setShowingDialog(false);
+            customTile.onDialogHidden();
         }
     }
 

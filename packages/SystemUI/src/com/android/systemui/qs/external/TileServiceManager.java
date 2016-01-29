@@ -52,6 +52,7 @@ public class TileServiceManager {
     private boolean mJustBound;
     private long mLastUpdate;
     private int mType;
+    private boolean mShowingDialog;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component) {
         this(tileServices, handler, new TileLifecycleManager(handler,
@@ -84,6 +85,10 @@ public class TileServiceManager {
                 .putInt(mStateManager.getComponent().flattenToString(), type).commit();
         mType = type;
         mServices.recalculateBindAllowance();
+    }
+
+    public void setShowingDialog(boolean dialog) {
+        mShowingDialog = dialog;
     }
 
     public IQSTileService getTileService() {
@@ -153,10 +158,13 @@ public class TileServiceManager {
             // Pending click is the most important thing, need to put this service at the top of
             // the list to be bound.
             mPriority = Integer.MAX_VALUE;
+        } else if (mShowingDialog) {
+            // Hang on to services that are showing dialogs so they don't die.
+            mPriority = Integer.MAX_VALUE - 1;
         } else if (mJustBound) {
             // If we just bound, lets not thrash on binding/unbinding too much, this is second most
             // important.
-            mPriority = Integer.MAX_VALUE - 1;
+            mPriority = Integer.MAX_VALUE - 2;
         } else if (!mBindRequested) {
             // Don't care about binding right now, put us last.
             mPriority = Integer.MIN_VALUE;
@@ -165,8 +173,8 @@ public class TileServiceManager {
             long timeSinceUpdate = currentTime - mLastUpdate;
             // Fit compare into integer space for simplicity. Make sure to leave MAX_VALUE and
             // MAX_VALUE - 1 for the more important states above.
-            if (timeSinceUpdate > Integer.MAX_VALUE - 2) {
-                mPriority = Integer.MAX_VALUE - 2;
+            if (timeSinceUpdate > Integer.MAX_VALUE - 3) {
+                mPriority = Integer.MAX_VALUE - 3;
             } else {
                 mPriority = (int) timeSinceUpdate;
             }

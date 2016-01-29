@@ -32,4 +32,6 @@ interface IQSService {
     boolean isLocked();
     boolean isSecure();
     void startUnlockAndRun(in Tile tile);
+
+    void onDialogHidden(in Tile tile);
 }
