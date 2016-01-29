@@ -674,7 +674,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
 
 bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     layer->clipRect.set(clip);
-    layer->setFbo(mRenderState.genFramebuffer());
+    layer->setFbo(mRenderState.createFramebuffer());
 
     writableSnapshot()->region = &writableSnapshot()->layer->region;
     writableSnapshot()->flags |= Snapshot::kFlagFboTarget | Snapshot::kFlagIsFboLayer;
