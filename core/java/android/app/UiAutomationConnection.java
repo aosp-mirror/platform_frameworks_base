@@ -77,7 +77,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private int mOwningUid;
 
-    public void connect(IAccessibilityServiceClient client) {
+    public void connect(IAccessibilityServiceClient client, int flags) {
         if (client == null) {
             throw new IllegalArgumentException("Client cannot be null!");
         }
@@ -87,7 +87,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 throw new IllegalStateException("Already connected.");
             }
             mOwningUid = Binder.getCallingUid();
-            registerUiTestAutomationServiceLocked(client);
+            registerUiTestAutomationServiceLocked(client, flags);
             storeRotationStateLocked();
         }
     }
@@ -322,7 +322,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
     }
 
-    private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client) {
+    private void registerUiTestAutomationServiceLocked(IAccessibilityServiceClient client,
+            int flags) {
         IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCESSIBILITY_SERVICE));
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
@@ -337,7 +338,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
-            manager.registerUiTestAutomationService(mToken, client, info);
+            manager.registerUiTestAutomationService(mToken, client, info, flags);
             mClient = client;
         } catch (RemoteException re) {
             throw new IllegalStateException("Error while registering UiTestAutomationService.", re);
