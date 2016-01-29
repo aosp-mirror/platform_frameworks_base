@@ -330,12 +330,12 @@ public final class TvInputManagerService extends SystemService {
             if (DEBUG) {
                 Slog.d(TAG, "add " + info.getId());
             }
-            TvInputState state = userState.inputMap.get(info.getId());
-            if (state == null) {
-                state = new TvInputState();
+            TvInputState inputState = userState.inputMap.get(info.getId());
+            if (inputState == null) {
+                inputState = new TvInputState();
+                inputState.info = info;
             }
-            state.info = info;
-            inputMap.put(info.getId(), state);
+            inputMap.put(info.getId(), inputState);
         }
 
         for (String inputId : inputMap.keySet()) {
@@ -781,7 +781,17 @@ public final class TvInputManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "setTvInputInfoLocked(inputInfo=" + inputInfo + ")");
         }
-        // TODO: Also update the internal input list.
+        String inputId = inputInfo.getId();
+        TvInputState inputState = userState.inputMap.get(inputId);
+        if (inputState == null) {
+            Slog.e(TAG, "failed to set input info - unknown input id " + inputId);
+            return;
+        }
+        if (inputState.info.equals(inputInfo)) {
+            return;
+        }
+        inputState.info = inputInfo;
+
         for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
                 callback.onTvInputInfoChanged(inputInfo);
@@ -852,7 +862,7 @@ public final class TvInputManagerService extends SystemService {
             }
 
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "setTvInputInfoChanged");
+                    Binder.getCallingUid(), userId, "setTvInputInfo");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
