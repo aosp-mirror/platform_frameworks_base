@@ -30,6 +30,8 @@ public class HeaderTransformState extends TransformState {
     private static Pools.SimplePool<HeaderTransformState> sInstancePool
             = new Pools.SimplePool<>(40);
     private View mExpandButton;
+    private View mWorkProfileIcon;
+    private TransformState mWorkProfileState;
 
     @Override
     public void initFrom(View view) {
@@ -37,13 +39,16 @@ public class HeaderTransformState extends TransformState {
         if (view instanceof NotificationHeaderView) {
             NotificationHeaderView header = (NotificationHeaderView) view;
             mExpandButton = header.getExpandButton();
+            mWorkProfileState = TransformState.obtain();
+            mWorkProfileIcon = header.getWorkProfileIcon();
+            mWorkProfileState.initFrom(mWorkProfileIcon);
         }
     }
 
     @Override
     public boolean transformViewTo(TransformState otherState, Runnable endRunnable) {
         // if the transforming notification has a header, we have ensured that it looks the same
-        // but the expand button, so lets fade just that one.
+        // but the expand button, so lets fade just that one and transform the work profile icon.
         if (!(mTransformedView instanceof NotificationHeaderView)) {
             return false;
         }
@@ -66,7 +71,7 @@ public class HeaderTransformState extends TransformState {
     @Override
     public void transformViewFrom(TransformState otherState) {
         // if the transforming notification has a header, we have ensured that it looks the same
-        // but the expand button, so lets fade just that one.
+        // but the expand button, so lets fade just that one and transform the work profile icon.
         if (!(mTransformedView instanceof NotificationHeaderView)) {
             return;
         }
@@ -79,10 +84,14 @@ public class HeaderTransformState extends TransformState {
             if (headerChild.getVisibility() == View.GONE) {
                 continue;
             }
-            if (headerChild != mExpandButton) {
-                headerChild.setVisibility(View.VISIBLE);
-            } else {
+            if (headerChild == mExpandButton) {
                 CrossFadeHelper.fadeIn(mExpandButton);
+            } else {
+                headerChild.setVisibility(View.VISIBLE);
+                if (headerChild == mWorkProfileIcon) {
+                    mWorkProfileState.animateViewFrom(
+                            ((HeaderTransformState) otherState).mWorkProfileState);
+                }
             }
         }
         return;
@@ -99,6 +108,9 @@ public class HeaderTransformState extends TransformState {
     @Override
     public void recycle() {
         super.recycle();
+        if (mWorkProfileState != null) {
+            mWorkProfileState.recycle();
+        }
         sInstancePool.release(this);
     }
 
@@ -106,6 +118,7 @@ public class HeaderTransformState extends TransformState {
     protected void reset() {
         super.reset();
         mExpandButton = null;
+        mWorkProfileState = null;
     }
 
     public void setVisible(boolean visible) {
@@ -124,6 +137,10 @@ public class HeaderTransformState extends TransformState {
             headerChild.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
             if (headerChild == mExpandButton) {
                 headerChild.setAlpha(visible ? 1.0f : 0.0f);
+            }
+            if (headerChild == mWorkProfileIcon) {
+                headerChild.setTranslationX(0);
+                headerChild.setTranslationY(0);
             }
         }
     }
@@ -144,6 +161,10 @@ public class HeaderTransformState extends TransformState {
             headerChild.animate().cancel();
             headerChild.setVisibility(View.VISIBLE);
             headerChild.setAlpha(1.0f);
+            if (headerChild == mWorkProfileIcon) {
+                headerChild.setTranslationX(0);
+                headerChild.setTranslationY(0);
+            }
         }
     }
 }

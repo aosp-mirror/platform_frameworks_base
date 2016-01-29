@@ -237,6 +237,10 @@ public class NotificationHeaderView extends LinearLayout {
         }
     }
 
+    public View getWorkProfileIcon() {
+        return mProfileBadge;
+    }
+
     public class HeaderTouchListener implements View.OnTouchListener {
 
         private final ArrayList<Rect> mTouchRects = new ArrayList<>();
