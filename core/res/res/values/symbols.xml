@@ -2525,4 +2525,9 @@
 
   <java-symbol type="string" name="usb_mtp_launch_notification_title" />
   <java-symbol type="string" name="usb_mtp_launch_notification_description" />
+
+  <!-- Resolver target actions -->
+  <java-symbol type="array" name="resolver_target_actions_pin" />
+  <java-symbol type="array" name="resolver_target_actions_unpin" />
+
 </resources>
