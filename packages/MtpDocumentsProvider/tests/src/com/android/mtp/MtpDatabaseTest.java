@@ -899,4 +899,24 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().stopAddingDocuments(null);
         assertEquals("1", mDatabase.getDocumentIdForDevice(100));
     }
+
+    public void testGetClosedDevice() {
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", /* opened is */ false , new MtpRoot[0], null, null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        final String[] columns = new String [] {
+                DocumentsContract.Root.COLUMN_ROOT_ID,
+                DocumentsContract.Root.COLUMN_TITLE,
+                DocumentsContract.Root.COLUMN_AVAILABLE_BYTES
+        };
+        try (final Cursor cursor = mDatabase.queryRoots(columns)) {
+            assertEquals(1, cursor.getCount());
+            assertTrue(cursor.moveToNext());
+            assertEquals(1, cursor.getLong(0));
+            assertEquals("Device", cursor.getString(1));
+            assertTrue(cursor.isNull(2));
+        }
+    }
 }
