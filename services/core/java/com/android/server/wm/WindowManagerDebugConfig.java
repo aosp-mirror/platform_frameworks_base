@@ -35,10 +35,10 @@ public class WindowManagerDebugConfig {
 
     static final boolean DEBUG_RESIZE = false;
     static final boolean DEBUG = false;
-    static final boolean DEBUG_ADD_REMOVE = false;
+    static final boolean DEBUG_ADD_REMOVE = true;
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
-    static final boolean DEBUG_ANIM = false;
+    static final boolean DEBUG_ANIM = true;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_LAYERS = false;
@@ -50,7 +50,7 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_ORIENTATION = false;
     static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
-    static final boolean DEBUG_APP_TRANSITIONS = false;
+    static final boolean DEBUG_APP_TRANSITIONS = true;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
