@@ -165,22 +165,27 @@ class MtpDatabase {
                             cursor.close();
                         }
 
-                        long capacityBytes = 0;
-                        long availableBytes = 0;
-                        int capacityIndex = cursor.getColumnIndex(Root.COLUMN_CAPACITY_BYTES);
-                        int availableIndex = cursor.getColumnIndex(Root.COLUMN_AVAILABLE_BYTES);
-                        while (storageCursor.moveToNext()) {
-                            // If requested columnNames does not include COLUMN_XXX_BYTES, we don't
-                            // calculate corresponding values.
-                            if (capacityIndex != -1) {
-                                capacityBytes += cursor.getLong(capacityIndex);
+                        if (storageCursor.getCount() != 0) {
+                            long capacityBytes = 0;
+                            long availableBytes = 0;
+                            int capacityIndex = cursor.getColumnIndex(Root.COLUMN_CAPACITY_BYTES);
+                            int availableIndex = cursor.getColumnIndex(Root.COLUMN_AVAILABLE_BYTES);
+                            while (storageCursor.moveToNext()) {
+                                // If requested columnNames does not include COLUMN_XXX_BYTES, we
+                                // don't calculate corresponding values.
+                                if (capacityIndex != -1) {
+                                    capacityBytes += cursor.getLong(capacityIndex);
+                                }
+                                if (availableIndex != -1) {
+                                    availableBytes += cursor.getLong(availableIndex);
+                                }
                             }
-                            if (availableIndex != -1) {
-                                availableBytes += cursor.getLong(availableIndex);
-                            }
+                            values.put(Root.COLUMN_CAPACITY_BYTES, capacityBytes);
+                            values.put(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
+                        } else {
+                            values.putNull(Root.COLUMN_CAPACITY_BYTES);
+                            values.putNull(Root.COLUMN_AVAILABLE_BYTES);
                         }
-                        values.put(Root.COLUMN_CAPACITY_BYTES, capacityBytes);
-                        values.put(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
                     }
                 } finally {
                     storageCursor.close();
