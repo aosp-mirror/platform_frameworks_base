@@ -567,6 +567,10 @@ class WindowStateAnimator {
 
     WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
+        if (w.hasSavedSurface()) {
+            Slog.i(TAG, "***** createSurface: " + this + ": called when we had a saved surface");
+        }
+
         if (mSurfaceController == null) {
             if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
                     "createSurface " + this + ": mDrawState=DRAW_PENDING");
