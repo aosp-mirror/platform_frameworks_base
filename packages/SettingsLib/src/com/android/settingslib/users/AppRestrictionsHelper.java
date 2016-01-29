@@ -29,7 +29,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -56,6 +55,7 @@ public class AppRestrictionsHelper {
     private final UserManager mUserManager;
     private final UserHandle mUser;
     private final boolean mRestrictedProfile;
+    private boolean mLeanback;
 
     HashMap<String,Boolean> mSelectedPackages = new HashMap<>();
     private List<SelectableAppInfo> mVisibleApps;
@@ -75,6 +75,10 @@ public class AppRestrictionsHelper {
 
     public boolean isPackageSelected(String packageName) {
         return mSelectedPackages.get(packageName);
+    }
+
+    public void setLeanback(boolean isLeanback) {
+        mLeanback = isLeanback;
     }
 
     public List<SelectableAppInfo> getVisibleApps() {
@@ -155,7 +159,11 @@ public class AppRestrictionsHelper {
 
         // Add launchers
         Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
-        launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        if (mLeanback) {
+            launcherIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        } else {
+            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        }
         addSystemApps(mVisibleApps, launcherIntent, excludePackages);
 
         // Add widgets
