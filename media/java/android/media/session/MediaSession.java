@@ -87,6 +87,12 @@ public final class MediaSession {
     public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 1 << 1;
 
     /**
+     * Set this flag on the session to indicate that it can handle
+     * the {@link PlaybackState#EXTRA_PREPARE_ONLY} field.
+     */
+    public static final int FLAG_HANDLES_PREPARE_ONLY = 1 << 2;
+
+    /**
      * System only flag for a session that needs to have priority over all other
      * sessions. This flag ensures this session will receive media button events
      * regardless of the current ordering in the system.
@@ -100,6 +106,7 @@ public final class MediaSession {
     @IntDef(flag = true, value = {
             FLAG_HANDLES_MEDIA_BUTTONS,
             FLAG_HANDLES_TRANSPORT_CONTROLS,
+            FLAG_HANDLES_PREPARE_ONLY,
             FLAG_EXCLUSIVE_GLOBAL_PRIORITY })
     public @interface SessionFlags { }
 

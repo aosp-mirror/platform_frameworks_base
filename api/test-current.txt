@@ -22505,6 +22505,7 @@ package android.media.session {
     method public void setRatingType(int);
     method public void setSessionActivity(android.app.PendingIntent);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
+    field public static final int FLAG_HANDLES_PREPARE_ONLY = 4; // 0x4
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
   }
 
@@ -22583,6 +22584,7 @@ package android.media.session {
     field public static final long ACTION_SKIP_TO_QUEUE_ITEM = 4096L; // 0x1000L
     field public static final long ACTION_STOP = 1L; // 0x1L
     field public static final android.os.Parcelable.Creator<android.media.session.PlaybackState> CREATOR;
+    field public static final java.lang.String EXTRA_PREPARE_ONLY = "android.media.session.extra.PREPARE_ONLY";
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
     field public static final int STATE_BUFFERING = 6; // 0x6
     field public static final int STATE_CONNECTING = 8; // 0x8
