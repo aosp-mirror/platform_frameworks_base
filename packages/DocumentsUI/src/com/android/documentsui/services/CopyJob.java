@@ -50,6 +50,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -214,10 +215,9 @@ class CopyJob extends Job {
         mBatchSize = calculateSize(mSrcs);
 
         DocumentInfo srcInfo;
-        DocumentInfo dstInfo;
+        DocumentInfo dstInfo = stack.peek();
         for (int i = 0; i < mSrcs.size() && !isCanceled(); ++i) {
             srcInfo = mSrcs.get(i);
-            dstInfo = stack.peek();
 
             // Guard unsupported recursive operation.
             if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
@@ -232,6 +232,7 @@ class CopyJob extends Job {
 
             processDocument(srcInfo, null, dstInfo);
         }
+        Metrics.logFileOperation(service, operationType, mSrcs, dstInfo);
     }
 
     @Override

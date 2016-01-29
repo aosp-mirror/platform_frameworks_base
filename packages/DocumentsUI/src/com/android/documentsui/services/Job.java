@@ -41,6 +41,7 @@ import android.provider.DocumentsContract;
 import android.util.Log;
 
 import com.android.documentsui.FilesActivity;
+import com.android.documentsui.Metrics;
 import com.android.documentsui.OperationDialogFragment;
 import com.android.documentsui.R;
 import com.android.documentsui.Shared;
@@ -114,6 +115,7 @@ abstract public class Job implements Runnable {
             // ensure the service is shut down and notifications
             // shown/closed.
             Log.e(TAG, "Operation failed due to an exception.", e);
+            Metrics.logFileOperationErrors(service, operationType, failedFiles);
         } finally {
             listener.onFinished(this);
         }
@@ -150,6 +152,7 @@ abstract public class Job implements Runnable {
 
     final void cancel() {
         mCanceled = true;
+        Metrics.logFileOperationCancelled(service, operationType);
     }
 
     final boolean isCanceled() {

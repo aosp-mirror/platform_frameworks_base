@@ -25,6 +25,7 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -90,6 +91,7 @@ final class DeleteJob extends Job {
                 onFileFailed(doc);
             }
         }
+        Metrics.logFileOperation(service, operationType, mSrcs, null);
     }
 
     @Override
