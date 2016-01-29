@@ -56,7 +56,15 @@ public class UserRestrictionsUtils {
     private UserRestrictionsUtils() {
     }
 
-    public static final Set<String> USER_RESTRICTIONS = Sets.newArraySet(
+    private static Set<String> newSetWithUniqueCheck(String[] strings) {
+        final Set<String> ret = Sets.newArraySet(strings);
+
+        // Make sure there's no overlap.
+        Preconditions.checkState(ret.size() == strings.length);
+        return ret;
+    }
+
+    public static final Set<String> USER_RESTRICTIONS = newSetWithUniqueCheck(new String[] {
             UserManager.DISALLOW_CONFIG_WIFI,
             UserManager.DISALLOW_MODIFY_ACCOUNTS,
             UserManager.DISALLOW_INSTALL_APPS,
@@ -94,7 +102,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_DATA_ROAMING,
             UserManager.DISALLOW_SET_USER_ICON
-    );
+    });
 
     /**
      * Set of user restriction which we don't want to persist.
@@ -139,6 +147,15 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE
     );
+
+    /**
+     * Throws {@link IllegalArgumentException} if the given restriction name is invalid.
+     */
+    public static void checkRestriction(@NonNull String restriction) {
+        if (!USER_RESTRICTIONS.contains(restriction)) {
+            throw new IllegalArgumentException("Unknown restriction: " + restriction);
+        }
+    }
 
     public static void writeRestrictions(@NonNull XmlSerializer serializer,
             @Nullable Bundle restrictions, @NonNull String tag) throws IOException {

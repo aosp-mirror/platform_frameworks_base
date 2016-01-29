@@ -930,6 +930,7 @@ public class UserManagerService extends IUserManager.Stub {
     /** @return a specific user restriction that's in effect currently. */
     @Override
     public boolean hasUserRestriction(String restrictionKey, int userId) {
+        UserRestrictionsUtils.checkRestriction(restrictionKey);
         Bundle restrictions = getEffectiveUserRestrictions(userId);
         return restrictions != null && restrictions.getBoolean(restrictionKey);
     }
@@ -946,6 +947,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean hasBaseUserRestriction(String restrictionKey, int userId) {
         checkManageUsersPermission("hasBaseUserRestriction");
+        UserRestrictionsUtils.checkRestriction(restrictionKey);
         synchronized (mRestrictionsLock) {
             Bundle bundle = mBaseUserRestrictions.get(userId);
             return (bundle != null && bundle.getBoolean(restrictionKey, false));
@@ -955,6 +957,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserRestriction(String key, boolean value, int userId) {
         checkManageUsersPermission("setUserRestriction");
+        UserRestrictionsUtils.checkRestriction(key);
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
             // a copy.
