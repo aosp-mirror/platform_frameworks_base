@@ -56,6 +56,7 @@ import android.net.Uri;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.DropBoxManager;
@@ -4959,14 +4960,20 @@ public final class ActivityThread {
         }
 
         /**
-         * For apps targetting SDK Honeycomb or later, we don't allow
-         * network usage on the main event loop / UI thread.
-         *
-         * Note to those grepping:  this is what ultimately throws
-         * NetworkOnMainThreadException ...
+         * For apps targetting Honeycomb or later, we don't allow network usage
+         * on the main event loop / UI thread. This is what ultimately throws
+         * {@link NetworkOnMainThreadException}.
          */
-        if (data.appInfo.targetSdkVersion > 9) {
+        if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
             StrictMode.enableDeathOnNetwork();
+        }
+
+        /**
+         * For apps targetting N or later, we don't allow file:// Uri exposure.
+         * This is what ultimately throws {@link FileUriExposedException}.
+         */
+        if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+            StrictMode.enableDeathOnFileUriExposure();
         }
 
         NetworkSecurityPolicy.getInstance().setCleartextTrafficPermitted(

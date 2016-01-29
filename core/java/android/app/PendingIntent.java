@@ -307,7 +307,7 @@ public final class PendingIntent implements Parcelable {
                 context.getContentResolver()) : null;
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(context);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
@@ -332,7 +332,7 @@ public final class PendingIntent implements Parcelable {
                 context.getContentResolver()) : null;
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(context);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
@@ -446,7 +446,7 @@ public final class PendingIntent implements Parcelable {
         String[] resolvedTypes = new String[intents.length];
         for (int i=0; i<intents.length; i++) {
             intents[i].migrateExtraStreamToClipData();
-            intents[i].prepareToLeaveProcess();
+            intents[i].prepareToLeaveProcess(context);
             resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
         }
         try {
@@ -472,7 +472,7 @@ public final class PendingIntent implements Parcelable {
         String[] resolvedTypes = new String[intents.length];
         for (int i=0; i<intents.length; i++) {
             intents[i].migrateExtraStreamToClipData();
-            intents[i].prepareToLeaveProcess();
+            intents[i].prepareToLeaveProcess(context);
             resolvedTypes[i] = intents[i].resolveTypeIfNeeded(context.getContentResolver());
         }
         try {
@@ -527,7 +527,7 @@ public final class PendingIntent implements Parcelable {
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(context);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_BROADCAST, packageName,
@@ -570,7 +570,7 @@ public final class PendingIntent implements Parcelable {
         String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
                 context.getContentResolver()) : null;
         try {
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(context);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                     ActivityManager.INTENT_SENDER_SERVICE, packageName,

@@ -4397,7 +4397,7 @@ public class Activity extends ContextThemeWrapper
             String resolvedType = null;
             if (fillInIntent != null) {
                 fillInIntent.migrateExtraStreamToClipData();
-                fillInIntent.prepareToLeaveProcess();
+                fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
             int result = ActivityManagerNative.getDefault()
@@ -4629,7 +4629,7 @@ public class Activity extends ContextThemeWrapper
                     intent.putExtra(Intent.EXTRA_REFERRER, referrer);
                 }
                 intent.migrateExtraStreamToClipData();
-                intent.prepareToLeaveProcess();
+                intent.prepareToLeaveProcess(this);
                 result = ActivityManagerNative.getDefault()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
                             intent, intent.resolveTypeIfNeeded(getContentResolver()), mToken,
@@ -4700,7 +4700,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent == null) {
             try {
                 intent.migrateExtraStreamToClipData();
-                intent.prepareToLeaveProcess();
+                intent.prepareToLeaveProcess(this);
                 return ActivityManagerNative.getDefault()
                     .startNextMatchingActivity(mToken, intent, options);
             } catch (RemoteException e) {
@@ -5128,7 +5128,7 @@ public class Activity extends ContextThemeWrapper
             if (false) Log.v(TAG, "Finishing self: token=" + mToken);
             try {
                 if (resultData != null) {
-                    resultData.prepareToLeaveProcess();
+                    resultData.prepareToLeaveProcess(this);
                 }
                 if (ActivityManagerNative.getDefault()
                         .finishActivity(mToken, resultCode, resultData, finishTask)) {
@@ -5355,7 +5355,7 @@ public class Activity extends ContextThemeWrapper
             @PendingIntent.Flags int flags) {
         String packageName = getPackageName();
         try {
-            data.prepareToLeaveProcess();
+            data.prepareToLeaveProcess(this);
             IIntentSender target =
                 ActivityManagerNative.getDefault().getIntentSender(
                         ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
@@ -6335,10 +6335,10 @@ public class Activity extends ContextThemeWrapper
                 resultData = mResultData;
             }
             if (resultData != null) {
-                resultData.prepareToLeaveProcess();
+                resultData.prepareToLeaveProcess(this);
             }
             try {
-                upIntent.prepareToLeaveProcess();
+                upIntent.prepareToLeaveProcess(this);
                 return ActivityManagerNative.getDefault().navigateUpTo(mToken, upIntent,
                         resultCode, resultData);
             } catch (RemoteException e) {

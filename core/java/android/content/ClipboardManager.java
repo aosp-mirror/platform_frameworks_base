@@ -118,7 +118,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     public void setPrimaryClip(ClipData clip) {
         try {
             if (clip != null) {
-                clip.prepareToLeaveProcess();
+                clip.prepareToLeaveProcess(true);
             }
             getService().setPrimaryClip(clip, mContext.getOpPackageName());
         } catch (RemoteException e) {

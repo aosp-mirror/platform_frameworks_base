@@ -1170,7 +1170,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
         try {
             intent.migrateExtraStreamToClipData();
-            intent.prepareToLeaveProcess();
+            intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startVoiceActivity(mToken, intent,
                     intent.resolveType(mContext.getContentResolver()));
             Instrumentation.checkStartActivityResult(res, intent);
