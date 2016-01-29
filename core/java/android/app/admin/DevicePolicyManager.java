@@ -3346,6 +3346,10 @@ public class DevicePolicyManager {
      * <p>If the device owner information contains only whitespaces then the message on the lock
      * screen will be blank and the user will not be allowed to change it.
      *
+     * <p>If the device owner information needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this string accordingly.
+     *
      * @param admin The name of the admin component to check.
      * @param info Device owner information which will be displayed instead of the user
      * owner info.
@@ -5211,6 +5215,10 @@ public class DevicePolicyManager {
      *  for support."
      * If the message is longer than 200 characters it may be truncated.
      *
+     * <p>If the short support message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this string accordingly.
+     *
      * @see #setLongSupportMessage
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -5249,6 +5257,10 @@ public class DevicePolicyManager {
     /**
      * Called by a device admin to set the long support message. This will
      * be displayed to the user in the device administators settings screen.
+     *
+     * <p>If the long support message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this string accordingly.
      *
      * @see #setShortSupportMessage
      *
@@ -5410,6 +5422,58 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             return 0;
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to set the name of the organization under
+     * management.
+     *
+     * <p>If the organization name needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this string accordingly.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param title The organization name or {@code null} to clear a previously set name.
+     */
+    public void setOrganizationName(@NonNull ComponentName admin, @Nullable String title) {
+        try {
+            mService.setOrganizationName(admin, title);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+        }
+    }
+
+    /**
+     * Called by a profile owner of a managed profile to retrieve the name of the organization
+     * under management.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The organization name or {@code null} if none is set.
+     */
+    public String getOrganizationName(@NonNull ComponentName admin) {
+        try {
+            return mService.getOrganizationName(admin);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+            return null;
+        }
+    }
+
+    /**
+     * Retrieve the default title message used in the confirm credentials screen for a given user.
+     *
+     * @param userHandle The user id of the user we're interested in.
+     * @return The organization name or {@code null} if none is set.
+     *
+     * @hide
+     */
+    public String getOrganizationNameForUser(int userHandle) {
+        try {
+            return mService.getOrganizationNameForUser(userHandle);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE);
+            return null;
         }
     }
 
