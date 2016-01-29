@@ -356,24 +356,48 @@ public class Html {
         }
     }
 
-    private static String getTextStyles(Spanned text, int start, int end) {
-        final StringBuilder style = new StringBuilder(" style=\"margin-top:0; margin-bottom:0;");
+    private static String getTextStyles(Spanned text, int start, int end,
+            boolean forceNoVerticalMargin, boolean includeTextAlign) {
+        String margin = null;
+        String textAlign = null;
 
-        final AlignmentSpan[] alignmentSpans = text.getSpans(start, end, AlignmentSpan.class);
-        final int len = alignmentSpans.length;
-        if (len > 0) {
-            final Layout.Alignment alignment = alignmentSpans[len - 1].getAlignment();
-            if (alignment == Layout.Alignment.ALIGN_NORMAL) {
-                style.append(" text-align:start;");
-            } else if (alignment == Layout.Alignment.ALIGN_CENTER) {
-                style.append(" text-align:center;");
-            } else if (alignment == Layout.Alignment.ALIGN_OPPOSITE) {
-                style.append(" text-align:end;");
+        if (forceNoVerticalMargin) {
+            margin = "margin-top:0; margin-bottom:0;";
+        }
+        if (includeTextAlign) {
+            final AlignmentSpan[] alignmentSpans = text.getSpans(start, end, AlignmentSpan.class);
+
+            // Only use the last AlignmentSpan with flag SPAN_PARAGRAPH
+            for (int i = alignmentSpans.length - 1; i >= 0; i--) {
+                AlignmentSpan s = alignmentSpans[i];
+                if ((text.getSpanFlags(s) & Spanned.SPAN_PARAGRAPH) == Spanned.SPAN_PARAGRAPH) {
+                    final Layout.Alignment alignment = s.getAlignment();
+                    if (alignment == Layout.Alignment.ALIGN_NORMAL) {
+                        textAlign = "text-align:start;";
+                    } else if (alignment == Layout.Alignment.ALIGN_CENTER) {
+                        textAlign = "text-align:center;";
+                    } else if (alignment == Layout.Alignment.ALIGN_OPPOSITE) {
+                        textAlign = "text-align:end;";
+                    }
+                    break;
+                }
             }
         }
 
-        style.append("\"");
-        return style.toString();
+        if (margin == null && textAlign == null) {
+            return "";
+        }
+
+        final StringBuilder style = new StringBuilder(" style=\"");
+        if (margin != null && textAlign != null) {
+            style.append(margin).append(" ").append(textAlign);
+        } else if (margin != null) {
+            style.append(margin);
+        } else if (textAlign != null) {
+            style.append(textAlign);
+        }
+
+        return style.append("\"").toString();
     }
 
     private static void withinBlockquote(StringBuilder out, Spanned text, int start, int end,
@@ -395,46 +419,55 @@ public class Html {
                 next = end;
             }
 
-            boolean isListItem = false;
-            ParagraphStyle[] paragraphStyles = text.getSpans(i, next, ParagraphStyle.class);
-            for (ParagraphStyle paragraphStyle : paragraphStyles) {
-                final int spanFlags = text.getSpanFlags(paragraphStyle);
-                if ((spanFlags & Spanned.SPAN_PARAGRAPH) == Spanned.SPAN_PARAGRAPH
-                        && paragraphStyle instanceof BulletSpan) {
-                    isListItem = true;
-                    break;
+            if (next == i) {
+                if (isInList) {
+                    // Current paragraph is no longer a list item; close the previously opened list
+                    isInList = false;
+                    out.append("</ul>\n");
                 }
-            }
-
-            if (isListItem && !isInList) {
-                // Current paragraph is the first item in a list
-                isInList = true;
-                out.append("<ul>\n");
-            }
-
-            if (isInList && !isListItem) {
-                // Current paragraph is no longer a list item; close the previously opened list
-                isInList = false;
-                out.append("</ul>\n");
-            }
-
-            String tagType = isListItem ? "li" : "p";
-            out.append("<").append(tagType).append(getTextDirection(text, start, next))
-                    .append(getTextStyles(text, start, next)).append(">");
-
-            if (next - i == 0) {
-                out.append("<br>");
+                out.append("<br>\n");
             } else {
+                boolean isListItem = false;
+                ParagraphStyle[] paragraphStyles = text.getSpans(i, next, ParagraphStyle.class);
+                for (ParagraphStyle paragraphStyle : paragraphStyles) {
+                    final int spanFlags = text.getSpanFlags(paragraphStyle);
+                    if ((spanFlags & Spanned.SPAN_PARAGRAPH) == Spanned.SPAN_PARAGRAPH
+                            && paragraphStyle instanceof BulletSpan) {
+                        isListItem = true;
+                        break;
+                    }
+                }
+
+                if (isListItem && !isInList) {
+                    // Current paragraph is the first item in a list
+                    isInList = true;
+                    out.append("<ul")
+                            .append(getTextStyles(text, i, next, true, false))
+                            .append(">\n");
+                }
+
+                if (isInList && !isListItem) {
+                    // Current paragraph is no longer a list item; close the previously opened list
+                    isInList = false;
+                    out.append("</ul>\n");
+                }
+
+                String tagType = isListItem ? "li" : "p";
+                out.append("<").append(tagType)
+                        .append(getTextDirection(text, i, next))
+                        .append(getTextStyles(text, i, next, !isListItem, true))
+                        .append(">");
+
                 withinParagraph(out, text, i, next);
-            }
 
-            out.append("</");
-            out.append(tagType);
-            out.append(">\n");
+                out.append("</");
+                out.append(tagType);
+                out.append(">\n");
 
-            if (next == end && isInList) {
-                isInList = false;
-                out.append("</ul>\n");
+                if (next == end && isInList) {
+                    isInList = false;
+                    out.append("</ul>\n");
+                }
             }
 
             next++;
