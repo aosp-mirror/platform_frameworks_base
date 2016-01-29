@@ -64,7 +64,7 @@ public:
 
     void bindFramebuffer(GLuint fbo);
     GLuint getFramebuffer() { return mFramebuffer; }
-    GLuint genFramebuffer();
+    GLuint createFramebuffer();
     void deleteFramebuffer(GLuint fbo);
 
     void invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlInfo* info);

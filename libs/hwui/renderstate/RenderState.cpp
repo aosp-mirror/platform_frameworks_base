@@ -144,7 +144,7 @@ void RenderState::bindFramebuffer(GLuint fbo) {
     }
 }
 
-GLuint RenderState::genFramebuffer() {
+GLuint RenderState::createFramebuffer() {
     GLuint ret;
     glGenFramebuffers(1, &ret);
     return ret;

@@ -43,7 +43,7 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
     mRenderTarget.offscreenBuffer = offscreenBuffer;
 
     // create and bind framebuffer
-    mRenderTarget.frameBufferId = mRenderState.genFramebuffer();
+    mRenderTarget.frameBufferId = mRenderState.createFramebuffer();
     mRenderState.bindFramebuffer(mRenderTarget.frameBufferId);
 
     // attach the texture to the FBO

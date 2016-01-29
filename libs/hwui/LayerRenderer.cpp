@@ -189,7 +189,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
-    GLuint fbo = renderState.genFramebuffer();
+    GLuint fbo = renderState.createFramebuffer();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");
         return nullptr;
@@ -357,7 +357,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             && bitmap->width() <= caches.maxTextureSize
             && bitmap->height() <= caches.maxTextureSize) {
 
-        GLuint fbo = renderState.getFramebuffer();
+        GLuint fbo = renderState.createFramebuffer();
         if (!fbo) {
             ALOGW("Could not obtain an FBO");
             return false;
