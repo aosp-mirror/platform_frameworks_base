@@ -82,6 +82,9 @@
     <dimen name="text_size_medium_material">18sp</dimen>
     <dimen name="text_size_small_material">14sp</dimen>
 
+    <dimen name="text_edit_floating_toolbar_elevation">2dp</dimen>
+    <dimen name="text_edit_floating_toolbar_margin">20dp</dimen>
+
     <dimen name="floating_window_z">16dp</dimen>
     <dimen name="floating_window_margin_left">16dp</dimen>
     <dimen name="floating_window_margin_top">8dp</dimen>
