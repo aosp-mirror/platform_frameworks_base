@@ -29,5 +29,5 @@ oneway interface ITvInputManagerCallback {
 
     void onInputStateChanged(in String inputId, int state);
 
-    void onTvInputInfoChanged(in String inputId, in TvInputInfo TvInputInfo);
+    void onTvInputInfoChanged(in TvInputInfo TvInputInfo);
 }

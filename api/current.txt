@@ -22892,7 +22892,7 @@ package android.media.tv {
     method public void onInputAdded(java.lang.String);
     method public void onInputRemoved(java.lang.String);
     method public void onInputStateChanged(java.lang.String, int);
-    method public void onTvInputInfoChanged(java.lang.String, android.media.tv.TvInputInfo);
+    method public void onTvInputInfoChanged(android.media.tv.TvInputInfo);
   }
 
   public abstract class TvInputService extends android.app.Service {
@@ -22900,7 +22900,7 @@ package android.media.tv {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public android.media.tv.TvInputService.RecordingSession onCreateRecordingSession(java.lang.String);
     method public abstract android.media.tv.TvInputService.Session onCreateSession(java.lang.String);
-    method public final void setTvInputInfo(java.lang.String, android.media.tv.TvInputInfo);
+    method public static final void setTvInputInfo(android.content.Context, android.media.tv.TvInputInfo);
     field public static final java.lang.String SERVICE_INTERFACE = "android.media.tv.TvInputService";
     field public static final java.lang.String SERVICE_META_DATA = "android.media.tv.input";
   }
