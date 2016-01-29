@@ -107,12 +107,6 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     }
 
     @Override
-    public void onRequestConditions(int relevance) {
-        if (DEBUG) Slog.d(TAG, "onRequestConditions relevance=" + relevance);
-        // does not advertise conditions
-    }
-
-    @Override
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         if (!ZenModeConfig.isValidScheduleConditionId(conditionId)) {
