@@ -150,25 +150,25 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void notifyHardwareAdded(TvInputHardwareInfo hardwareInfo) {
-                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HARDWARE_INPUT,
                         hardwareInfo).sendToTarget();
             }
 
             @Override
             public void notifyHardwareRemoved(TvInputHardwareInfo hardwareInfo) {
-                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HARDWARE_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HARDWARE_INPUT,
                         hardwareInfo).sendToTarget();
             }
 
             @Override
             public void notifyHdmiDeviceAdded(HdmiDeviceInfo deviceInfo) {
-                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_ADD_HDMI_INPUT,
                         deviceInfo).sendToTarget();
             }
 
             @Override
             public void notifyHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
-                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_TV_INPUT,
+                mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_INPUT,
                         deviceInfo).sendToTarget();
             }
         };
@@ -1934,42 +1934,42 @@ public abstract class TvInputService extends Service {
         private static final int DO_CREATE_SESSION = 1;
         private static final int DO_NOTIFY_SESSION_CREATED = 2;
         private static final int DO_CREATE_RECORDING_SESSION = 3;
-        private static final int DO_ADD_HARDWARE_TV_INPUT = 4;
-        private static final int DO_REMOVE_HARDWARE_TV_INPUT = 5;
-        private static final int DO_ADD_HDMI_TV_INPUT = 6;
-        private static final int DO_REMOVE_HDMI_TV_INPUT = 7;
+        private static final int DO_ADD_HARDWARE_INPUT = 4;
+        private static final int DO_REMOVE_HARDWARE_INPUT = 5;
+        private static final int DO_ADD_HDMI_INPUT = 6;
+        private static final int DO_REMOVE_HDMI_INPUT = 7;
 
-        private void broadcastAddHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
+        private void broadcastAddHardwareInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).addHardwareTvInput(deviceId, inputInfo);
+                    mCallbacks.getBroadcastItem(i).addHardwareInput(deviceId, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "error in broadcastAddHardwareTvInput", e);
+                    Log.e(TAG, "error in broadcastAddHardwareInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
         }
 
-        private void broadcastAddHdmiTvInput(int id, TvInputInfo inputInfo) {
+        private void broadcastAddHdmiInput(int id, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).addHdmiTvInput(id, inputInfo);
+                    mCallbacks.getBroadcastItem(i).addHdmiInput(id, inputInfo);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "error in broadcastAddHdmiTvInput", e);
+                    Log.e(TAG, "error in broadcastAddHdmiInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
         }
 
-        private void broadcastRemoveTvInput(String inputId) {
+        private void broadcastRemoveHardwareInput(String inputId) {
             int n = mCallbacks.beginBroadcast();
             for (int i = 0; i < n; ++i) {
                 try {
-                    mCallbacks.getBroadcastItem(i).removeTvInput(inputId);
+                    mCallbacks.getBroadcastItem(i).removeHardwareInput(inputId);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "error in broadcastRemoveTvInput", e);
+                    Log.e(TAG, "error in broadcastRemoveHardwareInput", e);
                 }
             }
             mCallbacks.finishBroadcast();
@@ -2075,35 +2075,35 @@ public abstract class TvInputService extends Service {
                     recordingSessionImpl.initialize(cb);
                     return;
                 }
-                case DO_ADD_HARDWARE_TV_INPUT: {
+                case DO_ADD_HARDWARE_INPUT: {
                     TvInputHardwareInfo hardwareInfo = (TvInputHardwareInfo) msg.obj;
                     TvInputInfo inputInfo = onHardwareAdded(hardwareInfo);
                     if (inputInfo != null) {
-                        broadcastAddHardwareTvInput(hardwareInfo.getDeviceId(), inputInfo);
+                        broadcastAddHardwareInput(hardwareInfo.getDeviceId(), inputInfo);
                     }
                     return;
                 }
-                case DO_REMOVE_HARDWARE_TV_INPUT: {
+                case DO_REMOVE_HARDWARE_INPUT: {
                     TvInputHardwareInfo hardwareInfo = (TvInputHardwareInfo) msg.obj;
                     String inputId = onHardwareRemoved(hardwareInfo);
                     if (inputId != null) {
-                        broadcastRemoveTvInput(inputId);
+                        broadcastRemoveHardwareInput(inputId);
                     }
                     return;
                 }
-                case DO_ADD_HDMI_TV_INPUT: {
+                case DO_ADD_HDMI_INPUT: {
                     HdmiDeviceInfo deviceInfo = (HdmiDeviceInfo) msg.obj;
                     TvInputInfo inputInfo = onHdmiDeviceAdded(deviceInfo);
                     if (inputInfo != null) {
-                        broadcastAddHdmiTvInput(deviceInfo.getId(), inputInfo);
+                        broadcastAddHdmiInput(deviceInfo.getId(), inputInfo);
                     }
                     return;
                 }
-                case DO_REMOVE_HDMI_TV_INPUT: {
+                case DO_REMOVE_HDMI_INPUT: {
                     HdmiDeviceInfo deviceInfo = (HdmiDeviceInfo) msg.obj;
                     String inputId = onHdmiDeviceRemoved(deviceInfo);
                     if (inputId != null) {
-                        broadcastRemoveTvInput(inputId);
+                        broadcastRemoveHardwareInput(inputId);
                     }
                     return;
                 }

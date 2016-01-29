@@ -311,7 +311,7 @@ public final class TvInputManagerService extends SystemService {
                     userState.serviceStateMap.put(component, serviceState);
                     updateServiceConnectionLocked(component, userId);
                 } else {
-                    inputList.addAll(serviceState.inputList);
+                    inputList.addAll(serviceState.hardwareInputList);
                 }
             } else {
                 try {
@@ -2018,7 +2018,7 @@ public final class TvInputManagerService extends SystemService {
         private final ServiceConnection connection;
         private final ComponentName component;
         private final boolean isHardware;
-        private final List<TvInputInfo> inputList = new ArrayList<>();
+        private final List<TvInputInfo> hardwareInputList = new ArrayList<>();
 
         private ITvInputService service;
         private ServiceCallback callback;
@@ -2215,39 +2215,36 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        private void addTvInputLocked(TvInputInfo inputInfo) {
+        private void addHardwareInputLocked(TvInputInfo inputInfo) {
             ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
-            serviceState.inputList.add(inputInfo);
+            serviceState.hardwareInputList.add(inputInfo);
             buildTvInputListLocked(mUserId, null);
         }
 
-        @Override
-        public void addHardwareTvInput(int deviceId, TvInputInfo inputInfo) {
+        public void addHardwareInput(int deviceId, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
             synchronized (mLock) {
-                mTvInputHardwareManager.addHardwareTvInput(deviceId, inputInfo);
-                addTvInputLocked(inputInfo);
+                mTvInputHardwareManager.addHardwareInput(deviceId, inputInfo);
+                addHardwareInputLocked(inputInfo);
             }
         }
 
-        @Override
-        public void addHdmiTvInput(int id, TvInputInfo inputInfo) {
+        public void addHdmiInput(int id, TvInputInfo inputInfo) {
             ensureHardwarePermission();
             ensureValidInput(inputInfo);
             synchronized (mLock) {
-                mTvInputHardwareManager.addHdmiTvInput(id, inputInfo);
-                addTvInputLocked(inputInfo);
+                mTvInputHardwareManager.addHdmiInput(id, inputInfo);
+                addHardwareInputLocked(inputInfo);
             }
         }
 
-        @Override
-        public void removeTvInput(String inputId) {
+        public void removeHardwareInput(String inputId) {
             ensureHardwarePermission();
             synchronized (mLock) {
                 ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
                 boolean removed = false;
-                for (Iterator<TvInputInfo> it = serviceState.inputList.iterator();
+                for (Iterator<TvInputInfo> it = serviceState.hardwareInputList.iterator();
                         it.hasNext(); ) {
                     if (it.next().getId().equals(inputId)) {
                         it.remove();
@@ -2257,7 +2254,7 @@ public final class TvInputManagerService extends SystemService {
                 }
                 if (removed) {
                     buildTvInputListLocked(mUserId, null);
-                    mTvInputHardwareManager.removeTvInput(inputId);
+                    mTvInputHardwareManager.removeHardwareInput(inputId);
                 } else {
                     Slog.e(TAG, "failed to remove input " + inputId);
                 }
