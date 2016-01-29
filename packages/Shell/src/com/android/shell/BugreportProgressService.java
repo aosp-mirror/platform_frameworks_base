@@ -832,7 +832,7 @@ public class BugreportProgressService extends Service {
                     + mProcesses + "), using info from intent instead (" + info + ")");
         }
 
-        addDetailsToZipFile(info);
+        addDetailsToZipFile(mContext, info);
 
         final Intent sendIntent = buildSendIntent(mContext, info);
         final Intent notifIntent;
@@ -856,6 +856,10 @@ public class BugreportProgressService extends Service {
      * Sends a notification indicating the bugreport has finished so use can share it.
      */
     private static void sendBugreportNotification(Context context, BugreportInfo info) {
+
+        // Since adding the details can take a while, do it before notifying user.
+        addDetailsToZipFile(context, info);
+
         final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
         shareIntent.setClass(context, BugreportProgressService.class);
         shareIntent.setAction(INTENT_BUGREPORT_SHARE);
@@ -949,7 +953,7 @@ public class BugreportProgressService extends Service {
      * If user provided a title, it will be saved into a {@code title.txt} entry; similarly, the
      * description will be saved on {@code description.txt}.
      */
-    private void addDetailsToZipFile(BugreportInfo info) {
+    private static void addDetailsToZipFile(Context context, BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.e(TAG, "INTERNAL ERROR: no bugreportFile on " + info);
@@ -959,10 +963,15 @@ public class BugreportProgressService extends Service {
             Log.d(TAG, "Not touching zip file since neither title nor description are set");
             return;
         }
+        if (info.addedDetailsToZip || info.addingDetailsToZip) {
+            Log.d(TAG, "Already added details to zip file for " + info);
+            return;
+        }
+        info.addingDetailsToZip = true;
 
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
-        sendBugreportBeingUpdatedNotification(mContext, info.pid); // ...and that takes time
+        sendBugreportBeingUpdatedNotification(context, info.pid); // ...and that takes time
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
         Log.d(TAG, "Writing temporary zip file (" + tmpZip + ") with title and/or description");
@@ -985,6 +994,7 @@ public class BugreportProgressService extends Service {
             addEntry(zos, "title.txt", info.title);
             addEntry(zos, "description.txt", info.description);
         } catch (IOException e) {
+            info.addingDetailsToZip = false;
             Log.e(TAG, "exception zipping file " + tmpZip, e);
             return;
         }
@@ -992,6 +1002,8 @@ public class BugreportProgressService extends Service {
         if (!tmpZip.renameTo(info.bugreportFile)) {
             Log.e(TAG, "Could not rename " + tmpZip + " to " + info.bugreportFile);
         }
+        info.addedDetailsToZip = true;
+        info.addingDetailsToZip = false;
     }
 
     private static void addEntry(ZipOutputStream zos, String entry, String text)
@@ -1387,6 +1399,12 @@ public class BugreportProgressService extends Service {
         boolean finished;
 
         /**
+         * Whether the details entries have been added to the bugreport yet.
+         */
+        boolean addingDetailsToZip;
+        boolean addedDetailsToZip;
+
+        /**
          * Internal counter used to name screenshot files.
          */
         int screenshotCounter;
@@ -1466,7 +1484,9 @@ public class BugreportProgressService extends Service {
                     + "\n\ttitle: " + title + "\n\tdescription: " + description
                     + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
                     + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
-                    + "\n\tlast_update: " + getFormattedLastUpdate();
+                    + "\n\tlast_update: " + getFormattedLastUpdate()
+                    + "\naddingDetailsToZip: " + addingDetailsToZip
+                    + " addedDetailsToZip: " + addedDetailsToZip;
         }
 
         // Parcelable contract
