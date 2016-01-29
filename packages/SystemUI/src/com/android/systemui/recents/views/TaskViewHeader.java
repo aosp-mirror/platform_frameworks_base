@@ -214,14 +214,18 @@ public class TaskViewHeader extends FrameLayout
 
     @Override
     protected void onFinishInflate() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+
         // Initialize the icon and description views
         mIconView = (ImageView) findViewById(R.id.icon);
         mIconView.setClickable(false);
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
-        mDismissButton.setOnClickListener(this);
-        mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
+            mMoveTaskButton.setVisibility(View.VISIBLE);
+        }
         mFocusTimerIndicatorStub = (ViewStub) findViewById(R.id.focus_timer_indicator_stub);
         mAppOverlayViewStub = (ViewStub) findViewById(R.id.app_overlay_stub);
     }
@@ -339,7 +343,6 @@ public class TaskViewHeader extends FrameLayout
     void setDimAlpha(float dimAlpha) {
         mDimAlpha = dimAlpha;
         updateBackgroundColor(dimAlpha);
-        invalidate();
     }
 
     /**
@@ -353,11 +356,12 @@ public class TaskViewHeader extends FrameLayout
             mTmpHSL[2] = Math.min(1f, mTmpHSL[2] + OVERLAY_LIGHTNESS_INCREMENT * (1.0f - dimAlpha));
             mOverlayBackground.setColorAndDim(ColorUtils.HSLToColor(mTmpHSL), dimAlpha);
             mDimLayerPaint.setAlpha((int) (dimAlpha * 255));
+            invalidate();
         }
     }
 
     /** Binds the bar view to the task */
-    public void rebindToTask(Task t) {
+    public void rebindToTask(Task t, boolean touchExplorationEnabled) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTask = t;
 
@@ -391,10 +395,6 @@ public class TaskViewHeader extends FrameLayout
                         ? mLightFreeformIcon
                         : mDarkFreeformIcon);
             }
-            if (mMoveTaskButton.getVisibility() != View.VISIBLE) {
-                mMoveTaskButton.setVisibility(View.VISIBLE);
-            }
-            mMoveTaskButton.setOnClickListener(this);
         }
 
         if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
@@ -408,32 +408,37 @@ public class TaskViewHeader extends FrameLayout
         }
 
         // In accessibility, a single click on the focused app info button will show it
-        if (ssp.isTouchExplorationEnabled()) {
+        if (touchExplorationEnabled) {
             mIconView.setOnClickListener(this);
         }
     }
 
     /** Unbinds the bar view from the task */
-    void unbindFromTask() {
+    void unbindFromTask(boolean touchExplorationEnabled) {
         mTask = null;
         mIconView.setImageDrawable(null);
-        mIconView.setOnClickListener(null);
-        mMoveTaskButton.setOnClickListener(null);
+        if (touchExplorationEnabled) {
+            mIconView.setOnClickListener(null);
+        }
     }
 
     /** Animates this task bar if the user does not interact with the stack after a certain time. */
     void startNoUserInteractionAnimation() {
-        if (mDismissButton.getVisibility() != View.VISIBLE) {
-            mDismissButton.setVisibility(View.VISIBLE);
-            mDismissButton.setAlpha(0f);
-            mDismissButton.animate()
-                    .alpha(1f)
-                    .setStartDelay(0)
-                    .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
-                    .setDuration(getResources().getInteger(
-                            R.integer.recents_task_enter_from_app_duration))
-                    .start();
-        }
+        int duration = getResources().getInteger(R.integer.recents_task_enter_from_app_duration);
+        mDismissButton.setOnClickListener(this);
+        mDismissButton.setVisibility(View.VISIBLE);
+        mDismissButton.animate()
+                .alpha(1f)
+                .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                .setDuration(duration)
+                .start();
+        mMoveTaskButton.setOnClickListener(this);
+        mMoveTaskButton.setVisibility(View.VISIBLE);
+        mMoveTaskButton.animate()
+                .alpha(1f)
+                .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                .setDuration(duration)
+                .start();
     }
 
     /**
@@ -441,11 +446,14 @@ public class TaskViewHeader extends FrameLayout
      * time.
      */
     void setNoUserInteractionState() {
-        if (mDismissButton.getVisibility() != View.VISIBLE) {
-            mDismissButton.animate().cancel();
-            mDismissButton.setVisibility(View.VISIBLE);
-            mDismissButton.setAlpha(1f);
-        }
+        mDismissButton.setVisibility(View.VISIBLE);
+        mDismissButton.animate().cancel();
+        mDismissButton.setAlpha(1f);
+        mDismissButton.setOnClickListener(this);
+        mMoveTaskButton.setVisibility(View.VISIBLE);
+        mMoveTaskButton.animate().cancel();
+        mMoveTaskButton.setAlpha(1f);
+        mMoveTaskButton.setOnClickListener(this);
     }
 
     /**
@@ -454,6 +462,11 @@ public class TaskViewHeader extends FrameLayout
      */
     void resetNoUserInteractionState() {
         mDismissButton.setVisibility(View.INVISIBLE);
+        mDismissButton.setAlpha(0f);
+        mDismissButton.setOnClickListener(null);
+        mMoveTaskButton.setVisibility(View.INVISIBLE);
+        mMoveTaskButton.setAlpha(0f);
+        mMoveTaskButton.setOnClickListener(null);
     }
 
     @Override
@@ -467,11 +480,8 @@ public class TaskViewHeader extends FrameLayout
     @Override
     public void onClick(View v) {
         if (v == mIconView) {
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            if (ssp.isTouchExplorationEnabled()) {
-                // In accessibility, a single click on the focused app info button will show it
-                EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
-            }
+            // In accessibility, a single click on the focused app info button will show it
+            EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
         } else if (v == mDismissButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
             tv.dismissTask();
