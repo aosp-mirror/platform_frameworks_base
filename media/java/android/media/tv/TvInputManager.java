@@ -719,9 +719,7 @@ public final class TvInputManager {
          * the media on which a newer version of the package exists becomes available/unavailable.
          *
          * @param inputId The ID of the TV input.
-         * @hide
          */
-        @SystemApi
         public void onInputUpdated(String inputId) {
         }
 
