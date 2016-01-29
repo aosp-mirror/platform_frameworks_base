@@ -26,6 +26,7 @@ import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -66,6 +67,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
@@ -114,8 +116,6 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
@@ -243,6 +243,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /** If true, the system is in the half-boot-to-decryption-screen state.
      * Prudently disable QS and notifications.  */
     private static final boolean ONLY_CORE_APPS;
+
+    /** If true, the lockscreen will show a distinct wallpaper */
+    private static final boolean ENABLE_LOCKSCREEN_WALLPAPER =
+            !ActivityManager.isLowRamDeviceStatic()
+                    && SystemProperties.getBoolean("debug.lockscreen_wallpaper", false);
 
     /* If true, the device supports freeform window management.
      * This affects the status bar UI. */
@@ -461,7 +466,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (state != null) {
                 if (!isPlaybackActive(state.getState())) {
                     clearCurrentMediaNotification();
-                    updateMediaMetaData(true);
+                    updateMediaMetaData(true, true);
                 }
             }
         }
@@ -471,7 +476,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             super.onMetadataChanged(metadata);
             if (DEBUG_MEDIA) Log.v(TAG, "DEBUG_MEDIA: onMetadataChanged: " + metadata);
             mMediaMetadata = metadata;
-            updateMediaMetaData(true);
+            updateMediaMetaData(true, true);
         }
     };
 
@@ -1315,7 +1320,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (key.equals(mMediaNotificationKey)) {
             clearCurrentMediaNotification();
-            updateMediaMetaData(true);
+            updateMediaMetaData(true, true);
         }
         if (deferRemoval) {
             mLatestRankingMap = ranking;
@@ -1706,7 +1711,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (metaDataChanged) {
             updateNotifications();
         }
-        updateMediaMetaData(metaDataChanged);
+        updateMediaMetaData(metaDataChanged, true);
     }
 
     private int getMediaControllerPlaybackState(MediaController controller) {
@@ -1765,7 +1770,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * Refresh or remove lockscreen artwork from media metadata.
      */
-    public void updateMediaMetaData(boolean metaDataChanged) {
+    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) return;
 
         if (mBackdrop == null) return; // called too early
@@ -1790,6 +1795,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 // might still be null
             }
         }
+        if (ENABLE_LOCKSCREEN_WALLPAPER && artworkBitmap == null) {
+            // TODO: use real lockscreen wallpaper.
+            WallpaperManager wallpaperManager = mContext
+                    .getSystemService(WallpaperManager.class);
+            artworkBitmap = wallpaperManager.getBitmap();
+        }
 
         final boolean hasArtwork = artworkBitmap != null;
 
@@ -1799,7 +1810,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // time to show some art!
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
-                mBackdrop.animate().alpha(1f);
+                if (allowEnterAnimation) {
+                    mBackdrop.animate().alpha(1f);
+                } else {
+                    mBackdrop.animate().cancel();
+                    mBackdrop.setAlpha(1f);
+                }
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
@@ -3023,6 +3039,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 notifyNavigationBarScreenOn(true);
             }
+            else if (ENABLE_LOCKSCREEN_WALLPAPER
+                    && Intent.ACTION_WALLPAPER_CHANGED.equals(action)) {
+                updateMediaMetaData(true, true);
+            }
         }
     };
 
@@ -3044,7 +3064,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 }
             } else if (ACTION_FAKE_ARTWORK.equals(action)) {
                 if (DEBUG_MEDIA_FAKE_ARTWORK) {
-                    updateMediaMetaData(true);
+                    updateMediaMetaData(true, true);
                 }
             }
         }
@@ -3108,7 +3128,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         clearCurrentMediaNotification();
-        updateMediaMetaData(true);
+        updateMediaMetaData(true, false);
     }
 
     private void setControllerUsers() {
@@ -3527,7 +3547,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         runLaunchTransitionEndRunnable();
         mLaunchTransitionFadingAway = false;
         mScrimController.forceHideScrims(false /* hide */);
-        updateMediaMetaData(true /* metaDataChanged */);
+        updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
     public boolean isCollapsing() {
@@ -3562,7 +3582,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     beforeFading.run();
                 }
                 mScrimController.forceHideScrims(true /* hide */);
-                updateMediaMetaData(false);
+                updateMediaMetaData(false, true);
                 mNotificationPanel.setAlpha(1);
                 mNotificationPanel.animate()
                         .alpha(0)
@@ -3764,7 +3784,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateStackScrollerState(goingToFullShade, fromShadeLocked);
         updateNotifications();
         checkBarModes();
-        updateMediaMetaData(false);
+        updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
                 mStatusBarKeyguardViewManager.isSecure());
     }
