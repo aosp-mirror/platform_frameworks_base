@@ -299,10 +299,10 @@ class AppWindowToken extends WindowToken {
         }
     }
 
-    void markSurfacesExiting() {
+    void setWindowsExiting(boolean exiting) {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState win = allAppWindows.get(i);
-            win.mExiting = true;
+            win.mExiting = exiting;
         }
     }
 
@@ -312,11 +312,11 @@ class AppWindowToken extends WindowToken {
      * @return true if the surfaces should be saved, false otherwise.
      */
     boolean shouldSaveSurface() {
-        // We want to save surface if the app's windows are "allDrawn", or if we're
-        // currently animating with save surfaces. (If the app didn't even finish
-        // drawing when the user exits, but we have a saved surface from last time,
-        // we still want to keep that surface.)
-        return allDrawn || mAnimatingWithSavedSurface;
+        // We want to save surface if the app's windows are "allDrawn".
+        // (If we started entering animation early with saved surfaces, allDrawn
+        // should have been restored to true. So we'll save again in that case
+        // even if app didn't actually finish drawing.)
+        return allDrawn;
     }
 
     boolean hasSavedSurface() {
@@ -334,13 +334,26 @@ class AppWindowToken extends WindowToken {
             return;
         }
         mAnimatingWithSavedSurface = true;
+
+        // Check if we have enough drawn windows to mark allDrawn= true.
+        int numInteresting = 0;
+        int numDrawn = 0;
         for (int i = windows.size() - 1; i >= 0; i--) {
-            WindowState ws = windows.get(i);
-            ws.restoreSavedSurface();
+            WindowState w = windows.get(i);
+            w.restoreSavedSurface();
+            if (w != startingWindow && !w.mAppDied
+                    && (!mAppAnimator.freezingScreen || !w.mAppFreezing)) {
+                numInteresting++;
+                if (w.isDrawnLw()) {
+                    numDrawn++;
+                }
+            }
         }
-        // Mark the app allDrawn since it must be allDrawn at the time
-        // it was first saved.
-        allDrawn = true;
+
+        allDrawn |= (numInteresting == numDrawn);
+
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
+                "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn);
     }
 
     void destroySavedSurfaces() {
@@ -348,6 +361,7 @@ class AppWindowToken extends WindowToken {
             WindowState win = windows.get(i);
             win.destroySavedSurface();
         }
+        mAnimatingWithSavedSurface = false;
     }
 
     @Override

@@ -1447,8 +1447,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mAppToken.allAppWindows.get(i);
-            if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
             if (win.mWillReplaceWindow && win.mReplacingWindow == this) {
+                if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + win);
                 win.mWillReplaceWindow = false;
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
@@ -2190,6 +2190,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
             if (mAppToken != null) {
                 pw.print(prefix); pw.print("mAppToken="); pw.print(mAppToken);
+                pw.print(" isAnimatingWithSavedSurface()=");
+                pw.print(isAnimatingWithSavedSurface());
                 pw.print(" mAppDied=");pw.println(mAppDied);
             }
             if (mTargetAppToken != null) {

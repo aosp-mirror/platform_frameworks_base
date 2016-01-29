@@ -2691,7 +2691,17 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 winAnimator.mEnterAnimationPending = false;
                 winAnimator.mEnteringAnimation = false;
-                if (winAnimator.hasSurface() && !win.mExiting) {
+                final boolean usingSavedSurfaceBeforeVisible =
+                        oldVisibility != View.VISIBLE && win.isAnimatingWithSavedSurface();
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
+                    if (winAnimator.hasSurface() && !win.mExiting
+                            && usingSavedSurfaceBeforeVisible) {
+                        Slog.d(TAG, "Ignoring layout to invisible when using saved surface " + win);
+                    }
+                }
+
+                if (winAnimator.hasSurface() && !win.mExiting
+                        && !usingSavedSurfaceBeforeVisible) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Relayout invis " + win
                             + ": mExiting=" + win.mExiting);
                     // If we are not currently running the exit animation, we
@@ -4219,6 +4229,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 wtoken.inPendingTransaction = true;
                 if (visible) {
+                    wtoken.setWindowsExiting(false);
                     mOpeningApps.add(wtoken);
                     wtoken.startingMoved = false;
                     wtoken.mEnteringAnimation = true;
@@ -4243,7 +4254,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 } else {
-                    wtoken.markSurfacesExiting();
+                    wtoken.setWindowsExiting(true);
                     mClosingApps.add(wtoken);
                     wtoken.mEnteringAnimation = false;
                 }
