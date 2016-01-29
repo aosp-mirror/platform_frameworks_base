@@ -266,7 +266,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return (configs.length > 0) ? INPUT_STATE_CONNECTED_STANDBY : INPUT_STATE_DISCONNECTED;
     }
 
-    public void addHardwareTvInput(int deviceId, TvInputInfo info) {
+    public void addHardwareInput(int deviceId, TvInputInfo info) {
         synchronized (mLock) {
             String oldInputId = mHardwareInputIdMap.get(deviceId);
             if (oldInputId != null) {
@@ -325,7 +325,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return false;
     }
 
-    public void addHdmiTvInput(int id, TvInputInfo info) {
+    public void addHdmiInput(int id, TvInputInfo info) {
         if (info.getType() != TvInputInfo.TYPE_HDMI) {
             throw new IllegalArgumentException("info (" + info + ") has non-HDMI type.");
         }
@@ -346,7 +346,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
-    public void removeTvInput(String inputId) {
+    public void removeHardwareInput(String inputId) {
         synchronized (mLock) {
             mInputMap.remove(inputId);
             int hardwareIndex = indexOfEqualValue(mHardwareInputIdMap, inputId);
