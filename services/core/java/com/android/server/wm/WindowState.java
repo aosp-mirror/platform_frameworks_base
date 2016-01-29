@@ -751,15 +751,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Math.min(mStableFrame.bottom, frame.bottom));
         }
 
-        mOverscanInsets.set(Math.max(mOverscanFrame.left - frame.left, 0),
-                Math.max(mOverscanFrame.top - frame.top, 0),
-                Math.max(frame.right - mOverscanFrame.right, 0),
-                Math.max(frame.bottom - mOverscanFrame.bottom, 0));
-
-
+        if (!inFreeformWorkspace()) {
+            // Freeform windows can be positioned outside of the display frame, but that is not a
+            // reason to provide them with overscan insets.
+            mOverscanInsets.set(Math.max(mOverscanFrame.left - frame.left, 0),
+                    Math.max(mOverscanFrame.top - frame.top, 0),
+                    Math.max(frame.right - mOverscanFrame.right, 0),
+                    Math.max(frame.bottom - mOverscanFrame.bottom, 0));
+        }
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-
             // For the docked divider, we calculate the stable insets like a full-screen window
             // so it can use it to calculate the snap positions.
             mStableInsets.set(Math.max(mStableFrame.left - mDisplayFrame.left, 0),
