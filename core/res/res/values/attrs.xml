@@ -6355,34 +6355,9 @@ i
     <!-- ========================== -->
     <eat-comment />
 
-    <!-- Drawable states.
-         The mapping of Drawable states to a particular drawables is specified
-         in the "state" elements of a Widget's "selector" element.
-         Possible values:
-         <ul>
-         <li>"state_focused"
-         <li>"state_window_focused"
-         <li>"state_enabled"
-         <li>"state_checked"
-         <li>"state_selected"
-         <li>"state_active"
-         <li>"state_single"
-         <li>"state_first"
-         <li>"state_mid"
-         <li>"state_last"
-         <li>"state_only"
-         <li>"state_pressed"
-         <li>"state_activated"
-         <li>"state_error"
-         <li>"state_circle"
-         <li>"state_rect"
-         <li>"state_grow"
-         <li>"state_move"
-         <li>"state_hovered"
-         <li>"state_drag_can_accept"
-         <li>"state_drag_hovered"
-         <li>"state_accessibility_focused"
-         </ul>  -->
+    <!-- Set of framework-provided states that may be specified on a Drawable. Actual usage of
+         states may vary between view implementations, as documented on the individual state
+         attributes. -->
     <declare-styleable name="DrawableStates">
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a view has input focus. -->
@@ -6393,13 +6368,13 @@ i
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a view is enabled. -->
         <attr name="state_enabled" format="boolean" />
-        <!-- State identifier indicating that the object <var>may</var> display a check mark.
-             See {@link android.R.attr#state_checked} for the identifier that indicates whether it is
+        <!-- State identifier indicating that the object <var>may</var> display a check mark. See
+             {@link android.R.attr#state_checked} for the identifier that indicates whether it is
              actually checked. -->
         <attr name="state_checkable" format="boolean"/>
         <!-- State identifier indicating that the object is currently checked.  See
-             {@link android.R.attr#state_checkable} for an additional identifier that can indicate if
-             any object may ever display a check, regardless of whether state_checked is
+             {@link android.R.attr#state_checkable} for an additional identifier that can indicate
+             if any object may ever display a check, regardless of whether state_checked is
              currently set. -->
         <attr name="state_checked" format="boolean"/>
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
@@ -6413,15 +6388,25 @@ i
              marked it as being of interest.  This is an alternative representation of
              state_checked for when the state should be propagated down the view hierarchy. -->
         <attr name="state_activated" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is considered "active" by its host. Actual usage may vary
+             between views. Consult the host view documentation for details. -->
         <attr name="state_active" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is considered "single" by its host. Actual usage may vary
+             between views. Consult the host view documentation for details. -->
         <attr name="state_single" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the first position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_first" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the middle position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_middle" format="boolean" />
-        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable}.-->
+        <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
+             set when a view or drawable is in the last position in an ordered set. Actual usage
+             may vary between views. Consult the host view documentation for details. -->
         <attr name="state_last" format="boolean" />
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              indicating that the Drawable is in a view that is hardware accelerated.
