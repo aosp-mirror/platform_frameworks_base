@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
-import static com.android.documentsui.State.MODE_UNKNOWN;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -53,7 +52,9 @@ import com.android.documentsui.ThumbnailCache;
 public class IconHelper {
     private static String TAG = "IconHelper";
 
-    private Context mContext;
+    private final Context mContext;
+
+    // Updated when icon size is set.
     private ThumbnailCache mCache;
     private Point mThumbSize;
     // The display mode (MODE_GRID, MODE_LIST, etc).
@@ -85,8 +86,13 @@ public class IconHelper {
      * @param mode See {@link State.MODE_LIST} and {@link State.MODE_GRID}.
      */
     public void setViewMode(@ViewMode int mode) {
-        // TODO: Instead of exposing setMode, make the mode final, and make separate instances for
-        // grid/list.
+        mMode = mode;
+        int thumbSize = getThumbSize(mode);
+        mThumbSize = new Point(thumbSize, thumbSize);
+        mCache = DocumentsApplication.getThumbnailsCache(mContext, mThumbSize);
+    }
+
+    private int getThumbSize(int mode) {
         int thumbSize;
         switch (mode) {
             case MODE_GRID:
@@ -99,8 +105,7 @@ public class IconHelper {
             default:
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }
-        mMode = mode;
-        mThumbSize = new Point(thumbSize, thumbSize);
+        return thumbSize;
     }
 
     /**
