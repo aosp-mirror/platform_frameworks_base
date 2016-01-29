@@ -18,7 +18,9 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Describes information about a detected access point. In addition
@@ -301,6 +303,12 @@ public class ScanResult implements Parcelable {
 
     /**
      *  @hide
+     * anqp lines from supplicant BSS response
+     */
+    public List<String> anqpLines;
+
+    /**
+     *  @hide
      * storing the raw bytes of full result IEs
      **/
     public byte[] bytes;
@@ -518,6 +526,15 @@ public class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+
+        if (anqpLines != null) {
+            dest.writeInt(anqpLines.size());
+            for (int i = 0; i < anqpLines.size(); i++) {
+                dest.writeString(anqpLines.get(i));
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -563,6 +580,14 @@ public class ScanResult implements Parcelable {
                         int len = in.readInt();
                         sr.informationElements[i].bytes = new byte[len];
                         in.readByteArray(sr.informationElements[i].bytes);
+                    }
+                }
+
+                n = in.readInt();
+                if (n != 0) {
+                    sr.anqpLines = new ArrayList<String>();
+                    for (int i = 0; i < n; i++) {
+                        sr.anqpLines.add(in.readString());
                     }
                 }
                 return sr;
