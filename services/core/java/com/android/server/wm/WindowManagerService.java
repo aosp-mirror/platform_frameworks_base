@@ -10599,5 +10599,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerService.this.isStackVisibleLocked(stackId);
             }
         }
+
+        @Override
+        public boolean isDockedDividerResizing() {
+            synchronized (mWindowMap) {
+                return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
+            }
+        }
     }
 }

@@ -1811,7 +1811,9 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
-                        startDragResizing(mPendingBackDropFrame);
+                        startDragResizing(mPendingBackDropFrame,
+                                mWinFrame.equals(mPendingBackDropFrame), mPendingVisibleInsets,
+                                mPendingStableInsets);
                         mResizeMode = freeformResizing
                                 ? RESIZE_MODE_FREEFORM
                                 : RESIZE_MODE_DOCKED_DIVIDER;
@@ -5845,9 +5847,11 @@ public final class ViewRootImpl implements ViewParent,
         // Tell all listeners that we are resizing the window so that the chrome can get
         // updated as fast as possible on a separate thread,
         if (mDragResizing) {
+            boolean fullscreen = frame.equals(backDropFrame);
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame);
+                    mWindowCallbacks.get(i).onWindowSizeIsChanging(backDropFrame, fullscreen,
+                            visibleInsets, stableInsets);
                 }
             }
         }
@@ -7046,12 +7050,14 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * Start a drag resizing which will inform all listeners that a window resize is taking place.
      */
-    private void startDragResizing(Rect initialBounds) {
+    private void startDragResizing(Rect initialBounds, boolean fullscreen, Rect systemInsets,
+            Rect stableInsets) {
         if (!mDragResizing) {
             mDragResizing = true;
             synchronized (mWindowCallbacks) {
                 for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {
-                    mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds);
+                    mWindowCallbacks.get(i).onWindowDragResizeStart(initialBounds, fullscreen,
+                            systemInsets, stableInsets);
                 }
             }
             mFullRedrawNeeded = true;

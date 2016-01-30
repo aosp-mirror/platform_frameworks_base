@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import com.android.server.input.InputWindowHandle;
-
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -53,6 +51,8 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 
+import com.android.server.input.InputWindowHandle;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -75,8 +75,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
@@ -2133,7 +2133,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // background.
         return (mDisplayContent.mDividerControllerLocked.isResizing()
                         || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
-                !task.inFreeformWorkspace() && !task.isFullscreen();
+                !task.inFreeformWorkspace();
+
     }
 
     void setDragResizing() {
@@ -2326,6 +2327,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         if (mDrawLock != null) {
             pw.print(prefix); pw.println("mDrawLock=" + mDrawLock);
+        }
+        if (isDragResizing()) {
+            pw.print(prefix); pw.println("isDragResizing=" + isDragResizing());
+        }
+        if (computeDragResizing()) {
+            pw.print(prefix); pw.println("computeDragResizing=" + computeDragResizing());
         }
     }
 

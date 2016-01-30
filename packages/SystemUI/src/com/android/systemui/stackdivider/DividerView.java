@@ -212,16 +212,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
         mDockSide = mWindowManagerProxy.getDockSide();
         initializeSnapAlgorithm();
-        if (mDockSide != WindowManager.DOCKED_INVALID) {
-            mWindowManagerProxy.setResizing(true);
-            mWindowManager.setSlippery(false);
-            if (touching) {
-                liftBackground();
-            }
-            return true;
-        } else {
-            return false;
+        mWindowManagerProxy.setResizing(true);
+        mWindowManager.setSlippery(false);
+        if (touching) {
+            liftBackground();
         }
+        return mDockSide != WindowManager.DOCKED_INVALID;
     }
 
     public void stopDragging(int position, float velocity, boolean avoidDismissStart) {
@@ -237,6 +233,16 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         flingTo(position, target, duration, interpolator);
         mWindowManager.setSlippery(true);
         releaseBackground();
+    }
+
+    private void stopDragging() {
+        mHandle.setTouching(false, true /* animate */);
+        mWindowManager.setSlippery(true);
+        releaseBackground();
+    }
+
+    private void updateDockSide() {
+        mDockSide = mWindowManagerProxy.getDockSide();
     }
 
     private void initializeSnapAlgorithm() {
@@ -271,6 +277,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mStartX = (int) event.getX();
                 mStartY = (int) event.getY();
                 boolean result = startDragging(true /* animate */, true /* touching */);
+                if (!result) {
+
+                    // Weren't able to start dragging successfully, so cancel it again.
+                    stopDragging();
+                }
                 mStartPosition = getCurrentPosition();
                 mMoving = false;
                 return result;
@@ -730,11 +741,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
         if (mAnimateAfterRecentsDrawn) {
             mAnimateAfterRecentsDrawn = false;
+            updateDockSide();
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
                     TOUCH_RESPONSE_INTERPOLATOR);
         }
         if (mGrowAfterRecentsDrawn) {
             mGrowAfterRecentsDrawn = false;
+            updateDockSide();
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
                     TOUCH_RESPONSE_INTERPOLATOR);
         }

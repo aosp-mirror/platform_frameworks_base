@@ -6877,7 +6877,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean dockedStackVisible = mWindowManagerInternal.isStackVisible(DOCKED_STACK_ID);
         final boolean freeformStackVisible =
                 mWindowManagerInternal.isStackVisible(FREEFORM_WORKSPACE_STACK_ID);
-        final boolean forceShowSystemBars = dockedStackVisible || freeformStackVisible;
+        final boolean resizing = mWindowManagerInternal.isDockedDividerResizing();
+
+        // We need to force system bars when the docked stack is visible, when the freeform stack
+        // is visible but also when we are resizing for the transitions when docked stack
+        // visibility changes.
+        final boolean forceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing;
         final boolean forceOpaqueSystemBars = forceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags

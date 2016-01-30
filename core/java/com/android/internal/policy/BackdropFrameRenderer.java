@@ -24,7 +24,6 @@ import android.view.Choreographer;
 import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
-import android.view.View;
 
 /**
  * The thread which draws a fill in background while the app is resizing in areas where the app
@@ -49,6 +48,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
     private final Rect mOldTargetRect = new Rect();
     private final Rect mNewTargetRect = new Rect();
+
     private Choreographer mChoreographer;
 
     // Cached size values from the last render for the case that the view hierarchy is gone
@@ -66,15 +66,23 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     private Drawable mUserCaptionBackgroundDrawable;
     private Drawable mResizingBackgroundDrawable;
     private ColorDrawable mStatusBarColor;
+    private ColorDrawable mNavigationBarColor;
+    private boolean mOldFullscreen;
+    private boolean mFullscreen;
+    private final Rect mOldSystemInsets = new Rect();
+    private final Rect mOldStableInsets = new Rect();
+    private final Rect mSystemInsets = new Rect();
+    private final Rect mStableInsets = new Rect();
 
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
             Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
-            Drawable userCaptionBackgroundDrawable, int statusBarColor) {
+            Drawable userCaptionBackgroundDrawable, int statusBarColor, int navigationBarColor,
+            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
         onResourcesLoaded(decorView, resizingBackgroundDrawable, captionBackgroundDrawable,
-                userCaptionBackgroundDrawable, statusBarColor);
+                userCaptionBackgroundDrawable, statusBarColor, navigationBarColor);
 
         // Create a render node for the content and frame backdrop
         // which can be resized independently from the content.
@@ -84,8 +92,14 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
         // Set the initial bounds and draw once so that we do not get a broken frame.
         mTargetRect.set(initialBounds);
+        mFullscreen = fullscreen;
+        mOldFullscreen = fullscreen;
+        mSystemInsets.set(systemInsets);
+        mStableInsets.set(stableInsets);
+        mOldSystemInsets.set(systemInsets);
+        mOldStableInsets.set(stableInsets);
         synchronized (this) {
-            changeWindowSizeLocked(initialBounds);
+            redrawLocked(initialBounds, fullscreen, mSystemInsets, mStableInsets);
         }
 
         // Kick off our draw thread.
@@ -94,7 +108,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
 
     void onResourcesLoaded(DecorView decorView, Drawable resizingBackgroundDrawable,
             Drawable captionBackgroundDrawableDrawable, Drawable userCaptionBackgroundDrawable,
-            int statusBarColor) {
+            int statusBarColor, int navigationBarColor) {
         mDecorView = decorView;
         mResizingBackgroundDrawable = resizingBackgroundDrawable;
         mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable;
@@ -108,6 +122,12 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         } else {
             mStatusBarColor = null;
         }
+        if (navigationBarColor != 0) {
+            mNavigationBarColor = new ColorDrawable(navigationBarColor);
+            addSystemBarNodeIfNeeded();
+        } else {
+            mNavigationBarColor = null;
+        }
     }
 
     private void addSystemBarNodeIfNeeded() {
@@ -119,13 +139,22 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     }
 
     /**
-     * Call this function asynchronously when the window size has been changed. The change will
-     * be picked up once per frame and the frame will be re-rendered accordingly.
+     * Call this function asynchronously when the window size has been changed or when the insets
+     * have changed or whether window switched between a fullscreen or non-fullscreen layout.
+     * The change will be picked up once per frame and the frame will be re-rendered accordingly.
+     *
      * @param newTargetBounds The new target bounds.
+     * @param fullscreen Whether the window is currently drawing in fullscreen.
+     * @param systemInsets The current visible system insets for the window.
+     * @param stableInsets The stable insets for the window.
      */
-    public void setTargetRect(Rect newTargetBounds) {
+    public void setTargetRect(Rect newTargetBounds, boolean fullscreen, Rect systemInsets,
+            Rect stableInsets) {
         synchronized (this) {
+            mFullscreen = fullscreen;
             mTargetRect.set(newTargetBounds);
+            mSystemInsets.set(systemInsets);
+            mStableInsets.set(stableInsets);
             // Notify of a bounds change.
             pingRenderLocked();
         }
@@ -204,16 +233,23 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                 return;
             }
             mNewTargetRect.set(mTargetRect);
-            if (!mNewTargetRect.equals(mOldTargetRect) || mReportNextDraw) {
+            if (!mNewTargetRect.equals(mOldTargetRect)
+                    || mOldFullscreen != mFullscreen
+                    || !mStableInsets.equals(mOldStableInsets)
+                    || !mSystemInsets.equals(mOldSystemInsets)
+                    || mReportNextDraw) {
+                mOldFullscreen = mFullscreen;
                 mOldTargetRect.set(mNewTargetRect);
-                changeWindowSizeLocked(mNewTargetRect);
+                mOldSystemInsets.set(mSystemInsets);
+                mOldStableInsets.set(mStableInsets);
+                redrawLocked(mNewTargetRect, mFullscreen, mSystemInsets, mStableInsets);
             }
         }
     }
 
     /**
      * The content is about to be drawn and we got the location of where it will be shown.
-     * If a "changeWindowSizeLocked" call has already been processed, we will re-issue the call
+     * If a "redrawLocked" call has already been processed, we will re-issue the call
      * if the previous call was ignored since the size was unknown.
      * @param xOffset The x offset where the content is drawn to.
      * @param yOffset The y offset where the content is drawn to.
@@ -235,8 +271,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
                     mLastYOffset,
                     mLastXOffset + mLastContentWidth,
                     mLastYOffset + mLastCaptionHeight + mLastContentHeight);
-            // If this was the first call and changeWindowSizeLocked got already called prior
-            // to us, we should re-issue a changeWindowSizeLocked now.
+            // If this was the first call and redrawLocked got already called prior
+            // to us, we should re-issue a redrawLocked now.
             return firstCall
                     && (mLastCaptionHeight != 0 || !mDecorView.isShowingCaption());
         }
@@ -251,16 +287,20 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     }
 
     /**
-     * Resizing the frame to fit the new window size.
+     * Redraws the background, the caption and the system inset backgrounds if something changed.
+     *
      * @param newBounds The window bounds which needs to be drawn.
+     * @param fullscreen Whether the window is currently drawing in fullscreen.
+     * @param systemInsets The current visible system insets for the window.
+     * @param stableInsets The stable insets for the window.
      */
-    private void changeWindowSizeLocked(Rect newBounds) {
+    private void redrawLocked(Rect newBounds, boolean fullscreen, Rect systemInsets,
+            Rect stableInsets) {
 
         // While a configuration change is taking place the view hierarchy might become
         // inaccessible. For that case we remember the previous metrics to avoid flashes.
         // Note that even when there is no visible caption, the caption child will exist.
         final int captionHeight = mDecorView.getCaptionHeight();
-        final int statusBarHeight = mDecorView.getStatusBarHeight();
 
         // The caption height will probably never dynamically change while we are resizing.
         // Once set to something other then 0 it should be kept that way.
@@ -302,19 +342,45 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         }
         mFrameAndBackdropNode.end(canvas);
 
-        if (mSystemBarBackgroundNode != null && mStatusBarColor != null) {
-            canvas = mSystemBarBackgroundNode.start(width, height);
-            mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
-            mStatusBarColor.setBounds(0, 0, left + width, statusBarHeight);
-            mStatusBarColor.draw(canvas);
-            mSystemBarBackgroundNode.end(canvas);
-            mRenderer.drawRenderNode(mSystemBarBackgroundNode);
-        }
+        drawColorViews(left, top, width, height, fullscreen, systemInsets, stableInsets);
 
         // We need to render the node explicitly
         mRenderer.drawRenderNode(mFrameAndBackdropNode);
 
         reportDrawIfNeeded();
+    }
+
+    private void drawColorViews(int left, int top, int width, int height,
+            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
+        if (mSystemBarBackgroundNode == null) {
+            return;
+        }
+        DisplayListCanvas canvas = mSystemBarBackgroundNode.start(width, height);
+        mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
+        final int topInset = DecorView.getColorViewTopInset(mStableInsets.top, mSystemInsets.top);
+        final int bottomInset = DecorView.getColorViewBottomInset(stableInsets.bottom,
+                systemInsets.bottom);
+        final int rightInset = DecorView.getColorViewRightInset(stableInsets.right,
+                systemInsets.right);
+        if (mStatusBarColor != null) {
+            mStatusBarColor.setBounds(0, 0, left + width, topInset);
+            mStatusBarColor.draw(canvas);
+        }
+
+        // We only want to draw the navigation bar if our window is currently fullscreen because we
+        // don't want the navigation bar background be moving around when resizing in docked mode.
+        // However, we need it for the transitions into/out of docked mode.
+        if (mNavigationBarColor != null && fullscreen) {
+            final int size = DecorView.getNavBarSize(bottomInset, rightInset);
+            if (DecorView.isNavBarToRightEdge(bottomInset, rightInset)) {
+                mNavigationBarColor.setBounds(width - size, 0, width, height);
+            } else {
+                mNavigationBarColor.setBounds(0, height - size, width, height);
+            }
+            mNavigationBarColor.draw(canvas);
+        }
+        mSystemBarBackgroundNode.end(canvas);
+        mRenderer.drawRenderNode(mSystemBarBackgroundNode);
     }
 
     /** Notify view root that a frame has been drawn by us, if it has requested so. */
