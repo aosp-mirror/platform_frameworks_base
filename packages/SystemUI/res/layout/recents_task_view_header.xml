@@ -49,8 +49,9 @@
         android:layout_marginEnd="@dimen/recents_task_view_header_button_width"
         android:layout_gravity="center_vertical|end"
         android:padding="15dp"
-        android:background="@drawable/recents_button_bg"
         android:src="@drawable/star"
+        android:background="?android:selectableItemBackground"
+        android:alpha="0"
         android:visibility="gone" />
     <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/dismiss_task"
@@ -58,9 +59,10 @@
         android:layout_height="@dimen/recents_task_view_header_button_height"
         android:layout_gravity="center_vertical|end"
         android:padding="15dp"
-        android:background="@drawable/recents_button_bg"
-        android:visibility="invisible"
-        android:src="@drawable/recents_dismiss_light" />
+        android:src="@drawable/recents_dismiss_light"
+        android:background="?android:selectableItemBackground"
+        android:alpha="0"
+        android:visibility="gone" />
 
     <!-- The progress indicator shows if auto-paging is enabled -->
     <ViewStub android:id="@+id/focus_timer_indicator_stub"

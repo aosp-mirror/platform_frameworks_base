@@ -93,7 +93,6 @@ public class TaskViewThumbnail extends View {
 
         mTaskViewRect.set(0, 0, width, height);
         updateThumbnailScale();
-        invalidate();
     }
 
     @Override
@@ -120,7 +119,6 @@ public class TaskViewThumbnail extends View {
             mDrawPaint.setShader(null);
             mThumbnailRect.setEmpty();
         }
-        invalidate();
     }
 
     /** Updates the paint to draw the thumbnail. */
@@ -138,7 +136,9 @@ public class TaskViewThumbnail extends View {
             mDrawPaint.setColorFilter(null);
             mDrawPaint.setColor(Color.argb(255, grey, grey, grey));
         }
-        invalidate();
+        if (!mInvisible) {
+            invalidate();
+        }
     }
 
     /**

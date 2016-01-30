@@ -29,6 +29,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.IntProperty;
@@ -114,6 +115,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     Task mTask;
     boolean mTaskDataLoaded;
     boolean mClipViewInStack = true;
+    boolean mTouchExplorationEnabled;
     AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
@@ -162,6 +164,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     void reset() {
         resetViewProperties();
         resetNoUserInteractionState();
+        readSystemFlags();
         setClipViewInStack(false);
         setCallbacks(null);
     }
@@ -174,6 +177,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /** Returns the view bounds. */
     AnimateableViewBounds getViewBounds() {
         return mViewBounds;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        readSystemFlags();
     }
 
     @Override
@@ -545,7 +554,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     public void onTaskDataLoaded(Task task) {
         // Bind each of the views to the new task data
         mThumbnailView.rebindToTask(mTask);
-        mHeaderView.rebindToTask(mTask);
+        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled);
         mTaskDataLoaded = true;
     }
 
@@ -554,13 +563,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         // Unbind each of the views from the task data and remove the task callback
         mTask.removeCallback(this);
         mThumbnailView.unbindFromTask();
-        mHeaderView.unbindFromTask();
+        mHeaderView.unbindFromTask(mTouchExplorationEnabled);
         mTaskDataLoaded = false;
     }
 
     @Override
     public void onTaskStackIdChanged() {
-        mHeaderView.rebindToTask(mTask);
+        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled);
     }
 
     /**** View.OnClickListener Implementation ****/
@@ -614,5 +623,13 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             });
         }
         EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * Reads current system flags related to accessibility and screen pinning.
+     */
+    private void readSystemFlags() {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
     }
 }
