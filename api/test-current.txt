@@ -28525,6 +28525,7 @@ package android.os {
     field public static java.lang.String DIRECTORY_DCIM;
     field public static java.lang.String DIRECTORY_DOCUMENTS;
     field public static java.lang.String DIRECTORY_DOWNLOADS;
+    field public static java.lang.String DIRECTORY_HOME;
     field public static java.lang.String DIRECTORY_MOVIES;
     field public static java.lang.String DIRECTORY_MUSIC;
     field public static java.lang.String DIRECTORY_NOTIFICATIONS;

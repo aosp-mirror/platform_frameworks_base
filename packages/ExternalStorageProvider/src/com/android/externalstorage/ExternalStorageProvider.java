@@ -27,6 +27,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -208,8 +209,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
                 root.flags |= Root.FLAG_SUPPORTS_CREATE;
             }
 
+            // Create the "Home" directory on disk, but don't the localized root.title
+            // since the directories shouldn't be localized.
             root.visiblePath = new File(
-                    primaryVolume.getPathForUser(userId), root.rootId);
+                    primaryVolume.getPathForUser(userId), Environment.DIRECTORY_HOME);
             root.path = new File(
                     primaryVolume.getInternalPathForUser(userId), root.rootId);
             try {
