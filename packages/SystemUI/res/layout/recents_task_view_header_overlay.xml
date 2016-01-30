@@ -45,6 +45,6 @@
         android:layout_height="@dimen/recents_task_bar_height"
         android:layout_gravity="center_vertical|end"
         android:padding="15dp"
-        android:background="?android:selectableItemBackground"
+        android:background="@drawable/recents_button_bg"
         android:src="@drawable/recents_info_light" />
 </FrameLayout>

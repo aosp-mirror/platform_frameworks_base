@@ -806,7 +806,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 } else {
                     Canvas c = new Canvas(thumbnail);
                     c.scale(toTransform.scale, toTransform.scale);
-                    mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */);
+                    mHeaderBar.rebindToTask(toTask);
                     mHeaderBar.draw(c);
                     c.setBitmap(null);
                 }
