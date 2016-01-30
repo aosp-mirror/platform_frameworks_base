@@ -17,7 +17,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
-import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE;
+import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -1672,7 +1672,7 @@ class ActivityStarter {
             return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
         }
 
-        if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_TO_SIDE) == 0) {
+        if (!launchToSideAllowed || (launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0) {
             return null;
         }
 

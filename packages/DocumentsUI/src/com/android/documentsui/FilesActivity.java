@@ -289,7 +289,7 @@ public class FilesActivity extends BaseActivity {
         // By default we'd be launched in-place above the existing app.
         // By setting launch-to-side ActivityManager will open us to side.
         if (inMultiWindowMode()) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_TO_SIDE);
+            intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT);
         }
 
         startActivity(intent);
