@@ -1576,6 +1576,25 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void onSaveInstanceState(Bundle outState) {
     }
 
+    /**
+     * Called when the Fragment's activity changes from fullscreen mode to multi-window mode and
+     * visa-versa. This is generally tied to {@link Activity#onMultiWindowChanged} of the containing
+     * Activity.
+     *
+     * @param inMultiWindow True if the activity is in multi-window mode.
+     */
+    public void onMultiWindowChanged(boolean inMultiWindow) {
+    }
+
+    /**
+     * Called by the system when the activity changes to and from picture-in-picture mode. This is
+     * generally tied to {@link Activity#onPictureInPictureChanged} of the containing Activity.
+     *
+     * @param inPictureInPicture True if the activity is in picture-in-picture mode.
+     */
+    public void onPictureInPictureChanged(boolean inPictureInPicture) {
+    }
+
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
     }
@@ -2305,6 +2324,20 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mChildFragmentManager != null) {
             mChildFragmentManager.dispatchResume();
             mChildFragmentManager.execPendingActions();
+        }
+    }
+
+    void performMultiWindowChanged(boolean inMultiWindow) {
+        onMultiWindowChanged(inMultiWindow);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchMultiWindowChanged(inMultiWindow);
+        }
+    }
+
+    void performPictureInPictureChanged(boolean inPictureInPicture) {
+        onPictureInPictureChanged(inPictureInPicture);
+        if (mChildFragmentManager != null) {
+            mChildFragmentManager.dispatchPictureInPictureChanged(inPictureInPicture);
         }
     }
 

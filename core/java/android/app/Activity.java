@@ -1837,6 +1837,7 @@ public class Activity extends ContextThemeWrapper
     public void onMultiWindowChanged(boolean inMultiWindow) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "onMultiWindowChanged " + this + ": " + inMultiWindow);
+        mFragments.dispatchMultiWindowChanged(inMultiWindow);
         if (mWindow != null) {
             mWindow.onMultiWindowChanged();
         }
@@ -1862,9 +1863,11 @@ public class Activity extends ContextThemeWrapper
      *
      * @param inPictureInPicture True if the activity is in picture-in-picture mode.
      */
+    @CallSuper
     public void onPictureInPictureChanged(boolean inPictureInPicture) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
                 "onPictureInPictureChanged " + this + ": " + inPictureInPicture);
+        mFragments.dispatchPictureInPictureChanged(inPictureInPicture);
     }
 
     /**
