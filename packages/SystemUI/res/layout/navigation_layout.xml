@@ -29,14 +29,16 @@
             android:id="@+id/ends_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:clipChildren="false" />
 
         <LinearLayout
             android:id="@+id/center_group"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:clipChildren="false" />
 
     </FrameLayout>
 
