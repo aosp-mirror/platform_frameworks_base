@@ -48,7 +48,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
@@ -693,6 +692,33 @@ public abstract class Context {
      * @see #MODE_WORLD_WRITEABLE
      */
     public abstract SharedPreferences getSharedPreferences(File file, int mode);
+
+    /**
+     * Migrate an existing shared preferences file from the given source storage
+     * context to this context. This is typically used to migrate data between
+     * storage locations after an upgrade, such as migrating from credential
+     * encrypted to device encrypted storage.
+     *
+     * @param sourceContext The source context which contains the existing
+     *            shared preferences to migrate.
+     * @param name The name of the shared preferences file.
+     * @return {@code true} if the migration was successful or if the shared
+     *         preferences didn't exist in the source context, otherwise
+     *         {@code false}.
+     * @see #createDeviceEncryptedStorageContext()
+     */
+    public abstract boolean migrateSharedPreferencesFrom(Context sourceContext, String name);
+
+    /**
+     * Delete an existing shared preferences file.
+     *
+     * @param name The name (unique in the application package) of the shared
+     *            preferences file.
+     * @return {@code true} if the shared preferences file was successfully
+     *         deleted; else {@code false}.
+     * @see #getSharedPreferences(String, int)
+     */
+    public abstract boolean deleteSharedPreferences(String name);
 
     /**
      * Open a private file associated with this Context's application package
@@ -1355,6 +1381,21 @@ public abstract class Context {
     public abstract SQLiteDatabase openOrCreateDatabase(String name,
             int mode, CursorFactory factory,
             @Nullable DatabaseErrorHandler errorHandler);
+
+    /**
+     * Migrate an existing database file from the given source storage context
+     * to this context. This is typically used to migrate data between storage
+     * locations after an upgrade, such as migrating from credential encrypted
+     * to device encrypted storage.
+     *
+     * @param sourceContext The source context which contains the existing
+     *            database to migrate.
+     * @param name The name of the database file.
+     * @return {@code true} if the migration was successful or if the database
+     *         didn't exist in the source context, otherwise {@code false}.
+     * @see #createDeviceEncryptedStorageContext()
+     */
+    public abstract boolean migrateDatabaseFrom(Context sourceContext, String name);
 
     /**
      * Delete an existing private SQLiteDatabase associated with this Context's

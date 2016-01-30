@@ -141,7 +141,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         notifyAll();
     }
 
-    private static File makeBackupFile(File prefsFile) {
+    static File makeBackupFile(File prefsFile) {
         return new File(prefsFile.getPath() + ".bak");
     }
 

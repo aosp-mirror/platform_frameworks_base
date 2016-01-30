@@ -186,6 +186,19 @@ public class ArrayUtils {
         return true;
     }
 
+    /**
+     * Test if any {@code check} items are contained in {@code array}.
+     */
+    public static <T> boolean containsAny(@Nullable T[] array, T[] check) {
+        if (check == null) return false;
+        for (T checkItem : check) {
+            if (contains(array, checkItem)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean contains(@Nullable int[] array, int value) {
         if (array == null) return false;
         for (int element : array) {

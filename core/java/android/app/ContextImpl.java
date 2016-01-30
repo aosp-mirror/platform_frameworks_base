@@ -16,9 +16,6 @@
 
 package android.app;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -61,7 +58,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
-import android.os.storage.StorageManager;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -69,10 +65,14 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -342,21 +342,11 @@ class ContextImpl extends Context {
     public SharedPreferences getSharedPreferences(File file, int mode) {
         SharedPreferencesImpl sp;
         synchronized (ContextImpl.class) {
-            if (sSharedPrefs == null) {
-                sSharedPrefs = new ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>>();
-            }
-
-            final String packageName = getPackageName();
-            ArrayMap<File, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
-            if (packagePrefs == null) {
-                packagePrefs = new ArrayMap<File, SharedPreferencesImpl>();
-                sSharedPrefs.put(packageName, packagePrefs);
-            }
-
-            sp = packagePrefs.get(file);
+            final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
+            sp = cache.get(file);
             if (sp == null) {
                 sp = new SharedPreferencesImpl(file, mode);
-                packagePrefs.put(file, sp);
+                cache.put(file, sp);
                 return sp;
             }
         }
@@ -370,12 +360,90 @@ class ContextImpl extends Context {
         return sp;
     }
 
+    private ArrayMap<File, SharedPreferencesImpl> getSharedPreferencesCacheLocked() {
+        if (sSharedPrefs == null) {
+            sSharedPrefs = new ArrayMap<>();
+        }
+
+        final String packageName = getPackageName();
+        ArrayMap<File, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
+        if (packagePrefs == null) {
+            packagePrefs = new ArrayMap<>();
+            sSharedPrefs.put(packageName, packagePrefs);
+        }
+
+        return packagePrefs;
+    }
+
+    /**
+     * Try our best to migrate all files from source to target that match
+     * requested prefix. Return false if we have any trouble migrating.
+     */
+    private static boolean migrateFiles(File sourceDir, File targetDir, final String prefix) {
+        final File[] sourceFiles = FileUtils.listFilesOrEmpty(sourceDir, new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith(prefix);
+            }
+        });
+
+        boolean res = true;
+        for (File sourceFile : sourceFiles) {
+            final File targetFile = new File(targetDir, sourceFile.getName());
+            Log.d(TAG, "Migrating " + sourceFile + " to " + targetFile);
+            try {
+                FileUtils.copyFileOrThrow(sourceFile, targetFile);
+                FileUtils.copyPermissions(sourceFile, targetFile);
+                if (!sourceFile.delete()) {
+                    throw new IOException("Failed to clean up " + sourceFile);
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to migrate " + sourceFile + ": " + e);
+                res = false;
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        synchronized (ContextImpl.class) {
+            final File source = sourceContext.getSharedPreferencesPath(name);
+            final File target = getSharedPreferencesPath(name);
+
+            // Evict any in-memory caches for either location
+            final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
+            cache.remove(source);
+            cache.remove(target);
+
+            return migrateFiles(source.getParentFile(), target.getParentFile(), source.getName());
+        }
+    }
+
+    @Override
+    public boolean deleteSharedPreferences(String name) {
+        synchronized (ContextImpl.class) {
+            final File prefs = getSharedPreferencesPath(name);
+            final File prefsBackup = SharedPreferencesImpl.makeBackupFile(prefs);
+
+            // Evict any in-memory caches
+            final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
+            cache.remove(prefs);
+
+            prefs.delete();
+            prefsBackup.delete();
+
+            // We failed if files are still lingering
+            return !(prefs.exists() || prefsBackup.exists());
+        }
+    }
+
     private File getPreferencesDir() {
         synchronized (mSync) {
             if (mPreferencesDir == null) {
                 mPreferencesDir = new File(getDataDirFile(), "shared_prefs");
             }
-            return mPreferencesDir;
+            return ensurePrivateDirExists(mPreferencesDir);
         }
     }
 
@@ -416,14 +484,14 @@ class ContextImpl extends Context {
     }
 
     // Common-path handling of app data dir creation
-    private static File createFilesDirLocked(File file) {
+    private static File ensurePrivateDirExists(File file) {
         if (!file.exists()) {
             if (!file.mkdirs()) {
                 if (file.exists()) {
                     // spurious failure; probably racing with another process for this app
                     return file;
                 }
-                Log.w(TAG, "Unable to create files subdir " + file.getPath());
+                Log.w(TAG, "Failed to ensure directory " + file.getAbsolutePath());
                 return null;
             }
             FileUtils.setPermissions(
@@ -440,7 +508,7 @@ class ContextImpl extends Context {
             if (mFilesDir == null) {
                 mFilesDir = new File(getDataDirFile(), "files");
             }
-            return createFilesDirLocked(mFilesDir);
+            return ensurePrivateDirExists(mFilesDir);
         }
     }
 
@@ -450,7 +518,7 @@ class ContextImpl extends Context {
             if (mNoBackupFilesDir == null) {
                 mNoBackupFilesDir = new File(getDataDirFile(), "no_backup");
             }
-            return createFilesDirLocked(mNoBackupFilesDir);
+            return ensurePrivateDirExists(mNoBackupFilesDir);
         }
     }
 
@@ -474,7 +542,7 @@ class ContextImpl extends Context {
             }
 
             // Create dirs if needed
-            return ensureDirsExistOrFilter(dirs);
+            return ensureExternalDirsExistOrFilter(dirs);
         }
     }
 
@@ -492,7 +560,7 @@ class ContextImpl extends Context {
             }
 
             // Create dirs if needed
-            return ensureDirsExistOrFilter(mExternalObbDirs);
+            return ensureExternalDirsExistOrFilter(mExternalObbDirs);
         }
     }
 
@@ -502,7 +570,7 @@ class ContextImpl extends Context {
             if (mCacheDir == null) {
                 mCacheDir = new File(getDataDirFile(), "cache");
             }
-            return createFilesDirLocked(mCacheDir);
+            return ensurePrivateDirExists(mCacheDir);
         }
     }
 
@@ -512,7 +580,7 @@ class ContextImpl extends Context {
             if (mCodeCacheDir == null) {
                 mCodeCacheDir = new File(getDataDirFile(), "code_cache");
             }
-            return createFilesDirLocked(mCodeCacheDir);
+            return ensurePrivateDirExists(mCodeCacheDir);
         }
     }
 
@@ -530,7 +598,7 @@ class ContextImpl extends Context {
             }
 
             // Create dirs if needed
-            return ensureDirsExistOrFilter(mExternalCacheDirs);
+            return ensureExternalDirsExistOrFilter(mExternalCacheDirs);
         }
     }
 
@@ -542,7 +610,7 @@ class ContextImpl extends Context {
             }
 
             // Create dirs if needed
-            return ensureDirsExistOrFilter(mExternalMediaDirs);
+            return ensureExternalDirsExistOrFilter(mExternalMediaDirs);
         }
     }
 
@@ -570,7 +638,7 @@ class ContextImpl extends Context {
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
-        File f = validateFilePath(name, true);
+        File f = getDatabasePath(name);
         int flags = SQLiteDatabase.CREATE_IF_NECESSARY;
         if ((mode & MODE_ENABLE_WRITE_AHEAD_LOGGING) != 0) {
             flags |= SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING;
@@ -584,9 +652,18 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+        synchronized (ContextImpl.class) {
+            final File source = sourceContext.getDatabasePath(name);
+            final File target = getDatabasePath(name);
+            return migrateFiles(source.getParentFile(), target.getParentFile(), source.getName());
+        }
+    }
+
+    @Override
     public boolean deleteDatabase(String name) {
         try {
-            File f = validateFilePath(name, false);
+            File f = getDatabasePath(name);
             return SQLiteDatabase.deleteDatabase(f);
         } catch (Exception e) {
         }
@@ -595,7 +672,26 @@ class ContextImpl extends Context {
 
     @Override
     public File getDatabasePath(String name) {
-        return validateFilePath(name, false);
+        File dir;
+        File f;
+
+        if (name.charAt(0) == File.separatorChar) {
+            String dirPath = name.substring(0, name.lastIndexOf(File.separatorChar));
+            dir = new File(dirPath);
+            name = name.substring(name.lastIndexOf(File.separatorChar));
+            f = new File(dir, name);
+        } else {
+            dir = getDatabasesDir();
+            f = makeFilename(dir, name);
+        }
+
+        if (!dir.isDirectory() && dir.mkdir()) {
+            FileUtils.setPermissions(dir.getPath(),
+                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                -1, -1);
+        }
+
+        return f;
     }
 
     @Override
@@ -604,16 +700,16 @@ class ContextImpl extends Context {
         return (list != null) ? list : EMPTY_STRING_ARRAY;
     }
 
-
     private File getDatabasesDir() {
         synchronized (mSync) {
             if (mDatabasesDir == null) {
-                mDatabasesDir = new File(getDataDirFile(), "databases");
+                if ("android".equals(getPackageName())) {
+                    mDatabasesDir = new File("/data/system");
+                } else {
+                    mDatabasesDir = new File(getDataDirFile(), "databases");
+                }
             }
-            if (mDatabasesDir.getPath().equals("databases")) {
-                mDatabasesDir = new File("/data/system");
-            }
-            return mDatabasesDir;
+            return ensurePrivateDirExists(mDatabasesDir);
         }
     }
 
@@ -1798,15 +1894,25 @@ class ContextImpl extends Context {
 
     private File getDataDirFile() {
         if (mPackageInfo != null) {
+            File res = null;
             if (isCredentialEncryptedStorage()) {
-                return mPackageInfo.getCredentialEncryptedDataDirFile();
+                res = mPackageInfo.getCredentialEncryptedDataDirFile();
             } else if (isDeviceEncryptedStorage()) {
-                return mPackageInfo.getDeviceEncryptedDataDirFile();
+                res = mPackageInfo.getDeviceEncryptedDataDirFile();
             } else {
-                return mPackageInfo.getDataDirFile();
+                res = mPackageInfo.getDataDirFile();
             }
+
+            if (res != null) {
+                return res;
+            } else {
+                throw new RuntimeException(
+                        "No data directory found for package " + getPackageName());
+            }
+        } else {
+            throw new RuntimeException(
+                    "No package details found for package " + getPackageName());
         }
-        throw new RuntimeException("Not supported in system context");
     }
 
     @Override
@@ -1982,29 +2088,6 @@ class ContextImpl extends Context {
         FileUtils.setPermissions(name, perms, -1, -1);
     }
 
-    private File validateFilePath(String name, boolean createDirectory) {
-        File dir;
-        File f;
-
-        if (name.charAt(0) == File.separatorChar) {
-            String dirPath = name.substring(0, name.lastIndexOf(File.separatorChar));
-            dir = new File(dirPath);
-            name = name.substring(name.lastIndexOf(File.separatorChar));
-            f = new File(dir, name);
-        } else {
-            dir = getDatabasesDir();
-            f = makeFilename(dir, name);
-        }
-
-        if (createDirectory && !dir.isDirectory() && dir.mkdir()) {
-            FileUtils.setPermissions(dir.getPath(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                -1, -1);
-        }
-
-        return f;
-    }
-
     private File makeFilename(File base, String name) {
         if (name.indexOf(File.separatorChar) < 0) {
             return new File(base, name);
@@ -2017,7 +2100,7 @@ class ContextImpl extends Context {
      * Ensure that given directories exist, trying to create them if missing. If
      * unable to create, they are filtered by replacing with {@code null}.
      */
-    private File[] ensureDirsExistOrFilter(File[] dirs) {
+    private File[] ensureExternalDirsExistOrFilter(File[] dirs) {
         File[] result = new File[dirs.length];
         for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];

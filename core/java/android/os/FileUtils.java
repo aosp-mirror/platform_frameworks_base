@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -36,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -141,6 +143,16 @@ public class FileUtils {
         return 0;
     }
 
+    public static void copyPermissions(File from, File to) throws IOException {
+        try {
+            final StructStat stat = Os.stat(from.getAbsolutePath());
+            Os.chmod(to.getAbsolutePath(), stat.st_mode);
+            Os.chown(to.getAbsolutePath(), stat.st_uid, stat.st_gid);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+
     /**
      * Return owning UID of given path, otherwise -1.
      */
@@ -167,50 +179,57 @@ public class FileUtils {
         return false;
     }
 
+    @Deprecated
+    public static boolean copyFile(File srcFile, File destFile) {
+        try {
+            copyFileOrThrow(srcFile, destFile);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     // copy a file from srcFile to destFile, return true if succeed, return
     // false if fail
-    public static boolean copyFile(File srcFile, File destFile) {
-        boolean result = false;
-        try {
-            InputStream in = new FileInputStream(srcFile);
-            try {
-                result = copyToFile(in, destFile);
-            } finally  {
-                in.close();
-            }
-        } catch (IOException e) {
-            result = false;
+    public static void copyFileOrThrow(File srcFile, File destFile) throws IOException {
+        try (InputStream in = new FileInputStream(srcFile)) {
+            copyToFileOrThrow(in, destFile);
         }
-        return result;
+    }
+
+    @Deprecated
+    public static boolean copyToFile(InputStream inputStream, File destFile) {
+        try {
+            copyToFileOrThrow(inputStream, destFile);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
      * Copy data from a source stream to destFile.
      * Return true if succeed, return false if failed.
      */
-    public static boolean copyToFile(InputStream inputStream, File destFile) {
+    public static void copyToFileOrThrow(InputStream inputStream, File destFile)
+            throws IOException {
+        if (destFile.exists()) {
+            destFile.delete();
+        }
+        FileOutputStream out = new FileOutputStream(destFile);
         try {
-            if (destFile.exists()) {
-                destFile.delete();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) >= 0) {
+                out.write(buffer, 0, bytesRead);
             }
-            FileOutputStream out = new FileOutputStream(destFile);
+        } finally {
+            out.flush();
             try {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) >= 0) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            } finally {
-                out.flush();
-                try {
-                    out.getFD().sync();
-                } catch (IOException e) {
-                }
-                out.close();
+                out.getFD().sync();
+            } catch (IOException e) {
             }
-            return true;
-        } catch (IOException e) {
-            return false;
+            out.close();
         }
     }
 
@@ -641,6 +660,15 @@ public class FileUtils {
 
     public static @NonNull File[] listFilesOrEmpty(File dir) {
         File[] res = dir.listFiles();
+        if (res != null) {
+            return res;
+        } else {
+            return EMPTY;
+        }
+    }
+
+    public static @NonNull File[] listFilesOrEmpty(File dir, FilenameFilter filter) {
+        File[] res = dir.listFiles(filter);
         if (res != null) {
             return res;
         } else {

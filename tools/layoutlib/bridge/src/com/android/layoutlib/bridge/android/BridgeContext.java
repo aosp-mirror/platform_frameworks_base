@@ -1258,6 +1258,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+        // pass
+        return false;
+    }
+
+    @Override
     public boolean deleteDatabase(String arg0) {
         // pass
         return false;
@@ -1436,6 +1442,18 @@ public final class BridgeContext extends Context {
             mSharedPreferences = new BridgeSharedPreferences();
         }
         return mSharedPreferences;
+    }
+
+    @Override
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        // pass
+        return false;
+    }
+
+    @Override
+    public boolean deleteSharedPreferences(String name) {
+        // pass
+        return false;
     }
 
     @Override

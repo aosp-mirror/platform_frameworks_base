@@ -151,6 +151,16 @@ public class MockContext extends Context {
     }
 
     @Override
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean deleteSharedPreferences(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public FileInputStream openFileInput(String name) throws FileNotFoundException {
         throw new UnsupportedOperationException();
     }
@@ -239,6 +249,11 @@ public class MockContext extends Context {
 
     @Override
     public String[] databaseList() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
         throw new UnsupportedOperationException();
     }
 

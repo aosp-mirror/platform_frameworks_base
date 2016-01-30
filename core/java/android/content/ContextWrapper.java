@@ -170,6 +170,16 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public boolean migrateSharedPreferencesFrom(Context sourceContext, String name) {
+        return mBase.migrateSharedPreferencesFrom(sourceContext, name);
+    }
+
+    @Override
+    public boolean deleteSharedPreferences(String name) {
+        return mBase.deleteSharedPreferences(name);
+    }
+
+    @Override
     public FileInputStream openFileInput(String name)
         throws FileNotFoundException {
         return mBase.openFileInput(name);
@@ -270,6 +280,11 @@ public class ContextWrapper extends Context {
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
         return mBase.openOrCreateDatabase(name, mode, factory, errorHandler);
+    }
+
+    @Override
+    public boolean migrateDatabaseFrom(Context sourceContext, String name) {
+        return mBase.migrateDatabaseFrom(sourceContext, name);
     }
 
     @Override
