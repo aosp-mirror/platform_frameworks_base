@@ -5,59 +5,10 @@ page.image=images/cards/android-studio_2x.png
 header.hide=1
 page.metaDescription=下載官方 Android IDE 和開發人員工具以建置適用於 Android 手機、平板電腦、穿戴式裝置、電視等裝置的應用程式。
 
-studio.version=1.4.0.10
-
-studio.linux_bundle_download=android-studio-ide-141.2288178-linux.zip
-studio.linux_bundle_bytes=380821638
-studio.linux_bundle_checksum=137e3734f2e8e285bd7c1d2fae2e8548d0f164bd
-
-studio.mac_bundle_download=android-studio-ide-141.2288178-mac.dmg
-studio.mac_bundle_bytes=364624965
-studio.mac_bundle_checksum=27068d59d5a78717d31bdedd054082b5c50d3897
-
-studio.win_bundle_download=android-studio-ide-141.2288178-windows.zip
-studio.win_bundle_bytes=373492997
-studio.win_bundle_checksum=c0851dc9a506ba9f4c1379a3e9b4019c08478220
-
-
-studio.win_bundle_exe_download=android-studio-bundle-141.2288178-windows.exe
-studio.win_bundle_exe_bytes=1177811944
-studio.win_bundle_exe_checksum=a2f0141d35f8f0c24dad2ff390e7f6231c5f7625
-
-studio.win_notools_exe_download=android-studio-ide-141.2288178-windows.exe
-studio.win_notools_exe_bytes=348295968
-studio.win_notools_exe_checksum=82d0d9c78ec23834956f941a07821be347fcb7bf
-
-
-
-
-sdk.linux_download=android-sdk_r24.3.4-linux.tgz
-sdk.linux_bytes=309138331
-sdk.linux_checksum=fb293d7bca42e05580be56b1adc22055d46603dd
-
-sdk.mac_download=android-sdk_r24.3.4-macosx.zip
-sdk.mac_bytes=98340900
-sdk.mac_checksum=128f10fba668ea490cc94a08e505a48a608879b9
-
-sdk.win_download=android-sdk_r24.3.4-windows.zip
-sdk.win_bytes=187496897
-sdk.win_checksum=4a8718fb4a2bf2128d34b92f23ddd79fc65839e7
-
-
-sdk.win_installer=installer_r24.3.4-windows.exe
-sdk.win_installer_bytes=139477985
-sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
-
-
-
-
-
-
 @jd:body
 
 <style type="text/css">
   .offline {display:none;}
-  a.download-bundle-button {display:block;}
   h2.feature {
     padding-top:30px;
     margin-top:0;
@@ -65,20 +16,7 @@ sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
   }
   .feature-blurb {
   margin:0px; font-size:16px; font-weight:300;
-  padding:40px 0 0 0;
-  }
-
-  .landing-button.green {
-    font-size:16px;
-    background-color:#90c653;
-    padding:8px 10px 10px;
-    margin:0;
-    width:206px;
-    text-align:center;
-  }
-
-  .landing-button.green:hover {
-    background-color:#85b84f;
+  padding-top:40px;
   }
 
   .landing-button .small {
@@ -96,8 +34,8 @@ sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
     white-space: nowrap;
     text-indent: -10000px;
     font-size:0px;
-    background: url(../images/tools/studio-logo.png);
-    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background: url({@docRoot}images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url({@docRoot}images/tools/studio-logo.png) 1x, url({@docRoot}images/tools/studio-logo_2x.png) 2x);
     background-size: 226px 78px;
   }
 
@@ -293,15 +231,15 @@ sdk.win_installer_checksum=094dd45f98a31f839feae898b48f23704f2878dd
 <p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
 width: 400px;text-align: center;">官方 Android IDE</p>
 
-<ul style="font-size:12px">
+<ul style="font-size:12px;line-height:19px;">
 <li>Android Studio IDE</li>
 <li>Android SDK 工具</li>
 <li>Android 6.0 (Marshmallow) 平台</li>
 <li>含 Google API 的 Android 6.0 模擬器系統映像檔</li>
 </ul>
 
-
-<a class="online landing-button green download-bundle-button" style="margin-top:30px;" href="#Other">Download</a>
+<a class="online landing-button green download-bundle-button"
+href="#Other" >Download Android Studio<br/><span class='small'></span></a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
