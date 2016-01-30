@@ -17,18 +17,16 @@
 package com.android.mediaframeworktest.stress;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.CameraTestHelper;
+import com.android.mediaframeworktest.helpers.CameraTestHelper;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 
-import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Environment;
 import android.os.Handler;
@@ -37,9 +35,6 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import com.android.mediaframeworktest.CameraStressTestRunner;
-
-import junit.framework.Assert;
 
 /**
  * Junit / Instrumentation test case for the following camera APIs:

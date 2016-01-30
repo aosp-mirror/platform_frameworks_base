@@ -17,9 +17,6 @@
 package com.android.mediaframeworktest.functional.camera;
 
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
@@ -32,9 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.List;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.CameraStressTestRunner;
-import com.android.mediaframeworktest.CameraTestHelper;
-import junit.framework.Assert;
+import com.android.mediaframeworktest.helpers.CameraTestHelper;
 
 /**
  * Junit / Instrumentation test case for camera API pairwise testing

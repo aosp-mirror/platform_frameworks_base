@@ -18,6 +18,7 @@ package com.android.mediaframeworktest;
 
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
+
 import com.android.mediaframeworktest.stress.CameraStressTest;
 import com.android.mediaframeworktest.functional.camera.CameraFunctionalTest;
 import com.android.mediaframeworktest.functional.camera.CameraPairwiseTest;

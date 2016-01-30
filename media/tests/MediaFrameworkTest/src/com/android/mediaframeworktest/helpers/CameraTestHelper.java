@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest;
+package com.android.mediaframeworktest.helpers;
+
+import junit.framework.Assert;
 
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -24,14 +26,10 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import junit.framework.Assert;
 
 public class CameraTestHelper {
 
