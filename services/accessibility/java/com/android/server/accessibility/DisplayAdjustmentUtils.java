@@ -110,17 +110,27 @@ class DisplayAdjustmentUtils {
         String matrix = Settings.Secure.getStringForUser(cr,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX, userId);
         if (matrix != null) {
-            colorMatrix = multiply(colorMatrix, getMatrix(matrix));
+            final float[] userMatrix = get4x4Matrix(matrix);
+            if (userMatrix != null) {
+                colorMatrix = multiply(colorMatrix, userMatrix);
+            }
         }
 
         setColorTransform(colorMatrix);
     }
 
-    private static float[] getMatrix(String matrix) {
+    private static float[] get4x4Matrix(String matrix) {
         String[] strValues = matrix.split(",");
+        if (strValues.length != 16) {
+            return null;
+        }
         float[] values = new float[strValues.length];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = Float.parseFloat(strValues[i]);
+        try {
+            for (int i = 0; i < values.length; i++) {
+                values[i] = Float.parseFloat(strValues[i]);
+            }
+        } catch (java.lang.NumberFormatException ex) {
+            return null;
         }
         return values;
     }
