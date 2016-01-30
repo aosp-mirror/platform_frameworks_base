@@ -4049,6 +4049,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // * or the token was marked as hidden and is exiting before we had a chance to play the
         // transition animation
         // * or this is an opening app and windows are being replaced.
+        boolean visibilityChanged = false;
         if (wtoken.hidden == visible || (wtoken.hidden && wtoken.mIsExiting) ||
                 (visible && wtoken.waitingForReplacement())) {
             boolean changed = false;
@@ -4115,6 +4116,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             wtoken.hidden = wtoken.hiddenRequested = !visible;
+            visibilityChanged = true;
             if (!visible) {
                 unsetAppFreezingScreenLocked(wtoken, true, true);
             } else {
@@ -4150,6 +4152,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wtoken.allAppWindows.get(i).mWinAnimator.isWindowAnimating()) {
                 delayed = true;
             }
+        }
+
+        if (visibilityChanged && visible && !delayed) {
+            // The token was made immediately visible, there will be no entrance animation. We need
+            // to inform the client the enter animation was finished.
+            wtoken.mEnteringAnimation = true;
+            mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(wtoken.token);
         }
 
         return delayed;
