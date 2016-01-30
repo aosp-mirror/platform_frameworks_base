@@ -62,7 +62,6 @@
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html"
-             es-lang=""
              ja-lang="アクティビティのライフサイクル 管理"
              ko-lang="액티비티 수명 주기 관리하기"
              pt-br-lang="Como gerenciar o ciclo de vida da atividade"
@@ -76,7 +75,6 @@
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html"
-             es-lang=""
              ja-lang="アクティビティを開始する"
              ko-lang="액티비티 시작하기"
              pt-br-lang="Iniciando uma atividade"
@@ -87,18 +85,10 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html"
-             es-lang=""
-             ja-lang=""
-             ko-lang=""
-             pt-br-lang=""
-             ru-lang=""
-             zh-cn-lang=""
-             zh-tw-lang="">
             Pausing and Resuming an Activity
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html"
-             es-lang=""
              ja-lang="アクティビティの一時停止と再開"
              ko-lang="액티비티 일시정지 및 재개하기"
              pt-br-lang="Pausando e reiniciando uma atividade"
@@ -109,7 +99,6 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html"
-             es-lang=""
              ja-lang="アクティビティを再作成する"
              ko-lang="액티비티 재생성하기"
              pt-br-lang="Recriando uma atividade"
@@ -150,7 +139,6 @@
 
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot?>training/basics/data-storage/index.html"
-             es-lang=""
              ja-lang="データの保存"
              ko-lang="데이터 저장하기"
              pt-br-lang="Salvando dados"
@@ -164,7 +152,6 @@
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/basics/data-storage/shared-preferences.html"
-             es-lang=""
              ja-lang="キー値セットを保存する"
              ko-lang="키-값 세트 저장하기"
              pt-br-lang="Salvando conjuntos de valor-chave"
@@ -175,7 +162,6 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/data-storage/files.html"
-             es-lang=""
              ja-lang="ファイルを保存する"
              ko-lang="파일 저장하기"
              pt-br-lang="Salvando arquivos"
@@ -186,7 +172,6 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/data-storage/databases.html"
-             es-lang=""
              ja-lang="SQL データベースにデータを保存する"
              ko-lang="SQL 데이터베이스에 데이터 저장하기"
              pt-br-lang="Salvando dados em bancos de dados do SQL"
@@ -202,7 +187,6 @@
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/intents/index.html"
-             es-lang=""
              ja-lang="他のアプリとの相互操作"
              ko-lang="액티비티 수명 주기 관리하기"
              pt-br-lang="Interagindo com outros aplicativos"
@@ -217,7 +201,6 @@
         </div>
         <ul>
           <li><a href="<?cs var:toroot ?>training/basics/intents/sending.html"
-             es-lang=""
              ja-lang="別のアプリにユーザーを送る"
              ko-lang="다른 앱으로 사용자 보내기"
              pt-br-lang="Enviando o usuário para outro aplicativo"
@@ -228,7 +211,6 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/intents/result.html"
-             es-lang=""
              ja-lang="アクティビティから結果を取得する"
              ko-lang="액티비티로부터 결과 가져오기"
              pt-br-lang="Obtendo resultados de uma atividade"
@@ -239,7 +221,6 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/intents/filters.html"
-             es-lang=""
              ja-lang="他のアプリからのアクティビティの開始を許可する"
              ko-lang="다른 앱이 자신의 액티비티를 시작하도록 허용하기"
              pt-br-lang="Permitindo que outros aplicativos iniciem sua atividade"

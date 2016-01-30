@@ -40,11 +40,7 @@ page.image=images/cards/design-material-for-android_2x.jpg
 
 
 <p itemprop="description">머티리얼 디자인은 플랫폼 및 기기 전반의 표현 방식, 모션 및
-<<<<<<< HEAD
 상호 작용 디자인에 대한 종합적인 지침입니다. Android에는 이제
-=======
-상호 작용 디자인에 대한 종합적인 지침입니다. Android에 이제
->>>>>>> Docs: L10N update for design documentation
 머티리얼 디자인 앱에 대한 지원이 포함되었습니다. Android 앱에서 머티리얼 디자인을 사용하려면 <a href="http://www.google.com/design/spec">머티리얼 디자인 사양</a>에
 규정되어 있는 지침을 따르세요. 또한 Android 5.0(API 레벨 21) 이상에서 제공하는
 새 구성 요소 및 기능을 사용하세요.</p>

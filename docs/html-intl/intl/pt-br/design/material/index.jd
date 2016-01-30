@@ -39,11 +39,7 @@ page.image=images/cards/design-material-for-android_2x.jpg
 
 
 
-<<<<<<< HEAD
 <p itemprop="description">O Material Design é um guia abrangente para design visual, de movimento e de 
-=======
-<p itemprop="description">O Material Design é um guia abrangente para projeto visual, de movimento e de 
->>>>>>> Docs: L10N update for design documentation
 interação para diversas plataformas e dispositivos. O Android agora é compatível com
 aplicativos do Material Design. Para usar o Material Design nos aplicativos Android, siga as orientações definidas 
 nas <a href="http://www.google.com/design/spec">especificações do Material Design</a> e use os novos 
@@ -102,11 +98,7 @@ Material Design:</p>
 <div style="float:left;width:250px;margin-right:0px;">
   <img src="{@docRoot}design/material/images/card_travel.png" width="500" height="426" />
   <p>O novo widget <code>CardView</code> permite exibir informações importantes dentro de 
-<<<<<<< HEAD
   cartões que têm aparência consistente.</p>
-=======
- cartões que têm aparência consistente.</p>
->>>>>>> Docs: L10N update for design documentation
 </div>
 <br style="clear:left"/>
 </div>
