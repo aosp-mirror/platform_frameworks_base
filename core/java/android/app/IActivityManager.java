@@ -581,11 +581,11 @@ public interface IActivityManager extends IInterface {
 
     public int getAppStartMode(int uid, String packageName) throws RemoteException;
 
-    public boolean inMultiWindowMode(IBinder token) throws RemoteException;
+    public boolean inMultiWindow(IBinder token) throws RemoteException;
 
-    public boolean inPictureInPictureMode(IBinder token) throws RemoteException;
+    public boolean inPictureInPicture(IBinder token) throws RemoteException;
 
-    public void enterPictureInPictureMode(IBinder token) throws RemoteException;
+    public void enterPictureInPicture(IBinder token) throws RemoteException;
 
     public void setVrMode(IBinder token, boolean enabled) throws RemoteException;
 
@@ -958,10 +958,10 @@ public interface IActivityManager extends IInterface {
     int MOVE_TOP_ACTIVITY_TO_PINNED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 349;
     int GET_APP_START_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 350;
     int UNLOCK_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 351;
-    int IN_MULTI_WINDOW_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 352;
-    int IN_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
+    int IN_MULTI_WINDOW_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 352;
+    int IN_PICTURE_IN_PICTURE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 353;
     int KILL_PACKAGE_DEPENDENTS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 354;
-    int ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
+    int ENTER_PICTURE_IN_PICTURE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 355;
     int ACTIVITY_RELAUNCHED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 356;
     int GET_URI_PERMISSION_OWNER_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 357;
     int RESIZE_DOCKED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 358;

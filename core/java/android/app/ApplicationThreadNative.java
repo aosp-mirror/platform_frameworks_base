@@ -730,21 +730,21 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case SCHEDULE_MULTI_WINDOW_MODE_CHANGED_TRANSACTION:
+        case SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             final IBinder b = data.readStrongBinder();
-            final boolean multiWindowMode = data.readInt() != 0;
-            scheduleMultiWindowModeChanged(b, multiWindowMode);
+            final boolean inMultiWindow = data.readInt() != 0;
+            scheduleMultiWindowChanged(b, inMultiWindow);
             return true;
         }
 
-        case SCHEDULE_PICTURE_IN_PICTURE_MODE_CHANGED_TRANSACTION:
+        case SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             final IBinder b = data.readStrongBinder();
-            final boolean pipMode = data.readInt() != 0;
-            schedulePictureInPictureModeChanged(b, pipMode);
+            final boolean inPip = data.readInt() != 0;
+            schedulePictureInPictureChanged(b, inPip);
             return true;
         }
 
@@ -1495,25 +1495,25 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     @Override
-    public final void scheduleMultiWindowModeChanged(
-            IBinder token, boolean multiWindowMode) throws RemoteException {
+    public final void scheduleMultiWindowChanged(
+            IBinder token, boolean inMultiWindow) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(multiWindowMode ? 1 : 0);
-        mRemote.transact(SCHEDULE_MULTI_WINDOW_MODE_CHANGED_TRANSACTION, data, null,
+        data.writeInt(inMultiWindow ? 1 : 0);
+        mRemote.transact(SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
     @Override
-    public final void schedulePictureInPictureModeChanged(IBinder token, boolean pipMode)
+    public final void schedulePictureInPictureChanged(IBinder token, boolean inPip)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
-        data.writeInt(pipMode ? 1 : 0);
-        mRemote.transact(SCHEDULE_PICTURE_IN_PICTURE_MODE_CHANGED_TRANSACTION, data, null,
+        data.writeInt(inPip ? 1 : 0);
+        mRemote.transact(SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

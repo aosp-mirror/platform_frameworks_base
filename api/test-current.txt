@@ -3408,7 +3408,7 @@ package android.app {
     method public boolean dispatchTouchEvent(android.view.MotionEvent);
     method public boolean dispatchTrackballEvent(android.view.MotionEvent);
     method public void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
-    method public void enterPictureInPictureMode();
+    method public void enterPictureInPicture();
     method public android.view.View findViewById(int);
     method public void finish();
     method public void finishActivity(int);
@@ -3448,8 +3448,8 @@ package android.app {
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
     method public boolean hasWindowFocus();
-    method public boolean inMultiWindowMode();
-    method public boolean inPictureInPictureMode();
+    method public boolean inMultiWindow();
+    method public boolean inPictureInPicture();
     method public void invalidateOptionsMenu();
     method public boolean isChangingConfigurations();
     method public final boolean isChild();
@@ -3503,7 +3503,7 @@ package android.app {
     method public void onLowMemory();
     method public boolean onMenuItemSelected(int, android.view.MenuItem);
     method public boolean onMenuOpened(int, android.view.Menu);
-    method public void onMultiWindowModeChanged(boolean);
+    method public void onMultiWindowChanged(boolean);
     method public boolean onNavigateUp();
     method public boolean onNavigateUpFromChild(android.app.Activity);
     method protected void onNewIntent(android.content.Intent);
@@ -3511,7 +3511,7 @@ package android.app {
     method public void onOptionsMenuClosed(android.view.Menu);
     method public void onPanelClosed(int, android.view.Menu);
     method protected void onPause();
-    method public void onPictureInPictureModeChanged(boolean);
+    method public void onPictureInPictureChanged(boolean);
     method protected void onPostCreate(android.os.Bundle);
     method public void onPostCreate(android.os.Bundle, android.os.PersistableBundle);
     method protected void onPostResume();

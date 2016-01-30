@@ -53,7 +53,6 @@ import android.net.Network;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
-import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
@@ -84,7 +83,6 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.LocaleList;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
@@ -1245,15 +1243,15 @@ public final class ActivityThread {
         }
 
         @Override
-        public void scheduleMultiWindowModeChanged(IBinder token, boolean multiWindowMode)
+        public void scheduleMultiWindowChanged(IBinder token, boolean inMultiWindow)
                 throws RemoteException {
-            sendMessage(H.MULTI_WINDOW_MODE_CHANGED, token, multiWindowMode ? 1 : 0);
+            sendMessage(H.MULTI_WINDOW_CHANGED, token, inMultiWindow ? 1 : 0);
         }
 
         @Override
-        public void schedulePictureInPictureModeChanged(IBinder token, boolean pipMode)
+        public void schedulePictureInPictureChanged(IBinder token, boolean inPip)
                 throws RemoteException {
-            sendMessage(H.PICTURE_IN_PICTURE_MODE_CHANGED, token, pipMode ? 1 : 0);
+            sendMessage(H.PICTURE_IN_PICTURE_CHANGED, token, inPip ? 1 : 0);
         }
 
         @Override
@@ -1325,8 +1323,8 @@ public final class ActivityThread {
         public static final int ENTER_ANIMATION_COMPLETE = 149;
         public static final int START_BINDER_TRACKING = 150;
         public static final int STOP_BINDER_TRACKING_AND_DUMP = 151;
-        public static final int MULTI_WINDOW_MODE_CHANGED = 152;
-        public static final int PICTURE_IN_PICTURE_MODE_CHANGED = 153;
+        public static final int MULTI_WINDOW_CHANGED = 152;
+        public static final int PICTURE_IN_PICTURE_CHANGED = 153;
         public static final int LOCAL_VOICE_INTERACTION_STARTED = 154;
 
         String codeToString(int code) {
@@ -1381,8 +1379,8 @@ public final class ActivityThread {
                     case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
                     case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
-                    case MULTI_WINDOW_MODE_CHANGED: return "MULTI_WINDOW_MODE_CHANGED";
-                    case PICTURE_IN_PICTURE_MODE_CHANGED: return "PICTURE_IN_PICTURE_MODE_CHANGED";
+                    case MULTI_WINDOW_CHANGED: return "MULTI_WINDOW_CHANGED";
+                    case PICTURE_IN_PICTURE_CHANGED: return "PICTURE_IN_PICTURE_CHANGED";
                     case LOCAL_VOICE_INTERACTION_STARTED: return "LOCAL_VOICE_INTERACTION_STARTED";
                 }
             }
@@ -1627,11 +1625,11 @@ public final class ActivityThread {
                 case STOP_BINDER_TRACKING_AND_DUMP:
                     handleStopBinderTrackingAndDump((ParcelFileDescriptor) msg.obj);
                     break;
-                case MULTI_WINDOW_MODE_CHANGED:
-                    handleMultiWindowModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                case MULTI_WINDOW_CHANGED:
+                    handleMultiWindowChanged((IBinder) msg.obj, msg.arg1 == 1);
                     break;
-                case PICTURE_IN_PICTURE_MODE_CHANGED:
-                    handlePictureInPictureModeChanged((IBinder) msg.obj, msg.arg1 == 1);
+                case PICTURE_IN_PICTURE_CHANGED:
+                    handlePictureInPictureChanged((IBinder) msg.obj, msg.arg1 == 1);
                     break;
                 case LOCAL_VOICE_INTERACTION_STARTED:
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
@@ -2880,17 +2878,17 @@ public final class ActivityThread {
         }
     }
 
-    private void handleMultiWindowModeChanged(IBinder token, boolean multiWindowMode) {
+    private void handleMultiWindowChanged(IBinder token, boolean inMultiWindow) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onMultiWindowModeChanged(multiWindowMode);
+            r.activity.onMultiWindowChanged(inMultiWindow);
         }
     }
 
-    private void handlePictureInPictureModeChanged(IBinder token, boolean pipMode) {
+    private void handlePictureInPictureChanged(IBinder token, boolean inPip) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onPictureInPictureModeChanged(pipMode);
+            r.activity.onPictureInPictureChanged(inPip);
         }
     }
 

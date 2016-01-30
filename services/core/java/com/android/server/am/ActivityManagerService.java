@@ -7061,7 +7061,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean inMultiWindowMode(IBinder token) {
+    public boolean inMultiWindow(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -7078,7 +7078,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean inPictureInPictureMode(IBinder token) {
+    public boolean inPictureInPicture(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
@@ -7094,24 +7094,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void enterPictureInPictureMode(IBinder token) {
+    public void enterPictureInPicture(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized(this) {
                 if (!mSupportsPictureInPicture) {
-                    throw new IllegalStateException("enterPictureInPictureMode: "
+                    throw new IllegalStateException("enterPictureInPicture: "
                             + "Device doesn't support picture-in-picture mode.");
                 }
 
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
 
                 if (r == null) {
-                    throw new IllegalStateException("enterPictureInPictureMode: "
+                    throw new IllegalStateException("enterPictureInPicture: "
                             + "Can't find activity for token=" + token);
                 }
 
                 if (!r.supportsPictureInPicture()) {
-                    throw new IllegalArgumentException("enterPictureInPictureMode: "
+                    throw new IllegalArgumentException("enterPictureInPicture: "
                             + "Picture-In-Picture not supported for r=" + r);
                 }
 
@@ -7120,7 +7120,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         ? mDefaultPinnedStackBounds : null;
 
                 mStackSupervisor.moveActivityToStackLocked(
-                        r, PINNED_STACK_ID, "enterPictureInPictureMode", bounds);
+                        r, PINNED_STACK_ID, "enterPictureInPicture", bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

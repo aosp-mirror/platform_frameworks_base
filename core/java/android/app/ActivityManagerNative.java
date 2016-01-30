@@ -2842,26 +2842,26 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(res);
             return true;
         }
-        case IN_MULTI_WINDOW_MODE_TRANSACTION: {
+        case IN_MULTI_WINDOW_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            final boolean multiWindowMode = inMultiWindowMode(token);
+            final boolean inMultiWindow = inMultiWindow(token);
             reply.writeNoException();
-            reply.writeInt(multiWindowMode ? 1 : 0);
+            reply.writeInt(inMultiWindow ? 1 : 0);
             return true;
         }
-        case IN_PICTURE_IN_PICTURE_MODE_TRANSACTION: {
+        case IN_PICTURE_IN_PICTURE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            final boolean pipMode = inPictureInPictureMode(token);
+            final boolean inPip = inPictureInPicture(token);
             reply.writeNoException();
-            reply.writeInt(pipMode ? 1 : 0);
+            reply.writeInt(inPip ? 1 : 0);
             return true;
         }
-        case ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION: {
+        case ENTER_PICTURE_IN_PICTURE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final IBinder token = data.readStrongBinder();
-            enterPictureInPictureMode(token);
+            enterPictureInPicture(token);
             reply.writeNoException();
             return true;
         }
@@ -6678,12 +6678,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean inMultiWindowMode(IBinder token) throws RemoteException {
+    public boolean inMultiWindow(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(IN_MULTI_WINDOW_MODE_TRANSACTION, data, reply, 0);
+        mRemote.transact(IN_MULTI_WINDOW_TRANSACTION, data, reply, 0);
         reply.readException();
         final boolean multiWindowMode = reply.readInt() == 1 ? true : false;
         data.recycle();
@@ -6692,12 +6692,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public boolean inPictureInPictureMode(IBinder token) throws RemoteException {
+    public boolean inPictureInPicture(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(IN_PICTURE_IN_PICTURE_MODE_TRANSACTION, data, reply, 0);
+        mRemote.transact(IN_PICTURE_IN_PICTURE_TRANSACTION, data, reply, 0);
         reply.readException();
         final boolean pipMode = reply.readInt() == 1 ? true : false;
         data.recycle();
@@ -6706,12 +6706,12 @@ class ActivityManagerProxy implements IActivityManager
     }
 
     @Override
-    public void enterPictureInPictureMode(IBinder token) throws RemoteException {
+    public void enterPictureInPicture(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
-        mRemote.transact(ENTER_PICTURE_IN_PICTURE_MODE_TRANSACTION, data, reply, 0);
+        mRemote.transact(ENTER_PICTURE_IN_PICTURE_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

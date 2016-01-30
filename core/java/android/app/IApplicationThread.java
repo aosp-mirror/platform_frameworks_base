@@ -152,8 +152,8 @@ public interface IApplicationThread extends IInterface {
     void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException;
     void startBinderTracking() throws RemoteException;
     void stopBinderTrackingAndDump(FileDescriptor fd) throws RemoteException;
-    void scheduleMultiWindowModeChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
-    void schedulePictureInPictureModeChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
+    void scheduleMultiWindowChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
+    void schedulePictureInPictureChanged(IBinder token, boolean multiWindowMode) throws RemoteException;
     void scheduleLocalVoiceInteractionStarted(IBinder token, IVoiceInteractor voiceInteractor) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
@@ -215,7 +215,7 @@ public interface IApplicationThread extends IInterface {
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
     int START_BINDER_TRACKING_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
     int STOP_BINDER_TRACKING_AND_DUMP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+57;
-    int SCHEDULE_MULTI_WINDOW_MODE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
-    int SCHEDULE_PICTURE_IN_PICTURE_MODE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
+    int SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
+    int SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
     int SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+60;
 }
