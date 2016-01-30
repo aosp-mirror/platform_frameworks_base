@@ -18,15 +18,10 @@
 
   <li class="nav-section">
     <div class="nav-section-header empty"><a href="<?cs var:toroot ?>design/material/index.html"
-       es-lang="Material Design"
        ja-lang="マテリアル デザイン"
        ko-lang="머티어리얼 디자인"
-       pt-br-lang="Material Design"
-       ru-lang="Material Design"
        zh-cn-lang="材料设计"
        zh-tw-lang="材料設計"
-       in-lang="Desain Bahan"
-       vi-lang="Material Design"
        >
     Material for Android</a></div>
   </li>
