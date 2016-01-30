@@ -151,6 +151,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
+        final MenuItem search = menu.findItem(R.id.menu_search);
 
         // I'm thinkin' this isn't necesary here. If it is...'cuz of a bug....
         // then uncomment the linke and let's get a proper bug reference here.
@@ -167,6 +168,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         fileSize.setVisible(!mState.forceSize);
         advanced.setVisible(!mState.forceAdvanced);
         settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
+        search.setVisible(canSearchRoot());
 
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
@@ -382,6 +384,11 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             }
         }
         return authorities;
+    }
+
+    boolean canSearchRoot() {
+        final RootInfo root = getCurrentRoot();
+        return (root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0;
     }
 
     final String getCallingPackageMaybeExtra() {
