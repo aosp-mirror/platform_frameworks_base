@@ -774,8 +774,9 @@ class WindowSurfacePlacer {
                                         + " a=" + winAnimator.mAnimating);
                             }
                         }
-                        if (w != atoken.startingWindow && !w.mAppDied) {
-                            if (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing) {
+                        if (w != atoken.startingWindow) {
+                            if (!w.mAppDied &&
+                                    (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing)) {
                                 atoken.numInterestingWindows++;
                                 if (w.isDrawnLw()) {
                                     atoken.numDrawnWindows++;
@@ -1156,8 +1157,6 @@ class WindowSurfacePlacer {
             }
             wtoken.inPendingTransaction = false;
 
-            wtoken.restoreSavedSurfaces();
-
             if (!mService.setTokenVisibilityLocked(
                     wtoken, animLp, true, transit, false, voiceInteraction)){
                 // This token isn't going to be animating. Add it to the list of tokens to
@@ -1277,9 +1276,8 @@ class WindowSurfacePlacer {
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
 
-                if (wtoken.hasSavedSurface() || wtoken.mAnimatingWithSavedSurface) {
-                    continue;
-                }
+                wtoken.restoreSavedSurfaces();
+
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
                 }

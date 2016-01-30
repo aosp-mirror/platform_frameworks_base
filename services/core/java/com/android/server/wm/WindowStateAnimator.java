@@ -272,11 +272,14 @@ class WindowStateAnimator {
     }
 
     void cancelExitAnimationForNextAnimationLocked() {
+        if (DEBUG_ANIM) Slog.d(TAG,
+                "cancelExitAnimationForNextAnimationLocked: " + mWin);
+
         if (mAnimation != null) {
             mAnimation.cancel();
             mAnimation = null;
             mLocalAnimating = false;
-            destroySurfaceLocked();
+            mWin.destroyOrSaveSurface();
         }
     }
 
@@ -498,10 +501,12 @@ class WindowStateAnimator {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
                     + drawStateToString());
         }
-        if (mWin.mAppToken != null) {
+        if (mWin.mAppToken != null && mWin.mAppToken.mAnimatingWithSavedSurface) {
             // App has drawn something to its windows, we're no longer animating with
             // the saved surfaces. If the user exits now, we only want to save again
             // if allDrawn is true.
+            if (DEBUG_ANIM) Slog.d(TAG,
+                    "finishDrawingLocked: mAnimatingWithSavedSurface=false " + mWin);
             mWin.mAppToken.mAnimatingWithSavedSurface = false;
         }
         if (mDrawState == DRAW_PENDING) {
@@ -534,8 +539,7 @@ class WindowStateAnimator {
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.allDrawn || atoken.mAnimatingWithSavedSurface ||
-                mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
+        if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = performShowLocked();
         }
         if (mDestroyPreservedSurfaceUponRedraw) {
@@ -569,6 +573,8 @@ class WindowStateAnimator {
         final WindowState w = mWin;
         if (w.hasSavedSurface()) {
             Slog.i(TAG, "***** createSurface: " + this + ": called when we had a saved surface");
+            w.restoreSavedSurface();
+            return mSurfaceController;
         }
 
         if (mSurfaceController == null) {
