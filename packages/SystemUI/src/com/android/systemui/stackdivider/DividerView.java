@@ -184,8 +184,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mStableInsets.set(insets.getStableInsetLeft(), insets.getStableInsetTop(),
-                insets.getStableInsetRight(), insets.getStableInsetBottom());
+        if (mStableInsets.left != insets.getStableInsetLeft()
+                || mStableInsets.top != insets.getStableInsetTop()
+                || mStableInsets.right != insets.getStableInsetRight()
+                || mStableInsets.bottom != insets.getStableInsetBottom()) {
+            mStableInsets.set(insets.getStableInsetLeft(), insets.getStableInsetTop(),
+                    insets.getStableInsetRight(), insets.getStableInsetBottom());
+            if (mSnapAlgorithm != null) {
+                mSnapAlgorithm = null;
+                getSnapAlgorithm();
+            }
+        }
         return super.onApplyWindowInsets(insets);
     }
 
@@ -496,12 +505,42 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         } else {
             mWindowManagerProxy.resizeDockedStack(mDockedRect, null, null, null, null);
         }
+        SnapTarget closestDismissTarget = mSnapAlgorithm.getClosestDismissTarget(position);
+        float dimFraction = getDimFraction(position, closestDismissTarget);
+        mWindowManagerProxy.setResizeDimLayer(dimFraction != 0f,
+                getStackIdForDismissTarget(closestDismissTarget),
+                dimFraction);
+    }
+
+    private float getDimFraction(int position, SnapTarget dismissTarget) {
         float fraction = mSnapAlgorithm.calculateDismissingFraction(position);
         fraction = Math.max(0, Math.min(fraction, 1f));
         fraction = DIM_INTERPOLATOR.getInterpolation(fraction);
-        mWindowManagerProxy.setResizeDimLayer(fraction != 0f,
-                getStackIdForDismissTarget(mSnapAlgorithm.getClosestDismissTarget(position)),
-                fraction);
+        if (hasInsetsAtDismissTarget(dismissTarget)) {
+
+            // Less darkening with system insets.
+            fraction *= 0.8f;
+        }
+        return fraction;
+    }
+
+    /**
+     * @return true if and only if there are system insets at the location of the dismiss target
+     */
+    private boolean hasInsetsAtDismissTarget(SnapTarget dismissTarget) {
+        if (isHorizontalDivision()) {
+            if (dismissTarget == mSnapAlgorithm.getDismissStartTarget()) {
+                return mStableInsets.top != 0;
+            } else {
+                return mStableInsets.bottom != 0;
+            }
+        } else {
+            if (dismissTarget == mSnapAlgorithm.getDismissStartTarget()) {
+                return mStableInsets.left != 0;
+            } else {
+                return mStableInsets.right != 0;
+            }
+        }
     }
 
     /**
@@ -587,7 +626,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
         if (dismissTarget != null && fraction > 0f
                 && isDismissing(splitTarget, position, dockSide)) {
-            fraction = calculateParallaxDismissingFraction(fraction);
+            fraction = calculateParallaxDismissingFraction(fraction, dockSide);
             int offsetPosition = (int) (taskPosition +
                     fraction * (dismissTarget.position - splitTarget.position));
             int width = taskRect.width();
@@ -617,8 +656,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
      * @return for a specified {@code fraction}, this returns an adjusted value that simulates a
      *         slowing down parallax effect
      */
-    private static float calculateParallaxDismissingFraction(float fraction) {
-        return SLOWDOWN_INTERPOLATOR.getInterpolation(fraction) / 3.5f;
+    private static float calculateParallaxDismissingFraction(float fraction, int dockSide) {
+        float result = SLOWDOWN_INTERPOLATOR.getInterpolation(fraction) / 3.5f;
+
+        // Less parallax at the top, just because.
+        if (dockSide == WindowManager.DOCKED_TOP) {
+            result /= 2f;
+        }
+        return result;
     }
 
     private static boolean isDismissing(SnapTarget snapTarget, int position, int dockSide) {

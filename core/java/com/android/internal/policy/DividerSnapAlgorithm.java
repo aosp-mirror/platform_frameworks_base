@@ -58,6 +58,7 @@ public class DividerSnapAlgorithm {
     private final Rect mInsets = new Rect();
     private final int mSnapMode;
     private final float mFixedRatio;
+    private boolean mIsHorizontalDivision;
 
     /** The first target which is still splitting the screen */
     private final SnapTarget mFirstSplitTarget;
@@ -78,6 +79,7 @@ public class DividerSnapAlgorithm {
         mDividerSize = dividerSize;
         mDisplayWidth = displayWidth;
         mDisplayHeight = displayHeight;
+        mIsHorizontalDivision = isHorizontalDivision;
         mInsets.set(insets);
         mSnapMode = res.getInteger(
                 com.android.internal.R.integer.config_dockedStackDividerSnapMode);
@@ -130,10 +132,12 @@ public class DividerSnapAlgorithm {
 
     public float calculateDismissingFraction(int position) {
         if (position < mFirstSplitTarget.position) {
-            return 1f - (float) position / mFirstSplitTarget.position;
+            return 1f - (float) (position - getStartInset())
+                    / (mFirstSplitTarget.position - getStartInset());
         } else if (position > mLastSplitTarget.position) {
             return (float) (position - mLastSplitTarget.position)
-                    / (mDismissEndTarget.position - mLastSplitTarget.position);
+                    / (mDismissEndTarget.position - getEndInset()
+                            - mLastSplitTarget.position - mDividerSize);
         }
         return 0f;
     }
@@ -165,6 +169,22 @@ public class DividerSnapAlgorithm {
 
     public SnapTarget getDismissEndTarget() {
         return mDismissEndTarget;
+    }
+
+    private int getStartInset() {
+        if (mIsHorizontalDivision) {
+            return mInsets.top;
+        } else {
+            return mInsets.left;
+        }
+    }
+
+    private int getEndInset() {
+        if (mIsHorizontalDivision) {
+            return mInsets.bottom;
+        } else {
+            return mInsets.right;
+        }
     }
 
     private SnapTarget snap(int position, boolean hardDismiss) {
