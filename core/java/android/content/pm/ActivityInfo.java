@@ -839,7 +839,7 @@ public class ActivityInfo extends ComponentInfo
                     + lockTaskLaunchModeToString(lockTaskLaunchMode));
         }
         if (layout != null) {
-            pw.println(prefix + "initialLayout=" + layout.width + "|"
+            pw.println(prefix + "defaultLayout=" + layout.width + "|"
                     + layout.widthFraction + ", " + layout.height + "|"
                     + layout.heightFraction + ", " + layout.gravity);
         }

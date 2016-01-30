@@ -3378,25 +3378,25 @@ public class PackageParser {
         int height = -1;
         float heightFraction = -1f;
         final int widthType = sw.getType(
-                com.android.internal.R.styleable.AndroidManifestLayout_initialWidth);
+                com.android.internal.R.styleable.AndroidManifestLayout_defaultWidth);
         if (widthType == TypedValue.TYPE_FRACTION) {
             widthFraction = sw.getFraction(
-                    com.android.internal.R.styleable.AndroidManifestLayout_initialWidth,
+                    com.android.internal.R.styleable.AndroidManifestLayout_defaultWidth,
                     1, 1, -1);
         } else if (widthType == TypedValue.TYPE_DIMENSION) {
             width = sw.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AndroidManifestLayout_initialWidth,
+                    com.android.internal.R.styleable.AndroidManifestLayout_defaultWidth,
                     -1);
         }
         final int heightType = sw.getType(
-                com.android.internal.R.styleable.AndroidManifestLayout_initialHeight);
+                com.android.internal.R.styleable.AndroidManifestLayout_defaultHeight);
         if (heightType == TypedValue.TYPE_FRACTION) {
             heightFraction = sw.getFraction(
-                    com.android.internal.R.styleable.AndroidManifestLayout_initialHeight,
+                    com.android.internal.R.styleable.AndroidManifestLayout_defaultHeight,
                     1, 1, -1);
         } else if (heightType == TypedValue.TYPE_DIMENSION) {
             height = sw.getDimensionPixelSize(
-                    com.android.internal.R.styleable.AndroidManifestLayout_initialHeight,
+                    com.android.internal.R.styleable.AndroidManifestLayout_defaultHeight,
                     -1);
         }
         int gravity = sw.getInt(
