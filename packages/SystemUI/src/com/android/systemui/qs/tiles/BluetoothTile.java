@@ -34,6 +34,7 @@ import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /** Quick settings tile: Bluetooth **/
@@ -217,11 +218,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
         private void updateItems() {
             if (mItems == null) return;
-            Item[] items = null;
+            ArrayList<Item> items = new ArrayList<Item>();
             final Collection<CachedBluetoothDevice> devices = mController.getDevices();
             if (devices != null) {
-                items = new Item[getBondedCount(devices)];
-                int i = 0;
                 for (CachedBluetoothDevice device : devices) {
                     if (device.getBondState() == BluetoothDevice.BOND_NONE) continue;
                     final Item item = new Item();
@@ -237,20 +236,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                         item.line2 = mContext.getString(R.string.quick_settings_connecting);
                     }
                     item.tag = device;
-                    items[i++] = item;
+                    items.add(item);
                 }
             }
-            mItems.setItems(items);
-        }
-
-        private int getBondedCount(Collection<CachedBluetoothDevice> devices) {
-            int ct = 0;
-            for (CachedBluetoothDevice device : devices) {
-                if (device.getBondState() != BluetoothDevice.BOND_NONE) {
-                    ct++;
-                }
-            }
-            return ct;
+            mItems.setItems(items.toArray(new Item[items.size()]));
         }
 
         @Override
