@@ -256,6 +256,8 @@ public class SystemServicesProxy {
      * Returns whether this device has freeform workspaces.
      */
     public boolean hasFreeformWorkspaceSupport() {
+        if (mPm == null) return false;
+
         return mHasFreeformWorkspaceSupport;
     }
 
