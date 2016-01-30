@@ -186,7 +186,7 @@ page.image=/images/cards/distribute/engage/card-game-services.png
 </div>
 
 <div class="resource-widget resource-flow-layout col-13"
-  data-query="collection:distribute/engage/gamesservices/related"
+  data-query="collection:distribute/engage/googleplaygames"
   data-sortOrder="-timestamp"
   data-cardSizes="9x3"
   data-maxResults="6"></div>

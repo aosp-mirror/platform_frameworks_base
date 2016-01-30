@@ -1,6 +1,5 @@
 <ul id="nav">
-
-    <li class="nav-section">
+  <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>about/versions/marshmallow/index.html">
       <span class="en">Marshmallow</span></a></div>
       <ul>
@@ -10,7 +9,6 @@
         Android 6.0 Changes</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/marshmallow/samples.html">
         Android 6.0 Samples</a></li>
-  </li>
       </ul>
   </li>
   <li class="nav-section">

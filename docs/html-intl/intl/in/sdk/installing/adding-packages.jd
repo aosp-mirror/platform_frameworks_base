@@ -1,7 +1,6 @@
 page.title=Menambahkan Paket SDK
 
 page.tags=sdk manager
-helpoutsWidget=true
 
 @jd:body
 
@@ -31,7 +30,7 @@ ol.large > li > h2 {
   line-height:20px;
   padding:0 0 0 20px;
   margin:0 0 20px 0;
-  display:inline-block;
+  display:inline;
   font-weight:normal;
 }
 ol.large > li:nth-child(1):before {

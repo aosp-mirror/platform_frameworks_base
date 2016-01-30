@@ -62,10 +62,9 @@
   </li>
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>design/style/index.html">Pure Android</a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>design/patterns/index.html">Pure Android</a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>design/style/devices-displays.html">Devices and Displays</a></li>
-      <li><a href="<?cs var:toroot ?>design/patterns/app-structure.html">App Structure</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/navigation.html"
        es-lang="Navegación con los botones Back y Up"
        ja-lang="Back と Up を使用したナビゲーション"
@@ -88,7 +87,6 @@
       <li><a href="<?cs var:toroot ?>design/patterns/widgets.html">Widgets</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/swipe-views.html">Swipe Views</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/fullscreen.html">Full Screen</a></li>
-
       <li><a href="<?cs var:toroot ?>design/patterns/confirming-acknowledging.html"
        es-lang="Confirmación y reconocimiento"
        ja-lang="確認と通知"
@@ -98,7 +96,6 @@
        zh-cn-lang="确认和确知"
        zh-tw-lang="確認及確認完成">
        Confirming &amp; Acknowledging</a></li>
-
       <li><a href="<?cs var:toroot ?>design/patterns/pure-android.html">Pure Android</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/compatibility.html">Compatibility</a></li>
       <li><a href="<?cs var:toroot ?>design/patterns/accessibility.html">Accessibility</a></li>

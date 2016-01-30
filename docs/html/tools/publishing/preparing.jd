@@ -1,4 +1,5 @@
 page.title=Preparing for Release
+page.metaDescription=Developer documentation on how to build the signed, release-ready APK. This process is the same for all Android apps.
 @jd:body
 
 <div id="qv-wrapper">

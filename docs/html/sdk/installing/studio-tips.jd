@@ -1,4 +1,7 @@
 page.title=Android Studio Tips and Tricks
+page.image=images/tools/studio-previewall.png
+page.tags="sdk", "studio", "android studio"
+meta.tags="studio"
 @jd:body
 
 <div id="qv-wrapper">

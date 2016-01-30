@@ -3,15 +3,7 @@ page.metaDescription=Take advantage of Android's flexible layout system and crea
 
 @jd:body
 
-<a class="notice-designers-material"
-  href="http://www.google.com/design/spec/layout/principles.html">
-  <div>
-    <h3>Material Design</h3>
-    <p>Layout Principles<p>
-  </div>
-</a>
-
-<p>Android powers hundreds of millions of phones, tablets, and other devices in a wide variety of screen sizes and
+<p>Android powers more than a billion phones, tablets, and other devices in a wide variety of screen sizes and
 form factors. By taking advantage of Android's flexible layout system, you can create apps that
 gracefully scale from large tablets to smaller phones.</p>
 

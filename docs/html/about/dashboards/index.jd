@@ -1,7 +1,9 @@
 page.title=Dashboards
-page.metaDescription=page.metaDescription=Charts that give you an overview of device characteristics and platform versions that are active in the Android ecosystem.
+page.metaDescription=page.metaDescription=An overview of device characteristics and platform versions that are active in the Android ecosystem.
 page.tags="android, dashboard, platforms, versions"
-meta.tags="ecosystem, versions, whatsnew"
+meta.tags="ecosystem, versions, whatsnew, dashboards"
+page.image=http://chart.googleapis.com/chart?chl=GL%201.1%20only%7CGL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A0.1%2C93.5%2C6.4&chco=c4df9b%2C6fad0c&chs=400x250&cht=p
+
 @jd:body
 
 <style>
