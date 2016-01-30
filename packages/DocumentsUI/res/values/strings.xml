@@ -39,8 +39,8 @@
     <string name="menu_sort">Sort by</string>
     <!-- Menu item that enters a mode to search for documents [CHAR LIMIT=24] -->
     <string name="menu_search">Search</string>
-    <!-- Menu item that enters activity to change settings [CHAR LIMIT=24] -->
-    <string name="menu_settings">Settings</string>
+    <!-- Menu item that enters activity to change settings for current root [CHAR LIMIT=24] -->
+    <string name="menu_settings">Storage settings</string>
 
     <!-- Menu item title that opens the selected documents [CHAR LIMIT=24] -->
     <string name="menu_open">Open</string>

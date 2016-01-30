@@ -176,6 +176,7 @@ public class RootInfo implements Durable, Parcelable {
         } else if (isExternalStorage()) {
             derivedIcon = R.drawable.ic_root_smartphone;
             derivedType = TYPE_LOCAL;
+            // TODO: Apply SD card icon to SD devices.
         } else if (isDownloads()) {
             derivedIcon = R.drawable.ic_root_download;
             derivedType = TYPE_DOWNLOADS;
@@ -242,6 +243,10 @@ public class RootInfo implements Durable, Parcelable {
     public boolean isLibrary() {
         return derivedType == TYPE_IMAGES || derivedType == TYPE_VIDEO || derivedType == TYPE_AUDIO
                 || derivedType == TYPE_RECENTS || derivedType == TYPE_DOWNLOADS;
+    }
+
+    public boolean hasSettings() {
+        return (flags & Root.FLAG_HAS_SETTINGS) != 0;
     }
 
     public Drawable loadIcon(Context context) {

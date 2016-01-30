@@ -297,7 +297,6 @@ public class DocumentsActivity extends BaseActivity {
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         boolean recents = cwd == null;
         boolean picking = mState.action == ACTION_CREATE
@@ -314,7 +313,6 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         fileSize.setVisible(fileSize.isVisible() && !picking);
-        settings.setVisible(false);
 
         if (mState.action == ACTION_CREATE) {
             final FragmentManager fm = getFragmentManager();
