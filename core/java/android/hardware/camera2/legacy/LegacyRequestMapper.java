@@ -89,7 +89,8 @@ public class LegacyRequestMapper {
                     COLOR_CORRECTION_ABERRATION_MODE,
                     /*defaultValue*/COLOR_CORRECTION_ABERRATION_MODE_FAST);
 
-            if (aberrationMode != COLOR_CORRECTION_ABERRATION_MODE_FAST) {
+            if (aberrationMode != COLOR_CORRECTION_ABERRATION_MODE_FAST &&
+                    aberrationMode != COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY) {
                 Log.w(TAG, "convertRequestToMetadata - Ignoring unsupported " +
                         "colorCorrection.aberrationMode = " + aberrationMode);
             }
@@ -446,7 +447,8 @@ public class LegacyRequestMapper {
                     NOISE_REDUCTION_MODE,
                     /*defaultValue*/NOISE_REDUCTION_MODE_FAST);
 
-            if (mode != NOISE_REDUCTION_MODE_FAST) {
+            if (mode != NOISE_REDUCTION_MODE_FAST &&
+                    mode != NOISE_REDUCTION_MODE_HIGH_QUALITY) {
                 Log.w(TAG, "convertRequestToMetadata - Ignoring unsupported " +
                         "noiseReduction.mode = " + mode);
             }
