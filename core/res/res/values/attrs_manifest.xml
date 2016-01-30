@@ -1288,6 +1288,7 @@
         <attr name="extractNativeLibs" />
         <attr name="forceDeviceEncrypted" format="boolean" />
         <attr name="encryptionAware" />
+        <attr name="resizeableActivity" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

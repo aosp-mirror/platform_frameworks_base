@@ -84,6 +84,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
@@ -2642,6 +2643,11 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ENCRYPTION_AWARE;
         }
 
+        if (sa.getBoolean(R.styleable.AndroidManifestApplication_resizeableActivity,
+                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N)) {
+            ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
+        }
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);
@@ -3232,7 +3238,10 @@ public class PackageParser {
 
             a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
-                if (sa.getBoolean(R.styleable.AndroidManifestActivity_resizeableActivity, true)) {
+                final boolean appDefault = (owner.applicationInfo.privateFlags
+                        & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
+                if (sa.getBoolean(
+                        R.styleable.AndroidManifestActivity_resizeableActivity, appDefault)) {
                     if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
                             false)) {
                         a.info.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
