@@ -4264,6 +4264,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    @Override
+    public void requestTvPictureInPicture() {
+        // no-op.
+    }
+
     public void notifyFpAuthModeChanged() {
         updateDozing();
     }

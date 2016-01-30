@@ -104,14 +104,7 @@ public class PipManager {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_PICTURE_IN_PICTURE_BUTTON.equals(action)) {
-                if (DEBUG) Log.d(TAG, "PIP button pressed");
-                if (!hasPipTasks()) {
-                    startPip();
-                } else if (mState == STATE_PIP_OVERLAY) {
-                    showPipMenu();
-                }
-            } else if (Intent.ACTION_MEDIA_RESOURCE_GRANTED.equals(action)) {
+            if (Intent.ACTION_MEDIA_RESOURCE_GRANTED.equals(action)) {
                 String[] packageNames = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                 int resourceType = intent.getIntExtra(Intent.EXTRA_MEDIA_RESOURCE_TYPE,
                         INVALID_RESOURCE_TYPE);
@@ -150,9 +143,21 @@ public class PipManager {
             Log.e(TAG, "registerTaskStackListener failed", e);
         }
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PICTURE_IN_PICTURE_BUTTON);
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+    }
+
+    /**
+     * Request PIP.
+     * It could either start PIP if there's none, and show PIP menu otherwise.
+     */
+    public void requestTvPictureInPicture() {
+        if (DEBUG) Log.d(TAG, "requestTvPictureInPicture()");
+        if (!hasPipTasks()) {
+            startPip();
+        } else if (mState == STATE_PIP_OVERLAY) {
+            showPipMenu();
+        }
     }
 
     private void startPip() {
@@ -161,7 +166,6 @@ public class PipManager {
         } catch (RemoteException|IllegalArgumentException e) {
             Log.e(TAG, "moveTopActivityToPinnedStack failed", e);
         }
-
     }
 
     /**
