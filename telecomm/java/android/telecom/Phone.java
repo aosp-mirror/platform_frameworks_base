@@ -348,11 +348,6 @@ public final class Phone {
     }
 
     private void checkCallTree(ParcelableCall parcelableCall) {
-        if (parcelableCall.getParentCallId() != null &&
-                !mCallByTelecomCallId.containsKey(parcelableCall.getParentCallId())) {
-            Log.wtf(this, "ParcelableCall %s has nonexistent parent %s",
-                    parcelableCall.getId(), parcelableCall.getParentCallId());
-        }
         if (parcelableCall.getChildCallIds() != null) {
             for (int i = 0; i < parcelableCall.getChildCallIds().size(); i++) {
                 if (!mCallByTelecomCallId.containsKey(parcelableCall.getChildCallIds().get(i))) {
