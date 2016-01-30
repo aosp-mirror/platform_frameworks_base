@@ -437,7 +437,7 @@ Studio</a>.</p>
 <h3>Windows</h3>
 
 <ul>
-<li>Microsoft&reg;  Windows&reg;  8/7/Vista (32 or 64-bit)</li>
+<li>Microsoft&reg;  Windows&reg;  8/7/Vista (32- or 64-bit)</li>
 <li>2 GB RAM minimum, 4 GB RAM recommended</li>
 <li>400 MB hard disk space</li>
 <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
@@ -477,6 +477,7 @@ rendering. You can then configure your project to use Java Development Kit (JDK)
 <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
+<li>64-bit distribution capable of running 32-bit applications</li>
 </ul>
 <p>Tested on Ubuntu&reg;  14.04, Trusty Tahr (64-bit distribution capable of running
 32-bit applications).</p>
