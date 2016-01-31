@@ -654,7 +654,6 @@ final class ActivityRecord {
                     _intent.getCategories().size() == 1 &&
                     _intent.getData() == null &&
                     _intent.getType() == null &&
-                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
                     !isResolverActivity()) {
                 // This sure looks like a home activity!
                 mActivityType = HOME_ACTIVITY_TYPE;
