@@ -82,7 +82,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/Idu7VcTTXfk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/Idu7VcTTXfk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -96,7 +96,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/IKhU180eJMo/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -125,7 +125,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Cast sample apps",
     "category":"google",
     "summary":"Get example Google Cast applications for both senders and receivers.",
-    "url":"http://www.github.com/googlecast",
+    "url":"https://www.github.com/googlecast",
     "group":"",
     "keywords": ["cast", "samples"],
     "tags": [],
@@ -158,7 +158,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Cardboard design guidelines",
     "category":"design",
     "summary":"Focus on overall usability and avoiding common VR pitfalls while creating an immersive experience of your own.",
-    "url":"http://www.google.com/design/spec-vr",
+    "url":"https://www.google.com/design/spec-vr",
     "group":"",
     "keywords": ["carboard","vr"],
     "tags": [],
@@ -220,7 +220,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/iokH4SAIfRw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/iokH4SAIfRw/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -234,7 +234,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/Eh2adsAyTKc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/Eh2adsAyTKc/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -248,7 +248,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/_AZ6UcPz-_g/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/_AZ6UcPz-_g/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -262,43 +262,43 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "image":"http://i1.ytimg.com/vi/iulXz8QTD1g/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/iulXz8QTD1g/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Intro To Material Design",
     "category":"material design",
     "summary":"These days, UI designers need to be thinking about phones, tablets, laptops, TVs, smartwatches, and beyond. In this DesignByte we talk about how Google designers have been working on making cross-platform and multi-screen design easier. We wanted to build a design system that felt at home on every screen, from the smallest watch to the largest TV.",
-    "url":"http://www.youtube.com/watch?v=p4gmvHyuZzw",
+    "url":"https://www.youtube.com/watch?v=p4gmvHyuZzw",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/p4gmvHyuZzw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/p4gmvHyuZzw/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Paper and Ink: The Materials that Matter",
     "category":"material design",
     "summary":"Join Rich Fulcher to learn about the materials of material design. See how virtual paper and ink form the foundation of your tactile user interface and master the rules that govern their behaviour.",
-    "url":"http://www.youtube.com/watch?v=YaG_ljfzeUw",
+    "url":"https://www.youtube.com/watch?v=YaG_ljfzeUw",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/YaG_ljfzeUw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/YaG_ljfzeUw/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"DesignBytes: Material Design in the Google I/O App",
     "category":"",
     "summary":"Roman Nurik shares details on the design process for the Google I/O 2014 app. To check out the app's source code, visit github.com/google/iosched.",
-    "url":"http://www.youtube.com/watch?v=XOcCOBe8PTc",
+    "url":"https://www.youtube.com/watch?v=XOcCOBe8PTc",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/XOcCOBe8PTc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/XOcCOBe8PTc/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -310,7 +310,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/kmUGLURRPkI/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/kmUGLURRPkI/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -322,7 +322,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/HGElAW224dE/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/HGElAW224dE/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -334,43 +334,43 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/zQekzaAgIlQ/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/zQekzaAgIlQ/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Battery Drain and Networking",
     "category":"",
     "summary":"Let’s take a moment to make something insanely clear: As far as battery is concerned, NETWORKING is the biggest, baddest, dirtiest offender there is. And optimizing performance here isn’t easy. Since the chip isn’t always awake and draining power, means you can optimize how it wakes up, sends traffic, and saves battery.",
-    "url":"http://www.youtube.com/watch?v=fEEulSk1kNY",
+    "url":"https://www.youtube.com/watch?v=fEEulSk1kNY",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/fEEulSk1kNY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/fEEulSk1kNY/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Batching Background Work Until Later",
     "category":"",
     "summary":"Yes, your app is special. But when it comes to battery use, sometimes it’s better to be part of the crowd. Why not spread the battery blame around a bit? Ian Ni-Lewis shows you how ridiculously easy it is to go from battery hog to team player in this video.",
-    "url":"http://www.youtube.com/watch?v=-3ry8PxcJJA",
+    "url":"https://www.youtube.com/watch?v=-3ry8PxcJJA",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/-3ry8PxcJJA/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/-3ry8PxcJJA/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"The Performance Lifecycle",
     "category":"",
     "summary":"Performance problems surface in your application at the least-wanted times (like right before you’re about to ship your first build). But don’t freak out: There’s a simple process that you can follow to help get your performance back under control.",
-    "url":"http://www.youtube.com/watch?v=_kKTGK-Cb_4",
+    "url":"https://www.youtube.com/watch?v=_kKTGK-Cb_4",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/_kKTGK-Cb_4/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/_kKTGK-Cb_4/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -382,7 +382,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["studio", "tools"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
     "type":"video"
   },
 
@@ -395,7 +395,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/M3Udfu6qidk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/M3Udfu6qidk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -407,7 +407,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/FOn64iqlphk/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -419,7 +419,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/fvtMtfCuEpw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/fvtMtfCuEpw/maxresdefault.jpg",
     "type":"video"
   },
     {
@@ -431,19 +431,19 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["google play services"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/F0Kh_RnSM0w/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/F0Kh_RnSM0w/maxresdefault.jpg",
     "type":"video"
   },
   {
     "title":"Running a Successful Games Business with Google",
     "category":"",
     "summary":"Sure, we all want to make the next great gaming masterpiece. But we also want to feed our families and/or dogs. Join Bob Meese from the Google Play team as he gives you some key pointers on how to make sure you're best taking advantage of Google Play and running a successful games business.",
-    "url":"http://www.youtube.com/watch?v=tDmnGNkTtlE",
+    "url":"https://www.youtube.com/watch?v=tDmnGNkTtlE",
     "group":"",
     "keywords": [],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/tDmnGNkTtlE/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/tDmnGNkTtlE/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -455,7 +455,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["tv"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/6K_jxccHv5M/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -467,7 +467,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["auto"],
     "tags": [
     ],
-    "image":"http://i1.ytimg.com/vi/ctiaVxgclsg/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/ctiaVxgclsg/maxresdefault.jpg",
     "type":"video"
   },
   {
@@ -535,7 +535,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": [],
     "tags": [],
-    "image":"http://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
+    "image":"https://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
     "type":"distribute"
   },
   {
@@ -553,7 +553,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Google for Education",
     "category":"google play",
     "summary":"Find out more about how Google can support your work with apps and tablets.",
-    "url":"http://www.google.com/edu/tablets/",
+    "url":"https://www.google.com/edu/tablets/",
     "group":"",
     "keywords": [],
     "tags": [],
@@ -586,7 +586,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Monetize your apps intelligently",
     "category":"google",
     "summary":"Generate revenue from your free games with ads tailored to match your game's look and feel.",
-    "url":"http://www.google.com/admob/",
+    "url":"https://www.google.com/admob/",
     "group":"",
     "keywords": ["AdMob"],
     "tags": [],
@@ -599,7 +599,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "versions", "blog", "googleplay"
     ],
-    "url": "http://android-developers.blogspot.com/",
+    "url": "https://android-developers.blogspot.com/",
     "timestamp": 1004884220000,
     "image": "images/blog.jpg",
     "title": "Android Developers Blog",
@@ -612,7 +612,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
+    "url": "https://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Making Android Apps that Play Nice",
@@ -625,7 +625,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
+    "url": "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Multithreading for Performance",
@@ -638,7 +638,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-content-policy.html",
+    "url": "https://play.google.com/about/developer-content-policy.html",
     "timestamp": 1194884220000,
     "image": "images/cards/google-play_2x.png",
     "title": "Developer Program Policies",
@@ -677,7 +677,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+    "url": "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
     "timestamp": 1194884220000,
     "image": "images/cards/google-play_2x.png",
     "title": "Google Play Featured Image Guidelines",
@@ -833,9 +833,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://youtu.be/SkHHPf3EdzE",
+    "url": "https://youtu.be/SkHHPf3EdzE",
     "timestamp": 1194884220000,
-    "image": "http://i1.ytimg.com/vi/SkHHPf3EdzE/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/SkHHPf3EdzE/maxresdefault.jpg",
     "title": "Level Up Your Android Game",
     "summary": "Learn how to take your game to the next level on Google Play.",
     "keywords": [],
@@ -859,7 +859,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-distribution-agreement.html",
+    "url": "https://play.google.com/about/developer-distribution-agreement.html",
     "timestamp": 1194884220000,
     "image": "images/cards/google-play_2x.png",
     "title": "Developer Distribution Agreement",
@@ -898,7 +898,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+    "url": "https://play.google.com/about/developer-distribution-agreement-addendum.html",
     "timestamp": 1194884220000,
     "image": "images/cards/google-play_2x.png",
     "title": "Google Play for Education Addendum",
@@ -911,7 +911,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
+    "url": "https://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
     "timestamp": null,
     "image": null,
     "title": "Native RTL Support in Android 4.2",
@@ -1122,9 +1122,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
       "#gpfe",
       "#googleplay"
     ],
-    "url": "http://youtu.be/vzvpcEffvaE",
+    "url": "https://youtu.be/vzvpcEffvaE",
     "timestamp": 1383243492000,
-    "image": "http://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/vzvpcEffvaE/maxresdefault.jpg",
     "title": "Introducing Tablets with Google Play for Education",
     "summary": "Schools in Hillsborough, New Jersey were among the first to try out Nexus 7 tablets with Google Play for Education. See the difference it made for students, teachers, and administrators.",
     "keywords": [],
@@ -1137,9 +1137,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#engagement",
     ],
-    "url": "http://www.youtube.com/yt/dev/",
+    "url": "https://www.youtube.com/yt/dev/",
     "timestamp": 1383243492000,
-    "image": "http://www.youtube.com/yt/dev/media/images/yt-dev-home-hero.jpg",
+    "image": "https://www.youtube.com/yt/dev/media/images/yt-dev-home-hero.jpg",
     "title": "YouTube for Developers",
     "summary": "The YouTube APIs and Tools enable you to integrate YouTube's video content and functionality into your website, app, or device.",
     "keywords": [],
@@ -1152,7 +1152,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#engagement",
     ],
-    "url": "http://www.google.com/analytics/mobile/",
+    "url": "https://www.google.com/analytics/mobile/",
     "timestamp": 1383243492000,
     "image": "images/cards/analytics-mobile_2x.jpg",
     "title": "Mobile App Analytics",
@@ -1169,9 +1169,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#gcm",
     ],
-    "url": "http://www.youtube.com/watch?v=y76rjidm8cU",
+    "url": "https://www.youtube.com/watch?v=y76rjidm8cU",
     "timestamp": 1383243492000,
-    "image": "http://1.bp.blogspot.com/-IF-1-1kA0sg/UYwTidxdi3I/AAAAAAAAAEU/ellLeQ-E1vs/s800/google-io-lockup-2.png",
+    "image": "https://1.bp.blogspot.com/-IF-1-1kA0sg/UYwTidxdi3I/AAAAAAAAAEU/ellLeQ-E1vs/s800/google-io-lockup-2.png",
     "title": "Google Cloud Messaging at I/O 2013",
     "summary": "Google Cloud Messaging allows your services to efficiently send data to applications on Android devices. See what's new, and learn how to use GCM to make your apps more efficient.",
     "keywords": ["gcm"],
@@ -1184,7 +1184,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#gcm",
     ],
-    "url": "http://developer.chrome.com/apps/cloudMessagingV2",
+    "url": "https://developer.chrome.com/apps/cloudMessagingV2",
     "timestamp": 1383243492000,
     "image": "images/kk-chromium-icon.png",
     "title": "Google Cloud Messaging for Chrome",
@@ -1200,7 +1200,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
+    "url": "https://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Make Beautiful Android App Icons",
@@ -1215,7 +1215,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
+    "url": "https://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Localize Your Promotional Graphics",
@@ -1230,7 +1230,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [
       "#sdkupdates"
     ],
-    "url": "http://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html",
+    "url": "https://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html",
     "timestamp": 1194884220000,
     "image": null,
     "title": "Make your App Content more Accessible with App Linking",
@@ -1308,7 +1308,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://en.wikipedia.org/wiki/XLIFF",
+    "url": "https://en.wikipedia.org/wiki/XLIFF",
     "timestamp": 1194884220000,
     "image": null,
     "title": "XML Localisation Interchange File Format (XLIFF)",
@@ -1347,7 +1347,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
+    "url": "https://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
     "timestamp": null,
     "image": "distribute/images/gp-edu-apps-image.jpg",
     "title": "Google play for education",
@@ -1373,7 +1373,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": ["games", "localization", "quality"],
-    "url": "http://www.youtube.com/watch?v=SkHHPf3EdzE",
+    "url": "https://www.youtube.com/watch?v=SkHHPf3EdzE",
     "timestamp": null,
     "image": "https://developers.google.com/apps/images/io_2013/google-io-logo.png",
     "title": "Level Up Your Android Game",
@@ -1399,9 +1399,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": ["monetize", "ads"],
-    "url": "http://www.google.com/doubleclick/publishers/small-business/index.html",
+    "url": "https://www.google.com/doubleclick/publishers/small-business/index.html",
     "timestamp": null,
-    "image": "http://www.google.com/doubleclick/publishers/small-business/images/define_ad.png",
+    "image": "https://www.google.com/doubleclick/publishers/small-business/images/define_ad.png",
     "title": "DoubleClick for Publishers",
     "summary": "A free ad management solution that helps growing publishers sell, schedule, deliver, and measure all of their digital ad inventory.",
     "keywords": ["ads"],
@@ -1412,7 +1412,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": ["monetize", "ads"],
-    "url": "http://support.google.com/googleplay/android-developer/topic/2985714",
+    "url": "https://support.google.com/googleplay/android-developer/topic/2985714",
     "timestamp": null,
     "image":"images/cards/google-play_2x.png",
     "title": "Policy Center: Ads",
@@ -1438,7 +1438,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://admob.blogspot.com/",
+    "url": "https://admob.blogspot.com/",
     "timestamp": null,
     "image": "images/cards/analytics-mobile_2x.jpg",
     "title": "Inside Admob",
@@ -1503,7 +1503,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": ["plus", "social"],
-    "url": "http://plus.google.com/+GooglePlay",
+    "url": "https://plus.google.com/+GooglePlay",
     "timestamp": null,
     "image": "images/cards/google-play_2x.png",
     "title": "+Google Play",
@@ -1531,7 +1531,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/guidelines",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "image": "https://developer.android.com/distribute/images/edu-guidelines.jpg",
     "title": "Education Guidelines",
     "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
     "keywords": [],
@@ -1544,7 +1544,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/faq",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/gpfe-faq.jpg",
+    "image": "https://developer.android.com/distribute/images/gpfe-faq.jpg",
     "title": "Education FAQ",
     "summary": "Answers to common questions you might have about Google Play for Education.",
     "keywords": [],
@@ -1581,9 +1581,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.png",
     "title": "Deer Hunter 2014 by Glu &mdash; Sign-in",
     "summary": "Glu finds that Google Play Game Services helps improve the user experience which leads to increased player happiness. They also find that Play Games Services signed in users tend to play longer and have a higher lifetime value.",
     "keywords": ["stories"],
@@ -1594,9 +1594,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.png",
     "title": "PBA® Bowling Challenge by Concrete Software &mdash; Quests",
     "summary": "Concrete Software finds that Google Play Game Services' quests are a great way to create new content for users that leads to higher engagement.",
     "keywords": ["stories"],
@@ -1607,9 +1607,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.png",
     "title": "Dragonplay Slots by Dragonplay &mdash; Sign-in",
     "summary": "Dragonplay finds that players who sign in with Google Play Games services tend to be high quality users who were highly engaged. They also tend to be easier to convert to paying users.",
     "keywords": ["stories"],
@@ -1620,9 +1620,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.png",
     "title": "Asphalt 8 by Gameloft &mdash; Friends invitations",
     "summary": "Gameloft finds that Google Play Game Services users are more engaged than the average Android user and more likely to convert to paying players.",
     "keywords": ["stories"],
@@ -1633,9 +1633,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.png",
     "title": "Eternity Warriors 3 by Glu &mdash; Gifting",
     "summary": "Glu finds that Google Play Game Services gifting outperforms other implementations (including those with incentives) because of its seamless flow and consistent performance.",
     "keywords": ["stories"],
@@ -1646,9 +1646,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.jpg",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.jpg",
     "title": "Rivals at War: Firefight by Hothead Games &mdash; Leaderboards",
     "summary": "Hothead Games is planning to include Google Play Game Services features in all their games going forwards after seeing that players that signed in with Play Games Services tend to show higher retention and a higher average revenue.",
     "keywords": ["stories"],
@@ -1659,9 +1659,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.png",
     "title": "Compulsive by TMSOFT &mdash; Cross-platform",
     "summary": "TMSOFT finds that users who authenticate with Play Games Services on Android and iOS play Compulsive twice as much and purchase in-app products over four times as much.",
     "keywords": ["stories"],
@@ -1672,9 +1672,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.png",
     "title": "Super Stickman Golf 2 by Noodlecake Studios &mdash; Multiplayer",
     "summary": "Noodlecake Studios finds that Google Play Game Services’ multiplayer feature helps reduce attrition.",
     "keywords": ["stories"],
@@ -1685,9 +1685,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebelGames_DrWhoLegacy_pgps.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebelGames_DrWhoLegacy_pgps.png",
     "title": "Dr. Doctor Who: Legacy by Tiny Rebel Games &mdash; Achievements",
     "summary": "After integrating achievements and cloud services from Google Play Game Services, Tiny Rebel Games saw a dramatic increase in daily revenues as a result of an increase in daily installs and an increase in the average revenue per install.",
     "keywords": ["stories"],
@@ -1698,9 +1698,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf",
+    "url": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf",
     "timestamp": null,
-    "image": "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.png",
+    "image": "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.png",
     "title": "Leo’s Fortune by 1337 &amp; Senri &mdash; Saved games",
     "summary": "1337 + Senri finds that Google Play Game Services is easy to integrate and provides essential game functions like cloud saved games, achievements and leaderboards which have a very large adoption rate amongst players.",
     "keywords": ["stories"],
@@ -1763,9 +1763,9 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://www.google.com/tagmanager/",
+    "url": "https://www.google.com/tagmanager/",
     "timestamp": null,
-    "image": "http://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
+    "image": "https://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
     "title": "Google Tag Manager",
     "summary": "Google Tag Manager enables you to change configuration values in your mobile apps using the Google Tag Manager interface, without having to rebuild and resubmit application binaries to app marketplaces.",
     "keywords": ["analytics", "tagmanager"],
@@ -1960,7 +1960,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "url": "https://support.google.com/tagmanager/answer/6003007",
     "timestamp": null,
-    "image": "http://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
+    "image": "https://www.google.com/tagmanager/images/gtm-hero-illustration-small.png",
     "title": "In-App A/B Testing",
     "summary": "With content experiments in Google Tag Manager you can test multiple variations of your app to find which works best.",
     "keywords": ["tagmanager"],
@@ -2286,7 +2286,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
-    "url": "http://analyticsacademy.withgoogle.com/mobile-app",
+    "url": "https://analyticsacademy.withgoogle.com/mobile-app",
     "timestamp": null,
     "image": "distribute/images/advertising.jpg",
     "title": "Analytics Academy for Mobile Apps",
@@ -2644,7 +2644,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["wear", "wearable", "watch face"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/AK38PJZmIW8/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/AK38PJZmIW8/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2656,7 +2656,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["support", "compatibility"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/3PIc-DuEU2s/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/3PIc-DuEU2s/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2668,7 +2668,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["support", "compatibility","design-code"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/5Be2mJzP-Uw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/5Be2mJzP-Uw/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2680,7 +2680,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["tools", "studio","gradle"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/cD7NPxuuXYY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/cD7NPxuuXYY/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2692,7 +2692,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["tools", "studio","layout"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/JLLnhwtDoHw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/JLLnhwtDoHw/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2704,7 +2704,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["tools", "studio","debugging","profiling","performance"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2736,7 +2736,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Android for Work",
     "category":"Enterprise",
     "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
-    "url":"http://www.android.com/work/",
+    "url":"https://www.android.com/work/",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
@@ -2752,7 +2752,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2764,7 +2764,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2776,7 +2776,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2788,7 +2788,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2824,7 +2824,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/yYU4DHLwoRk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/yYU4DHLwoRk/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2836,7 +2836,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/ndBdf1_oOGA/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/ndBdf1_oOGA/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2848,7 +2848,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/VOn7VrTRlA4/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/VOn7VrTRlA4/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2860,7 +2860,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/OW1A4XFRuyc/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/OW1A4XFRuyc/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2872,7 +2872,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/HXacyy0HSW0/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/HXacyy0HSW0/maxresdefault.jpg",
     "lang":"en",
     "type":"video"
   },
@@ -2884,7 +2884,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/vcSj8ln-BlE/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/vcSj8ln-BlE/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2896,7 +2896,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2908,7 +2908,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/C8lUdPVSzDk/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/C8lUdPVSzDk/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2920,7 +2920,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/N72ksDKrX6c/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/N72ksDKrX6c/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2932,7 +2932,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/U9tw5ypqEN0/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/U9tw5ypqEN0/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2944,7 +2944,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/iZqDdvhTZj0/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/iZqDdvhTZj0/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2956,7 +2956,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/5sCQjeGoE7M/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/5sCQjeGoE7M/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2968,7 +2968,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/LQoohRwojmw/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/LQoohRwojmw/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2980,7 +2980,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "group":"",
     "keywords": ["Marshmallow"],
     "tags": [],
-    "image":"http://i1.ytimg.com/vi/f17qe9vZ8RM/maxresdefault.jpg",
+    "image":"https://i1.ytimg.com/vi/f17qe9vZ8RM/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
@@ -2994,7 +2994,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=wcjqBSei3a0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/wcjqBSei3a0/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/wcjqBSei3a0/maxresdefault.jpg",
     "title": "Developers connecting the world through Google Play",
     "summary": "The mobile ecosystem is empowering developers to make good on the dream of connecting the world through technology to improve people's lives.",
     "tags":["io15","googleplay"],
@@ -3003,7 +3003,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/B6ydLpkhq04/maxresdefault.jpg",
     "title": "Store Listing Experiments for Google Play",
     "summary": "Learn how to use Google Play’s new store listing optimization feature to get more installs of your app, and how to test different graphics and text to find out which options perform the best. ",
     "tags":["io15","googleplay","store listing"],
@@ -3012,7 +3012,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "url":"https://www.youtube.com/watch?v=jyO3-rF4Mu0&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "image": "http://i1.ytimg.com/vi/jyO3-rF4Mu0/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/jyO3-rF4Mu0/maxresdefault.jpg",
     "title": "Growing games with Google",
     "summary": "The games industry has never been more promising and full of opportunities. This talk covers how Google is helping developers across a broad range of existing and emerging platforms.",
     "tags":["io15","android", "googleplay","games"],
@@ -3020,7 +3020,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type":"video"
   },
   {
-    "url":"http://www.youtube.com/watch?v=yJisuP94lHU",
+    "url":"https://www.youtube.com/watch?v=yJisuP94lHU",
     "image": "images/distribute/hero-playtime-opener.jpg",
     "title": "Playtime 2015: Innovation happens everywhere",
     "type":"Video",
@@ -3028,7 +3028,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
   },
   {
-    "url":"http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "url":"https://www.youtube.com/watch?v=JrR6o5tYMWQ",
     "image": "images/distribute/hero-acquisition-devbyte.jpg",
     "title": "User acquisition and tracking on Google Play",
     "type" : "Video",
@@ -3114,7 +3114,7 @@ METADATA['en'].carousel = {
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
-  "http://www.youtube.com/watch?v=yJisuP94lHU": {
+  "https://www.youtube.com/watch?v=yJisuP94lHU": {
     "url":"https://www.youtube.com/watch?v=yJisuP94lHU&index=1&list=PLWz5rJ2EKKc_QRBk7Zkl5uGjR1He7vG-w",
     "image": "images/distribute/hero-playtime-opener.jpg",
     "title": "Playtime 2015: Innovation happens everywhere",
@@ -3122,76 +3122,76 @@ METADATA['en'].carousel = {
     "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
   },
   "http://www.youtube.com/watch?v=rcU7VEs1hiE": {
-    "url":"http://www.youtube.com/watch?v=rcU7VEs1hiE&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "url":"https://www.youtube.com/watch?v=rcU7VEs1hiE&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-rogervoice-story.jpg",
     "title": "RogerVoice uses beta testing to launch on Android first",
     "type" : "youtube",
     "summary": "RogerVoice helps people who are hearing impaired make phone calls through voice recognition and text captions. Hear how they used material design and beta testing to create a UI that's accessible and intuitive to navigate.",
   },
   "http://www.youtube.com/watch?v=JFlX9rW7Epc": {
-    "url":"http://www.youtube.com/watch?v=JFlX9rW7Epc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "url":"https://www.youtube.com/watch?v=JFlX9rW7Epc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-domain-story.jpg",
     "title": "Domain increases installs by 44% with Material Design",
     "type" : "youtube",
     "summary": "Learn how Domain, a premier real-estate portal in Australia, drastically improved their Google Play app reviews, ratings and downloads by investing in their Android app experience.",
   },
   "http://www.youtube.com/watch?v=4CqXCkcN_d4": {
-    "url":"http://www.youtube.com/watch?v=4CqXCkcN_d4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "url":"https://www.youtube.com/watch?v=4CqXCkcN_d4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-dots-story.jpg",
     "title": "Dots increases installs with Store Listing Experiments",
     "type" : "youtube",
     "summary": "Hear how US-founded game developer, Dots, used the Store Listing Experiments feature in the Google Play Developer Console to test what icon, graphics, and text worked the best at converting visitors to installs.",
   },
-  "http://www.youtube.com/watch?v=JrR6o5tYMWQ": {
-    "url":"http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+  "https://www.youtube.com/watch?v=JrR6o5tYMWQ": {
+    "url":"https://www.youtube.com/watch?v=JrR6o5tYMWQ",
     "image": "images/distribute/hero-acquisition-devbyte.jpg",
     "title": "User acquisition and tracking on Google Play",
     "type" : "youtube",
     "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
   },
-  "http://www.youtube.com/watch?v=Pd49vTkvu0U": {
-    "url":"http://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=Pd49vTkvu0U": {
+    "url":"https://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-jelly-button.jpg",
     "title": "How Jelly Button Games are growing globally through data",
     "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery.",
   },
-  "http://www.youtube.com/watch?v=700gYRkhkLM": {
-    "url":"http://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=700gYRkhkLM": {
+    "url":"https://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-outfit7.jpg",
     "title": "Outfit7 — Building an entertainment company with Google",
     "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories....",
   },
-  "http://www.youtube.com/watch?v=MPnH7h12h0U": {
-    "url":"http://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=MPnH7h12h0U": {
+    "url":"https://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-haystack.jpg",
     "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen.",
   },
-  "http://www.youtube.com/watch?v=ekxABqJeRBc": {
-    "url":"http://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=ekxABqJeRBc": {
+    "url":"https://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-ginlemon.jpg",
     "title": "How GinLemon is breaking through with Google Play",
     "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy.",
   },
-  "http://www.youtube.com/watch?v=0r36OJaeMo4": {
-    "url":"http://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=0r36OJaeMo4": {
+    "url":"https://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-shifty-jelly.jpg",
     "title": "Shifty Jelly — building a number 1 podcast app",
     "summary": "Shifty Jelly is an Adelaide based mobile development company that has seen great success building Pocket Casts, a premium podcast manager app.",
   },
-  "http://www.youtube.com/watch?v=1Iw7Tg_afKk": {
+  "https://www.youtube.com/watch?v=1Iw7Tg_afKk": {
     "image": "images/distribute/hero-wooga.jpg",
-    "url":"http://www.youtube.com/watch?v=1Iw7Tg_afKk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "url":"https://www.youtube.com/watch?v=1Iw7Tg_afKk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "title": "Wooga’s fast iterations on Google Play",
     "summary": "The speed at which Wooga is able to iterate its live and under development games with the Android and Google Play tools has been key to delivering hits such as Diamond Dash, Jelly Splash, and Agent Alice.",
   },
-  "http://www.youtube.com/watch?v=TieksFvD-7o": {
-    "url":"http://www.youtube.com/watch?v=TieksFvD-7o&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=TieksFvD-7o": {
+    "url":"https://www.youtube.com/watch?v=TieksFvD-7o&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-trello.jpg",
     "title": "Trello lifts engagement by double digits with material design",
     "summary": "Trello recently redesigned their collaborative planning app using the material design guidelines, and their efforts paid off.",
   },
-  "http://www.youtube.com/watch?v=MCoh4Pxs_ok": {
-    "url":"http://www.youtube.com/watch?v=MCoh4Pxs_ok&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+  "https://www.youtube.com/watch?v=MCoh4Pxs_ok": {
+    "url":"https://www.youtube.com/watch?v=MCoh4Pxs_ok&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-the-hunt.jpg",
     "title": "The Hunt — growing engagement with material design and Google Play",
     "summary": "Material design has helped The Hunt to enhance engagement in their style advice and product discovery app. ",
@@ -3245,7 +3245,7 @@ METADATA['en'].collections = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=yJisuP94lHU",
+      "https://www.youtube.com/watch?v=yJisuP94lHU",
       "http://www.youtube.com/watch?v=rcU7VEs1hiE",
       "http://www.youtube.com/watch?v=JFlX9rW7Epc",
       "http://www.youtube.com/watch?v=4CqXCkcN_d4"
@@ -3262,9 +3262,9 @@ METADATA['en'].collections = {
   "design/landing/latest": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=p4gmvHyuZzw",
-      "http://www.youtube.com/watch?v=YaG_ljfzeUw",
-      "http://www.youtube.com/watch?v=XOcCOBe8PTc"
+      "https://www.youtube.com/watch?v=p4gmvHyuZzw",
+      "https://www.youtube.com/watch?v=YaG_ljfzeUw",
+      "https://www.youtube.com/watch?v=XOcCOBe8PTc"
     ]
   },
   "design/landing/materialdesign": {
@@ -3311,9 +3311,9 @@ METADATA['en'].collections = {
   "develop/landing/latest": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2015/04/new-android-code-samples.html",
-      "http://android-developers.blogspot.com/2015/04/android-support-library-221.html",
-      "http://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
+      "https://android-developers.blogspot.com/2015/04/new-android-code-samples.html",
+      "https://android-developers.blogspot.com/2015/04/android-support-library-221.html",
+      "https://android-developers.blogspot.com/2015/03/a-new-reference-app-for-multi-device.html"
     ]
   },
   "develop/landing/devpatterns": {
@@ -3327,9 +3327,9 @@ METADATA['en'].collections = {
   "develop/landing/performance": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=fEEulSk1kNY",
-      "http://www.youtube.com/watch?v=-3ry8PxcJJA",
-      "http://www.youtube.com/watch?v=_kKTGK-Cb_4"
+      "https://www.youtube.com/watch?v=fEEulSk1kNY",
+      "https://www.youtube.com/watch?v=-3ry8PxcJJA",
+      "https://www.youtube.com/watch?v=_kKTGK-Cb_4"
     ]
   },
   "develop/landing/buildwithgoogle": {
@@ -3409,9 +3409,9 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
     "distribute/googleplay/guide.html",
-    "http://www.youtube.com/watch?v=JrR6o5tYMWQ",
+    "https://www.youtube.com/watch?v=JrR6o5tYMWQ",
     "https://www.youtube.com/watch?v=B6ydLpkhq04&list=PLOU2XLYxmsIKLNUPiFCWVtcO7mZRZ9MmS",
-    "http://www.youtube.com/watch?v=yJisuP94lHU",
+    "https://www.youtube.com/watch?v=yJisuP94lHU",
     ]
   },
   "distribute/landing/googleplay": {
@@ -3452,7 +3452,7 @@ METADATA['en'].collections = {
   "distribute/edu/videos/experience": {
     "title": "",
     "resources": [
-      "http://youtu.be/vzvpcEffvaE"
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/gp/gplanding": {
@@ -3477,7 +3477,7 @@ METADATA['en'].collections = {
   },
   "distribute/googleplay/gpfw": {
     "resources": [
-      "http://www.android.com/work/",
+      "https://www.android.com/work/",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
       "training/enterprise/index.html"
     ]
@@ -3554,7 +3554,7 @@ METADATA['en'].collections = {
       "google/play-services/index.html",
       "https://developers.google.com/analytics/solutions/mobile-implementation-guide",
       "https://developers.google.com/analytics/devguides/collection/android/",
-      "http://www.google.com/tagmanager/",
+      "https://www.google.com/tagmanager/",
       "https://github.com/googleanalytics/google-analytics-plugin-for-unity"
     ]
   },
@@ -3654,7 +3654,7 @@ METADATA['en'].collections = {
   "distribute/tools/news": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/",
+      "https://android-developers.blogspot.com/",
       "https://plus.google.com/+AndroidDevelopers/"
     ]
   },
@@ -3736,7 +3736,7 @@ METADATA['en'].collections = {
     "resources": [
       "https://developers.google.com/cast/docs/ux_guidelines",
       "https://developers.google.com/cast/docs/android_sender",
-      "http://www.github.com/googlecast"
+      "https://www.github.com/googlecast"
     ]
   },
   "distribute/googleplay/cardboard": {
@@ -3744,13 +3744,13 @@ METADATA['en'].collections = {
     "resources": [
       "https://www.google.com/get/cardboard/get-cardboard/",
       "https://developers.google.com/cardboard/android/download",
-      "http://www.google.com/design/spec-vr"
+      "https://www.google.com/design/spec-vr"
     ]
   },
   "distribute/googleplay/gpfe/highlight": {
     "title": "About Google Play for Education",
     "resources": [
-      "http://youtu.be/vzvpcEffvaE"
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/googleplay/gpfe/dev/about": {
@@ -3771,28 +3771,28 @@ METADATA['en'].collections = {
       "https://developers.google.com/edu/guidelines",
       "distribute/essentials/quality/tablets.html",
       "distribute/googleplay/developer-console.html",
-      "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+      "https://play.google.com/about/developer-distribution-agreement-addendum.html",
     ]
   },
   "distribute/googleplay/aboutgpfe/educators/about": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://www.youtube.com/watch?v=haEmsMo0f3w"
+      "https://www.google.com/edu/tablets/",
+      "https://www.youtube.com/watch?v=haEmsMo0f3w"
     ]
   },
   "distribute/googleplay/aboutgpfe/educators": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://youtu.be/vzvpcEffvaE"
+      "https://www.google.com/edu/tablets/",
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/googleplay/gettingstartedgpfe/educators": {
     "title": "About Google Play for Education / Educators",
     "resources": [
-      "http://www.google.com/edu/tablets/",
-      "http://youtu.be/vzvpcEffvaE"
+      "https://www.google.com/edu/tablets/",
+      "https://youtu.be/vzvpcEffvaE"
     ]
   },
   "distribute/essentials/eduessentials/developers": {
@@ -3806,7 +3806,7 @@ METADATA['en'].collections = {
   "distribute/essentials/eduessentials/educators": {
     "title": "",
     "resources": [
-      "http://www.google.com/edu/tablets/",
+      "https://www.google.com/edu/tablets/",
       "distribute/essentials/quality/tablets.html",
     ]
   },
@@ -3815,7 +3815,7 @@ METADATA['en'].collections = {
     "resources": [
       "design/index.html",
       "training/articles/perf-anr.html",
-      "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html"
+      "https://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html"
     ]
   },
   "distribute/users/appinvites": {
@@ -3841,18 +3841,18 @@ METADATA['en'].collections = {
       "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/device-art.html",
-      "http://plus.google.com/+GooglePlay"
+      "https://plus.google.com/+GooglePlay"
     ]
   },
   "distribute/users/createagreatlisting": {
     "title": "",
     "resources": [
       "https://support.google.com/googleplay/android-developer/answer/1078870",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
       "distribute/tools/launch-checklist.html",
-      "http://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
-      "http://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
-      "http://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html"
+      "https://android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html",
+      "https://android-developers.blogspot.com/2012/12/localize-your-promotional-graphics-on.html",
+      "https://android-developers.blogspot.com/2013/10/making-your-app-content-more-accessible.html"
     ]
   },
   "distribute/users/appindexing": {
@@ -3877,8 +3877,8 @@ METADATA['en'].collections = {
     "resources": [
       "https://support.google.com/admob/topic/2784623",
       "https://developers.google.com/mobile-ads-sdk/download",
-      "http://support.google.com/googleplay/android-developer/topic/2985714",
-      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "https://support.google.com/googleplay/android-developer/topic/2985714",
+      "https://analyticsacademy.withgoogle.com/mobile-app",
       "https://support.google.com/analytics/answer/2611404",
       "https://support.google.com/admob/answer/3111064"
     ]
@@ -3894,16 +3894,16 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "distribute/googleplay/developer-console.html",
-      "http://android-developers.blogspot.com/"
+      "https://android-developers.blogspot.com/"
     ]
   },
   "distribute/toolsreference/bestpractices/games": {
     "title": "",
     "resources": [
       "google/play-services/games.html",
-      "http://android-developers.blogspot.com/",
+      "https://android-developers.blogspot.com/",
       "distribute/googleplay/developer-console.html",
-      "http://www.youtube.com/watch?v=1RIz-cmTQB4"
+      "https://www.youtube.com/watch?v=1RIz-cmTQB4"
     ]
   },
   "distribute/essentials/corequalityguidelines/visualdesign": {
@@ -3919,7 +3919,7 @@ METADATA['en'].collections = {
   "distribute/essentials/corequalityguidelines/functionality": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
+      "https://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html",
       "guide/components/tasks-and-back-stack.html",
       "training/basics/activity-lifecycle/recreating.html"
     ]
@@ -3964,19 +3964,19 @@ METADATA['en'].collections = {
   "distribute/essentials/core/performance": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2010/12/new-gingerbread-api-strictmode.html",
+      "https://android-developers.blogspot.com/2010/12/new-gingerbread-api-strictmode.html",
       "training/articles/perf-anr.html",
-      "http://android-developers.blogspot.com/2010/07/multithreading-for-performance.html"
+      "https://android-developers.blogspot.com/2010/07/multithreading-for-performance.html"
     ]
   },
   "distribute/essentials/core/play": {
     "title": "",
     "resources": [
       "distribute/tools/launch-checklist.html",
-      "http://play.google.com/about/developer-content-policy.html",
+      "https://play.google.com/about/developer-content-policy.html",
       "https://support.google.com/googleplay/android-developer/answer/188189",
       "https://support.google.com/googleplay/android-developer/answer/1078870",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
       "https://support.google.com/googleplay/android-developer/answer/113477"
     ]
   },
@@ -4056,7 +4056,7 @@ METADATA['en'].collections = {
   "distribute/essentials/tabletguidelines/googleplay": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "google/play/filters.html"
     ]
   },
@@ -4064,7 +4064,7 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "distribute/essentials/quality/core.html",
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
+      "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "distribute/tools/launch-checklist.html",
       "distribute/tools/promote/device-art.html"
     ]
@@ -4074,14 +4074,14 @@ METADATA['en'].collections = {
     "resources": [
       "design/patterns/notifications.html",
       "distribute/engage/gcm.html",
-      "http://play.google.com/about/developer-content-policy.html"
+      "https://play.google.com/about/developer-content-policy.html"
     ]
   },
   "distribute/engage/analytics": {
     "title": "",
     "resources": [
-      "http://www.google.com/analytics/mobile/",
-      "http://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html",
+      "https://www.google.com/analytics/mobile/",
+      "https://android-developers.blogspot.com/2013/10/improved-app-insight-by-linking-google.html",
       "https://developers.google.com/analytics/devguides/collection/android/"
     ]
   },
@@ -4126,7 +4126,7 @@ METADATA['en'].collections = {
       "distribute/stories/localization.html",
       "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
-      "http://www.youtube.com/watch?v=SkHHPf3EdzE"
+      "https://www.youtube.com/watch?v=SkHHPf3EdzE"
     ]
   },
   "distribute/engage/gcm": {
@@ -4142,7 +4142,7 @@ METADATA['en'].collections = {
       "https://developers.google.com/games/services/",
       "distribute/analyze/start.html",
       "distribute/googleplay/cardboard.html",
-      "http://www.google.com/admob/"
+      "https://www.google.com/admob/"
     ]
   },
   "distribute/engage/googleplaygames": {
@@ -4151,7 +4151,7 @@ METADATA['en'].collections = {
       "https://developers.google.com/games/services/",
       "distribute/analyze/start.html",
       "distribute/googleplay/cardboard.html",
-      "http://www.google.com/admob/"
+      "https://www.google.com/admob/"
     ]
   },
   "distribute/engage/gplus": {
@@ -4189,9 +4189,9 @@ METADATA['en'].collections = {
   "distribute/engage/video/more": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/yt/dev/",
+      "https://www.youtube.com/yt/dev/",
       "distribute/essentials/best-practices/games.html",
-      "http://www.youtube.com/watch?v=RRelFvc6Czo"
+      "https://www.youtube.com/watch?v=RRelFvc6Czo"
     ]
   },
   "distribute/engage/community": {
@@ -4204,15 +4204,15 @@ METADATA['en'].collections = {
   "distribute/engage/kiwi": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=WWArLD6nqrk"
+      "https://www.youtube.com/watch?v=WWArLD6nqrk"
     ]
   },
   "distribute/toolsreference/gpfefaq": {
     "title": "",
     "resources": [
-      "http://www.google.com/edu/tablets/",
+      "https://www.google.com/edu/tablets/",
       "distribute/googleplay/edu/start.html",
-      "http://play.google.com/about/developer-distribution-agreement-addendum.html",
+      "https://play.google.com/about/developer-distribution-agreement-addendum.html",
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html"
     ]
@@ -4226,7 +4226,7 @@ METADATA['en'].collections = {
   "distribute/tools/loc/designforloc": {
     "title": "",
     "resources": [
-      "http://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
+      "https://android-developers.blogspot.com/2013/03/native-rtl-support-in-android-42.html",
       "guide/topics/resources/string-resource.html#Plurals",
       "guide/topics/resources/string-resource.html",
       "reference/java/util/Locale.html"
@@ -4237,7 +4237,7 @@ METADATA['en'].collections = {
     "resources": [
       "guide/topics/resources/string-resource.html",
       "design/style/writing.html",
-      "http://en.wikipedia.org/wiki/XLIFF"
+      "https://en.wikipedia.org/wiki/XLIFF"
     ]
   },
   "distribute/toolsreference/localizationchecklist/translatestrings": {
@@ -4342,7 +4342,7 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "https://support.google.com/googleplay/android-developer/answer/1078870",
-      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
+      "https://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/productdetails": {
@@ -4362,7 +4362,7 @@ METADATA['en'].collections = {
   "distribute/toolsreference/launchchecklist/finalchecks": {
     "title": "",
     "resources": [
-      "http://play.google.com/about/developer-content-policy.html",
+      "https://play.google.com/about/developer-content-policy.html",
       "https://support.google.com/googleplay/android-developer/answer/113476",
       "support.html"
     ]
@@ -4407,9 +4407,9 @@ METADATA['en'].collections = {
   "distribute/monetize/advertising": {
     "title": "",
     "resources": [
-      "http://www.google.com/ads/admob/#subid=us-en-et-dac",
-      "http://www.google.com/doubleclick/publishers/small-business/index.html",
-      "http://support.google.com/googleplay/android-developer/topic/2985714",
+      "https://www.google.com/ads/admob/#subid=us-en-et-dac",
+      "https://www.google.com/doubleclick/publishers/small-business/index.html",
+      "https://support.google.com/googleplay/android-developer/topic/2985714",
       "training/monetization/ads-and-ux.html"
     ]
   },
@@ -4417,8 +4417,8 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "https://support.google.com/admob/topic/2784623",
-      "http://admob.blogspot.com/",
-      "http://analyticsacademy.withgoogle.com/mobile-app",
+      "https://admob.blogspot.com/",
+      "https://analyticsacademy.withgoogle.com/mobile-app",
     ]
   },
   "distribute/monetize/paymentmethods": {
@@ -4494,16 +4494,16 @@ METADATA['en'].collections = {
   "distribute/stories/games": {
     "title": "",
     "resources": [
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
-      "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
     ]
   },
   "overview/1": {

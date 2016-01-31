@@ -25,7 +25,7 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/xelYnWcYkuE/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/xelYnWcYkuE/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -37,7 +37,7 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/lJdjY3z6-LY/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/lJdjY3z6-LY/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -45,11 +45,11 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "title": "Android Wear 関連の動画に日本語字幕が付きました",
     "category": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/android-wear.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://i1.ytimg.com/vi/4JcDYkgqksY/maxresdefault.jpg",
+    "image": "https://i1.ytimg.com/vi/4JcDYkgqksY/maxresdefault.jpg",
     "type": "blog"
   },
   {
@@ -57,11 +57,11 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "title": "Android Studio 1.0 をリリースしました",
     "category": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://3.bp.blogspot.com/-1hV3sD1At74/VIaQSWBasUI/AAAAAAAABAU/9vYLJMsmMuQ/s1600/studio-logo.png",
+    "image": "https://3.bp.blogspot.com/-1hV3sD1At74/VIaQSWBasUI/AAAAAAAABAU/9vYLJMsmMuQ/s1600/studio-logo.png",
     "type": "blog"
   },
   {
@@ -69,11 +69,11 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "title": "Google Play 開発者サービス 6.5 のご紹介",
     "category": "",
     "summary": "",
-    "url": "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+    "url": "https://googledevjp.blogspot.jp/2014/12/google-play-65.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://1.bp.blogspot.com/-4BNREC0Jojo/VGo7ahW35wI/AAAAAAAABAc/9thZl94F6fY/s1600/GMS%2B-%2BRelease%2BBlog%2BNacho%2B-%2BMap%2BToolbar.png",
+    "image": "https://1.bp.blogspot.com/-4BNREC0Jojo/VGo7ahW35wI/AAAAAAAABAc/9thZl94F6fY/s1600/GMS%2B-%2BRelease%2BBlog%2BNacho%2B-%2BMap%2BToolbar.png",
     "type": "blog"
   },
   {
@@ -105,7 +105,7 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "title": "Google Play アプリ ポリシー センター",
     "category": "",
     "summary": "",
-    "url": "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+    "url": "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -129,11 +129,11 @@ METADATA['ja'].extras = METADATA['ja'].extras.concat([
     "title": "Google Cloud Platform が支える、新感覚リアルタイム RPG ユニゾンリーグ - 株式会社エイチームの GCP 導入事例",
     "category": "",
     "summary": "スケーラブルなバックエンドを実現する Google Cloud Platform の最新導入事例。",
-    "url": "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+    "url": "https://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://3.bp.blogspot.com/-xp7KoPkbne4/VI_PfoFil3I/AAAAAAAAA3U/-k1UZ0zjCBc/s1600/unison-league.jpeg",
+    "image": "https://3.bp.blogspot.com/-xp7KoPkbne4/VI_PfoFil3I/AAAAAAAAA3U/-k1UZ0zjCBc/s1600/unison-league.jpeg",
     "type": "distribute"
   },
   {
@@ -168,17 +168,17 @@ METADATA['ja'].collections = {
     "resources": [
       "https://www.youtube.com/watch?v=xelYnWcYkuE",
       "https://www.youtube.com/playlist?list=PLCOC_kP3nqGIHEgwm9mybvA04Vn4Cg9nn",
-      "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
-      "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
-      "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+      "https://googledevjp.blogspot.jp/2014/12/android-wear.html",
+      "https://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+      "https://googledevjp.blogspot.jp/2014/12/google-play-65.html",
       "distribute/googleplay/developer-console.html#alpha-beta",
       "distribute/googleplay/guide.html",
       "distribute/essentials/quality/core.html",
-      "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
       "support.html",
       "distribute/essentials/quality/wear.html",
       "training/tv/start/index.html",
-      "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+      "https://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
       "distribute/monetize/ads.html"
     ]
   },
