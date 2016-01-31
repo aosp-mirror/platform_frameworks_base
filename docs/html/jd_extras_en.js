@@ -471,6 +471,90 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type":"video"
   },
   {
+    "title":"Debugging and testing in Android Studio",
+    "titleFriendly":"",
+    "summary":"This video introduces the state of unit testing support in Studio and Google’s new Android Testing Support Library for functional UI testing and running instrumented tests on a device.",
+    "url":"https://www.youtube.com/watch?v=2I6fuD20qlY",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/2I6fuD20qlY/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"Android Testing (Android Dev Summit 2015)",
+    "titleFriendly":"",
+    "summary":"Overview of the testing tools and frameworks provided by Google and how they can help you to iterate more quickly and maintain a more healthy codebase.",
+    "url":"https://www.youtube.com/watch?v=vdasFFfXKOY",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/vdasFFfXKOY/maxresdefault.jpg",
+    "type":"video"
+  },
+  {
+    "title":"dumpsys",
+    "titleFriendly":"",
+    "summary":"A tool that runs on the device and provides information about the status of system services.",
+    "url":"https://source.android.com/devices/tech/debug/dumpsys.html",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"",
+    "type":"google"
+  },
+  {
+    "title":"Android Testing Samples",
+    "titleFriendly":"",
+    "summary":"A collection of samples demonstrating different frameworks and techniques for automated testing.",
+    "url":"https://github.com/googlesamples/android-testing",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+  {
+    "title":"Android Testing Templates",
+    "titleFriendly":"",
+    "summary":"A collection of Google's Android testing tools and frameworks, all integrated in a single application project.",
+    "url":"https://github.com/googlesamples/android-testing-templates",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+   {
+    "title":"Android Testing Support Library (GitHub)",
+    "titleFriendly":"",
+    "summary":"A resource page on GitHub for the Android Testing Support Library.",
+    "url":"https://google.github.io/android-testing-support-library",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"Samples"
+  },
+  {
+    "title":"Android Testing Codelab",
+    "titleFriendly":"",
+    "summary":"This codelab shows how to build an Android app from the ground up in Android Studio, using a Model View Presenter architecture, Unit Tests and Instrumentation Tests.",
+    "url":"https://codelabs.developers.google.com/codelabs/android-testing/index.html",
+    "group":"",
+    "keywords": ["testing"],
+    "tags": [
+    ],
+    "image":"images/testing/testing-icon.png",
+    "type":"google"
+  },
+  {
     "title":"Developer Registration",
     "category":"google play",
     "summary":"Additional information about the registration process.",
@@ -4504,6 +4588,42 @@ METADATA['en'].collections = {
       "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
       "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
       "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
+    ]
+  },
+  "training/testing/overview": {
+    "title": "",
+    "resources": [
+      "training/testing/start/index.html",
+      "tools/testing/testing_android.html",
+      "https://www.youtube.com/watch?v=vdasFFfXKOY"
+    ]
+  },
+  "training/testing/tools": {
+    "title": "",
+    "resources": [
+      "tools/testing-support-library/index.html",
+      "tools/help/monkey.html",
+      "tools/help/monkeyrunner_concepts.html",
+      "tools/testing/testing_otheride.html",
+      "https://source.android.com/devices/tech/debug/dumpsys.html"
+    ]
+  },
+  "training/testing/techniques": {
+    "title": "",
+    "resources": [
+      "training/testing/ui-testing/index.html",
+      "training/testing/unit-testing/index.html",
+      "training/testing/performance.html"
+    ]
+  },
+  "training/testing/resources": {
+    "title": "",
+    "resources": [
+      "https://github.com/googlesamples/android-testing",
+      "https://www.youtube.com/watch?v=2I6fuD20qlY",
+      "https://codelabs.developers.google.com/codelabs/android-testing/index.html",
+      "https://github.com/googlesamples/android-testing-templates",
+      "https://google.github.io/android-testing-support-library"
     ]
   },
   "overview/1": {
