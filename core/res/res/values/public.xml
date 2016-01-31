@@ -2662,8 +2662,8 @@
 
     <public type="attr" name="listMenuViewStyle" />
     <public type="attr" name="subMenuArrow" />
-    <public type="attr" name="initialWidth" />
-    <public type="attr" name="initialHeight" />
+    <public type="attr" name="defaultWidth" />
+    <public type="attr" name="defaultHeight" />
     <public type="attr" name="minimalSize" />
     <public type="attr" name="resizeableActivity" />
     <public type="attr" name="supportsPictureInPicture" />

@@ -1288,6 +1288,7 @@
         <attr name="extractNativeLibs" />
         <attr name="forceDeviceEncrypted" format="boolean" />
         <attr name="encryptionAware" />
+        <attr name="resizeableActivity" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -2238,21 +2239,21 @@
     <!-- <code>layout</code> tag allows configuring the layout for the activity within multi-window
          environment. -->
     <declare-styleable name="AndroidManifestLayout" parent="AndroidManifestActivity">
-        <!-- Initial width of the activity. Can be either a fixed value or fraction, in which case
+        <!-- Default width of the activity. Can be either a fixed value or fraction, in which case
              the width will be constructed as a fraction of the total available width. -->
-        <attr name="initialWidth" format="dimension|fraction" />
-        <!-- Initial height of the activity. Can be either a fixed value or fraction, in which case
+        <attr name="defaultWidth" format="dimension|fraction" />
+        <!-- Default height of the activity. Can be either a fixed value or fraction, in which case
              the height will be constructed as a fraction of the total available height. -->
-        <attr name="initialHeight" format="dimension|fraction" />
+        <attr name="defaultHeight" format="dimension|fraction" />
         <!-- Where to initially position the activity inside the available space. Uses constants
              defined in {@link android.view.Gravity}. -->
         <attr name="gravity" />
         <!-- Minimal height of the activity.
 
-             <p>NOTE: A task's root activity value is applied to all additional activities launched
-             in the task. That is if the root activity of a task set minimal size, then the system
-             will set the same minimal size on all other activities in the task. It will also
-             ignore any other minimal size attributes of non-root activities. -->
+         <p><strong>NOTE:</strong> A task's root activity value is applied to all additional
+         activities launched in the task. That is if the root activity of a task set minimal size,
+         then the system will set the same minimal size on all other activities in the task. It will
+         also ignore any other minimal size attributes of non-root activities. -->
         <attr name="minimalSize" format="dimension" />
     </declare-styleable>
 

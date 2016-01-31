@@ -515,6 +515,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER = 1 << 10;
 
     /**
+     * When set, the activities associated with this application are resizeable by default.
+     * @see android.R.styleable#AndroidManifestActivity_resizeableActivity
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES = 1 << 11;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */

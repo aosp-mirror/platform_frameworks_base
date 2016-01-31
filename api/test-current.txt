@@ -437,7 +437,9 @@ package android {
     field public static final deprecated int dayOfWeekBackground = 16843924; // 0x1010494
     field public static final deprecated int dayOfWeekTextAppearance = 16843925; // 0x1010495
     field public static final int debuggable = 16842767; // 0x101000f
+    field public static final int defaultHeight = 16844021; // 0x10104f5
     field public static final int defaultValue = 16843245; // 0x10101ed
+    field public static final int defaultWidth = 16844020; // 0x10104f4
     field public static final int delay = 16843212; // 0x10101cc
     field public static final int dependency = 16843244; // 0x10101ec
     field public static final int descendantFocusability = 16842993; // 0x10100f1
@@ -680,10 +682,8 @@ package android {
     field public static final int indicatorStart = 16843729; // 0x10103d1
     field public static final int inflatedId = 16842995; // 0x10100f3
     field public static final int initOrder = 16842778; // 0x101001a
-    field public static final int initialHeight = 16844021; // 0x10104f5
     field public static final int initialKeyguardLayout = 16843714; // 0x10103c2
     field public static final int initialLayout = 16843345; // 0x1010251
-    field public static final int initialWidth = 16844020; // 0x10104f4
     field public static final int innerRadius = 16843359; // 0x101025f
     field public static final int innerRadiusRatio = 16843163; // 0x101019b
     field public static final deprecated int inputMethod = 16843112; // 0x1010168
