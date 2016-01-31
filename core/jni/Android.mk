@@ -184,6 +184,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/android/graphics \
     $(LOCAL_PATH)/../../libs/hwui \
     $(LOCAL_PATH)/../../../native/opengl/libs \
+    $(LOCAL_PATH)/../../../native/vulkan/include \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
@@ -233,6 +234,7 @@ LOCAL_SHARED_LIBRARIES := \
     libEGL \
     libGLESv1_CM \
     libGLESv2 \
+    libvulkan \
     libETC1 \
     libhardware \
     libhardware_legacy \

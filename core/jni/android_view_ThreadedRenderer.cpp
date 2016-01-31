@@ -27,6 +27,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/egl_cache.h>
+#include <vulkan/vulkan_loader_data.h>
 
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
@@ -618,6 +619,18 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 }
 
 // ----------------------------------------------------------------------------
+// Layers
+// ----------------------------------------------------------------------------
+
+static void android_view_ThreadedRenderer_setupVulkanLayerPath(JNIEnv* env, jobject clazz,
+        jstring layerPath) {
+
+    const char* layerArray = env->GetStringUTFChars(layerPath, NULL);
+    vulkan::LoaderData::GetInstance().layer_path = layerArray;
+    env->ReleaseStringUTFChars(layerPath, layerArray);
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -658,6 +671,8 @@ static const JNINativeMethod gMethods[] = {
     { "nDumpProfileData", "([BLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileData },
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
+    { "setupVulkanLayerPath", "(Ljava/lang/String;)V",
+                (void*) android_view_ThreadedRenderer_setupVulkanLayerPath },
     { "nAddRenderNode", "(JJZ)V", (void*) android_view_ThreadedRenderer_addRenderNode},
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
